@@ -38,3 +38,16 @@
 8. **원본/데이터/보안:** 원본 로드맵·설계 PNG GitHub에 보관, v1 `astra-pdf-redesigner:current:v1` 자동 삭제·변경 금지. 이미지 Blob은 새 IndexedDB에 저장. 비밀/외부 API 없음. 기능은 검증 전 main으로 병합 금지.
 9. **다음 우선 작업:** runner 장애 근거 확인 → 빌드·E2E 수행 → 결함 최소 수정 → STEP 1 회귀·PDF 인쇄/이미지 검증 → main merge → 문서·BOOK 최신화. 사용자 개인정보 포함 문서는 자동 시험 금지.
 10. **시각/검증:** 2026-10-18 22:39:17 KST, 로컬 단위/순수 타입 검사와 GitHub 두 runner 미배정 실패 확인. 실제 STEP 2 Chrome/Windows 테스트 아직 수행하지 않음.
+
+
+## 최신 작업 인수인계 — 2026-10-18 23:38:59 KST (STEP 2 기능 브랜치)
+1. **목표·기술:** 원본 PDF 콘텐츠 보존 후 디자인 재조판. 현재 STEP 2 개인 문서 제작기, React/TypeScript/Vite, IndexedDB/브라우저 APIs. STEP 3 PDF 가져오기는 아직 금지.
+2. **완료 기능/변경:** `feature/step2-full-20261018`의 V2 편집/문서함/이미지/JSON 기능 소스를 유지. `Workspace.tsx` 이미지 블록 TypeScript 타입 분기와 미사용 import 수정, E2E 손상된 PNG CRC fixture 교체. STEP 1 UI·localStorage v1 원본 미변경. 공개 저장소에서 Actions 러너가 다시 배정됨.
+3. **테스트:** 검증된 기능 SHA `caa0747a5b6967393e05b1b704fe0aa5b3f6aa24`. [CI run 39136882566](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39136882566) **success**, 단위 14 PASS/0 FAIL, `npm run build` PASS, 실제 Chrome STEP 1 회귀·A4 PDF 15p PASS, STEP 2 IndexedDB·섹션 이동·PNG 이미지·프로젝트 JSON export/import·이미지 PDF PASS. 추가 수동 항목 미검증.
+4. **상태/중단:** STEP 1 main 기존 검증 상태 보존. STEP 2 기능 브랜치 통합 스모크 통과; **main 미병합**, STEP 2 전체 최종 완료 미판정. STEP 3 미착수.
+5. **오류·시도·금지:** 종전 GitHub Actions 러너 미할당은 저장소 공개 상태 이후 해소. 재실행 시 TS6133/TS2339 8건 수정, 후속 E2E에서 PNG IDAT CRC 오류 검증·fixture 교체해 최종 PASS. 동일한 무의미한 runner 재시도 불필요. 로컬 npm registry DNS EAI_AGAIN 문제 별도.
+6. **저장소/브랜치/SHA/경로:** `hibi89/astra_pdf_redesigner` / `feature/step2-full-20261018` 기능 SHA 위와 같음. `src/step2/Workspace.tsx`, `tests/step2-browser.mjs` 변경. `main`은 문서 업데이트뿐, STEP 2 소스 미병합.
+7. **Production/환경:** Production URL/Vercel 미적용. 로컬 `npm install`, `npm test`, `npm run build`, `npm run dev`, Chrome/Edge 우선.
+8. **원본/백업/보안:** 사용자 원본 `docs/ASTRA_ORIGINAL_ROADMAP.txt`, 원본 PNG 2종 및 `docs/ASTRA_STEP2_ORIGINAL_INSTRUCTIONS.txt` 보존. `astra-pdf-redesigner:current:v1` 기존 저장 데이터 삭제/수정 금지. 민감 문서 외부 전송 금지, 공개 저장소에 비밀 추가 금지.
+9. **다음 1단위/완료 기준:** JPEG/WebP·이미지 레이아웃·문서 전환/저장 경쟁·실패 복구 중 위험이 높은 부분을 골라 최소 테스트와 수정·CI 검증. 실제 Windows 검수는 별도. 그 후 main 병합 판단.
+10. **확인 시각/범위:** GitHub Actions run `39136882566` success, 2026-10-18 23:38:59 KST 종료·로그 검증. 기능 SHA `caa0747a5b6967393e05b1b704fe0aa5b3f6aa24`, 인수인계 문서/BOOK 최종 커밋은 별도 조회 후 확인.
