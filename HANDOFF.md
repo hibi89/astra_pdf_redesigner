@@ -63,3 +63,15 @@
 8. **원본/백업/보안:** 기존 `docs/ASTRA_ORIGINAL_ROADMAP.txt`·PNG 2장·STEP 2 원본 지침 유지. localStorage v1·IndexedDB 사용자 문서 삭제/변경 금지, 외부 전송·토큰 없음.
 9. **다음 작업/승인:** JPEG/WebP와 이미지 출력 경계, 또는 IndexedDB 실패 복구 중 **다음 한 단위**를 테스트; 기존 자동 검증 유지 후 main 병합 검토. 실 Windows/Edge 검수는 사용자 수동으로 남음.
 10. **시각/검증 범위/문서 기준:** 2026-10-18 23:47:43 KST, run 39137537886 완료·로그 재조회, 기능 SHA `44d7be92f04be8ff4e1effeb9c16f271069cfe46`; 문서 HEAD·중앙 BOOK 커밋은 기록 후 재조회.
+
+## 최신 인수인계 — 2026-10-18 23:59:02 KST (STEP 2 이미지 검증)
+1. **목표·구현 범위:** 원본 콘텐츠와 디자인 분리를 목표로 하는 로컬 PDF 리디자인 앱. 현재 STEP 2 문서 제작기 이미지 검증을 수행; STEP 3 기존 PDF 가져오기 미착수.
+2. **변경:** 이미지 핸들러/사용자 데이터 수정 없음. `tests/step2-browser.mjs`에 실제 Chrome Canvas JPEG(32×16 가로)·WebP(16×32 세로) 업로드, IndexedDB 새로고침, 이미지 원본 byte-for-byte JSON 내보내기, Chrome A4 PDF `pdfimages` 이미지 포함 검증 추가. 테스트는 개인 이미지·외부 API 불사용.
+3. **검증:** [Actions run 39138352449](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39138352449) **success**; Node `npm test` 16/16 PASS; TypeScript/Vite 빌드 PASS; Chrome JPEG/WebP 디코딩·복원·메타·원본 바이트 일치·PDF 이미지 3종 포함 PASS; STEP 1 PDF 15페이지 및 이전 STEP 2 스모크 PASS.
+4. **현재 상태:** 기능 브랜치 `feature/step2-full-20261018`의 검증 코드 SHA `fa459db3317026190c85f690e5744950ed3b4da1`; 이후 문서 커밋은 GitHub 재조회. main은 STEP 1 기존 코드 유지, STEP 2 main 병합 미진행. STEP 2 전체 최종 수용 미판정.
+5. **오류/재시도/원인:** 파일 2회 다운로드가 Chrome 동작에 영향을 받아 테스트 파일 탐색이 타임아웃(`39138141905`, `39138228608`). 사용자 앱 이상으로 단정하지 않음. JSON 다운로드 앞단 Blob을 직접 확인하도록 테스트 하네스 변경 → 최종 PASS. 같은 다운로드 탐색 방식 재사용 금지.
+6. **코드·저장소:** `hibi89/astra_pdf_redesigner`, `tests/step2-browser.mjs`, `src/step2/images.ts`(미변경), `src/step2/projectFile.ts`(미변경); 원래 STEP 1 v1 저장키 변경·삭제 없음.
+7. **환경/배포:** 로컬 React/Vite, `npm test`, `npm run build`, `npm run dev` → 127.0.0.1:5173; Vercel/Production 없음.
+8. **데이터/보안:** 원본 STEP1 회고록, 설계 PNG 2종, STEP2 지침 원본, 사용자 저장 데이터 유지; 신규 테스트 이미지는 비민감 합성 데이터만 사용, 서버로 문서·이미지 전송 안 함.
+9. **다음 1단위/검증 조건:** IndexedDB 할당량·트랜잭션 실패 복구 혹은 대형 이미지/긴 캡션/페이지 분할 경계 1단위를 테스트. 사용자 Windows/Edge 실제 저장 검수는 별도. 전 항목을 완료로 주장하지 않고 main 병합은 후속 판단.
+10. **갱신 및 확인:** 2026-10-18 23:59:02 KST, run `39138352449` success 및 전체 로그 재확인, 기능 SHA `fa459db3317026190c85f690e5744950ed3b4da1`. 문서 HEAD·BOOK 동기화 후 재조회 기준.
