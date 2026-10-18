@@ -96,3 +96,13 @@
 - 동일 CDP 기반 `tests/browser-smoke.mjs`, `tests/step2-browser.mjs`를 실제 Edge에서 재실행해 STEP1 A4 15p·한글 텍스트 추출, STEP2 PNG/JPEG/WebP·PDF raster·긴 캡션 다페이지·IndexedDB/JSON 저장·실패 복구 PASS. Chrome 전체 회귀/Node16 단위/빌드도 PASS.
 - 구체 범위·한계는 `docs/STEP2_EDGE_CHROMIUM_CI_VALIDATION_2026-10-19.md`. Windows Edge PDF 실제 렌더링/키보드 수동 검수는 **미검증**, Windows Chrome 1p 사용자 제출 문서 검증은 별도의 부분 PASS.
 - 테스트 임시 프로필 정리 `ENOTEMPTY` 경고가 발생했으나 CI 성공·앱 저장 안전성 테스트 결과와 분리해 보고. **main 병합 HOLD** / STEP3 미착수.
+
+
+## 2026-10-19 02:43 KST — main+STEP2 기능 실병합 사전 테스트 (커밋/푸시 없음)
+
+- 분기: 기능 73 commits ahead, main 32 commits ahead. 시험 당시 `main` `e35e5dfe6a17d32ab1e1e1b2fe21d8bb2b52323a`, `feature` `8d9fdb1adef31875a793cce9376de3154eb08229`.
+- GitHub Actions 별도 임시 runner에서 `git switch --detach origin/main`, `git merge --no-commit --no-ff FEATURE_SHA`. conflict 0, staging 28 paths, HEAD 여전히 main SHA/ `MERGE_HEAD` feature SHA 확인.
+- main `HANDOFF.md`/`STATUS.md`, STEP1 `src/App.tsx`/`src/storage.ts`, 원본 roadmap/BLUEPRINT/STEP1_SPEC/PNG 2개와 feature STEP2 원본 지침 **바이트 단위 보존** PASS.
+- [Actions #39150537369](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39150537369) **SUCCESS**: 병합 상태 그대로 Node 16/16, TypeScript/Vite build, Chrome 전체 E2E+실제 2탭/마이그레이션 abort·별도 프로필 JSON 이식, Microsoft Edge 155 A4 PDF/IndexedDB 회귀 PASS. 독립 기능 HEAD CI [#39150537297](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39150537297)도 SUCCESS.
+- 증거/한계: `docs/STEP2_ISOLATED_MAIN_MERGE_PREFLIGHT_2026-10-19.md`. 실제 `main`에 반영하지 않았고 Windows Edge 사용자 환경의 장문/이미지 시각 시험 등은 미완료. 이 기록 뒤 main STATUS/HANDOFF만 바뀌면 **병합 직전 최신 SHAs로 재시도해야 함**.
+- **기술 병합 사전검증 PASS / 사용자 수용·main 병합 HOLD.** 진행률 STEP2 약 99% (비공식), 전체 7단계 단순 동등비중 약 28~29% (유의미한 5%p 상승 아님).
