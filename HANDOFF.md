@@ -30,10 +30,10 @@
 ## STEP 2 새 지침 인수인계 — 2026-10-18 22:39:17 KST (기능 브랜치, main 미병합)
 1. **목표:** 사용자 확정 PDF 콘텐츠 보존·스타일 재조판. 현재 단계 STEP 2는 PDF 업로드 이전의 개인 문서 제작기. 확정 원본은 `docs/ASTRA_STEP2_ORIGINAL_INSTRUCTIONS.txt` (feature branch).
 2. **구현:** `feature/step2-full-20261018`에서 V2 섹션/소제목/문단/이미지 블록 UI, 문서 목록 생성·복제·삭제/수정, 추가 컴팩트 테마, 네이티브 IndexedDB 자산·메타 저장, 변환, JSON 내보내기·가져오기 구현. STEP 1 화면은 별도 호환 버튼으로 유지.
-3. **테스트:** 로컬 Node 22 단위 **13/13 PASS**; 순수 TypeScript 모듈의 별도 타입검사 PASS; JSX 구문 검사 PASS. 전체 Vite build 및 실제 Chrome STEP 2 검사 미검증. GitHub Actions #39131861115/#39132088786 runner 미배정 실패.
+3. **테스트:** 로컬 Node 22 단위 **14/14 PASS**; 순수 TypeScript 모듈의 별도 타입검사 PASS; JSX 구문 검사 PASS. 전체 Vite build 및 실제 Chrome STEP 2 검사 미검증. GitHub Actions #39131861115/#39132088786 runner 미배정 실패.
 4. **상태:** STEP 1 main 자동 검증 완료(이전 run #39129894290). STEP 2는 브랜치 소스 구현 중 **검증 대기/부분 완료**. STEP 3 미착수.
 5. **실패 및 대안:** CI 작업 약 2초 종료, runner_name 공백·steps 0, 로그 BlobNotFound. 코드 실패인지 미확인. 환경 npm 설치 EAI_AGAIN / --offline ENOTCACHED. 동일 방식 재시도 금지. 인터넷 연결된 개발환경에서 빌드+Chrome E2E 검증.
-6. **저장소/SHA:** `hibi89/astra_pdf_redesigner`, main HEAD 문서 갱신 후 재조회, 기능 브랜치 `feature/step2-full-20261018` SHA `4ea4c57a7eef3a0a7710f510119ce766be8a37d9`. `src/step2/*`, `src/Root.tsx`, `tests/step2-browser.mjs`.
+6. **저장소/SHA:** `hibi89/astra_pdf_redesigner`, main HEAD 문서 갱신 후 재조회, 기능 브랜치 `feature/step2-full-20261018` SHA `ebb5861cbc795286c1aa1d9ea1321fb46f261ffb`. `src/step2/*`, `src/Root.tsx`, `tests/step2-browser.mjs`.
 7. **배포:** Production/Vercel 미적용, 로컬 React/Vite, `npm install`, `npm test`, `npm run build`, `npm run dev` → `127.0.0.1:5173`.
 8. **원본/데이터/보안:** 원본 로드맵·설계 PNG GitHub에 보관, v1 `astra-pdf-redesigner:current:v1` 자동 삭제·변경 금지. 이미지 Blob은 새 IndexedDB에 저장. 비밀/외부 API 없음. 기능은 검증 전 main으로 병합 금지.
 9. **다음 우선 작업:** runner 장애 근거 확인 → 빌드·E2E 수행 → 결함 최소 수정 → STEP 1 회귀·PDF 인쇄/이미지 검증 → main merge → 문서·BOOK 최신화. 사용자 개인정보 포함 문서는 자동 시험 금지.
