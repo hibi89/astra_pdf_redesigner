@@ -345,5 +345,11 @@ try{
       await Promise.race([exited,delay(2500)]);
     }
   }
-  rmSync(dir,{recursive:true,force:true,maxRetries:8,retryDelay:200});
+  // Chromium child helpers can still hold a profile directory briefly after Chrome exits.
+  // Cleanup errors must not hide actual assertion results on ephemeral CI hosts.
+  try{rmSync(dir,{recursive:true,force:true,maxRetries:12,retryDelay:250});}
+  catch(error){
+    if(!['ENOTEMPTY','EBUSY','EPERM'].includes(error?.code))throw error;
+    console.warn('WARN STEP2: Chrome temporary profile cleanup deferred ('+error.code+')');
+  }
 }
