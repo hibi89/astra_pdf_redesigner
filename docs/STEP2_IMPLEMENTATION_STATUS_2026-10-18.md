@@ -86,3 +86,11 @@
 - [Actions 39140653462](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39140653462) **success**: 16/16 unit PASS, TS/Vite build PASS, Chrome STEP 1 15p PDF + STEP2 저장·이미지·JSON/실패 복구 회귀 PASS.
 - 남은 것은 실제 2개 탭 Web Locks 보호 E2E, 사용자 Windows/Edge 수동 저장·한글 글꼴/미관 검수. 테스트는 텍스트/이미지 포함 및 좌표 경계를 확인했지 픽셀 레벨 이미지 왜곡·겹침까지 포괄하지 않음.
 - STEP2 추정 약 92%, 전체 7단계 단순 동일 비중 약 28%. **전체 STEP2 완료/main 병합 아님**. 다음 `ㄱ`에서 멀티탭 검증.
+
+
+## 2026-10-19 00:36:17 KST — 실제 Chrome 두 탭 동시 편집 보호
+- 코드 SHA `3fe13c1097f63296d45c683f63ba0b95acd005a9`: 앱 소스 변경 없이 `tests/step2-multitab.mjs` 신규, `.github/workflows/ci.yml` CI 스모크 추가. 합성 테스트용 두 페이지는 같은 브라우저 프로필/동일 origin을 공유하되 별도 CDP 대상.
+- 탭1 단독 `navigator.locks` 편집 잠금 획득(held 1)·원문 저장; 탭2 접근 시 잠금 불허·편집 UI/인쇄 비활성 및 안내 경고, 원문 불변 PASS.
+- 탭1 종료시 held 0 확인 후 **탭2 새로고침** → 새 잠금(held 1)·원문 보존, 탭2 수정·저장·재시작 후 새 내용 유지 PASS. 자동 승계 아님; 명시적 새로고침 요구.
+- [GitHub Actions 39141151527](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39141151527) **success**: Node 16/16, TypeScript/Vite build PASS, STEP1 Chrome A4 15p, STEP2 기존 사진/JSON/에러 복구/다중 페이지 검증 PASS, 신규 MULTITAB PASS 3개.
+- 남음: Windows Chrome/Edge 수동 PDF/한글·시각 검수, 사용자 최종 수용 및 main 병합 전 요구사항 체크리스트, 잠금 미지원 브라우저/강제 종료는 미검증. STEP2 약 95%, 전체 7단계 단순 동일가중 약 28~29%(비공식 추정). main 미병합, STEP3 미착수.
