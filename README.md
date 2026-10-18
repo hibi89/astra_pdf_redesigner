@@ -41,7 +41,7 @@ React / TypeScript / Vite / CSS, 기본 로컬 개발 주소 `127.0.0.1`만 바�
 
 ## STEP 2 기능 브랜치 검증 현황 (2026-10-19, **Linux Chrome 통합검증 성공 / 최종 수용 전**)
 
-작업 브랜치 `feature/step2-full-20261018`에서 문서함, 섹션·블록 편집, PNG/JPEG/WebP 이미지, IndexedDB 자동 저장, 여러 문서 관리, `.localdoc.json` 내보내기/가져오기, 컴팩트 리포트 테마 소스를 구현했습니다. 이 기능 브랜치는 Ubuntu Node 22에서 **단위 테스트 16/16, TypeScript/Vite 빌드 및 실제 Chrome 통합검증**을 완료했습니다([Actions #39143261165](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39143261165)). 단, **기존 STEP 1 저장 데이터가 선존재하는 신규 Chrome 프로필에서의 cold-start 마이그레이션과 서로 다른 Chrome 프로필 간 실제 `.localdoc.json` 내보내기·가져오기·PNG/WebP 원본 보존·A4 출력은 CI 검증을 통과했습니다. Windows Chrome/Edge 수동 인쇄·한글/시각 검수 및 추가 저장 실패 경계 검증은 아직 남아 있습니다**입니다. STEP 2 기능은 아직 `main`에 병합하지 않았습니다. 자세한 검증 내역은 [STEP 2 검증 기록](docs/STEP2_IMPLEMENTATION_STATUS_2026-10-18.md)을 보세요.
+작업 브랜치 `feature/step2-full-20261018`에서 문서함, 섹션·블록 편집, PNG/JPEG/WebP 이미지, IndexedDB 자동 저장, 여러 문서 관리, `.localdoc.json` 내보내기/가져오기, 컴팩트 리포트 테마 소스를 구현했습니다. 이 기능 브랜치는 Ubuntu Node 22에서 **단위 테스트 16/16, TypeScript/Vite 빌드 및 실제 Chrome 통합검증**을 완료했습니다([Actions #39143261165](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39143261165)). 단, **기존 STEP 1 저장 데이터가 선존재하는 신규 Chrome 프로필 cold-start 마이그레이션, 최초 migration 트랜잭션 강제 abort 이후 원본·완료 marker 롤백과 재시도, 서로 다른 Chrome 프로필 간 실제 `.localdoc.json` 이식·PNG/WebP 원본 보존·A4 출력이 모두 CI를 통과했습니다. Windows Chrome/Edge 실제 인쇄·한글·시각/키보드 수동 검수는 아직 남아 있습니다**입니다. STEP 2 기능은 아직 `main`에 병합하지 않았습니다. 자세한 검증 내역은 [STEP 2 검증 기록](docs/STEP2_IMPLEMENTATION_STATUS_2026-10-18.md)을 보세요.
 
 소스 동작 예상 흐름: `npm install` → `npm test` → `npm run build` → `npm run dev`. 프로젝트 가져오기는 **현재 문서를 덮어쓰지 않고 새 문서로 추가**합니다. 100MiB 이하 `.localdoc.json` 파일의 이미지 데이터는 파일에 포함되며, **암호화되지 않으므로 별도 보안 저장**하세요. Web Locks 지원 브라우저에서는 한 탭만 편집하도록 제한합니다. Windows/Edge 인쇄 품질은 별도 검증이 필요합니다.
 
@@ -52,3 +52,6 @@ React / TypeScript / Vite / CSS, 기본 로컬 개발 주소 `127.0.0.1`만 바�
 
 
 추가 증거: [Chrome 프로필 A→B 실물 JSON 파일 이식 Actions #39144399956](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39144399956). 서로 다른 Chrome 사용자 데이터 디렉터리에서 테스트했고, 가져오기는 B의 기존 문서를 덮어쓰지 않고 독립 ID로 추가하는 것을 확인했습니다.
+
+
+[STEP2 최초 마이그레이션 중 강제 트랜잭션 중단·복구 검증 Actions #39145149408](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39145149408): 실패 직후 v2 문서·완료 표시·활성 문서 쓰기가 모두 취소되고 STEP1 원본이 보존되며, 이후 재시도·새로고침에서도 중복 생성이 없는지 확인했습니다. 기능 브랜치의 STEP2 코드는 아직 `main`에 병합하지 않았습니다.
