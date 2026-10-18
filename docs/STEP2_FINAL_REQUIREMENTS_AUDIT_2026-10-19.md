@@ -36,7 +36,7 @@
 2. **늦은 STEP1 최초 마이그레이션의 활성 문서 변경:** `idb.initialize`가 기존 V2 ACTIVE가 있음에도 migration 문서를 ACTIVE로 지정. **기존 ACTIVE가 이미 있으면 유지**, 없을 때만 마이그레이션 문서를 활성화하도록 수정. 같은 트랜잭션의 marker/doc 기록과 v1 localStorage 보존 유지. 모드 왕복 후 활성 V2 데이터 유지·중복 마이그레이션 방지 테스트 추가.
 3. **STEP1 기존 브라우저 스모크의 초기화 경쟁:** 새 모드 전환 버튼이 준비 완료까지 disabled가 되면서 예전 테스트의 빠른 click이 무시됨. `tests/browser-smoke.mjs`에서 버튼 활성화를 기다리도록 수정.
 
-> 위 3건의 **최종 코드 통합검증 결과는 최신 Actions 성공 로그로 따로 판정**한다. 이전 성공 로그(#39141151527)는 이번 수정 전 기준이므로 수정본 성공으로 오인하지 말 것.
+> 위 3건의 **최종 코드 통합검증은 [Actions #39142445389](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39142445389) SUCCESS로 확인**. Node 16/16, TS/Vite 빌드, STEP1 15페이지 인쇄, STEP2 전체 기존 회귀와 빠른 화면 전환/저장 실패 차단/1회 마이그레이션/2탭 잠금 PASS. 검증 기능 SHA `eba463ca4f2046a73724b29ce6ffbf572c1b3ff8`. 실패한 중간 CI는 마이그레이션 후 활성 문서 변경 발견, 테스트 대기 조건, 임시 Chrome 폴더 정리 충돌로 분석·수정한 기록이며 최종 성공으로 대체됨.
 
 ## 병합/완료 결정
 - **판정: HOLD**. 현재 기존 STEP1 안정 main에 STEP2 기능 병합하지 않음.
@@ -44,3 +44,10 @@
 - 사용자 최종 수용: Windows Chrome/Edge A4 PDF 저장·한글 선택·페이지 나눔/이미지·테마 육안 검수는 별도 수동 항목. 완전 검수 후 완료 여부 판단.
 - 다음 단위 권고: 이번 CI의 진단/수정 검증 마무리 → **기존 STEP1 localStorage가 먼저 있는 새 프로필 cold-start**를 Chrome에서 재현하는 회귀 시험 추가. 필요시 미검증 import 이식 테스트 연계.
 - 진행률은 테스트 항목 누락을 보수적으로 반영해 STEP2 **약 90~95%**, 전체 7단계 동등 가중 약 **27~28%**로 추정(난도·시간 반영 안 함). 임의의 100% 판정 금지.
+
+
+## 최종 자동 검증 결과 — 2026-10-19 00:53 KST
+- [Actions #39142445389](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39142445389) **SUCCESS**, 검증 소스 SHA `eba463ca4f2046a73724b29ce6ffbf572c1b3ff8`. 실제 Chrome STEP1 렌더·A4 PDF15p, STEP2 이미지·프로젝트 JSON·IndexedDB 실패/복구·PDF 페이지 나눔·멀티탭 Web Locks 및 빠른 모드 전환 복귀와 재시도 시나리오 PASS.
+- **기술 판정:** 이 브랜치의 위 검증 항목에서는 회귀 없음. 다만 사용자 지침 16·17절의 cold-start v1 실물 마이그레이션, 별도 프로필 import, Windows Chrome/Edge 수동 인쇄·한글/이미지 시각 확인은 증거 부족.
+- **병합 판단 유지:** HOLD. 수용 증거 부족이 곧 구현 실패를 뜻하지는 않지만, 아직 main에 STEP2 통합 커밋을 만들지 않음.
+- **다음 ㄱ:** 기존 유효한 STEP1 `localStorage`를 사전에 가진 신규 Chrome 프로필에서 마이그레이션 시나리오(원문·디자인·marker·중복 방지·원본 보존)를 실제 E2E로 재현. 이후 두 번째 신규 프로필에서 JSON 이식 검증. CI+Windows 수동 검수 후 병합 검토.
