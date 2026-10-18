@@ -140,3 +140,16 @@
 8. **원본/보안:** STEP1 `astra-pdf-redesigner:current:v1` localStorage 원본, 설계 PNG 2종, roadmap TXT, STEP2 원본 지침 보존. 고객 문서/이미지 외부 전송·로그 표시/비밀 없음.
 9. **다음 `ㄱ`/완료 기준:** **실제 v1 데이터 선존재 독립 Chrome 프로필 cold-start migration 자동 시험**(title/author/date/4개 항목·서식 원문·디자인·marker 1회·v1 원본 불변). 그다음 새 브라우저 프로필 JSON 가져오기, Windows/Edge 수동 검수; 통과한 후 main 병합/STEP2 최종 완료 판단.
 10. **기준 시간·진행률:** 2026-10-19 00:53:28 KST, CI #39142445389 success. STEP2 보수적 **약 90~95%**, 전체 7단계 **약 27~28%** (동일 비중 비공식 추정). 5%p 이상 실질 상승 시 별도 보고.
+
+
+## 최신 인수인계 — 2026-10-19 01:04 KST (실제 Chrome V1 cold-start 데이터 이동)
+1. **목표/원본:** Astra PDF Redesigner p5, 원본 PDF 내용 보존·디자인 교체 최종 목표. STEP2 개인 문서 제작기 기능 브랜치만 검증 중, `docs/ASTRA_STEP2_ORIGINAL_INSTRUCTIONS.txt` 유지. STEP3 PDF 가져오기 미착수.
+2. **구현:** `tests/step2-cold-migration.mjs` 신규. 별도 신규 Chrome 사용자 프로필에 앱 실행 **전** 유효한 v1 `localStorage` 합성 회고록을 preseed, 실제 React/IndexedDB 자동 migration 테스트. `.github/workflows/ci.yml`에 연결. Chrome 테스트 종료 시 임시 프로필 정리 오류가 기능 검증 결과를 덮지 않도록 `tests/step2-browser.mjs` 및 신규 테스트 cleanup error 분리.
+3. **실제 검증:** [run 39143261165](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39143261165) **success**, SHA `abb3d9425e72a2708306674176346727ef0ea710`, Node 16/16, TS/Vite build, STEP1 PDF15p 및 STEP2 기존 Chrome 전 항목 PASS. 신규: 4개 원문 섹션·빈 섹션/공백·문자·작성자·날짜·디자인 보존, v2 문서 1개·독립 IDs, ACTIVE·migration true, v1 original bytes 불변, reload 후 이중 생성 방지 PASS.
+4. **진행/보류:** STEP2 자동 검증과 구현 약 95% 비공식 추정. **main 병합 HOLD**: 프로필 간 JSON backup/import 실물 이식 E2E, 사용자 Windows/Edge 인쇄/한글/시각 수동 검증 남음. 저장 실패 중 원자적 migration 롤백 별도 미검증.
+5. **오류/원인:** 기존 Chrome temp profile 정리 ENOTEMPTY로 CI가 기능 PASS 후 실패한 기록 #39143134124; cleanup 경고 분리 후 최종 SUCCESS #39143261165. 기능 검증과 cleanup 경고 구별, 임시 합성 데이터 테스트 서버 환경 한정.
+6. **Repo/Branch/SHA/경로:** `hibi89/astra_pdf_redesigner`, `feature/step2-full-20261018`; verified code SHA `abb3d9425e72a2708306674176346727ef0ea710`; 신규 `tests/step2-cold-migration.mjs`, `.github/workflows/ci.yml` 갱신. main은 STEP1 기능 그대로 유지.
+7. **실행/배포:** Node22, `npm install`, `npm test`, `npm run build`, `npm run dev` localhost 127.0.0.1:5173. GitHub Ubuntu Chrome CI. Production/Vercel 미적용.
+8. **원본·보안:** 사용자 기존 v1 `localStorage`와 v2 IndexedDB/설계 PNG·TXT/STEP2 원본 지침 보존, 고객 데이터/네트워크 전송 없음. 테스트는 임시 synthetic records만 사용.
+9. **다음 `ㄱ`:** 신규 브라우저 프로필 A에서 이미지 포함 문서 JSON 내보내기 → 완전 별도 Chrome 프로필 B에서 JSON 가져오기, 새 ID·원문/이미지 bytes/디자인 복원·A4 검증. 다음 수용 사항은 사용자 Windows/Edge 출력.
+10. **진행률:** 2026-10-19 01:04 KST. STEP2 약 95%, 전체 7단계 동일비중 약 28~29%(가중·시간 미반영). 중앙 `BOOK.md`/보고서 동기화 후 재확인.
