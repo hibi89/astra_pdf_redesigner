@@ -136,9 +136,9 @@ try{
     dims=>dims?.some(([w,h])=>w===32&&h===16)&&dims?.some(([w,h])=>w===16&&h===32));
   console.log('PASS STEP2: actual JPEG landscape and WebP portrait decode, IndexedDB reload and exact dimensions');
 
-  const savedFiles=new Set(readdirSync(dir).filter(name=>name.endsWith('.localdoc.json')));
+  const savedFiles=new Set(readdirSync(dir).filter(name=>name.endsWith('.json')));
   await evaluate("[...document.querySelectorAll('button')].find(b=>b.textContent==='프로젝트 내보내기').click()");
-  const exportedName=await eventually(()=>readdirSync(dir).find(name=>name.endsWith('.localdoc.json')&&!savedFiles.has(name)));
+  const exportedName=await eventually(()=>readdirSync(dir).find(name=>name.endsWith('.json')&&!savedFiles.has(name)));
   const packageData=JSON.parse(readFileSync(join(dir,exportedName),'utf8'));
   assert.equal(packageData.assets.length,3);
   for(const fixture of formats){
