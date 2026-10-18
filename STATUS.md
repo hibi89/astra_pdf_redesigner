@@ -1,7 +1,7 @@
 # STATUS — Astra PDF Redesigner
 
 - 저장소: `hibi89/astra_pdf_redesigner` / `main`
-- 단계: **STEP 1 구현 및 GitHub Actions 자동 검증 완료 / 사용자 Windows 인쇄 확인 대기**
+- 단계: **STEP 1 자동 검증 완료 / STEP 2 블록 모델 첫 단위 구현·GitHub Actions 통과 / STEP 2 편집기 미구현**
 - 검증된 소스 커밋: `639b5e984e8ba711674a3b3d29fc6baf881a14d1`
 - 검증 GitHub Actions: [#39128155552](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39128155552), 결론 **success** (검증 종료 2026-10-18 21:39:37 KST)
 - 로컬/Vercel 배포: 로컬 전용. Vercel Production 없음(미적용).
@@ -25,12 +25,23 @@
 - 사용자 Windows Chrome/Edge 인쇄 대화상자의 PDF로 저장, 브라우저 머리글·바닥글/배경 옵션 및 실제 한글 글꼴의 선택 품질: **수동 검증 필요**.
 - 국비학원 사이트에서 PDF 첨부 제출 가능 여부 확인 필요(자동 제출 범위 제외).
 - 실제 OS별 글꼴과 인쇄 페이지 나눔은 달라질 수 있음.
-- STEP 2~7 기능(기존 PDF, OCR, 이미지, AI, 검색, 설치형)은 전부 미구현(계획대로 제외).
+- STEP 2의 **블록 모델 및 STEP 1 비파괴 변환기만 구현**; 블록 편집 UI·이미지 저장·다중 문서·내보내기는 미구현. STEP 3~7의 기존 PDF 가져오기/OCR/AI/검색/설치형은 미구현.
 
 ## 다음 작업
-1. 사용자 Windows Chrome/Edge에서 `npm install && npm run dev` 실행, 실제 회고록 입력 후 PDF 출력 결과를 직접 확인.
-2. 출력 검증 완료 시 STEP 1 사용자 수용 상태 기록. 다음 STEP 2는 새 지시·승인 후 착수.
+1. STEP 2에서 블록 편집과 이미지·여러 문서의 지속 저장 구현. STEP 1 v1 저장 데이터는 기존 키를 변경·삭제하지 않고 읽기/변환한다.
+2. 로컬 이미지 업로드 후 PDF 출력 검증, 프로젝트 내보내기/가져오기 복원 확인.
+3. 사용자 Windows Chrome/Edge의 실제 인쇄·한글 선택 검수는 여전히 필요.
 
 - 기준 검증 시점: 2026-10-18 21:39:37 KST
 
 - CI 안정화 보완: 새로고침 완료 이벤트 명시 대기 및 문서만 변경된 커밋에서는 CI 실행 생략; 최신 코드/워크플로 HEAD `639b5e984e8ba711674a3b3d29fc6baf881a14d1`, 검증 run `39128155552`.
+
+## 2026-10-18 STEP 2 착수·첫 단위 (추가 기록)
+- 사용자 확정: 최종 목표는 **기존 PDF 콘텐츠를 보존한 디자인 리디자인**, 아스트라 단계 순서 유지.
+- 선택 설계: 순서 있는 제목/문단/이미지 블록 모델. 대안 비교 및 제약은 `docs/STEP2_DESIGN_DECISION_2026-10-18.md`.
+- 구현: `src/step2/model.ts` (블록·프로젝트/컬렉션 타입, STEP 1 데이터 변환, 순서 변경, 런타임 검사), `tests/step2-model.test.ts`.
+- STEP 1 UI·`src/storage.ts`·localStorage v1 키 **미변경**. 신규 모델만 분리해 추가.
+- 로컬 Node 22 `npm test` **9/9 PASS** (기존 5 + 신규 4). 로컬 npm 설치/빌드는 DNS 장애로 미검증.
+- GitHub PR [#1](https://github.com/hibi89/astra_pdf_redesigner/pull/1) squash merge → **기능 SHA `5eb2b8d5db89f69a2a61254ddd79651d1226ad56`**, main.
+- GitHub Actions [#39129894290](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39129894290) `success` (2026-10-18 22:04:29 KST 재조회 기준): 설치, 9개 단위 테스트, TypeScript/Vite 빌드, Chrome 인쇄 스모크 (워크플로 내 실행 검증).
+- **남은 작업:** STEP 2 UI·IndexedDB 이미지 저장·문서 관리·내보내기/가져오기·사용자 Windows 검수. STEP 2 완성 아님.
