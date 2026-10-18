@@ -76,7 +76,7 @@ export function scanImagePlacements(
   }
   return found;
 }
-function readPixels(image:unknown):{width:number;height:number;bytes:Uint8Array;kind:number}|null{
+function readPixels(image:unknown):{width:number;height:number;bytes:Uint8Array|Uint8ClampedArray;kind:number}|null{
   if(!image||typeof image!=='object')return null;
   const value=image as Record<string,unknown>;
   if(!Number.isInteger(value.width)||!Number.isInteger(value.height))return null;
