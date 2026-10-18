@@ -114,7 +114,9 @@ try{
   await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),x=>x==='저장됨');
   await send('Page.reload',{ignoreCache:true});
   await eventually(()=>evaluate("document.querySelector('.project-paper')?.textContent"),v=>v?.includes('STEP3_TEST_END_7519'));
-  assert.equal(await evaluate("document.querySelectorAll('.doc-list-item').length"),before+1);
+  await eventually(()=>evaluate("document.querySelectorAll('.doc-list-item').length"),n=>n===before+1);
+  await eventually(()=>evaluate("document.querySelectorAll('.project-paper img').length"),n=>n>=1);
+  await eventually(()=>evaluate("Promise.all([...document.querySelectorAll('.project-paper img')].map(img=>img.decode().then(()=>true,()=>false))).then(x=>x.every(Boolean))"));
   const printed=await send('Page.printToPDF',{preferCSSPageSize:true,printBackground:false});
   const pdfPath=join(dir,'step3-imported-output.pdf');
   writeFileSync(pdfPath,Buffer.from(printed.data,'base64'));
