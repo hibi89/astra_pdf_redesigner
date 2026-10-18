@@ -54,3 +54,13 @@
 - **main은 STEP 1 검증 소스 유지**. STEP 2 기능 브랜치 코드는 빌드/실브라우저 검증 후에만 main 병합. 문서 원본 v1 자동 삭제·덮어쓰기 없음.
 - 다음 작업: GitHub Actions runner 복구/다른 인터넷 가능한 환경에서 `npm install && npm run build` 및 `tests/browser-smoke.mjs`·`tests/step2-browser.mjs` 실행 → 실패 코드 수정 → 병합/문서 갱신.
 - 세부 기록: feature 브랜치의 `docs/STEP2_IMPLEMENTATION_STATUS_2026-10-18.md`.
+
+
+## STEP 2 통합 자동 검증 완료 — 2026-10-18 23:38:59 KST
+- 저장소 공개 여부 재조회: **Public**. GitHub Actions 러너 미배정 상태 이후, 과거 run `39132721985` 재실행(시도 2)에서 실제 Node/빌드까지 진행됨. 설치/테스트 PASS 후 `Workspace.tsx` TS 오류 8건 발견.
+- 기능 브랜치 `feature/step2-full-20261018`에서 이미지 블록 분기 타입 좁히기·미사용 import 제거 (`59628b9c3bb7a704f7b7079626b562dd1338c2ab`).
+- 이후 Chrome 테스트 PNG fixture가 잘못된 IDAT CRC를 포함한 사실 확인. **테스트 자산만** 올바른 2×2 PNG로 교체 (`caa0747a5b6967393e05b1b704fe0aa5b3f6aa24`).
+- [GitHub Actions #39136882566](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39136882566): **success**. Node 22 단위 **14/14 PASS**, TypeScript/Vite 빌드 PASS, 실제 Chrome 기존 STEP 1 회귀 PASS 및 A4 PDF 15페이지/텍스트 추출 PASS, STEP 2 IndexedDB 저장·복원·섹션 순서·PNG 이미지/Blob 복원·JSON 백업/가져오기·이미지 포함 A4 PDF 스모크 PASS.
+- 아직 **사용자 Windows Chrome/Edge 출력, JPEG/WebP 및 가로·세로 대형 이미지, 길고 복잡한 캡션, 멀티탭 충돌, 빠른 저장 경쟁 및 실패 복구는 미검증**. STEP 2 최종 수용 전 추가 검수 필요.
+- **main에는 STEP 2 기능 미병합**. 이 커밋은 문서 상태 변경만 수행. Production/Vercel 미적용(로컬 앱).
+- 다음 `ㄱ`: 자동 CI로 발견되지 않는 저장 경쟁/이미지 유형·페이지 나눔 보강 검증을 1단위 진행하고, 충분히 통과한 뒤 main 병합을 판단한다.
