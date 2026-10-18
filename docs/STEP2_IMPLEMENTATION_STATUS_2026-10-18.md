@@ -94,3 +94,12 @@
 - 탭1 종료시 held 0 확인 후 **탭2 새로고침** → 새 잠금(held 1)·원문 보존, 탭2 수정·저장·재시작 후 새 내용 유지 PASS. 자동 승계 아님; 명시적 새로고침 요구.
 - [GitHub Actions 39141151527](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39141151527) **success**: Node 16/16, TypeScript/Vite build PASS, STEP1 Chrome A4 15p, STEP2 기존 사진/JSON/에러 복구/다중 페이지 검증 PASS, 신규 MULTITAB PASS 3개.
 - 남음: Windows Chrome/Edge 수동 PDF/한글·시각 검수, 사용자 최종 수용 및 main 병합 전 요구사항 체크리스트, 잠금 미지원 브라우저/강제 종료는 미검증. STEP2 약 95%, 전체 7단계 단순 동일가중 약 28~29%(비공식 추정). main 미병합, STEP3 미착수.
+
+
+## 2026-10-19 00:53:28 KST — 원본 지침 감사, 빠른 화면 전환·늦은 STEP1 마이그레이션 보호
+- 근거: `docs/STEP2_FINAL_REQUIREMENTS_AUDIT_2026-10-19.md`에 원본 `docs/ASTRA_STEP2_ORIGINAL_INSTRUCTIONS.txt` 1~18절 기능별 판정 작성. 완료·코드만 확인·수동 대기 항목을 구별하고 **병합 HOLD** 기록.
+- 발견 결함: STEP2 debounce 저장이 끝나기 전에 STEP1 모드로 이동하면 Workspace unmount로 미저장 변경 유실 위험 → `Workspace.tsx` 이동 전 반드시 flush 성공 대기, 실패 시 이동 거부/복구.
+- 발견 결함: STEP2 사용 후 레거시 STEP1 localStorage가 새로 생성되면 `idb.initialize()`가 migrated 문서를 ACTIVE로 강제 변경 → 기존 ACTIVE가 존재하면 유지, migration 문서 별도 추가/marker와 원자적으로 저장하도록 수정.
+- 검증: 실제 Chrome 즉시 전환 후 원문 보존·복귀/새로고침 유지·v1 migration 중복 생성 방지, 강제 QuotaExceededError 상황 전환 취소·메모리 편집 유지·재시도 PASS. STEP1 browser smoke 버튼 준비 상태 기다리기, E2E Chrome 프로세스 종료 후 임시 폴더 삭제하도록 보완.
+- [Actions 39142445389](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39142445389) **SUCCESS**, 기능 SHA `eba463ca4f2046a73724b29ce6ffbf572c1b3ff8`: 16/16 Node, TS/Vite 빌드, STEP1 Chrome A4 PDF15p, STEP2 모든 기존 E2E + 신규 즉시 전환 PASS.
+- **추가 증거 필요:** 처음부터 유효한 v1 데이터가 있는 별도 Chrome 프로필에서 마이그레이션 cold-start와 원본 보존·중복 방지, 신규 브라우저 프로필에서 JSON import 왕복, Windows Chrome/Edge/한글/이미지 육안 인쇄. STEP2 최종 수용 및 main 기능 병합은 진행하지 않음.
