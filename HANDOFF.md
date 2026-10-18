@@ -218,3 +218,16 @@
 8. **데이터/보안:** 실제 사용자 v1 localStorage·v2 IndexedDB, 로드맵 원본 TXT/PNG, 원본 지침 무변경. 테스트는 합성 임시 Chrome/Edge 브라우저 프로필에서만 실행; 사용자 PDF 원본은 GitHub 공개 업로드 금지, API 키 없음.
 9. **다음 1단위:** main과 feature의 병합 준비·충돌·원본 안전성 및 사용자 승인 전제 조건 재확인. Windows Edge 실제 A4/한글/사진·키보드 미검증은 남기되 자동 검사를 반복해 사용자에게 재요구하지 말 것. 명시적 병합 승인 전 main 변경 금지.
 10. **기준:** 2026-10-19 02:24 KST, Actions #39149195481 SUCCESS·Edge 바이너리/버전·실제 테스트 로그 확인. STEP2 약 98~99%, 전체 28~29%, 5%p 이상 상승 아니므로 전체 진행률 변동 별도 선언 불필요.
+
+
+## 최신 인수인계 — 2026-10-19 02:43 KST (STEP2 main 격리 3-way 병합 실제 통과)
+1. **목표/현재:** `hibi89/astra_pdf_redesigner` p5 STEP2 개인 문서 제작기를 기존 STEP1 main에 안전하게 병합할 수 있는지 실환경 검증. 최종 기존 PDF 본문 추출/재디자인 STEP3~7은 아직 미착수. 사용자는 반복 수동검수 최소화 희망.
+2. **이번 변경:** `feature/step2-full-20261018`에 `.github/workflows/step2-merge-preflight.yml` 신규: GitHub Actions `contents:read`, checkout `fetch-depth:0`, `persist-credentials:false`, `main` detached HEAD에서 실제 `git merge --no-commit --no-ff FEATURE_SHA` 수행한 뒤 **merge commit/push 없이** 검수. 앱 기능 원본 코드 수정 없음.
+3. **병합 결과:** [Actions #39150537369](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39150537369) **SUCCESS**; 시험 조합 main `e35e5dfe6a17d32ab1e1e1b2fe21d8bb2b52323a` + feature `8d9fdb1adef31875a793cce9376de3154eb08229`. diverged 73 ahead/32 behind, Git 충돌 0, `git diff --name-only --diff-filter=U` 빈 결과, staged 28개 경로, HEAD는 여전히 main/ MERGE_HEAD feature 일치.
+4. **데이터·원본 불변:** main `HANDOFF.md`, `STATUS.md`, `src/App.tsx`, `src/storage.ts`, 원본 roadmap TXT, STEP1/BLUEPRINT spec, PNG 2개 및 feature STEP2 원본 지침을 병합 트리에서 원본 파일에 `cmp`로 바이트 비교 **모두 PASS**. 테스트용 합성 문서만 사용; 사용자 실제 브라우저 데이터 변경 없음.
+5. **병합 트리 기능 증거:** Node16/16, TypeScript/Vite build, 실제 Chrome STEP1 A4 15p 및 STEP2 이미지/JSON/저장·2탭 Web Locks·V1 migration abort/재시도·프로필간 JSON 이식 **PASS**. 실제 Microsoft Edge 155에서 STEP1 A4·STEP2 PNG/JPEG/WebP/긴 캡션/IndexedDB 저장 오류 복구 **PASS**. 동일 feature 자체 CI #39150537297 SUCCESS.
+6. **경계/승인:** **main 실제 병합 미진행 / STEP2 사용자 최종 수용 HOLD**. Windows Chrome에서 사용자가 제출한 1p A4 한글 PDF 일부 PASS; Windows Edge 사용자가 생성한 이미지/긴 문서 출력·키보드 육안 수동검수 미확인. 사용자 승인 전에 main merge 금지. Status/Handoff 갱신으로 main docs-only HEAD가 변하면 **병합 직전 최신 main+feature SHAs로 preflight 재실행 필수**.
+7. **저장소/증거:** `docs/STEP2_ISOLATED_MAIN_MERGE_PREFLIGHT_2026-10-19.md`에 SHA/28 files/CMP/모든 통합 테스트 기록, `.github/workflows/step2-merge-preflight.yml` 계속 feature push마다 검사. 기존 원본 `docs/ASTRA_ORIGINAL_ROADMAP.txt`, `docs/blueprints/*.png`, STEP2 지침 TXT 불변.
+8. **배포/보안:** GitHub Ubuntu Node22, headless Chrome+Edge, Vite localhost. 사용자 원본·비밀/토큰 접근/외부 공개 없음. Production/Vercel 미배포. GitHub main 브랜치 기능은 STEP1 상태 유지.
+9. **다음 1단위:** 실사용 Windows의 미확인 항목을 명시하며 STEP2 수용/병합 승인 판단. 사용자 명시적 승인이 있으면 최신 main/feature 재확인·preflight 재실행 → 실제 병합 및 main 전체 CI/원본 보존 검증. STEP3 시작은 이후 별도.
+10. **진행률:** 2026-10-19 02:43 KST STEP2 자동·기술 관점 약 **99%** 비공식, 전체 동일 비중 7단계 **약 28~29%**, 전체 5%p 이상 상승 아님. 시험한 feature SHA `8d9fdb1adef31875a793cce9376de3154eb08229`, Actions #39150537369 최종 success 로그 확보.
