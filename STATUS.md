@@ -186,3 +186,13 @@
 - **검증 경계:** Ubuntu **Linux Edge** 155에서의 자동 검사이며 **Windows Edge 실제 PDF·폰트·육안 수용 아님**. Edge에서는 STEP1/2 browser smoke 두 스크립트 실행, Chrome 전용 다른 2탭/프로필간 이식 스크립트까지 Edge에서 별도 실행한 것은 아님. Windows Chrome 1페이지 사용자 제출 PDF 부분 PASS 증거는 별도 유지.
 - 보고서: feature `docs/STEP2_EDGE_CHROMIUM_CI_VALIDATION_2026-10-19.md`. `README.md`, STEP2 감사/Windows 검수 문서·구현 상태 최신 반영. **STEP2 최종 수용·main 병합 HOLD**, STEP3~7 미착수. 진행률 STEP2 비공식 약 98~99%, 전체 동일 비중 7단계 약 28~29%, 유의미한 5%p 상승 없음.
 - 다음 작업: 남은 Windows 실환경 수용 항목을 최소화해 판단하고 병합 전 feature/main 충돌·코드/원본 보호를 재검토한다. 사용자 명시적 승인 없는 main 병합 금지.
+
+
+## 2026-10-19 02:43 KST — STEP2 main+feature 실제 격리 병합·바이트 무결성·통합 회귀 성공
+- 최신 비교: `main`과 `feature/step2-full-20261018`이 **diverged**, 기능 브랜치 73 commits ahead/32 behind. 실제 병합을 GitHub Actions 격리 runner에서 **detached main HEAD** `e35e5dfe6a17d32ab1e1e1b2fe21d8bb2b52323a` + 기능 SHA `8d9fdb1adef31875a793cce9376de3154eb08229`로 `git merge --no-commit --no-ff` 수행. **충돌 0**, 28개 staged 경로, HEAD main 유지/ MERGE_HEAD feature 일치. **main에 merge commit/푸시 없음**.
+- 기존 main의 `HANDOFF.md`/`STATUS.md`, STEP1 `src/App.tsx`/`src/storage.ts`, 로드맵·STEP1/BLUEPRINT 명세·설계 PNG2장과 feature STEP2 원본 지침 `docs/ASTRA_STEP2_ORIGINAL_INSTRUCTIONS.txt`를 병합 결과와 **byte-for-byte** 비교 **전부 PASS**. STEP1와 기존 인수인계 보호 확인.
+- [GitHub Actions #39150537369](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39150537369) **SUCCESS**: 병합된 임시 트리에서 Node 16/16, TS/Vite 빌드, Google Chrome STEP1 PDF15p·STEP2 이미지/JSON·저장 실패·실제 2탭·V1 migration abort/재시도·독립 프로필 JSON 파일 이식 및 Microsoft Edge 155 STEP1/STEP2 A4 PDF·긴 캡션·저장 복구 전체 PASS. 기능 브랜치 단독 CI [#39150537297](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39150537297)도 SUCCESS.
+- 기능 브랜치 `.github/workflows/step2-merge-preflight.yml` 신규(추후 push시 자동 재검증). 상세 보고 `docs/STEP2_ISOLATED_MAIN_MERGE_PREFLIGHT_2026-10-19.md`. 앱 기능 코드 변경 없음, workflow·보고서만 추가.
+- **판정:** 기술적 병합 사전검증 PASS. 사용자 Windows Chrome 1p 한글/A4 부분 PASS, Windows Edge 실제 긴 PDF/이미지·키보드 육안 수용 미완료. STEP2 최종 수용·main 실제 병합은 사용자 명시적 승인 전 **HOLD**, STEP3 미착수.
+- 이번 상태 문서 추가 뒤 **main HEAD가 바뀌므로**, 최종 merge 전에 새로운 main/feature SHA 조합으로 preflight 다시 실행해야 한다. 이전 run의 `main` SHA는 `e35e5dfe6a17d32ab1e1e1b2fe21d8bb2b52323a`. 원본 파일들이 후속 수정에도 그대로인지 병합시 확인.
+- 진행률 비공식 STEP2 **약 99%**(자동·기술적 준비 관점), 전체 7단계 **약 28~29%**(동일 비중 단순 환산; 5%p 상승 없음). 다음: 수동 수용 범위·병합 명시적 승인 여부 확인 → 승인시 최신 main HEAD로 재검증 후 main 병합/CI 확인.
