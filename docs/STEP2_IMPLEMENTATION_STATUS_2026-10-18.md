@@ -118,3 +118,10 @@
 - A에서 합성 본문+PNG·WebP 저장·다운로드한 `.localdoc.json`의 파일 데이터를 그대로 B의 file input에 제공. B 기존 문서는 보존되고 import 문서의 텍스트·테마·메타·이미지 원본 바이트·치수·순서가 동일. 모든 document/section/block/asset ID는 새로 생성되고 누락 참조 없음. reload 및 A4 PDF 내 이미지 2개까지 PASS.
 - [CI #39144399956](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39144399956) **SUCCESS**, SHA `17f2e65e1873b4c75dc484cc7c6e11965a29f5ff`, Node 16/16, TS/Vite build, STEP1 15p PDF 및 이전 STEP2 저장/멀티탭/cold migration 회귀 PASS.
 - 미검증 migration transaction 실패 원자적 rollback 및 사용자 Windows Chrome/Edge 수동 인쇄·한글·시각. STEP2 약 96% 비공식 추정, main 기능 미병합. 다음 검증은 v1 cold migration 실패 주입·원본/marker rollback.
+
+
+## 2026-10-19 01:29 KST — 최초 V1→V2 마이그레이션 실제 IndexedDB abort/재시도 PASS
+- `tests/step2-cold-migration.mjs` fault-injection `STEP2_INJECT_MIGRATION_ABORT=1`: 신규 Chrome에서 V1 source 사전 생성 후 초기 `documents+meta` write transaction을 의도적으로 abort. **docs 0 / marker undefined / active undefined / V1 source bytes unchanged** PASS. 오류 화면 확인 뒤 reload로 정상 migration 1회 성공, 추가 reload 시 데이터·IDs 불변 및 중복 0 PASS.
+- Chrome 스모크의 저장 재시도 후 legacy 모드 전환 시 React 작업 잠금 해제를 기다리도록 `tests/step2-browser.mjs` 테스트 대기 조건 수정(기능 소스 미변경).
+- [Actions 39145149408](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39145149408) **success**. 검증 SHA `a5009a76499a983aa4566adabddabf862c9e839b`; 단위 16/16 PASS, TS/Vite build PASS, Chrome STEP1 15p PDF, STEP2 이전 모든 E2E와 신규 migration 실패 복구 PASS.
+- 사용자 Windows Chrome/Edge 한글 인쇄·레이아웃/접근성 수동 검증 **대기**, STEP2 main 기능 **미병합**, STEP3~7 미착수. STEP2 약 97~98%, 전체 동등가중 약 28~29% (비공식).
