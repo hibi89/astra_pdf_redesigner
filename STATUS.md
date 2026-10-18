@@ -48,8 +48,8 @@
 
 ## STEP 2 상세 지침 반영 및 기능 브랜치 구현 중 (2026-10-18 22:39:17 KST)
 - 사용자 제공 STEP 2 지침 원문을 `feature/step2-full-20261018`의 `docs/ASTRA_STEP2_ORIGINAL_INSTRUCTIONS.txt`에 변경 없이 보존.
-- 기능 브랜치 최신 확인 SHA `4ea4c57a7eef3a0a7710f510119ce766be8a37d9`. 코드 구현: V2 섹션·블록 모델, IndexedDB(문서·자산·메타), 안전 마이그레이션, 문서함, 이미지 검증/편집, 프로젝트 JSON 내보내기·가져오기, 추가 컴팩트 테마, Chrome 브라우저 테스트 코드.
-- 로컬 Node 22 `npm test` **13/13 PASS**, 전역 TypeScript로 순수 모델/저장 모듈 정적 타입검사 PASS, JSX 구문 검사 PASS. **전체 React/Vite 빌드·STEP 2 Chrome IndexedDB/인쇄 실제 테스트는 미검증**.
+- 기능 브랜치 최신 확인 SHA `ebb5861cbc795286c1aa1d9ea1321fb46f261ffb`. 코드 구현: V2 섹션·블록 모델, IndexedDB(문서·자산·메타), 안전 마이그레이션, 문서함, 이미지 검증/편집, 프로젝트 JSON 내보내기·가져오기, 추가 컴팩트 테마, Chrome 브라우저 테스트 코드.
+- 로컬 Node 22 `npm test` **14/14 PASS**, 전역 TypeScript로 순수 모델/저장 모듈 정적 타입검사 PASS, JSX 구문 검사 PASS. **전체 React/Vite 빌드·STEP 2 Chrome IndexedDB/인쇄 실제 테스트는 미검증**.
 - CI 두 차례 `39131861115`, `39132088786`: 러너 미배정, `steps=[]`, 약 2초 뒤 종료. 테스트 실행 전 실패로 앱 오류 여부 불명. 동일 시도 반복 중단. 로컬 npm offline도 ENOTCACHED, 온라인 DNS EAI_AGAIN.
 - **main은 STEP 1 검증 소스 유지**. STEP 2 기능 브랜치 코드는 빌드/실브라우저 검증 후에만 main 병합. 문서 원본 v1 자동 삭제·덮어쓰기 없음.
 - 다음 작업: GitHub Actions runner 복구/다른 인터넷 가능한 환경에서 `npm install && npm run build` 및 `tests/browser-smoke.mjs`·`tests/step2-browser.mjs` 실행 → 실패 코드 수정 → 병합/문서 갱신.
