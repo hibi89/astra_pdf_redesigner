@@ -226,6 +226,72 @@ try{
   assert.deepEqual(await evaluate(imageSnapshotCode),imagesAfter);
   console.log('PASS STEP2: retry commits replacement without orphan assets; persisted document and image survive reload');
 
+  // A4 pagination: large portrait image at a paragraph boundary, short caption
+  // kept on same page, then a long caption split across several pages.
+  await evaluate("[...document.querySelectorAll('button')].find(b=>b.textContent.includes('+ 빈 문서')).click()");
+  await eventually(()=>evaluate("document.querySelectorAll('.project-paper figure img').length"),n=>n===0);
+  const preceding=Array.from({length:37},(_,i)=>'BEFORE_IMAGE_LINE_'+String(i+1).padStart(3,'0')).join('\n');
+  await fill('.section-editor .block-editor textarea',preceding,'HTMLTextAreaElement');
+  await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),v=>v==='저장됨');
+  const uploadPortrait="(async()=>{const c=document.createElement('canvas');c.width=1200;c.height=2500;const ctx=c.getContext('2d');ctx.fillStyle='#e7b35a';ctx.fillRect(0,0,1200,2500);ctx.fillStyle='#315183';ctx.fillRect(0,0,1200,200);ctx.fillStyle='#c13b68';ctx.fillRect(0,2300,1200,200);const blob=await new Promise(resolve=>c.toBlob(resolve,'image/png'));if(!blob)throw Error('Canvas encode failed');const dt=new DataTransfer();dt.items.add(new File([blob],'a4-portrait-1200x2500.png',{type:'image/png'}));const input=document.querySelector('.section-editor .add-block input[type=file]');input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}))})()";
+  await evaluate(uploadPortrait);
+  await eventually(()=>evaluate("(()=>{const i=document.querySelector('.project-paper figure img');return i&&i.complete?[i.naturalWidth,i.naturalHeight]:null})()"),v=>v?.[0]===1200&&v?.[1]===2500);
+  await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),v=>v==='저장됨');
+  const updateCaption=(value)=>evaluate("(()=>{const label=[...document.querySelectorAll('.block-editor label')].find(x=>x.textContent.includes('이미지 설명'));const input=label?.querySelector('input');if(!input)throw Error('Missing caption input');Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set.call(input,"+JSON.stringify(value)+");input.dispatchEvent(new Event('input',{bubbles:true}))})()");
+  const shortCaption='SHORT_CAPTION_A4_BOUNDARY_9001';
+  await updateCaption(shortCaption);
+  await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),v=>v==='저장됨');
+  const printA4=async(name)=>{
+    const path=join(dir,name);
+    const pdf=await send('Page.printToPDF',{printBackground:false,preferCSSPageSize:true});
+    writeFileSync(path,Buffer.from(pdf.data,'base64'));
+    const info=execFileSync('pdfinfo',[path],{encoding:'utf8'});
+    assert.ok(info.includes('(A4)'),'Expected actual A4 PDF');
+    const pages=Number(info.match(/^Pages:\s+(\d+)/m)?.[1]);
+    assert.ok(pages>=2);
+    const fullText=execFileSync('pdftotext',[path,'-'],{encoding:'utf8'});
+    const imgInfo=execFileSync('pdfimages',['-list',path],{encoding:'utf8'});
+    const imagePages=imgInfo.split('\n').filter(x=>/^\s*\d+\s+\d+\s+image\s/.test(x)).map(x=>Number(x.trim().split(/\s+/)[0]));
+    assert.ok(imagePages.length>=1,'Image missing in printed PDF');
+    return{path,pages,fullText,imagePages};
+  };
+  const shortPrint=await printA4('step2-short-caption.pdf');
+  assert.ok(shortPrint.fullText.includes('BEFORE_IMAGE_LINE_001'));
+  assert.ok(shortPrint.fullText.includes('BEFORE_IMAGE_LINE_037'));
+  assert.equal(shortPrint.fullText.split(shortCaption).length-1,1);
+  const captionPage=Array.from({length:shortPrint.pages},(_,i)=>i+1).find(n=>execFileSync('pdftotext',['-f',String(n),'-l',String(n),shortPrint.path,'-'],{encoding:'utf8'}).includes(shortCaption));
+  assert.ok(shortPrint.imagePages.includes(captionPage),'Image and short caption must share the same printable page');
+  console.log('PASS STEP2: tall portrait with short caption stays together at A4 boundary');
+
+  const first='LONG_CAPTION_START_8162', last='LONG_CAPTION_END_8162';
+  const longCaption=[first,...Array.from({length:190},(_,i)=>'CAPTION_ROW_'+String(i+1).padStart(3,'0')+' 원문을 보존하는 여러 페이지 길이의 설명입니다.'),last].join('\n');
+  await updateCaption(longCaption);
+  await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),v=>v==='저장됨');
+  const longPrint=await printA4('step2-long-caption.pdf');
+  assert.ok(longPrint.pages>shortPrint.pages,'Long caption should span additional pages');
+  assert.equal(longPrint.fullText.split(first).length-1,1);
+  assert.equal(longPrint.fullText.split(last).length-1,1);
+  assert.ok(longPrint.fullText.includes('CAPTION_ROW_001')&&longPrint.fullText.includes('CAPTION_ROW_190'));
+  assert.ok(longPrint.fullText.includes('BEFORE_IMAGE_LINE_037'));
+  console.log('PASS STEP2: long image caption spans additional A4 pages, full content retained');
+
+  const bbox=execFileSync('pdftotext',['-bbox-layout',longPrint.path,'-'],{encoding:'utf8'});
+  const bounds=[...bbox.matchAll(/<page width="([\d.]+)" height="([\d.]+)"/g)].map(m=>({w:Number(m[1]),h:Number(m[2])}));
+  assert.equal(bounds.length,longPrint.pages);
+  const segments=bbox.split(/<page width="[\d.]+" height="[\d.]+">/).slice(1);
+  let count=0;
+  for(let p=0;p<segments.length;p++){
+    for(const m of segments[p].matchAll(/<word xMin="([\d.]+)" yMin="([\d.]+)" xMax="([\d.]+)" yMax="([\d.]+)">/g)){
+      const coords=m.slice(1).map(Number);
+      assert.ok(coords[0]>=0&&coords[1]>=0&&coords[2]<=bounds[p].w+0.5&&coords[3]<=bounds[p].h+0.5,
+        'PDF word escaped A4 page '+String(p+1));
+      count++;
+    }
+  }
+  assert.ok(count>200,'Expected multi-page extracted text coordinates');
+  console.log('PASS STEP2: word bounding boxes remain within A4 media bounds');
+
+
 
 
 
