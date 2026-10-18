@@ -131,3 +131,13 @@
 - **남은 수용 증거:** 유효한 기존 STEP1 v1 데이터가 사전 존재하는 **독립 Chrome 프로필 cold-start 마이그레이션 E2E**(현재는 단위·지연 발생 상황 검증), 독립 프로필 JSON 가져오기, 사용자 Windows Chrome/Edge PDF 출력·한글·시각 수동 검수. UI 접근성 전체 수동 점검도 남음.
 - **병합 판정 HOLD:** `main`에 STEP2 기능 미병합, STEP3 미착수. 보수적 추정 STEP2 **약 90~95%**, 전체 7단계 **약 27~28%** (동일 비중 단순 환산·소요 시간 반영 안 함). 이전 기준에서 유의미한 5%p 순증 아님.
 - 다음 `ㄱ`: STEP1 v1 원본 있는 별도 Chrome 프로필에서 실제 초기 마이그레이션/복원·중복 방지 검증. 이후 별도 프로필 JSON 이식 확인 → main 병합 여부 판단.
+
+
+## 2026-10-19 01:04 KST — STEP2 V1 선존재 신규 프로필 마이그레이션 E2E 성공
+- 검증 코드 `abb3d9425e72a2708306674176346727ef0ea710`, 기능 브랜치 `feature/step2-full-20261018`. 원본 STEP1 `localStorage`이 **처음부터 존재**하는 신규 Chrome 프로필을 만들어 앱 JS 이전에 유효한 v1 형식의 **합성 데이터**를 저장. 실제 사용자 데이터 수정 없이 검증.
+- `tests/step2-cold-migration.mjs`와 `.github/workflows/ci.yml` 테스트 추가. Chrome IndexedDB에서 STEP2 문서 1개(빈 문서 중복 없음), v1 제목/작성자/날짜·4개 본문 항목 원문/공백/줄바꿈/특수문자·기존 디자인 exact match, 고유 ID·ACTIVE·migration marker true PASS.
+- 기존 `astra-pdf-redesigner:current:v1` 원본 JSON byte-for-byte 유지 PASS. Chrome 새로고침 후 문서·ACTIVE·migration marker 원상태 동일/중복 복제 0 PASS.
+- [GitHub Actions `39143261165`](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39143261165) **SUCCESS**: `npm test` 16/16 PASS, TS/Vite 빌드 PASS, 기존 STEP1 Chrome PDF 15p·STEP2 이미지/JSON·2탭·인쇄·저장 실패 회귀+신규 cold migration PASS.
+- 유의: Chrome test 종료에서 합성 임시 프로필 삭제 `ENOTEMPTY` 경고 발생. **검증 PASS와 분리**하여 CI 완료 success, runner 임시 디렉터리 정리 경고는 기록. 기능 데이터/사용자 문서와 무관.
+- **남은 수용 항목:** 새로운 Chrome 프로필 간 JSON 파일 실물 내보내기→가져오기 E2E, 사용자의 Windows Chrome/Edge A4 인쇄/한글·시각 검수, 초기 migration 실제 트랜잭션 실패 주입은 별도 미검증.
+- 상태 STEP2 **약 95% 비공식 추정**, 전체 7단계 단순 동일비중 환산 **약 28~29%**. 진도 유의미 상승 기준(5%p) 미달. **main STEP2 병합 HOLD**; STEP3~7 미착수. 다음 `ㄱ`: 독립 Chrome 프로필 JSON 이식/복원 검증.
