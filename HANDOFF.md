@@ -205,3 +205,16 @@
 8. **기술/환경:** Node22, React19/TS/Vite/IndexedDB, `npm install`, `npm test`, `npm run build`, `npm run dev`. Local 127.0.0.1. No Vercel/Production, 외부 AI API 없음.
 9. **다음 1단위:** 이미 Linux Chrome 자동 검사 통과한 것은 반복 검증 최소화. 남은 Windows Edge/이미지 포함 장문 수동 검수 범위를 사용자와 합의하되 사용자 PC 개입 요구 최소화; 병합 승인 후 main 최신 문서 보존하며 병합 및 main CI 검증. STEP3는 별도 사용자 지침 후.
 10. **진행률/시간:** 2026-10-19 02:14 KST. STEP2 약 **97~98%**, 전체 7단계 단순 동등 비중 약 **28~29%**. 5%p 유의미한 상승 아님. 검증 SHA `6708ce28ebe7781e7f282443ab20295e139e4ad3`, Actions #39148544554 성공 확인.
+
+
+## 최신 인수인계 — 2026-10-19 02:24 KST (Linux Microsoft Edge 155 실제 A4 PDF/저장 E2E)
+1. **목적:** Astra PDF Redesigner p5, STEP2 개인 문서 제작기 마무리. 기존 PDF 본문 보존·재디자인은 장기 목표(STEP3~7 미착수). 사용자 반복 수동테스트 최소화, 자동 가능한 것은 CI 수행.
+2. **변경:** `feature/step2-full-20261018`의 `.github/workflows/ci.yml`에 Edge 필수 단계 추가. `microsoft-edge` 탐지 실패시 **exit 1**; 제품 버전 출력 및 Poppler 확인 후 Edge 실행 경로로 기존 `tests/browser-smoke.mjs`, `tests/step2-browser.mjs` 두 CDP 테스트를 실제 실행. 앱 React/IndexedDB 기능 코드는 변경하지 않음.
+3. **검증:** [Actions #39149195481](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39149195481) **SUCCESS**; 검증 소스 SHA `34352fd4e92ca43641da3b4d9de3070232276497`. Microsoft Edge `/usr/bin/microsoft-edge` **155.0.4283.45**, STEP1 A4 PDF15p/텍스트 추출/편집 UI 제외 PASS, STEP2 IndexedDB 저장, PNG/JPEG/WebP 원본 및 PDF raster, JSON 가져오기·내보내기, 긴 캡션/대형 이미지 A4, QuotaExceededError·이미지 교체 중지 복구, 레거시 화면 전환 테스트 PASS. 기존 Google Chrome 전수·Node 16/16·TS 빌드도 PASS.
+4. **검증 범위/한계:** 실제 **Ubuntu Linux Edge** 자동 검증이며 사용자 **Windows Edge 실제 PDF/글꼴·시각 검수는 미완료**. 사용자가 제출한 Windows Chrome 1페이지 A4 한글 PDF 부분 증거는 존재, Windows 다페이지/이미지 및 키보드 조작 별도. Edge에서는 browser-smoke/step2-browser 두 스모크만 실행(Chrome 별도 멀티탭/프로필간 이식 스크립트의 Edge 재실행은 아님).
+5. **완료/병합:** STEP2 자동 검증 중심 약 **98~99%**(비공식 추정), 7단계 전체 동일 비중 약 **28~29%**. 사용자 수용/Windows 잔여 사항 및 명시적 승인 전 **main 기능 미병합 HOLD**, STEP3 미착수.
+6. **GitHub 파일/refs:** 저장소 `hibi89/astra_pdf_redesigner`, 브랜치 `feature/step2-full-20261018`; 검증 코드 `34352fd4e92ca43641da3b4d9de3070232276497`, `docs/STEP2_EDGE_CHROMIUM_CI_VALIDATION_2026-10-19.md`, `docs/STEP2_FINAL_REQUIREMENTS_AUDIT_2026-10-19.md`, `docs/STEP2_WINDOWS_ACCEPTANCE_AND_MERGE_GATE_2026-10-19.md`, `README.md`. main은 기존 STEP1 코드 보존.
+7. **테스트 환경:** GitHub Ubuntu Node22 + Chrome + Microsoft Edge 155, Vite localhost 127.0.0.1:4173, npm test/build, Poppler. 타이밍 이슈와 임시 프로필 cleanup `ENOTEMPTY` WARN은 사용자 데이터 실패와 구별. Production/Vercel 미배포.
+8. **데이터/보안:** 실제 사용자 v1 localStorage·v2 IndexedDB, 로드맵 원본 TXT/PNG, 원본 지침 무변경. 테스트는 합성 임시 Chrome/Edge 브라우저 프로필에서만 실행; 사용자 PDF 원본은 GitHub 공개 업로드 금지, API 키 없음.
+9. **다음 1단위:** main과 feature의 병합 준비·충돌·원본 안전성 및 사용자 승인 전제 조건 재확인. Windows Edge 실제 A4/한글/사진·키보드 미검증은 남기되 자동 검사를 반복해 사용자에게 재요구하지 말 것. 명시적 병합 승인 전 main 변경 금지.
+10. **기준:** 2026-10-19 02:24 KST, Actions #39149195481 SUCCESS·Edge 바이너리/버전·실제 테스트 로그 확인. STEP2 약 98~99%, 전체 28~29%, 5%p 이상 상승 아니므로 전체 진행률 변동 별도 선언 불필요.
