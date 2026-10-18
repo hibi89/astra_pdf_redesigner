@@ -44,3 +44,31 @@ jobs:
           CHROME_PATH="$CHROME_BIN" node tests/step2-cold-migration.mjs
           CHROME_PATH="$CHROME_BIN" STEP2_INJECT_MIGRATION_ABORT=1 node tests/step2-cold-migration.mjs
           CHROME_PATH="$CHROME_BIN" node tests/step2-cross-profile.mjs
+
+      - name: Microsoft Edge A4 print and IndexedDB smoke
+        run: |
+          set -euo pipefail
+          EDGE_BIN=$(command -v microsoft-edge || command -v microsoft-edge-stable || command -v microsoft-edge-beta || true)
+          if [ -z "$EDGE_BIN" ]; then
+            echo "::error::Microsoft Edge unavailable; required Edge PDF and storage checks cannot run"
+            exit 1
+          fi
+          echo "Microsoft Edge executable: $EDGE_BIN"
+          "$EDGE_BIN" --version
+          if ! command -v pdfinfo >/dev/null || ! command -v pdftotext >/dev/null || ! command -v pdfimages >/dev/null; then
+            echo "::error::Poppler PDF inspection tools missing"
+            exit 1
+          fi
+          npm run dev -- --port 4173 >/tmp/astra-vite-edge.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:4173 >/dev/null; then break; fi
+            sleep 0.5
+          done
+          curl -fsS http://127.0.0.1:4173 >/dev/null
+          echo "Running STEP 1 A4 print and STEP 2 IndexedDB, images, JSON and long-caption PDF regressions with actual Edge"
+          CHROME_PATH="$EDGE_BIN" node tests/browser-smoke.mjs
+          CHROME_PATH="$EDGE_BIN" node tests/step2-browser.mjs
+          echo "PASS EDGE: STEP1 A4 PDF and STEP2 print, persistence, images, import/export and pagination checks"
+
