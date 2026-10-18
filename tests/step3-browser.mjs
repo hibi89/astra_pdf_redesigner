@@ -53,12 +53,26 @@ try{
   const original=await evaluate("document.querySelector('.doc-list-item.active strong')?.textContent");
 
   // Create a selectable-text PDF with CDP itself, no network fixture dependencies.
-  const html='<html><head><meta charset="UTF-8"><style>body{font-family:sans-serif;margin:70px}h1{font-size:28px}p{font-size:14px;line-height:2}</style></head>'+
+  const html='<html><head><meta charset="UTF-8"><style>@page{size:A4}body{font-family:sans-serif;margin:70px}h1{font-size:28px}p{font-size:14px;line-height:2}.next{break-before:page;page-break-before:always}img{display:block;width:180px;height:110px;object-fit:contain}</style></head>'+
     '<body><h1>STEP3_TEST_BEGIN_7519</h1><p>선택 가능한 한글 PDF ABC-123 100%</p>'+
-    '<p>두 번째 문단 2/3 입력 &amp; 저장 확인</p><p>STEP3_TEST_END_7519</p></body></html>';
+    '<p>두 번째 문단 2/3 입력 &amp; 저장 확인</p>'+
+    '<div id="page2" class="next"><p>STEP3_PAGE2_BEGIN_7519</p><p>여기는 2페이지의 내용입니다.</p></div></body></html>';
   await evaluate('document.open();document.write('+JSON.stringify(html)+');document.close()');
-  await eventually(()=>evaluate("Boolean(document.body.textContent.includes('STEP3_TEST_END_7519'))"));
+  await evaluate("(async()=>{const c=document.createElement('canvas');c.width=120;c.height=80;"+
+    "const ctx=c.getContext('2d');ctx.fillStyle='#1b74bc';ctx.fillRect(0,0,120,80);"+
+    "ctx.fillStyle='#ffbf35';ctx.fillRect(15,12,74,54);ctx.fillStyle='#183f70';ctx.fillRect(65,25,40,38);"+
+    "const img=new Image();img.src=c.toDataURL('image/png');img.alt='TEST_RECOVERABLE_IMAGE';"+
+    "document.querySelector('#page2').append(img);await img.decode();"+
+    "const end=document.createElement('p');end.textContent='STEP3_TEST_END_7519';"+
+    "document.querySelector('#page2').append(end);return true;})()");
+  await eventually(()=>evaluate("Boolean(document.body.textContent.includes('STEP3_TEST_END_7519')&&document.images.length===1&&document.images[0].complete)"));
   const pdf=await send('Page.printToPDF',{preferCSSPageSize:true,printBackground:false});
+  const srcPath=join(dir,'step3-fixture-source.pdf');
+  writeFileSync(srcPath,Buffer.from(pdf.data,'base64'));
+  const srcInfo=execFileSync('pdfinfo',[srcPath],{encoding:'utf8'});
+  const srcImages=execFileSync('pdfimages',['-list',srcPath],{encoding:'utf8'});
+  assert.ok(/Pages:\s*[2-9]/.test(srcInfo),'Synthetic PDF should span multiple pages');
+  assert.ok(/^\s*\d+\s+\d+\s+image/m.test(srcImages),'Fixture PDF must actually contain a bitmap XObject');
   assert.ok(pdf.data?.length>1000,'Synthetic PDF missing');
   console.log('PASS STEP3 FIXTURE: selectable PDF generated with actual browser');
   await send('Page.navigate',{url});
@@ -69,6 +83,14 @@ try{
     "const input=document.querySelector('.step3-import-panel input[type=file]');"+
     "input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}));})()");
   await eventually(()=>evaluate("document.querySelector('.step3-import-panel')?.textContent"),txt=>txt?.includes('STEP3_TEST_BEGIN_7519')&&txt.includes('STEP3_TEST_END_7519'));
+  const recoveredSummary=await evaluate("document.querySelector('[data-step3-image-count]')?.textContent");
+  console.log('STEP3 IMAGE SUMMARY:',recoveredSummary);
+  assert.match(recoveredSummary??'',/PNG 복원 [1-9]/,'PDF.js must recover a bitmap from actual Chrome/Edge-generated PDF');
+  assert.ok(await evaluate("document.querySelectorAll('.step3-image-thumbnail').length")>=1,
+    'Image review thumbnail must be visible before user confirms');
+  assert.ok(await evaluate("document.querySelectorAll('.step3-block-review details').length")>=2,
+    'Two independent PDF pages must be visible for review');
+  console.log('PASS STEP3 MULTIPAGE/IMAGE REVIEW: source image decoded and recovered with explicit count');
   assert.equal(await evaluate("document.querySelectorAll('.doc-list-item').length"),before,'Review touched persisted document list');
   assert.equal(await evaluate("document.querySelector('.doc-list-item.active strong')?.textContent"),original,'Review switched active document');
   const hasSource=await evaluate("Boolean(document.querySelector('.step3-import-panel iframe[src^=blob]'))");
@@ -79,7 +101,10 @@ try{
   await evaluate("document.querySelector('.step3-confirm input[type=checkbox]').click()");
   await evaluate("(()=>{const b=[...document.querySelectorAll('.step3-import-panel button')].find(b=>b.textContent.includes('검수 결과를 새 문서로 저장'));if(!b||b.disabled)throw Error('PDF confirm disabled');b.click();})()");
   await eventually(()=>evaluate("document.querySelectorAll('.doc-list-item').length"),n=>n===before+1);
-  await eventually(()=>evaluate("document.querySelector('.project-paper')?.textContent"),t=>t?.includes('STEP3_TEST_BEGIN_7519')&&t.includes('STEP3_TEST_END_7519'));
+  await eventually(()=>evaluate("document.querySelector('.project-paper')?.textContent"),t=>t?.includes('STEP3_TEST_BEGIN_7519')&&t.includes('STEP3_PAGE2_BEGIN_7519')&&t.includes('STEP3_TEST_END_7519'));
+  assert.ok(await evaluate("document.querySelectorAll('.project-paper img').length")>=1,'Recovered PNG must render in new document');
+  await eventually(()=>evaluate("Promise.all([...document.querySelectorAll('.project-paper img')].map(img=>img.decode().then(()=>true,()=>false))).then(x=>x.every(Boolean))"));
+
   assert.equal(await evaluate("document.querySelector('.doc-list-item.active strong')?.textContent?.includes('step3-sample')"),true);
   assert.equal(await evaluate("document.querySelector('.section-editor .help-text')?.textContent?.includes('원본 PDF 출처')"),true);
   console.log('PASS STEP3 IMPORT: review creates independent active V2 document with PDF source provenance');
@@ -95,8 +120,15 @@ try{
   writeFileSync(pdfPath,Buffer.from(printed.data,'base64'));
   const info=execFileSync('pdfinfo',[pdfPath],{encoding:'utf8'});
   const text=execFileSync('pdftotext',[pdfPath,'-'],{encoding:'utf8'});
-  assert.ok(info.includes('(A4)')&&text.includes('STEP3_TEST_BEGIN_7519')&&text.includes('STEP3_TEST_END_7519'),
-    'Imported PDF text not preserved in A4 reprint');
+  const embedded=execFileSync('pdfimages',['-list',pdfPath],{encoding:'utf8'});
+  assert.ok(info.includes('(A4)')&&text.includes('STEP3_TEST_BEGIN_7519')&&
+    text.includes('STEP3_PAGE2_BEGIN_7519')&&text.includes('STEP3_TEST_END_7519'),
+    'Imported multi-page PDF must preserve text in A4 reprint');
+  assert.ok(text.indexOf('STEP3_TEST_BEGIN_7519')<text.indexOf('STEP3_PAGE2_BEGIN_7519')&&
+    text.indexOf('STEP3_PAGE2_BEGIN_7519')<text.indexOf('STEP3_TEST_END_7519'),
+    'Reprinted PDF has incorrect page/text reading order');
+  assert.ok(/^\s*\d+\s+\d+\s+image/m.test(embedded),'Reprinted A4 PDF must include recovered raster image');
+  console.log('PASS STEP3 MULTIPAGE/IMAGE REPRINT: source order and embedded PNG survive theme/reload/A4 output');
   console.log('PASS STEP3 END-TO-END: imported PDF survives theme/reload and retains start/end markers in new A4 PDF');
 }finally{
   if(ws)ws.close();
