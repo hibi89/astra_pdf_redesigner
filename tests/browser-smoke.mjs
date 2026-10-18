@@ -1,35 +1,22 @@
 // No test browser dependency: uses Node 22 WebSocket + Chrome DevTools Protocol.
 // Run while the Vite server is listening on http://127.0.0.1:4173.
 import assert from 'node:assert/strict';
-import { spawn, execFileSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
+import { launchBrowser } from './browser-process.mjs';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const browser = process.env.CHROME_PATH || 'chromium';
 const url = process.env.SMOKE_URL || 'http://127.0.0.1:4173';
-const port = 9336;
 const dir = mkdtempSync(join(tmpdir(), 'astra-browser-'));
-const proc = spawn(browser, [
-  '--headless=new', '--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage',
-  '--disable-background-networking', '--no-first-run', '--no-default-browser-check',
-  `--user-data-dir=${dir}`, `--remote-debugging-port=${port}`, 'about:blank',
-], { stdio: 'ignore' });
+const session = launchBrowser(browser,dir,'STEP1 browser-smoke');
 let ws;
 let seq = 1;
 const pending = new Map();
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function devtools() {
-  for (let attempt = 0; attempt < 70; attempt += 1) {
-    try {
-      const response = await fetch(`http://127.0.0.1:${port}/json/version`, { signal: AbortSignal.timeout(800) });
-      if (response.ok) return (await response.json()).webSocketDebuggerUrl;
-    } catch { /* Chrome launching */ }
-    await wait(200);
-  }
-  throw new Error('Chrome DevTools did not start');
-}
+async function devtools() {return session.devtools();}
 
 function request(method, params = {}, sessionId) {
   return new Promise((resolve, reject) => {
@@ -173,7 +160,10 @@ try {
   console.log(`PASS: Chrome print CSS, A4 PDF ${pages} pages, text extraction, no editor UI`);
 } finally {
   if (ws) ws.close();
-  proc.kill('SIGTERM');
-  await wait(350);
-  rmSync(dir, { recursive: true, force: true });
+  await session.close();
+  try{rmSync(dir,{recursive:true,force:true,maxRetries:12,retryDelay:250});}
+  catch(error){
+    if(!['ENOTEMPTY','EBUSY','EPERM'].includes(error?.code))throw error;
+    console.warn('WARN STEP1: temporary browser profile cleanup deferred ('+error.code+')');
+  }
 }
