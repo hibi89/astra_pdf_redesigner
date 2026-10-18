@@ -153,3 +153,16 @@
 8. **원본·보안:** 사용자 기존 v1 `localStorage`와 v2 IndexedDB/설계 PNG·TXT/STEP2 원본 지침 보존, 고객 데이터/네트워크 전송 없음. 테스트는 임시 synthetic records만 사용.
 9. **다음 `ㄱ`:** 신규 브라우저 프로필 A에서 이미지 포함 문서 JSON 내보내기 → 완전 별도 Chrome 프로필 B에서 JSON 가져오기, 새 ID·원문/이미지 bytes/디자인 복원·A4 검증. 다음 수용 사항은 사용자 Windows/Edge 출력.
 10. **진행률:** 2026-10-19 01:04 KST. STEP2 약 95%, 전체 7단계 동일비중 약 28~29%(가중·시간 미반영). 중앙 `BOOK.md`/보고서 동기화 후 재확인.
+
+
+## 현재 인수인계 — 2026-10-19 01:19 KST (STEP2 실물 JSON 파일의 프로필 간 이식 검증)
+1. **목표/현재 단계:** 기존 PDF 원문 보존·재디자인 최종 목표. 현재 STEP2 개인 문서 제작기 검증, React/TS/Vite/IndexedDB. STEP3 실제 PDF 추출·재구성 미시작.
+2. **변경:** 앱 소스는 변경하지 않음. `tests/step2-cross-profile.mjs` 새 Chrome CDP E2E 추가, `.github/workflows/ci.yml`에 실행 연결. 기능 브랜치 `feature/step2-full-20261018`.
+3. **검증:** [Actions `39144399956`](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39144399956) **SUCCESS**, 검증 SHA `17f2e65e1873b4c75dc484cc7c6e11965a29f5ff`: unit 16/16, TS/Vite build, Chrome STEP1 A4 15p 및 STEP2 모든 이전 E2E PASS. 프로필 A synthetic 한글/영문 본문·디자인·PNG/WebP 저장 후 실제 `.localdoc.json` 다운로드. 분리된 B Chrome 프로필 `DOM.setFileInputFiles`로 파일 import, 기존 B 문서 유지·원문/디자인/bytes 동일·고유 ID 재발급·새로고침 유지·PDF 이미지 2개 PASS.
+4. **완료/보류:** 프로필 간 이식 검증 완료. STEP2 전체 최종 수용/main 병합 **HOLD**, 원본 사용자 Windows Chrome/Edge 실제 PDF/한글/배치·키보드 수동 검수 및 migration transaction 실패 rollback 주입 남음. STEP3~7 미착수.
+5. **오류·시도:** 이번 검증 최종 CI가 첫 실행부터 SUCCESS. 기존 임시 프로필 정리 지연 WARN은 지난 cold migration 테스트에서 보고된 별개 사항. 확인된 신규 앱 결함 없음.
+6. **저장소/브랜치/SHA:** `hibi89/astra_pdf_redesigner`, `feature/step2-full-20261018`; 검증 기능 코드 `17f2e65e1873b4c75dc484cc7c6e11965a29f5ff`. `tests/step2-cross-profile.mjs` 및 CI YAML, `docs/STEP2_FINAL_REQUIREMENTS_AUDIT_2026-10-19.md`, `README.md` 검증 현황 최신화. main은 STEP1만.
+7. **환경/배포:** Ubuntu GitHub Actions Chrome, Node22 `npm install`/`npm test`/`npm run build`/`npm run dev`, local port 4173 테스트. Windows/Edge 미실행, Production/Vercel 미적용.
+8. **원본/보안:** STEP1 v1 localStorage, V2 사용자 IndexedDB, 원본 지침 및 이미지·TXT 보존. 테스트는 합성 파일/임시 Chrome 사용자 디렉터리만 사용; 실제 사용자 데이터 변경·외부 전송 없음.
+9. **다음 1단위:** V1 최초 마이그레이션 중 실제 IDB transaction abort를 강제하여 marker·doc·원본 데이터 무손실/재시도 성공을 검증. 별도 사용자 Windows/Edge 인쇄·시각 수용 이후 main 병합 재판단.
+10. **진행률/기준:** 2026-10-19 01:19 KST, STEP2 약 96%, 전체 7단계 동등가중 약 28~29% (기간·난도 비반영 비공식 추정). 5%p 이상 증가나 단계 완료 시 별도 알림.
