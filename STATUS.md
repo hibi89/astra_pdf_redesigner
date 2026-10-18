@@ -168,3 +168,12 @@
 - 검수 전용 별도 프로필·origin을 안내해 실제 사용자 문서·기존 `5173` origin/데이터를 변경하지 않도록 함. 수동 증거는 합성 PDF·스크린샷으로 수집하고 사용자 원본·비밀 키는 제출하지 않는다.
 - 진척도: STEP2 약 **97~98%**, 7단계 동등가중 전체 약 **28~29%** 이전 추정 유지. 문서화만 추가됐으며 유의미한 실질 진도 상승은 아님.
 - **다음 작업:** 사용자 Windows Chrome/Edge에서 수동 검수 결과를 수집하면 FAIL 분석·수정·재검증 후 main 병합 판단. 사용자 PC에서 아직 테스트하지 않음.
+
+
+## 2026-10-19 02:14 KST — STEP2 병합 전 코드/CI 검수, 브라우저 필수 검사 강화
+- GitHub `main` vs `feature/step2-full-20261018` 정적 비교. 앞섬 **63 commits**, 뒤짐 **28 commits**인 diverged 상태. main 쪽 최근 수정은 `HANDOFF.md`/`STATUS.md` 중심, 기능 브랜치는 STEP2 React/IndexedDB/CSS/테스트 신설. **실제 merge 및 merge 성공/충돌 검사 미수행**, main STEP1 원본·사용자 데이터 무변경.
+- **CI 신뢰성 문제 수정:** 기존 `.github/workflows/ci.yml`은 Chrome 미설치 시 `exit 0`으로 실브라우저 검사를 건너뛰고 성공 처리할 가능성. 필수 Chrome/PDF 테스트 누락 시 `::error`와 **`exit 1`**로 실패하도록 변경(기능 변경 없음).
+- [GitHub Actions #39148544554](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39148544554) **SUCCESS**, 실제 코드 SHA `6708ce28ebe7781e7f282443ab20295e139e4ad3`. Node 16/16, TypeScript/Vite build, Chrome executable `/usr/bin/google-chrome`, STEP1 A4 15p 및 STEP2 이미지/IndexedDB·마이그레이션 abort/긴 캡션·멀티탭·크로스 프로필 JSON E2E **전부 PASS**.
+- **실제 사용자 Windows Chrome PDF 부분 증거 확인:** 첨부된 짧은 문서 1페이지 `594.96 x 841.92 pt` A4, Creator Windows Chrome155, 내장 `MalgunGothic`/`MalgunGothicBold` 글꼴·Unicode 매핑, 한글 제목/본문 정상 추출, 인쇄 UI 보이지 않음. 이 파일 자체는 GitHub 공개 게시 금지. **Edge 출력·Windows 2페이지 이상/이미지/긴 캡션은 미검증**, 실제 뷰어에서 문자 선택·복사 수동 동작도 미확인. '21/21 모든 수동 항목 미실행'이라는 기존 표기는 **일부 Chrome 증거 존재**로 정정.
+- 상세 감사 파일: feature `docs/STEP2_PREMERGE_CODE_CI_AUDIT_2026-10-19.md` 및 `docs/STEP2_WINDOWS_ACCEPTANCE_AND_MERGE_GATE_2026-10-19.md` (Windows Chrome 부분 증거 기록). `README.md` 최신 CI 연동. CI 임시 Chrome 프로필 cleanup `ENOTEMPTY` 간헐적 WARN은 여전히 존재하나 기능 검사 성공과 별개.
+- **병합 판정 HOLD:** 사용자 명시적 승인 전 main 병합 없음. STEP2 약 **97~98%**, 전체 7단계 단순 동등 가중 **28~29%** 이전 추정 유지. 새 코드 감사/CI 신뢰성 개선은 5%p 실질 진도 상승 아님. 다음: 미검증 수용 범위를 협의하고 필요 시 Edge/장문 증거 추가·결함 해결 후 main 병합 승인/재검증.
