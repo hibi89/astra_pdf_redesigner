@@ -2,8 +2,8 @@
 
 - 저장소: `hibi89/astra_pdf_redesigner` / `main`
 - 단계: **STEP 1 구현 및 GitHub Actions 자동 검증 완료 / 사용자 Windows 인쇄 확인 대기**
-- 검증된 소스 커밋: `f2f92195ea3b6969fceccc7a8fd8d4bdb99717f8`
-- 검증 GitHub Actions: [#39127637583](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39127637583), 결론 **success** (검증 종료 2026-10-18 21:32:15 KST)
+- 검증된 소스 커밋: `639b5e984e8ba711674a3b3d29fc6baf881a14d1`
+- 검증 GitHub Actions: [#39128155552](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39128155552), 결론 **success** (검증 종료 2026-10-18 21:39:37 KST)
 - 로컬/Vercel 배포: 로컬 전용. Vercel Production 없음(미적용).
 
 ## 완료 기능
@@ -31,4 +31,6 @@
 1. 사용자 Windows Chrome/Edge에서 `npm install && npm run dev` 실행, 실제 회고록 입력 후 PDF 출력 결과를 직접 확인.
 2. 출력 검증 완료 시 STEP 1 사용자 수용 상태 기록. 다음 STEP 2는 새 지시·승인 후 착수.
 
-- 기준 검증 시점: 2026-10-18 21:32:15 KST
+- 기준 검증 시점: 2026-10-18 21:39:37 KST
+
+- CI 안정화 보완: 새로고침 완료 이벤트 명시 대기 및 문서만 변경된 커밋에서는 CI 실행 생략; 최신 코드/워크플로 HEAD `639b5e984e8ba711674a3b3d29fc6baf881a14d1`, 검증 run `39128155552`.
