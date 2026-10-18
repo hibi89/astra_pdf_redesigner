@@ -41,8 +41,8 @@ try{
   await evaluate("document.querySelectorAll('.section-editor')[1].querySelector('button[aria-label*=\"위로 이동\"]').click()");
   assert.equal(await evaluate("document.querySelectorAll('.section-editor')[0].querySelector('input').value"),'새 섹션');
   console.log('PASS STEP2: add/reorder independent sections');
-  // PNG 2x2 with actual decoded contents.
-  const base64='iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+/alYAAAAASUVORK5CYII=';
+  // Valid PNG 2x2 with intact IDAT CRC (Chrome rejects malformed PNGs).
+  const base64='iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAFklEQVR4nGOUS3nGwMDAxMDAwMDAAAAQQgFsBOs6hwAAAABJRU5ErkJggg==';
   await evaluate(`(()=>{const b=Uint8Array.from(atob(${JSON.stringify(base64)}),c=>c.charCodeAt(0));const f=new File([b],'one.png',{type:'image/png'});const t=new DataTransfer();t.items.add(f);const e=document.querySelector('.section-editor .add-block input[type=file]');e.files=t.files;e.dispatchEvent(new Event('change',{bubbles:true}));})()`);
   await eventually(()=>evaluate("Boolean(document.querySelector('.project-paper figure img')?.complete)"));
   const state=await evaluate("document.querySelectorAll('.project-paper img').length");assert.equal(state,1);
