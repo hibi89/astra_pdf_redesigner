@@ -137,5 +137,9 @@ try{
       proc.kill('SIGKILL');await Promise.race([exit,delay(2500)]);
     }
   }
-  rmSync(dir,{recursive:true,force:true,maxRetries:8,retryDelay:200});
+  try{rmSync(dir,{recursive:true,force:true,maxRetries:12,retryDelay:250});}
+  catch(error){
+    if(!['ENOTEMPTY','EBUSY','EPERM'].includes(error?.code))throw error;
+    console.warn('WARN STEP2: temporary cold-start profile cleanup deferred ('+error.code+')');
+  }
 }
