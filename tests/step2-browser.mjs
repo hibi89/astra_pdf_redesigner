@@ -334,4 +334,16 @@ try{
 
 
 
-}finally{if(ws)ws.close();proc.kill('SIGTERM');await delay(300);rmSync(dir,{recursive:true,force:true});}
+}finally{
+  if(ws)ws.close();
+  if(proc.exitCode===null&&proc.signalCode===null){
+    const exited=new Promise(resolve=>proc.once('exit',resolve));
+    proc.kill('SIGTERM');
+    await Promise.race([exited,delay(2500)]);
+    if(proc.exitCode===null&&proc.signalCode===null){
+      proc.kill('SIGKILL');
+      await Promise.race([exited,delay(2500)]);
+    }
+  }
+  rmSync(dir,{recursive:true,force:true,maxRetries:8,retryDelay:200});
+}
