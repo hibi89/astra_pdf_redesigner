@@ -313,8 +313,12 @@ try{
   // A failed write must block navigation, preserve the draft and show an error.
   await evaluate("(()=>{const original=IDBDatabase.prototype.transaction;let fail=true;IDBDatabase.prototype.transaction=function(stores,mode,...options){if(fail&&stores==='documents'&&mode==='readwrite'){fail=false;IDBDatabase.prototype.transaction=original;throw new DOMException('Injected mode-switch write failure','QuotaExceededError')}return original.call(this,stores,mode,...options)}})()");
   const failedText='FAILED_MODE_SWITCH_RECOVERY_20261019';
+  await eventually(()=>evaluate("[...document.querySelectorAll('button')].find(b=>b.textContent==='기존 회고록 편집')?.disabled"),v=>v===false);
   await evaluate("(()=>{const el=document.querySelector('.section-editor .block-editor textarea');Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set.call(el,"+JSON.stringify(failedText)+");el.dispatchEvent(new Event('input',{bubbles:true}));[...document.querySelectorAll('button')].find(b=>b.textContent==='기존 회고록 편집').click()})()");
-  await eventually(()=>evaluate("document.querySelector('.warning')?.textContent.includes('Injected mode-switch write failure')"));
+  await eventually(()=>evaluate("document.querySelector('.warning')?.textContent.includes('Injected mode-switch write failure')"),v=>v,3500).catch(async()=>{
+    const state=await evaluate("(()=>{const b=[...document.querySelectorAll('button')].find(b=>b.textContent==='기존 회고록 편집');return{legacy:!!document.querySelector('.mode-bar'),buttonDisabled:b?.disabled,save:document.querySelector('.save-chip')?.textContent,warning:document.querySelector('.warning')?.textContent,preview:document.querySelector('.project-paper')?.textContent.includes('FAILED_MODE_SWITCH_RECOVERY_20261019')}})()");
+    throw new Error('Failed-switch diagnostic '+JSON.stringify(state));
+  });
   assert.ok(await evaluate("Boolean(document.querySelector('.project-paper')&&!document.querySelector('.mode-bar'))"),'Navigation occurred despite save failure');
   assert.ok(await evaluate("document.querySelector('.project-paper')?.textContent.includes("+JSON.stringify(failedText)+")"),'Unsaved draft lost after failed navigation');
   await evaluate("[...document.querySelectorAll('button')].find(b=>b.textContent.includes('지금 저장 / 재시도')).click()");
