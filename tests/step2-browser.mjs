@@ -136,10 +136,11 @@ try{
     dims=>dims?.some(([w,h])=>w===32&&h===16)&&dims?.some(([w,h])=>w===16&&h===32));
   console.log('PASS STEP2: actual JPEG landscape and WebP portrait decode, IndexedDB reload and exact dimensions');
 
-  const savedFiles=new Set(readdirSync(dir).filter(name=>name.endsWith('.json')));
+  // Capture the JSON Blob before the download; repeated browser downloads may be blocked or renamed.
+  await evaluate('(()=>{const original=URL.createObjectURL.bind(URL);URL.createObjectURL=(blob)=>{if(blob.type==="application/json")window.__astraExportBlob=blob;return original(blob);};})()');
   await evaluate("[...document.querySelectorAll('button')].find(b=>b.textContent==='프로젝트 내보내기').click()");
-  const exportedName=await eventually(()=>readdirSync(dir).find(name=>name.endsWith('.json')&&!savedFiles.has(name)));
-  const packageData=JSON.parse(readFileSync(join(dir,exportedName),'utf8'));
+  const exportedJson=await eventually(()=>evaluate('(async()=>window.__astraExportBlob?await window.__astraExportBlob.text():null)()'));
+  const packageData=JSON.parse(exportedJson);
   assert.equal(packageData.assets.length,3);
   for(const fixture of formats){
     const asset=packageData.assets.find(item=>item.originalName===fixture.name);
