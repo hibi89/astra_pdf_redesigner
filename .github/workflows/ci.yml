@@ -1,7 +1,7 @@
-name: Step 1 validation
+name: Astra STEP 1 + STEP 2 validation
 on:
   push:
-    branches: [main]
+    branches: [main, 'feature/step2-*']
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
@@ -39,3 +39,4 @@ jobs:
             sleep 0.5
           done
           CHROME_PATH="$CHROME_BIN" node tests/browser-smoke.mjs
+          CHROME_PATH="$CHROME_BIN" node tests/step2-browser.mjs

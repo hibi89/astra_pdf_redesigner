@@ -1,107 +1,100 @@
-import { PALETTE, SECTION_FIELDS, type DesignSettings, type PersistedState } from '../types.ts';
+import { defaultDesign, defaultDocument, exampleDocument, localToday, PALETTE, SECTION_FIELDS, type DesignSettings, type PersistedState } from '../types.ts';
 
-/** STEP 2's ordered, local-first document structure. Binary images are stored separately. */
+export const LIMITS = { imageBytes: 10 * 1024 * 1024, imagePixels: 20_000_000, importBytes: 100 * 1024 * 1024, sections: 200, blocks: 3000, documents: 1000, text: 500_000 } as const;
+export type Alignment = 'left' | 'center' | 'right';
+export type ImageSize = 'small' | 'medium' | 'large';
 export type ContentBlock =
-  | { id: string; kind: 'heading'; text: string }
-  | { id: string; kind: 'paragraph'; text: string }
-  | { id: string; kind: 'image'; assetId: string; caption: string; altText: string };
-
+  | { id: string; kind: 'heading' | 'paragraph'; text: string }
+  | { id: string; kind: 'image'; assetId: string; caption: string; alignment: Alignment; size: ImageSize };
+export interface DocumentSection { id: string; title: string; blocks: ContentBlock[] }
 export interface ProjectDocument {
+  schemaVersion: 2;
   id: string;
   name: string;
-  title: string;
-  author: string;
-  date: string;
-  blocks: ContentBlock[];
-  design: DesignSettings;
   createdAt: string;
   updatedAt: string;
+  content: { title: string; author: string; date: string; sections: DocumentSection[] };
+  design: DesignSettings;
 }
-
-export interface DocumentCollection {
-  schemaVersion: 2;
-  activeDocumentId: string;
-  documents: ProjectDocument[];
+export interface ImageAsset { id: string; documentId: string; mimeType: string; originalName: string; byteSize: number; width: number; height: number; blob: Blob }
+export interface DocumentCollection { schemaVersion: 2; activeDocumentId: string; documents: ProjectDocument[] }
+export const newIdentifier = () => globalThis.crypto.randomUUID();
+export const newSection = (title = '새 섹션'): DocumentSection => ({ id: newIdentifier(), title, blocks: [{ id: newIdentifier(), kind: 'paragraph', text: '' }] });
+export const newBlock = (kind: 'heading' | 'paragraph'): ContentBlock => ({ id: newIdentifier(), kind, text: '' });
+export function blankProject(now = new Date().toISOString()): ProjectDocument {
+  return { schemaVersion: 2, id: newIdentifier(), name: '새 문서', createdAt: now, updatedAt: now,
+    content: { title: '새 문서', author: '', date: localToday(), sections: [newSection()] }, design: defaultDesign() };
 }
-
-export function newIdentifier(): string {
-  return globalThis.crypto.randomUUID();
+export function migrateStep1Document(legacy: PersistedState, createId: () => string = newIdentifier, now = new Date().toISOString()): ProjectDocument {
+  return { schemaVersion: 2, id: createId(), name: legacy.document.title, createdAt: now, updatedAt: now,
+    content: { title: legacy.document.title, author: legacy.document.author, date: legacy.document.date,
+      sections: SECTION_FIELDS.map(([key, title]) => ({ id: createId(), title,
+        blocks: [{ id: createId(), kind: 'paragraph' as const, text: legacy.document[key] }] })) },
+    design: { ...legacy.design } };
 }
-
-export function migrateStep1Document(
-  legacy: PersistedState,
-  createId: () => string = newIdentifier,
-  now: string = new Date().toISOString(),
-): ProjectDocument {
-  const blocks: ContentBlock[] = [];
-  for (const [key, label] of SECTION_FIELDS) {
-    const text = legacy.document[key];
-    // An empty section does not carry any prose to preserve.
-    if (!text.trim()) continue;
-    blocks.push({ id: createId(), kind: 'heading', text: label });
-    blocks.push({ id: createId(), kind: 'paragraph', text });
-  }
-  return {
-    id: createId(),
-    name: legacy.document.title,
-    title: legacy.document.title,
-    author: legacy.document.author,
-    date: legacy.document.date,
-    blocks,
-    design: { ...legacy.design },
-    createdAt: now,
-    updatedAt: now,
-  };
+export function retrospectiveProject(example = false): ProjectDocument {
+  const source: PersistedState = { schemaVersion: 1, document: example ? exampleDocument() : defaultDocument(), design: defaultDesign() };
+  return migrateStep1Document(source);
 }
-
-/** Reorder a block without changing either its data or any other block. */
-export function moveBlock(blocks: readonly ContentBlock[], id: string, offset: -1 | 1): ContentBlock[] {
-  const from = blocks.findIndex((block) => block.id === id);
-  const to = from + offset;
-  if (from < 0 || to < 0 || to >= blocks.length) return [...blocks];
-  const result = [...blocks];
-  [result[from], result[to]] = [result[to], result[from]];
-  return result;
+export function moveItem<T extends { id: string }>(items: readonly T[], id: string, direction: -1 | 1): T[] {
+  const from = items.findIndex(item => item.id === id); const to = from + direction;
+  const copy = [...items]; if (from < 0 || to < 0 || to >= items.length) return copy;
+  [copy[from], copy[to]] = [copy[to], copy[from]]; return copy;
 }
-
+export const moveBlock = moveItem;
 export function updateTextBlock(blocks: readonly ContentBlock[], id: string, text: string): ContentBlock[] {
-  return blocks.map((block) => block.id === id && block.kind !== 'image' ? { ...block, text } : block);
+  return blocks.map(block => block.id === id && block.kind !== 'image' ? { ...block, text } : block);
 }
-
-function isRecord(value: unknown): value is Record<string, unknown> {
-  return value !== null && typeof value === 'object' && !Array.isArray(value);
+export function visibleSections(doc: ProjectDocument): DocumentSection[] {
+  return doc.content.sections.filter(section => section.blocks.some(block =>
+    block.kind === 'image' || (block.kind === 'paragraph' && !!block.text.trim())));
 }
-
-function isDesign(value: unknown): value is DesignSettings {
-  return isRecord(value) &&
-    ['report', 'minimal', 'diary'].includes(String(value.theme)) &&
-    PALETTE.some((color) => color.value === value.accent) &&
-    ['small', 'medium', 'large'].includes(String(value.textSize)) &&
-    ['sans', 'serif'].includes(String(value.font));
+export function documentAssetIds(doc: ProjectDocument): string[] {
+  return [...new Set(doc.content.sections.flatMap(section => section.blocks.flatMap(block => block.kind === 'image' ? [block.assetId] : [])))];
 }
-
-function isBlock(value: unknown): value is ContentBlock {
-  if (!isRecord(value) || typeof value.id !== 'string' || !value.id) return false;
-  if (value.kind === 'heading' || value.kind === 'paragraph') return typeof value.text === 'string';
-  if (value.kind === 'image') return typeof value.assetId === 'string' && !!value.assetId &&
-    typeof value.caption === 'string' && typeof value.altText === 'string';
-  return false;
+export function cloneProject(source: ProjectDocument, assets: readonly ImageAsset[], now = new Date().toISOString()): { document: ProjectDocument; assets: ImageAsset[] } {
+  const id = newIdentifier(); const assetIds = new Map<string, string>();
+  for (const asset of assets) assetIds.set(asset.id, newIdentifier());
+  const document: ProjectDocument = { ...source, id, name: `${source.name} 복사본`, createdAt: now, updatedAt: now,
+    content: { ...source.content, sections: source.content.sections.map(section => ({ ...section, id: newIdentifier(),
+      blocks: section.blocks.map(block => block.kind === 'image'
+        ? { ...block, id: newIdentifier(), assetId: assetIds.get(block.assetId) ?? block.assetId }
+        : { ...block, id: newIdentifier() }) })) } };
+  return { document, assets: assets.map(asset => ({ ...asset, id: assetIds.get(asset.id)!, documentId: id })) };
 }
-
+const record = (o: unknown): o is Record<string, unknown> => !!o && typeof o === 'object' && !Array.isArray(o);
+const text = (v: unknown, max = LIMITS.text): v is string => typeof v === 'string' && v.length <= max;
+const identifier = (v: unknown): v is string => text(v, 150) && v.length > 0;
+const idUnique = (items: {id: string}[]) => new Set(items.map(item => item.id)).size === items.length;
+export function isDesign(value: unknown): value is DesignSettings {
+  return record(value) && ['report', 'minimal', 'diary', 'compact'].includes(String(value.theme)) &&
+    PALETTE.some(color => color.value === value.accent) &&
+    ['small', 'medium', 'large'].includes(String(value.textSize)) && ['sans', 'serif'].includes(String(value.font));
+}
 export function isProjectDocument(value: unknown): value is ProjectDocument {
-  if (!isRecord(value)) return false;
-  if (!['id', 'name', 'title', 'author', 'date', 'createdAt', 'updatedAt'].every(
-    (key) => typeof value[key] === 'string',
-  )) return false;
-  if (!value.id || !Array.isArray(value.blocks) || value.blocks.length > 1000 || !isDesign(value.design)) return false;
-  if (!value.blocks.every(isBlock)) return false;
-  return new Set(value.blocks.map((block: ContentBlock) => block.id)).size === value.blocks.length;
+  if (!record(value) || value.schemaVersion !== 2 || !identifier(value.id) || !text(value.name, 250) ||
+      !text(value.createdAt, 60) || !text(value.updatedAt, 60) || !isDesign(value.design) || !record(value.content)) return false;
+  const c = value.content;
+  if (!text(c.title, 2000) || !text(c.author, 1000) || !text(c.date, 60) || !Array.isArray(c.sections) || c.sections.length > LIMITS.sections) return false;
+  let blocks = 0; const allIds: string[] = [];
+  for (const section of c.sections) {
+    if (!record(section) || !identifier(section.id) || !text(section.title, 2000) || !Array.isArray(section.blocks)) return false;
+    allIds.push(section.id);
+    for (const block of section.blocks) {
+      if (!record(block) || !identifier(block.id)) return false;
+      allIds.push(block.id); blocks++;
+      if (blocks > LIMITS.blocks) return false;
+      if (block.kind === 'image') {
+        if (!identifier(block.assetId) || !text(block.caption, LIMITS.text) ||
+            !['left', 'center', 'right'].includes(String(block.alignment)) ||
+            !['small', 'medium', 'large'].includes(String(block.size))) return false;
+      } else if (!['paragraph', 'heading'].includes(String(block.kind)) || !text(block.text)) return false;
+    }
+  }
+  return new Set(allIds).size === allIds.length;
 }
-
 export function isDocumentCollection(value: unknown): value is DocumentCollection {
-  if (!isRecord(value) || value.schemaVersion !== 2 || typeof value.activeDocumentId !== 'string' ||
-      !Array.isArray(value.documents) || value.documents.length > 1000 || !value.documents.every(isProjectDocument)) return false;
-  const ids = new Set(value.documents.map((doc: ProjectDocument) => doc.id));
-  return ids.size === value.documents.length &&
-    (value.documents.length === 0 ? value.activeDocumentId === '' : ids.has(value.activeDocumentId));
+  if (!record(value) || value.schemaVersion !== 2 || !text(value.activeDocumentId, 150) ||
+      !Array.isArray(value.documents) || value.documents.length > LIMITS.documents || !value.documents.every(isProjectDocument) || !idUnique(value.documents)) return false;
+  return value.documents.length ? value.documents.some(doc => doc.id === value.activeDocumentId) : value.activeDocumentId === '';
 }

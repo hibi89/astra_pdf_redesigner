@@ -105,6 +105,12 @@ try {
     catch (error) { clearTimeout(timer); ws.removeEventListener('message', listener); throw error; }
   };
 
+  const openLegacy = async () => {
+    await eventually(() => evalJs("[...document.querySelectorAll('button')].some(b=>b.textContent.includes('기존 회고록 편집'))"));
+    await evalJs("[...document.querySelectorAll('button')].find(b=>b.textContent.includes('기존 회고록 편집')).click()");
+    await eventually(() => evalJs("Boolean(document.querySelector('textarea[name=learned]'))"));
+  };
+  await openLegacy();
   await eventually(() => evalJs("Boolean(document.querySelector('.document') && document.querySelector('textarea[name=learned]'))"));
   assert.equal(await evalJs("document.querySelectorAll('.document-section').length"), 0);
   assert.equal(await evalJs("Boolean(document.querySelector('.document-author'))"), false);
@@ -118,6 +124,7 @@ try {
   assert.equal(await evalJs("document.querySelector('.document-section .section-body')?.textContent"), sample);
   await eventually(() => evalJs("JSON.parse(localStorage.getItem('astra-pdf-redesigner:current:v1') || '{}').design?.theme"), (v) => v === 'diary');
   await reload();
+  await openLegacy();
   await eventually(() => evalJs("document.querySelector('.document-section .section-body')?.textContent"), (v) => v === sample);
   assert.equal(await evalJs("document.querySelector('.document')?.classList.contains('paper-theme-diary')"), true);
   console.log('PASS: live editing, exact paragraphs, theme switch, reload persistence');
@@ -125,12 +132,14 @@ try {
   await evalJs("window.confirm=()=>true;document.querySelector('.text-button').click()");
   await eventually(() => evalJs("document.querySelectorAll('.document-section').length"), (v) => v === 0);
   await reload();
+  await openLegacy();
   await eventually(() => evalJs("document.querySelector('.document') !== null"));
   assert.equal(await evalJs("document.querySelectorAll('.document-section').length"), 0);
   console.log('PASS: reset clears state across reload');
 
   await evalJs("localStorage.setItem('astra-pdf-redesigner:current:v1', '{broken');");
   await reload();
+  await openLegacy();
   await eventually(() => evalJs("Boolean(document.querySelector('textarea[name=learned]'))"));
   console.log('PASS: malformed localStorage recovery');
 
@@ -142,6 +151,7 @@ try {
   };
   await evalJs(`localStorage.setItem('astra-pdf-redesigner:current:v1', ${JSON.stringify(JSON.stringify(restored))})`);
   await reload();
+  await openLegacy();
   await eventually(() => evalJs("document.querySelector('.section-body')?.textContent?.includes('END_MARKER_LONG_PDF')"));
   assert.equal(await evalJs("document.querySelectorAll('.document-section').length"), 1);
   assert.equal(await evalJs("Boolean(document.querySelector('.document-author'))"), false);
