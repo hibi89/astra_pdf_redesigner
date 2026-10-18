@@ -1,12 +1,13 @@
 // Pure and deterministic single-column PDF text reconstruction.
 // This module does not touch storage, browser globals, or uploaded file bytes.
+import type { ImageRecoveryResult, RecoveredPdfImage } from './imageRecovery.ts';
 export type PdfRole='heading'|'paragraph'|'caption';
 export interface PdfFragment {
   text:string; page:number; x:number; y:number; width:number; height:number; fontSize:number;
 }
 export interface PdfPageInput {
   number:number; width:number; height:number; pieces:PdfFragment[];
-  imageDetected:boolean; operatorWarning?:string;
+  imageDetected:boolean; operatorWarning?:string;imageRecovery?:ImageRecoveryResult;
 }
 export interface PdfOrigin {
   page:number; x:number; y:number; width:number; height:number;
@@ -14,7 +15,7 @@ export interface PdfOrigin {
 export interface PdfDraftBlock {
   id:string; text:string; role:PdfRole; origin:PdfOrigin;
 }
-export interface PdfDraftPage {number:number; blocks:PdfDraftBlock[]; charCount:number; imageDetected:boolean}
+export interface PdfDraftPage {number:number; blocks:PdfDraftBlock[]; charCount:number; imageDetected:boolean; images:RecoveredPdfImage[];imageCount:number;omittedImages:number;}
 export interface PdfDraft {
   fileName:string; pageCount:number; pages:PdfDraftPage[]; warnings:string[]; totalChars:number;
 }
@@ -56,6 +57,15 @@ export function reconstructLines(page:PdfPageInput):{lines:PdfLine[];multiColumn
     }
     return{text:output,x,y,width:Math.max(0,right-x),height:Math.max(...sorted.map(p=>p.height)),fontSize:median(sorted.map(p=>p.fontSize))};
   }).filter(line=>line.text.trim().length>0).sort((a,b)=>Math.abs(a.y-b.y)>2?a.y-b.y:a.x-b.x);
+  // Distinct non-overlapping left/right text runs often indicate columns;
+  // only warn, never silently rearrange multiple columns as one.
+  const left=lines.filter(l=>l.x<page.width*.42&&l.width<page.width*.45);
+  const right=lines.filter(l=>l.x>page.width*.52&&l.width<page.width*.45);
+  if(left.length>=2&&right.length>=2){
+    const overlap=Math.min(Math.max(...left.map(l=>l.y)),Math.max(...right.map(l=>l.y)))-
+      Math.max(Math.min(...left.map(l=>l.y)),Math.min(...right.map(l=>l.y)));
+    if(overlap>20)multiColumn=true;
+  }
   return{lines,multiColumn};
 }
 function lineRole(line:PdfLine,bodyFont:number):PdfRole{
@@ -67,6 +77,7 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
   if(!pages.length||pages.length>PDF_IMPORT_LIMITS.pages)throw Error('PDF 페이지 수가 지원 범위를 벗어났습니다.');
   const warnings:string[]=[];
   const sorted=[...pages].sort((a,b)=>a.number-b.number);
+  if(sorted.some((p,i)=>p.number!==i+1))throw Error('PDF 페이지 번호가 연속되지 않거나 중복됐습니다.');
   const allFonts=sorted.flatMap(p=>p.pieces.filter(t=>t.text.trim()).map(t=>t.fontSize));
   const body=median(allFonts),outPages:PdfDraftPage[]=[];
   let totalChars=0,totalBlocks=0;
@@ -74,7 +85,14 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
     const {lines,multiColumn}=reconstructLines(page);
     const blocks:PdfDraftBlock[]=[];
     if(!lines.length)warnings.push(page.number+'페이지에서 선택 가능한 문자를 찾지 못했습니다. 스캔/이미지 또는 문자 매핑 실패 가능성이 있어 원본 검수가 필요합니다.');
-    if(page.imageDetected)warnings.push(page.number+'페이지에 PDF 이미지가 감지됐습니다. 이 버전은 이미지를 새 문서로 자동 복원하지 않으므로 원본과 대조해 수동 추가해야 합니다.');
+    const images=page.imageRecovery?.images??[];
+    const detected=page.imageRecovery?.detected??(page.imageDetected?1:0);
+    const omitted=Math.max(0,detected-images.length);
+    if(detected>0){
+      warnings.push(page.number+'페이지 이미지 '+detected+'건 감지, '+images.length+'건 PNG 재구성, '+omitted+'건 미복원. 원본 비트스트림이 아니라 PDF.js가 디코딩한 픽셀을 PNG로 재구성하므로 색상·마스크·배치를 반드시 대조하세요.');
+      if(omitted)warnings.push(page.number+'페이지 미복원 이미지 '+omitted+'건은 새 PDF에서 누락될 수 있습니다. 별도로 확인하고 수동 보완하세요.');
+    }
+    for(const problem of page.imageRecovery?.problems??[])warnings.push(page.number+'페이지 PDF 이미지 제한/오류: '+problem.slice(0,140));
     if(page.operatorWarning)warnings.push(page.number+'페이지 그래픽 분석 일부 실패: '+page.operatorWarning.slice(0,100));
     if(multiColumn)warnings.push(page.number+'페이지에서 열 또는 넓은 텍스트 간격이 감지됐습니다. 자동 읽기 순서를 확인하세요.');
     for(const line of lines){
@@ -101,7 +119,7 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
       if(totalChars>PDF_IMPORT_LIMITS.characters)throw Error('PDF 추출 텍스트가 50만 자 제한을 초과했습니다.');
       if(totalBlocks>PDF_IMPORT_LIMITS.blocks)throw Error('PDF 추출 블록이 2,500개 제한을 초과했습니다.');
     }
-    outPages.push({number:page.number,blocks,charCount:lines.reduce((n,x)=>n+x.text.length,0),imageDetected:page.imageDetected});
+    outPages.push({number:page.number,blocks,charCount:lines.reduce((n,x)=>n+x.text.length,0),imageDetected:detected>0,images,imageCount:detected,omittedImages:omitted});
   }
   if(!totalChars)throw Error('선택 가능한 텍스트가 없습니다. 스캔 PDF는 OCR 지원 전까지 가져올 수 없습니다.');
   warnings.unshift('PDF의 읽기 순서·줄바꿈·공백·제목/캡션 분류는 추정입니다. 원본과 대조해 검수한 뒤 문서함에 추가하세요.');
