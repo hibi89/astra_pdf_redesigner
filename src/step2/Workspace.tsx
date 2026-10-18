@@ -52,7 +52,7 @@ export default function Workspace({onLegacy}:Props){
   const urls=useAssetUrls(w.assets);
   const doc=w.document;
   const imageRefs=useMemo(()=>doc?documentAssetIds(doc):[],[doc]);
-  const editable=w.ready&&w.writable&&!busy&&!printBusy;
+  const editable=w.ready&&w.writable&&!w.operating&&!busy&&!printBusy;
   const operation=async(fn:()=>Promise<unknown>)=>{setBusy(true);try{await fn();}catch(e){w.setError(e instanceof Error?e.message:'작업 중 오류가 발생했습니다.');}finally{setBusy(false);}};
   const editDoc=(fn:(prev:ProjectDocument)=>ProjectDocument)=>w.edit(fn);
   const editSection=(id:string,fn:(s:DocumentSection)=>DocumentSection)=>editDoc(d=>({...d,content:{...d.content,sections:d.content.sections.map(s=>s.id===id?fn(s):s)}}));
