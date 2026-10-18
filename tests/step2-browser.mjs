@@ -192,6 +192,41 @@ try{
   await eventually(()=>evaluate("document.querySelector('.project-paper')?.textContent"),value=>value?.includes('SAVE_FAILURE_RECOVERY_987654'));
   console.log('PASS STEP2: manual save retry persists unsaved edits and survives reload');
 
+  // Force an IndexedDB transaction abort after putting the new image asset.
+  // All queued document/asset mutations must roll back atomically.
+  const imageSnapshotCode="(async()=>{const db=await new Promise((resolve,reject)=>{const r=indexedDB.open('astra-pdf-redesigner:v2');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});try{const ask=req=>new Promise((resolve,reject)=>{req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});const active=await ask(db.transaction('meta','readonly').objectStore('meta').get('activeDocumentId'));const doc=await ask(db.transaction('documents','readonly').objectStore('documents').get(active));const assets=await ask(db.transaction('assets','readonly').objectStore('assets').index('documentId').getAll(active));const entries=await Promise.all(assets.map(async asset=>({id:asset.id,mime:asset.mimeType,name:asset.originalName,bytes:btoa(String.fromCharCode(...new Uint8Array(await asset.blob.arrayBuffer())))})));entries.sort((a,b)=>a.id.localeCompare(b.id));return{docId:active,imageIds:doc.content.sections.flatMap(s=>s.blocks.filter(b=>b.kind==='image').map(b=>b.assetId)),entries}}finally{db.close()}})()";
+  const imagesBefore=await evaluate(imageSnapshotCode);
+  assert.equal(imagesBefore.imageIds.length,3);
+  assert.equal(imagesBefore.entries.length,3);
+  await evaluate("(()=>{const original=IDBObjectStore.prototype.put;let fired=false;IDBObjectStore.prototype.put=function(value,...args){const req=original.call(this,value,...args);if(!fired&&this.name==='assets'&&value?.originalName==='rollback-replacement.png'){fired=true;const tx=this.transaction;queueMicrotask(()=>{window.__astraForcedRollback=true;try{tx.abort()}finally{IDBObjectStore.prototype.put=original}})}return req};window.__astraForcedRollback=false})()");
+  const replaceImageCode="(async()=>{const canvas=document.createElement('canvas');canvas.width=8;canvas.height=4;const ctx=canvas.getContext('2d');ctx.fillStyle='#d37e22';ctx.fillRect(0,0,8,4);const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));if(!blob)throw Error('Cannot generate replacement PNG');const file=new File([blob],'rollback-replacement.png',{type:'image/png'});const transfer=new DataTransfer();transfer.items.add(file);const input=document.querySelector('.block-editor input[type=file]');if(!input)throw Error('Missing image replacement input');input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}))})()";
+  await evaluate(replaceImageCode);
+  await eventually(()=>evaluate("window.__astraForcedRollback===true"));
+  await eventually(()=>evaluate("document.querySelector('.warning')?.textContent"),txt=>Boolean(txt?.trim()));
+  assert.deepEqual(await evaluate(imageSnapshotCode),imagesBefore,'Aborted replacement changed document, assets or original bytes');
+  assert.equal(await evaluate("document.querySelectorAll('.project-paper figure img').length"),3);
+  assert.equal(await evaluate("Boolean([...document.querySelectorAll('.project-paper figure img')].every(img=>img.complete&&img.naturalWidth>0))"),true);
+  console.log('PASS STEP2: aborted real image replacement atomically rolls back doc, asset put and old asset delete');
+
+  await reload();
+  await eventually(()=>evaluate("document.querySelectorAll('.project-paper figure img').length"),n=>n===3);
+  await eventually(()=>evaluate("Boolean([...document.querySelectorAll('.project-paper figure img')].every(img=>img.naturalWidth>0))"));
+  assert.deepEqual(await evaluate(imageSnapshotCode),imagesBefore,'Reload after abort did not preserve exact original image bytes');
+  console.log('PASS STEP2: original image refs and exact bytes survive reload after failed replacement');
+
+  await evaluate(replaceImageCode);
+  await eventually(()=>evaluate(imageSnapshotCode),s=>s?.entries?.some(a=>a.name==='rollback-replacement.png')&&s.entries.length===3);
+  const imagesAfter=await evaluate(imageSnapshotCode);
+  assert.equal(imagesAfter.entries.length,3,'Successful replacement left orphan assets');
+  assert.equal(imagesAfter.imageIds.length,3);
+  assert.ok(!imagesAfter.entries.some(a=>a.id===imagesBefore.imageIds[0]),'Original replaced asset not deleted');
+  assert.ok(imagesAfter.imageIds.every(id=>imagesAfter.entries.some(a=>a.id===id)),'Document references missing asset');
+  await reload();
+  await eventually(()=>evaluate("Boolean([...document.querySelectorAll('.project-paper figure img')].some(img=>img.naturalWidth===8&&img.naturalHeight===4))"));
+  assert.deepEqual(await evaluate(imageSnapshotCode),imagesAfter);
+  console.log('PASS STEP2: retry commits replacement without orphan assets; persisted document and image survive reload');
+
+
 
 
 }finally{if(ws)ws.close();proc.kill('SIGTERM');await delay(300);rmSync(dir,{recursive:true,force:true});}
