@@ -8,10 +8,15 @@ export default function PdfImportPanel({disabled,onImport}:Props){
   const [draft,setDraft]=useState<PdfDraft|null>(null);
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[confirmed,setConfirmed]=useState(false);
   const [previewUrl,setPreviewUrl]=useState('');
+  const [imageUrls,setImageUrls]=useState<Record<string,string>>({});
   const urlRef=useRef('');
-  useEffect(()=>()=>{if(urlRef.current)URL.revokeObjectURL(urlRef.current);},[]);
+  const imageUrlRef=useRef<Record<string,string>>({});
+  useEffect(()=>()=>{if(urlRef.current)URL.revokeObjectURL(urlRef.current);
+    Object.values(imageUrlRef.current).forEach(u=>URL.revokeObjectURL(u));},[]);
   const forget=()=>{
     if(urlRef.current)URL.revokeObjectURL(urlRef.current);
+    Object.values(imageUrlRef.current).forEach(u=>URL.revokeObjectURL(u));
+    imageUrlRef.current={};setImageUrls({});
     urlRef.current='';setPreviewUrl('');setDraft(null);setError('');setConfirmed(false);
   };
   const choose=async(file:File)=>{
@@ -20,6 +25,9 @@ export default function PdfImportPanel({disabled,onImport}:Props){
       const parsed=await extractLocalPdf(file);
       // The source file remains an ephemeral browser Blob URL only during review.
       const url=URL.createObjectURL(file);urlRef.current=url;setPreviewUrl(url);
+      const imageMap:Record<string,string>={};
+      for(const page of parsed.pages)for(const image of page.images)imageMap[image.id]=URL.createObjectURL(image.blob);
+      imageUrlRef.current=imageMap;setImageUrls(imageMap);
       setDraft(parsed);
     }catch(e){setError(e instanceof Error?e.message:'PDF에서 내용을 추출할 수 없습니다.');}
     finally{setBusy(false);}
@@ -38,6 +46,11 @@ export default function PdfImportPanel({disabled,onImport}:Props){
       return {...p,blocks:copy};
     })}:prev);
   };
+  const toggleImage=(page:number,id:string,include:boolean)=>{
+    setConfirmed(false);
+    setDraft(prev=>prev?{...prev,pages:prev.pages.map(p=>p.number===page?
+      {...p,images:p.images.map(img=>img.id===id?{...img,include}:img)}:p)}:prev);
+  };
   const commit=async()=>{
     if(!draft||!confirmed||busy||disabled)return;
     setBusy(true);
@@ -49,6 +62,9 @@ export default function PdfImportPanel({disabled,onImport}:Props){
     finally{setBusy(false);}
   };
   const totalBlocks=draft?.pages.reduce((s,p)=>s+p.blocks.length,0)??0;
+  const detected=draft?.pages.reduce((s,p)=>s+p.imageCount,0)??0;
+  const recovered=draft?.pages.reduce((s,p)=>s+p.images.length,0)??0;
+  const included=draft?.pages.reduce((s,p)=>s+p.images.filter(i=>i.include).length,0)??0;
   return <section className="panel step3-import-panel no-print" aria-labelledby="pdf-import-title">
     <div className="panel-heading"><h2 id="pdf-import-title">STEP 3 · 기존 PDF 가져오기</h2><span className="panel-caption">텍스트 선택 가능한 단일 열 PDF</span></div>
     <p className="help-text">파일은 이 브라우저에서만 분석합니다. 외부로 전송하지 않고, 검수·확정 전에는 기존 문서함을 변경하지 않습니다.</p>
@@ -59,7 +75,8 @@ export default function PdfImportPanel({disabled,onImport}:Props){
     {busy&&<p role="status">PDF를 분석하거나 새 문서를 저장하는 중입니다…</p>}
     {!!error&&<p className="warning" role="alert">{error}</p>}
     {draft&&<>
-      <p className="help-text">원본: {draft.fileName} · {draft.pageCount}페이지 · 추출 {draft.totalChars.toLocaleString('ko-KR')}자 · 편집 가능한 블록 {totalBlocks}개</p>
+      <p className="help-text">원본: {draft.fileName} · {draft.pageCount}페이지 · 추출 {draft.totalChars.toLocaleString('ko-KR')}자 · 편집 가능한 텍스트 블록 {totalBlocks}개</p>
+      <p className="help-text" data-step3-image-count>이미지 감지 {detected}건 · PNG 복원 {recovered}건 · 저장 선택 {included}건 · 미복원 {Math.max(0,detected-recovered)}건</p>
       <div className="warning" role="status"><strong>완전 복원이 아닙니다.</strong> 텍스트 분류·위치·줄바꿈·공백은 추정입니다. 이미지·표·도형이 누락될 수 있습니다. 원본을 대조해 수정하세요.</div>
       <details open><summary>추출 경고·검토 사항 {draft.warnings.length}건</summary>
         <ul>{draft.warnings.map((message,i)=><li key={i}>{message}</li>)}</ul>
@@ -71,7 +88,18 @@ export default function PdfImportPanel({disabled,onImport}:Props){
         </details>}
         <div className="step3-block-review">
           {draft.pages.map(page=><details key={page.number} open={page.number===1}>
-            <summary>원본 {page.number}페이지 — {page.blocks.length}블록{page.imageDetected?' · 이미지 복원 필요':''}</summary>
+            <summary>원본 {page.number}페이지 — {page.blocks.length}개 텍스트 · 이미지 {page.images.length}/{page.imageCount}복원{page.omittedImages?' · 미복원 '+page.omittedImages+'건':''}</summary>
+            {page.images.length>0&&<div className="step3-image-review">
+              <p className="help-text">PDF.js가 디코딩한 이미지를 PNG로 재구성했습니다. 원본 비트스트림·마스크/클리핑 효과가 그대로 보존된 것은 아닙니다. 위치는 근사치이며 저장 후 STEP2 편집기에서 크기·순서를 바꿀 수 있습니다.</p>
+              {page.images.map((image,i)=><div className="section-editor" key={image.id}>
+                <strong>이미지 {i+1} · {image.width}×{image.height}px · {image.origin.x}, {image.origin.y}pt</strong>
+                {imageUrls[image.id]&&<img src={imageUrls[image.id]} className="step3-image-thumbnail" alt={page.number+'페이지 복원 이미지 '+(i+1)}/>}
+                <label className="field step3-confirm"><input type="checkbox" checked={image.include} disabled={disabled||busy}
+                  onChange={e=>toggleImage(page.number,image.id,e.target.checked)}/>
+                  이 이미지를 새 문서에 포함 (원본과 대조)
+                </label>
+              </div>)}
+            </div>}
             {!page.blocks.length&&<p className="warning">선택 가능한 문자가 없습니다. 스캔·이미지 콘텐츠를 확인하세요.</p>}
             {page.blocks.map((block,i)=><div className="section-editor" key={block.id}>
               <div className="block-header"><strong>원본 {block.origin.page}p · {block.origin.x}, {block.origin.y}pt</strong>
@@ -95,7 +123,7 @@ export default function PdfImportPanel({disabled,onImport}:Props){
       </div>
       <label className="field step3-confirm"><input type="checkbox" checked={confirmed} disabled={disabled||busy}
         onChange={e=>setConfirmed(e.target.checked)}/>
-        원본과 추출 결과를 비교했고, 누락·오인식·순서 오류 가능성을 확인했습니다. 새 문서로 추가합니다.
+        원본과 추출 결과 및 이미지 복원·누락 개수를 확인했습니다. 미복원 그래픽은 새 PDF에서 누락될 수 있으며, 포함 선택 이미지는 PNG 근사 복원임을 인지하고 새 문서로 추가합니다.
       </label>
       <div className="toolbar">
         <button className="secondary-button" disabled={busy} onClick={forget}>가져오기 취소</button>
