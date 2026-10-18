@@ -39,10 +39,13 @@ React / TypeScript / Vite / CSS, 기본 로컬 개발 주소 `127.0.0.1`만 바�
 - [ ] Chrome / Edge 인쇄 옵션과 페이지 나눔 확인
 
 
-## STEP 2 기능 브랜치 작업 안내 (2026-10-18, **통합 테스트 미검증**)
+## STEP 2 기능 브랜치 검증 현황 (2026-10-19, **Linux Chrome 통합검증 성공 / 최종 수용 전**)
 
-작업 브랜치 `feature/step2-full-20261018`에서 문서함, 섹션·블록 편집, PNG/JPEG/WebP 이미지, IndexedDB 자동 저장, 여러 문서 관리, `.localdoc.json` 내보내기/가져오기, 컴팩트 리포트 테마 소스를 구현했습니다. 이 코드는 **빌드·Chrome 통합검증 완료 전이므로 main의 STEP 1 앱과 구분**합니다. 자세한 검증 내역은 [STEP 2 검증 기록](docs/STEP2_IMPLEMENTATION_STATUS_2026-10-18.md)을 보세요.
+작업 브랜치 `feature/step2-full-20261018`에서 문서함, 섹션·블록 편집, PNG/JPEG/WebP 이미지, IndexedDB 자동 저장, 여러 문서 관리, `.localdoc.json` 내보내기/가져오기, 컴팩트 리포트 테마 소스를 구현했습니다. 이 기능 브랜치는 Ubuntu Node 22에서 **단위 테스트 16/16, TypeScript/Vite 빌드 및 실제 Chrome 통합검증**을 완료했습니다([Actions #39142445389](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39142445389)). 단, **기존 STEP 1 데이터가 먼저 있는 환경에서의 cold-start 마이그레이션, 별도 브라우저 프로필로 프로젝트 이식, Windows Chrome/Edge 수동 인쇄·시각/한글 검수는 별도 수용 항목**입니다. STEP 2 기능은 아직 `main`에 병합하지 않았습니다. 자세한 검증 내역은 [STEP 2 검증 기록](docs/STEP2_IMPLEMENTATION_STATUS_2026-10-18.md)을 보세요.
 
 소스 동작 예상 흐름: `npm install` → `npm test` → `npm run build` → `npm run dev`. 프로젝트 가져오기는 **현재 문서를 덮어쓰지 않고 새 문서로 추가**합니다. 100MiB 이하 `.localdoc.json` 파일의 이미지 데이터는 파일에 포함되며, **암호화되지 않으므로 별도 보안 저장**하세요. Web Locks 지원 브라우저에서는 한 탭만 편집하도록 제한합니다. Windows/Edge 인쇄 품질은 별도 검증이 필요합니다.
 
 이미지 개별 파일은 10MiB·2,000만 픽셀 이하이며 PNG/JPEG/WebP만 사용합니다. 원본 이미지의 방향·화질은 변경하지 않습니다. 문서함은 IndexedDB(origin/브라우저 프로필 단위)에 저장되므로 브라우저 사이트 데이터를 지우면 소실될 수 있습니다. STEP 1의 `localStorage` 원본은 자동 삭제하지 않습니다.
+
+
+최종 요구사항별 검수와 보류 사유는 [STEP 2 요구사항 감사](docs/STEP2_FINAL_REQUIREMENTS_AUDIT_2026-10-19.md)에 기록했습니다. 빠른 화면 전환 전에 미저장 V2 문서를 먼저 저장하도록 보강했고, STEP 1 데이터가 나중에 발견되어도 기존 활성 V2 문서를 임의로 바꾸지 않습니다. 저장 실패 시 화면 전환은 취소됩니다.
