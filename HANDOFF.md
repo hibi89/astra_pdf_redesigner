@@ -114,3 +114,16 @@
 8. **원본·보안:** STEP1 v1 localStorage·기존 원본 PNG/TXT/STEP2 지침·사용자 IndexedDB 문서 불변. 임시 Chrome 프로필과 합성 문서만 테스트. 개인정보·문서 본문 외부 전송/로그 노출 금지.
 9. **다음 1단위:** 실제 두 Chrome 탭 동시 접근시 2번째 탭 편집 잠금·1번째 탭 종료 후 재접근/저장 복구 E2E 수행, 성공 후 STEP2 병합·수동 검수 판단.
 10. **기준 시각/진행률:** 2026-10-19 00:29:24 KST, 검증 run `39140653462` success/코드 SHA `3173098c0df9d210cd8d762b28d09a36b5298f73`; STEP2 **약 92%**, 전체 7단계 동일 비중 환산 **약 28%**의 비공식 추정. 비중/일정 미반영. 문서와 중앙 BOOK 최종 HEAD는 커밋 뒤 재조회.
+
+
+## 최신 인수인계 — 2026-10-19 00:36:17 KST (STEP 2 멀티탭 잠금)
+1. **목적/현상:** `hibi89/astra_pdf_redesigner` p5, 기존 PDF 콘텐츠 보존·디자인 재조판 최종 목표. 현재 STEP2 React/Vite/IndexedDB 문서 제작기. STEP3 PDF 업로드·리디자인 미착수.
+2. **구현/변경:** 앱 코드는 수정하지 않음. 신규 `tests/step2-multitab.mjs`(Chrome DevTools Protocol 실제 두 탭 + Web Locks), `.github/workflows/ci.yml`에 `CHROME_PATH="$CHROME_BIN" node tests/step2-multitab.mjs` 추가. 이전 STEP1/2 원문·자산·localStorage 원본 무변경.
+3. **검증 증거:** [Actions 39141151527](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39141151527) **success**, Node **16/16 PASS**, TS/Vite 빌드, Chrome STEP1 15p A4 및 STEP2 종전 기능 회귀 PASS. Chrome 2탭에서 독점 잠금/둘째 탭 편집 차단·경고, 소유 탭 닫으면 잠금 0, 둘째 탭 새로고침 후 잠금 재획득, 기존 원문·신규 편집 저장/재시작 보존까지 검사 PASS.
+4. **상태/결정:** STEP2 주요 자동 검증 **약 95% 완료 추정**, 전체 7단계 동등 가중 **약 28~29%**. STEP2 전체 100% 수용 아님; main에는 STEP1 유지, STEP2 feature 미병합. STEP3~7 미착수.
+5. **문제/대안:** 잠금 소유자 종료 시 둘째 탭은 **자동 활성화가 아닌 새로고침**으로 편집권 획득(현재 UI 안내와 일치). 크래시/OS별 브라우저/브라우저 Web Locks 미지원 조건은 미검증. 기존 설계에 수정 필요 없음.
+6. **SHA/위치:** `hibi89/astra_pdf_redesigner`, `feature/step2-full-20261018`, 기능 검증 SHA `3fe13c1097f63296d45c683f63ba0b95acd005a9`; 추가 파일 `tests/step2-multitab.mjs`, `.github/workflows/ci.yml`.
+7. **운영/환경:** `npm install`, `npm test`, `npm run build`, `npm run dev` → 127.0.0.1:5173. CI Ubuntu Chrome Node22. Production URL·Vercel 미적용.
+8. **원본·보안:** `docs/ASTRA_ORIGINAL_ROADMAP.txt`, 설계 PNG 2장, `docs/ASTRA_STEP2_ORIGINAL_INSTRUCTIONS.txt`, 기존 사용자 IndexedDB·localStorage v1 원본 그대로. 테스트 임시 Chrome 프로필에 합성 텍스트만 사용, 유료 API/비밀/고객 데이터 없음.
+9. **다음 작업:** STEP2 완료 기준을 사용자 지침과 코드/테스트/CI 근거로 항목별 점검. 누락 시 처리, 그 후 STEP2→main PR·병합 판단. 사용자 Windows Chrome/Edge PDF 저장·인쇄 미리보기/한글 폰트·육안 확인은 별도 수동 수용 기준.
+10. **검증 시각:** 2026-10-19 00:36:17 KST, run `39141151527` 결론 SUCCESS 로그 확인, 테스트 기능 SHA `3fe13c1097f63296d45c683f63ba0b95acd005a9`; `STATUS.md`/본 문서/BOOK commit SHA는 갱신 후 재조회.
