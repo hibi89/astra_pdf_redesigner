@@ -159,3 +159,12 @@
 - [GitHub Actions #39145149408](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39145149408) **SUCCESS**(테스트 코드 SHA `a5009a76499a983aa4566adabddabf862c9e839b`). 단위 **16/16**, TypeScript/Vite 빌드, STEP1 A4 PDF15p·STEP2 PNG/JPEG/WebP·JSON 프로필간 이식·IndexedDB 저장복구/멀티탭/긴 캡션 모든 Chrome 회귀 및 신규 abort·복구 PASS.
 - **잔여 수용:** 사용자 Windows Chrome/Edge에서 한글/폰트, A4 인쇄 이미지 잘림·페이지 나눔, 키보드 접근성 실제 수동 검수. Linux Chrome 자동 테스트 결과를 사용자 OS 실검수로 표현하지 않음.
 - STEP2 구현·자동검증 기준 추정 **약 97~98%**. 전체 로드맵 7단계 단순 동등가중 **약 28~29%**, 5%p 이상 진도 상승은 아님. STEP2 main 코드 병합 HOLD, STEP3~7 미착수. 다음 `ㄱ`: Windows/Edge 사용자 수동 수용 절차·결과 확인 및 병합 조건 판단.
+
+
+## 2026-10-19 01:40 KST — Windows Chrome/Edge STEP2 수동 수용 절차·병합 조건 확정
+- 기능 브랜치 `feature/step2-full-20261018`의 `docs/STEP2_WINDOWS_ACCEPTANCE_AND_MERGE_GATE_2026-10-19.md` 신규 문서. `docs/ASTRA_STEP2_ORIGINAL_INSTRUCTIONS.txt` 원본 §16 **21개 수동 검사 번호 유지**·§17 최종 완료 기준·§18 보고 조건에 맞춰 테스트 전용 Windows PowerShell 실행, 서로 다른 Chrome/Edge 프로필, localhost 별도 포트 `4178` 및 A4 PDF 증거 수집·오류 보고 양식 작성.
+- 모든 수동 검사 상태: **미실행 21/21**, Windows Chrome·Edge 한글/이미지/캡션 시각·키보드 검증 결과 미접수. 이전 Ubuntu Chrome Actions [#39145149408](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39145149408) SUCCESS (기능 SHA `a5009a76499a983aa4566adabddabf862c9e839b`, Node 16/16, 빌드/실제 Chrome 회귀)와 혼동 금지.
+- 병합 게이트: 최신 feature diff·CI 확인 + 실제 Windows Chrome/Edge 수동 결과에서 중요한 데이터 손상·누락·인쇄 실패 0 + 미실행/차단 근거 문서화 + 사용자 명시적 승인. **현재 STEP2 전체 수용 HOLD / main 기능 미병합**, STEP3 미착수.
+- 검수 전용 별도 프로필·origin을 안내해 실제 사용자 문서·기존 `5173` origin/데이터를 변경하지 않도록 함. 수동 증거는 합성 PDF·스크린샷으로 수집하고 사용자 원본·비밀 키는 제출하지 않는다.
+- 진척도: STEP2 약 **97~98%**, 7단계 동등가중 전체 약 **28~29%** 이전 추정 유지. 문서화만 추가됐으며 유의미한 실질 진도 상승은 아님.
+- **다음 작업:** 사용자 Windows Chrome/Edge에서 수동 검수 결과를 수집하면 FAIL 분석·수정·재검증 후 main 병합 판단. 사용자 PC에서 아직 테스트하지 않음.
