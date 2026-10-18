@@ -76,3 +76,8 @@ STEP 2 병합·완료 전 필요한 **원본 지침 §16의 21개 수동 검사*
 [격리된 3-way 병합·원본 보존·Chrome/Edge 통합 검수 보고서](docs/STEP2_ISOLATED_MAIN_MERGE_PREFLIGHT_2026-10-19.md) / [GitHub Actions #39150537369](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39150537369).
 
 `main`(시험 당시 `e35e5dfe6a17d32ab1e1e1b2fe21d8bb2b52323a`)을 별도 Actions runner의 **detached HEAD**로 체크아웃해 STEP2 기능 커밋 `8d9fdb1adef31875a793cce9376de3154eb08229`을 `git merge --no-commit --no-ff`로 병합 시험한 결과 **충돌 0**, STEP1 기존 App/storage, main의 최신 STATUS/HANDOFF, 로드맵/PNG 및 STEP2 지침 원본 바이트 그대로 보존 PASS, 병합한 트리에서 Node16/16·빌드·Chrome 전체 E2E·Edge A4/저장 E2E **PASS**. 메인 브랜치에 실제 merge commit/푸시는 하지 않았습니다. 최종 사용자 수용·승인 및 병합 시점 최신 HEAD 재검증은 별도입니다.
+
+
+## STEP 2 병합 후 CI 상태 (2026-10-19)
+
+PR #2는 `main`에 병합되었으며 merge SHA는 `f1ad26320b12b07019b115f77f8cf55e62f1e7e6`입니다. 초기 `main` CI에서 Edge CDP 연결 실패가 발생했으나, 브라우저 WebSocket 직접 연결과 독립 Edge runner로 복구한 코드 SHA `a54c10a89e486cf4ab0f922f9ee6aa83fffe013a`의 [Actions #39157047624](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39157047624)는 **Chrome·Edge 포함 전체 SUCCESS**입니다. [상세 복구 보고서](docs/STEP2_POSTMERGE_MAIN_CI_RECOVERY_2026-10-19.md) 및 [Windows 수동 검수표](docs/STEP2_WINDOWS_ACCEPTANCE_AND_MERGE_GATE_2026-10-19.md)를 참고하세요. **Windows Edge 실제 PDF와 Windows 장문/이미지 PDF 육안 수용 검수는 미완료**이며, STEP 3은 아직 미착수입니다.

@@ -176,3 +176,11 @@ Start-Process -FilePath $edge -ArgumentList @("--user-data-dir=`"$testEdge`"", '
 - Windows Edge 실사용 육안 검사 결과가 제출되지 않았으므로 그 항목을 자동 테스트 근거로 **완료 표시하지 않는다**.
 - 추후 검증 시 브라우저/버전, PDF 조건, PASS/FAIL, 재현 단계와 증거를 기록한다. 실제 사용자 문서나 민감한 데이터를 GitHub에 게시하지 않는다.
 - 이번 승인으로 허용되는 것은 **조건부 main 병합**이며, STEP 2 전체 Windows 사용자 수용/품질 검증 완료 선언은 아니다.
+
+
+## 10. 2026-10-19 — 병합 후 main CI 실패 복구 및 Windows 미검증 유지
+
+- PR #2 **실제 main 병합 완료**, merge SHA `f1ad26320b12b07019b115f77f8cf55e62f1e7e6`. 따라서 과거 항목 중 `main 미병합` 표시는 **병합 당시 이전 상태 기록**이며, 현재는 해당하지 않음.
+- 병합 직후 [main CI #39155133495](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39155133495) Edge 시작 CDP 검사 실패. CI 전용 헬퍼를 수정하고 Edge를 Chrome과 독립 runner로 분리한 결과 `main` 코드 SHA `a54c10a89e486cf4ab0f922f9ee6aa83fffe013a`의 [새 CI #39157047624](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39157047624) **SUCCESS**: Node16/16·build·Chrome STEP1/2 전체·Edge STEP1/2 실제 PDF/이미지/긴 캡션·DB 실패/복구 PASS.
+- 이 결과는 **GitHub Ubuntu의 Linux 브라우저 자동 검증**이다. **Windows Edge 실물 PDF, Windows 긴 본문/이미지 다페이지 육안, 키보드/작은 화면, Windows Chrome↔Edge JSON 이식은 NOT RUN**. 본 문서 §9 체크박스를 체크하지 않으며, STEP2 전체 Windows 수용·전체 검증 완료 선언 금지.
+- 상세: [main Edge CI 복구 보고서](STEP2_POSTMERGE_MAIN_CI_RECOVERY_2026-10-19.md).

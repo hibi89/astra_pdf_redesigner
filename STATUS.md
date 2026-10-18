@@ -204,3 +204,12 @@
 - 이전 격리 병합 Actions [#39150537369](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39150537369) **SUCCESS**(main `e35e5dfe6a17d32ab1e1e1b2fe21d8bb2b52323a`, feature `8d9fdb1adef31875a793cce9376de3154eb08229`). Draft PR 생성 시 main `e9044998f6f05cb41d13e339e6e8424e37ef62bb`, head `d94fdd831ce53b3afb4e02eea640c93c3209cc94`로 **이전 시험 SHAs와 다름**. PR mergeable=clean만으로 새 조합의 통합 CI PASS 확정 불가.
 - **최종 병합 게이트:** 사용자 수동 검수 미완료 항목 해결 또는 명시적 잔여위험 수용 + 사용자 STEP2 main 병합 명시적 승인 → 최신 main/feature SHA 고정하여 isolated preflight·CI 재검증 → 실제 merge 및 새 main CI PASS 확인. 병합 승인 전 Draft 유지.
 - 기능 브랜치 `docs/STEP2_ISOLATED_MAIN_MERGE_PREFLIGHT_2026-10-19.md`에 PR 등록/남은 수용 조건 추기. STEP2 약 **99%** 자동·기술 관점 비공식 추정, 전체 7단계 동등 비중 약 **28~29%**; PR 생성은 전체 완성을 높이지 않음. STEP3~7 미착수.
+
+
+## 2026-10-19 — 병합 후 Edge CI 실패 복구, main 전체 자동검사 SUCCESS
+- PR #2의 STEP2 병합 SHA `f1ad26320b12b07019b115f77f8cf55e62f1e7e6`; 병합 직후 [Actions #39155133495](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39155133495) **FAILURE**(Chrome PASS, Edge STEP1 `/json/version` CDP startup timeout). D-Bus 경고가 존재하나 근본 원인임은 확정하지 않음.
+- 사용자 새 `ㄱ` 지시에 따라 **CI 전용 복구**: `tests/browser-process.mjs`에서 `DevToolsActivePort`의 WebSocket 경로로 직접 핸드셰이크, 검사 스크립트 5개 연결 방식을 공통화; Edge 독립 runner job 도입(`.github/workflows/ci.yml`). **`src/**` 앱 기능·사용자 원본·기존 설계 수정 없음**, 변경 파일 총 7개(테스트6+워크플로1).
+- 기능/CI 수정 `main` SHA `a54c10a89e486cf4ab0f922f9ee6aa83fffe013a`, [Actions #39157047624](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39157047624) **SUCCESS**: `build-and-test` Node16/16, TS/Vite 빌드, Chrome STEP1·STEP2 E2E·2탭/마이그레이션 abort·프로필 간 JSON PASS; 분리된 Edge job STEP1/STEP2 A4 PDF·이미지·긴 캡션·IndexedDB 복구 PASS. CDP 실제 WebSocket 연결 성공 로그 확인.
+- 보고서: `docs/STEP2_POSTMERGE_MAIN_CI_RECOVERY_2026-10-19.md`. 기존 병합/원본 Git blob SHA 비교 PASS 기록 유지, 앱 동작 코드 수정 없음.
+- **Windows Edge 실물 PDF·Windows 긴 문서/PNG-JPEG-WebP 다페이지 육안·키보드·작은 창 사용자 수동 검수는 여전히 NOT RUN. STEP2 전체 검증 완료나 100% 선언 금지.**
+- STEP 3 미착수. 진행률 보수적 추정 STEP2 구현/자동검증 약 **99%**, 전체 동일 비중 7단계 약 **28~29%** 유지. 추후 앱 기능 구현은 별도 사용자 지시 필요.

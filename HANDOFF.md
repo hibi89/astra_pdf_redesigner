@@ -244,3 +244,14 @@
 8. **유의:** 현재 main doc 갱신으로 PR base SHA가 또 변할 수 있으므로, 병합 직전 최신 PR head/base 재조회→isolated preflight 재실행. 중요 자료 원본 변경/유실 막기.
 9. **다음 1단위:** 사용자 별도 승인 요청 시 잔여 Windows Edge 시각 검수 수용/추가 실행 중 선택→(승인된 경우) 최신 HEAD 기준 병합 사전검사 및 main merge·새 main CI. 승인 없으면 PR Draft 유지.
 10. **진척도:** 2026-10-19 02:52 KST, STEP2 기술 구현 약 **99%**, 전체 7단계 동일 가중 약 **28~29%** 비공식 추정; 실사용 최종 수용/병합 미완료. 5%p 의미 있는 상승 없음.
+
+
+## 최신 인수인계 — 2026-10-19 (main Edge CDP 자동검사 복구 SUCCESS)
+1. **p5 프로젝트:** `hibi89/astra_pdf_redesigner`, PR #2 STEP2 개인 문서 제작기 **main 병합 완료**, merge SHA `f1ad26320b12b07019b115f77f8cf55e62f1e7e6`.
+2. **병합 직후 main 실패:** [Actions #39155133495](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39155133495) FAILURE: Node16/16/빌드/Chrome 전수 PASS, Edge STEP1 CDP `/json/version` 제한시간 초과. 로그 Edge `DevTools listening` 출력 확인, D-Bus 경고는 원인 미확정.
+3. **새 지시로 복구 실행:** tests `browser-process.mjs`가 프로필별 DevToolsActivePort에 기록된 WS URL에 직접 연결/핸드셰이크(+stderr/종료 진단); 5개 브라우저 스모크 수정. CI `edge-validation`을 Chrome과 다른 Ubuntu runner로 분리. 앱 `src/**` 변경 없음.
+4. **검증 성공:** main 기능/CI 코드 SHA `a54c10a89e486cf4ab0f922f9ee6aa83fffe013a`, [Actions #39157047624](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39157047624) SUCCESS, 독립 jobs `build-and-test`, `Microsoft Edge A4 PDF and IndexedDB` 모두 success. Node 16/16, build, Chrome 장문/이미지/IndexedDB·2탭 Web Locks·V1 migration abort·JSON A→B, Edge 실 A4/이미지·장문·저장 오류/복구 전수 PASS.
+5. **산출 보고:** `docs/STEP2_POSTMERGE_MAIN_CI_RECOVERY_2026-10-19.md`. 기능 코드 변경 0, CI/테스트 파일 7개 수정. main 새 docs-only HEAD가 생기면 **검증된 실행 SHA는 `a54c10a89e486cf4ab0f922f9ee6aa83fffe013a`**라고 분리 표기할 것.
+6. **미완료:** 사용자 실제 Windows Edge A4/한글, Windows Chrome/Edge 2페이지 이상 장문·이미지 PDF 육안, 키보드·작은 화면/Windows간 JSON 이식 등 *NOT RUN*. 사용자는 잔여 위험을 main 병합에 대해 수용했으나 STEP2 Windows 최종 수용을 완료했다고 표시하지 말 것.
+7. **다음:** STEP3 PDF import/재디자인 미착수. 사용자 별도 `ㄱ` 또는 명시 지시로 진행 방향 결정; 현재 응답에서는 새 기능 개발하지 않음. 실제 상용 사용 전 Windows 수동 체크리스트 `docs/STEP2_WINDOWS_ACCEPTANCE_AND_MERGE_GATE_2026-10-19.md`를 완료해야 함.
+8. **진척도:** STEP2 기술적 기능 약 99% / 전체 7단계 동일 비중 약 28~29%의 비공식 추정 유지. STEP2 전체 검증 PASS는 아님.
