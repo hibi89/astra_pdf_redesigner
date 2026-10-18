@@ -231,3 +231,16 @@
 8. **배포/보안:** GitHub Ubuntu Node22, headless Chrome+Edge, Vite localhost. 사용자 원본·비밀/토큰 접근/외부 공개 없음. Production/Vercel 미배포. GitHub main 브랜치 기능은 STEP1 상태 유지.
 9. **다음 1단위:** 실사용 Windows의 미확인 항목을 명시하며 STEP2 수용/병합 승인 판단. 사용자 명시적 승인이 있으면 최신 main/feature 재확인·preflight 재실행 → 실제 병합 및 main 전체 CI/원본 보존 검증. STEP3 시작은 이후 별도.
 10. **진행률:** 2026-10-19 02:43 KST STEP2 자동·기술 관점 약 **99%** 비공식, 전체 동일 비중 7단계 **약 28~29%**, 전체 5%p 이상 상승 아님. 시험한 feature SHA `8d9fdb1adef31875a793cce9376de3154eb08229`, Actions #39150537369 최종 success 로그 확보.
+
+
+## 최신 인수인계 — 2026-10-19 02:52 KST (p5 STEP2 Draft PR #2)
+1. **목적:** STEP1 원본 편집기·v1 localStorage를 유지하며 STEP2 React/TS/IndexedDB/이미지·JSON/A4 제작기 브랜치를 main에 검토용 등록. STEP3 PDF 원문 추출/재디자인은 아직 미착수.
+2. **결과:** [Draft PR #2](https://github.com/hibi89/astra_pdf_redesigner/pull/2) **open / draft=true / merged=false**. Head `feature/step2-full-20261018`, base `main`. 생성 후 GitHub API `mergeable=true`, `mergeable_state=clean` 확인(당시 head `d94fdd831ce53b3afb4e02eea640c93c3209cc94`, base `e9044998f6f05cb41d13e339e6e8424e37ef62bb`). PR 설명에 기능·테스트·Windows 수동 미검증·수용 체크리스트 및 승인조건 작성. **실제 merge 하지 않음**.
+3. **검증:** 기존 preflight [#39150537369](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39150537369) SUCCESS(기능 `8d9fdb1adef31875a793cce9376de3154eb08229` + main `e35e5dfe6a17d32ab1e1e1b2fe21d8bb2b52323a`), 파일 바이트 보존·Node16/16·빌드·Chrome/Edge E2E PASS. **현재 PR HEAD와 시험 SHA는 달라 최신 HEAD의 전체 preflight PASS로 단정하지 않음**. GitHub mergeable=clean은 충돌 없음 표시에 한정.
+4. **사용자 부분 검수:** 실제 Windows Chrome155 1p A4 PDF 한글·폰트 임베딩·텍스트 추출·앱 UI 제외 부분 PASS. Windows Edge 실 PDF, Windows 이미지/다페이지/키보드 최종 수동 검수 미완료. 자동 가능한 항목은 모두 CI로 처리; 반복적인 사용자 조작 요구는 최소화.
+5. **판정:** STEP2 main 통합 PR은 **Draft 상태 HOLD**, 사용자 명시적 main 병합 승인 전 merge 금지. 사용자 남은 수동/시각 문제 수용 여부도 별도 확인 필요.
+6. **Repository/docs:** `hibi89/astra_pdf_redesigner`, `feature/step2-full-20261018`; PR #2, `docs/STEP2_ISOLATED_MAIN_MERGE_PREFLIGHT_2026-10-19.md`, `docs/STEP2_WINDOWS_ACCEPTANCE_AND_MERGE_GATE_2026-10-19.md`, `docs/STEP2_FINAL_REQUIREMENTS_AUDIT_2026-10-19.md`, `README.md`. main STATUS/HANDOFF는 문서만 변경, STEP1 앱 기능은 그대로.
+7. **실행/환경:** Node22 npm test/build, GitHub Actions Ubuntu Chrome+Microsoft Edge 155, 로컬 Vite, no Production/Vercel. 원본 로드맵 PNG/TXT, STEP2 지침 TXT, 사용자 localStorage/IndexedDB 그대로. 외부 API 키 없음.
+8. **유의:** 현재 main doc 갱신으로 PR base SHA가 또 변할 수 있으므로, 병합 직전 최신 PR head/base 재조회→isolated preflight 재실행. 중요 자료 원본 변경/유실 막기.
+9. **다음 1단위:** 사용자 별도 승인 요청 시 잔여 Windows Edge 시각 검수 수용/추가 실행 중 선택→(승인된 경우) 최신 HEAD 기준 병합 사전검사 및 main merge·새 main CI. 승인 없으면 PR Draft 유지.
+10. **진척도:** 2026-10-19 02:52 KST, STEP2 기술 구현 약 **99%**, 전체 7단계 동일 가중 약 **28~29%** 비공식 추정; 실사용 최종 수용/병합 미완료. 5%p 의미 있는 상승 없음.
