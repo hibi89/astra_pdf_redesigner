@@ -101,3 +101,16 @@
 8. **원본·백업·보안:** STEP1 저장 키·로드맵 PNG/TXT·사용자 문서 변경 없음. 테스트는 합성 이미지·테스트 브라우저 profile만 사용. 비밀/API 없음.
 9. **다음 작업 및 수용 기준:** 대형 이미지·긴 설명 출력의 다중 페이지 PDF/텍스트·이미지 누락·겹침 검증 → 멀티탭 충돌 실제 검사 → 최종 STEP2 수용 후 main 병합 검토, 사용자 Windows Chrome/Edge 출력 별도.
 10. **검증 시각:** 2026-10-19 00:20:19 KST, 기능 SHA `154ff8d98aa97da311362c1e11ea78bac9db77d9`, run `39139965821` success 로그·결과 재확인. main/feature 문서 HEAD 및 중앙 BOOK은 갱신 뒤 다시 읽는다.
+
+
+## 최신 인수인계 — 2026-10-19 00:29:24 KST (STEP 2 A4 레이아웃 경계)
+1. **목표·요구·스택:** 기존 PDF 원문을 보존하며 새 디자인으로 재조판하는 최종 목적. 현재 STEP 2 개인 문서 제작기(React/Vite/IndexedDB); 사용자 제공 `docs/ASTRA_STEP2_ORIGINAL_INSTRUCTIONS.txt` 원형 유지, STEP 3 PDF import 미시작.
+2. **구현 내용:** `tests/step2-browser.mjs`에 고해상도 세로형 이미지(1200×2500), 선행 37줄, 짧은 캡션 및 190줄 긴 캡션의 실제 Chrome A4 PDF 회귀 테스트 추가. 앱 코드/CSS는 변경하지 않음.
+3. **검증 결과:** [run 39140653462](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39140653462) **success**: 16/16 unit, TS/Vite build, STEP 1 Chrome PDF 15p·기존 STEP 2 회귀 PASS. 짧은 캡션과 이미지 동일 페이지, 긴 캡션 전/후 표지 보존, 추가 페이지 생성, PDF 전체 텍스트 좌표 A4 물리 경계 내부 PASS.
+4. **완료/진행/미검증:** STEP 2 인쇄 경계 특정 시나리오 통과. 실제 멀티탭 경쟁/잠금과 사용자 Windows Chrome/Edge 인쇄·육안 검수 미검증, STEP 2 전체 수용/main 병합 아직 보류. STEP3~7 미착수.
+5. **문제/제약:** Chrome A4에서는 해당 사례에 인쇄 수정 필요 없었음. `pdfimages`는 이미지 포함/페이지 검사이고 bbox는 텍스트 물리 범위 검사이므로 픽셀 수준 겹침/미관 전체 증명은 아님. 불필요한 CSS 변경 금지.
+6. **브랜치/커밋/경로:** `hibi89/astra_pdf_redesigner` / `feature/step2-full-20261018`, 검증 코드 SHA `3173098c0df9d210cd8d762b28d09a36b5298f73`; `tests/step2-browser.mjs`. main에는 기존 검증된 STEP1 코드 유지.
+7. **실행/배포:** `npm install`, `npm test`, `npm run build`, `npm run dev`; Chrome CI Ubuntu Node22. Production/Vercel 없음.
+8. **원본·보안:** STEP1 v1 localStorage·기존 원본 PNG/TXT/STEP2 지침·사용자 IndexedDB 문서 불변. 임시 Chrome 프로필과 합성 문서만 테스트. 개인정보·문서 본문 외부 전송/로그 노출 금지.
+9. **다음 1단위:** 실제 두 Chrome 탭 동시 접근시 2번째 탭 편집 잠금·1번째 탭 종료 후 재접근/저장 복구 E2E 수행, 성공 후 STEP2 병합·수동 검수 판단.
+10. **기준 시각/진행률:** 2026-10-19 00:29:24 KST, 검증 run `39140653462` success/코드 SHA `3173098c0df9d210cd8d762b28d09a36b5298f73`; STEP2 **약 92%**, 전체 7단계 동일 비중 환산 **약 28%**의 비공식 추정. 비중/일정 미반영. 문서와 중앙 BOOK 최종 HEAD는 커밋 뒤 재조회.
