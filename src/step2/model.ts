@@ -48,7 +48,7 @@ export function updateTextBlock(blocks: readonly ContentBlock[], id: string, tex
 }
 export function visibleSections(doc: ProjectDocument): DocumentSection[] {
   return doc.content.sections.filter(section => section.blocks.some(block =>
-    block.kind === 'image' || (block.kind !== 'image' && !!block.text.trim())));
+    block.kind === 'image' || !!block.text.trim()));
 }
 export function documentAssetIds(doc: ProjectDocument): string[] {
   return [...new Set(doc.content.sections.flatMap(section => section.blocks.flatMap(block => block.kind === 'image' ? [block.assetId] : [])))];

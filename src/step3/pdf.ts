@@ -11,12 +11,12 @@ export async function extractLocalPdf(file:File):Promise<PdfDraft>{
   GlobalWorkerOptions.workerSrc=workerUrl;
   const bytes=new Uint8Array(await file.arrayBuffer());
   // A separate local copy avoids transferring the user's File's original ArrayBuffer.
-  const loading=getDocument({data:bytes,isEvalSupported:false,stopAtErrors:true});
+  const loading=getDocument({data:bytes,stopAtErrors:true});
   try{
     const pdf=await loading.promise;
     if(pdf.numPages<1||pdf.numPages>PDF_IMPORT_LIMITS.pages)throw Error('지원하는 PDF는 1~50페이지입니다.');
     const imageOps=new Set<number>([
-      OPS.paintImageXObject,OPS.paintInlineImageXObject,OPS.paintJpegXObject,
+      OPS.paintImageXObject,OPS.paintInlineImageXObject,
       OPS.paintImageMaskXObject,OPS.paintImageXObjectRepeat,OPS.paintInlineImageXObjectGroup,
     ].filter((n):n is number=>typeof n==='number'));
     const pages:PdfPageInput[]=[];
