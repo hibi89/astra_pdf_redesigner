@@ -75,3 +75,16 @@
 8. **데이터/보안:** 원본 STEP1 회고록, 설계 PNG 2종, STEP2 지침 원본, 사용자 저장 데이터 유지; 신규 테스트 이미지는 비민감 합성 데이터만 사용, 서버로 문서·이미지 전송 안 함.
 9. **다음 1단위/검증 조건:** IndexedDB 할당량·트랜잭션 실패 복구 혹은 대형 이미지/긴 캡션/페이지 분할 경계 1단위를 테스트. 사용자 Windows/Edge 실제 저장 검수는 별도. 전 항목을 완료로 주장하지 않고 main 병합은 후속 판단.
 10. **갱신 및 확인:** 2026-10-18 23:59:02 KST, run `39138352449` success 및 전체 로그 재확인, 기능 SHA `fa459db3317026190c85f690e5744950ed3b4da1`. 문서 HEAD·BOOK 동기화 후 재조회 기준.
+
+
+## 2026-10-19 00:10:27 KST 현재 작업 인수인계 — STEP 2 저장 실패 회복
+1. **목적/기술:** 최종 PDF 원문 보존·디자인 재조판 로컬 앱. 현재 STEP 2 문서 제작기 React/Vite/IndexedDB, STEP 3 PDF 불러오기 미착수.
+2. **구현·의미:** 기능 브랜치 `feature/step2-full-20261018`, `src/step2/useWorkspace.ts` 저장 재시도 성공 시 낡은 오류 안내 제거; `tests/step2-browser.mjs`에 실제 Chrome 브라우저 IndexedDB 문서 write 트랜잭션 1회 강제 실패 후 복구 시나리오 추가.
+3. **실제 테스트:** [CI 39139215112](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39139215112) **success**. `npm test` 16/16, `npm run build` PASS, Chrome 기존 STEP 1 PDF15p·STEP2 JPEG/WebP/PNG·JSON·다중 문서 회귀 PASS. QuotaExceededError 주입: 기존 DB 원본 보전, 편집 메모리 유지, 저장 실패 경고, 이탈 경고, 긴급 JSON export(원문·이미지), 저장 재시도·오류 안내 해제·새로고침 후 데이터 보존 모두 PASS.
+4. **상태/미완료:** STEP 2 핵심 구현·자동 테스트 상당 부분 검증. 전체 완료 선언 및 main 코드 병합 **대기**; Windows/Edge 수동 인쇄·대형 이미지/긴 캡션·이미지 트랜잭션 실패·멀티탭은 미검증. STEP 3~7 미착수.
+5. **발견 문제·원인·대안:** 실패한 비동기 IndexedDB 저장 이후 재시도는 이전에도 정상 동작했으나 UI 오류 메시지 유지 위험을 확인해 최소 수정. QuotaExceededError 테스트는 1회 주입이며 물리적 디스크 부족 전체 조건을 재현한 것은 아님.
+6. **SHA/경로:** 검증 기능 SHA `9339adb319a78192a0dda5ae437de248e9a056ca`. `tests/step2-browser.mjs`, `src/step2/useWorkspace.ts`. 저장소 `hibi89/astra_pdf_redesigner`, 브랜치 `feature/step2-full-20261018`, main에는 기존 STEP 1 유지.
+7. **실행/배포:** `npm install`, `npm test`, `npm run build`, `npm run dev` localhost 127.0.0.1:5173. Vercel Production/로그인/API 없음.
+8. **보안·원본:** 사용자 기존 `astra-pdf-redesigner:current:v1` localStorage와 STEP 1 설계 원본, 프로젝트 JSON·이미지 원본 유지. 합성 테스트 문서/이미지만 사용, 문서 데이터 외부 전송·로그 출력 금지.
+9. **다음 작업/기준:** 1단위로 대형 이미지·긴 캡션·페이지 경계 검증 또는 이미지 교체 transaction rollback 주입. 남은 항목 전수검사 전 STEP 2 100% 주장 금지. main 병합은 후속 검수 후.
+10. **진행률/갱신:** 2026-10-19 00:10:27 KST, STEP 2 자동 검증 기준 약 85~90%, **7단계 단순 동일비중 환산 약 26~27%**(정량 일정/난이도 반영하지 않은 참고치). CI `39139215112` success·SHA `9339adb319a78192a0dda5ae437de248e9a056ca` 로그 확인; 문서/BOOK 최종 HEAD는 저장 후 재조회.
