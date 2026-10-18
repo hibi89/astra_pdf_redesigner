@@ -133,3 +133,11 @@
 - [GitHub Actions #39149195481](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39149195481) **SUCCESS**, SHA `34352fd4e92ca43641da3b4d9de3070232276497`. Node 16/16·빌드·Chrome 전체 회귀 및 Edge STEP1 A4 15p·STEP2 이미지/JSON/IndexedDB·긴 캡션 A4/강제 저장 실패 복구 전체 PASS.
 - 보고서 `docs/STEP2_EDGE_CHROMIUM_CI_VALIDATION_2026-10-19.md`. Edge 자동화 범위는 `browser-smoke`·`step2-browser` 두 스모크; Chrome에서만 별도 실행되는 2탭/프로필간 이식 등을 Edge에서도 전부 실행했다고 주장하지 않음.
 - Windows Edge 실제 PDF/한글/폰트 시각 및 사용자 수동 수용 미완료, STEP2 `main` 기능 미병합. STEP2 진척도 비공식 약 98~99%, 전체 단순 동등 비중 약 28~29%.
+
+
+## 2026-10-19 02:43 KST — 분기 main/STEP2 기능 실제 3-way 무커밋 병합 PASS
+
+- `.github/workflows/step2-merge-preflight.yml` 추가: GitHub-hosted 일회성 runner에서 기능 브랜치 `8d9fdb1adef31875a793cce9376de3154eb08229`을 시험 당시 main `e35e5dfe6a17d32ab1e1e1b2fe21d8bb2b52323a`에 `git merge --no-commit --no-ff`로 합쳐 **실제 충돌 0** 확인, 실제 GitHub main/feature branch ref 변경 없음.
+- main STATUS/HANDOFF, STEP1 App/storage, 원본 로드맵·2개 설계 PNG, STEP2 원본 지침 등 전체 10개 파일 **byte identical** 확인.
+- Merge tree 자체의 Node16/16, TS/Vite build, Chrome STEP1+STEP2 E2E·2탭 Web Locks·migrate abort·JSON 프로필간 이식·Edge 실제 PDF/이미지/긴 캡션 E2E PASS. [Actions #39150537369](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39150537369) **success**, 기능 브랜치 독립 CI #39150537297 success.
+- `docs/STEP2_ISOLATED_MAIN_MERGE_PREFLIGHT_2026-10-19.md`에 자세한 대상 SHA·보존 경로·남은 수용 조건 기록. **main 실제 미병합**, Windows Edge 실 PDF 시각·키보드 등 수동 수용 미완료. 다음: 승인 전제 및 병합 직전 최신 HEAD로 재검증.
