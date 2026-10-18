@@ -80,3 +80,14 @@
 - 과정 중 두 번 실패한 E2E(`39138141905`, `39138228608`)는 **두 번째 동일 이름 JSON 다운로드 파일 탐색 시간 초과**. 실제 업로드/복원은 통과. 브라우저 반복 다운로드 파일명/허용 정책에 의존하지 않고 다운로드 직전 생성한 JSON Blob을 확인하도록 테스트를 수정하여 최종 PASS.
 - 미검증: 큰 이미지·긴 캡션에서 실제 시각적 잘림, 여러 이미지 페이지 경계, 멀티탭 충돌, 저장 공간 부족/오류 복구, 사용자 Windows Chrome/Edge 출력. PDF 내 이미지 **포함**을 검증했으며 픽셀 단위 동일 배치를 검증한 것은 아님.
 - **STEP 2 전체 최종 수용 및 main 기능 병합 대기**. STEP 3 미착수, Production 미적용. 다음 `ㄱ`: 저장 오류·IndexedDB 트랜잭션 실패 복구 또는 대형 이미지·캡션 출력 경계 중 1단위 집중 검증.
+
+
+## 2026-10-19 00:10:27 KST — STEP 2 IndexedDB 저장 실패 복구 검증
+- [GitHub Actions run 39139215112](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39139215112): **success**, 기능 SHA `9339adb319a78192a0dda5ae437de248e9a056ca`, Node 22 단위 테스트 **16/16 PASS**, TypeScript/Vite 빌드 PASS, 실제 Chrome STEP 1 A4 PDF 15페이지 및 STEP 2 이미지/JSON/인쇄·문서 전환 회귀 PASS.
+- 테스트에서 `IDBDatabase.prototype.transaction`을 1회 가로채 문서 `readwrite` 저장을 `QuotaExceededError`로 실패시킴. **실패 시 DB 원본 미변경·편집 중 최신 원문 메모리 유지·'저장 실패' 안내·beforeunload 이탈 경고 PASS**.
+- 미저장 메모리 문서를 JSON으로 내보내 텍스트·첨부 이미지가 포함됨을 확인 PASS. '지금 저장 / 재시도' 후 DB에 최신 본문 반영·새로고침 복원 PASS.
+- 발견한 UX 문제: 저장 재시도 성공 뒤 구식 오류 안내가 남을 위험. `src/step2/useWorkspace.ts`에서 저장 성공 시 오류 안내 지움; Chrome E2E에서 확인 PASS.
+- 신규/수정 파일: `tests/step2-browser.mjs`(실제 브라우저 실패 주입), `src/step2/useWorkspace.ts`(성공 안내 보정). **STEP 1 localStorage 원본 불변**, main에 STEP 2 기능 미병합.
+- **남은 위험:** 이미지 교체 트랜잭션 실패/부분 롤백 주입, 멀티탭 충돌, 큰 이미지·긴 캡션의 출력/페이지 분할·실제 Windows Chrome/Edge 수동 점검. 모든 IndexedDB 실패 유형을 검증한 것은 아님.
+- **진행률 참고(비공식 추정):** STEP 2 요구기능 구현 대부분 완료, 자동 검증 기준 약 **85~90%**. 전체 7단계를 단순히 동일 비중으로 계산하면 **약 26~27%**이며 실제 개발 난이도별 가중 진행률은 아님. 유의미한 완료 기준 또는 약 5%p 이상 변화 시 사용자에게 재보고.
+- 다음 1단위: 대형 이미지·긴 캡션의 A4 인쇄 경계, 또는 이미지 교체 트랜잭션 실패 주입·복구 추가 검증. 후속 검수 후 main 병합 판단. STEP 3 미착수.
