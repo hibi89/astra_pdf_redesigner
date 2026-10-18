@@ -1,7 +1,7 @@
 # STATUS — Astra PDF Redesigner
 
 - 저장소: `hibi89/astra_pdf_redesigner` / `main`
-- 단계: **STEP 1 자동 검증 완료 / STEP 2 블록 모델 첫 단위 구현·GitHub Actions 통과 / STEP 2 편집기 미구현**
+- 단계: **STEP 1 main 안정 / STEP 2 feature 편집기·저장·인쇄 스모크 검증 완료, 저장 경쟁 방어 추가, 추가 검수 대기**
 - 검증된 소스 커밋: `639b5e984e8ba711674a3b3d29fc6baf881a14d1`
 - 검증 GitHub Actions: [#39128155552](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39128155552), 결론 **success** (검증 종료 2026-10-18 21:39:37 KST)
 - 로컬/Vercel 배포: 로컬 전용. Vercel Production 없음(미적용).
@@ -64,3 +64,10 @@
 - 아직 **사용자 Windows Chrome/Edge 출력, JPEG/WebP 및 가로·세로 대형 이미지, 길고 복잡한 캡션, 멀티탭 충돌, 빠른 저장 경쟁 및 실패 복구는 미검증**. STEP 2 최종 수용 전 추가 검수 필요.
 - **main에는 STEP 2 기능 미병합**. 이 커밋은 문서 상태 변경만 수행. Production/Vercel 미적용(로컬 앱).
 - 다음 `ㄱ`: 자동 CI로 발견되지 않는 저장 경쟁/이미지 유형·페이지 나눔 보강 검증을 1단위 진행하고, 충분히 통과한 뒤 main 병합을 판단한다.
+
+## STEP 2 저장 경쟁 방어 — 2026-10-18 23:47:43 KST
+- 작업 범위 **1단위**: 동시에 들어오는 문서 전환·생성·복제·삭제·이미지 작업의 중복 실행 거부. 변경 동작 중 편집 폼 비활성화, 실패 후 잠금 해제. 기존 STEP 1 화면·저장 데이터 미수정.
+- 기능 브랜치 `feature/step2-full-20261018`, 검증 코드 SHA `44d7be92f04be8ff4e1effeb9c16f271069cfe46`. 신규 `src/step2/mutationGate.ts`; `src/step2/useWorkspace.ts`, `src/step2/Workspace.tsx`, `tests/step2-mutation.test.ts`, `tests/step2-browser.mjs`.
+- [GitHub Actions #39137537886](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39137537886): **success**, Node 단위 **16/16 PASS**, TypeScript/Vite **빌드 PASS**, Chrome **동일 이벤트 루프 내 두 문서 전환 요청 중복 방어**·원본 본문/활성 문서 새로고침 복원 PASS. STEP 1 Chrome A4 15페이지 및 STEP 2 이미지·JSON 입출력 회귀 PASS.
+- **여전히 미검증:** JPEG/WebP, 가로/세로 대형 이미지·긴 캡션 인쇄, 멀티탭 충돌, 저장소 오류/할당량 실패 주입, 사용자 Windows/Edge 수동 출력 검수. 위 테스트는 특정 전환 경쟁 1종의 성공이며 모든 경쟁 조건을 증명하지 않음.
+- **main 기능 미병합**, Production/Vercel 미적용. 다음 `ㄱ`: 미검증 JPEG/WebP·이미지 출력 경계 또는 저장 실패 복구 중 1단위 추가 검증 후 main 병합 판단.
