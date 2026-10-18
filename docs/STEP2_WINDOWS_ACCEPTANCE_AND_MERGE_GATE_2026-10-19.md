@@ -143,3 +143,11 @@ Start-Process -FilePath $edge -ArgumentList @("--user-data-dir=`"$testEdge`"", '
 - **수동 체크리스트 15번(인쇄 UI 제외)은 Chrome 짧은 문서에 한해 관찰 PASS**. 16번 중 **한글 정상 출력·PDF 텍스트 추출 PASS**, 실제 뷰어에서 사용자 마우스로 글자 선택·복사는 별도 미확인. 14번은 **여러 페이지 출력**을 뜻하므로 1페이지 PDF만으로 PASS 처리 불가.
 - 이미지가 없는 파일(`pdfimages -list` 이미지 행 0)이므로 **17번 이미지 잘림/왜곡/누락, 18번 긴 문서/긴 캡션, Edge 인쇄는 검증하지 않음**. 최종 21항은 부분 증거까지 수집한 후 Windows Chrome과 Edge 각각 평가한다.
 - 공개 프로젝트 로그/문서에는 사용자 제출 PDF의 메타데이터·검증 결과만 기록한다. 업로드된 PDF 원본·실제 작성 내용·기기 식별값은 별도 복사/게시 금지.
+
+
+## 8. Linux Microsoft Edge 자동 실브라우저 검증 — 2026-10-19
+
+- [GitHub Actions #39149195481](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39149195481) **SUCCESS**, 코드 SHA `34352fd4e92ca43641da3b4d9de3070232276497`. GitHub Actions Ubuntu의 **실제 Microsoft Edge 155.0.4283.45**(`/usr/bin/microsoft-edge`)에서 STEP1 A4 PDF 15페이지, STEP2 IndexedDB 저장·복원, PNG/JPEG/WebP·실제 PDF 이미지, 긴 캡션 페이지 나눔 및 저장 실패·재시도 검증 PASS.
+- 상세 로그 및 스모크 범위: [Edge 자동 검증 보고서](STEP2_EDGE_CHROMIUM_CI_VALIDATION_2026-10-19.md). 기존 Chrome 전체 CI도 함께 PASS.
+- **별도 표시:** Ubuntu Linux Edge **자동 PASS ≠ Windows Edge 수동 PASS**. 사용자 Windows Chrome 1페이지 PDF에서 A4·한글·내장 글꼴·인쇄 UI 제외의 일부 확인은 이루어졌으나, 실제 Windows Edge 출력과 Windows 다페이지 이미지 시각/키보드 조작은 여전히 미확인. 원본 수동 항목 21개는 전체 완료로 표시하지 않음.
+- STEP2 자동 검증 기준 진행률은 약 98~99%, 전체 7단계 단순 동일 비중 28~29% 비공식 추정. `main` 기능 병합 및 STEP3 미착수.
