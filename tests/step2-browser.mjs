@@ -294,8 +294,12 @@ try{
   // Requirement audit: a rapid switch to the legacy mode must flush the current
   // in-memory document instead of cancelling the 450ms debounce on unmount.
   const quickText='FAST_MODE_SWITCH_SAVED_20261019';
+  await eventually(()=>evaluate("[...document.querySelectorAll('button')].find(b=>b.textContent==='기존 회고록 편집')?.disabled"),v=>v===false);
   await evaluate("(()=>{const el=document.querySelector('.section-editor .block-editor textarea');const set=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set;set.call(el,"+JSON.stringify(quickText)+");el.dispatchEvent(new Event('input',{bubbles:true}));const button=[...document.querySelectorAll('button')].find(b=>b.textContent==='기존 회고록 편집');if(!button)throw Error('mode switch button missing');button.click()})()");
-  await eventually(()=>evaluate("Boolean(document.querySelector('.mode-bar')&&document.querySelector('button.print-button'))"));
+  await eventually(()=>evaluate("Boolean(document.querySelector('.mode-bar')&&document.querySelector('button.print-button'))"),v=>v,3500).catch(async()=>{
+    const state=await evaluate("(()=>{const button=[...document.querySelectorAll('button')].find(b=>b.textContent==='기존 회고록 편집');return{mode:!!document.querySelector('.mode-bar'),buttonDisabled:button?.disabled,save:document.querySelector('.save-chip')?.textContent,warning:document.querySelector('.warning')?.textContent,preview:document.querySelector('.project-paper')?.textContent.includes('FAST_MODE_SWITCH_SAVED_20261019')}})()");
+    throw new Error('Mode switch not reached: '+JSON.stringify(state));
+  });
   await evaluate("[...document.querySelectorAll('.mode-bar button')].find(b=>b.textContent.includes('개인 문서 제작기로 돌아가기')).click()");
   await eventually(()=>evaluate("document.querySelector('.project-paper')?.textContent.includes("+JSON.stringify(quickText)+")"));
   await reload();
