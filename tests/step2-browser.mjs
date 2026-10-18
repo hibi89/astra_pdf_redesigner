@@ -1,19 +1,18 @@
 // End-to-end Chrome DevTools Protocol smoke: real IndexedDB, images, export/import and print.
 import assert from 'node:assert/strict';
-import { spawn, execFileSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
+import { launchBrowser } from './browser-process.mjs';
 import { mkdtempSync, rmSync, readFileSync, writeFileSync, readdirSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 const chrome=process.env.CHROME_PATH||'chromium',url=process.env.SMOKE_URL||'http://127.0.0.1:4173';
-const dir=mkdtempSync(join(tmpdir(),'astra-step2-'));const port=9338;
-const proc=spawn(chrome,['--headless=new','--no-sandbox','--disable-gpu','--disable-dev-shm-usage','--disable-background-networking','--no-first-run',`--user-data-dir=${dir}`,`--remote-debugging-port=${port}`,'about:blank'],{stdio:'ignore'});
+const dir=mkdtempSync(join(tmpdir(),'astra-step2-'));
+const browserSession=launchBrowser(chrome,dir,'STEP2 browser-smoke');
 let ws;let seq=1;const pending=new Map();const delay=(ms)=>new Promise(resolve=>setTimeout(resolve,ms));
 function request(method,params={},sessionId){return new Promise((resolve,reject)=>{const id=seq++;pending.set(id,{resolve,reject});ws.send(JSON.stringify({id,method,params,...(sessionId?{sessionId}:{})}));});}
 async function eventually(fn,check=(value)=>!!value,timeout=15000){const begin=Date.now();while(Date.now()-begin<timeout){try{const val=await fn();if(check(val))return val;}catch(e){if(!/context was destroyed|navigated or closed|Cannot find context/i.test(String(e)))throw e;}await delay(150);}throw new Error('Browser condition timeout');}
 try{
-  let endpoint;
-  for(let i=0;i<70;i++){try{const r=await fetch(`http://127.0.0.1:${port}/json/version`);if(r.ok){endpoint=(await r.json()).webSocketDebuggerUrl;break;}}catch{}await delay(180);}
-  if(!endpoint)throw new Error('Chrome did not start');ws=new WebSocket(endpoint);
+  const endpoint=await browserSession.devtools();ws=new WebSocket(endpoint);
   await new Promise((resolve,reject)=>{ws.addEventListener('open',resolve,{once:true});ws.addEventListener('error',reject,{once:true});});
   ws.addEventListener('message',event=>{const m=JSON.parse(event.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);if(m.error)p.reject(new Error(m.error.message));else p.resolve(m.result);}});
   const {targetId}=await request('Target.createTarget',{url});const {sessionId}=await request('Target.attachToTarget',{targetId,flatten:true});
@@ -339,15 +338,7 @@ try{
 
 }finally{
   if(ws)ws.close();
-  if(proc.exitCode===null&&proc.signalCode===null){
-    const exited=new Promise(resolve=>proc.once('exit',resolve));
-    proc.kill('SIGTERM');
-    await Promise.race([exited,delay(2500)]);
-    if(proc.exitCode===null&&proc.signalCode===null){
-      proc.kill('SIGKILL');
-      await Promise.race([exited,delay(2500)]);
-    }
-  }
+  await browserSession.close();
   // Chromium child helpers can still hold a profile directory briefly after Chrome exits.
   // Cleanup errors must not hide actual assertion results on ephemeral CI hosts.
   try{rmSync(dir,{recursive:true,force:true,maxRetries:12,retryDelay:250});}
