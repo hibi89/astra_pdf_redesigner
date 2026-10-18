@@ -4,7 +4,7 @@ import { ACTIVE, deleteDocument, initialize, listDocuments, openDatabase, readAs
 import { validateImage } from './images.ts';
 import { exportProject, importProject } from './projectFile.ts';
 import { createMutationGate } from './mutationGate.ts';
-import { pdfDraftToProject } from '../step3/convert.ts';
+import { pdfDraftToProject, pdfDraftAssets } from '../step3/convert.ts';
 import type { PdfDraft } from '../step3/structure.ts';
 
 type SaveState='대기'|'저장 중'|'저장됨'|'저장 실패';
@@ -145,10 +145,11 @@ export function useWorkspace(){
     try{
       const db=ensure();await flush();
       const next=pdfDraftToProject(source);
-      // Do not change the current draft, active ID, or any assets until the
-      // new document and the active marker commit in one IndexedDB transaction.
-      await writeTransaction(db,next,[],[],{[ACTIVE]:next.id});
-      setCurrent(next,[]);await refresh();setError('');return true;
+      const images=pdfDraftAssets(source,next.id);
+      // Do not change current draft, active ID, or any previous image until
+      // the new document, decoded PNG assets and active ID atomically commit.
+      await writeTransaction(db,next,images,[],{[ACTIVE]:next.id});
+      setCurrent(next,images);await refresh();setError('');return true;
     }catch(error){
       setError(error instanceof Error?error.message:'PDF 문서를 저장하지 못했습니다.');
       return false;
