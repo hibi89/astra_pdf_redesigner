@@ -267,3 +267,14 @@
 7. **보고/목표:** `docs/STEP3_PDF_IMPORT_DESIGN_2026-10-19.md` 및 `docs/STEP3_MVP_IMPLEMENTATION_AND_CI_2026-10-19.md`는 **feature**에만 존재. 이번에는 Step3 코드 `main`에 병합하지 않았으며 명시적 승인 전 Draft 유지.
 8. **다음 작업:** 다양한 합성 텍스트·혼합 이미지 페이지에서 원본 대조 정확도 측정, 추출 누락 위험 신호 및 PDF 이미지 추출 경로 검증, CI 강화를 진행. 실제 사용자 PDF는 승인 없이 GitHub에 업로드/공개하지 말 것.
 9. **진척도:** STEP3 약 45~50% 비공식 (첫 MVP 자동 검증 관점), 전체 동등비중 7단계 약35% 비공식. 실제 시간/품질 35% 완성이라는 뜻 아님.
+
+
+## 최신 인수인계 — 2026-10-19 STEP3 이미지 복원·다페이지 검증
+1. **기준:** p5 `hibi89/astra_pdf_redesigner`. main은 STEP2 안정 코드 보존. STEP3는 `feature/step3-pdf-import-20261019`, [Draft PR #3](https://github.com/hibi89/astra_pdf_redesigner/pull/3)에서만 구현, main merge 금지(명시적 승인 전).
+2. **새 구현:** `src/step3/imageRecovery.ts` 브라우저 PDF.js 이미지 operator CTM/viewport 좌표, 일반 XObject/inline 디코딩 픽셀→PNG, 마스크/회전/그룹/반복/잘못된 좌표 미지원 경고. `pdf.ts` 이미지 복원 호출, `structure.ts` 페이지 순서·여러 열 경고 및 감지/복원/미복원 건수, `ImportPanel.tsx` 복원 PNG 미리보기·개별 포함/제외·명시 확인. `convert.ts` 새 V2 이미지 블록/Asset 변환·근사 위치, `src/step2/{model,useWorkspace}.ts` 원본 좌표(선택)·문서/PNG/active 원자 저장.
+3. **CI 판정:** 구현/검증 SHA `53c56e47a10606e381d4f5593695b7ca11bc7733`, [Actions #39162038601](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39162038601) **SUCCESS**; Node26/26·build, 기존 STEP1/2 Chrome·Edge E2E/저장·멀티탭/프로필간 JSON 회귀 PASS. 실제 Chrome/Edge 합성 **2페이지** PDF 컬러 이미지 1건 감지/복원/미복원0, 원본 비교→새 V2 문서·PNG 저장→리로드→A4 PDF raster 이미지 포함/`pdftotext` 첫-끝 순서 PASS.
+4. **증거:** feature `docs/STEP3_IMAGE_RECOVERY_MULTIPAGE_VALIDATION_2026-10-19.md`, `docs/STEP3_PDF_IMPORT_DESIGN_2026-10-19.md`, `docs/STEP3_MVP_IMPLEMENTATION_AND_CI_2026-10-19.md`. 중간 실패 run은 문구/TS 타입/체크박스 선택자/비동기 로딩 경합 수정과 구분, 마지막 성공 run만 최신 PASS 증거.
+5. **제한:** PNG **재인코딩**, 원본 이미지 bytes 보존 아님; 이미지 마스크·회전·그룹/반복·클리핑/벡터·다단/표 문서의 완전 복원 아님. 고용량/다량 XObject 실물 성능과 정확도 미검증.
+6. **추가 수용:** 실제 사용자 PDF 5~10개 대조 및 Windows Chrome/Edge 실 PDF·장문/이미지·키보드 육안 NOT RUN. STEP2 Windows 미완료 검수 별도 유지. 실제 사용자 PDF를 공개 저장소에 올리지 않음.
+7. **다음 `ㄱ`:** 누락/복잡 이미지 합성 fixture 확대, 페이지 순서 모호성·오류 계측, 실문서 샘플 수용 검증 기준 강화. PR #3은 Draft 유지. STEP4 선착수 금지.
+8. **진척도:** STEP3 비공식 약65~70%, 전체 단계 동등비중 약38%(이전35% 대비 +3%p). 기능/CI 검증 SHA와 문서만 갱신된 feature HEAD는 구분. STEP3 최종 전체 수용 아님.

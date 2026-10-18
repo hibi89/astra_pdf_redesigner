@@ -223,3 +223,14 @@
 - 완성 아님: 실제 PDF 5~10개 대조, PDF 내부 이미지 원본 자동 추출·복원, 일부 표/다단/문자 매핑/순서의 정확도, Windows 실물 검증은 **미구현/미검증**. STEP2 Windows Edge/장문·이미지 PDF 육안 검수도 **NOT RUN 유지**.
 - 자세한 [STEP3 설계](https://github.com/hibi89/astra_pdf_redesigner/blob/feature/step3-pdf-import-20261019/docs/STEP3_PDF_IMPORT_DESIGN_2026-10-19.md), [MVP 결과](https://github.com/hibi89/astra_pdf_redesigner/blob/feature/step3-pdf-import-20261019/docs/STEP3_MVP_IMPLEMENTATION_AND_CI_2026-10-19.md). Draft PR #3 main 통합 금지; 최종 수용/실제 고객 PDF 검토·별도 승인 필요.
 - 진행률 비공식 STEP1 100%, STEP2 기술 구현 약99%(Windows 일부 미완료), STEP3 첫 MVP **약45~50%**, STEP4~7 미착수. 7단계 동일 비중 단순 전체 **약35%**(이전 28~29% 대비 5%p 이상 상승). 실제 난이도/남은 시간 기준 추정 아님.
+
+
+## 2026-10-19 — STEP3 이미지 PNG 재구성·실제 2페이지 PDF 회귀 PASS (Draft PR #3)
+- STEP3 기능 브랜치 `feature/step3-pdf-import-20261019`, [Draft PR #3](https://github.com/hibi89/astra_pdf_redesigner/pull/3) 검토 상태. **main 기능 미병합**. 기존 STEP1/2 main 소스와 로컬 사용자 데이터 변경 없음.
+- PDF.js operator list에서 이미지 행렬/원본 페이지 좌표를 추적하고, 지원되는 일반 XObject·inline 이미지의 **디코딩된 픽셀을 PNG로 재구성**, 이미지 누락 개수와 실패 이유·복원 썸네일·포함/제외 체크박스를 표기하도록 구현. 마스크·회전·반복/그룹·클리핑 및 색상 완전 일치는 미지원/미확인임을 경고. 원본 encoded JPEG/PNG 바이트 추출과 구분.
+- 선택된 복원 PNG를 STEP2 schemaVersion2 문서의 이미지 블록/Asset에 연결, 문서+이미지+활성 ID IndexedDB **단일 atomic transaction**; 확인 이전 문서함 불변. 페이지 단위 텍스트·이미지 출처를 보존하며 이미지 위치는 근사 배치.
+- **검증 코드 SHA `53c56e47a10606e381d4f5593695b7ca11bc7733`**, [feature Actions #39162038601](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39162038601) **SUCCESS**: Node 26/26, TS/Vite build, 기존 STEP1/2 Chrome/Edge 회귀 PASS. Chrome·Edge 각 실제 2페이지 이미지 PDF에서 1건 감지/PNG 1건 복원/미복원0, 명시적 확인→새 문서/이미지 IDB 저장→테마 변경/리로드→실제 A4 PDF `pdfimages -list` 이미지 존재 및 텍스트 1→2페이지 마커 순서 PASS.
+- 상세: [이미지 복원·다페이지 검증 보고서](https://github.com/hibi89/astra_pdf_redesigner/blob/feature/step3-pdf-import-20261019/docs/STEP3_IMAGE_RECOVERY_MULTIPAGE_VALIDATION_2026-10-19.md).
+- **미완료:** 실제 사용자 간단한 PDF 5~10개 원문/추출·영상/이미지 육안 대조, 복잡한 클리핑·표·다단·회전/투명 이미지·고용량 성능, Windows Chrome/Edge 현장 검증. 기존 STEP2 Windows Edge 실물 PDF/장문·이미지/키보드 육안 체크리스트 NOT RUN 유지. STEP3 전체 완료/100% 선언 금지.
+- 비공식 추정 STEP3 **65~70%**, 전체 7단계 동일 비중 약 **38%**(이전 약35% 대비 ~3%p, 5%p 유의미 상승 아님). 실제 개발 시간/상용 품질 기준 아님.
+- 다음 단위: 혼합/미지원 이미지의 누락 감지 회귀 확장 및 실제 샘플 대조; 사용자 최종 수용·별도 승인 전 PR Draft·main 미병합 유지.
