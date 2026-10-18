@@ -70,3 +70,11 @@
 - `src/step2/useWorkspace.ts` 저장 성공 뒤 `setError('')`로 기존 오류 배너 정리. 앱 기타 기능/사용자 기존 저장키 미변경.
 - [CI 39139215112](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39139215112) **success** — 테스트 16/16, 빌드 PASS, Chrome STEP1 15p PDF 및 기존 STEP2 이미지/JSON/인쇄 스모크 회귀 PASS. 기능 SHA `9339adb319a78192a0dda5ae437de248e9a056ca`.
 - 미검증: IndexedDB 이미지 교체 트랜잭션 강제 중단·롤백, 여러 탭 충돌, 대형 이미지와 긴 캡션 인쇄, Windows/Edge 수동 확인. **main 병합 및 STEP 2 전체 완료 유보**. 실험은 고의 실패 1회이며 모든 디스크 부족 상태를 포괄하지 않음.
+
+
+## 2026-10-19 00:20:19 KST — 실제 이미지 교체 트랜잭션 롤백/재시도
+- 코드 SHA `154ff8d98aa97da311362c1e11ea78bac9db77d9`: 앱 소스 무변경, `tests/step2-browser.mjs` 실제 브라우저 스모크만 보강.
+- IDB `assets.put`에서 새 교체용 PNG 입력을 탐지한 뒤 해당 transaction을 `abort()`함. 사용자가 갖고 있던 기존 3개 이미지에 대해 문서의 참조 배열, asset IDs·bytes·MIME·파일명 및 이미지 개수가 강제 실패 전후 완전히 동일함을 확인 PASS.
+- 새로고침 복구 PASS. 실패 유도 제거 후 같은 이미지 재교체 성공 → 참조 업데이트, 이전 asset 제거, 고아 이미지 없음, 새로고침 후 출력 미리보기 정상 PASS.
+- [GitHub Actions 39139965821](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39139965821) **success**. `npm test` 16/16, `npm run build` PASS, STEP1 Chrome PDF 15페이지, STEP2 PNG/JPEG/WebP/프로젝트 JSON/문서 전환/실패 후 백업·재시도 회귀 PASS.
+- 잔여 작업: 큰 이미지와 긴 캡션 PDF 페이지 경계, 여러 탭 쓰기 잠금 검증, 사용자 Windows Chrome/Edge 수동 확인. STEP2 약 90%는 추정치이며 최종 완료·main 병합 아님. STEP3 미착수.
