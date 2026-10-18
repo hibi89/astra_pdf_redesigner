@@ -49,3 +49,9 @@
 - [Run #39136882566](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39136882566) **success**: 단위 14/14, TypeScript + Vite 빌드, 실제 Chrome STEP 1 회귀 및 A4 PDF 15p, STEP 2 저장·섹션 이동·PNG 원본·JSON import/export·이미지 PDF 스모크 PASS.
 - **미검증:** JPEG/WebP, 이미지 가로/세로/대형·긴 캡션 인쇄, 빠른 문서 전환과 저장 순서 경쟁, 저장 장애·다중 탭 충돌, 사용자 Windows/Edge. 단위/스모크 통과를 STEP 2 100%로 판정하지 않음.
 - `main`에는 STEP 2 기능 미병합. 다음 작업은 위험 높은 미검증 항목의 1단위 회귀 테스트·보강이며, 사용자 문서 사용 금지.
+
+## 2026-10-18 23:47:43 KST — 비동기 문서 작업 충돌 방지 1단위 검증
+- 원인: 기존 문서 전환·생성·복제·이미지 변경이 async로 각각 실행되어, 중복 클릭 시 이전 작업의 늦은 완료가 화면·활성 문서 상태를 뒤바꿀 위험.
+- 구현: `src/step2/mutationGate.ts` 문서 변경 단일 실행(동시 요청은 명시적 거절). `useWorkspace` 편집 차단 및 변이 API 적용, `Workspace` 제어 비활성화. 원래 STEP 1과 데이터·저장소 키는 그대로 유지.
+- 자동 검증: [GitHub Actions run 39137537886](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39137537886) SUCCESS, **16/16 unit PASS**, TS/Vite build PASS. 실제 Chrome에서 동시에 서로 다른 문서를 여는 요청을 수행해 한 요청 거부/첫 요청 보존/새로고침 후 원문·활성 문서 지속 확인 PASS. STEP 1 A4 PDF 15p와 STEP 2 이미지/JSON/PDF 기존 E2E 회귀 PASS.
+- 코드 SHA `44d7be92f04be8ff4e1effeb9c16f271069cfe46`. **남음:** JPEG/WebP, 다양한 이미지 배치, 멀티탭 충돌, IndexedDB 저장 실패 주입·복구, Windows/Edge 수동 확인. STEP 2 전체 완료 아님, main 병합 전 추가 검토.
