@@ -18,7 +18,7 @@
 | 4-3. 이미지 | PNG/JPEG/WebP 시그니처·디코딩·크기/용량 검사, 캡션·정렬·크기·교체/삭제 | CI 검증 (일부 UI만 구현 확인) |
 | 5. 데이터 모델 | schemaVersion 2, UUID 기반 문서/섹션/블록/자산 ID·내용/디자인 별도·빈 섹션 출력 규칙 | CI 검증 |
 | 6. 로컬 저장·보호 | IndexedDB 3 store, debounce·상태·빠른 전환 방어·QuotaExceededError 복구·교체 rollback·2탭 Web Locks | CI 검증 (브라우저 크래시/권한 강제 해제 미검증) |
-| 7. STEP1 마이그레이션 | v1 파서·V2 변환·동일 트랜잭션 migration marker, 원본 유지. unit에서 원문 보존 확인. **늦은 마이그레이션 시 기존 ACTIVE를 덮지 않도록 수정** | 실제 기존 v1 데이터 **별도 브라우저 cold-start 검증 필요** |
+| 7. STEP1 마이그레이션 | v1 파서·V2 변환·동일 트랜잭션 marker, 원본 유지, 기존 ACTIVE 보존. 실제 새 Chrome 프로필에서 v1 선존재 cold-start·새로고침·중복 방지·원본 바이트 동일성 검증 | **실제 Chrome CI 검증** (저장 실패 주입 별도 미확인) |
 | 8. 프로젝트 export/import | `.localdoc.json`, 이미지 Base64 실제 파일, 크기/타입/버전·허용값·중복/누락 참조, 새 ID·트랜잭션 | 동일 Chrome 환경 CI 검증; **다른 브라우저 프로필/origin 가져오기 수동/자동 별도 필요** |
 | 9. UI 구성·접근성 | 문서함 접기, 편집·디자인·PDF·JSON, label·disabled·경고 제공 | 구현 확인; 키보드/모바일 전체 수동 대기 |
 | 10. 테마·PDF | 기존 3종+compact, 공통 미리보기·인쇄, A4 PDF 15p/이미지/190줄 캡션 좌표·본문 보존 | Chrome CI 검증; Windows/Edge 및 픽셀 육안 수동 대기 |
@@ -26,7 +26,7 @@
 | 12. 개인정보·보안·라이선스 | IndexedDB/로컬, 백엔드/API/CDN 추가 없음, 시스템 글꼴·원본 메타데이터 및 백업 경고 | 코드 확인; 네트워크/OS 전수 보안감사는 미실시 |
 | 13. 만들지 않을 기능 | STEP3 PDF 추출·OCR/AI/클라우드·캔버스/설치형 없음 | 범위 준수 |
 | 14. 구현 순서 | V2 모델→저장·UI→이미지→JSON→테마→자동 검증 | 기록·코드 확인 |
-| 15. 자동 테스트 | `npm test` 16/16; Chrome 실 E2E 사진/JSON/IDB/인쇄/동시 탭 별도 | CI 검증 (마이그레이션 cold-start·별도 프로필 import 추가 필요) |
+| 15. 자동 테스트 | `npm test` 16/16; 실제 Chrome 이미지/JSON/IndexedDB/인쇄/동시 탭 및 선존재 v1 cold-start 마이그레이션 | **CI 검증** (프로필 간 JSON import 추가 필요) |
 | 16. 수동 테스트 21항 | CI로 일부 대체 가능하나 Chrome/Edge·Windows 실 OS·한글 선택·키보드·새 프로필 검증 미완료 | 수동 대기 |
 | 17. 완료 기준 | 기능 대부분 구현·Chrome 자동 검증. 외부 환경 수용 및 특정 이동·마이그레이션 경계 검증 추가 필요 | **STEP2 전체 완료 선언 보류** |
 | 18. 실행·최종 보고 | `npm install` / `npm test` / `npm run build` / `npm run dev` 존재, `npm run lint`는 미설정 | 보고·기록 진행 중 |
@@ -51,3 +51,13 @@
 - **기술 판정:** 이 브랜치의 위 검증 항목에서는 회귀 없음. 다만 사용자 지침 16·17절의 cold-start v1 실물 마이그레이션, 별도 프로필 import, Windows Chrome/Edge 수동 인쇄·한글/이미지 시각 확인은 증거 부족.
 - **병합 판단 유지:** HOLD. 수용 증거 부족이 곧 구현 실패를 뜻하지는 않지만, 아직 main에 STEP2 통합 커밋을 만들지 않음.
 - **다음 ㄱ:** 기존 유효한 STEP1 `localStorage`를 사전에 가진 신규 Chrome 프로필에서 마이그레이션 시나리오(원문·디자인·marker·중복 방지·원본 보존)를 실제 E2E로 재현. 이후 두 번째 신규 프로필에서 JSON 이식 검증. CI+Windows 수동 검수 후 병합 검토.
+
+
+## 신규 Chrome 프로필 V1 선존재 마이그레이션 검증 — 2026-10-19 01:04 KST
+- 신규 `tests/step2-cold-migration.mjs`: 앱 JS 실행 **전** 별도 Chrome 프로필에 실제 v1 `localStorage` 규격의 **합성 테스트 회고록** 저장. `Page.addScriptToEvaluateOnNewDocument`로 첫 로딩 전에 데이터 주입 후 주입 hook 해제. 실제 사용자 자료는 사용하거나 수정하지 않음.
+- `schemaVersion:1` 제목/작성자/날짜/원문 4개 항목(빈 항목·줄바꿈·선후 공백·탭·특수문자 포함), theme/color/font/textSize → 단일 v2 문서, 각 section/paragraph 정확 복사·고유 ID 확인 PASS.
+- V1 `localStorage` 원본 JSON 바이트 그대로 유지, V2 `activeDocumentId`를 신규 migrated doc으로 설정, `v1MigrationFinished` true 확인 PASS. Chrome 새로고침 후 중복 생성 없고 데이터·ID·원본 바이트 모두 같음 PASS.
+- [Actions #39143261165](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39143261165) **SUCCESS** (코드 SHA `abb3d9425e72a2708306674176346727ef0ea710`): 단위 16/16, TS/Vite 빌드, STEP 1/2 기존 Chrome E2E 및 신규 migration 테스트 3개 PASS.
+- 테스트 종료 시 Chrome 임시 프로필 삭제가 종종 `ENOTEMPTY` 경고를 내기 때문에 테스트 함수 검증과 폴더 정리를 분리. 최종 CI에 정리 지연 WARN 하나 있지만 기능 검증 통과. 임시 자료는 합성 문서만 포함하고 ephemeral CI runner에서 실행.
+- **여전히 미검증:** 초기 migration `readwrite` 강제 실패 시 완료 marker/원문 rollback(구현은 같은 transaction), 서로 다른 Chrome 프로필 사이 JSON 파일 내보내기/가져오기 실제 이식, 사용자 Windows/Edge A4·한글·미관·접근성 검수.
+- **병합 판정 HOLD 유지**, 다음 `ㄱ`은 별도 신규 프로필 JSON 이식 E2E 한 단위. Step 2 추정 약 95%, 전체 7단계 동일가중 약 28~29%; 지난 단계 대비 5%p 이상 상승이 아님.
