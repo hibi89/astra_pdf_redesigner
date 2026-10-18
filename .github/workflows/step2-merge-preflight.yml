@@ -111,3 +111,16 @@ jobs:
           CHROME_PATH="$EDGE_BIN" node tests/step2-browser.mjs
           echo "PASS MERGED EDGE: STEP1 and STEP2 A4 PDF, images, IndexedDB and JSON"
           echo "PASS MERGE PREFLIGHT: merged tree was tested without creating a merge commit or changing main"
+      - name: Verify neither main nor feature changed during this preflight
+        shell: bash
+        run: |
+          set -euo pipefail
+          MERGED_MAIN_SHA=$(git rev-parse HEAD)
+          MERGED_FEATURE_SHA=$(cat .git/MERGE_HEAD)
+          REMOTE_MAIN_SHA=$(git ls-remote --exit-code origin refs/heads/main | cut -f1)
+          REMOTE_FEATURE_SHA=$(git ls-remote --exit-code origin refs/heads/feature/step2-full-20261018 | cut -f1)
+          echo "PREFLIGHT_CHECKED_MAIN_SHA=$MERGED_MAIN_SHA"
+          echo "PREFLIGHT_CHECKED_FEATURE_SHA=$MERGED_FEATURE_SHA"
+          test "$REMOTE_MAIN_SHA" = "$MERGED_MAIN_SHA" || { echo "::error::main changed during preflight; rerun with latest main"; exit 1; }
+          test "$REMOTE_FEATURE_SHA" = "$MERGED_FEATURE_SHA" || { echo "::error::feature changed during preflight; rerun with latest head"; exit 1; }
+          echo "PASS MERGE REFS STABLE: both remote branch heads match fully tested merge inputs"
