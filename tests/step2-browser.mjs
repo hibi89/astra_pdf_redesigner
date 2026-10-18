@@ -163,5 +163,34 @@ try{
   assert.ok(rasterRows.length>=3,'PDF embedded fewer than three PNG/JPEG/WebP image rasters');
   console.log('PASS STEP2: Chrome A4 PDF embeds all three PNG/JPEG/WebP images');
 
+  // Inject a one-time QuotaExceededError into the actual IndexedDB document write.
+  // The draft, persisted document, unload guard, emergency backup and retry must remain safe.
+  await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),v=>v==='저장됨');
+  const persistedCode="(async()=>{const db=await new Promise((resolve,reject)=>{const r=indexedDB.open('astra-pdf-redesigner:v2');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});try{const active=await new Promise((resolve,reject)=>{const r=db.transaction('meta','readonly').objectStore('meta').get('activeDocumentId');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});const doc=await new Promise((resolve,reject)=>{const r=db.transaction('documents','readonly').objectStore('documents').get(active);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});return doc.content.sections.flatMap(s=>s.blocks).filter(b=>b.kind==='paragraph').map(b=>b.text).join('|')}finally{db.close()}})()";
+  const baseline=await evaluate(persistedCode);
+  await evaluate("(()=>{const original=IDBDatabase.prototype.transaction;let failing=true;IDBDatabase.prototype.transaction=function(stores,mode,...options){if(failing&&mode==='readwrite'&&stores==='documents'){failing=false;IDBDatabase.prototype.transaction=original;throw new DOMException('Injected QuotaExceededError, test only','QuotaExceededError')}return original.call(this,stores,mode,...options)}})()");
+  const recoveryText='SAVE_FAILURE_RECOVERY_987654';
+  await fill('.section-editor .block-editor textarea',recoveryText,'HTMLTextAreaElement');
+  await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),value=>value==='저장 실패');
+  assert.ok(await evaluate("document.querySelector('.warning')?.textContent.includes('Injected QuotaExceededError')"));
+  assert.ok(await evaluate("document.querySelector('.project-paper')?.textContent.includes('SAVE_FAILURE_RECOVERY_987654')"));
+  assert.equal(await evaluate(persistedCode),baseline,'Failed IndexedDB transaction modified persisted document');
+  assert.equal(await evaluate("(()=>{const e=new Event('beforeunload',{cancelable:true});window.dispatchEvent(e);return e.defaultPrevented})()"),true);
+  console.log('PASS STEP2: injected QuotaExceededError preserves persisted document, memory draft and unload protection');
+
+  // The backup must use current in-memory content even when the last save failed.
+  await evaluate("window.__astraExportBlob=null;[...document.querySelectorAll('button')].find(b=>b.textContent==='프로젝트 내보내기').click()");
+  const emergencyBackup=await eventually(()=>evaluate('(async()=>window.__astraExportBlob?await window.__astraExportBlob.text():null)()'));
+  assert.ok(JSON.parse(emergencyBackup).document.content.sections.some(s=>s.blocks.some(b=>b.text==='SAVE_FAILURE_RECOVERY_987654')));
+  console.log('PASS STEP2: emergency JSON export contains unsaved text and attached images');
+
+  await evaluate("[...document.querySelectorAll('button')].find(b=>b.textContent.includes('지금 저장 / 재시도')).click()");
+  await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),value=>value==='저장됨');
+  assert.ok((await evaluate(persistedCode)).includes(recoveryText),'Save retry did not persist latest draft');
+  await reload();
+  await eventually(()=>evaluate("document.querySelector('.project-paper')?.textContent"),value=>value?.includes('SAVE_FAILURE_RECOVERY_987654'));
+  console.log('PASS STEP2: manual save retry persists unsaved edits and survives reload');
+
+
 
 }finally{if(ws)ws.close();proc.kill('SIGTERM');await delay(300);rmSync(dir,{recursive:true,force:true});}
