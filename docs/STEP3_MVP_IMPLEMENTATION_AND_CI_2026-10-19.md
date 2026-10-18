@@ -48,3 +48,14 @@
 ## 5. 진척도(비공식)
 - STEP1 **100%**, STEP2 구현·자동검증 **약 99%**(Windows 실물 육안 미완료), STEP3 **약 45~50%**(세로형 MVP 구현 및 자동 검증, 이미지/실문서 검수 미완료), STEP4~7 **0%**.
 - 전체 7단계 동등비중 단순 추정 **약 35%**. 실제 남은 작업시간이나 상품 품질을 나타내지 않는다.
+
+
+## 2026-10-19 후속 STEP3 이미지 복원·다페이지 스모크 추가
+
+앞선 §3의 “PDF 안 이미지 원본을 실제 ImageAsset으로 추출·복원하는 기능 미구현”은 **최초 텍스트 중심 MVP 당시 상태**를 기록한 것이다. 후속 코드에서는 일반 PDF.js 디코딩 이미지에 한해 **PNG 재구성→ImageAsset→별도 V2 문서 저장**을 구현했으며, original encoded image byte preservation이나 모든 유형의 이미지 복원은 아니다.
+
+- 확인된 기능 SHA `53c56e47a10606e381d4f5593695b7ca11bc7733`; [Actions #39162038601](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39162038601) **SUCCESS**, Chrome·Edge **양쪽 성공**, Node **26/26**, TypeScript build PASS.
+- 2페이지 PDF+컬러 이미지(Chrome/Edge 각각 합성)를 PDF.js로 읽어 이미지 1건 감지/PNG 1건 복원/미복원0, 원본 비교 UI·사용자 이미지 포함 선택·확정 전 DB 불변, 별도 문서 원자 저장·새로고침·실제 A4 PDF 이미지 embedded/텍스트 페이지 마커 순서 PASS.
+- 마스크/기울기/그룹·반복 XObject, 회전/복잡표/다단/OCR/페이지 클립 등의 미지원은 경고·미복원 항목이다. 사용자 실제 PDF 5~10개, Windows 육안 검수 **NOT RUN**.
+- 상세 [STEP3 이미지·다페이지 검증](STEP3_IMAGE_RECOVERY_MULTIPAGE_VALIDATION_2026-10-19.md).
+- 비공식 추정 STEP3 약 **65~70%**, 7단계 전체 약 **38%**(동등 비중). STEP3 전체 수용·main 병합 승인 아님.

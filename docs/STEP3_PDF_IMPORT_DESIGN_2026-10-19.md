@@ -44,3 +44,14 @@
 
 ## 7. 현재 진행
 - 2026-10-19: 기능 브랜치 `feature/step3-pdf-import-20261019`을 STEP2 main 합본 `2c81797735661263ce9fe992ca3fa3b356f60869`에서 생성. 이 문서는 STEP3 첫 설계 체크포인트이며 구현 검증은 후속 CI에서만 확정.
+
+
+## 8. STEP 3 이미지 디코딩 복원·다페이지 검증 (2026-10-19 추가)
+
+앞선 §3·§4는 **초기 텍스트 전용 MVP 기준**이다. 후속 기능을 **`feature/step3-pdf-import-20261019`에서 구현**하여, 일반 PDF.js 이미지 XObject와 일부 inline 픽셀을 PNG로 재구성하고 선택한 이미지를 별도 새 문서에 저장하는 흐름을 추가했다. 이때 원본 이미지 바이너리 byte-for-byte 추출·클리핑/마스크 완전 재현은 아니다.
+
+- 파일: `src/step3/imageRecovery.ts`, `pdf.ts`, `structure.ts`, `convert.ts`, `ImportPanel.tsx`, `src/step2/model.ts`/`useWorkspace.ts`.
+- 이미지 감지·PNG 변환·누락 사유·선택 포함 UI를 제공한다. 원본 PDF와 육안 비교 필요함을 명시. 복원 PNG는 문서·활성 ID와 같은 IDB 트랜잭션에 저장.
+- **Chrome/Edge 실브라우저 CI #39162038601 SUCCESS**(검증 기능 SHA `53c56e47a10606e381d4f5593695b7ca11bc7733`): Node26/26+build PASS, 합성 2페이지 PDF 이미지 1건 감지·1건 PNG 복원·미복원0, DB 저장·리로드·최종 A4 PDF 이미지 포함·페이지 순서 PASS.
+- 지원 범위 밖의 PDF 마스크·회전·그룹 반복·복잡한 그래픽은 **미복원 경고**로 처리. 사용자 실문서 5~10개·Windows 실환경 검증은 여전히 미완료.
+- 추가 검증 기록: [STEP3 이미지 복원·다페이지 CI 보고서](STEP3_IMAGE_RECOVERY_MULTIPAGE_VALIDATION_2026-10-19.md). 원본 로드맵의 완료 판정은 아직 충족하지 않음.
