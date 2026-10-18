@@ -1,7 +1,7 @@
 // Cold-start: pre-existing real V1 localStorage, fresh Chrome profile,
 // actual STEP2 initialization. Only synthetic text; no user files.
 import assert from 'node:assert/strict';
-import {spawn} from 'node:child_process';
+import {launchBrowser} from './browser-process.mjs';
 import {mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
@@ -9,10 +9,8 @@ import {join} from 'node:path';
 const chrome=process.env.CHROME_PATH||'chromium',url=process.env.SMOKE_URL||'http://127.0.0.1:4173';
 const origin=new URL(url).origin,key='astra-pdf-redesigner:current:v1',dbName='astra-pdf-redesigner:v2';
 const injectAbort=process.env.STEP2_INJECT_MIGRATION_ABORT==='1';
-const dir=mkdtempSync(join(tmpdir(),'astra-v1-cold-')),port=injectAbort?9343:9340;
-const proc=spawn(chrome,['--headless=new','--no-sandbox','--disable-gpu','--disable-dev-shm-usage',
-  '--disable-background-networking','--no-first-run','--no-default-browser-check',
-  '--user-data-dir='+dir,'--remote-debugging-port='+port,'about:blank'],{stdio:'ignore'});
+const dir=mkdtempSync(join(tmpdir(),'astra-v1-cold-'));
+const browserSession=launchBrowser(chrome,dir,'STEP2 cold-migration '+(injectAbort?'abort':'normal'));
 let ws,sequence=0,sessionId;
 const pending=new Map(),delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 function request(method,params={},session){
@@ -42,12 +40,7 @@ const source={
 };
 const original=JSON.stringify(source);
 try{
-  let endpoint;
-  for(let i=0;i<70;i++){
-    try{const r=await fetch('http://127.0.0.1:'+port+'/json/version');if(r.ok){endpoint=(await r.json()).webSocketDebuggerUrl;break;}}catch{}
-    await delay(180);
-  }
-  if(!endpoint)throw Error('Chrome did not start');
+  const endpoint=await browserSession.devtools();
   ws=new WebSocket(endpoint);
   await new Promise((resolve,reject)=>{
     ws.addEventListener('open',resolve,{once:true});ws.addEventListener('error',reject,{once:true});
@@ -151,13 +144,7 @@ try{
   console.log(injectAbort?'PASS STEP2 MIGRATION ROLLBACK: retry creates exactly one document, commits marker, preserves V1 bytes and remains idempotent after reload':'PASS STEP2 COLD MIGRATION: reload does not duplicate migrated record or change legacy source');
 }finally{
   if(ws)ws.close();
-  if(proc.exitCode===null&&proc.signalCode===null){
-    const exit=new Promise(resolve=>proc.once('exit',resolve));
-    proc.kill('SIGTERM');await Promise.race([exit,delay(2500)]);
-    if(proc.exitCode===null&&proc.signalCode===null){
-      proc.kill('SIGKILL');await Promise.race([exit,delay(2500)]);
-    }
-  }
+  await browserSession.close();
   try{rmSync(dir,{recursive:true,force:true,maxRetries:12,retryDelay:250});}
   catch(error){
     if(!['ENOTEMPTY','EBUSY','EPERM'].includes(error?.code))throw error;
