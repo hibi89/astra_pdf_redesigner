@@ -80,3 +80,11 @@
 - [GitHub Actions #39145149408](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39145149408): **SUCCESS**, 검증 코드 SHA `a5009a76499a983aa4566adabddabf862c9e839b`. 단위 **16/16 PASS**, TypeScript/Vite 빌드 PASS, 기존 Chrome STEP1 15p PDF·STEP2 이미지/JSON·저장복구/멀티탭/프로필 A→B 이식 회귀와 신규 migration abort/재시도 PASS.
 - **최종 수용·main 병합 HOLD:** 사용자 Windows Chrome/Edge에서 A4 PDF 저장·한글 글꼴 및 페이지/이미지 레이아웃·키보드 사용성 수동 검증은 미완료. 모든 종류의 실제 OS 전원 장애 및 브라우저 저장소 제한 환경을 검증한 것은 아님.
 - STEP2 자동 검증 기준 추정 **약 97~98%**, 전체 7단계 단순 동일비중 **약 28~29%**(시간·난도 미반영). 다음 한 단위는 사용자 환경 수용 체크리스트 제공 및 테스트 결과 접수/필요시 수정과 `main` 병합 판단.
+
+## 2026-10-19 01:40 KST — Windows 수동 수용 21개 원본 번호 및 main 병합 게이트 확정
+- 원본 `docs/ASTRA_STEP2_ORIGINAL_INSTRUCTIONS.txt` §16의 **수동 검수 21개 항목 1~21 모두 번호·의미 유지**, §17의 STEP2 완료 기준, §18의 실제 실행/보고 기준을 `docs/STEP2_WINDOWS_ACCEPTANCE_AND_MERGE_GATE_2026-10-19.md`로 구체화함.
+- Windows Chrome/Edge에서는 테스트용 독립 브라우저 프로필 + `127.0.0.1:4178` origin을 이용. 실제 사용자 데이터/원본 문서를 수정·삭제하지 않고 synthetic 문서로 A4 PDF 저장, 한글 텍스트 선택, 이미지/캡션 페이지 경계, 4종 테마, 새로고침/복제/JSON 파일 가져오기, 키보드·작은 화면/외부 백엔드 없이 작동을 검수하도록 함.
+- CI 최신 성공은 [#39145149408](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39145149408), 기능 검증 SHA `a5009a76499a983aa4566adabddabf862c9e839b`. **Windows/Edge 수동 검사 PASS로 대체하지 않음**.
+- 현재 수동 검사 상태 **미실행 21/21**. Windows 사용자의 브라우저 버전·결과/스크린샷·PDF를 아직 받지 않음. `main` 기능 병합 결정은 **HOLD**.
+- 병합 게이트: 최신 feature HEAD/Actions/변경 diff 검증, STEP1/v1 데이터 보호, Windows 핵심 PDF·한글·이미지·테마·백업 이식 검수에서 중대 FAIL 0, 미실행/차단 설명, 사용자 승인 → 그 후 main 병합 및 main CI 재검증. 병합 전 STEP3 작업 시작 금지.
+- 이번 단위는 **검수 문서 및 기준 작성**만으로 자동·수동 기능 테스트를 새로 실행하지 않았음. 추정 진행률 STEP2 약 97~98%, 전체 7단계 28~29% 유지 (5%p 상승 아님).
