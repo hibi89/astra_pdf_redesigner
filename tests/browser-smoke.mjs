@@ -41,12 +41,19 @@ function request(method, params = {}, sessionId) {
 
 async function eventually(action, check = (result) => Boolean(result), timeout = 8000) {
   const started = Date.now();
+  let navigationError;
   while (Date.now() - started < timeout) {
-    const value = await action();
-    if (check(value)) return value;
+    try {
+      const value = await action();
+      if (check(value)) return value;
+    } catch (error) {
+      // Page.reload temporarily destroys Chrome's JavaScript execution context.
+      if (!/navigated or closed|Execution context was destroyed|Cannot find context/i.test(String(error))) throw error;
+      navigationError = error;
+    }
     await wait(120);
   }
-  throw new Error('Timed out waiting for browser condition');
+  throw new Error(`Timed out waiting for browser condition: ${String(navigationError ?? 'false')}`);
 }
 
 try {
