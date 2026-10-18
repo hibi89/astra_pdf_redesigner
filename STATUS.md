@@ -196,3 +196,11 @@
 - **판정:** 기술적 병합 사전검증 PASS. 사용자 Windows Chrome 1p 한글/A4 부분 PASS, Windows Edge 실제 긴 PDF/이미지·키보드 육안 수용 미완료. STEP2 최종 수용·main 실제 병합은 사용자 명시적 승인 전 **HOLD**, STEP3 미착수.
 - 이번 상태 문서 추가 뒤 **main HEAD가 바뀌므로**, 최종 merge 전에 새로운 main/feature SHA 조합으로 preflight 다시 실행해야 한다. 이전 run의 `main` SHA는 `e35e5dfe6a17d32ab1e1e1b2fe21d8bb2b52323a`. 원본 파일들이 후속 수정에도 그대로인지 병합시 확인.
 - 진행률 비공식 STEP2 **약 99%**(자동·기술적 준비 관점), 전체 7단계 **약 28~29%**(동일 비중 단순 환산; 5%p 상승 없음). 다음: 수동 수용 범위·병합 명시적 승인 여부 확인 → 승인시 최신 main HEAD로 재검증 후 main 병합/CI 확인.
+
+
+## 2026-10-19 02:52 KST — STEP2 main 통합 Draft Pull Request 준비 완료
+- [GitHub Draft PR #2](https://github.com/hibi89/astra_pdf_redesigner/pull/2) 생성: `feature/step2-full-20261018` → `main`. 상태 `open`/`draft=true`/`merged=false` 확인, GitHub의 당시 `mergeable=true`, `mergeable_state=clean`. **실제 main merge·push 미수행**.
+- PR은 STEP2 전체 기능·V1 로컬 데이터/원본 보존·Linux Chrome/Edge 실제 PDF/DB/JSON CI 성공과 Windows Chrome 사용자 제출 1p PDF 부분 검증·남아있는 Windows Edge/긴 이미지·키보드 시각 수용의 차이를 명시. 원본 사용자 PDF는 공개 저장소에 올리지 않음.
+- 이전 격리 병합 Actions [#39150537369](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39150537369) **SUCCESS**(main `e35e5dfe6a17d32ab1e1e1b2fe21d8bb2b52323a`, feature `8d9fdb1adef31875a793cce9376de3154eb08229`). Draft PR 생성 시 main `e9044998f6f05cb41d13e339e6e8424e37ef62bb`, head `d94fdd831ce53b3afb4e02eea640c93c3209cc94`로 **이전 시험 SHAs와 다름**. PR mergeable=clean만으로 새 조합의 통합 CI PASS 확정 불가.
+- **최종 병합 게이트:** 사용자 수동 검수 미완료 항목 해결 또는 명시적 잔여위험 수용 + 사용자 STEP2 main 병합 명시적 승인 → 최신 main/feature SHA 고정하여 isolated preflight·CI 재검증 → 실제 merge 및 새 main CI PASS 확인. 병합 승인 전 Draft 유지.
+- 기능 브랜치 `docs/STEP2_ISOLATED_MAIN_MERGE_PREFLIGHT_2026-10-19.md`에 PR 등록/남은 수용 조건 추기. STEP2 약 **99%** 자동·기술 관점 비공식 추정, 전체 7단계 동등 비중 약 **28~29%**; PR 생성은 전체 완성을 높이지 않음. STEP3~7 미착수.
