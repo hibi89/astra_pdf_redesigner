@@ -38,7 +38,17 @@ export async function importProject(file:Blob):Promise<{document:ProjectDocument
   if(!record(raw)||raw.format!==FORMAT||raw.formatVersion!==VERSION)throw new Error('지원하지 않는 프로젝트 형식 또는 버전입니다.');
   if(!isProjectDocument(raw.document))throw new Error('프로젝트 문서 데이터가 손상되었거나 지원하지 않는 버전입니다.');
   if(!Array.isArray(raw.assets)||raw.assets.length>LIMITS.blocks)throw new Error('이미지 목록 형식 또는 개수가 올바르지 않습니다.');
-  const doc=raw.document;const required=documentAssetIds(doc);
+  const parsed=raw.document;
+  // Whitelist every persisted property. Unknown keys from external JSON must never enter our model.
+  const doc:ProjectDocument={
+    schemaVersion:2,id:parsed.id,name:parsed.name,createdAt:parsed.createdAt,updatedAt:parsed.updatedAt,
+    content:{title:parsed.content.title,author:parsed.content.author,date:parsed.content.date,
+      sections:parsed.content.sections.map(section=>({id:section.id,title:section.title,blocks:section.blocks.map(block=>
+        block.kind==='image'?{id:block.id,kind:'image' as const,assetId:block.assetId,caption:block.caption,alignment:block.alignment,size:block.size}:
+        {id:block.id,kind:block.kind,text:block.text})}))},
+    design:{theme:parsed.design.theme,accent:parsed.design.accent,textSize:parsed.design.textSize,font:parsed.design.font},
+  };
+  const required=documentAssetIds(doc);
   if(raw.assets.length!==required.length)throw new Error('프로젝트 파일의 이미지 개수와 참조가 일치하지 않습니다.');
   const ids=new Set<string>();let total=0;
   const verified:ImageAsset[]=[];

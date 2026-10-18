@@ -19,7 +19,7 @@
 - 기존 STEP 1 회고록 편집 UI는 접근 가능한 별도 호환 화면으로 남김.
 
 ## 실제 검증
-1. Node 22 `npm test`: **13/13 PASS** (기존 5 + 신규 8). 타입·변환·섹션 순서·복제 독립성·손상 설정·형식/JSON/이미지 헤더 등 순수 로직.
+1. Node 22 `npm test`: **14/14 PASS** (기존 5 + 신규 9). 타입·변환·섹션 순서·복제 독립성·손상 설정·형식/JSON/이미지 헤더 등 순수 로직.
 2. 로컬 글로벌 TypeScript `tsc --noEmit --strict --skipLibCheck --moduleResolution bundler --module esnext --allowImportingTsExtensions --target es2022 --lib es2022,dom src/step2/model.ts src/step2/images.ts src/step2/projectFile.ts src/step2/idb.ts`: **PASS**.
 3. 로컬 TypeScript `transpileModule` JSX 구문 검사 (`Workspace.tsx`, `Root.tsx`, `useWorkspace.ts`): 구문 오류 **0건**. 타입 검사 또는 빌드 성공을 뜻하지 않음.
 4. GitHub Actions (feature) #39131861115 / #39132088786: **실패**. 두 번 모두 Linux runner 미배정 (`runner_name=''`, steps `[]`), 실행 약 2초 후 종료. **테스트/빌드는 시작되지 않았으므로 앱 코드 오류라고 확정할 수 없음**. job 로그 다운로드에서 BlobNotFound 404. 동일 방식의 무의미한 재시도 중지.

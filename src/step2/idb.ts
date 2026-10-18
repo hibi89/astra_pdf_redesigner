@@ -30,7 +30,8 @@ export function openDatabase(): Promise<IDBDatabase> {
 
 export async function listDocuments(db:IDBDatabase):Promise<ProjectDocument[]>{
   const tx=db.transaction(DOCS,'readonly');const done=complete(tx);const items=await request(tx.objectStore(DOCS).getAll()) as ProjectDocument[];await done;
-  return items.filter(isProjectDocument).sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt));
+  if(items.some(item=>!isProjectDocument(item)))throw new Error('일부 문서 데이터가 손상되었습니다. 기존 기록은 삭제하지 않았습니다. 백업 후 상태를 확인해 주세요.');
+  return items.sort((a,b)=>b.updatedAt.localeCompare(a.updatedAt));
 }
 export async function readDocument(db:IDBDatabase,id:string):Promise<ProjectDocument|undefined>{
   const tx=db.transaction(DOCS,'readonly');const done=complete(tx);const doc=await request(tx.objectStore(DOCS).get(id));await done;

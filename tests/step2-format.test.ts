@@ -33,3 +33,14 @@ test('image signature and dimensional limit prefilter',()=>{
   assert.equal(imageType(png),'image/png');assert.deepEqual(imageDimensions(png,'image/png'),{width:2,height:3});
   assert.equal(imageType(Uint8Array.from([60,115,118,103,62])),null);
 });
+test('validated import strips unrecognized keys and preserves exact known text',async()=>{
+  const doc=blankProject();doc.content.sections[0].blocks[0]={...doc.content.sections[0].blocks[0],kind:'paragraph',text:'원문\n\n100%'};
+  const input={format:'astra-local-document',formatVersion:1,document:{...doc,rogue:'ignore-me',content:{...doc.content,rogue:'remove',sections:doc.content.sections.map(section=>({...section,other:'untrusted'}))},design:{...doc.design,evil:'untrusted'}},assets:[]};
+  const imported=await importProject(new Blob([JSON.stringify(input)]));
+  assert.equal(imported.document.content.sections[0].blocks[0].kind,'paragraph');
+  assert.equal(imported.document.content.sections[0].blocks[0].text,'원문\n\n100%');
+  assert.ok(!('rogue' in imported.document));
+  assert.ok(!('rogue' in imported.document.content));
+  assert.ok(!('other' in imported.document.content.sections[0]));
+  assert.ok(!('evil' in imported.document.design));
+});
