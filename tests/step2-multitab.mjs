@@ -2,7 +2,7 @@
 // Regression: Web Locks grant exactly one active editor; closing tab A then
 // reloading tab B allows it to acquire the lease without corrupting documents.
 import assert from 'node:assert/strict';
-import {spawn} from 'node:child_process';
+import {launchBrowser} from './browser-process.mjs';
 import {mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
@@ -10,12 +10,7 @@ import {join} from 'node:path';
 const chrome=process.env.CHROME_PATH||'chromium';
 const url=process.env.SMOKE_URL||'http://127.0.0.1:4173';
 const temp=mkdtempSync(join(tmpdir(),'astra-multitab-'));
-const port=9339;
-const child=spawn(chrome,[
-  '--headless=new','--no-sandbox','--disable-gpu','--disable-dev-shm-usage',
-  '--disable-background-networking','--no-first-run',
-  '--user-data-dir='+temp,'--remote-debugging-port='+port,'about:blank',
-],{stdio:'ignore'});
+const browserSession=launchBrowser(chrome,temp,'STEP2 multitab');
 let ws, sequence=1;
 const inflight=new Map();
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -65,14 +60,7 @@ async function attach(){
   return{targetId,sessionId,send,evalJS,reload};
 }
 try{
-  let endpoint;
-  for(let i=0;i<70;i++){
-    try{const response=await fetch('http://127.0.0.1:'+port+'/json/version');
-      if(response.ok){endpoint=(await response.json()).webSocketDebuggerUrl;break;}
-    }catch{}
-    await delay(180);
-  }
-  if(!endpoint)throw Error('Chrome failed to start');
+  const endpoint=await browserSession.devtools();
   ws=new WebSocket(endpoint);
   await new Promise((resolve,reject)=>{
     ws.addEventListener('open',resolve,{once:true});
@@ -124,7 +112,10 @@ try{
   console.log('PASS STEP2 MULTITAB: new lock owner persists new edits after reload; no stale overwrite');
 }finally{
   if(ws)ws.close();
-  child.kill('SIGTERM');
-  await delay(250);
-  rmSync(temp,{recursive:true,force:true});
+  await browserSession.close();
+  try{rmSync(temp,{recursive:true,force:true,maxRetries:12,retryDelay:250});}
+  catch(error){
+    if(!['ENOTEMPTY','EBUSY','EPERM'].includes(error?.code))throw error;
+    console.warn('WARN STEP2 MULTITAB: temporary profile cleanup deferred ('+error.code+')');
+  }
 }
