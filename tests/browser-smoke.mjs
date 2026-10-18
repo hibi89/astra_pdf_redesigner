@@ -106,7 +106,7 @@ try {
   };
 
   const openLegacy = async () => {
-    await eventually(() => evalJs("[...document.querySelectorAll('button')].some(b=>b.textContent.includes('기존 회고록 편집'))"));
+    await eventually(() => evalJs("[...document.querySelectorAll('button')].some(b=>b.textContent.includes('기존 회고록 편집') && !b.disabled)"));
     await evalJs("[...document.querySelectorAll('button')].find(b=>b.textContent.includes('기존 회고록 편집')).click()");
     await eventually(() => evalJs("Boolean(document.querySelector('textarea[name=learned]'))"));
   };
