@@ -186,6 +186,7 @@ try{
 
   await evaluate("[...document.querySelectorAll('button')].find(b=>b.textContent.includes('지금 저장 / 재시도')).click()");
   await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),value=>value==='저장됨');
+  await eventually(()=>evaluate("!document.querySelector('.warning')?.textContent.includes('Injected QuotaExceededError')"));
   assert.ok((await evaluate(persistedCode)).includes(recoveryText),'Save retry did not persist latest draft');
   await reload();
   await eventually(()=>evaluate("document.querySelector('.project-paper')?.textContent"),value=>value?.includes('SAVE_FAILURE_RECOVERY_987654'));
