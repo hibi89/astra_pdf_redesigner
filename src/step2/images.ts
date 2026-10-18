@@ -31,7 +31,7 @@ export function imageDimensions(bytes:Uint8Array,mime:string):{width:number;heig
   }
   return null;
 }
-export async function validateImage(file:Blob, originalName:string,documentId:string,id=newIdentifier()):Promise<ImageAsset>{
+export async function validateImage(file:Blob, originalName:string,documentId:string,id:string=newIdentifier()):Promise<ImageAsset>{
   if(file.size===0||file.size>LIMITS.imageBytes)throw new Error('이미지 파일은 1개당 10MiB 이하여야 합니다.');
   const first=new Uint8Array(await file.slice(0,Math.min(file.size,65536)).arrayBuffer());
   const mime=imageType(first);

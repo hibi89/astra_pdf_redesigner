@@ -63,7 +63,7 @@ export function cloneProject(source: ProjectDocument, assets: readonly ImageAsse
   return { document, assets: assets.map(asset => ({ ...asset, id: assetIds.get(asset.id)!, documentId: id })) };
 }
 const record = (o: unknown): o is Record<string, unknown> => !!o && typeof o === 'object' && !Array.isArray(o);
-const text = (v: unknown, max = LIMITS.text): v is string => typeof v === 'string' && v.length <= max;
+const text = (v: unknown, max: number = LIMITS.text): v is string => typeof v === 'string' && v.length <= max;
 const identifier = (v: unknown): v is string => text(v, 150) && v.length > 0;
 const idUnique = (items: {id: string}[]) => new Set(items.map(item => item.id)).size === items.length;
 export function isDesign(value: unknown): value is DesignSettings {

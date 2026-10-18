@@ -53,7 +53,7 @@ export async function importProject(file:Blob):Promise<{document:ProjectDocument
     if(total>LIMITS.importBytes*0.7)throw new Error('프로젝트 이미지 용량 제한을 초과했습니다.');
     const bytes=fromBase64(item.base64);
     if(bytes.length!==item.byteSize)throw new Error('이미지 데이터와 기록된 용량이 다릅니다.');
-    const actual=await validateImage(new Blob([new Uint8Array(bytes)],{type:item.mimeType}),item.originalName,doc.id,item.id);
+    const actual=await validateImage(new Blob([new Uint8Array(bytes)],{type:item.mimeType as string}),item.originalName as string,doc.id,item.id as string);
     if(actual.width!==item.width||actual.height!==item.height||actual.mimeType!==item.mimeType)throw new Error('이미지 메타데이터와 실제 파일이 다릅니다.');
     verified.push(actual);
   }
