@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
 import { PALETTE, THEMES } from '../types.ts';
-import { LIMITS, documentAssetIds, moveItem, newBlock, newIdentifier, newSection, visibleSections, type ContentBlock, type DocumentSection, type ImageAsset, type ProjectDocument } from './model.ts';
+import { LIMITS, documentAssetIds, moveItem, newBlock, newSection, visibleSections, type ContentBlock, type DocumentSection, type ImageAsset, type ProjectDocument } from './model.ts';
 import { downloadProject } from './projectFile.ts';
 import { useWorkspace } from './useWorkspace.ts';
 
@@ -32,6 +32,7 @@ export function ProjectPreview({doc,urls}: {doc:ProjectDocument;urls:Record<stri
         {section.blocks.map(block=>{
           if(block.kind==='heading')return block.text.trim()?<h3 className="block-heading" key={block.id}>{block.text}</h3>:null;
           if(block.kind==='paragraph')return block.text.trim()?<div className="section-body block-prose" key={block.id}>{block.text}</div>:null;
+          if (block.kind !== 'image') return null;
           const url=urls[block.assetId];
           return <figure className={`document-figure align-${block.alignment} figure-${block.size}`} key={block.id}>
             {url?<img src={url} alt={block.caption?'': '문서 이미지'} data-asset-id={block.assetId}/>:<p className="asset-error">이미지를 불러오는 중이거나 파일이 누락되었습니다.</p>}
