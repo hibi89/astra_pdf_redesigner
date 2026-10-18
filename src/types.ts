@@ -1,4 +1,4 @@
-export type ThemeId = 'report' | 'minimal' | 'diary';
+export type ThemeId = 'report' | 'minimal' | 'diary' | 'compact';
 export type FontKind = 'sans' | 'serif';
 export type TextSize = 'small' | 'medium' | 'large';
 

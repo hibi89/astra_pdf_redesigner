@@ -1,35 +1,22 @@
 // No test browser dependency: uses Node 22 WebSocket + Chrome DevTools Protocol.
 // Run while the Vite server is listening on http://127.0.0.1:4173.
 import assert from 'node:assert/strict';
-import { spawn, execFileSync } from 'node:child_process';
+import { execFileSync } from 'node:child_process';
+import { launchBrowser } from './browser-process.mjs';
 import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 
 const browser = process.env.CHROME_PATH || 'chromium';
 const url = process.env.SMOKE_URL || 'http://127.0.0.1:4173';
-const port = 9336;
 const dir = mkdtempSync(join(tmpdir(), 'astra-browser-'));
-const proc = spawn(browser, [
-  '--headless=new', '--no-sandbox', '--disable-gpu', '--disable-dev-shm-usage',
-  '--disable-background-networking', '--no-first-run', '--no-default-browser-check',
-  `--user-data-dir=${dir}`, `--remote-debugging-port=${port}`, 'about:blank',
-], { stdio: 'ignore' });
+const session = launchBrowser(browser,dir,'STEP1 browser-smoke');
 let ws;
 let seq = 1;
 const pending = new Map();
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function devtools() {
-  for (let attempt = 0; attempt < 70; attempt += 1) {
-    try {
-      const response = await fetch(`http://127.0.0.1:${port}/json/version`, { signal: AbortSignal.timeout(800) });
-      if (response.ok) return (await response.json()).webSocketDebuggerUrl;
-    } catch { /* Chrome launching */ }
-    await wait(200);
-  }
-  throw new Error('Chrome DevTools did not start');
-}
+async function devtools() {return session.devtools();}
 
 function request(method, params = {}, sessionId) {
   return new Promise((resolve, reject) => {
@@ -105,6 +92,12 @@ try {
     catch (error) { clearTimeout(timer); ws.removeEventListener('message', listener); throw error; }
   };
 
+  const openLegacy = async () => {
+    await eventually(() => evalJs("[...document.querySelectorAll('button')].some(b=>b.textContent.includes('기존 회고록 편집') && !b.disabled)"));
+    await evalJs("[...document.querySelectorAll('button')].find(b=>b.textContent.includes('기존 회고록 편집')).click()");
+    await eventually(() => evalJs("Boolean(document.querySelector('textarea[name=learned]'))"));
+  };
+  await openLegacy();
   await eventually(() => evalJs("Boolean(document.querySelector('.document') && document.querySelector('textarea[name=learned]'))"));
   assert.equal(await evalJs("document.querySelectorAll('.document-section').length"), 0);
   assert.equal(await evalJs("Boolean(document.querySelector('.document-author'))"), false);
@@ -118,6 +111,7 @@ try {
   assert.equal(await evalJs("document.querySelector('.document-section .section-body')?.textContent"), sample);
   await eventually(() => evalJs("JSON.parse(localStorage.getItem('astra-pdf-redesigner:current:v1') || '{}').design?.theme"), (v) => v === 'diary');
   await reload();
+  await openLegacy();
   await eventually(() => evalJs("document.querySelector('.document-section .section-body')?.textContent"), (v) => v === sample);
   assert.equal(await evalJs("document.querySelector('.document')?.classList.contains('paper-theme-diary')"), true);
   console.log('PASS: live editing, exact paragraphs, theme switch, reload persistence');
@@ -125,12 +119,14 @@ try {
   await evalJs("window.confirm=()=>true;document.querySelector('.text-button').click()");
   await eventually(() => evalJs("document.querySelectorAll('.document-section').length"), (v) => v === 0);
   await reload();
+  await openLegacy();
   await eventually(() => evalJs("document.querySelector('.document') !== null"));
   assert.equal(await evalJs("document.querySelectorAll('.document-section').length"), 0);
   console.log('PASS: reset clears state across reload');
 
   await evalJs("localStorage.setItem('astra-pdf-redesigner:current:v1', '{broken');");
   await reload();
+  await openLegacy();
   await eventually(() => evalJs("Boolean(document.querySelector('textarea[name=learned]'))"));
   console.log('PASS: malformed localStorage recovery');
 
@@ -142,6 +138,7 @@ try {
   };
   await evalJs(`localStorage.setItem('astra-pdf-redesigner:current:v1', ${JSON.stringify(JSON.stringify(restored))})`);
   await reload();
+  await openLegacy();
   await eventually(() => evalJs("document.querySelector('.section-body')?.textContent?.includes('END_MARKER_LONG_PDF')"));
   assert.equal(await evalJs("document.querySelectorAll('.document-section').length"), 1);
   assert.equal(await evalJs("Boolean(document.querySelector('.document-author'))"), false);
@@ -163,7 +160,10 @@ try {
   console.log(`PASS: Chrome print CSS, A4 PDF ${pages} pages, text extraction, no editor UI`);
 } finally {
   if (ws) ws.close();
-  proc.kill('SIGTERM');
-  await wait(350);
-  rmSync(dir, { recursive: true, force: true });
+  await session.close();
+  try{rmSync(dir,{recursive:true,force:true,maxRetries:12,retryDelay:250});}
+  catch(error){
+    if(!['ENOTEMPTY','EBUSY','EPERM'].includes(error?.code))throw error;
+    console.warn('WARN STEP1: temporary browser profile cleanup deferred ('+error.code+')');
+  }
 }
