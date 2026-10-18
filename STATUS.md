@@ -110,3 +110,13 @@
 - [Actions run 39140653462](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39140653462) **success**, 단위 **16/16**, TypeScript/Vite build PASS, 기존 STEP 1 A4 PDF 15페이지 및 STEP 2 이미지/IndexedDB/JSON/실패 복구 회귀 PASS.
 - **미검증:** 실제 출력물의 픽셀 수준 시각적 잘림/미세 겹침, Windows Chrome/Edge의 시스템 글꼴·인쇄 미리보기, 실제 다중 탭 Web Locks 충돌. 특정 합성 이미지/캡션의 Chrome PDF 검증이며 모든 레이아웃을 보장하지 않음.
 - **다음 `ㄱ`: 실제 두 탭 동시 접근 충돌·잠금 해제 검증. STEP 2는 추정 **약 92%**, 전체 7단계 **단순 동일 비중 약 28%**, 기준 직전 약 27%에서 유의미한 5%p 상승은 아님. main STEP2 기능 미병합, STEP 3~7 미착수.
+
+
+## 2026-10-19 00:36:17 KST — STEP 2 실제 Chrome 2탭 Web Locks 독점 편집 검증
+- 검증 코드 SHA `3fe13c1097f63296d45c683f63ba0b95acd005a9`, 작업 브랜치 `feature/step2-full-20261018`. 앱 기능 코드 변경 **없음**. `tests/step2-multitab.mjs` 신규 및 `.github/workflows/ci.yml`에 검증 단계 추가.
+- **같은 Chrome 브라우저 프로필·같은 origin**에 실제 두 탭 생성. 첫 탭의 `navigator.locks.query()`에서 `astra-pdf-redesigner-editor` 독점 잠금 1개 확인. 둘째 탭은 문서 목록·본문 편집 미개방, 읽기 전용 경고 노출·출력 버튼 비활성화, 첫 탭 원문 유지 PASS.
+- 첫 탭 `Target.closeTarget` 닫기 → Web Lock 해제(보유 수 0) → 둘째 탭 새로고침으로 새로운 독점 잠금 획득, 기존 문서 내용 유지 PASS. 이어 둘째 탭에서 새 내용 수정·자동 저장·새로고침 복원 PASS. 구버전 데이터 덮어쓰기 없음.
+- [GitHub Actions run 39141151527](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39141151527): **success**, Node 테스트 **16/16 PASS**, TypeScript/Vite 빌드 PASS, STEP1 A4 PDF 15p 및 기존 STEP2 JPEG/WebP·PNG·JSON/IndexedDB 실패 주입·인쇄 페이지 나눔 회귀 PASS. 멀티탭 3개 검사 PASS.
+- **미검증/제약:** 잠금 미지원 브라우저의 실사용 동작, 강제 종료·OS 전원 장애, Windows Chrome/Edge 인쇄 및 한글 글꼴·PDF 육안 검수. 둘째 탭은 **첫 탭 종료 후 새로고침이 필요**하며 자동 편집권 승계 기능을 구현한 것이 아님.
+- STEP2 개발/자동 검증은 **약 95% 비공식 추정**, 전체 7단계 단순 동일가중 환산 **약 28~29%**. 이전 전체 약 28% 대비 유의미한 5%p 증가는 아님. 테스트 커버리지 계량치가 아니며 실시간 일정/난이도 미반영.
+- **main STEP2 기능 미병합**, Production/Vercel 없음. 다음 `ㄱ`: STEP2 최종 출시/병합 전 요구사항 대조·자동 증거 점검 후 GitHub PR 생성 여부 판단. 사용자 Windows/Edge 수동 검사 전 완전한 수용 주장 금지. STEP3~7 미착수.
