@@ -88,3 +88,16 @@
 8. **보안·원본:** 사용자 기존 `astra-pdf-redesigner:current:v1` localStorage와 STEP 1 설계 원본, 프로젝트 JSON·이미지 원본 유지. 합성 테스트 문서/이미지만 사용, 문서 데이터 외부 전송·로그 출력 금지.
 9. **다음 작업/기준:** 1단위로 대형 이미지·긴 캡션·페이지 경계 검증 또는 이미지 교체 transaction rollback 주입. 남은 항목 전수검사 전 STEP 2 100% 주장 금지. main 병합은 후속 검수 후.
 10. **진행률/갱신:** 2026-10-19 00:10:27 KST, STEP 2 자동 검증 기준 약 85~90%, **7단계 단순 동일비중 환산 약 26~27%**(정량 일정/난이도 반영하지 않은 참고치). CI `39139215112` success·SHA `9339adb319a78192a0dda5ae437de248e9a056ca` 로그 확인; 문서/BOOK 최종 HEAD는 저장 후 재조회.
+
+
+## 2026-10-19 00:20:19 KST 현재 작업 인수인계 — 이미지 교체 트랜잭션 안전성
+1. **프로젝트·목표:** Astra PDF Redesigner `p5`; 원본 PDF 콘텐츠 보존·새 디자인 재조판이 최종 목표. 현재 STEP 2 React/Vite/IndexedDB 문서 제작기, STEP 3 PDF 가져오기 미착수.
+2. **구현/변경:** 기존 `src/step2/idb.ts`의 문서·자산·메타 단일 transaction을 그대로 사용. `tests/step2-browser.mjs`에 실제 Chrome 데이터 저장 실패 주입 테스트 추가. 앱 코드와 STEP 1/v1 localStorage 원본 변경 없음.
+3. **검증:** [Actions run 39139965821](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39139965821) **success**, Node 16/16, TS/Vite build PASS, Chrome 기존 STEP1 15p PDF 및 STEP2 기능 회귀 PASS. 신규 테스트: image asset `put` 후 transaction `abort()` 강제 → 문서 참조/기존 이미지 바이트/자산 개수 완전 보존, 새로고침 후 확인; fault 제거 후 재교체 성공·기존 자산만 제거·고아 자산 0·복원 PASS.
+4. **상태/경계:** 이미지 교체 원자성 검증 완료, STEP2 전체 약 90% 수준이라는 비공식 추정; main 기능 미병합. 전체 7단계 동등 가중 환산 약 27%, 실소요시간 추정 아님.
+5. **오류·시도/우회:** 오류 재현은 한 번의 진짜 IDB 트랜잭션 중단; 기존 구현이 정상 롤백되어 앱 로직 변경 불필요. 이 통과만으로 브라우저 저장소 전체 고장/디스크 부족을 전부 검증했다고 주장하지 않음.
+6. **저장소/SHA/경로:** `hibi89/astra_pdf_redesigner`, `feature/step2-full-20261018` 검증 코드 SHA `154ff8d98aa97da311362c1e11ea78bac9db77d9`, 테스트 `tests/step2-browser.mjs`. main 코드 STEP1 기존 유지.
+7. **실행/배포:** `npm install`, `npm test`, `npm run build`, `npm run dev` localhost 127.0.0.1:5173. Vercel/Production 없음.
+8. **원본·백업·보안:** STEP1 저장 키·로드맵 PNG/TXT·사용자 문서 변경 없음. 테스트는 합성 이미지·테스트 브라우저 profile만 사용. 비밀/API 없음.
+9. **다음 작업 및 수용 기준:** 대형 이미지·긴 설명 출력의 다중 페이지 PDF/텍스트·이미지 누락·겹침 검증 → 멀티탭 충돌 실제 검사 → 최종 STEP2 수용 후 main 병합 검토, 사용자 Windows Chrome/Edge 출력 별도.
+10. **검증 시각:** 2026-10-19 00:20:19 KST, 기능 SHA `154ff8d98aa97da311362c1e11ea78bac9db77d9`, run `39139965821` success 로그·결과 재확인. main/feature 문서 HEAD 및 중앙 BOOK은 갱신 뒤 다시 읽는다.
