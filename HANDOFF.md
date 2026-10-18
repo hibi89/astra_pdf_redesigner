@@ -255,3 +255,15 @@
 6. **미완료:** 사용자 실제 Windows Edge A4/한글, Windows Chrome/Edge 2페이지 이상 장문·이미지 PDF 육안, 키보드·작은 화면/Windows간 JSON 이식 등 *NOT RUN*. 사용자는 잔여 위험을 main 병합에 대해 수용했으나 STEP2 Windows 최종 수용을 완료했다고 표시하지 말 것.
 7. **다음:** STEP3 PDF import/재디자인 미착수. 사용자 별도 `ㄱ` 또는 명시 지시로 진행 방향 결정; 현재 응답에서는 새 기능 개발하지 않음. 실제 상용 사용 전 Windows 수동 체크리스트 `docs/STEP2_WINDOWS_ACCEPTANCE_AND_MERGE_GATE_2026-10-19.md`를 완료해야 함.
 8. **진척도:** STEP2 기술적 기능 약 99% / 전체 7단계 동일 비중 약 28~29%의 비공식 추정 유지. STEP2 전체 검증 PASS는 아님.
+
+
+## 최신 인수인계 — 2026-10-19 STEP3 첫 PDF 가져오기 MVP (p5)
+1. **기준:** `hibi89/astra_pdf_redesigner` 안정 main은 STEP2까지 병합된 상태, 기존 성공 CI #39157047624. 원본 로드맵 `docs/ASTRA_ORIGINAL_ROADMAP.txt` STEP3 §5를 우선한다. STEP1/2 저장 자료·앱 기능 원본 변경 금지.
+2. **현재 작업:** `feature/step3-pdf-import-20261019`, [Draft PR #3](https://github.com/hibi89/astra_pdf_redesigner/pull/3) **open/draft**. main 앱 코드 미병합. STEP3 PDF 가져오기 첫 세로형 MVP 구성.
+3. **소스:** `src/step3/pdf.ts` PDF.js `6.4.299` + worker bundled `?url`; `structure.ts` 좌표 기반 단일 열 읽기순서·제목/본문/캡션 추정·경고; `convert.ts` STEP2 문서 변환; `ImportPanel.tsx` 원본 Blob PDF 뷰어와 추출검수·수정·명시적 확정; `src/step2/model.ts` caption 및 출처 좌표 optional 호환; `useWorkspace.ts` 원자적 새 문서 저장; `Workspace.tsx` 통합. `pdfjs-dist` Apache-2.0.
+4. **테스트:** feature 구현/검증 코드 SHA `e216866a592362342ac6dd2ca2105b71799cc8fc` 및 [Actions #39159350165](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39159350165) **success**. Node **21/21 PASS**, TS/Vite build PASS, 기존 Chrome/Edge STEP1/2 회귀 + 실제 양 브라우저 STEP3 합성 PDF 업로드→원본대조·새로고침·새 A4 재출력 E2E PASS. 실패했던 첫 타입 컴파일은 PDF.js v6 TypeScript API 차이 수정 후 해결.
+5. **안전:** PDF bytes 브라우저 내 처리, 외부 서버/CDN 없음; 원본 PDF 영구 DB 저장하지 않음, 확인 전 기존 문서함 변경 없음, 저장은 새 문서+ACTIVE 단일 transaction. 텍스트를 임의 재작성하지 않으며 읽기순서·줄바꿈·공백 추정 경고.
+6. **아직 안 된 것:** 실제 단순 PDF 5~10개 원본/추출 비교, PDF 이미지 복원(현재 이미지 명령 감지 및 경고), 다단/표·암호/스캔 OCR, Windows 현장 테스트. 이전 STEP2 Windows Edge 실제 PDF·장문 이미지·키보드 NOT RUN 계속.
+7. **보고/목표:** `docs/STEP3_PDF_IMPORT_DESIGN_2026-10-19.md` 및 `docs/STEP3_MVP_IMPLEMENTATION_AND_CI_2026-10-19.md`는 **feature**에만 존재. 이번에는 Step3 코드 `main`에 병합하지 않았으며 명시적 승인 전 Draft 유지.
+8. **다음 작업:** 다양한 합성 텍스트·혼합 이미지 페이지에서 원본 대조 정확도 측정, 추출 누락 위험 신호 및 PDF 이미지 추출 경로 검증, CI 강화를 진행. 실제 사용자 PDF는 승인 없이 GitHub에 업로드/공개하지 말 것.
+9. **진척도:** STEP3 약 45~50% 비공식 (첫 MVP 자동 검증 관점), 전체 동등비중 7단계 약35% 비공식. 실제 시간/품질 35% 완성이라는 뜻 아님.

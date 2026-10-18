@@ -213,3 +213,13 @@
 - 보고서: `docs/STEP2_POSTMERGE_MAIN_CI_RECOVERY_2026-10-19.md`. 기존 병합/원본 Git blob SHA 비교 PASS 기록 유지, 앱 동작 코드 수정 없음.
 - **Windows Edge 실물 PDF·Windows 긴 문서/PNG-JPEG-WebP 다페이지 육안·키보드·작은 창 사용자 수동 검수는 여전히 NOT RUN. STEP2 전체 검증 완료나 100% 선언 금지.**
 - STEP 3 미착수. 진행률 보수적 추정 STEP2 구현/자동검증 약 **99%**, 전체 동일 비중 7단계 약 **28~29%** 유지. 추후 앱 기능 구현은 별도 사용자 지시 필요.
+
+
+## 2026-10-19 — STEP3 기존 PDF 가져오기 첫 세로형 MVP, Draft PR #3
+- 기존 STEP2 안정 main 코드 SHA `a54c10a89e486cf4ab0f922f9ee6aa83fffe013a`의 [Actions #39157047624](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39157047624) SUCCESS 유지. **main 앱 기능은 수정하지 않았다**.
+- 사용자 `ㄱ` 승인으로 로드맵 §5 STEP3 착수. **기능 브랜치 `feature/step3-pdf-import-20261019`** 신규(최초 base main `2c81797735661263ce9fe992ca3fa3b356f60869`), [Draft PR #3](https://github.com/hibi89/astra_pdf_redesigner/pull/3) 작성. 아직 main 병합하지 않음.
+- 브라우저 로컬 PDF.js `6.4.299`(Apache-2.0)로 선택 가능한 단일 열 PDF 텍스트·좌표 추출, 원본 Blob PDF 대조·분류/순서/본문 수정, 확인 후 별도 schemaVersion2 문서 atomic 저장, 기존 테마로 A4 재출력 구현. 원본 PDF 파일 바이트는 영구 저장하지 않음. 30MiB/50p 제한·스캔/암호 PDF 차단·원본 이미지 미복원/열·순서 위험 경고.
+- **실제 [feature CI #39159350165](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39159350165) SUCCESS**(검증 코드 `e216866a592362342ac6dd2ca2105b71799cc8fc`). 단위 **21/21**, TypeScript/Vite 빌드, 기존 STEP1/2 Chrome/Edge 회귀, 양쪽 실제 브라우저의 합성 PDF 생성→PDF.js 가져오기 검수→DB 신규 저장→테마·리로드→A4 재출력 PASS.
+- 완성 아님: 실제 PDF 5~10개 대조, PDF 내부 이미지 원본 자동 추출·복원, 일부 표/다단/문자 매핑/순서의 정확도, Windows 실물 검증은 **미구현/미검증**. STEP2 Windows Edge/장문·이미지 PDF 육안 검수도 **NOT RUN 유지**.
+- 자세한 [STEP3 설계](https://github.com/hibi89/astra_pdf_redesigner/blob/feature/step3-pdf-import-20261019/docs/STEP3_PDF_IMPORT_DESIGN_2026-10-19.md), [MVP 결과](https://github.com/hibi89/astra_pdf_redesigner/blob/feature/step3-pdf-import-20261019/docs/STEP3_MVP_IMPLEMENTATION_AND_CI_2026-10-19.md). Draft PR #3 main 통합 금지; 최종 수용/실제 고객 PDF 검토·별도 승인 필요.
+- 진행률 비공식 STEP1 100%, STEP2 기술 구현 약99%(Windows 일부 미완료), STEP3 첫 MVP **약45~50%**, STEP4~7 미착수. 7단계 동일 비중 단순 전체 **약35%**(이전 28~29% 대비 5%p 이상 상승). 실제 난이도/남은 시간 기준 추정 아님.
