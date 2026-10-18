@@ -14,7 +14,8 @@ export function parseStored(raw: string | null): PersistedState | null {
   try {
     const source: unknown = JSON.parse(raw);
     if (!record(source) || source.schemaVersion !== 1 || !record(source.document) || !record(source.design)) return null;
-    if (!docKeys.every((key) => typeof source.document[key] === 'string')) return null;
+    const doc = source.document as Record<string, unknown>;
+    if (!docKeys.every((key) => typeof doc[key] === 'string')) return null;
     const design = source.design;
     if (!['report', 'minimal', 'diary'].includes(String(design.theme)) ||
         !PALETTE.some((c) => c.value === design.accent) ||
@@ -22,7 +23,7 @@ export function parseStored(raw: string | null): PersistedState | null {
         !['sans', 'serif'].includes(String(design.font))) return null;
     return {
       schemaVersion: 1,
-      document: source.document as unknown as Retrospective,
+      document: doc as unknown as Retrospective,
       design: design as unknown as DesignSettings,
     };
   } catch {
