@@ -75,4 +75,27 @@ try{
   assert.ok(!pdfText.includes('문서함 이름')); // editing/list label should not bleed into PDF
   assert.ok(execFileSync('pdfinfo',[file],{encoding:'utf8'}).includes('A4'));
   console.log('PASS STEP2: Chrome A4 print with image/paragraphs and no editing UI');
+
+  // Two document switch clicks within the same event turn must not race.
+  const createBlank=()=>evaluate("[...document.querySelectorAll('button')].find(b=>b.textContent.includes('+ 빈 문서')).click()");
+  await createBlank();
+  await eventually(()=>evaluate("document.querySelectorAll('.doc-list-item').length"),n=>n===2);
+  await createBlank();
+  await eventually(()=>evaluate("document.querySelectorAll('.doc-list-item').length"),n=>n===3);
+  const choices=await evaluate(`(()=>{
+    const buttons=[...document.querySelectorAll('.doc-list-item:not(.active)')];
+    const first=buttons.find(b=>b.querySelector('strong')?.textContent==='문서함 이름');
+    const second=buttons.find(b=>b!==first);
+    if(!first||!second) throw new Error('expected two switchable documents');
+    first.click(); second.click();
+    return [first.querySelector('strong').textContent,second.querySelector('strong').textContent];
+  })()`);
+  assert.equal(choices[0], '문서함 이름');
+  await eventually(()=>evaluate("document.querySelector('.doc-list-item.active strong')?.textContent"),x=>x==='문서함 이름');
+  await eventually(()=>evaluate("document.querySelector('.project-paper .section-body')?.textContent"),x=>x==='STEP2_BEGIN 한글 원문\\n\\n123% STEP2_END');
+  await eventually(()=>evaluate("document.querySelector('.warning')?.textContent.includes('다른 문서 작업')"));
+  await reload();
+  await eventually(()=>evaluate("document.querySelector('.project-paper .section-body')?.textContent"),x=>x==='STEP2_BEGIN 한글 원문\\n\\n123% STEP2_END');
+  console.log('PASS STEP2: simultaneous document switch rejected; prior draft and active document survive reload');
+
 }finally{if(ws)ws.close();proc.kill('SIGTERM');await delay(300);rmSync(dir,{recursive:true,force:true});}
