@@ -9,3 +9,20 @@ button:disabled{cursor:not-allowed;opacity:.48}select{min-height:38px;padding:7p
 @media print{.mode-bar{display:none!important}.project-paper .document-figure{break-inside:auto!important}.project-paper .document-figure img{max-height:224mm!important;break-inside:avoid-page;page-break-inside:avoid}.project-paper .document-figure figcaption{break-inside:auto!important}.project-paper .block-heading{break-after:avoid-page}.project-paper .document-section{break-inside:auto!important}.project-paper{overflow:visible!important}.project-paper .asset-error{color:#9f2828!important}}
 
 .save-group{display:flex;align-items:center;gap:7px}.save-group .text-button{font-size:11px;padding:4px}
+
+
+/* STEP 3 — transient local PDF review; never part of printed output. */
+.step3-import-panel { margin-top: 1rem; }
+.step3-import-panel details { border: 1px solid #d9dee6; border-radius: 8px; margin: 10px 0; padding: 10px; }
+.step3-import-panel summary { cursor: pointer; font-weight: 600; }
+.step3-import-panel .warning { white-space: pre-wrap; }
+.step3-import-panel ul { padding-left: 1.5rem; }
+.step3-import-panel li { margin: .3rem 0; overflow-wrap: anywhere; }
+.step3-import-panel iframe { width: 100%; max-width: 100%; border: 1px solid #d9dee6; border-radius: 8px; background: #fff; }
+.step3-block-review { max-height: 560px; overflow-y: auto; overscroll-behavior: contain; }
+.step3-block-review .section-editor { margin: 10px 0; padding: 10px; }
+.step3-block-review .field textarea { min-height: 76px; resize: vertical; }
+.step3-confirm { display: flex !important; flex-direction: row !important; align-items: flex-start; gap: 10px; font-size: .9rem; }
+.step3-confirm input { margin-top: 5px; flex: none; }
+.project-paper .block-caption { color: #576573; white-space: pre-wrap; font-size: .84em; line-height: 1.55; break-inside: auto; overflow-wrap: anywhere; margin: .25rem 0 .75rem; }
+@media print { .step3-import-panel, .step3-source-compare, .step3-block-review { display:none !important; } }
