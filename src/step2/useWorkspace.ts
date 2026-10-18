@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { blankProject, cloneProject, isProjectDocument, newIdentifier, type ImageAsset, type ProjectDocument } from './model.ts';
+import { blankProject, cloneProject, documentAssetIds, isProjectDocument, newIdentifier, type ImageAsset, type ProjectDocument } from './model.ts';
 import { ACTIVE, deleteDocument, initialize, listDocuments, openDatabase, readAssets, readDocument, readMeta, saveDocument, setActive, writeTransaction } from './idb.ts';
 import { validateImage } from './images.ts';
 import { exportProject, importProject } from './projectFile.ts';
@@ -20,7 +20,7 @@ export function useWorkspace(){
     setStatus('저장 중');
     const snapshot=structuredClone(doc);
     const task=tail.current.catch(()=>{}).then(()=>saveDocument(db,snapshot));tail.current=task;
-    try{await task;if(draft.current?.id===doc.id){saved.current=Math.max(saved.current,seq);setStatus(saved.current===dirty.current?'저장됨':'저장 중');}}
+    try{await task;if(draft.current?.id===doc.id){saved.current=Math.max(saved.current,seq);setStatus(saved.current===dirty.current?'저장됨':'저장 중');await listDocuments(db).then(setDocuments);}}
     catch(e){setStatus('저장 실패');setError(e instanceof Error?e.message:'저장에 실패했습니다.');throw e;}
   },[]);
   const edit=useCallback((update:(doc:ProjectDocument)=>ProjectDocument)=>{
@@ -82,7 +82,9 @@ export function useWorkspace(){
   },[flush,setCurrent,refresh]);
   const duplicate=useCallback(async()=>{
     try{const db=ensure();await flush();if(!draft.current)return false;
-      const copy=cloneProject(draft.current,await readAssets(db,draft.current.id));
+      const currentAssets=await readAssets(db,draft.current.id);
+      if(documentAssetIds(draft.current).some(id=>!currentAssets.some(asset=>asset.id===id)))throw new Error('원본 이미지가 누락되어 안전하게 복제할 수 없습니다.');
+      const copy=cloneProject(draft.current,currentAssets);
       await writeTransaction(db,copy.document,copy.assets,[],{[ACTIVE]:copy.document.id});setCurrent(copy.document,copy.assets);await refresh();return true;
     }catch(e){setError(e instanceof Error?e.message:'문서 복제 실패');return false;}
   },[flush,setCurrent,refresh]);

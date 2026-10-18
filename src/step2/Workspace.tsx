@@ -83,7 +83,7 @@ export default function Workspace({onLegacy}:Props){
           </>}
         </section>
         {doc&&<>
-          <section className="panel"><div className="panel-heading project-heading-row"><h2>문서 정보</h2><span className="save-chip" role="status" aria-live="polite">{w.status}</span></div>
+          <section className="panel"><div className="panel-heading project-heading-row"><h2>문서 정보</h2><span className="save-group"><span className="save-chip" role="status" aria-live="polite">{w.status}</span><button className="text-button" disabled={!editable} onClick={()=>void operation(()=>w.flush())}>지금 저장 / 재시도</button></span></div>
             <div className="form-grid">
               <label className="field field-wide">문서함 이름<input disabled={!editable} value={doc.name} onChange={e=>editDoc(d=>({...d,name:e.target.value}))}/></label>
               <label className="field field-wide">출력 제목<input disabled={!editable} value={doc.content.title} onChange={e=>editDoc(d=>({...d,content:{...d.content,title:e.target.value}}))}/></label>

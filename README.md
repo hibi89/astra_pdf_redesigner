@@ -38,6 +38,11 @@ React / TypeScript / Vite / CSS, 기본 로컬 개발 주소 `127.0.0.1`만 바�
 - [ ] 빈 섹션 및 작성자: 미리보기/인쇄 양쪽에서 숨김
 - [ ] Chrome / Edge 인쇄 옵션과 페이지 나눔 확인
 
-## 자동 검증 근거 (2026-10-18)
 
-GitHub Actions의 Ubuntu Node 22에서 단위 테스트 5/5, TypeScript + Vite 빌드, Chrome 실제 브라우저 검증과 A4 PDF 15페이지 출력이 확인되었습니다. 상세 로그: [Run #39128155552](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39128155552). 브라우저 시나리오 소스는 `tests/browser-smoke.mjs`입니다. 사용자 Windows Chrome/Edge 인쇄 화면과 학원 첨부 여부는 별도 확인이 필요합니다.
+## STEP 2 기능 브랜치 작업 안내 (2026-10-18, **통합 테스트 미검증**)
+
+작업 브랜치 `feature/step2-full-20261018`에서 문서함, 섹션·블록 편집, PNG/JPEG/WebP 이미지, IndexedDB 자동 저장, 여러 문서 관리, `.localdoc.json` 내보내기/가져오기, 컴팩트 리포트 테마 소스를 구현했습니다. 이 코드는 **빌드·Chrome 통합검증 완료 전이므로 main의 STEP 1 앱과 구분**합니다. 자세한 검증 내역은 [STEP 2 검증 기록](docs/STEP2_IMPLEMENTATION_STATUS_2026-10-18.md)을 보세요.
+
+소스 동작 예상 흐름: `npm install` → `npm test` → `npm run build` → `npm run dev`. 프로젝트 가져오기는 **현재 문서를 덮어쓰지 않고 새 문서로 추가**합니다. 100MiB 이하 `.localdoc.json` 파일의 이미지 데이터는 파일에 포함되며, **암호화되지 않으므로 별도 보안 저장**하세요. Web Locks 지원 브라우저에서는 한 탭만 편집하도록 제한합니다. Windows/Edge 인쇄 품질은 별도 검증이 필요합니다.
+
+이미지 개별 파일은 10MiB·2,000만 픽셀 이하이며 PNG/JPEG/WebP만 사용합니다. 원본 이미지의 방향·화질은 변경하지 않습니다. 문서함은 IndexedDB(origin/브라우저 프로필 단위)에 저장되므로 브라우저 사이트 데이터를 지우면 소실될 수 있습니다. STEP 1의 `localStorage` 원본은 자동 삭제하지 않습니다.
