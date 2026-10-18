@@ -6,7 +6,7 @@ export type ImageSize = 'small' | 'medium' | 'large';
 export interface PdfBlockOrigin { page:number; x:number; y:number; width:number; height:number }
 export type ContentBlock =
   | { id: string; kind: 'heading' | 'paragraph' | 'caption'; text: string; origin?:PdfBlockOrigin }
-  | { id: string; kind: 'image'; assetId: string; caption: string; alignment: Alignment; size: ImageSize };
+  | { id: string; kind: 'image'; assetId: string; caption: string; alignment: Alignment; size: ImageSize; origin?:PdfBlockOrigin };
 export interface DocumentSection { id: string; title: string; blocks: ContentBlock[] }
 export interface ProjectDocument {
   schemaVersion: 2;
@@ -91,12 +91,12 @@ export function isProjectDocument(value: unknown): value is ProjectDocument {
             !['small', 'medium', 'large'].includes(String(block.size))) return false;
       } else {
         if (!['paragraph', 'heading', 'caption'].includes(String(block.kind)) || !text(block.text)) return false;
-        if ('origin' in block) {
-          if (!record(block.origin) || !Number.isInteger(block.origin.page) || (block.origin.page as number)<1 || (block.origin.page as number)>1000 ||
-              !['x','y','width','height'].every(key=>typeof (block.origin as Record<string,unknown>)[key]==='number' &&
-              Number.isFinite((block.origin as Record<string,number>)[key]) && (block.origin as Record<string,number>)[key]>=0 &&
-              (block.origin as Record<string,number>)[key]<=100000)) return false;
-        }
+      }
+      if ('origin' in block) {
+        if (!record(block.origin) || !Number.isInteger(block.origin.page) || (block.origin.page as number)<1 || (block.origin.page as number)>1000 ||
+            !['x','y','width','height'].every(key=>typeof (block.origin as Record<string,unknown>)[key]==='number' &&
+            Number.isFinite((block.origin as Record<string,number>)[key]) && (block.origin as Record<string,number>)[key]>=0 &&
+            (block.origin as Record<string,number>)[key]<=100000)) return false;
       }
     }
   }
