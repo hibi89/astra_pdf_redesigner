@@ -166,3 +166,16 @@
 8. **원본/보안:** STEP1 v1 localStorage, V2 사용자 IndexedDB, 원본 지침 및 이미지·TXT 보존. 테스트는 합성 파일/임시 Chrome 사용자 디렉터리만 사용; 실제 사용자 데이터 변경·외부 전송 없음.
 9. **다음 1단위:** V1 최초 마이그레이션 중 실제 IDB transaction abort를 강제하여 marker·doc·원본 데이터 무손실/재시도 성공을 검증. 별도 사용자 Windows/Edge 인쇄·시각 수용 이후 main 병합 재판단.
 10. **진행률/기준:** 2026-10-19 01:19 KST, STEP2 약 96%, 전체 7단계 동등가중 약 28~29% (기간·난도 비반영 비공식 추정). 5%p 이상 증가나 단계 완료 시 별도 알림.
+
+
+## 최신 인수인계 — 2026-10-19 01:29 KST (STEP2 최초 migration 원자적 rollback)
+1. **목표/범위:** Astra PDF Redesigner p5, 최종 기존 PDF 본문 보존·디자인 재조판. STEP2 React/TS/Vite/IndexedDB 개인 문서 제작기. STEP3 PDF 실제 가져오기 미착수.
+2. **변경:** `tests/step2-cold-migration.mjs` 신규 fault 모드 `STEP2_INJECT_MIGRATION_ABORT=1` 및 `.github/workflows/ci.yml` 별도 실행 추가. 실제 Chrome에서 v1 선존재+초기 migration `documents+meta` IDB transaction을 `abort()`; 실패 이후 새로고침으로 재시도 검증. `tests/step2-browser.mjs` 저장 성공 뒤 버튼 활성화 대기 조건만 보강. **앱 기능 소스 변경 없음**.
+3. **실제 검증:** [GitHub Actions #39145149408](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39145149408) **SUCCESS**, SHA `a5009a76499a983aa4566adabddabf862c9e839b`. 실패 직후 V2 문서 0, 완료 marker/ACTIVE 없음, V1 원본 바이트 동일, 오류 안내 PASS. 1회 재시도 시 정확한 V2 원문/서식 복원 및 marker/active 생성, 추가 reload 시 중복 문서 0 PASS. Node16/16, TS/Vite build, STEP1 Chrome PDF15p 및 STEP2 기존 PNG/JPEG/WebP/JSON·다중 탭·긴 캡션 전체 회귀 PASS.
+4. **현재 완료·미완료:** STEP2 핵심 앱 기능 및 예정된 Linux Chrome E2E 항목 대부분 통과. **STEP2 최종 수용·main 기능 병합 HOLD**, 사용자 Windows Chrome/Edge A4 출력·한글 폰트·이미지 레이아웃·키보드 수동 검수 남음. STEP3~7 미착수.
+5. **발견 오류·원인·대안:** 초기 CI #39144986696은 기존 화면 전환 E2E에서 save-chip 저장됨 표시 뒤 버튼 disabled 해제가 늦어지는 타이밍 실패(앱 데이터 손상 아님). 테스트에서 disabled=false 기다린 후 click하게 수정, 최종 run 성공. 브라우저 임시 프로필 cleanup warning은 테스트 데이터 영역만 관련.
+6. **저장소/브랜치/SHA/위치:** `hibi89/astra_pdf_redesigner`, `feature/step2-full-20261018` 코드 SHA `a5009a76499a983aa4566adabddabf862c9e839b`; `tests/step2-cold-migration.mjs`, `tests/step2-browser.mjs`, `.github/workflows/ci.yml`, `docs/STEP2_FINAL_REQUIREMENTS_AUDIT_2026-10-19.md`. main에는 기존 STEP1 소스만.
+7. **테스트 환경/배포:** GitHub Actions Ubuntu Node22+Chrome, `npm install`, `npm test`, `npm run build`, `npm run dev` localhost. Vercel/Production 미배포.
+8. **원본·보안:** 사용자 v1 localStorage/v2 IndexedDB·원본 설계 파일·원본 지침 보존. 실패 주입은 합성 데이터·임시 Chrome 프로필에서만 실행; 실제 문서 변경 없음/외부 API 호출 없음.
+9. **다음 1단위/완료 기준:** 사용자 Windows Chrome/Edge에서 STEP1 15p PDF/STEP2 한글·PNG/JPEG/WebP·페이지 나눔·프로필 import 수동 수용용 체크리스트 마련. 사용자 테스트 결과 확인 후 STEP2 수용/기능 main 병합 여부 결정. 수동 검증 전 완료·병합 주장 금지.
+10. **진행률/시각:** 2026-10-19 01:29 KST, STEP2 약 97~98% 추정, 전체 7단계 동등비중 약 28~29% (비공식·가중/시간 미반영). CI #39145149408 success·검증 SHA `a5009a76499a983aa4566adabddabf862c9e839b` 로그 확인.
