@@ -64,3 +64,11 @@ git merge --no-commit --no-ff "$FEATURE_SHA"
 - 다음 1단위: 사용자 수용 범위/남은 Windows Edge 시각 검수에 대한 결정을 받고, 병합 승인 후 **최신 main+feature HEAD 재검사, 실제 main 병합 및 main CI 성공** 확인. 그 전 STEP3 미착수, main 직접 변경 금지.
 
 **원본 `docs/ASTRA_ORIGINAL_ROADMAP.txt`, 설계 PNG, STEP2 지침 TXT, 사용자 로컬 자료는 변경하지 않았다.**
+
+
+## 2026-10-19 — Draft PR #2 개설 및 최종 승인 게이트
+- [Draft Pull Request #2](https://github.com/hibi89/astra_pdf_redesigner/pull/2): `feature/step2-full-20261018` → `main`. **open / draft=true / merged=false**, PR 생성 직후 GitHub REST 재조회 `mergeable=true`, `mergeable_state=clean` (당시 기준 main `e9044998f6f05cb41d13e339e6e8424e37ef62bb`, head `d94fdd831ce53b3afb4e02eea640c93c3209cc94`).
+- PR 제출 내용은 범위·데이터 원본 보호·자동 검사·Linux Edge와 Windows Edge 검증의 차이·Windows 실사용 검수 미완료·merge 승인 체크리스트 포함. PR을 **Draft로 남겨두었으며 실제 main에 기능 병합/푸시하지 않음**.
+- 앞선 격리 병합 CI [#39150537369](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39150537369)은 **이전 main `e35e5dfe...` / feature `8d9fdb1a...` 쌍**에서 성공한 기록. 새 PR HEAD 쌍의 테스트가 새로 성공한 것으로 쓰면 안 됨. 현재 PR GitHub mergeable=clean은 Git 충돌 여부 정보이지 Chrome·Edge 전체 회귀 PASS를 자동 증명하지 않음.
+- 실제 병합 전 필요한 추가 결정: (1) 미검증 Windows Edge/장문·큰 이미지·키보드 항목을 실제 수동 확인할지, 남은 위험을 사용자가 명시적으로 수용할지, (2) 사용자 **main 병합 명시적 승인**. 둘 다 충족 후 최신 PR base/head를 고정해 `step2-merge-preflight` 및 main 병합 전 검증을 다시 수행하고 병합 후 main CI PASS까지 기록.
+- 현재 STEP2 구현·자동 검증 약 99% 추정, 전체 동일 비중 로드맵 약 28~29%. PR 생성만으로 단계 완료나 전체 진행률 상향하지 않음. STEP3 미착수.
