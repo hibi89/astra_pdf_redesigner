@@ -141,3 +141,11 @@
 - 유의: Chrome test 종료에서 합성 임시 프로필 삭제 `ENOTEMPTY` 경고 발생. **검증 PASS와 분리**하여 CI 완료 success, runner 임시 디렉터리 정리 경고는 기록. 기능 데이터/사용자 문서와 무관.
 - **남은 수용 항목:** 새로운 Chrome 프로필 간 JSON 파일 실물 내보내기→가져오기 E2E, 사용자의 Windows Chrome/Edge A4 인쇄/한글·시각 검수, 초기 migration 실제 트랜잭션 실패 주입은 별도 미검증.
 - 상태 STEP2 **약 95% 비공식 추정**, 전체 7단계 단순 동일비중 환산 **약 28~29%**. 진도 유의미 상승 기준(5%p) 미달. **main STEP2 병합 HOLD**; STEP3~7 미착수. 다음 `ㄱ`: 독립 Chrome 프로필 JSON 이식/복원 검증.
+
+
+## 2026-10-19 01:19 KST — STEP2 Chrome 별도 프로필 간 JSON 프로젝트 이식 검증 PASS
+- 앱 코드 변경 없음. `feature/step2-full-20261018`의 신규 `tests/step2-cross-profile.mjs`와 Actions CI 연결. [GitHub Actions `39144399956`](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39144399956) **SUCCESS** (검증 코드 SHA `17f2e65e1873b4c75dc484cc7c6e11965a29f5ff`; Node 단위 16/16, TS/Vite 빌드, STEP1/2 기존 Chrome 회귀 PASS).
+- **프로필 A:** 별도 Chrome 사용자 디렉터리에서 synthetic 본문·메타/compact 디자인·원본 PNG(40×70)·WebP(84×36) 2개 저장, UI에서 실제 `.localdoc.json` 다운로드; 파일 내 Base64와 DB 원본 이미지 bytes 일치 확인.
+- **프로필 B:** 프로필 A와 독립된 Chrome 사용자 디렉터리에서 빈 문서만 존재함을 먼저 확인. CDP `DOM.setFileInputFiles`로 A가 다운로드한 **동일 실물 파일**을 B의 프로젝트 가져오기 파일 입력창에 전달하여 앱 import. 기존 B 문서 보존, 원문·메타·디자인·이미지 bytes/순서/규격 정확 복원·모든 doc/section/block/asset ID 새로 발급·참조 오류 없음 PASS. 새로고침 후 유지·A4 PDF 본문·이미지 2개 포함 PASS.
+- 이전 검증 완료: 기존 STEP1 v1 cold-start 마이그레이션, 저장 실패 복원, 이미지 원자적 교체, 멀티탭 Web Locks, 긴 캡션·A4 페이지 나눔 등. **아직 미검증:** V1→V2 **초기 migration transaction 강제 abort/원본·marker rollback**, Windows Chrome/Edge 인쇄·한글/시각 수동 검수와 전체 접근성.
+- **상태:** STEP2 주요 자동 수용 증거 대부분 완료, 진행률 **약 96%**(비공식 추정). 전체 7단계 단순 동등가중 **약 28~29%**, 5%p 유의미 상승 아님. `main` 기능 STEP1 유지, STEP2 병합 HOLD, STEP3~7 미착수. 다음 `ㄱ`은 초기 migration 쓰기 실패 주입·복구 검사 1단위.
