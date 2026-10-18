@@ -89,7 +89,7 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
     const detected=page.imageRecovery?.detected??(page.imageDetected?1:0);
     const omitted=Math.max(0,detected-images.length);
     if(detected>0){
-      warnings.push(page.number+'페이지 이미지 '+detected+'건 감지, '+images.length+'건 PNG 재구성, '+omitted+'건 미복원. 원본 비트스트림이 아니라 PDF.js가 디코딩한 픽셀을 PNG로 재구성하므로 색상·마스크·배치를 반드시 대조하세요.');
+      warnings.push(page.number+'페이지에 PDF 이미지가 감지됐습니다. '+detected+'건 중 '+images.length+'건 PNG 재구성, '+omitted+'건 미복원. 원본 비트스트림이 아니라 PDF.js가 디코딩한 픽셀을 PNG로 재구성하므로 색상·마스크·배치를 반드시 대조하세요.');
       if(omitted)warnings.push(page.number+'페이지 미복원 이미지 '+omitted+'건은 새 PDF에서 누락될 수 있습니다. 별도로 확인하고 수동 보완하세요.');
     }
     for(const problem of page.imageRecovery?.problems??[])warnings.push(page.number+'페이지 PDF 이미지 제한/오류: '+problem.slice(0,140));
