@@ -78,3 +78,11 @@
 - 새로고침 복구 PASS. 실패 유도 제거 후 같은 이미지 재교체 성공 → 참조 업데이트, 이전 asset 제거, 고아 이미지 없음, 새로고침 후 출력 미리보기 정상 PASS.
 - [GitHub Actions 39139965821](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39139965821) **success**. `npm test` 16/16, `npm run build` PASS, STEP1 Chrome PDF 15페이지, STEP2 PNG/JPEG/WebP/프로젝트 JSON/문서 전환/실패 후 백업·재시도 회귀 PASS.
 - 잔여 작업: 큰 이미지와 긴 캡션 PDF 페이지 경계, 여러 탭 쓰기 잠금 검증, 사용자 Windows Chrome/Edge 수동 확인. STEP2 약 90%는 추정치이며 최종 완료·main 병합 아님. STEP3 미착수.
+
+
+## 2026-10-19 00:29:24 KST — A4 페이지 경계/고해상도 이미지/긴 캡션 검증
+- 코드 SHA `3173098c0df9d210cd8d762b28d09a36b5298f73`. 사용자 데이터 없는 Chrome E2E 추가, 앱 코드/CSS 무변경. **1200×2500px 세로 이미지** + 선행 37줄 후 A4 인쇄에서 PDF 이미지 존재·짧은 캡션과 이미지 동일 페이지·본문 첫/마지막 표지 존재 PASS.
+- 캡션 190줄로 교체한 A4 PDF에서 페이지 추가 생성, 긴 캡션 시작/끝·첫/끝 행, 앞선 본문 표지 모두 보존 및 단어 좌표들이 page bounds 안에 있는지 `pdftotext -bbox-layout` 기반 검사 PASS.
+- [Actions 39140653462](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39140653462) **success**: 16/16 unit PASS, TS/Vite build PASS, Chrome STEP 1 15p PDF + STEP2 저장·이미지·JSON/실패 복구 회귀 PASS.
+- 남은 것은 실제 2개 탭 Web Locks 보호 E2E, 사용자 Windows/Edge 수동 저장·한글 글꼴/미관 검수. 테스트는 텍스트/이미지 포함 및 좌표 경계를 확인했지 픽셀 레벨 이미지 왜곡·겹침까지 포괄하지 않음.
+- STEP2 추정 약 92%, 전체 7단계 단순 동일 비중 약 28%. **전체 STEP2 완료/main 병합 아님**. 다음 `ㄱ`에서 멀티탭 검증.
