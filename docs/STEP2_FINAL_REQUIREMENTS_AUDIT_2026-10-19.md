@@ -70,3 +70,13 @@
 - Chrome B A4 PDF에서 문자열 표지와 내장 이미지 2개 확인 PASS (시각적 픽셀 검수는 아님).
 - [GitHub Actions #39144399956](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39144399956) **SUCCESS**, 코드 SHA `17f2e65e1873b4c75dc484cc7c6e11965a29f5ff`; 단위 16/16, TS/Vite 빌드, STEP1/2 기존 Chrome 회귀 및 신규 cross-profile 검사 PASS.
 - **잔여:** 초기 STEP1→STEP2 migration 트랜잭션 실패 주입·원자적 rollback 증거, 사용자 Windows Chrome/Edge A4·한글·시각·입력 수동 검수. **STEP2 최종 완료/main 병합 HOLD**. 추정 STEP2 약 96%, 전체 동등 7단계 약 28~29%; 이전 대비 5%p 상승 미만.
+
+
+## 2026-10-19 01:29 KST — 최초 STEP1 마이그레이션 강제 abort·원본/marker 롤백 검증
+- `tests/step2-cold-migration.mjs`에 `STEP2_INJECT_MIGRATION_ABORT=1` 테스트 모드 추가. **사용자 데이터가 아닌 합성 V1 원본**을 가진 신규 Chrome 프로필에서 실제 IDB `documents+meta` 마이그레이션 트랜잭션의 `put` 작업을 큐에 넣은 뒤 **동일 트랜잭션을 `abort()`**하여 원자적 롤백 검증.
+- 실패 직후 DB 문서 **0건**, 완료 marker **없음**, ACTIVE **없음**, V1 `localStorage` 원본 JSON 바이트 **불변** PASS. 화면 저장 오류 안내 확인.
+- 페이지 새로고침으로 1회 실패 주입 제거 뒤 자동 migration 재수행 → 문서/섹션4/원문/메타/디자인 보존·정상 marker/ACTIVE 생성 PASS. 추가 새로고침 이후 **단일 문서 유지**·marker/원문/IDs 불변 PASS.
+- `.github/workflows/ci.yml`은 정상 cold-start 실행 뒤 실패 주입 모드를 따로 실행. 기존 `tests/step2-browser.mjs`의 저장 재시도 직후 화면 전환 버튼 활성화를 기다리는 검증 동기화 보완(앱 기능 코드 변경 없음).
+- [GitHub Actions #39145149408](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39145149408): **SUCCESS**, 검증 코드 SHA `a5009a76499a983aa4566adabddabf862c9e839b`. 단위 **16/16 PASS**, TypeScript/Vite 빌드 PASS, 기존 Chrome STEP1 15p PDF·STEP2 이미지/JSON·저장복구/멀티탭/프로필 A→B 이식 회귀와 신규 migration abort/재시도 PASS.
+- **최종 수용·main 병합 HOLD:** 사용자 Windows Chrome/Edge에서 A4 PDF 저장·한글 글꼴 및 페이지/이미지 레이아웃·키보드 사용성 수동 검증은 미완료. 모든 종류의 실제 OS 전원 장애 및 브라우저 저장소 제한 환경을 검증한 것은 아님.
+- STEP2 자동 검증 기준 추정 **약 97~98%**, 전체 7단계 단순 동일비중 **약 28~29%**(시간·난도 미반영). 다음 한 단위는 사용자 환경 수용 체크리스트 제공 및 테스트 결과 접수/필요시 수정과 `main` 병합 판단.
