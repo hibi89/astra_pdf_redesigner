@@ -28,7 +28,7 @@ export function useWorkspace(){
     setStatus('저장 중');
     const snapshot=structuredClone(doc);
     const task=tail.current.catch(()=>{}).then(()=>saveDocument(db,snapshot));tail.current=task;
-    try{await task;if(draft.current?.id===doc.id){saved.current=Math.max(saved.current,seq);setStatus(saved.current===dirty.current?'저장됨':'저장 중');await listDocuments(db).then(setDocuments);}}
+    try{await task;if(draft.current?.id===doc.id){saved.current=Math.max(saved.current,seq);setStatus(saved.current===dirty.current?'저장됨':'저장 중');await listDocuments(db).then(setDocuments);setError('');}}
     catch(e){setStatus('저장 실패');setError(e instanceof Error?e.message:'저장에 실패했습니다.');throw e;}
   },[]);
   const edit=useCallback((update:(doc:ProjectDocument)=>ProjectDocument)=>{
