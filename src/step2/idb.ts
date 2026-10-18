@@ -85,8 +85,17 @@ export async function initialize(db:IDBDatabase):Promise<{warning?:string}>{
     const doc=migrateStep1Document(parsed);
     const tx=db.transaction([DOCS,META],'readwrite');const done=complete(tx);
     const meta=tx.objectStore(META);
+    const activeBefore=meta.get(ACTIVE);
     const check=meta.get(MIGRATION);
-    check.onsuccess=()=>{if(!check.result){tx.objectStore(DOCS).put(doc);meta.put(true,MIGRATION);meta.put(doc.id,ACTIVE);}};
+    check.onsuccess=()=>{
+      if(!check.result){
+        tx.objectStore(DOCS).put(doc);
+        meta.put(true,MIGRATION);
+        // Preserve an existing STEP 2 working document when STEP 1 is first
+        // opened later. Legacy import must not steal the active document.
+        if(!activeBefore.result)meta.put(doc.id,ACTIVE);
+      }
+    };
     await done;
   }
   const list=await listDocuments(db);
