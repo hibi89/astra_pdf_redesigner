@@ -61,3 +61,12 @@
 - [Actions #39138352449](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39138352449) **success** — 단위 16/16 PASS, TS/Vite build PASS, STEP 1 Chrome 15-page PDF PASS, STEP 2 JPEG/WebP·PNG·저장·백업·PDF·문서 전환 테스트 PASS.
 - 중간 실행 `39138141905`, `39138228608`은 두 번째 JSON 다운로드 파일 탐색 타임아웃. 파일 이름/중복 다운로드 정책에 의존하지 않고 다운로드 직전 생성 JSON Blob을 잡아 검사하는 방식으로 테스트 하네스 수정. 최종 성공 로그 확인.
 - 지원범위/한계: PNG/JPEG/WebP 이미지 포함 PDF는 확인; 고해상도·장문 캡션 페이지 분할의 육안·픽셀 품질, 저장 실패 주입, 멀티탭 및 Windows/Edge 인쇄는 미검증. STEP 2 전체 완료·main 병합은 아직 대기. STEP 3 미착수.
+
+
+## 2026-10-19 00:10:27 KST — QuotaExceededError 실제 브라우저 주입 및 복구
+- 테스트 `tests/step2-browser.mjs`: 실제 Chrome IndexedDB `documents` 저장 `readwrite` 트랜잭션을 1회 `QuotaExceededError`로 실패 주입. 단위 모킹 통과가 아닌 실제 브라우저 테스트.
+- 실패 시 기존 DB persisted 문서 불변, 최신 편집 원문 미리보기·React 메모리 보존, `저장 실패` 상태·경고 및 이탈 보호 PASS.
+- 오류 중 JSON 응급 백업(원문·이미지 포함) PASS, 수동 `지금 저장 / 재시도` 후 IndexedDB 반영·새로고침 복원·구식 오류 안내 소거 PASS.
+- `src/step2/useWorkspace.ts` 저장 성공 뒤 `setError('')`로 기존 오류 배너 정리. 앱 기타 기능/사용자 기존 저장키 미변경.
+- [CI 39139215112](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39139215112) **success** — 테스트 16/16, 빌드 PASS, Chrome STEP1 15p PDF 및 기존 STEP2 이미지/JSON/인쇄 스모크 회귀 PASS. 기능 SHA `9339adb319a78192a0dda5ae437de248e9a056ca`.
+- 미검증: IndexedDB 이미지 교체 트랜잭션 강제 중단·롤백, 여러 탭 충돌, 대형 이미지와 긴 캡션 인쇄, Windows/Edge 수동 확인. **main 병합 및 STEP 2 전체 완료 유보**. 실험은 고의 실패 1회이며 모든 디스크 부족 상태를 포괄하지 않음.
