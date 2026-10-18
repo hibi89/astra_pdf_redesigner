@@ -14,3 +14,17 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npm test
       - run: npm run build
+      - name: Chrome print and persistence smoke
+        run: |
+          CHROME_BIN=$(command -v google-chrome || command -v chromium || true)
+          test -n "$CHROME_BIN"
+          command -v pdfinfo
+          command -v pdftotext
+          npm run dev -- --port 4173 >/tmp/astra-vite.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:4173 >/dev/null; then break; fi
+            sleep 0.5
+          done
+          CHROME_PATH="$CHROME_BIN" node tests/browser-smoke.mjs
