@@ -98,4 +98,69 @@ try{
   await eventually(()=>evaluate("document.querySelector('.project-paper .section-body')?.textContent"),x=>x===['STEP2_BEGIN 한글 원문','','123% STEP2_END'].join('\n'));
   console.log('PASS STEP2: simultaneous document switch rejected; prior draft and active document survive reload');
 
+  // Generate synthetic landscape JPEG and portrait WebP in Chrome itself.
+  // Test the real browser decoders, persistence and exact original-file bytes.
+  const formats=[
+    {name:'landscape-test.jpg',mime:'image/jpeg',width:32,height:16},
+    {name:'portrait-test.webp',mime:'image/webp',width:16,height:32},
+  ];
+  for(const fixture of formats){
+    const existing=await evaluate("document.querySelectorAll('.project-paper figure img').length");
+    const expr=[
+      '(async()=>{',
+      'const canvas=document.createElement("canvas");',
+      'canvas.width='+fixture.width+';canvas.height='+fixture.height+';',
+      'const context=canvas.getContext("2d");',
+      'context.fillStyle="#1577aa";context.fillRect(0,0,canvas.width,canvas.height);',
+      'context.fillStyle="#e34a88";context.fillRect(2,2,7,7);',
+      'const blob=await new Promise(resolve=>canvas.toBlob(resolve,'+JSON.stringify(fixture.mime)+',0.82));',
+      'if(!blob||blob.type!=='+JSON.stringify(fixture.mime)+')throw Error("browser unsupported image MIME");',
+      'const file=new File([blob],'+JSON.stringify(fixture.name)+',{type:blob.type});',
+      'const bytes=new Uint8Array(await blob.arrayBuffer());',
+      'const encoded=btoa(String.fromCharCode(...bytes));',
+      'const transfer=new DataTransfer();transfer.items.add(file);',
+      'const input=document.querySelector(".section-editor .add-block input[type=file]");',
+      'if(!input)throw Error("missing image input");',
+      'input.files=transfer.files;input.dispatchEvent(new Event("change",{bubbles:true}));',
+      'return encoded;',
+      '})()'
+    ].join('\n');
+    fixture.base64=await evaluate(expr);
+    await eventually(()=>evaluate("document.querySelectorAll('.project-paper figure img').length"),n=>n===existing+1);
+    await eventually(()=>evaluate("(()=>{const img=[...document.querySelectorAll('.project-paper figure img')].at(-1);return img&&img.complete?[img.naturalWidth,img.naturalHeight]:null;})()"),
+      dims=>dims?.[0]===fixture.width&&dims?.[1]===fixture.height);
+    await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),s=>s==='저장됨');
+  }
+  await reload();
+  await eventually(()=>evaluate("(()=>{const imgs=[...document.querySelectorAll('.project-paper figure img')];return imgs.length===3&&imgs.every(img=>img.complete&&img.naturalWidth>0)?imgs.map(img=>[img.naturalWidth,img.naturalHeight]):null;})()"),
+    dims=>dims?.some(([w,h])=>w===32&&h===16)&&dims?.some(([w,h])=>w===16&&h===32));
+  console.log('PASS STEP2: actual JPEG landscape and WebP portrait decode, IndexedDB reload and exact dimensions');
+
+  const savedFiles=new Set(readdirSync(dir).filter(name=>name.endsWith('.localdoc.json')));
+  await evaluate("[...document.querySelectorAll('button')].find(b=>b.textContent==='프로젝트 내보내기').click()");
+  const exportedName=await eventually(()=>readdirSync(dir).find(name=>name.endsWith('.localdoc.json')&&!savedFiles.has(name)));
+  const packageData=JSON.parse(readFileSync(join(dir,exportedName),'utf8'));
+  assert.equal(packageData.assets.length,3);
+  for(const fixture of formats){
+    const asset=packageData.assets.find(item=>item.originalName===fixture.name);
+    assert.ok(asset,'Missing image in JSON project backup: '+fixture.name);
+    assert.equal(asset.mimeType,fixture.mime);
+    assert.equal(asset.width,fixture.width);
+    assert.equal(asset.height,fixture.height);
+    assert.ok(Buffer.from(asset.base64,'base64').equals(Buffer.from(fixture.base64,'base64')),
+      'Backup modified original file bytes: '+fixture.name);
+  }
+  console.log('PASS STEP2: JPEG/WebP stored without modification and exported in JSON with exact bytes');
+
+  const multiPdf=join(dir,'jpeg-webp-a4.pdf');
+  const printed=await send('Page.printToPDF',{printBackground:false,preferCSSPageSize:true});
+  writeFileSync(multiPdf,Buffer.from(printed.data,'base64'));
+  assert.ok(execFileSync('pdfinfo',[multiPdf],{encoding:'utf8'}).includes('A4'));
+  assert.ok(execFileSync('pdftotext',[multiPdf,'-'],{encoding:'utf8'}).includes('STEP2_BEGIN'));
+  const imageOutput=execFileSync('pdfimages',['-list',multiPdf],{encoding:'utf8'});
+  const rasterRows=imageOutput.split('\n').filter(line=>/^\s*\d+\s+\d+\s+image\s/.test(line));
+  assert.ok(rasterRows.length>=3,'PDF embedded fewer than three PNG/JPEG/WebP image rasters');
+  console.log('PASS STEP2: Chrome A4 PDF embeds all three PNG/JPEG/WebP images');
+
+
 }finally{if(ws)ws.close();proc.kill('SIGTERM');await delay(300);rmSync(dir,{recursive:true,force:true});}
