@@ -51,3 +51,15 @@
 8. **원본/백업/보안:** 사용자 원본 `docs/ASTRA_ORIGINAL_ROADMAP.txt`, 원본 PNG 2종 및 `docs/ASTRA_STEP2_ORIGINAL_INSTRUCTIONS.txt` 보존. `astra-pdf-redesigner:current:v1` 기존 저장 데이터 삭제/수정 금지. 민감 문서 외부 전송 금지, 공개 저장소에 비밀 추가 금지.
 9. **다음 1단위/완료 기준:** JPEG/WebP·이미지 레이아웃·문서 전환/저장 경쟁·실패 복구 중 위험이 높은 부분을 골라 최소 테스트와 수정·CI 검증. 실제 Windows 검수는 별도. 그 후 main 병합 판단.
 10. **확인 시각/범위:** GitHub Actions run `39136882566` success, 2026-10-18 23:38:59 KST 종료·로그 검증. 기능 SHA `caa0747a5b6967393e05b1b704fe0aa5b3f6aa24`, 인수인계 문서/BOOK 최종 커밋은 별도 조회 후 확인.
+
+## 현재 인수인계 갱신 — 2026-10-18 23:47:43 KST
+1. **목표/용도/요구/기술:** 사용자의 PDF 원문 보존·새 디자인 재조판 최종 목표. STEP 2 개인 문서 제작기(React/Vite/IndexedDB); STEP 3 PDF 업로드·OCR 미착수.
+2. **완료 기능/결정:** STEP 2 feature의 문서·이미지/JSON 기능에 문서 변경 작업 동시 실행 방지 추가. `src/step2/mutationGate.ts`를 통해 다른 문서 변경 시작을 거절하고 작업 중 편집 비활성화; 실패 시 재시도 가능. 기존 STEP 1·v1 localStorage 원본 미변경.
+3. **테스트:** `npm test` **16/16 PASS**, `npm run build` PASS, Chrome 실제 실행에서 동일 턴의 복수 문서 전환 차단/원문·활성 문서 새로고침 유지, STEP 1 A4 PDF 15p·STEP 2 PNG/JSON/인쇄 스모크 PASS. 증거 [run 39137537886](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39137537886).
+4. **상태/중단:** 저장 경쟁 방어 1단위 구현·CI 검증 완료. STEP 2 전체 수용·main 병합은 아직 대기. STEP 3 미착수.
+5. **오류/원인/시도/대안:** 이전 구현은 `switchTo` 등의 비동기 동작 중 후속 변경 실행이 가능해 순서 역전 위험. 중복 요청 거부 게이트로 최소 해결, 실패 뒤 잠금 해제 단위테스트. JPEG/WebP·큰 이미지·멀티탭 및 저장 실패 주입까지 완료 주장 금지.
+6. **저장소/브랜치/SHA:** `hibi89/astra_pdf_redesigner` / `feature/step2-full-20261018` 기능 SHA `44d7be92f04be8ff4e1effeb9c16f271069cfe46`; main 기능은 STEP 1 유지. 주요 경로 `src/step2/mutationGate.ts`, `useWorkspace.ts`, `Workspace.tsx`, `tests/step2-mutation.test.ts`, `tests/step2-browser.mjs`.
+7. **Production/환경:** 배포 미적용(로컬 프로그램); 개발 `npm install`, `npm test`, `npm run build`, `npm run dev`, `127.0.0.1:5173`.
+8. **원본/백업/보안:** 기존 `docs/ASTRA_ORIGINAL_ROADMAP.txt`·PNG 2장·STEP 2 원본 지침 유지. localStorage v1·IndexedDB 사용자 문서 삭제/변경 금지, 외부 전송·토큰 없음.
+9. **다음 작업/승인:** JPEG/WebP와 이미지 출력 경계, 또는 IndexedDB 실패 복구 중 **다음 한 단위**를 테스트; 기존 자동 검증 유지 후 main 병합 검토. 실 Windows/Edge 검수는 사용자 수동으로 남음.
+10. **시각/검증 범위/문서 기준:** 2026-10-18 23:47:43 KST, run 39137537886 완료·로그 재조회, 기능 SHA `44d7be92f04be8ff4e1effeb9c16f271069cfe46`; 문서 HEAD·중앙 BOOK 커밋은 기록 후 재조회.
