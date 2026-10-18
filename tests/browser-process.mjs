@@ -32,26 +32,60 @@ export function launchBrowser(binary,profile,label='browser') {
   );
   return{
     child,
-    async devtools(timeoutMs=18000){
+    // Use the WebSocket path written by this exact browser into its own profile.
+    // Edge sometimes announces "DevTools listening" while /json/version hangs;
+    // HTTP discovery is unnecessary and was the source of the flaky timeout.
+    async connect(timeoutMs=35000){
       const file=join(profile,'DevToolsActivePort');
-      const until=Date.now()+timeoutMs;
-      let last='DevToolsActivePort not found';
-      while(Date.now()<until){
-        if(spawnError||!isAlive(child))throw diagnostic('exited before CDP was ready: '+last);
+      const deadline=Date.now()+timeoutMs;
+      let last='DevToolsActivePort not yet available';
+      let attempts=0;
+      while(Date.now()<deadline){
+        if(spawnError||!isAlive(child))throw diagnostic('exited before CDP WebSocket handshake: '+last);
         try{
           const record=readFileSync(file,'utf8').split(/\r?\n/);
-          const port=Number(record[0]);
-          if(!Number.isInteger(port)||port<1||port>65535)throw Error('invalid DevToolsActivePort');
-          const r=await fetch(`http://127.0.0.1:${port}/json/version`,{signal:AbortSignal.timeout(700)});
-          if(!r.ok)throw Error('HTTP '+r.status);
-          const info=await r.json();
-          if(typeof info.webSocketDebuggerUrl!=='string')throw Error('CDP endpoint missing');
-          console.log(`PASS BROWSER CDP READY: ${label} pid=${child.pid}, assigned-port=${port}`);
-          return info.webSocketDebuggerUrl;
+          const port=Number(record[0]?.trim());
+          const path=record[1]?.trim();
+          if(!Number.isInteger(port)||port<1||port>65535)throw Error('DevToolsActivePort has no valid port');
+          if(!/^\/devtools\/browser\/[a-zA-Z0-9-]+$/.test(path??''))throw Error('DevToolsActivePort has no browser WebSocket path');
+          const address=`ws://127.0.0.1:${port}${path}`;
+          attempts++;
+          const ws=new WebSocket(address);
+          try{
+            await new Promise((resolve,reject)=>{
+              let settled=false,timer;
+              const cleanup=()=>{
+                clearTimeout(timer);
+                ws.removeEventListener('open',onOpen);
+                ws.removeEventListener('error',onError);
+                ws.removeEventListener('close',onClose);
+              };
+              const succeed=()=>{
+                if(settled)return;
+                settled=true;cleanup();resolve();
+              };
+              const fail=message=>{
+                if(settled)return;
+                settled=true;cleanup();reject(Error(message));
+              };
+              const onOpen=()=>succeed();
+              const onError=event=>fail('CDP WebSocket error: '+String(event?.message??'connection failed'));
+              const onClose=event=>fail('CDP WebSocket closed before open: '+String(event?.code??'unknown'));
+              ws.addEventListener('open',onOpen);
+              ws.addEventListener('error',onError);
+              ws.addEventListener('close',onClose);
+              timer=setTimeout(()=>fail('CDP WebSocket handshake timed out'),Math.max(150,Math.min(1800,deadline-Date.now())));
+            });
+          }catch(error){
+            try{ws.close();}catch{/* already closed */}
+            throw error;
+          }
+          console.log(`PASS BROWSER CDP CONNECTED: ${label} pid=${child.pid}, assigned-port=${port}, attempts=${attempts}`);
+          return ws;
         }catch(error){last=error instanceof Error?error.message:String(error);}
-        await pause(140);
+        await pause(200);
       }
-      throw diagnostic('CDP startup timed out after '+timeoutMs+'ms: '+last);
+      throw diagnostic('CDP WebSocket startup timed out after '+timeoutMs+'ms, attempts='+attempts+': '+last);
     },
     async close(){
       if(!isAlive(child)){await exit;return;}

@@ -60,12 +60,7 @@ async function attach(){
   return{targetId,sessionId,send,evalJS,reload};
 }
 try{
-  const endpoint=await browserSession.devtools();
-  ws=new WebSocket(endpoint);
-  await new Promise((resolve,reject)=>{
-    ws.addEventListener('open',resolve,{once:true});
-    ws.addEventListener('error',reject,{once:true});
-  });
+  ws=await browserSession.connect();
   ws.addEventListener('message',event=>{
     const message=JSON.parse(event.data);
     if(message.id&&inflight.has(message.id)){

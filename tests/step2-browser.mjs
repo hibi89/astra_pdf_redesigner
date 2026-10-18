@@ -12,8 +12,7 @@ let ws;let seq=1;const pending=new Map();const delay=(ms)=>new Promise(resolve=>
 function request(method,params={},sessionId){return new Promise((resolve,reject)=>{const id=seq++;pending.set(id,{resolve,reject});ws.send(JSON.stringify({id,method,params,...(sessionId?{sessionId}:{})}));});}
 async function eventually(fn,check=(value)=>!!value,timeout=15000){const begin=Date.now();while(Date.now()-begin<timeout){try{const val=await fn();if(check(val))return val;}catch(e){if(!/context was destroyed|navigated or closed|Cannot find context/i.test(String(e)))throw e;}await delay(150);}throw new Error('Browser condition timeout');}
 try{
-  const endpoint=await browserSession.devtools();ws=new WebSocket(endpoint);
-  await new Promise((resolve,reject)=>{ws.addEventListener('open',resolve,{once:true});ws.addEventListener('error',reject,{once:true});});
+  ws=await browserSession.connect();
   ws.addEventListener('message',event=>{const m=JSON.parse(event.data);if(m.id&&pending.has(m.id)){const p=pending.get(m.id);pending.delete(m.id);if(m.error)p.reject(new Error(m.error.message));else p.resolve(m.result);}});
   const {targetId}=await request('Target.createTarget',{url});const {sessionId}=await request('Target.attachToTarget',{targetId,flatten:true});
   const send=(m,p)=>request(m,p??{},sessionId);

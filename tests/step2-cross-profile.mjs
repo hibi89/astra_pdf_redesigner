@@ -26,12 +26,7 @@ async function launch(label){
   let ws=null,seq=0,sessionId;
   const pending=new Map();
   try{
-    const endpoint=await browserSession.devtools();
-    ws=new WebSocket(endpoint);
-    await new Promise((resolve,reject)=>{
-      ws.addEventListener('open',resolve,{once:true});
-      ws.addEventListener('error',reject,{once:true});
-    });
+    ws=await browserSession.connect();
     ws.addEventListener('message',event=>{
       const m=JSON.parse(event.data);
       if(m.id&&pending.has(m.id)){

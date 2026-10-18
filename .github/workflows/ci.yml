@@ -44,7 +44,17 @@ jobs:
           CHROME_PATH="$CHROME_BIN" node tests/step2-cold-migration.mjs
           CHROME_PATH="$CHROME_BIN" STEP2_INJECT_MIGRATION_ABORT=1 node tests/step2-cold-migration.mjs
           CHROME_PATH="$CHROME_BIN" node tests/step2-cross-profile.mjs
-
+  # A new GitHub-hosted VM prevents leftover Chrome helpers and long-running
+  # profile cleanup from exhausting Edge browser resources.
+  edge-validation:
+    name: Microsoft Edge A4 PDF and IndexedDB
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - run: npm install --no-audit --no-fund
       - name: Microsoft Edge A4 print and IndexedDB smoke
         run: |
           set -euo pipefail
@@ -56,8 +66,8 @@ jobs:
           echo "Microsoft Edge executable: $EDGE_BIN"
           "$EDGE_BIN" --version
           if ! command -v pdfinfo >/dev/null || ! command -v pdftotext >/dev/null || ! command -v pdfimages >/dev/null; then
-            echo "::error::Poppler PDF inspection tools missing"
-            exit 1
+            sudo apt-get update -qq
+            sudo apt-get install -y poppler-utils
           fi
           npm run dev -- --port 4173 >/tmp/astra-vite-edge.log 2>&1 &
           SERVER_PID=$!

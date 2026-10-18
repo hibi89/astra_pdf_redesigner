@@ -16,8 +16,6 @@ let seq = 1;
 const pending = new Map();
 const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-async function devtools() {return session.devtools();}
-
 function request(method, params = {}, sessionId) {
   return new Promise((resolve, reject) => {
     const id = seq++;
@@ -44,12 +42,7 @@ async function eventually(action, check = (result) => Boolean(result), timeout =
 }
 
 try {
-  const wsUrl = await devtools();
-  ws = new WebSocket(wsUrl);
-  await new Promise((resolve, reject) => {
-    ws.addEventListener('open', resolve, { once: true });
-    ws.addEventListener('error', reject, { once: true });
-  });
+  ws = await session.connect();
   ws.addEventListener('message', (event) => {
     const value = JSON.parse(event.data);
     if (value.id && pending.has(value.id)) {

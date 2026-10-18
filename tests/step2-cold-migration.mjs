@@ -40,11 +40,7 @@ const source={
 };
 const original=JSON.stringify(source);
 try{
-  const endpoint=await browserSession.devtools();
-  ws=new WebSocket(endpoint);
-  await new Promise((resolve,reject)=>{
-    ws.addEventListener('open',resolve,{once:true});ws.addEventListener('error',reject,{once:true});
-  });
+  ws=await browserSession.connect();
   ws.addEventListener('message',event=>{
     const m=JSON.parse(event.data);
     if(m.id&&pending.has(m.id)){
