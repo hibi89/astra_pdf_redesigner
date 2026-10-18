@@ -41,7 +41,7 @@ React / TypeScript / Vite / CSS, 기본 로컬 개발 주소 `127.0.0.1`만 바�
 
 ## STEP 2 기능 브랜치 검증 현황 (2026-10-19, **Linux Chrome 통합검증 성공 / 최종 수용 전**)
 
-작업 브랜치 `feature/step2-full-20261018`에서 문서함, 섹션·블록 편집, PNG/JPEG/WebP 이미지, IndexedDB 자동 저장, 여러 문서 관리, `.localdoc.json` 내보내기/가져오기, 컴팩트 리포트 테마 소스를 구현했습니다. 이 기능 브랜치는 Ubuntu Node 22에서 **단위 테스트 16/16, TypeScript/Vite 빌드 및 실제 Chrome 통합검증**을 완료했습니다([Actions #39145149408](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39145149408)). 기존 STEP 1 저장 데이터의 cold-start 마이그레이션, 최초 마이그레이션 실패 시 원자적 롤백·재시도, 서로 다른 Chrome 프로필 간 `.localdoc.json` 이식과 이미지 원본 보존·A4 PDF 포함 여부도 자동 검증했습니다. **Windows Chrome/Edge 실제 인쇄·한글·시각·키보드 수동 검수는 아직 수행하지 않았습니다.** STEP 2 기능은 아직 `main`에 병합하지 않았습니다. 자세한 검증 내역은 [STEP 2 검증 기록](docs/STEP2_IMPLEMENTATION_STATUS_2026-10-18.md)을 보세요.
+작업 브랜치 `feature/step2-full-20261018`에서 문서함, 섹션·블록 편집, PNG/JPEG/WebP 이미지, IndexedDB 자동 저장, 여러 문서 관리, `.localdoc.json` 내보내기/가져오기, 컴팩트 리포트 테마 소스를 구현했습니다. 이 기능 브랜치는 Ubuntu Node 22에서 **단위 테스트 16/16, TypeScript/Vite 빌드 및 실제 Chrome 통합검증**을 완료했습니다([Actions #39148544554](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39148544554)). 이 CI부터 Chrome이 없으면 브라우저 검사를 건너뛰고 성공 처리하는 대신 필수 검사 실패로 판정합니다. 기존 STEP 1 저장 데이터의 cold-start 마이그레이션, 최초 마이그레이션 실패 시 원자적 롤백·재시도, 서로 다른 Chrome 프로필 간 `.localdoc.json` 이식과 이미지 원본 보존·A4 PDF 포함 여부도 자동 검증했습니다. **Windows Chrome/Edge 실제 인쇄·한글·시각·키보드 수동 검수는 아직 수행하지 않았습니다.** STEP 2 기능은 아직 `main`에 병합하지 않았습니다. 자세한 검증 내역은 [STEP 2 검증 기록](docs/STEP2_IMPLEMENTATION_STATUS_2026-10-18.md)을 보세요.
 
 소스 동작 예상 흐름: `npm install` → `npm test` → `npm run build` → `npm run dev`. 프로젝트 가져오기는 **현재 문서를 덮어쓰지 않고 새 문서로 추가**합니다. 100MiB 이하 `.localdoc.json` 파일의 이미지 데이터는 파일에 포함되며, **암호화되지 않으므로 별도 보안 저장**하세요. Web Locks 지원 브라우저에서는 한 탭만 편집하도록 제한합니다. Windows/Edge 인쇄 품질은 별도 검증이 필요합니다.
 
@@ -60,3 +60,7 @@ React / TypeScript / Vite / CSS, 기본 로컬 개발 주소 `127.0.0.1`만 바�
 ## Windows Chrome/Edge 수동 검수 (미실행)
 
 STEP 2 병합·완료 전 필요한 **원본 지침 §16의 21개 수동 검사**, 테스트용 별도 프로필 실행 명령, 실제 Windows A4 PDF/한글·이미지 확인 항목, 증거 양식 및 **main 병합 승인 게이트**는 [Windows STEP 2 수용 체크리스트](docs/STEP2_WINDOWS_ACCEPTANCE_AND_MERGE_GATE_2026-10-19.md)에 있습니다. 모든 수동 항목은 아직 **미실행**, STEP2 기능 브랜치는 `main`에 **미병합**입니다. 기존 사용자 브라우저 프로필/문서는 직접 검증용으로 변경하거나 삭제하지 마세요.
+
+## STEP 2 병합 전 코드·CI 점검
+
+[병합 전 코드·CI 점검 보고서](docs/STEP2_PREMERGE_CODE_CI_AUDIT_2026-10-19.md): `main`과 기능 브랜치 비교, 원본 STEP1 보호, Chrome 누락 시 CI 실패 처리, Windows Chrome 사용자 제공 단일 A4 PDF 부분 검증과 Edge/장문/이미지 수동 검수의 미완료 범위를 기록했습니다. `main` 병합과 STEP3 시작은 아직 보류 상태입니다.
