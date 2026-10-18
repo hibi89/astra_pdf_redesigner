@@ -40,3 +40,12 @@
 2. 실제 Chrome에서 `tests/browser-smoke.mjs`, `tests/step2-browser.mjs` 수행, 정확한 로그 기반 최소 수정.
 3. JPEG/WebP/가로세로 이미지·여러 페이지·긴 캡션·비정상 프로젝트, 탭 잠금, 빠른 문서 전환, 저장 실패 수동 확인.
 4. 완전한 테스트 후 기능 브랜치→main 병합, 최신 SHA·STATUS/HANDOFF/BOOK 재조회, 사용자 PC Chrome/Edge 최종 확인.
+
+
+## 2026-10-18 23:38:59 KST 후속 검증
+- 저장소 현재 Public 확인. GitHub Actions 이전 실패 run `39132721985` 재실행 시 러너 배정·npm install·14 테스트 PASS, `Workspace.tsx` 이미지 블록 유니온 타입 오류 8건으로 빌드 실패.
+- 타입 분기 수정·미사용 import 제거 commit `59628b9c3bb7a704f7b7079626b562dd1338c2ab`.
+- 후속 Chrome E2E 업로드 timeout 분석: 테스트 PNG의 IDAT CRC 불일치. 유효한 PNG fixture로 교체 commit `caa0747a5b6967393e05b1b704fe0aa5b3f6aa24`.
+- [Run #39136882566](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39136882566) **success**: 단위 14/14, TypeScript + Vite 빌드, 실제 Chrome STEP 1 회귀 및 A4 PDF 15p, STEP 2 저장·섹션 이동·PNG 원본·JSON import/export·이미지 PDF 스모크 PASS.
+- **미검증:** JPEG/WebP, 이미지 가로/세로/대형·긴 캡션 인쇄, 빠른 문서 전환과 저장 순서 경쟁, 저장 장애·다중 탭 충돌, 사용자 Windows/Edge. 단위/스모크 통과를 STEP 2 100%로 판정하지 않음.
+- `main`에는 STEP 2 기능 미병합. 다음 작업은 위험 높은 미검증 항목의 1단위 회귀 테스트·보강이며, 사용자 문서 사용 금지.
