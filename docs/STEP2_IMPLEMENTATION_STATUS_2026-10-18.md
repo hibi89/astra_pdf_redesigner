@@ -112,3 +112,9 @@
 - [GitHub Actions 39143261165](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39143261165) **success**, 기능 SHA `abb3d9425e72a2708306674176346727ef0ea710`: Node 테스트 16/16, TS/Vite 빌드, STEP1/2 기존 Chrome 회귀와 신규 cold-start 3 checks PASS.
 - Cleanup 지연: `ENOTEMPTY` synthetic temp-profile warning은 ephemeral Chrome 종료 비동기성 때문. 앱 기능 테스트는 별도 PASS, CI run success. 추후 cleanup 진단 시 동일 로그 참고.
 - **다음:** 별도 Chrome 프로필간 JSON export/import 검증. Windows/Edge 인쇄·한글/시각 수동 점검과 별도 migration 실패 롤백 주입은 남음. main STEP2 미병합. 추정 STEP2 95%, 전체 동등 7단계 약 28~29%.
+
+## 2026-10-19 01:19 KST — Chrome 프로필 A→B 실제 JSON 파일 왕복 이식
+- 기존 앱 코드 무변경, 신규 `tests/step2-cross-profile.mjs` 및 CI run 연결. 프로필 A와 B는 사용자 데이터 디렉터리가 별개인 Chrome 프로세스·DevTools CDP 세션.
+- A에서 합성 본문+PNG·WebP 저장·다운로드한 `.localdoc.json`의 파일 데이터를 그대로 B의 file input에 제공. B 기존 문서는 보존되고 import 문서의 텍스트·테마·메타·이미지 원본 바이트·치수·순서가 동일. 모든 document/section/block/asset ID는 새로 생성되고 누락 참조 없음. reload 및 A4 PDF 내 이미지 2개까지 PASS.
+- [CI #39144399956](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39144399956) **SUCCESS**, SHA `17f2e65e1873b4c75dc484cc7c6e11965a29f5ff`, Node 16/16, TS/Vite build, STEP1 15p PDF 및 이전 STEP2 저장/멀티탭/cold migration 회귀 PASS.
+- 미검증 migration transaction 실패 원자적 rollback 및 사용자 Windows Chrome/Edge 수동 인쇄·한글·시각. STEP2 약 96% 비공식 추정, main 기능 미병합. 다음 검증은 v1 cold migration 실패 주입·원본/marker rollback.
