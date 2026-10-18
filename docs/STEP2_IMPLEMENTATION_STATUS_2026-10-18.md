@@ -55,3 +55,9 @@
 - 구현: `src/step2/mutationGate.ts` 문서 변경 단일 실행(동시 요청은 명시적 거절). `useWorkspace` 편집 차단 및 변이 API 적용, `Workspace` 제어 비활성화. 원래 STEP 1과 데이터·저장소 키는 그대로 유지.
 - 자동 검증: [GitHub Actions run 39137537886](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39137537886) SUCCESS, **16/16 unit PASS**, TS/Vite build PASS. 실제 Chrome에서 동시에 서로 다른 문서를 여는 요청을 수행해 한 요청 거부/첫 요청 보존/새로고침 후 원문·활성 문서 지속 확인 PASS. STEP 1 A4 PDF 15p와 STEP 2 이미지/JSON/PDF 기존 E2E 회귀 PASS.
 - 코드 SHA `44d7be92f04be8ff4e1effeb9c16f271069cfe46`. **남음:** JPEG/WebP, 다양한 이미지 배치, 멀티탭 충돌, IndexedDB 저장 실패 주입·복구, Windows/Edge 수동 확인. STEP 2 전체 완료 아님, main 병합 전 추가 검토.
+
+## 2026-10-18 23:59:02 KST — JPEG/WebP 이미지 형식과 PDF 출력 검증
+- 검증 기능 코드 SHA `fa459db3317026190c85f690e5744950ed3b4da1`; 앱 코드 자체 변경 없음. `tests/step2-browser.mjs` 추가: Chrome Canvas 생성 JPEG 32×16(가로)·WebP 16×32(세로) 업로드, 실제 디코딩·원래 치수, IndexedDB 저장·새로고침 복원, JSON export Blob 원본 바이트 비교, `Page.printToPDF` A4 및 `pdfimages -list` 이미지 3종 포함 여부 검사.
+- [Actions #39138352449](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39138352449) **success** — 단위 16/16 PASS, TS/Vite build PASS, STEP 1 Chrome 15-page PDF PASS, STEP 2 JPEG/WebP·PNG·저장·백업·PDF·문서 전환 테스트 PASS.
+- 중간 실행 `39138141905`, `39138228608`은 두 번째 JSON 다운로드 파일 탐색 타임아웃. 파일 이름/중복 다운로드 정책에 의존하지 않고 다운로드 직전 생성 JSON Blob을 잡아 검사하는 방식으로 테스트 하네스 수정. 최종 성공 로그 확인.
+- 지원범위/한계: PNG/JPEG/WebP 이미지 포함 PDF는 확인; 고해상도·장문 캡션 페이지 분할의 육안·픽셀 품질, 저장 실패 주입, 멀티탭 및 Windows/Edge 인쇄는 미검증. STEP 2 전체 완료·main 병합은 아직 대기. STEP 3 미착수.
