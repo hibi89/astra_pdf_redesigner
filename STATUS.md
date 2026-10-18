@@ -71,3 +71,12 @@
 - [GitHub Actions #39137537886](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39137537886): **success**, Node 단위 **16/16 PASS**, TypeScript/Vite **빌드 PASS**, Chrome **동일 이벤트 루프 내 두 문서 전환 요청 중복 방어**·원본 본문/활성 문서 새로고침 복원 PASS. STEP 1 Chrome A4 15페이지 및 STEP 2 이미지·JSON 입출력 회귀 PASS.
 - **여전히 미검증:** JPEG/WebP, 가로/세로 대형 이미지·긴 캡션 인쇄, 멀티탭 충돌, 저장소 오류/할당량 실패 주입, 사용자 Windows/Edge 수동 출력 검수. 위 테스트는 특정 전환 경쟁 1종의 성공이며 모든 경쟁 조건을 증명하지 않음.
 - **main 기능 미병합**, Production/Vercel 미적용. 다음 `ㄱ`: 미검증 JPEG/WebP·이미지 출력 경계 또는 저장 실패 복구 중 1단위 추가 검증 후 main 병합 판단.
+
+## STEP 2 JPEG/WebP 검증 완료 — 2026-10-18 23:59:02 KST
+- 대상: `feature/step2-full-20261018` 기능 SHA `fa459db3317026190c85f690e5744950ed3b4da1`. 이번 단위는 앱 소스 변경 없이 **실제 Chrome 테스트 `tests/step2-browser.mjs`만 확장**.
+- Chrome Canvas로 만든 개인정보 없는 테스트 이미지 사용: **가로형 JPEG 32×16**, **세로형 WebP 16×32**. 실제 입력 업로드 → 디코딩 → IndexedDB 저장 → 새로고침 후 두 이미지 원래 치수 복원 PASS.
+- JSON 내보내기 Blob에서 MIME·가로세로·Base64 바이트를 확인하여 **JPEG/WebP 원본 파일 바이트 1:1 보존 PASS**. 기존 PNG 포함 A4 PDF에서 `pdfimages -list` 이미지 3개 이상 포함 PASS. PDF 형식 A4·본문 텍스트 검사 PASS.
+- [GitHub Actions run 39138352449](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39138352449) **success**. `npm test` **16/16 PASS**, `npm run build` PASS, STEP 1 Chrome PDF 15페이지 및 기존 STEP 2 회귀 PASS.
+- 과정 중 두 번 실패한 E2E(`39138141905`, `39138228608`)는 **두 번째 동일 이름 JSON 다운로드 파일 탐색 시간 초과**. 실제 업로드/복원은 통과. 브라우저 반복 다운로드 파일명/허용 정책에 의존하지 않고 다운로드 직전 생성한 JSON Blob을 확인하도록 테스트를 수정하여 최종 PASS.
+- 미검증: 큰 이미지·긴 캡션에서 실제 시각적 잘림, 여러 이미지 페이지 경계, 멀티탭 충돌, 저장 공간 부족/오류 복구, 사용자 Windows Chrome/Edge 출력. PDF 내 이미지 **포함**을 검증했으며 픽셀 단위 동일 배치를 검증한 것은 아님.
+- **STEP 2 전체 최종 수용 및 main 기능 병합 대기**. STEP 3 미착수, Production 미적용. 다음 `ㄱ`: 저장 오류·IndexedDB 트랜잭션 실패 복구 또는 대형 이미지·캡션 출력 경계 중 1단위 집중 검증.
