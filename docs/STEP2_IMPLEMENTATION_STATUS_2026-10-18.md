@@ -125,3 +125,11 @@
 - Chrome 스모크의 저장 재시도 후 legacy 모드 전환 시 React 작업 잠금 해제를 기다리도록 `tests/step2-browser.mjs` 테스트 대기 조건 수정(기능 소스 미변경).
 - [Actions 39145149408](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39145149408) **success**. 검증 SHA `a5009a76499a983aa4566adabddabf862c9e839b`; 단위 16/16 PASS, TS/Vite build PASS, Chrome STEP1 15p PDF, STEP2 이전 모든 E2E와 신규 migration 실패 복구 PASS.
 - 사용자 Windows Chrome/Edge 한글 인쇄·레이아웃/접근성 수동 검증 **대기**, STEP2 main 기능 **미병합**, STEP3~7 미착수. STEP2 약 97~98%, 전체 동등가중 약 28~29% (비공식).
+
+
+## 2026-10-19 — Ubuntu Microsoft Edge 155 실제 PDF/IndexedDB 테스트
+
+- `.github/workflows/ci.yml`에서 `microsoft-edge` 설치 여부와 버전 검사, 없으면 실패. 설치된 `/usr/bin/microsoft-edge` **155.0.4283.45**에서 실제 STEP1·STEP2 Chrome CDP 기반 브라우저 검사 재사용.
+- [GitHub Actions #39149195481](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39149195481) **SUCCESS**, SHA `34352fd4e92ca43641da3b4d9de3070232276497`. Node 16/16·빌드·Chrome 전체 회귀 및 Edge STEP1 A4 15p·STEP2 이미지/JSON/IndexedDB·긴 캡션 A4/강제 저장 실패 복구 전체 PASS.
+- 보고서 `docs/STEP2_EDGE_CHROMIUM_CI_VALIDATION_2026-10-19.md`. Edge 자동화 범위는 `browser-smoke`·`step2-browser` 두 스모크; Chrome에서만 별도 실행되는 2탭/프로필간 이식 등을 Edge에서도 전부 실행했다고 주장하지 않음.
+- Windows Edge 실제 PDF/한글/폰트 시각 및 사용자 수동 수용 미완료, STEP2 `main` 기능 미병합. STEP2 진척도 비공식 약 98~99%, 전체 단순 동등 비중 약 28~29%.
