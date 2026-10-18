@@ -69,7 +69,7 @@ export default function Workspace({onLegacy}:Props){
   };
   return <>
     <header className="app-header no-print"><div className="brand"><span className="brand-icon">A</span><div><h1>아스트라 PDF 리디자이너</h1><p>STEP 2 · 개인 문서 제작기</p></div></div>
-      <div className="print-actions"><button className="secondary-button" onClick={onLegacy}>기존 회고록 편집</button>
+      <div className="print-actions"><button className="secondary-button" disabled={!editable} onClick={()=>void operation(async()=>{await w.flush();onLegacy();})}>기존 회고록 편집</button>
       <button className="print-button" disabled={!editable} onClick={()=>void print()}>{printBusy?'준비 중…':'PDF 저장 / 인쇄'}</button><span>인쇄 창에서 ‘PDF로 저장’을 선택하세요.</span></div>
     </header>
     <main className="app-layout project-layout">
