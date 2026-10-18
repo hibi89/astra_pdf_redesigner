@@ -323,6 +323,9 @@ try{
   assert.ok(await evaluate("document.querySelector('.project-paper')?.textContent.includes("+JSON.stringify(failedText)+")"),'Unsaved draft lost after failed navigation');
   await evaluate("[...document.querySelectorAll('button')].find(b=>b.textContent.includes('지금 저장 / 재시도')).click()");
   await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),v=>v==='저장됨');
+  // React can still be clearing operating after the save-chip becomes "저장됨".
+  // Wait for the navigation control to become enabled before simulating a click.
+  await eventually(()=>evaluate("[...document.querySelectorAll('button')].find(b=>b.textContent==='기존 회고록 편집')?.disabled"),v=>v===false);
   await evaluate("[...document.querySelectorAll('button')].find(b=>b.textContent==='기존 회고록 편집').click()");
   await eventually(()=>evaluate("Boolean(document.querySelector('.mode-bar'))"));
   await evaluate("[...document.querySelectorAll('.mode-bar button')].find(b=>b.textContent.includes('개인 문서 제작기로 돌아가기')).click()");
