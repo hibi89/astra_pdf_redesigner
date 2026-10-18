@@ -151,3 +151,28 @@ Start-Process -FilePath $edge -ArgumentList @("--user-data-dir=`"$testEdge`"", '
 - 상세 로그 및 스모크 범위: [Edge 자동 검증 보고서](STEP2_EDGE_CHROMIUM_CI_VALIDATION_2026-10-19.md). 기존 Chrome 전체 CI도 함께 PASS.
 - **별도 표시:** Ubuntu Linux Edge **자동 PASS ≠ Windows Edge 수동 PASS**. 사용자 Windows Chrome 1페이지 PDF에서 A4·한글·내장 글꼴·인쇄 UI 제외의 일부 확인은 이루어졌으나, 실제 Windows Edge 출력과 Windows 다페이지 이미지 시각/키보드 조작은 여전히 미확인. 원본 수동 항목 21개는 전체 완료로 표시하지 않음.
 - STEP2 자동 검증 기준 진행률은 약 98~99%, 전체 7단계 단순 동일 비중 28~29% 비공식 추정. `main` 기능 병합 및 STEP3 미착수.
+
+
+## 9. 잔여 위험의 승인과 후속 Windows 수동 검수 — 2026-10-19
+
+**사용자가 명시적으로 STEP 2의 `main` 병합과 아래 잔여 Windows 위험을 수용했다.** 단, **수동 검수 항목의 PASS 판정이나 STEP 2 전체 검증 완료를 승인한 것은 아니다.** 21개 원본 수동 항목의 포괄적 수용 상태는 미완료로 유지한다.
+
+### 병합 승인 조건 (검증될 때까지 HOLD)
+- [ ] 최신 `main` + `feature/step2-full-20261018` HEAD로 **실제 3-way 무커밋 병합 사전검사** 다시 실행, 원본 파일 바이트 불변 + Node 16/16 + TypeScript 빌드 + Chrome 전체 + Edge PDF/저장 회귀 PASS
+- [ ] 동일 최신 기능 HEAD의 필수 CI 성공 (Chrome/Edge 검사 누락 시 실패 처리)
+- [ ] 검사가 실패하면 **Draft 해제·병합하지 않고 원인 보고**
+- [ ] 검사가 모두 성공한 후 Draft 해제·명시적으로 허가된 `main` 병합; 실제 병합 커밋 SHA 확인
+- [ ] 병합 후 **새 `main` SHA의 전체 CI SUCCESS** 및 기존 원본 코드·지침/이미지 보존 확인. CI 실패하면 **STEP 3 등 다음 단계 중단** 후 원인 보고
+
+### 병합 후에도 미완료로 유지할 Windows 전용 수동 항목
+- [ ] **Windows Edge 실물 A4 PDF**: 한글 폰트/선택·복사/인쇄 대화상자 설정과 화면 시각 품질. GitHub Ubuntu Edge 자동화 PASS와 별개.
+- [ ] **Windows Edge 및 Chrome에서 2페이지 이상 실제 PDF 육안 검수**: 긴 한국어 문단·긴 이미지 캡션, 페이지 넘김, 문장/제목/캡션 잘림과 누락
+- [ ] **Windows 가로·세로 실제 이미지 포함 PDF 육안 검수**: PNG/JPEG/WebP 이미지 배치, 종횡비, 이미지 누락·잘림·왜곡
+- [ ] **키보드·작은 화면·사용성**: 탭 탐색, 포커스, 문서관리/모달 접근성과 작은 화면에서 조작 가능 여부
+- [ ] **브라우저 간 수동 파일 이식·복구**: 실제 Windows Chrome ↔ Edge에서 .localdoc.json 및 이미지 원본 보존 (기존 Linux Chrome A↔B는 자동 PASS)
+
+### 검수 기록 원칙
+- 사용자 제출 Windows Chrome **짧은 1p PDF**의 A4·한글·글꼴/텍스트 추출·인쇄 UI 제외는 부분 증거로 유지한다.
+- Windows Edge 실사용 육안 검사 결과가 제출되지 않았으므로 그 항목을 자동 테스트 근거로 **완료 표시하지 않는다**.
+- 추후 검증 시 브라우저/버전, PDF 조건, PASS/FAIL, 재현 단계와 증거를 기록한다. 실제 사용자 문서나 민감한 데이터를 GitHub에 게시하지 않는다.
+- 이번 승인으로 허용되는 것은 **조건부 main 병합**이며, STEP 2 전체 Windows 사용자 수용/품질 검증 완료 선언은 아니다.
