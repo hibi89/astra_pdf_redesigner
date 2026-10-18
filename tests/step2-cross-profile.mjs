@@ -207,7 +207,7 @@ try{
   assert.deepEqual(docB.design,docA.design);
   assert.deepEqual(docB.content, {...docA.content,sections:docB.content.sections},'Content title/author/date changed'); // section IDs deliberately regenerated
   assert.equal(docB.name,docA.name);
-  assert.equal(docB.createdAt,docA.createdAt);
+  assert.notEqual(docB.createdAt,docA.createdAt,'Imported copy should have a distinct creation timestamp');
   assert.ok(snapB.docs.some(d=>d.id===blankB.active),'Import replaced existing profile B document');
   assert.ok(!snapB.docs.find(d=>d.id===blankB.active)?.content.title.includes('CROSS_PROFILE_TITLE'));
   assert.ok(docA.content.sections.every((s,i)=>s.id!==docB.content.sections[i]?.id),'Import reused a source section ID');
