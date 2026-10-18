@@ -88,3 +88,11 @@
 - 현재 수동 검사 상태 **미실행 21/21**. Windows 사용자의 브라우저 버전·결과/스크린샷·PDF를 아직 받지 않음. `main` 기능 병합 결정은 **HOLD**.
 - 병합 게이트: 최신 feature HEAD/Actions/변경 diff 검증, STEP1/v1 데이터 보호, Windows 핵심 PDF·한글·이미지·테마·백업 이식 검수에서 중대 FAIL 0, 미실행/차단 설명, 사용자 승인 → 그 후 main 병합 및 main CI 재검증. 병합 전 STEP3 작업 시작 금지.
 - 이번 단위는 **검수 문서 및 기준 작성**만으로 자동·수동 기능 테스트를 새로 실행하지 않았음. 추정 진행률 STEP2 약 97~98%, 전체 7단계 28~29% 유지 (5%p 상승 아님).
+
+
+## 2026-10-19 — Microsoft Edge 실브라우저 A4 PDF·IndexedDB 자동 검증
+
+- GitHub `.github/workflows/ci.yml`에 실제 Edge 필수 단계 추가. Edge 실행파일 부재 시 **CI exit 1**. [Actions #39149195481](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39149195481) **SUCCESS**, 코드 SHA `34352fd4e92ca43641da3b4d9de3070232276497`. 로그로 `/usr/bin/microsoft-edge`, `Microsoft Edge 155.0.4283.45` 제품·버전 확인.
+- 동일 CDP 기반 `tests/browser-smoke.mjs`, `tests/step2-browser.mjs`를 실제 Edge에서 재실행해 STEP1 A4 15p·한글 텍스트 추출, STEP2 PNG/JPEG/WebP·PDF raster·긴 캡션 다페이지·IndexedDB/JSON 저장·실패 복구 PASS. Chrome 전체 회귀/Node16 단위/빌드도 PASS.
+- 구체 범위·한계는 `docs/STEP2_EDGE_CHROMIUM_CI_VALIDATION_2026-10-19.md`. Windows Edge PDF 실제 렌더링/키보드 수동 검수는 **미검증**, Windows Chrome 1p 사용자 제출 문서 검증은 별도의 부분 PASS.
+- 테스트 임시 프로필 정리 `ENOTEMPTY` 경고가 발생했으나 CI 성공·앱 저장 안전성 테스트 결과와 분리해 보고. **main 병합 HOLD** / STEP3 미착수.
