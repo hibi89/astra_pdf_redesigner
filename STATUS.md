@@ -177,3 +177,12 @@
 - **실제 사용자 Windows Chrome PDF 부분 증거 확인:** 첨부된 짧은 문서 1페이지 `594.96 x 841.92 pt` A4, Creator Windows Chrome155, 내장 `MalgunGothic`/`MalgunGothicBold` 글꼴·Unicode 매핑, 한글 제목/본문 정상 추출, 인쇄 UI 보이지 않음. 이 파일 자체는 GitHub 공개 게시 금지. **Edge 출력·Windows 2페이지 이상/이미지/긴 캡션은 미검증**, 실제 뷰어에서 문자 선택·복사 수동 동작도 미확인. '21/21 모든 수동 항목 미실행'이라는 기존 표기는 **일부 Chrome 증거 존재**로 정정.
 - 상세 감사 파일: feature `docs/STEP2_PREMERGE_CODE_CI_AUDIT_2026-10-19.md` 및 `docs/STEP2_WINDOWS_ACCEPTANCE_AND_MERGE_GATE_2026-10-19.md` (Windows Chrome 부분 증거 기록). `README.md` 최신 CI 연동. CI 임시 Chrome 프로필 cleanup `ENOTEMPTY` 간헐적 WARN은 여전히 존재하나 기능 검사 성공과 별개.
 - **병합 판정 HOLD:** 사용자 명시적 승인 전 main 병합 없음. STEP2 약 **97~98%**, 전체 7단계 단순 동등 가중 **28~29%** 이전 추정 유지. 새 코드 감사/CI 신뢰성 개선은 5%p 실질 진도 상승 아님. 다음: 미검증 수용 범위를 협의하고 필요 시 Edge/장문 증거 추가·결함 해결 후 main 병합 승인/재검증.
+
+
+## 2026-10-19 02:24 KST — Microsoft Edge 실제 Linux 브라우저 PDF·저장 회귀 자동화 성공
+- GitHub Actions `.github/workflows/ci.yml` 기능 브랜치 `feature/step2-full-20261018`에 `Microsoft Edge A4 print and IndexedDB smoke` **필수 단계** 추가. Edge 없을 때 우회 성공 방지(`::error`+exit 1), 출력도구 pdfinfo/pdftotext/pdfimages 확인, 별도 Vite 테스트 서버에서 `tests/browser-smoke.mjs`·`tests/step2-browser.mjs`를 `CHROME_PATH="$EDGE_BIN"`으로 실행.
+- [Actions #39149195481](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39149195481) **SUCCESS**. 실제 로그: `Microsoft Edge executable: /usr/bin/microsoft-edge`; `Microsoft Edge 155.0.4283.45`. 테스트 기능 SHA `34352fd4e92ca43641da3b4d9de3070232276497`. Node 단위 16/16, TS/Vite build, 기존 Chrome 전수 회귀 PASS.
+- **Edge 실제 검증 PASS:** STEP1 A4 15p·한글 PDF 텍스트 추출·편집 UI 제외, STEP2 IndexedDB 저장/새로고침·PNG/JPEG/WebP 원본 bytes·이미지 PDF raster 포함·JSON 백업/불량 입력 거부·대형 세로 이미지+긴 캡션 다페이지 A4·QuotaExceededError 저장실패·이미지 교체 transaction abort 복원·화면 전환 미저장 보호. 테스트용 임시 Chrome 프로필 삭제 `ENOTEMPTY` 경고는 간헐적이지만 Actions 최종 성공.
+- **검증 경계:** Ubuntu **Linux Edge** 155에서의 자동 검사이며 **Windows Edge 실제 PDF·폰트·육안 수용 아님**. Edge에서는 STEP1/2 browser smoke 두 스크립트 실행, Chrome 전용 다른 2탭/프로필간 이식 스크립트까지 Edge에서 별도 실행한 것은 아님. Windows Chrome 1페이지 사용자 제출 PDF 부분 PASS 증거는 별도 유지.
+- 보고서: feature `docs/STEP2_EDGE_CHROMIUM_CI_VALIDATION_2026-10-19.md`. `README.md`, STEP2 감사/Windows 검수 문서·구현 상태 최신 반영. **STEP2 최종 수용·main 병합 HOLD**, STEP3~7 미착수. 진행률 STEP2 비공식 약 98~99%, 전체 동일 비중 7단계 약 28~29%, 유의미한 5%p 상승 없음.
+- 다음 작업: 남은 Windows 실환경 수용 항목을 최소화해 판단하고 병합 전 feature/main 충돌·코드/원본 보호를 재검토한다. 사용자 명시적 승인 없는 main 병합 금지.
