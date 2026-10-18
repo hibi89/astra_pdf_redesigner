@@ -127,3 +127,16 @@
 8. **원본·보안:** `docs/ASTRA_ORIGINAL_ROADMAP.txt`, 설계 PNG 2장, `docs/ASTRA_STEP2_ORIGINAL_INSTRUCTIONS.txt`, 기존 사용자 IndexedDB·localStorage v1 원본 그대로. 테스트 임시 Chrome 프로필에 합성 텍스트만 사용, 유료 API/비밀/고객 데이터 없음.
 9. **다음 작업:** STEP2 완료 기준을 사용자 지침과 코드/테스트/CI 근거로 항목별 점검. 누락 시 처리, 그 후 STEP2→main PR·병합 판단. 사용자 Windows Chrome/Edge PDF 저장·인쇄 미리보기/한글 폰트·육안 확인은 별도 수동 수용 기준.
 10. **검증 시각:** 2026-10-19 00:36:17 KST, run `39141151527` 결론 SUCCESS 로그 확인, 테스트 기능 SHA `3fe13c1097f63296d45c683f63ba0b95acd005a9`; `STATUS.md`/본 문서/BOOK commit SHA는 갱신 후 재조회.
+
+
+## 최신 작업 인수인계 — 2026-10-19 00:53:28 KST (STEP 2 원본 요구사항 최종 감사)
+1. **목표/원본:** Astra PDF Redesigner p5 최종 목표는 기존 PDF 본문 그대로 보존·다른 디자인 재조판. STEP2 로컬 개인 문서 제작기 범위만 완료 검토. 원본은 `docs/ASTRA_STEP2_ORIGINAL_INSTRUCTIONS.txt` (1~18절), 상세 수용 체크리스트는 feature `docs/STEP2_FINAL_REQUIREMENTS_AUDIT_2026-10-19.md`.
+2. **수정/기능:** `src/step2/Workspace.tsx` 레거시 모드 전환 전 `await w.flush()` 실행, 저장 실패 시 전환하지 않음. `src/step2/idb.ts` 유효한 existing ACTIVE 보존하며 늦은 STEP1 migration doc을 별도 추가, marker와 doc transaction 유지. `tests/browser-smoke.mjs` 초기화 대기, `tests/step2-browser.mjs` 새 전환 E2E·종료 정리 안정화. README 최신 검증 결과 반영.
+3. **검증:** [Actions #39142445389](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39142445389) **SUCCESS**, SHA `eba463ca4f2046a73724b29ce6ffbf572c1b3ff8`: Node 16/16, TS/Vite 빌드 PASS, 실제 Chrome STEP1 PDF15p·STEP2 이미지/프로젝트파일/실패복구·2탭·대형 이미지·긴 캡션·빠른 화면 전환·저장 실패 차단 PASS.
+4. **완료/미완료:** 기능 브랜치 코드 CI 통과. **STEP2 전체 수용 및 main 병합 HOLD**, 이유: 유효한 STEP1 v1 기존 데이터의 cold-start browser migration, 별도 프로필 JSON import, 사용자 Windows/Edge PDF·한글 시각 수동 테스트 미완료. STEP3~7 미착수.
+5. **실패/원인/대안:** 검토 도중 빠른 전환 미저장 위험과 delayed migration ACTIVE 강제 변경을 발견해 코드 수정. 중간 CI 초기화 전 disabled 버튼 클릭, 전환 후 wrong active document, mock save failure test readiness, 임시 Chrome 테스트 폴더 ENOTEMPTY 문제 수정. 마지막 run `39142445389` SUCCESS. 통과한 범위를 벗어난 성공 주장 금지.
+6. **저장소/브랜치/SHA:** `hibi89/astra_pdf_redesigner`, `feature/step2-full-20261018`. 마지막 검증 코드 SHA `eba463ca4f2046a73724b29ce6ffbf572c1b3ff8`; main에는 STEP1 소스만. 상세 감사 `docs/STEP2_FINAL_REQUIREMENTS_AUDIT_2026-10-19.md`.
+7. **환경:** Node22/npm, React19/TS/Vite, `npm install`, `npm test`, `npm run build`, `npm run dev` → 127.0.0.1:5173; GitHub Ubuntu Chrome CI. Production/Vercel 없음.
+8. **원본/보안:** STEP1 `astra-pdf-redesigner:current:v1` localStorage 원본, 설계 PNG 2종, roadmap TXT, STEP2 원본 지침 보존. 고객 문서/이미지 외부 전송·로그 표시/비밀 없음.
+9. **다음 `ㄱ`/완료 기준:** **실제 v1 데이터 선존재 독립 Chrome 프로필 cold-start migration 자동 시험**(title/author/date/4개 항목·서식 원문·디자인·marker 1회·v1 원본 불변). 그다음 새 브라우저 프로필 JSON 가져오기, Windows/Edge 수동 검수; 통과한 후 main 병합/STEP2 최종 완료 판단.
+10. **기준 시간·진행률:** 2026-10-19 00:53:28 KST, CI #39142445389 success. STEP2 보수적 **약 90~95%**, 전체 7단계 **약 27~28%** (동일 비중 비공식 추정). 5%p 이상 실질 상승 시 별도 보고.
