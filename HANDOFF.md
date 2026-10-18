@@ -179,3 +179,16 @@
 8. **원본·보안:** 사용자 v1 localStorage/v2 IndexedDB·원본 설계 파일·원본 지침 보존. 실패 주입은 합성 데이터·임시 Chrome 프로필에서만 실행; 실제 문서 변경 없음/외부 API 호출 없음.
 9. **다음 1단위/완료 기준:** 사용자 Windows Chrome/Edge에서 STEP1 15p PDF/STEP2 한글·PNG/JPEG/WebP·페이지 나눔·프로필 import 수동 수용용 체크리스트 마련. 사용자 테스트 결과 확인 후 STEP2 수용/기능 main 병합 여부 결정. 수동 검증 전 완료·병합 주장 금지.
 10. **진행률/시각:** 2026-10-19 01:29 KST, STEP2 약 97~98% 추정, 전체 7단계 동등비중 약 28~29% (비공식·가중/시간 미반영). CI #39145149408 success·검증 SHA `a5009a76499a983aa4566adabddabf862c9e839b` 로그 확인.
+
+
+## 최신 인수인계 — 2026-10-19 01:40 KST (STEP2 Windows 수용·병합 HOLD)
+1. **목표·범위:** p5 Astra PDF Redesigner, 기존 PDF 본문 보존/새 디자인 리디자인 전체 7단계 중 STEP2 개인 문서 제작기 수용 직전. STEP3~7 미착수.
+2. **이번 작업:** 원본 `docs/ASTRA_STEP2_ORIGINAL_INSTRUCTIONS.txt` §16 21항을 그대로 보존한 `docs/STEP2_WINDOWS_ACCEPTANCE_AND_MERGE_GATE_2026-10-19.md` 신규 생성. Windows Chrome/Edge의 PDF(A4·머리글/바닥글 없음), 한글 텍스트 선택, PNG/JPEG/WebP와 큰 이미지/캡션 페이지 경계, 4종 테마, 저장/복제/JSON 브라우저 이식, 키보드·좁은 화면·백엔드 없이 동작을 수동 점검할 절차/증거 양식·병합 게이트 문서화.
+3. **실제 검증 기준:** 마지막 기능 검증 [Actions #39145149408](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39145149408) SUCCESS, 기능 SHA `a5009a76499a983aa4566adabddabf862c9e839b`, Node 16/16 PASS·TypeScript/Vite 빌드·Ubuntu Chrome STEP1 15p/STEP2 이미지·저장 실패·기존 v1 migration abort·프로필간 JSON·PDF·멀티탭 회귀 PASS. **이번 단위에 새 테스트 실행 안 함**. Windows 수동 항목 **21/21 미실행**.
+4. **현재 상태/판정:** STEP2 자동 근거 충분하나 OS별 실제 인쇄/한글/이미지 레이아웃 수동 수용 미완료. **STEP2 최종 완료 선언·main 코드 병합 HOLD**. README·요구사항 감사 문서에서 같은 한계 기록. STEP3 시작 금지.
+5. **핵심 위험/안전:** 브라우저 프로필·origin별 IndexedDB 격리(`4178` 테스트 포트; 기본 `5173`과 별개). 기존 실제 사용자 데이터 삭제/초기화 금지, 합성 테스트 프로젝트만 사용. PDF 헤더/풋터 브라우저 설정은 앱에서 자동 강제 불가능, Chrome/Edge·OS 시스템 글꼴 차이 실제 검수 필요.
+6. **저장소/브랜치/경로:** `hibi89/astra_pdf_redesigner`, `feature/step2-full-20261018`, `docs/STEP2_WINDOWS_ACCEPTANCE_AND_MERGE_GATE_2026-10-19.md`, `docs/STEP2_FINAL_REQUIREMENTS_AUDIT_2026-10-19.md`; main은 STEP1 기능 보존. 원본 로드맵/TXT·PNG는 무변경.
+7. **로컬 Windows 준비:** Node22+ Git, 새 전용 클론에 `npm install`, `npm test`, `npm run build`, `npm run dev -- --port 4178 --strictPort`; 별도 test Chrome/Edge 프로필로 `127.0.0.1:4178` 접속, PDF 저장/한글 선택/시각 증거 수집. 명령·절차는 신규 문서에 모두 있음.
+8. **백업/보안·배포:** 사용자 로컬 데이터·이미지 원본 무변경. 프로젝트 JSON 미암호화, 테스트는 합성 자료만 사용. Production/Vercel 미배포. API·비밀 키 추가 없음.
+9. **다음 작업·수용 조건:** 사용자 실제 Windows Chrome/Edge 실행 결과(21항 중 필수 관문·FAIL 재현·합성 PDF/스크린샷) 접수 → 결함 수정 시 CI 재검증 → feature-to-main diff 최종 리뷰·사용자 승인 후 병합 → main Actions 검증. 결과 미수령이면 PASS 주장·병합 금지.
+10. **기준 시각/진척도:** 2026-10-19 01:40 KST; STEP2 **약 97~98%** 추정, 전체 7단계 단순 동등가중 **약 28~29%** 유지. 5%p 진도 상승 없음; 새 문서·README·감사/BOOK 갱신 후 GitHub 재조회 필요.
