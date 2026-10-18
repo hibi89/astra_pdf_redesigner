@@ -103,3 +103,12 @@
 - 검증: 실제 Chrome 즉시 전환 후 원문 보존·복귀/새로고침 유지·v1 migration 중복 생성 방지, 강제 QuotaExceededError 상황 전환 취소·메모리 편집 유지·재시도 PASS. STEP1 browser smoke 버튼 준비 상태 기다리기, E2E Chrome 프로세스 종료 후 임시 폴더 삭제하도록 보완.
 - [Actions 39142445389](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39142445389) **SUCCESS**, 기능 SHA `eba463ca4f2046a73724b29ce6ffbf572c1b3ff8`: 16/16 Node, TS/Vite 빌드, STEP1 Chrome A4 PDF15p, STEP2 모든 기존 E2E + 신규 즉시 전환 PASS.
 - **추가 증거 필요:** 처음부터 유효한 v1 데이터가 있는 별도 Chrome 프로필에서 마이그레이션 cold-start와 원본 보존·중복 방지, 신규 브라우저 프로필에서 JSON import 왕복, Windows Chrome/Edge/한글/이미지 육안 인쇄. STEP2 최종 수용 및 main 기능 병합은 진행하지 않음.
+
+
+## 2026-10-19 01:04 KST — 실제 신규 Chrome 프로필 V1 선존재 마이그레이션 PASS
+- 테스트 `tests/step2-cold-migration.mjs`는 React 실행 전 V1 `localStorage`을 갖춘 **완전 신규 Chrome 사용자 프로필** 생성. synthetic v1 JSON을 preseed한 후 실제 STEP2 시작·IndexedDB migration 확인, 이후 preload hook 제거.
+- 합성 문서 원본: 제목·작성자·날짜·`learned/difficult/solved/reflection` 텍스트/빈 항목/줄바꿈·공백·탭·특수문자·URLs, `theme/ accent/textSize/font`. V2 문서 하나/섹션4/원문/디자인과 고유 ID·ACTIVE·migration marker **PASS**.
+- 앱 load/reload 전후 V1 raw JSON **byte-for-byte 같음**, 새로고침 후 V2 문서/IDs/활성 ID/marker 보존 및 중복 생성 0 **PASS**.
+- [GitHub Actions 39143261165](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39143261165) **success**, 기능 SHA `abb3d9425e72a2708306674176346727ef0ea710`: Node 테스트 16/16, TS/Vite 빌드, STEP1/2 기존 Chrome 회귀와 신규 cold-start 3 checks PASS.
+- Cleanup 지연: `ENOTEMPTY` synthetic temp-profile warning은 ephemeral Chrome 종료 비동기성 때문. 앱 기능 테스트는 별도 PASS, CI run success. 추후 cleanup 진단 시 동일 로그 참고.
+- **다음:** 별도 Chrome 프로필간 JSON export/import 검증. Windows/Edge 인쇄·한글/시각 수동 점검과 별도 migration 실패 롤백 주입은 남음. main STEP2 미병합. 추정 STEP2 95%, 전체 동등 7단계 약 28~29%.
