@@ -1,0 +1,113 @@
+name: Astra STEP2 isolated main merge preflight
+on:
+  push:
+    branches: ['feature/step2-full-20261018']
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+  workflow_dispatch:
+
+jobs:
+  isolated-merge:
+    name: Test temporary merge without touching main
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Merge current feature commit into detached main without committing or pushing
+        shell: bash
+        run: |
+          set -euo pipefail
+          FEATURE_SHA="$GITHUB_SHA"
+          git fetch --no-tags origin main
+          MAIN_SHA=$(git rev-parse refs/remotes/origin/main)
+          echo "MERGE_PREFLIGHT_FEATURE_SHA=$FEATURE_SHA"
+          echo "MERGE_PREFLIGHT_MAIN_SHA=$MAIN_SHA"
+          git config user.name "Astra Merge Preflight"
+          git config user.email "astra-merge-preflight@users.noreply.github.com"
+          git switch --detach "$MAIN_SHA"
+          if ! git merge --no-commit --no-ff "$FEATURE_SHA"; then
+            echo "::error::STEP2 feature cannot merge cleanly with the current main commit"
+            git status --short
+            git diff --name-only --diff-filter=U
+            exit 1
+          fi
+          test "$(git rev-parse HEAD)" = "$MAIN_SHA" || { echo "::error::main HEAD moved during local preflight"; exit 1; }
+          test "$(cat .git/MERGE_HEAD)" = "$FEATURE_SHA" || { echo "::error::unexpected merge source"; exit 1; }
+          test -z "$(git diff --name-only --diff-filter=U)" || { echo "::error::unresolved conflict markers"; exit 1; }
+          echo "PASS MERGE: 3-way merge in detached worktree, no commit and no GitHub branch writes"
+
+          # Enforce exact byte preservation of the latest main handoff, STEP1
+          # source, and the original unmodified user-supplied roadmap/blueprints.
+          for path in \
+            HANDOFF.md \
+            STATUS.md \
+            src/App.tsx \
+            src/storage.ts \
+            docs/ASTRA_ORIGINAL_ROADMAP.txt \
+            docs/STEP1_SPEC.md \
+            docs/BLUEPRINT.md \
+            docs/blueprints/architecture-flow.png \
+            docs/blueprints/seven-step-plan.png; do
+            if ! cmp -s <(git show "refs/remotes/origin/main:$path") "$path"; then
+              echo "::error::main original changed by feature merge: $path"
+              exit 1
+            fi
+            echo "PASS PRESERVED_MAIN: $path"
+          done
+          cmp -s <(git show "$FEATURE_SHA:docs/ASTRA_STEP2_ORIGINAL_INSTRUCTIONS.txt") docs/ASTRA_STEP2_ORIGINAL_INSTRUCTIONS.txt ||
+            { echo "::error::STEP2 original instruction text changed by merge"; exit 1; }
+          echo "PASS PRESERVED_FEATURE: docs/ASTRA_STEP2_ORIGINAL_INSTRUCTIONS.txt"
+          test -e src/step2/Workspace.tsx
+          test -e tests/step2-cross-profile.mjs
+          echo "PASS MERGED CONTENT: STEP2 app and regression tests present"
+          echo "MERGE_PREFLIGHT_STAGE_COUNT=$(git diff --cached --name-only | wc -l)"
+      - name: Test and build the uncommitted merge result
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          npm test
+          npm run build
+          echo "PASS MERGED NODE22: unit tests and TypeScript/Vite build"
+      - name: Chrome and Edge A4 print plus data protection on merged tree
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME_BIN=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)
+          EDGE_BIN=$(command -v microsoft-edge || command -v microsoft-edge-stable || true)
+          test -n "$CHROME_BIN" || { echo "::error::Required Chrome unavailable"; exit 1; }
+          test -n "$EDGE_BIN" || { echo "::error::Required Microsoft Edge unavailable"; exit 1; }
+          if ! command -v pdfinfo >/dev/null || ! command -v pdftotext >/dev/null || ! command -v pdfimages >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y poppler-utils
+          fi
+          echo "Chrome binary: $CHROME_BIN"
+          echo "Edge binary: $EDGE_BIN"
+          "$EDGE_BIN" --version
+          npm run dev -- --port 4173 --strictPort >/tmp/astra-merge-vite.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          for i in $(seq 1 60); do
+            if curl -fsS http://127.0.0.1:4173 >/dev/null; then break; fi
+            sleep 0.5
+          done
+          curl -fsS http://127.0.0.1:4173 >/dev/null
+          CHROME_PATH="$CHROME_BIN" node tests/browser-smoke.mjs
+          CHROME_PATH="$CHROME_BIN" node tests/step2-browser.mjs
+          CHROME_PATH="$CHROME_BIN" node tests/step2-multitab.mjs
+          CHROME_PATH="$CHROME_BIN" node tests/step2-cold-migration.mjs
+          CHROME_PATH="$CHROME_BIN" STEP2_INJECT_MIGRATION_ABORT=1 node tests/step2-cold-migration.mjs
+          CHROME_PATH="$CHROME_BIN" node tests/step2-cross-profile.mjs
+          echo "PASS MERGED CHROME: STEP1, STEP2, 2 tabs, migration rollback and cross-profile backup"
+          CHROME_PATH="$EDGE_BIN" node tests/browser-smoke.mjs
+          CHROME_PATH="$EDGE_BIN" node tests/step2-browser.mjs
+          echo "PASS MERGED EDGE: STEP1 and STEP2 A4 PDF, images, IndexedDB and JSON"
+          echo "PASS MERGE PREFLIGHT: merged tree was tested without creating a merge commit or changing main"
