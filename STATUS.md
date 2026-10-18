@@ -120,3 +120,14 @@
 - **미검증/제약:** 잠금 미지원 브라우저의 실사용 동작, 강제 종료·OS 전원 장애, Windows Chrome/Edge 인쇄 및 한글 글꼴·PDF 육안 검수. 둘째 탭은 **첫 탭 종료 후 새로고침이 필요**하며 자동 편집권 승계 기능을 구현한 것이 아님.
 - STEP2 개발/자동 검증은 **약 95% 비공식 추정**, 전체 7단계 단순 동일가중 환산 **약 28~29%**. 이전 전체 약 28% 대비 유의미한 5%p 증가는 아님. 테스트 커버리지 계량치가 아니며 실시간 일정/난이도 미반영.
 - **main STEP2 기능 미병합**, Production/Vercel 없음. 다음 `ㄱ`: STEP2 최종 출시/병합 전 요구사항 대조·자동 증거 점검 후 GitHub PR 생성 여부 판단. 사용자 Windows/Edge 수동 검사 전 완전한 수용 주장 금지. STEP3~7 미착수.
+
+
+## 2026-10-19 00:53:28 KST — STEP 2 원본 요구사항 대조 및 전환·마이그레이션 결함 수정
+- 기준: `docs/ASTRA_STEP2_ORIGINAL_INSTRUCTIONS.txt` (1~18절)와 실제 feature 소스·16개 Node 테스트·Chrome E2E 대조. 상세 표: feature `docs/STEP2_FINAL_REQUIREMENTS_AUDIT_2026-10-19.md`.
+- **실제 결함 1:** STEP2 본문 자동 저장 debounce(450ms) 이전에 ‘기존 회고록 편집’을 클릭하면 Workspace unmount 시 타이머가 제거돼 아직 저장되지 않은 글이 유실될 수 있었음. `src/step2/Workspace.tsx`에서 `await w.flush()` 성공한 경우에만 모드 전환, 실패 시 문서 유지/오류·재시도 안내.
+- **실제 결함 2:** 최초 STEP1 localStorage가 뒤늦게 생긴 상태에서 STEP2를 재진입하면 `idb.initialize`가 migration 문서를 ACTIVE로 강제해 기존 편집 문서가 바뀌었음. `src/step2/idb.ts`의 migration transaction이 **기존 ACTIVE 있으면 유지**, 없을 때만 migrated doc을 ACTIVE로 저장하도록 수정. 이전 v1 localStorage 원본 유지, 문서·migration marker 동시 처리.
+- **테스트 연동 수정:** STEP1 Chrome 스모크는 전환 버튼이 활성화될 때까지 기다림. STEP2 Chrome 스모크는 빠른 화면 전환 후 원문 보존/중복 migration 방지/강제 저장 실패 시 전환 취소·재시도 검증. Chrome 테스트 종료에서 프로세스 종료를 기다린 뒤 임시 profile을 제거하도록 보완.
+- [GitHub Actions #39142445389](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39142445389) **SUCCESS**. 테스트 **16/16 PASS**, TS/Vite 빌드 PASS, STEP1 Chrome 15p A4 및 STEP2 기존 이미지/JSON/저장/2탭/페이지 나눔 회귀+신규 화면 전환 PASS. 검증 SHA `eba463ca4f2046a73724b29ce6ffbf572c1b3ff8`.
+- **남은 수용 증거:** 유효한 기존 STEP1 v1 데이터가 사전 존재하는 **독립 Chrome 프로필 cold-start 마이그레이션 E2E**(현재는 단위·지연 발생 상황 검증), 독립 프로필 JSON 가져오기, 사용자 Windows Chrome/Edge PDF 출력·한글·시각 수동 검수. UI 접근성 전체 수동 점검도 남음.
+- **병합 판정 HOLD:** `main`에 STEP2 기능 미병합, STEP3 미착수. 보수적 추정 STEP2 **약 90~95%**, 전체 7단계 **약 27~28%** (동일 비중 단순 환산·소요 시간 반영 안 함). 이전 기준에서 유의미한 5%p 순증 아님.
+- 다음 `ㄱ`: STEP1 v1 원본 있는 별도 Chrome 프로필에서 실제 초기 마이그레이션/복원·중복 방지 검증. 이후 별도 프로필 JSON 이식 확인 → main 병합 여부 판단.
