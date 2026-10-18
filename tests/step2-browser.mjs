@@ -92,10 +92,10 @@ try{
   })()`);
   assert.equal(choices[0], '문서함 이름');
   await eventually(()=>evaluate("document.querySelector('.doc-list-item.active strong')?.textContent"),x=>x==='문서함 이름');
-  await eventually(()=>evaluate("document.querySelector('.project-paper .section-body')?.textContent"),x=>x==='STEP2_BEGIN 한글 원문\\n\\n123% STEP2_END');
+  await eventually(()=>evaluate("document.querySelector('.project-paper .section-body')?.textContent"),x=>x===['STEP2_BEGIN 한글 원문','','123% STEP2_END'].join('\n'));
   await eventually(()=>evaluate("document.querySelector('.warning')?.textContent.includes('다른 문서 작업')"));
   await reload();
-  await eventually(()=>evaluate("document.querySelector('.project-paper .section-body')?.textContent"),x=>x==='STEP2_BEGIN 한글 원문\\n\\n123% STEP2_END');
+  await eventually(()=>evaluate("document.querySelector('.project-paper .section-body')?.textContent"),x=>x===['STEP2_BEGIN 한글 원문','','123% STEP2_END'].join('\n'));
   console.log('PASS STEP2: simultaneous document switch rejected; prior draft and active document survive reload');
 
 }finally{if(ws)ws.close();proc.kill('SIGTERM');await delay(300);rmSync(dir,{recursive:true,force:true});}
