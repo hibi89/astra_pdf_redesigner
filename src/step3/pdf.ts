@@ -1,5 +1,6 @@
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { PDF_IMPORT_LIMITS, makePdfDraft, type PdfDraft, type PdfFragment, type PdfPageInput } from './structure.ts';
+import { recoverPageImages, type ImageOpCodes } from './imageRecovery.ts';
 
 // Browser-only PDF.js adapter. Never send PDF bytes to a server.
 export async function extractLocalPdf(file:File):Promise<PdfDraft>{
@@ -15,10 +16,7 @@ export async function extractLocalPdf(file:File):Promise<PdfDraft>{
   try{
     const pdf=await loading.promise;
     if(pdf.numPages<1||pdf.numPages>PDF_IMPORT_LIMITS.pages)throw Error('지원하는 PDF는 1~50페이지입니다.');
-    const imageOps=new Set<number>([
-      OPS.paintImageXObject,OPS.paintInlineImageXObject,
-      OPS.paintImageMaskXObject,OPS.paintImageXObjectRepeat,OPS.paintInlineImageXObjectGroup,
-    ].filter((n):n is number=>typeof n==='number'));
+
     const pages:PdfPageInput[]=[];
     for(let pageNum=1;pageNum<=pdf.numPages;pageNum++){
       const page=await pdf.getPage(pageNum);
@@ -38,11 +36,20 @@ export async function extractLocalPdf(file:File):Promise<PdfDraft>{
           height:size,fontSize:size});
       }
       let imageDetected=false,operatorWarning='';
+      let imageRecovery:PdfPageInput['imageRecovery'];
       try{
-        const ops=await page.getOperatorList();
-        imageDetected=ops.fnArray.some(op=>imageOps.has(op));
+        const opList=await page.getOperatorList();
+        const obj=page as unknown as {
+          objs:{has?:(key:string)=>boolean;get:(key:string,cb?:(image:unknown)=>void)=>unknown};
+          commonObjs?:{has?:(key:string)=>boolean;get:(key:string,cb?:(image:unknown)=>void)=>unknown};
+        };
+        imageRecovery=await recoverPageImages(
+          pageNum,opList,view.transform,view.width,view.height,
+          OPS as unknown as ImageOpCodes,{objs:obj.objs,commonObjs:obj.commonObjs},
+        );
+        imageDetected=imageRecovery.detected>0;
       }catch(error){operatorWarning=error instanceof Error?error.name:'그래픽 명령 분석 실패';}
-      pages.push({number:pageNum,width:view.width,height:view.height,pieces,imageDetected,operatorWarning});
+      pages.push({number:pageNum,width:view.width,height:view.height,pieces,imageDetected,operatorWarning,imageRecovery});
       page.cleanup();
     }
     return makePdfDraft(file.name,pages);
