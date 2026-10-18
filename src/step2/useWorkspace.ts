@@ -3,12 +3,20 @@ import { blankProject, cloneProject, documentAssetIds, isProjectDocument, newIde
 import { ACTIVE, deleteDocument, initialize, listDocuments, openDatabase, readAssets, readDocument, readMeta, saveDocument, setActive, writeTransaction } from './idb.ts';
 import { validateImage } from './images.ts';
 import { exportProject, importProject } from './projectFile.ts';
+import { createMutationGate } from './mutationGate.ts';
 
 type SaveState='대기'|'저장 중'|'저장됨'|'저장 실패';
 export function useWorkspace(){
   const [ready,setReady]=useState(false),[error,setError]=useState(''),[status,setStatus]=useState<SaveState>('대기');
   const [documents,setDocuments]=useState<ProjectDocument[]>([]),[document,setDocument]=useState<ProjectDocument|null>(null);
   const [assets,setAssets]=useState<ImageAsset[]>([]),[writable,setWritable]=useState(false),[locked,setLocked]=useState(false);
+  const [operating,setOperating]=useState(false);
+  const mutationGate=useRef(createMutationGate());
+  const protectedMutation=useCallback(<T,>(action:()=>Promise<T>):Promise<T>=>mutationGate.current.run(async()=>{
+    setOperating(true);
+    try{return await action();}
+    finally{setOperating(false);}
+  }),[]);
   const dbRef=useRef<IDBDatabase|null>(null),draft=useRef<ProjectDocument|null>(null),dirty=useRef(0),saved=useRef(0),timer=useRef<ReturnType<typeof setTimeout>|null>(null);
   const tail=useRef<Promise<void>>(Promise.resolve()),released=useRef<null|(()=>void)>(null),allowWrites=useRef(false);
   const setCurrent=useCallback((doc:ProjectDocument,all:ImageAsset[])=>{draft.current=doc;dirty.current=0;saved.current=0;setDocument(doc);setAssets(all);setStatus('저장됨');},[]);
@@ -24,7 +32,7 @@ export function useWorkspace(){
     catch(e){setStatus('저장 실패');setError(e instanceof Error?e.message:'저장에 실패했습니다.');throw e;}
   },[]);
   const edit=useCallback((update:(doc:ProjectDocument)=>ProjectDocument)=>{
-    if(!allowWrites.current||!draft.current)return;
+    if(!allowWrites.current||!draft.current||mutationGate.current.busy)return;
     const doc=update(draft.current);
     if(!isProjectDocument(doc)){setError('변경된 문서 구조가 유효하지 않습니다.');return;}
     const next={...doc,updatedAt:new Date().toISOString()};
@@ -141,5 +149,14 @@ export function useWorkspace(){
       setCurrent(incoming.document,incoming.assets);await refresh();setError('');return true;
     }catch(e){setError(e instanceof Error?e.message:'프로젝트를 가져올 수 없습니다.');return false;}
   },[flush,setCurrent,refresh]);
-  return{ready,locked,writable,error,setError,status,documents,document,assets,edit,flush,switchTo,create,duplicate,remove,insertImage,removeImage,removeSection,exportCurrent,importCurrent};
+  return{ready,locked,writable,operating,error,setError,status,documents,document,assets,edit,flush,
+    switchTo:(id:string)=>protectedMutation(()=>switchTo(id)),
+    create:(kind:'blank'|'retro'|'example')=>protectedMutation(()=>create(kind)),
+    duplicate:()=>protectedMutation(duplicate),
+    remove:()=>protectedMutation(remove),
+    insertImage:(file:File,sectionId:string,replaceId?:string)=>protectedMutation(()=>insertImage(file,sectionId,replaceId)),
+    removeImage:(sectionId:string,blockId:string)=>protectedMutation(()=>removeImage(sectionId,blockId)),
+    removeSection:(sectionId:string)=>protectedMutation(()=>removeSection(sectionId)),
+    exportCurrent:()=>protectedMutation(exportCurrent),
+    importCurrent:(file:File)=>protectedMutation(()=>importCurrent(file))};
 }
