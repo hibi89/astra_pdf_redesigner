@@ -291,6 +291,33 @@ try{
   assert.ok(count>200,'Expected multi-page extracted text coordinates');
   console.log('PASS STEP2: word bounding boxes remain within A4 media bounds');
 
+  // Requirement audit: a rapid switch to the legacy mode must flush the current
+  // in-memory document instead of cancelling the 450ms debounce on unmount.
+  const quickText='FAST_MODE_SWITCH_SAVED_20261019';
+  await evaluate("(()=>{const el=document.querySelector('.section-editor .block-editor textarea');const set=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set;set.call(el,"+JSON.stringify(quickText)+");el.dispatchEvent(new Event('input',{bubbles:true}));const button=[...document.querySelectorAll('button')].find(b=>b.textContent==='기존 회고록 편집');if(!button)throw Error('mode switch button missing');button.click()})()");
+  await eventually(()=>evaluate("Boolean(document.querySelector('.mode-bar')&&document.querySelector('button.print-button'))"));
+  await evaluate("[...document.querySelectorAll('.mode-bar button')].find(b=>b.textContent.includes('개인 문서 제작기로 돌아가기')).click()");
+  await eventually(()=>evaluate("document.querySelector('.project-paper')?.textContent.includes("+JSON.stringify(quickText)+")"));
+  await reload();
+  await eventually(()=>evaluate("document.querySelector('.project-paper')?.textContent.includes("+JSON.stringify(quickText)+")"));
+  console.log('PASS STEP2: immediate legacy-mode switch flushes pending edit; mode return and reload preserve text');
+
+  // A failed write must block navigation, preserve the draft and show an error.
+  await evaluate("(()=>{const original=IDBDatabase.prototype.transaction;let fail=true;IDBDatabase.prototype.transaction=function(stores,mode,...options){if(fail&&stores==='documents'&&mode==='readwrite'){fail=false;IDBDatabase.prototype.transaction=original;throw new DOMException('Injected mode-switch write failure','QuotaExceededError')}return original.call(this,stores,mode,...options)}})()");
+  const failedText='FAILED_MODE_SWITCH_RECOVERY_20261019';
+  await evaluate("(()=>{const el=document.querySelector('.section-editor .block-editor textarea');Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set.call(el,"+JSON.stringify(failedText)+");el.dispatchEvent(new Event('input',{bubbles:true}));[...document.querySelectorAll('button')].find(b=>b.textContent==='기존 회고록 편집').click()})()");
+  await eventually(()=>evaluate("document.querySelector('.warning')?.textContent.includes('Injected mode-switch write failure')"));
+  assert.ok(await evaluate("Boolean(document.querySelector('.project-paper')&&!document.querySelector('.mode-bar'))"),'Navigation occurred despite save failure');
+  assert.ok(await evaluate("document.querySelector('.project-paper')?.textContent.includes("+JSON.stringify(failedText)+")"),'Unsaved draft lost after failed navigation');
+  await evaluate("[...document.querySelectorAll('button')].find(b=>b.textContent.includes('지금 저장 / 재시도')).click()");
+  await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),v=>v==='저장됨');
+  await evaluate("[...document.querySelectorAll('button')].find(b=>b.textContent==='기존 회고록 편집').click()");
+  await eventually(()=>evaluate("Boolean(document.querySelector('.mode-bar'))"));
+  await evaluate("[...document.querySelectorAll('.mode-bar button')].find(b=>b.textContent.includes('개인 문서 제작기로 돌아가기')).click()");
+  await eventually(()=>evaluate("document.querySelector('.project-paper')?.textContent.includes("+JSON.stringify(failedText)+")"));
+  console.log('PASS STEP2: failed mode switch write blocks navigation and preserves in-memory text; retry succeeds');
+
+
 
 
 
