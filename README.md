@@ -69,3 +69,10 @@ STEP 2 병합·완료 전 필요한 **원본 지침 §16의 21개 수동 검사*
 ## GitHub Actions — 실제 Microsoft Edge 테스트
 
 [Microsoft Edge 155 STEP1·STEP2 A4 PDF 및 IndexedDB 회귀 성공](docs/STEP2_EDGE_CHROMIUM_CI_VALIDATION_2026-10-19.md): [Actions #39149195481](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39149195481)에서 실제 `/usr/bin/microsoft-edge`, `Microsoft Edge 155.0.4283.45`를 실행했습니다. STEP1 A4 15페이지, STEP2 이미지 PNG/JPEG/WebP, 긴 캡션 여러 페이지, IndexedDB 저장 실패/복구와 JSON 백업이 **Linux Edge에서 PASS**했습니다. **Windows Edge 수동 인쇄·폰트·시각 확인을 대신하지는 않습니다.**
+
+
+## 실제 main 병합 사전검사 — **테스트 성공 / 실제 병합은 미실행**
+
+[격리된 3-way 병합·원본 보존·Chrome/Edge 통합 검수 보고서](docs/STEP2_ISOLATED_MAIN_MERGE_PREFLIGHT_2026-10-19.md) / [GitHub Actions #39150537369](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39150537369).
+
+`main`(시험 당시 `e35e5dfe6a17d32ab1e1e1b2fe21d8bb2b52323a`)을 별도 Actions runner의 **detached HEAD**로 체크아웃해 STEP2 기능 커밋 `8d9fdb1adef31875a793cce9376de3154eb08229`을 `git merge --no-commit --no-ff`로 병합 시험한 결과 **충돌 0**, STEP1 기존 App/storage, main의 최신 STATUS/HANDOFF, 로드맵/PNG 및 STEP2 지침 원본 바이트 그대로 보존 PASS, 병합한 트리에서 Node16/16·빌드·Chrome 전체 E2E·Edge A4/저장 E2E **PASS**. 메인 브랜치에 실제 merge commit/푸시는 하지 않았습니다. 최종 사용자 수용·승인 및 병합 시점 최신 HEAD 재검증은 별도입니다.
