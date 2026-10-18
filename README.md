@@ -37,3 +37,7 @@ React / TypeScript / Vite / CSS, 기본 로컬 개발 주소 `127.0.0.1`만 바�
 - [ ] 긴 URL·공백 없는 문장: 오른쪽 넘침 없음
 - [ ] 빈 섹션 및 작성자: 미리보기/인쇄 양쪽에서 숨김
 - [ ] Chrome / Edge 인쇄 옵션과 페이지 나눔 확인
+
+## 자동 검증 근거 (2026-10-18)
+
+GitHub Actions의 Ubuntu Node 22에서 단위 테스트 5/5, TypeScript + Vite 빌드, Chrome 실제 브라우저 검증과 A4 PDF 15페이지 출력이 확인되었습니다. 상세 로그: [Run #39127637583](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39127637583). 브라우저 시나리오 소스는 `tests/browser-smoke.mjs`입니다. 사용자 Windows Chrome/Edge 인쇄 화면과 학원 첨부 여부는 별도 확인이 필요합니다.
