@@ -8,7 +8,8 @@ import {join} from 'node:path';
 
 const chrome=process.env.CHROME_PATH||'chromium',url=process.env.SMOKE_URL||'http://127.0.0.1:4173';
 const origin=new URL(url).origin,key='astra-pdf-redesigner:current:v1',dbName='astra-pdf-redesigner:v2';
-const dir=mkdtempSync(join(tmpdir(),'astra-v1-cold-')),port=9340;
+const injectAbort=process.env.STEP2_INJECT_MIGRATION_ABORT==='1';
+const dir=mkdtempSync(join(tmpdir(),'astra-v1-cold-')),port=injectAbort?9343:9340;
 const proc=spawn(chrome,['--headless=new','--no-sandbox','--disable-gpu','--disable-dev-shm-usage',
   '--disable-background-networking','--no-first-run','--no-default-browser-check',
   '--user-data-dir='+dir,'--remote-debugging-port='+port,'about:blank'],{stdio:'ignore'});
@@ -68,14 +69,18 @@ try{
     if(r.exceptionDetails)throw Error(JSON.stringify(r.exceptionDetails));
     return r.result.value;
   };
-  const seed="(()=>{if(location.origin!=="+JSON.stringify(origin)+")return;localStorage.setItem("+JSON.stringify(key)+","+JSON.stringify(original)+");window.__astraV1Preseeded=true;})()";
+  // Abort after queuing the document write but before the migration transaction
+  // commits its document, active ID, and marker. The fault is one-shot and
+  // affects only the migration's combined documents+meta readwrite transaction.
+  const fault=injectAbort?
+    "const orig=IDBObjectStore.prototype.put;let injected=false;IDBObjectStore.prototype.put=function(value,...args){const req=orig.call(this,value,...args);if(!injected&&this.name==='documents'&&this.transaction.objectStoreNames.contains('meta')){injected=true;const tx=this.transaction;queueMicrotask(()=>{window.__astraMigrationAbortTriggered=true;try{tx.abort()}catch(e){window.__astraMigrationAbortError=String(e)}finally{IDBObjectStore.prototype.put=orig}})}return req};":"";
+  const seed="(()=>{if(location.origin!=="+JSON.stringify(origin)+")return;localStorage.setItem("+JSON.stringify(key)+","+JSON.stringify(original)+");window.__astraV1Preseeded=true;"+fault+"})()";
   const {identifier}=await send('Page.addScriptToEvaluateOnNewDocument',{source:seed});
   await send('Page.navigate',{url});
   await until(()=>evaluate('window.__astraV1Preseeded===true'));
   await send('Page.removeScriptToEvaluateOnNewDocument',{identifier});
   assert.equal(await evaluate('localStorage.getItem('+JSON.stringify(key)+')'),original);
 
-  await until(()=>evaluate("Boolean(document.querySelector('.project-paper')&&document.querySelector('.doc-list-item.active')&&document.querySelector('.save-chip')?.textContent==='저장됨')"));
   const snapshotExpr="(async()=>{"+
     "const db=await new Promise((resolve,reject)=>{const r=indexedDB.open("+JSON.stringify(dbName)+");r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});"+
     "const get=r=>new Promise((resolve,reject)=>{r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});"+
@@ -83,6 +88,22 @@ try{
     "const meta=db.transaction('meta','readonly').objectStore('meta');const a=meta.get('activeDocumentId'),m=meta.get('v1MigrationFinished');"+
     "const [active,marker]=await Promise.all([get(a),get(m)]);"+
     "return {docs,active,marker,v1:localStorage.getItem("+JSON.stringify(key)+")}}finally{db.close()}})()";
+  if(injectAbort){
+    await until(()=>evaluate("window.__astraMigrationAbortTriggered===true"));
+    await until(()=>evaluate("Boolean(document.querySelector('.warning[role=alert]')?.textContent)"));
+    assert.equal(await evaluate("window.__astraMigrationAbortError"),undefined,'Failed to abort the intended IndexedDB transaction');
+    const failed=await evaluate(snapshotExpr);
+    assert.equal(failed.docs.length,0,'An aborted migration left a partial V2 document');
+    assert.equal(failed.marker,undefined,'An aborted migration left a false completion marker');
+    assert.equal(failed.active,undefined,'An aborted migration changed the active V2 document');
+    assert.equal(failed.v1,original,'An aborted migration modified the V1 original');
+    console.log('PASS STEP2 MIGRATION ROLLBACK: forced IDB abort leaves no migrated doc, marker or active ID and preserves exact V1 bytes');
+    // On a fresh page the one-shot fault is gone; migration must retry safely.
+    await send('Page.reload',{ignoreCache:true});
+    await until(()=>evaluate("Boolean(document.querySelector('.project-paper')&&document.querySelector('.doc-list-item.active')&&document.querySelector('.save-chip')?.textContent==='저장됨')"));
+  }else{
+    await until(()=>evaluate("Boolean(document.querySelector('.project-paper')&&document.querySelector('.doc-list-item.active')&&document.querySelector('.save-chip')?.textContent==='저장됨')"));
+  }
   const initial=await evaluate(snapshotExpr);
   assert.equal(initial.v1,original,'Original V1 localStorage bytes were changed');
   assert.equal(initial.docs.length,1,'Cold start created unexpected blank/duplicate V2 documents');
@@ -127,7 +148,7 @@ try{
   await reload();
   await until(()=>evaluate("Boolean(document.querySelector('.doc-list-item.active')&&document.querySelector('.project-paper'))"));
   assert.deepEqual(await evaluate(snapshotExpr),initial,'Migration duplicated or rewrote existing V1/V2 data during reload');
-  console.log('PASS STEP2 COLD MIGRATION: reload does not duplicate migrated record or change legacy source');
+  console.log(injectAbort?'PASS STEP2 MIGRATION ROLLBACK: retry creates exactly one document, commits marker, preserves V1 bytes and remains idempotent after reload':'PASS STEP2 COLD MIGRATION: reload does not duplicate migrated record or change legacy source');
 }finally{
   if(ws)ws.close();
   if(proc.exitCode===null&&proc.signalCode===null){
