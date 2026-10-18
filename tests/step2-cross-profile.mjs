@@ -2,7 +2,8 @@
 // file, and load that file with Chrome's file input from a different profile B.
 // All content is synthetic. Node 22 / DevTools Protocol, no browser dependency.
 import assert from 'node:assert/strict';
-import {spawn,execFileSync} from 'node:child_process';
+import {execFileSync} from 'node:child_process';
+import {launchBrowser} from './browser-process.mjs';
 import {mkdtempSync,readFileSync,readdirSync,writeFileSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
@@ -19,22 +20,13 @@ async function until(fn,check=v=>Boolean(v),timeout=18000){
   }
   throw Error('Cross-profile test timed out: last='+JSON.stringify(last)+' error='+String(err||'none'));
 }
-async function launch(label,port){
-  const dir=join(workspace,'profile-'+label), child=spawn(chrome,[
-    '--headless=new','--no-sandbox','--disable-gpu','--disable-dev-shm-usage',
-    '--disable-background-networking','--no-first-run','--no-default-browser-check',
-    '--user-data-dir='+dir,'--remote-debugging-port='+port,'about:blank',
-  ],{stdio:'ignore'});
+async function launch(label){
+  const dir=join(workspace,'profile-'+label);
+  const browserSession=launchBrowser(chrome,dir,'STEP2 cross-profile '+label);
   let ws=null,seq=0,sessionId;
   const pending=new Map();
   try{
-    let endpoint;
-    for(let i=0;i<70;i++){
-      try{const r=await fetch('http://127.0.0.1:'+port+'/json/version');if(r.ok){endpoint=(await r.json()).webSocketDebuggerUrl;break;}}
-      catch{}
-      await wait(180);
-    }
-    if(!endpoint)throw Error('Chrome '+label+' did not start');
+    const endpoint=await browserSession.devtools();
     ws=new WebSocket(endpoint);
     await new Promise((resolve,reject)=>{
       ws.addEventListener('open',resolve,{once:true});
@@ -77,21 +69,12 @@ async function launch(label,port){
       try{await send('Page.reload',{ignoreCache:true});await done;}
       finally{clearTimeout(timer);ws.removeEventListener('message',listener);}
     };
-    const close=async()=>{
-      ws.close();
-      if(child.exitCode===null&&child.signalCode===null){
-        const exit=new Promise(resolve=>child.once('exit',resolve));
-        child.kill('SIGTERM');await Promise.race([exit,wait(2000)]);
-        if(child.exitCode===null&&child.signalCode===null){
-          child.kill('SIGKILL');await Promise.race([exit,wait(2000)]);
-        }
-      }
-    };
+    const close=async()=>{ws.close();await browserSession.close();};
     await until(()=>evaluate("Boolean(document.querySelector('.doc-list-item.active')&&document.querySelector('.section-editor .block-editor textarea')&&document.querySelector('.save-chip')?.textContent==='저장됨')"));
     return{send,evaluate,reload,close};
   }catch(e){
     if(ws)ws.close();
-    child.kill('SIGTERM');
+    await browserSession.close();
     throw e;
   }
 }
@@ -137,7 +120,7 @@ async function addSyntheticImage(tab,mime,name,w,h,shade){
 }
 let a,b;
 try{
-  a=await launch('A',9341);
+  a=await launch('A');
   const originalA=await a.evaluate(snapshotJS);
   assert.equal(originalA.docs.length,1);
   await a.evaluate(setInput('.project-layout .form-grid .field-wide input','EXPORT_A_WORKSPACE_20261019'));
@@ -184,7 +167,7 @@ try{
   console.log('PASS STEP2 PROFILE A: actual downloaded .localdoc.json file has complete text, theme and byte-identical PNG/WebP');
 
   await a.close();a=null;
-  b=await launch('B',9342);
+  b=await launch('B');
   const blankB=await b.evaluate(snapshotJS);
   assert.equal(blankB.docs.length,1);
   assert.equal(blankB.assets.length,0);
