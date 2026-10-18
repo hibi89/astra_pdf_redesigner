@@ -149,3 +149,13 @@
 - **프로필 B:** 프로필 A와 독립된 Chrome 사용자 디렉터리에서 빈 문서만 존재함을 먼저 확인. CDP `DOM.setFileInputFiles`로 A가 다운로드한 **동일 실물 파일**을 B의 프로젝트 가져오기 파일 입력창에 전달하여 앱 import. 기존 B 문서 보존, 원문·메타·디자인·이미지 bytes/순서/규격 정확 복원·모든 doc/section/block/asset ID 새로 발급·참조 오류 없음 PASS. 새로고침 후 유지·A4 PDF 본문·이미지 2개 포함 PASS.
 - 이전 검증 완료: 기존 STEP1 v1 cold-start 마이그레이션, 저장 실패 복원, 이미지 원자적 교체, 멀티탭 Web Locks, 긴 캡션·A4 페이지 나눔 등. **아직 미검증:** V1→V2 **초기 migration transaction 강제 abort/원본·marker rollback**, Windows Chrome/Edge 인쇄·한글/시각 수동 검수와 전체 접근성.
 - **상태:** STEP2 주요 자동 수용 증거 대부분 완료, 진행률 **약 96%**(비공식 추정). 전체 7단계 단순 동등가중 **약 28~29%**, 5%p 유의미 상승 아님. `main` 기능 STEP1 유지, STEP2 병합 HOLD, STEP3~7 미착수. 다음 `ㄱ`은 초기 migration 쓰기 실패 주입·복구 검사 1단위.
+
+
+## 2026-10-19 01:29 KST — STEP 1→2 최초 마이그레이션 트랜잭션 중단·복구 검증 성공
+- 기능 브랜치 `feature/step2-full-20261018`의 `tests/step2-cold-migration.mjs`에서 실제 Chrome IndexedDB `documents+meta` 마이그레이션 트랜잭션을 `put` 큐 등록 뒤 강제 `abort()`하는 1회 오류 주입 E2E 추가. 앱 로직·사용자 데이터는 변경하지 않고 합성 v1 데이터만 사용.
+- **실패 직후 검증:** V2 documents 0건, `v1MigrationFinished` marker 없음, `activeDocumentId` 없음, STEP1 v1 `localStorage` raw JSON 바이트 불변, 오류 안내 PASS.
+- **복구 검증:** 새로고침 후 주입 제거 → V1 원문 4개 항목/공백/줄바꿈·메타/디자인이 V2 문서로 1회 이동하고 marker·active 생성 PASS. 추가 reload 이후 같은 V2 ID·내용·marker 유지, 중복 문서 없음 PASS.
+- 기존 `tests/step2-browser.mjs`에서 저장 재시도 '저장됨' 표시 직후 모드 변경 버튼 활성화까지 기다리도록 시험 타이밍 수정. 이전 CI `39144986696`의 테스트 클릭 타이밍 실패 해결. 앱 기능 소스 수정 없음.
+- [GitHub Actions #39145149408](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39145149408) **SUCCESS**(테스트 코드 SHA `a5009a76499a983aa4566adabddabf862c9e839b`). 단위 **16/16**, TypeScript/Vite 빌드, STEP1 A4 PDF15p·STEP2 PNG/JPEG/WebP·JSON 프로필간 이식·IndexedDB 저장복구/멀티탭/긴 캡션 모든 Chrome 회귀 및 신규 abort·복구 PASS.
+- **잔여 수용:** 사용자 Windows Chrome/Edge에서 한글/폰트, A4 인쇄 이미지 잘림·페이지 나눔, 키보드 접근성 실제 수동 검수. Linux Chrome 자동 테스트 결과를 사용자 OS 실검수로 표현하지 않음.
+- STEP2 구현·자동검증 기준 추정 **약 97~98%**. 전체 로드맵 7단계 단순 동등가중 **약 28~29%**, 5%p 이상 진도 상승은 아님. STEP2 main 코드 병합 HOLD, STEP3~7 미착수. 다음 `ㄱ`: Windows/Edge 사용자 수동 수용 절차·결과 확인 및 병합 조건 판단.
