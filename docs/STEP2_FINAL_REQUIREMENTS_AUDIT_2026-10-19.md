@@ -19,7 +19,7 @@
 | 5. 데이터 모델 | schemaVersion 2, UUID 기반 문서/섹션/블록/자산 ID·내용/디자인 별도·빈 섹션 출력 규칙 | CI 검증 |
 | 6. 로컬 저장·보호 | IndexedDB 3 store, debounce·상태·빠른 전환 방어·QuotaExceededError 복구·교체 rollback·2탭 Web Locks | CI 검증 (브라우저 크래시/권한 강제 해제 미검증) |
 | 7. STEP1 마이그레이션 | v1 파서·V2 변환·동일 트랜잭션 marker, 원본 유지, 기존 ACTIVE 보존. 실제 새 Chrome 프로필에서 v1 선존재 cold-start·새로고침·중복 방지·원본 바이트 동일성 검증 | **실제 Chrome CI 검증** (저장 실패 주입 별도 미확인) |
-| 8. 프로젝트 export/import | `.localdoc.json`, 이미지 Base64 실제 파일, 크기/타입/버전·허용값·중복/누락 참조, 새 ID·트랜잭션 | 동일 Chrome 환경 CI 검증; **다른 브라우저 프로필/origin 가져오기 수동/자동 별도 필요** |
+| 8. 프로젝트 export/import | `.localdoc.json` 실제 다운로드 후 독립 Chrome 프로필 파일 입력으로 import, 이미지 Base64 원본 바이트·문서/디자인 복원·새 ID·기존 문서 유지·A4 PDF | **독립 프로필 Chrome CI 검증** |
 | 9. UI 구성·접근성 | 문서함 접기, 편집·디자인·PDF·JSON, label·disabled·경고 제공 | 구현 확인; 키보드/모바일 전체 수동 대기 |
 | 10. 테마·PDF | 기존 3종+compact, 공통 미리보기·인쇄, A4 PDF 15p/이미지/190줄 캡션 좌표·본문 보존 | Chrome CI 검증; Windows/Edge 및 픽셀 육안 수동 대기 |
 | 11. 모듈 분리 | model/idb/images/projectFile/useWorkspace/Workspace 및 CSS 책임 분리 | 구현 확인 |
@@ -61,3 +61,12 @@
 - 테스트 종료 시 Chrome 임시 프로필 삭제가 종종 `ENOTEMPTY` 경고를 내기 때문에 테스트 함수 검증과 폴더 정리를 분리. 최종 CI에 정리 지연 WARN 하나 있지만 기능 검증 통과. 임시 자료는 합성 문서만 포함하고 ephemeral CI runner에서 실행.
 - **여전히 미검증:** 초기 migration `readwrite` 강제 실패 시 완료 marker/원문 rollback(구현은 같은 transaction), 서로 다른 Chrome 프로필 사이 JSON 파일 내보내기/가져오기 실제 이식, 사용자 Windows/Edge A4·한글·미관·접근성 검수.
 - **병합 판정 HOLD 유지**, 다음 `ㄱ`은 별도 신규 프로필 JSON 이식 E2E 한 단위. Step 2 추정 약 95%, 전체 7단계 동일가중 약 28~29%; 지난 단계 대비 5%p 이상 상승이 아님.
+
+## 신규 독립 Chrome 프로필 A→B JSON 이식 검증 — 2026-10-19 01:19 KST
+- `tests/step2-cross-profile.mjs` 신규 및 `.github/workflows/ci.yml` CI 추가. 테스트 데이터는 synthetic 텍스트와 Canvas에서 생성한 PNG 40×70 및 WebP 84×36 이미지로 한정.
+- Chrome 프로필 **A**에 문서 작성·레이아웃 설정 및 2개 이미지 실제 IndexedDB 저장 → UI '프로젝트 내보내기'에서 `.localdoc.json` **실제 파일 다운로드** → 파일의 문서·이미지 원본 Base64 무결성 검증 PASS.
+- 프로필 A 종료 후, 별도 사용자 데이터 디렉터리의 Chrome 프로필 **B** 실행. 기존 빈 문서만 있는 DB 상태 확인 → CDP `DOM.setFileInputFiles`를 사용해 프로필 A가 다운로드한 **같은 파일 경로**를 브라우저의 실제 `input[type=file]`에 전달 → 앱 기존 import 코드 실행.
+- 프로필 B에서 기존 빈 문서 보존, 문서 본문/섹션·한글·줄바꿈·작성자·날짜/스타일 보존, PNG·WebP **원본 이미지 바이트·규격·종류·순서 일치**, 문서/섹션/블록/asset ID 재발급 및 참조 무결성 PASS. 새로고침 후 보존 PASS.
+- Chrome B A4 PDF에서 문자열 표지와 내장 이미지 2개 확인 PASS (시각적 픽셀 검수는 아님).
+- [GitHub Actions #39144399956](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39144399956) **SUCCESS**, 코드 SHA `17f2e65e1873b4c75dc484cc7c6e11965a29f5ff`; 단위 16/16, TS/Vite 빌드, STEP1/2 기존 Chrome 회귀 및 신규 cross-profile 검사 PASS.
+- **잔여:** 초기 STEP1→STEP2 migration 트랜잭션 실패 주입·원자적 rollback 증거, 사용자 Windows Chrome/Edge A4·한글·시각·입력 수동 검수. **STEP2 최종 완료/main 병합 HOLD**. 추정 STEP2 약 96%, 전체 동등 7단계 약 28~29%; 이전 대비 5%p 상승 미만.
