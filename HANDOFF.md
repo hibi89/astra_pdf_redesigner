@@ -192,3 +192,16 @@
 8. **백업/보안·배포:** 사용자 로컬 데이터·이미지 원본 무변경. 프로젝트 JSON 미암호화, 테스트는 합성 자료만 사용. Production/Vercel 미배포. API·비밀 키 추가 없음.
 9. **다음 작업·수용 조건:** 사용자 실제 Windows Chrome/Edge 실행 결과(21항 중 필수 관문·FAIL 재현·합성 PDF/스크린샷) 접수 → 결함 수정 시 CI 재검증 → feature-to-main diff 최종 리뷰·사용자 승인 후 병합 → main Actions 검증. 결과 미수령이면 PASS 주장·병합 금지.
 10. **기준 시각/진척도:** 2026-10-19 01:40 KST; STEP2 **약 97~98%** 추정, 전체 7단계 단순 동등가중 **약 28~29%** 유지. 5%p 진도 상승 없음; 새 문서·README·감사/BOOK 갱신 후 GitHub 재조회 필요.
+
+
+## 최신 인수인계 — 2026-10-19 02:14 KST (STEP2 병합 전 코드 감사 / CI fail-closed)
+1. **목표/상태:** p5 Astra PDF Redesigner. STEP2 개인 문서 제작기 feature는 자동 검증 상당 부분 완료. 기존 STEP1 `main` 보존. STEP2 main 병합·STEP3~7 아직 시작하지 않음. 사용자는 가능한 자동 검증을 GPT가 직접 수행하고 Windows 실제 조작을 반복 요구하지 않기를 원함.
+2. **이번 작업:** `main...feature/step2-full-20261018` 및 역방향 비교(기능 브랜치 63 ahead, 28 behind; main의 최신 HANDOFF/STATUS 문서 유지 필요), `src/step2/{idb,useWorkspace,model,images,projectFile,Workspace}`, `src/Root.tsx`, `.github/workflows/ci.yml` 및 E2E 스모크 정적 감사. 새 보고 `docs/STEP2_PREMERGE_CODE_CI_AUDIT_2026-10-19.md`.
+3. **코드 수정:** CI에서 Chrome 없을 때 경고+성공(`exit 0`) 처리 경로를 **오류+실패(`exit 1`)**로 변경. React 앱/IndexedDB 기능 소스 변경 없음. 검증 코드 SHA `6708ce28ebe7781e7f282443ab20295e139e4ad3`.
+4. **실제 검증:** [Actions #39148544554](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39148544554) **success**; Node 16/16 PASS, TypeScript/Vite build PASS, 로그에 `Chrome: /usr/bin/google-chrome`, STEP1 15p PDF/STEP2 이미지·JSON·동시탭·migration abort·큰 이미지/긴 캡션 등 모든 Chrome 스모크 PASS. 테스트 Chrome 임시 profile cleanup 경고 `ENOTEMPTY`는 가끔 있으나 최종 CI success.
+5. **Windows 실제 제출물:** 사용자가 Windows Chrome155에서 짧은 PDF 및 편집기 화면 제출. PDF 1p A4 `594.96×841.92pt`, 맑은 고딕 embedded+Unicode, 한글 원문 추출 가능, 편집기 UI 인쇄 제외 확인. 이 PDF는 이미지 없는 1페이지라 Windows 대형 이미지/2페이지 이상·Edge 시각/글꼴·키보드까지 완료로 간주하지 않음. 실제 사용자 PDF 파일은 공개 GitHub 저장소로 옮기지 않음. 21항 전체 PASS는 아직 미확정, 일부 Chrome 부분 증거 기록.
+6. **병합 판단:** HOLD. feature와 main은 diverged; main 문서 기록을 보존하며 실제 3-way merge/diff/새 CI 확인 필요. 사용자의 명시적 승인 전 main 기능 병합 금지.
+7. **Repo/Paths:** `hibi89/astra_pdf_redesigner`, feature `feature/step2-full-20261018`; `docs/STEP2_PREMERGE_CODE_CI_AUDIT_2026-10-19.md`, Windows checklist `docs/STEP2_WINDOWS_ACCEPTANCE_AND_MERGE_GATE_2026-10-19.md`, `.github/workflows/ci.yml`, `README.md`. 기존 원본 roadmap/TXT/PNG·STEP1 v1 localStorage 삭제/수정 금지.
+8. **기술/환경:** Node22, React19/TS/Vite/IndexedDB, `npm install`, `npm test`, `npm run build`, `npm run dev`. Local 127.0.0.1. No Vercel/Production, 외부 AI API 없음.
+9. **다음 1단위:** 이미 Linux Chrome 자동 검사 통과한 것은 반복 검증 최소화. 남은 Windows Edge/이미지 포함 장문 수동 검수 범위를 사용자와 합의하되 사용자 PC 개입 요구 최소화; 병합 승인 후 main 최신 문서 보존하며 병합 및 main CI 검증. STEP3는 별도 사용자 지침 후.
+10. **진행률/시간:** 2026-10-19 02:14 KST. STEP2 약 **97~98%**, 전체 7단계 단순 동등 비중 약 **28~29%**. 5%p 유의미한 상승 아님. 검증 SHA `6708ce28ebe7781e7f282443ab20295e139e4ad3`, Actions #39148544554 성공 확인.
