@@ -15,6 +15,8 @@ test('STEP3 vector paint risk: count distinct fill and stroke events, not path c
   assert.equal(count,4);
   assert.equal(countVectorPaintOps({fnArray:[91,88,11,12]},op),0);
   assert.equal(countVectorPaintOps({fnArray:[91,88]},{}),0);
+  assert.equal(countVectorPaintOps({fnArray:[91,91,91]}, {...op,constructPath:91}),3);
+  assert.equal(countVectorPaintOps({fnArray:[91,op.stroke,91,op.stroke]}, {...op,constructPath:91}),2);
 });
 
 test('STEP3 vector paint risk: per-page warnings expose structural loss but preserve text',()=>{
@@ -24,8 +26,8 @@ test('STEP3 vector paint risk: per-page warnings expose structural loss but pres
   ]);
   assert.equal(draft.pages[0].vectorPaintCount,3);
   assert.equal(draft.pages[1].vectorPaintCount,0);
-  assert.ok(draft.warnings.some(w=>w.includes('1페이지 벡터 경로 페인팅 3회')));
-  assert.ok(!draft.warnings.some(w=>w.includes('2페이지 벡터 경로 페인팅')));
+  assert.ok(draft.warnings.some(w=>w.includes('1페이지 벡터 경로 관련 명령 3회')));
+  assert.ok(!draft.warnings.some(w=>w.includes('2페이지 벡터 경로 관련 명령')));
   assert.ok(draft.warnings.some(w=>w.includes('도형/셀 개수가 아닙니다')));
   assert.equal(draft.pages[0].blocks[0].text,'TABLE_A_906');
   assert.equal(draft.pages[1].blocks[0].text,'END_907');
@@ -37,5 +39,5 @@ test('STEP3 vector paint risk: image-only and unknown operator-analysis cases do
   ]);
   assert.equal(draft.pages[0].vectorPaintCount,0);
   assert.ok(draft.warnings.some(w=>w.includes('미복원 이미지 1건')));
-  assert.ok(!draft.warnings.some(w=>w.includes('벡터 경로 페인팅')));
+  assert.ok(!draft.warnings.some(w=>w.includes('벡터 경로 관련 명령')));
 });

@@ -78,7 +78,7 @@ export default function PdfImportPanel({disabled,onImport}:Props){
     {draft&&<>
       <p className="help-text">원본: {draft.fileName} · {draft.pageCount}페이지 · 추출 {draft.totalChars.toLocaleString('ko-KR')}자 · 편집 가능한 텍스트 블록 {totalBlocks}개</p>
       <p className="help-text" data-step3-image-count>이미지 감지 {detected}건 · PNG 복원 {recovered}건 · 저장 선택 {included}건 · 미복원 {Math.max(0,detected-recovered)}건</p>
-      <p className="help-text" data-step3-vector-count>원본 벡터 경로 페인팅 {vectorPaints}회 · 선/도형·표 구조 자동 복원 미지원 (도형/셀 개수 아님)</p>
+      <p className="help-text" data-step3-vector-count>원본 벡터 경로 관련 명령 {vectorPaints}회 · 선/도형·표 구조 자동 복원 미지원 (명령 수, 도형/셀 개수 아님)</p>
       <div className="warning" role="status"><strong>완전 복원이 아닙니다.</strong> 텍스트 분류·위치·줄바꿈·공백은 추정입니다. 이미지·표·도형이 누락될 수 있습니다. 원본을 대조해 수정하세요.</div>
       <details open><summary>추출 경고·검토 사항 {draft.warnings.length}건</summary>
         <ul>{draft.warnings.map((message,i)=><li key={i}>{message}</li>)}</ul>

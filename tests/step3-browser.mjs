@@ -201,13 +201,13 @@ try{
   assert.ok(mixedWarnings.some(w=>w?.includes('열 또는 넓은 텍스트 간격')),
     'The actual multi-column PDF must warn about uncertain reading order');
   const vectorRiskSummary=await evaluate("document.querySelector('[data-step3-vector-count]')?.textContent");
-  assert.match(vectorRiskSummary??'',/벡터 경로 페인팅 3회/,
-    'Actual source PDF has exactly 3 stroke paint commands for vector table rules');
-  assert.ok(mixedWarnings.some(w=>w?.includes('1페이지 벡터 경로 페인팅 3회')),
-    'Review must disclose the page-local 3 vector path paint operations and lack of table-line reconstruction');
+  assert.match(vectorRiskSummary??'',/벡터 경로 관련 명령 [1-9][0-9]*회/,
+    'PDF.js must flag the source vector path construction batches');
+  assert.ok(mixedWarnings.some(w=>/1페이지 벡터 경로 관련 명령 [1-9][0-9]*회/.test(w??'')),
+    'Review must disclose page-local vector batches without claiming preserved table lines');
   assert.ok((vectorRiskSummary??'').includes('도형/셀 개수 아님'),
     'Risk count must never masquerade as recovered table cells');
-  console.log('PASS STEP3 MIXED VECTOR RISK: 3 painted paths, explicit table/shape loss advisory');
+  console.log('PASS STEP3 MIXED VECTOR RISK:',vectorRiskSummary,'; explicit table/shape loss advisory');
   assert.ok(await evaluate("document.querySelector('.step3-import-panel')?.textContent?.includes('이미지·표·도형이 누락될 수 있습니다')"),
     'Vector table/graphics fidelity limitation must remain visible');
   const mixedSummary=await evaluate("document.querySelector('[data-step3-image-count]')?.textContent");

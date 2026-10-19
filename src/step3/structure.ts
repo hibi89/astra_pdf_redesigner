@@ -100,7 +100,7 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
     const detected=page.imageRecovery?.detected??(page.imageDetected?1:0);
     const omitted=Math.max(0,detected-images.length);
     const vectorPaintCount=Number.isSafeInteger(page.vectorPaintCount)&&page.vectorPaintCount!>0?page.vectorPaintCount!:0;
-    if(vectorPaintCount>0)warnings.push(page.number+'페이지 벡터 경로 페인팅 '+vectorPaintCount+'회 감지: 원본 표 선·셀 경계·도형은 새 문서로 자동 복원되지 않습니다. 원본과 대조해 수동 보완하세요. (이 값은 도형/셀 개수가 아닙니다.)');
+    if(vectorPaintCount>0)warnings.push(page.number+'페이지 벡터 경로 관련 명령 '+vectorPaintCount+'회 감지: 원본 표 선·셀 경계·도형은 새 문서로 자동 복원되지 않습니다. 원본과 대조해 수동 보완하세요. (명령 수이며 도형/셀 개수가 아닙니다.)');
     if(detected>0){
       warnings.push(page.number+'페이지에 PDF 이미지가 감지됐습니다. '+detected+'건 중 '+images.length+'건 PNG 재구성, '+omitted+'건 미복원. 원본 비트스트림이 아니라 PDF.js가 디코딩한 픽셀을 PNG로 재구성하므로 색상·마스크·배치를 반드시 대조하세요.');
       if(omitted)warnings.push(page.number+'페이지 미복원 이미지 '+omitted+'건은 새 PDF에서 누락될 수 있습니다. 별도로 확인하고 수동 보완하세요.');
