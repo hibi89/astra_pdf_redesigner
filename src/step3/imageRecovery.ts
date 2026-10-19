@@ -16,6 +16,7 @@ export interface ImageOpCodes {
   paintInlineImageXObject:number;paintImageMaskXObject:number;
   paintImageXObjectRepeat?:number;paintInlineImageXObjectGroup?:number;
   paintImageMaskXObjectRepeat?:number;paintImageMaskXObjectGroup?:number;
+  clip?:number;eoClip?:number;
 }
 export interface ImageOperatorList {
   fnArray:readonly number[];argsArray:readonly unknown[][];
@@ -35,18 +36,27 @@ const round=(value:number)=>Math.max(0,Math.round(value*100)/100);
 
 export interface ImageOperator {
   opIndex:number;kind:'xobject'|'inline'|'unsupported';args:readonly unknown[];
-  origin:PdfOrigin|null;reason?:string;
+  origin:PdfOrigin|null;reason?:string;clipWarning?:string;
 }
 export function scanImagePlacements(
   pageNumber:number,fn:ImageOperatorList,viewport:readonly number[],
   pageWidth:number,pageHeight:number,ops:ImageOpCodes
 ):ImageOperator[]{
-  let matrix:Matrix=[...identity],stack:Matrix[]=[];
+  let matrix:Matrix=[...identity],clipActive=false;
+  const stack:{matrix:Matrix;clipActive:boolean}[]=[];
   const found:ImageOperator[]=[];
   for(let i=0;i<fn.fnArray.length;i++){
     const op=fn.fnArray[i],args=fn.argsArray[i]??[];
-    if(op===ops.save){stack.push([...matrix]);continue;}
-    if(op===ops.restore){matrix=stack.pop()??[...identity];continue;}
+    if(op===ops.save){stack.push({matrix:[...matrix],clipActive});continue;}
+    if(op===ops.restore){
+      const previous=stack.pop();
+      matrix=previous?.matrix??[...identity];clipActive=previous?.clipActive??false;
+      continue;
+    }
+    // Track active PDF clip scopes. Cropping the decoded pixels is not attempted.
+    if((ops.clip!==undefined&&op===ops.clip)||(ops.eoClip!==undefined&&op===ops.eoClip)){
+      clipActive=true;continue;
+    }
     if(op===ops.transform){
       const delta=(args.length===6&&args.every(n=>typeof n==='number'&&Number.isFinite(n)))?args as number[]:null;
       if(delta)matrix=multiply(matrix,delta);
@@ -72,7 +82,9 @@ export function scanImagePlacements(
     found.push({opIndex:i,kind:isXObject?'xobject':isInline?'inline':'unsupported',args,
       origin,reason:!isBasic?'이미지 마스크·반복·그룹 그래픽은 자동 복원하지 않습니다.':
         skewOrRotation?'이미지가 회전되거나 기울어져 있어 자동 배치를 보류합니다.':
-        !valid?'이미지 영역이 페이지 밖이거나 위치가 불확실합니다.':undefined});
+        !valid?'이미지 영역이 페이지 밖이거나 위치가 불확실합니다.':undefined,
+      clipWarning:clipActive&&isBasic?
+        '이미지에 클리핑 경로가 적용됐습니다. 복원 PNG에는 잘린 영역이 재현되지 않을 수 있으므로 원본과 반드시 대조하세요.':undefined});
   }
   return found;
 }
@@ -139,6 +151,8 @@ export async function recoverPageImages(
   const entries=scanImagePlacements(pageNumber,fn,viewport,pageWidth,pageHeight,ops);
   const images:RecoveredPdfImage[]=[],problems:string[]=[];
   for(const entry of entries){
+    // Keep valid decoded images, but surface clip-parity risks for review.
+    if(entry.clipWarning)problems.push(entry.clipWarning);
     if(images.length>=LIMIT.perPage){problems.push('페이지당 복원 이미지 15개 제한 초과');continue;}
     if(!entry.origin||entry.reason||entry.kind==='unsupported'){
       problems.push(entry.reason??'이미지 위치 또는 픽셀 복원 불가');continue;

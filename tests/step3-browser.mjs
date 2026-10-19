@@ -5,6 +5,7 @@ import {mkdtempSync,rmSync,writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {launchBrowser} from './browser-process.mjs';
+import {makeClippedImagePdf} from './fixtures/step3-clipped-pdf.mjs';
 const binary=process.env.CHROME_PATH||'chromium',url=process.env.SMOKE_URL||'http://127.0.0.1:4173';
 const dir=mkdtempSync(join(tmpdir(),'astra-step3-'));
 const browser=launchBrowser(binary,dir,'STEP3 PDF import');
@@ -132,6 +133,35 @@ try{
   assert.ok(/^\s*\d+\s+\d+\s+image/m.test(embedded),'Reprinted A4 PDF must include recovered raster image');
   console.log('PASS STEP3 MULTIPAGE/IMAGE REPRINT: source order and embedded PNG survive theme/reload/A4 output');
   console.log('PASS STEP3 END-TO-END: imported PDF survives theme/reload and retains start/end markers in new A4 PDF');
+
+  // Real clipped PDF, not only simulated PDF.js operator arrays.
+  const clipBytes=makeClippedImagePdf(),clipPath=join(dir,'step3-clipped-source.pdf');
+  writeFileSync(clipPath,clipBytes);
+  assert.ok(execFileSync('pdftotext',[clipPath,'-'],{encoding:'utf8'}).includes('STEP3_CLIP_SOURCE_842'));
+  const clipRows=execFileSync('pdfimages',['-list',clipPath],{encoding:'utf8'}).split('\n')
+    .filter(line=>/^\s*\d+\s+\d+\s+image/.test(line));
+  assert.equal(clipRows.length,2,'Fixture PDF must draw two bitmap images, including a clipped occurrence');
+  const clipBefore=await evaluate("document.querySelectorAll('.doc-list-item').length");
+  const clipActiveTitle=await evaluate("document.querySelector('.doc-list-item.active strong')?.textContent");
+  await evaluate("(()=>{const encoded="+JSON.stringify(clipBytes.toString('base64'))+";"+
+    "const bytes=Uint8Array.from(atob(encoded),c=>c.charCodeAt(0));"+
+    "const file=new File([bytes],'step3-clip-fixture.pdf',{type:'application/pdf'});"+
+    "const dt=new DataTransfer();dt.items.add(file);"+
+    "const input=document.querySelector('.step3-import-panel input[type=file]');"+
+    "input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}));})()");
+  const clipWarnings=await eventually(
+    ()=>evaluate("[...document.querySelectorAll('.step3-import-panel details li')].map(x=>x.textContent)"),
+    lines=>lines?.some(line=>line?.includes('이미지에 클리핑 경로가 적용됐습니다')),
+  );
+  assert.ok(clipWarnings.some(line=>line?.includes('클리핑 경로')));
+  const clipSummary=await evaluate("document.querySelector('[data-step3-image-count]')?.textContent");
+  assert.match(clipSummary??'',/이미지 감지 [1-9]/);
+  assert.match(clipSummary??'',/PNG 복원 [1-9]/);
+  assert.equal(await evaluate("document.querySelectorAll('.doc-list-item').length"),clipBefore,
+    'Clipped PDF review must not persist a document before confirmation');
+  assert.equal(await evaluate("document.querySelector('.doc-list-item.active strong')?.textContent"),clipActiveTitle,
+    'Clipped PDF review must preserve the existing active document');
+  console.log('PASS STEP3 CLIPPED XOBJECT PDF: real clipped raster triggers a review warning without premature persistence');
 }finally{
   if(ws)ws.close();
   await browser.close();

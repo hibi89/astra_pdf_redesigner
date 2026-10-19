@@ -127,3 +127,44 @@ test('STEP3 images: rejected placement does not corrupt following graphics-state
   assert.deepEqual(result[1].origin,{page:2,x:45,y:182,width:100,height:60});
   assert.equal(result[1].reason,undefined);
 });
+
+test('STEP3 images: PDF clipping flags active scopes and restores after Q',()=>{
+  const clipOp:ImageOpCodes={...op,clip:10,eoClip:11};
+  const fn={
+    fnArray:[op.save,op.transform,op.paintImageXObject,op.restore,
+      op.save,clipOp.clip!,op.transform,op.paintImageXObject,
+      op.save,clipOp.eoClip!,op.paintInlineImageXObject,op.restore,
+      op.paintImageMaskXObject,op.restore,
+      op.save,op.transform,op.paintImageXObject,op.restore],
+    argsArray:[[],[96,0,0,64,60,610],['regular'],[],
+      [],[],[140,0,0,90,55,435],['clipped'],
+      [],[],[{}],[],['masked'],[],
+      [],[75,0,0,40,50,300],['after-restore'],[]],
+  };
+  const entries=scanImagePlacements(1,fn,[1,0,0,-1,0,842],595,842,clipOp);
+  assert.equal(entries.length,5);
+  assert.equal(entries[0].clipWarning,undefined,'unclipped image should not be flagged');
+  assert.ok(entries[1].clipWarning?.includes('클리핑 경로'));
+  assert.ok(entries[2].clipWarning?.includes('클리핑 경로'),'nested even-odd clip must warn');
+  assert.equal(entries[3].kind,'unsupported');
+  assert.equal(entries[4].clipWarning,undefined,'Q must restore clipping and not warn later image');
+  assert.deepEqual(entries[4].origin,{page:1,x:50,y:502,width:75,height:40});
+});
+
+test('STEP3 images: clipped and unsupported placements retain loss counts separately from clip advisories',()=>{
+  const page:PdfPageInput={number:1,width:595,height:842,
+    pieces:[pixel('원본 문장은 변하지 않습니다',1,50,80)],imageDetected:true,
+    imageRecovery:{detected:4,images:[{
+      id:'valid-clipped-image',origin:{page:1,x:55,y:250,width:140,height:90},
+      width:24,height:24,mimeType:'image/png',
+      blob:new Blob(['synthetic'],{type:'image/png'}),include:true,method:'decoded-xobject',
+    }],problems:['이미지에 클리핑 경로가 적용됐습니다. 원본 대조 필요',
+      '이미지 마스크 복원 불가','반복 이미지 복원 불가','그룹 이미지 복원 불가']}};
+  const draft=makePdfDraft('clipped-with-unsupported.pdf',[page]);
+  assert.equal(draft.pages[0].imageCount,4);
+  assert.equal(draft.pages[0].images.length,1);
+  assert.equal(draft.pages[0].omittedImages,3);
+  assert.ok(draft.warnings.some(t=>t.includes('미복원 이미지 3건')));
+  assert.ok(draft.warnings.some(t=>t.includes('클리핑 경로')));
+  assert.equal(draft.pages[0].blocks[0].text,'원본 문장은 변하지 않습니다');
+});
