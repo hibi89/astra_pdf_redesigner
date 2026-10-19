@@ -196,6 +196,8 @@ try{
   for(const marker of MIXED_LAYOUT_MARKERS)
     assert.equal(reviewText.split(marker).length-1,1,'Missing or duplicated review marker: '+marker);
   const mixedWarnings=await evaluate("[...document.querySelectorAll('.step3-import-panel details li')].map(x=>x.textContent)");
+  console.log('STEP3 MIXED WARNING COUNT:',mixedWarnings.length,
+    'column=',mixedWarnings.some(w=>w?.includes('열 또는 넓은 텍스트 간격')));
   assert.ok(mixedWarnings.some(w=>w?.includes('열 또는 넓은 텍스트 간격')),
     'The actual multi-column PDF must warn about uncertain reading order');
   assert.ok(await evaluate("document.querySelector('.step3-import-panel')?.textContent?.includes('이미지·표·도형이 누락될 수 있습니다')"),

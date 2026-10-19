@@ -66,6 +66,16 @@ export function reconstructLines(page:PdfPageInput):{lines:PdfLine[];multiColumn
       Math.max(Math.min(...left.map(l=>l.y)),Math.min(...right.map(l=>l.y)));
     if(overlap>20)multiColumn=true;
   }
+  // PDF.js can combine left and right runs into a single TextItem. That
+  // erases their individual x coordinates even if its bbox still covers a
+  // large gap. Warn conservatively on repeated short-but-sparse wide lines;
+  // never reorder their text or claim that columns were reconstructed.
+  const sparseWide=lines.filter(line=>{
+    const characters=line.text.replace(/\s/g,'').length;
+    return characters>=6&&characters<=75&&line.width>=page.width*.42&&
+      line.width>characters*line.fontSize*.9;
+  });
+  if(sparseWide.length>=2)multiColumn=true;
   return{lines,multiColumn};
 }
 function lineRole(line:PdfLine,bodyFont:number):PdfRole{

@@ -62,3 +62,18 @@ test('STEP3: suspect large side-by-side text gap triggers reading-order warning'
   assert.equal(reconstructLines(p).multiColumn,true);
   assert.ok(makePdfDraft('col.pdf',[p]).warnings.some(w=>w.includes('열 또는')));
 });
+
+test('STEP3: merged sparse wide text items warn about possible columns without rewriting text',()=>{
+  const merged={number:1,width:595,height:842,imageDetected:false,pieces:[
+    piece('LEFT_ALPHA_902 RIGHT_ALPHA_903',1,40,110,12,407),
+    piece('LEFT_BETA_904 RIGHT_BETA_905',1,40,150,12,399),
+    piece('TABLE_A_906 TABLE_B_907',1,50,260,11,328),
+    piece('TABLE_C_908 TABLE_D_909',1,50,320,11,328),
+  ]};
+  const result=reconstructLines(merged);
+  assert.equal(result.multiColumn,true);
+  const draft=makePdfDraft('merged-columns.pdf',[merged]);
+  assert.ok(draft.warnings.some(w=>w.includes('열 또는 넓은 텍스트 간격')));
+  assert.ok(draft.pages[0].blocks.some(b=>b.text.includes('LEFT_ALPHA_902 RIGHT_ALPHA_903')));
+  assert.ok(draft.pages[0].blocks.some(b=>b.text.includes('TABLE_C_908 TABLE_D_909')));
+});
