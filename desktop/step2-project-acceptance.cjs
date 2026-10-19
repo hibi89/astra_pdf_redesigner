@@ -108,6 +108,7 @@ async function verifyReloadedProject(){
   }finally{db.close();}
 }
 async function runStep2ProjectAcceptance(win,renderLocalPdf){
+  const verifyOnly=process.argv.includes('--astra-step2-preservation-verify');
   if(process.env.GITHUB_ACTIONS!=='true'||!process.env.RUNNER_TEMP)
     throw Error('STEP2 acceptance allowed on GitHub Actions only');
   const root=path.resolve(process.env.RUNNER_TEMP);
@@ -116,13 +117,19 @@ async function runStep2ProjectAcceptance(win,renderLocalPdf){
      path.dirname(output)!==root||
      !/^astra-step2-project-[A-Za-z0-9-]+\.pdf$/i.test(path.basename(output)))
     throw Error('STEP2 PDF output must be directly under isolated RUNNER_TEMP');
-  const before=await win.webContents.executeJavaScript(
-    '('+editStep2InBrowser.toString()+')('+JSON.stringify(PNG64)+')',true);
-  if(!before?.editorSaved||!before?.image)throw Error('STEP2 UI edit did not complete');
+  if(!verifyOnly){
+    const before=await win.webContents.executeJavaScript(
+      '('+editStep2InBrowser.toString()+')('+JSON.stringify(PNG64)+')',true);
+    if(!before?.editorSaved||!before?.image)throw Error('STEP2 UI edit did not complete');
+  }
   await win.loadURL(APP_URL);
   const persisted=await win.webContents.executeJavaScript(
     '('+verifyReloadedProject.toString()+')()',true);
   if(!persisted?.saved||persisted.assets!==1)throw Error('STEP2 IndexedDB reload failed');
+  if(verifyOnly){
+    console.log('PASS ASTRA STEP2 PROFILE PRESERVED: stored document and PNG survived installed EXE restart');
+    return;
+  }
   const bytes=await renderLocalPdf();
   await fs.writeFile(output,bytes,{flag:'wx'});
   const restored=await fs.readFile(output);
