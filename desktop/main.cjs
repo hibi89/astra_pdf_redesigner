@@ -11,6 +11,8 @@ const {runStep2VersionchangeAcceptance}=require('./step2-versionchange-acceptanc
 
 const APP_URL='astra://app/index.html';
 const SMOKE=process.argv.includes('--astra-desktop-smoke');
+const PERSONAL_TEST=process.argv.includes('--astra-personal-test');
+if(SMOKE&&PERSONAL_TEST)throw Error('Smoke and personal-test profiles are mutually exclusive');
 const PDF_ACCEPTANCE=SMOKE&&process.argv.includes('--astra-pdf-acceptance');
 const STEP2_ACCEPTANCE=SMOKE&&(process.argv.includes('--astra-step2-acceptance')||process.argv.includes('--astra-step2-preservation-verify')||process.argv.includes('--astra-step2-schema-upgrade-verify'));
 const STEP2_VERSIONCHANGE_ACCEPTANCE=SMOKE&&process.argv.includes('--astra-step2-versionchange-verify');
@@ -25,7 +27,11 @@ app.setPath('userData',SMOKE
     /^astra-step2-profile-[A-Za-z0-9-]+$/.test(path.basename(process.env.ASTRA_STEP2_PROFILE_DIR))
     ?path.resolve(process.env.ASTRA_STEP2_PROFILE_DIR)
     :path.join(os.tmpdir(),'astra-desktop-ci-'+process.pid))
-  :path.join(app.getPath('appData'),'AstraPDFRedesigner'));
+  :PERSONAL_TEST
+    ?path.join(os.tmpdir(),'astra-p5-personal-test-profile')
+    :path.join(app.getPath('appData'),'AstraPDFRedesigner'));
+if(PERSONAL_TEST)console.log('ASTRA PERSONAL TEST userData:',app.getPath('userData'));
+
 if(process.platform==='win32')app.setAppUserModelId('com.astra.pdfredesigner');
 
 const lock=app.requestSingleInstanceLock();
