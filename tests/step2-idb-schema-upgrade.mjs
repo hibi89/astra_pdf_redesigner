@@ -121,5 +121,8 @@ try {
 } finally {
   if(ws)ws.close();
   await browser.close();
-  rmSync(dir,{recursive:true,force:true,maxRetries:10,retryDelay:200});
+  // Browser process is gone, but Chrome helper processes may still release
+  // profile files asynchronously. Cleanup must not turn a passed test red.
+  try { rmSync(dir,{recursive:true,force:true,maxRetries:20,retryDelay:300}); }
+  catch(error) { console.warn('WARN isolated Chrome profile cleanup:',error.message); }
 }
