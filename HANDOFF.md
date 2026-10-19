@@ -434,3 +434,10 @@
 8. **원본·백업·인증·수정 금지:** 설계 원본 `docs/ASTRA_ORIGINAL_ROADMAP.txt`/PNG 2장/STEP2 사용자 원본 지침·localStorage STEP1 v1·IndexedDB STEP2 v2 데이터 변경 금지. 이번 검증은 GitHub Windows 임시 프로필·합성 자료만 사용, 고객 파일·비밀·환경변수 기록/외부 전송 없음. 이전 기능 커밋 SHA로 원복 가능; 새 프로그램 출시에 서명/SmartScreen 대응 필요.
 9. **다음 우선순위·절차·완료·승인:** 다음 `ㄱ`은 **실제 합성 IndexedDB STEP2 문서+PNG를 버전 업그레이드 전후 동일 Windows 프로필에서 비교 검증**하거나, 사용자 Windows에서 저장창/한글 장문 문서를 수동 검수. 기능 브랜치의 추가 테스트는 1단위씩 하고 Windows CI 성공 후 기록. PR3/PR4의 main 병합과 STEP4 착수는 최신 사전검사·사용자 별도 명시 승인 전 금지.
 10. **검증 시각·범위·문서 기준:** 2026-10-19 16:11:22 KST, GitHub Actions 성공 SHA/Windows 로그의 STEP2 저장 문서 3p/5토큰/1이미지·기존 회귀 통과 확인. 문서 갱신 후 main HEAD와 중앙 BOOK p5 행 별도 재조회 필수. Linux/Windows CI 결과는 실고객 품질·상용 준비 완료가 아님.
+
+## 2026-10-19 16:22:28 KST — Windows STEP2 동일 프로필 별도 EXE 재실행 보존 PASS
+- PR4 feature 코드 `0c627cdca0668a6f7548a1407eb8d5088faaa264`, [Windows CI #39215369203](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39215369203) `completed/success` (head SHA 일치), Node 19/19·desktop 6/6·빌드·NSIS 설치/제거 PASS.
+- 실제 STEP2 UI 합성 문서+PNG IndexedDB 저장 → A4 3페이지/식별자 5/5/래스터 1 출력 → **별도 설치 EXE 두 번째 프로세스에서 동일 CI 격리 프로필로 재실행, 문서·이미지·캡션·자산·실제 이미지 디코딩 보존 PASS**. 로그 `PASS ASTRA STEP2 PROFILE PRESERVED`, `PASS ASTRA STEP2 SECOND EXE LAUNCH` 확인.
+- 보고 `docs/WINDOWS_STEP2_RESTART_PRESERVATION_2026-10-19.md` (PR4 feature docs commit `4249efe10b7959a7899b7af9e7b8a78ac237c1eb`). 시험용 unsigned EXE SHA256 `AB74148E4DD30CBB7C9996790271AF4832DDD0A6896856211F53FDDB5D3E6AD2`, [Artifact #12169552072](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39215369203/artifacts/12169552072) 112310681 bytes, 2026-10-26T07:22:28Z 만료.
+- **미검증**: 동일 버전 재실행이며 **서로 다른 버전으로 업그레이드 아님**. 실제 고객 PC GUI/실문서 품질·코드서명/SmartScreen/상용 수용 미검증. PR3/PR4 Draft/open/unmerged, STEP4·main 기능 병합 별도 승인 전 금지. 전체 7단계 비공식 약38% 유지.
+- 다음 `ㄱ`: 상이한 버전 두 빌드로 동일 CI 프로필의 실제 STEP2 문서+PNG 보존/재출력 확인. 고객 데이터 사용 금지.

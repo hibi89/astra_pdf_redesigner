@@ -346,3 +346,10 @@
 - 기능 성공 CI 이후 feature docs-only 커밋 `883568e2f0f47186cb561c9d82bbc985a3cb4742`, 상세 보고서 `docs/WINDOWS_STEP2_STORED_PROJECT_PDF_ACCEPTANCE_2026-10-19.md`. 시험용 unsigned EXE SHA256 `60048F38227DB08C43F9BC073938AC94D1BFD94A07AF91C424654EB9B8E134E6`; [Artifact 12168803144](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39214047605/artifacts/12168803144), ZIP 112,310,427 bytes·2026-10-26T07:11:12Z 만료.
 - **NOT RUN:** 고객 실문서 5~10개·PDF 픽셀/표·한글 폰트 육안, Windows 저장창 수동 클릭/취소/덮어쓰기/실사용 PC SmartScreen, 실제 데이터 업그레이드 보존, 코드 서명·정식 판매. STEP3 PDF 가져오기는 Windows 설치형에 **미포함**. PR3/PR4 Draft/open/unmerged; 병합·STEP4 승인 전 금지. 전체 비공식 약38% 유지, 데스크톱 별도 상품화 트랙.
 - **다음 `ㄱ`**: 동일 사용자 프로필에서 설치판 버전 업그레이드 전후 합성 STEP2 문서+PNG IndexedDB 보존(기존 sentinel 1개 검증 확대)을 한 단위 검증. 사용자 실제 문서는 외부 CI로 올리지 않음.
+
+## 2026-10-19 16:22:28 KST — Windows STEP2 동일 프로필 별도 EXE 재실행 보존 PASS
+- PR4 feature 코드 `0c627cdca0668a6f7548a1407eb8d5088faaa264`, [Windows CI #39215369203](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39215369203) `completed/success` (head SHA 일치), Node 19/19·desktop 6/6·빌드·NSIS 설치/제거 PASS.
+- 실제 STEP2 UI 합성 문서+PNG IndexedDB 저장 → A4 3페이지/식별자 5/5/래스터 1 출력 → **별도 설치 EXE 두 번째 프로세스에서 동일 CI 격리 프로필로 재실행, 문서·이미지·캡션·자산·실제 이미지 디코딩 보존 PASS**. 로그 `PASS ASTRA STEP2 PROFILE PRESERVED`, `PASS ASTRA STEP2 SECOND EXE LAUNCH` 확인.
+- 보고 `docs/WINDOWS_STEP2_RESTART_PRESERVATION_2026-10-19.md` (PR4 feature docs commit `4249efe10b7959a7899b7af9e7b8a78ac237c1eb`). 시험용 unsigned EXE SHA256 `AB74148E4DD30CBB7C9996790271AF4832DDD0A6896856211F53FDDB5D3E6AD2`, [Artifact #12169552072](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39215369203/artifacts/12169552072) 112310681 bytes, 2026-10-26T07:22:28Z 만료.
+- **미검증**: 동일 버전 재실행이며 **서로 다른 버전으로 업그레이드 아님**. 실제 고객 PC GUI/실문서 품질·코드서명/SmartScreen/상용 수용 미검증. PR3/PR4 Draft/open/unmerged, STEP4·main 기능 병합 별도 승인 전 금지. 전체 7단계 비공식 약38% 유지.
+- 다음 `ㄱ`: 상이한 버전 두 빌드로 동일 CI 프로필의 실제 STEP2 문서+PNG 보존/재출력 확인. 고객 데이터 사용 금지.
