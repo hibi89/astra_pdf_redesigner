@@ -290,3 +290,15 @@
 8. **원본/백업/보안**: 원본 Git SHA와 Git history로 복구. 브라우저 localStorage/IndexedDB, PDF/이미지 사용자 원본, 로드맵·PNG 보호. 합성 테스트만 사용; 민감 데이터·토큰 미출력.
 9. **다음 확정 작업/완료 기준**: 이번 신규 커밋의 3개 Node 테스트 및 종전 회귀 전체 CI를 검증한다. 통과 근거 없으면 테스트 완료나 진행률 상승 주장하지 않는다. Windows 실사용/사용자 PDF 수용 검사는 별도.
 10. **시각·검증 범위**: 2026-10-19 10:29:29 KST. 이번 검증은 소스 반영과 blob 재조회까지. 문서 자체의 최신 HEAD는 저장 후 별도 확인. STEP3 65~70%, 전체 약38%는 종전 비공식 추정 유지.
+
+## 2026-10-19 10:48:52 KST — STEP3 신규 회귀 검증·Edge CDP 초기화 실패 최소 수정 인수인계
+1. **목표/기술·요구:** 기존 PDF 콘텐츠 우선 보존→검수→재디자인 PDF 출력. 로컬 React/TypeScript/Vite+PDF.js/IndexedDB, 이번 한 단위는 STEP3 신규 이미지 누락/좌표 회귀의 실제 CI 검증.
+2. **완료 기능·변경 이유:** 사용자 이전 `ㄱ`에서 추가한 이미지 마스크/반복·그룹, 페이지 밖/제로 영역, 복구된 graphics-state 3개 회귀를 검증. Edge 첫 CDP 접속이 느린 CI 환경에서 제한시간 35초를 넘은 로그 확인 후 `tests/browser-process.mjs`만 수정, **Edge만 60초 / Chrome 35초**. `src/**`, STEP1/2 사용자 파일·브라우저 저장 데이터·오리지널 로드맵 변경 없음.
+3. **테스트/성공·실패:** 구 SHA `2200836cc529f4272e78456783d36e50f6b0142c` Actions [#39185454384](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39185454384) **실패(Edge CDP 최초 연결 timeout)**, Node 29/29·빌드·Chrome 전수 성공. 최신 검증 SHA **`aa63fc262d0a2db080be4be82bd91d7b4a5b3976`**, Actions [#39186875371](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39186875371) **전체 SUCCESS**, Node 29/29 PASS, 0 FAIL, TypeScript/Vite build PASS, Google Chrome STEP1/2/3 회귀 PASS, Linux Microsoft Edge 155 STEP1/2/3 PDF·이미지·저장 E2E PASS. Chrome/Edge 두 job logs 직접 확인. Windows 수동 결과 미검증.
+4. **완료/대기/중단:** 단위 목표인 최신 SHA CI 검증과 Edge 초기화 복구 **완료**. STEP3 전체 65~70% 비공식, 전체 7단계 동일가중 약38% 유지. STEP3 PR #3 **Draft/open/unmerged**, main 기능 미병합. 실제 사용자 PDF 및 Windows Edge/긴 문서 육안 수용 대기.
+5. **오류/원인·시도·금지:** 실패 로그 Edge `DevTools listening` 표시 후 CDP WebSocket handshake timeout `35000ms`; 이전 성공 Edge 최초 연결 ~24초, CI 변동성 확인. D-Bus 경고는 확정 원인 아님. 동일 커밋에서 실패한 Edge 전수 회귀를 새 SHA의 **60초 제한**으로 성공시키며 재검증. 임의로 이 timeout을 계속 늘리거나 CI를 우회 성공 처리하는 방식 금지. Chromium 임시 프로필 cleanup `ENOTEMPTY`는 아직 간헐적 경고이며 사용자 데이터 손상 증거 아님.
+6. **저장소/브랜치/SHA·경로:** `hibi89/astra_pdf_redesigner`, `feature/step3-pdf-import-20261019`, CI 검증 기능 SHA `aa63fc262d0a2db080be4be82bd91d7b4a5b3976`; `tests/browser-process.mjs`, `tests/step3-image-recovery.test.ts`, `.github/workflows/ci.yml`. main 문서 저장 후 HEAD 재조회 필요. PR #3은 Draft 유지.
+7. **Production/명령/환경:** 앱 로컬, Vercel/Production **미적용**. `npm install`, `npm test`, `npm run build`, `npm run dev` (`127.0.0.1:5173`). Actions Ubuntu Node22 Chrome+Microsoft Edge155, Poppler `pdfinfo`, `pdftotext`, `pdfimages`.
+8. **원본·백업·인증/보안:** STEP1 localStorage v1, STEP2 IndexedDB v2 기존 문서 및 원본 `docs/blueprints/*.png`, `docs/ASTRA_ORIGINAL_ROADMAP.txt`, 사용자 실제 PDF 수정·업로드 금지. Git 이력과 커밋 SHA로 기능 원상복귀 가능. 합성 픽셀/텍스트만 Actions 실행; 토큰 없음.
+9. **다음 작업/기준/승인:** 다음 `ㄱ`에서 **복잡 이미지(마스크·반복/그룹/클리핑) 누락 경고 fixture 1단위 강화**. 재구성 품질/배치/글꼴은 실문서 원본과 육안 대조를 별도 수행. STEP3 main 병합 전 원본 손실 평가·최신 main/feature 병합 사전 검증·사용자 승인 필요. Windows 검증이 없으면 100%/상용 수용 완료 선언 금지.
+10. **갱신 KST/검증 시점/기준:** 2026-10-19 10:48:52 KST, GitHub run #39186875371 `completed/success` (updated_at 2026-10-19T01:48:25Z)와 두 job 로그 및 PR Draft/HEAD 직접 확인. 기능 검증 코드 `aa63fc262d0a2db080be4be82bd91d7b4a5b3976`. 문서 HEAD는 최종 재조회로 확인.
