@@ -382,3 +382,12 @@
 - v2 코드는 Windows CI 작업 중 임시로 적용·빌드됨. Git 브랜치 제품 소스는 v1 유지하며 PR #5의 additive schema patch와 동일 형태. 브라우저 롤백 검증 [#39222517425](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39222517425) 별도 성공.
 - **미검증:** 일반 사용자 Windows 10/11 설치판, 실고객 문서, 코드 서명/SmartScreen, 비정상 전원종료 복구 및 장문 PDF 육안. unsigned 설치 artifact는 7일 한정 테스트용. 상세 `docs/WINDOWS_IDB_SCHEMA_V2_INSTALLED_UPGRADE_2026-10-19.md`.
 - **다음:** 해당 성공을 제품 main 병합 승인으로 간주하지 말 것. PR #4/#5/#6 모두 Draft 그대로, STEP4 금지.
+
+## 2026-10-19 — IndexedDB 업그레이드 충돌 복구 인수인계
+
+- 현재 브랜치 `codex/p5-windows-reliability`, 코드 SHA `0080272b7a1a2b306f911532c0e217f3e215df27`; 기준 원격 테스트 ref는 `e2f767d87f1657f6fdecdee0457b223f285823f0`. Draft PR #7은 `test/windows-idb-v2-installed-upgrade` 대상이며 open/unmerged 상태다.
+- 주요 변경: `src/step2/idb.ts`가 versionchange 때 연결을 닫고, 이미 blocked로 거부된 open 요청의 늦은 성공도 닫는다. 더 높은 DB 버전에서 구버전 앱이 초기화/쓰기 경로로 진입하지 않고 안내를 보인다. `useWorkspace.ts`는 편집 잠금을 풀고 읽기 전용으로 멈추며 미저장 변경 경고를 유지한다.
+- `tests/step2-versionchange.mjs`는 합성 문서·PNG와 임시 프로필로 경쟁 v1→v2 업그레이드, 저장 데이터/이미지 bytes/메타데이터/active ID, 같은 버전 재오픈, versionchange 트랜잭션 abort rollback, 재시작 후 더 높은 버전 안내, 재시도, blocked 후 늦은 성공 핸들 정리 및 다음 업그레이드를 확인한다. Chrome·Edge 로컬 모두 PASS; profile cleanup PASS.
+- 결과: `npm test` 19/19, `npm run build`, `npm run desktop:verify` 6/6 PASS. Chrome·Edge Actions #39239803359 attempt 2와 Windows 설치판 Actions #39239803360 모두 SUCCESS. 최초 Edge attempt 실패는 CDP 연결 일시 실패이며 같은 run 재시도 성공으로 기록했다.
+- 로컬 `tests/step2-cross-profile.mjs`는 마지막 PDF 텍스트 검사에서 `pdftotext` 누락으로 중단했다. Ubuntu Actions 전체 Chrome 교차 프로필 검증은 PASS다. 추후 로컬 재실행이 필요하면 Poppler `pdftotext`가 있는 환경에서 기준을 유지해 실행한다.
+- 다음 우선순위: Draft PR #7 검토 대기. 필요 시 다른/손상된 외부 연결 환경을 추가로 점검하되 제품 schema bump는 별도 요구가 있기 전 하지 않는다. 실제 일반 사용자 설치판/전원 장애 검증은 미완료로 유지한다. PR #3~#6 및 main 병합, STEP4 착수 금지.

@@ -308,3 +308,13 @@
 - v2 코드는 Windows CI 작업 중 임시로 적용·빌드됨. Git 브랜치 제품 소스는 v1 유지하며 PR #5의 additive schema patch와 동일 형태. 브라우저 롤백 검증 [#39222517425](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39222517425) 별도 성공.
 - **미검증:** 일반 사용자 Windows 10/11 설치판, 실고객 문서, 코드 서명/SmartScreen, 비정상 전원종료 복구 및 장문 PDF 육안. unsigned 설치 artifact는 7일 한정 테스트용. 상세 `docs/WINDOWS_IDB_SCHEMA_V2_INSTALLED_UPGRADE_2026-10-19.md`.
 - **다음:** 해당 성공을 제품 main 병합 승인으로 간주하지 말 것. PR #4/#5/#6 모두 Draft 그대로, STEP4 금지.
+
+## 2026-10-19 — IndexedDB versionchange·실패 복구 경계
+
+- 격리 브랜치 `codex/p5-windows-reliability`, 코드 커밋 `0080272b7a1a2b306f911532c0e217f3e215df27` (기준 `test/windows-idb-v2-installed-upgrade` SHA `e2f767d87f1657f6fdecdee0457b223f285823f0`). Draft PR [#7](https://github.com/hibi89/astra_pdf_redesigner/pull/7); 병합하지 않음.
+- `versionchange` 이벤트에서 열린 연결을 닫고 편집 탭을 읽기 전용으로 전환한다. `blocked` 후 늦은 성공 연결을 즉시 닫고, 더 높은 DB 버전은 안전한 재시작 안내로 처리한다. 제품 DB 버전은 올리지 않았다.
+- 로컬: Node 테스트 19/19 PASS, TypeScript·Vite build PASS, `desktop:verify` 6/6 PASS. 새 격리 E2E Chrome 10/10, Edge 10/10 checkpoint PASS; 기존 Chrome 멀티탭, cold migration, abort·재시도 회귀 PASS. 테스트 임시 프로필 0개 잔류.
+- 로컬 교차 프로필 테스트는 `pdftotext` 실행 파일 부재로 PDF 텍스트 최종 assertion에서 중단됐다. 검증 조건은 바꾸지 않았고, GitHub Chrome job의 전체 교차 프로필 테스트는 PASS.
+- [GitHub Actions #39239803359](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39239803359) attempt 2 SUCCESS: Chrome build-and-test 및 Edge 전체 회귀 PASS. 최초 Edge attempt는 기존 `browser-smoke`의 CDP WebSocket handshake timeout으로 실패했고, 재실행은 통과했다.
+- [Windows Actions #39239803360](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39239803360) SUCCESS: Windows Server 2025 Electron smoke, NSIS 설치·제거 및 설치된 0.1.0/IDB v1 → 0.1.1/IDB v2 덮어쓰기 검증. 문서·PNG·active ID 보존 PASS. v2 후보는 임시 CI checkout에서만 생성.
+- 실제 사용자 Windows PC·데이터, 서명/SmartScreen, 전원 중단 상황은 미검증. main, PR #3~#6, STEP4 변경 없음.
