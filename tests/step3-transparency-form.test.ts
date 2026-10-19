@@ -27,3 +27,36 @@ test('STEP3 Form XObject and alpha: actual PDF.js operator traces are observable
     }finally{await task.destroy();}
   }
 });
+
+test('STEP3 composition signals: actual transparent and opaque Form PDFs differ without content change',async()=>{
+  const {getDocument,OPS}=await import('pdfjs-dist/legacy/build/pdf.mjs');
+  const {scanGraphicsComposition}=await import('../src/step3/graphicsRisk.ts');
+  for(const scenario of [
+    {label:'transparent grouped form',input:{alpha:0.4,group:true},transparent:true},
+    {label:'opaque non-group form',input:{alpha:1,group:false},transparent:false},
+  ]){
+    const task=getDocument({data:new Uint8Array(makeTransparencyFormPdf(scenario.input)),useSystemFonts:true});
+    try{
+      const pdf=await task.promise,page=await pdf.getPage(1);
+      const result=scanGraphicsComposition(await page.getOperatorList(),OPS);
+      assert.ok(result.formScopes>0,scenario.label+' Form boundary must be reported');
+      assert.equal(result.transparencySignals>0,scenario.transparent,
+        scenario.label+' alpha/group classification mismatch: '+JSON.stringify(result));
+      const original=(await page.getTextContent()).items.flatMap(item=>'str' in item?[item.str]:[]).join(' ');
+      assert.ok(original.includes('FORM_ALPHA_SOURCE_201')&&original.includes('FORM_ALPHA_END_202'));
+    }finally{await task.destroy();}
+  }
+});
+
+test('STEP3 composition risk: alpha/soft mask/blend and Form warnings stay independent',async()=>{
+  const {scanGraphicsComposition}=await import('../src/step3/graphicsRisk.ts');
+  const ops={setGState:1,beginGroup:2,paintFormXObjectBegin:3};
+  assert.deepEqual(scanGraphicsComposition({fnArray:[1,3,2],argsArray:[
+    [[['ca',0.5],['CA',1],['BM','multiply'],['SMask',true]]],[],[],
+  ]},ops),{transparencySignals:4,formScopes:1});
+  assert.deepEqual(scanGraphicsComposition({fnArray:[1,3],argsArray:[
+    [[['ca',1],['CA',1],['BM','Normal'],['SMask',false]]],[],
+  ]},ops),{transparencySignals:0,formScopes:1});
+  assert.deepEqual(scanGraphicsComposition({fnArray:[],argsArray:[]},ops),
+    {transparencySignals:0,formScopes:0});
+});

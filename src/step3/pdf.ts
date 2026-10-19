@@ -2,6 +2,7 @@ import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { PDF_IMPORT_LIMITS, makePdfDraft, type PdfDraft, type PdfFragment, type PdfPageInput } from './structure.ts';
 import { recoverPageImages, type ImageOpCodes } from './imageRecovery.ts';
 import { countVectorPaintOps, type VectorPaintOpCodes } from './vectorRisk.ts';
+import { scanGraphicsComposition, type GraphicsCompositionCodes } from './graphicsRisk.ts';
 
 // Browser-only PDF.js adapter. Never send PDF bytes to a server.
 export async function extractLocalPdf(file:File):Promise<PdfDraft>{
@@ -38,10 +39,12 @@ export async function extractLocalPdf(file:File):Promise<PdfDraft>{
       }
       let imageDetected=false,operatorWarning='';
       let vectorPaintCount:number|undefined;
+      let compositionRisk:PdfPageInput['compositionRisk'];
       let imageRecovery:PdfPageInput['imageRecovery'];
       try{
         const opList=await page.getOperatorList();
         vectorPaintCount=countVectorPaintOps(opList,OPS as unknown as VectorPaintOpCodes);
+        compositionRisk=scanGraphicsComposition(opList,OPS as unknown as GraphicsCompositionCodes);
         const obj=page as unknown as {
           objs:{has?:(key:string)=>boolean;get:(key:string,cb?:(image:unknown)=>void)=>unknown};
           commonObjs?:{has?:(key:string)=>boolean;get:(key:string,cb?:(image:unknown)=>void)=>unknown};
@@ -52,7 +55,7 @@ export async function extractLocalPdf(file:File):Promise<PdfDraft>{
         );
         imageDetected=imageRecovery.detected>0;
       }catch(error){operatorWarning=error instanceof Error?error.name:'그래픽 명령 분석 실패';}
-      pages.push({number:pageNum,width:view.width,height:view.height,pieces,imageDetected,operatorWarning,imageRecovery,vectorPaintCount});
+      pages.push({number:pageNum,width:view.width,height:view.height,pieces,imageDetected,operatorWarning,imageRecovery,vectorPaintCount,compositionRisk});
       page.cleanup();
     }
     return makePdfDraft(file.name,pages);

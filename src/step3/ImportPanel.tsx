@@ -66,6 +66,8 @@ export default function PdfImportPanel({disabled,onImport}:Props){
   const recovered=draft?.pages.reduce((s,p)=>s+p.images.length,0)??0;
   const included=draft?.pages.reduce((s,p)=>s+p.images.filter(i=>i.include).length,0)??0;
   const vectorPaints=draft?.pages.reduce((s,p)=>s+p.vectorPaintCount,0)??0;
+  const transparencySignals=draft?.pages.reduce((s,p)=>s+p.compositionRisk.transparencySignals,0)??0;
+  const formScopes=draft?.pages.reduce((s,p)=>s+p.compositionRisk.formScopes,0)??0;
   return <section className="panel step3-import-panel no-print" aria-labelledby="pdf-import-title">
     <div className="panel-heading"><h2 id="pdf-import-title">STEP 3 · 기존 PDF 가져오기</h2><span className="panel-caption">텍스트 선택 가능한 단일 열 PDF</span></div>
     <p className="help-text">파일은 이 브라우저에서만 분석합니다. 외부로 전송하지 않고, 검수·확정 전에는 기존 문서함을 변경하지 않습니다.</p>
@@ -79,6 +81,7 @@ export default function PdfImportPanel({disabled,onImport}:Props){
       <p className="help-text">원본: {draft.fileName} · {draft.pageCount}페이지 · 추출 {draft.totalChars.toLocaleString('ko-KR')}자 · 편집 가능한 텍스트 블록 {totalBlocks}개</p>
       <p className="help-text" data-step3-image-count>이미지 감지 {detected}건 · PNG 복원 {recovered}건 · 저장 선택 {included}건 · 미복원 {Math.max(0,detected-recovered)}건</p>
       <p className="help-text" data-step3-vector-count>원본 벡터 경로 관련 명령 {vectorPaints}회 · 선/도형·표 구조 자동 복원 미지원 (명령 수, 도형/셀 개수 아님)</p>
+      <p className="help-text" data-step3-composition-count>투명도·합성 위험 신호 {transparencySignals}건 · Form XObject 범위 {formScopes}건 · 원본 합성 효과의 동일 복원 미보장 (객체 수·복원 성공률 아님)</p>
       <div className="warning" role="status"><strong>완전 복원이 아닙니다.</strong> 텍스트 분류·위치·줄바꿈·공백은 추정입니다. 이미지·표·도형이 누락될 수 있습니다. 원본을 대조해 수정하세요.</div>
       <details data-step3-acceptance-checklist open>
         <summary>원본 대조 체크리스트 · 저장 전 확인</summary>
@@ -86,7 +89,7 @@ export default function PdfImportPanel({disabled,onImport}:Props){
           <li>텍스트·숫자·기호: 각 페이지의 누락·중복·줄바꿈을 원본과 비교하세요.</li>
           <li>다단·표의 읽기 순서: 좌우 열과 표 셀의 내용 순서를 확인하세요. {draft.warnings.some(w=>w.includes('열 또는 넓은 텍스트 간격'))?'순서 위험 경고가 있습니다.':'자동 검사에서 경고가 없어도 정확한 순서는 보장되지 않습니다.'}</li>
           <li>표 선·벡터 도형: 원본에 있는 격자·셀 경계와 표시되지 않은 도형을 확인하세요. {vectorPaints>0?'경로 관련 명령 '+vectorPaints+'회 감지됐습니다.':'관련 명령 0회는 그래픽 보존을 증명하지 않습니다.'}</li>
-          <li>이미지: 원본과 PNG 복원·색상·자르기·위치를 대조하세요. 감지 {detected}건, 복원 {recovered}건, 미복원 {Math.max(0,detected-recovered)}건.</li>
+          <li>이미지: 원본과 PNG 복원·색상·자르기·위치를 대조하세요. 감지 {detected}건, 복원 {recovered}건, 미복원 {Math.max(0,detected-recovered)}건. Form·투명도 합성은 원형 재현이 보장되지 않습니다.</li>
         </ul>
         <p className="help-text">경고 및 자동 집계는 손실 위험을 안내할 뿐 복원 정확도나 표 구조 보존을 보증하지 않습니다.</p>
       </details>

@@ -1,6 +1,7 @@
 // Pure and deterministic single-column PDF text reconstruction.
 // This module does not touch storage, browser globals, or uploaded file bytes.
 import type { ImageRecoveryResult, RecoveredPdfImage } from './imageRecovery.ts';
+import type { GraphicsCompositionRisk } from './graphicsRisk.ts';
 export type PdfRole='heading'|'paragraph'|'caption';
 export interface PdfFragment {
   text:string; page:number; x:number; y:number; width:number; height:number; fontSize:number;
@@ -9,6 +10,7 @@ export interface PdfPageInput {
   number:number; width:number; height:number; pieces:PdfFragment[];
   imageDetected:boolean; operatorWarning?:string;imageRecovery?:ImageRecoveryResult;
   vectorPaintCount?:number;
+  compositionRisk?:GraphicsCompositionRisk;
 }
 export interface PdfOrigin {
   page:number; x:number; y:number; width:number; height:number;
@@ -16,7 +18,7 @@ export interface PdfOrigin {
 export interface PdfDraftBlock {
   id:string; text:string; role:PdfRole; origin:PdfOrigin;
 }
-export interface PdfDraftPage {number:number; blocks:PdfDraftBlock[]; charCount:number; imageDetected:boolean; images:RecoveredPdfImage[];imageCount:number;omittedImages:number;vectorPaintCount:number;}
+export interface PdfDraftPage {number:number; blocks:PdfDraftBlock[]; charCount:number; imageDetected:boolean; images:RecoveredPdfImage[];imageCount:number;omittedImages:number;vectorPaintCount:number;compositionRisk:GraphicsCompositionRisk;}
 export interface PdfDraft {
   fileName:string; pageCount:number; pages:PdfDraftPage[]; warnings:string[]; totalChars:number;
 }
@@ -101,6 +103,12 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
     const omitted=Math.max(0,detected-images.length);
     const vectorPaintCount=Number.isSafeInteger(page.vectorPaintCount)&&page.vectorPaintCount!>0?page.vectorPaintCount!:0;
     if(vectorPaintCount>0)warnings.push(page.number+'페이지 벡터 경로 관련 명령 '+vectorPaintCount+'회 감지: 원본 표 선·셀 경계·도형은 새 문서로 자동 복원되지 않습니다. 원본과 대조해 수동 보완하세요. (명령 수이며 도형/셀 개수가 아닙니다.)');
+    const compositionRisk:GraphicsCompositionRisk={
+      transparencySignals:Number.isSafeInteger(page.compositionRisk?.transparencySignals)&&page.compositionRisk!.transparencySignals>0?page.compositionRisk!.transparencySignals:0,
+      formScopes:Number.isSafeInteger(page.compositionRisk?.formScopes)&&page.compositionRisk!.formScopes>0?page.compositionRisk!.formScopes:0,
+    };
+    if(compositionRisk.transparencySignals>0)warnings.push(page.number+'페이지 투명도·합성 그래픽 위험 신호 '+compositionRisk.transparencySignals+'건 감지: 원본 알파/블렌딩/투명 그룹 효과는 PNG·벡터 변환에서 그대로 보존되지 않을 수 있습니다. 원본과 반드시 대조하세요. (신호 수는 투명 객체 개수가 아닙니다.)');
+    if(compositionRisk.formScopes>0)warnings.push(page.number+'페이지 Form XObject 범위 '+compositionRisk.formScopes+'건 감지: 내부 이미지·글자·도형의 조합·변환·투명도는 자동으로 동일하게 재현된다는 보장이 없습니다. (범위 수는 복원 성공률이 아닙니다.)');
     if(detected>0){
       warnings.push(page.number+'페이지에 PDF 이미지가 감지됐습니다. '+detected+'건 중 '+images.length+'건 PNG 재구성, '+omitted+'건 미복원. 원본 비트스트림이 아니라 PDF.js가 디코딩한 픽셀을 PNG로 재구성하므로 색상·마스크·배치를 반드시 대조하세요.');
       if(omitted)warnings.push(page.number+'페이지 미복원 이미지 '+omitted+'건은 새 PDF에서 누락될 수 있습니다. 별도로 확인하고 수동 보완하세요.');
@@ -132,7 +140,7 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
       if(totalChars>PDF_IMPORT_LIMITS.characters)throw Error('PDF 추출 텍스트가 50만 자 제한을 초과했습니다.');
       if(totalBlocks>PDF_IMPORT_LIMITS.blocks)throw Error('PDF 추출 블록이 2,500개 제한을 초과했습니다.');
     }
-    outPages.push({number:page.number,blocks,charCount:lines.reduce((n,x)=>n+x.text.length,0),imageDetected:detected>0,images,imageCount:detected,omittedImages:omitted,vectorPaintCount});
+    outPages.push({number:page.number,blocks,charCount:lines.reduce((n,x)=>n+x.text.length,0),imageDetected:detected>0,images,imageCount:detected,omittedImages:omitted,vectorPaintCount,compositionRisk});
   }
   if(!totalChars)throw Error('선택 가능한 텍스트가 없습니다. 스캔 PDF는 OCR 지원 전까지 가져올 수 없습니다.');
   warnings.unshift('PDF의 읽기 순서·줄바꿈·공백·제목/캡션 분류는 추정입니다. 원본과 대조해 검수한 뒤 문서함에 추가하세요.');

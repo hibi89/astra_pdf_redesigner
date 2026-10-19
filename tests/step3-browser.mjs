@@ -7,6 +7,7 @@ import {join} from 'node:path';
 import {launchBrowser} from './browser-process.mjs';
 import {makeClippedImagePdf} from './fixtures/step3-clipped-pdf.mjs';
 import {makeMixedLayoutPdf,MIXED_LAYOUT_MARKERS} from './fixtures/step3-mixed-layout-pdf.mjs';
+import {makeTransparencyFormPdf} from './fixtures/step3-transparency-form-pdf.mjs';
 const binary=process.env.CHROME_PATH||'chromium',url=process.env.SMOKE_URL||'http://127.0.0.1:4173';
 const dir=mkdtempSync(join(tmpdir(),'astra-step3-'));
 const browser=launchBrowser(binary,dir,'STEP3 PDF import');
@@ -190,6 +191,39 @@ try{
   assert.equal(await evaluate("document.querySelectorAll('.doc-list-item').length"),clipBefore,
     'Mixed clip/stroke review cannot persist original documents without confirmation');
   console.log('PASS STEP3 CLIP+STROKE PDF: same path is painted and clipped; vector risk plus image warning');
+
+  // Actual PDF.js/BROWSER signal for a Form XObject inside an alpha group:
+  // never declare compositing pixel equivalence, even if a raster is decoded.
+  for(const scenario of [
+    {name:'step3-transparent-form.pdf',params:{alpha:0.4,group:true},hasTransparency:true},
+    {name:'step3-opaque-form.pdf',params:{alpha:1,group:false},hasTransparency:false},
+  ]){
+    const source=makeTransparencyFormPdf(scenario.params);
+    await evaluate("(()=>{const encoded="+JSON.stringify(source.toString('base64'))+
+      ",name="+JSON.stringify(scenario.name)+";"+
+      "const bytes=Uint8Array.from(atob(encoded),c=>c.charCodeAt(0));"+
+      "const file=new File([bytes],name,{type:'application/pdf'});"+
+      "const dt=new DataTransfer();dt.items.add(file);"+
+      "const input=document.querySelector('.step3-import-panel input[type=file]');"+
+      "input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}));})()");
+    const compositionSummary=await eventually(
+      ()=>evaluate("document.querySelector('[data-step3-composition-count]')?.textContent"),
+      value=>!!value&&/Form XObject 범위 [1-9][0-9]*건/.test(value)&&
+        scenario.hasTransparency===/투명도·합성 위험 신호 [1-9][0-9]*건/.test(value)
+    );
+    assert.ok(compositionSummary.includes('동일 복원 미보장'),
+      'Form and alpha counters must not promise source fidelity');
+    const warnings=await evaluate("[...document.querySelectorAll('.step3-import-panel details li')].map(x=>x.textContent)");
+    assert.ok(warnings.some(w=>w?.includes('Form XObject 범위')));
+    assert.equal(warnings.some(w=>w?.includes('투명도·합성 그래픽 위험 신호')),scenario.hasTransparency,
+      'Opaque form should not produce an alpha risk warning');
+    assert.ok(await evaluate("document.querySelector('.step3-import-panel')?.textContent?.includes('FORM_ALPHA_END_202')"),
+      'Selectable source text markers must remain visible in review');
+    assert.equal(await evaluate("document.querySelectorAll('.doc-list-item').length"),clipBefore,
+      'Form/alpha PDF review must not persist any existing document');
+    console.log('PASS STEP3 FORM/ALPHA REVIEW:',scenario.name,compositionSummary);
+  }
+
 
 
   // Source/output acceptance matrix for a known-difficult layout: two columns,
