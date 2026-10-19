@@ -81,3 +81,13 @@ STEP 2 병합·완료 전 필요한 **원본 지침 §16의 21개 수동 검사*
 ## STEP 2 병합 후 CI 상태 (2026-10-19)
 
 PR #2는 `main`에 병합되었으며 merge SHA는 `f1ad26320b12b07019b115f77f8cf55e62f1e7e6`입니다. 초기 `main` CI에서 Edge CDP 연결 실패가 발생했으나, 브라우저 WebSocket 직접 연결과 독립 Edge runner로 복구한 코드 SHA `a54c10a89e486cf4ab0f922f9ee6aa83fffe013a`의 [Actions #39157047624](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39157047624)는 **Chrome·Edge 포함 전체 SUCCESS**입니다. [상세 복구 보고서](docs/STEP2_POSTMERGE_MAIN_CI_RECOVERY_2026-10-19.md) 및 [Windows 수동 검수표](docs/STEP2_WINDOWS_ACCEPTANCE_AND_MERGE_GATE_2026-10-19.md)를 참고하세요. **Windows Edge 실제 PDF와 Windows 장문/이미지 PDF 육안 수용 검수는 미완료**이며, STEP 3은 아직 미착수입니다.
+
+## Windows 설치형 GUI 시험판 (2026-10-19, STEP1·STEP2)
+
+- 안정된 main의 STEP1·STEP2를 Electron 설치형으로 포장해 CLI/Node.js/VS Code 없이 프로그램 아이콘으로 실행할 수 있게 설계했습니다.
+- PDF 파일 저장 버튼에 Windows 기본 저장 위치 선택창을 연결했습니다. 웹 브라우저에서는 기존 인쇄 창을 사용합니다.
+- Windows 자동 검증: https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39206761720 (Node 19/19, desktop 3/3, 개발용 Electron 및 패키징된 EXE의 실제 PDF 디스크 저장 PASS).
+- 최신 unsigned 개발용 설치 파일: https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39206761720/artifacts/12165323804 (7일 보존).
+- 상세 검증/미완료: docs/WINDOWS_DESKTOP_NATIVE_PDF_EXPORT_2026-10-19.md.
+- 기존 브라우저의 문서는 앱으로 자동 이동하지 않습니다. STEP2의 .localdoc.json 내보내기/가져오기를 사용해야 합니다.
+- Windows 실사용 설치/삭제, PDF 대화상자 수동 검증, 한글/장문·이미지 실제 품질은 미완료입니다. STEP3 PDF 업로드/리디자인 기능은 이 설치형 시험판에 아직 포함되지 않습니다.

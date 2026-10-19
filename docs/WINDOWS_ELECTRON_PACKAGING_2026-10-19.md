@@ -59,3 +59,11 @@
 - [ ] 구매자용 매뉴얼, 배포 파일 해시·악성코드 검사, 권한/라이선스 검토.
 
 **릴리스 판정: 개발용 Windows 설치 파일 MVP 성공. 판매용 정식판 아님.**
+
+## 네이티브 PDF 파일 저장 추가 검증 (2026-10-19)
+
+- 이전 테스트판 이후 Electron preload IPC 기반 Windows GUI PDF 저장 대화상자 코드를 추가. 일반 웹판의 window.print() 동작은 유지.
+- CI 코드 SHA e11076cf77946416bc59bcaa88227c8265499ab3. Windows Actions #39206761720 SUCCESS: Node 19/19, desktop 3/3, Electron 및 win-unpacked EXE 실제 PDF 파일 생성/저장(15,257 bytes), NSIS 패키징 PASS.
+- 신규 unsigned 시험판 SHA256: 1FEB8C6801EB2870479955A5669B9405AC3117490A99954230AECB1470D3C84C.
+- 설치 파일: https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39206761720/artifacts/12165323804 (7일 보존). 이전 검증/해시는 이전 시험판이며 이 링크가 최신.
+- 상세: docs/WINDOWS_DESKTOP_NATIVE_PDF_EXPORT_2026-10-19.md. 고객 PC 설치/삭제, GUI 저장 창 수동 동작, 실제 한글·장문 A4 품질 미검증. 정식 판매 가능 판정 아님.
