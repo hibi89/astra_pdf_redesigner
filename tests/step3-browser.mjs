@@ -161,7 +161,7 @@ try{
   const clipVectorSummary=await evaluate("document.querySelector('[data-step3-vector-count]')?.textContent");
   assert.match(clipVectorSummary??'',/벡터 경로 관련 명령 0회/,
     'Image-only clipping path must not be misclassified as painted vector table lines');
-  assert.ok(await evaluate("document.querySelector('[data-step3-acceptance-checklist]')?.textContent?.includes('그래픽 보존을 증명하지 않습니다')),
+  assert.ok(await evaluate("document.querySelector('[data-step3-acceptance-checklist]')?.textContent?.includes('그래픽 보존을 증명하지 않습니다')"),
     'Zero-risk operator count must not imply source graphics were preserved');
   console.log('PASS STEP3 CLIP-ONLY VECTOR CONTROL: clipping mask excluded, image warning retained');
   assert.equal(await evaluate("document.querySelectorAll('.doc-list-item').length"),clipBefore,
