@@ -93,6 +93,8 @@ try {
   # commit -> reload -> PDF output. This does not inject preview HTML.
   $projectPdf = Join-Path $env:RUNNER_TEMP ("astra-step2-project-$PID.pdf")
   if (Test-Path -LiteralPath $projectPdf) { throw 'Refusing to overwrite STEP2 project PDF' }
+  $env:ASTRA_STEP2_PROFILE_DIR = Join-Path $env:RUNNER_TEMP ("astra-step2-profile-$PID")
+  if (Test-Path -LiteralPath $env:ASTRA_STEP2_PROFILE_DIR) { throw 'Refusing to reuse an existing STEP2 profile' }
   $env:ASTRA_STEP2_ACCEPTANCE_OUT = $projectPdf
   try {
     $projectProcess = Start-Process -FilePath $installedExe -ArgumentList @('--astra-desktop-smoke','--astra-step2-acceptance') -PassThru -Wait -NoNewWindow
@@ -100,8 +102,12 @@ try {
     & node tests/verify-desktop-pdf.mjs $projectPdf --step2-project
     if ($LASTEXITCODE -ne 0) { throw "Installed STEP2 project PDF verification failed: $LASTEXITCODE" }
     Write-Host 'PASS ASTRA INSTALLED STEP2 PROJECT PDF: actual editor, IDB, reload, A4 text/image PDF'
+    $preserve = Start-Process -FilePath $installedExe -ArgumentList @('--astra-desktop-smoke','--astra-step2-preservation-verify') -PassThru -Wait -NoNewWindow
+    if ($preserve.ExitCode -ne 0) { throw "STEP2 persisted project failed separate installed EXE restart: $($preserve.ExitCode)" }
+    Write-Host 'PASS ASTRA STEP2 SECOND EXE LAUNCH: same profile document and PNG intact'
   } finally {
     Remove-Item Env:ASTRA_STEP2_ACCEPTANCE_OUT -ErrorAction SilentlyContinue
+    Remove-Item Env:ASTRA_STEP2_PROFILE_DIR -ErrorAction SilentlyContinue
     if (Test-Path -LiteralPath $projectPdf) { Remove-Item -LiteralPath $projectPdf -Force }
   }
 
