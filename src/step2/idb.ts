@@ -3,8 +3,8 @@ import { parseStored, STORAGE_KEY } from '../storage.ts';
 import { migrateStep1Document } from './model.ts';
 
 const NAME='astra-pdf-redesigner:v2';
-const VERSION=1; // IndexedDB upgrade version, independent from document schemaVersion.
-const DOCS='documents', ASSETS='assets', META='meta';
+const VERSION=2; // IndexedDB upgrade version, independent from document schemaVersion.
+const DOCS='documents', ASSETS='assets', META='meta', MIGRATION_AUDIT='migrationAudit';
 export const ACTIVE='activeDocumentId', MIGRATION='v1MigrationFinished';
 
 export function request<T>(req: IDBRequest<T>): Promise<T> {
@@ -21,6 +21,9 @@ export function openDatabase(): Promise<IDBDatabase> {
       if(!db.objectStoreNames.contains(DOCS)) db.createObjectStore(DOCS,{keyPath:'id'});
       if(!db.objectStoreNames.contains(ASSETS)){const store=db.createObjectStore(ASSETS,{keyPath:'id'});store.createIndex('documentId','documentId',{unique:false});}
       if(!db.objectStoreNames.contains(META))db.createObjectStore(META);
+      // Additive v2 migration: retain all existing document, asset, and meta stores.
+      // The versionchange transaction rolls back automatically if this fails.
+      if(!db.objectStoreNames.contains(MIGRATION_AUDIT))db.createObjectStore(MIGRATION_AUDIT,{keyPath:'id'});
     };
     req.onsuccess=()=>resolve(req.result);
     req.onerror=()=>reject(req.error??new Error('IndexedDB opening failed'));

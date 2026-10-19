@@ -360,3 +360,18 @@
 - 0.1.1은 **CI에서만 패키지 버전 번호를 바꾼 동일 앱 코드·동일 저장 스키마 빌드**. 따라서 **버전만 다른 설치 패키지 업그레이드 시 데이터 보존**을 검증한 것이며 **기능 코드/스키마 변경에 따른 마이그레이션은 미검증**. 고객 PC 수동 인수, 서명·SmartScreen, 실문서 시각 품질도 미검증.
 - 근거 [PR4 보고서](https://github.com/hibi89/astra_pdf_redesigner/blob/feature/windows-electron-package-20261019/docs/WINDOWS_NSIS_VERSION_UPGRADE_STEP2_PERSISTENCE_2026-10-19.md), feature docs 커밋 `057ccef81b97dd741c46002c28292bfdf544362f`; unsigned CI 전용 0.1.1 EXE SHA256 `EBDD0945CCF242CA126A109DA20772D3854DB0A292E5A39BBE28977F83F559FA`, [Artifact #12169723064](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39216361190/artifacts/12169723064), 2026-10-26 만료.
 - 다음 `ㄱ`: 기존 앱 코드 또는 IndexedDB 스키마 **실제 변경**을 재현한 호환성 검사 가능성 확인 및 작은 단위 실행. PR3·PR4 Draft/open/unmerged, main 기능 병합/STEP4 별도 승인 전 금지; 전체 7단계 추정 약38% 유지.
+
+
+## 2026-10-19 — Isolated IndexedDB schema v1→v2 verification (Draft PR #5)
+- Branch `test/idb-schema-v2-preservation`, head `c478e512869bb6253b498db880489330d8eb5928`; **not merged into main**.
+- Additive `migrationAudit` store only; existing `documents`, `assets`, `meta` stores retained. No customer data touched.
+- GitHub Actions run [39219644702](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39219644702) completed SUCCESS: `build-and-test` and Edge jobs passed. Chrome log explicitly states `PASS IDB v1 -> v2: documents, binary asset, active ID preserved; audit store added; reload idempotent`.
+- Scope: isolated synthetic Chrome v1→v2 upgrade; not yet real customer PDF/Windows installed upgrade, nor rollback fault injection for the v2 schema transaction. No STEP4 or merge approval.
+- Next: review upgrade edge cases and rollback coverage, then obtain explicit approval before merging.
+
+
+## 2026-10-19 — IDB rollback CI #101
+- GitHub Actions run [39221951751](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39221951751) SUCCESS at commit `bad7de659292a6d7f9ae5005799c059c9faf364c`: both build-and-test and Microsoft Edge jobs passed.
+- Chrome logs confirmed `PASS IDB v2 ROLLBACK` (forced versionchange abort leaves v1 schema, document, binary asset, active ID unchanged) and `PASS IDB v1 -> v2` (successful retry and reload idempotency).
+- Residual warning: Chrome temporary profile cleanup returned `ENOTEMPTY` even after retry; isolated temp directory may remain on ephemeral CI runner. Treat as test-harness hygiene debt, not fully resolved.
+- Synthetic isolated browser test only; actual Windows installed-app upgrade on user data remains untested. Draft PR #5 must remain unmerged pending explicit approval.
