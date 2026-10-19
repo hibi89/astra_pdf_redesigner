@@ -91,3 +91,9 @@ PR #2는 `main`에 병합되었으며 merge SHA는 `f1ad26320b12b07019b115f77f8c
 - 상세 검증/미완료: docs/WINDOWS_DESKTOP_NATIVE_PDF_EXPORT_2026-10-19.md.
 - 기존 브라우저의 문서는 앱으로 자동 이동하지 않습니다. STEP2의 .localdoc.json 내보내기/가져오기를 사용해야 합니다.
 - Windows 실사용 설치/삭제, PDF 대화상자 수동 검증, 한글/장문·이미지 실제 품질은 미완료입니다. STEP3 PDF 업로드/리디자인 기능은 이 설치형 시험판에 아직 포함되지 않습니다.
+
+### Windows 설치형 실제 설치·제거 회귀 — 2026-10-19
+
+- [Windows Actions #39208406254](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39208406254): NSIS **실제 무인 설치/제거**, 두 바로가기 생성/정리, 설치된 Electron GUI+PDF 생성, 합성 앱 데이터 보존 **PASS**. Node19/19·desktop4/4.
+- 최신 개발용 unsigned [설치 파일 다운로드(7일 보존)](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39208406254/artifacts/12165714586).
+- [NSIS 실제 설치·제거 수용 기록](docs/WINDOWS_NSIS_INSTALL_UNINSTALL_ACCEPTANCE_2026-10-19.md). GUI 마법사·PDF 저장 대화상자 수동 조작 및 실제 A4/한글/장문 육안은 미검증. STEP3 PDF 가져오기는 미포함.

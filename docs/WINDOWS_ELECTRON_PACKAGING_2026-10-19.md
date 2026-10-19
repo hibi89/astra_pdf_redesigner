@@ -67,3 +67,11 @@
 - 신규 unsigned 시험판 SHA256: 1FEB8C6801EB2870479955A5669B9405AC3117490A99954230AECB1470D3C84C.
 - 설치 파일: https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39206761720/artifacts/12165323804 (7일 보존). 이전 검증/해시는 이전 시험판이며 이 링크가 최신.
 - 상세: docs/WINDOWS_DESKTOP_NATIVE_PDF_EXPORT_2026-10-19.md. 고객 PC 설치/삭제, GUI 저장 창 수동 동작, 실제 한글·장문 A4 품질 미검증. 정식 판매 가능 판정 아님.
+
+### NSIS 실제 설치/제거 자동 검증 — 2026-10-19 추가
+
+- 코드 SHA `8822f25bf5a7ab6fe3d4886455f853c60fd4b2a5`; [Windows CI #39208406254](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39208406254) **SUCCESS**.
+- Windows isolated temp 경로에 unsigned NSIS **실제 /S 설치** → 앱/Uninstall EXE 확인 → 바탕화면·시작 메뉴 바로가기 각각 1개 → **설치된 앱 실제 실행+PDF 생성**(15,257 bytes) → `/S` 제거 → 앱/바로가기 제거 확인, 합성 userData marker 유지.
+- Node **19/19**, 데스크톱 보안·수명주기 검사 **4/4**, TS/Vite·packaged exe PASS.
+- 새 개발용 설치 파일 SHA256 `C49D217B48ECA4ABAA80296D2E03C80D0C331F8148C361D6C267DB5918A7977A`, [Artifact 12165714586](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39208406254/artifacts/12165714586), 2026-10-26 UTC 만료 예정.
+- 상세 근거 `docs/WINDOWS_NSIS_INSTALL_UNINSTALL_ACCEPTANCE_2026-10-19.md`. **기존 링크/해시/미검증 항목은 이전 검증 시점 기록이며 이번 결과가 최신**. 수동 설치 마법사·GUI 저장 창/실제 한글·장문 PDF 시각 검증/기존 사용자 프로필 업그레이드/코드서명은 여전히 미완료.
