@@ -7,7 +7,12 @@
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
-    "test": "node --experimental-strip-types --test tests/*.test.ts"
+    "test": "node --experimental-strip-types --test tests/*.test.ts",
+    "desktop:run": "npm run build && electron .",
+    "desktop:smoke": "electron . --astra-desktop-smoke",
+    "desktop:test": "node --test tests/desktop-shell.test.cjs",
+    "desktop:verify": "node desktop/verify-bundle.cjs && npm run desktop:test",
+    "desktop:package": "npm run build && electron-builder --win nsis --x64 --publish never"
   },
   "dependencies": {
     "react": "^19.2.0",
@@ -18,6 +23,9 @@
     "@types/react-dom": "^19.2.0",
     "@vitejs/plugin-react": "^5.1.0",
     "typescript": "~5.9.3",
-    "vite": "^7.1.0"
-  }
+    "vite": "^7.1.0",
+    "electron": "44.9.0",
+    "electron-builder": "26.15.3"
+  },
+  "main": "desktop/main.cjs"
 }
