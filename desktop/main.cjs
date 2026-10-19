@@ -1,5 +1,6 @@
 'use strict';
-const {app,BrowserWindow,dialog,net,protocol,session}=require('electron');
+const {app,BrowserWindow,dialog,ipcMain,net,protocol,session}=require('electron');
+const fs=require('node:fs/promises');
 const os=require('node:os');
 const path=require('node:path');
 const {pathToFileURL}=require('node:url');
@@ -61,12 +62,60 @@ function configureSession(){
   });
 }
 
+
+const PDF_OPTIONS=Object.freeze({pageSize:'A4',preferCSSPageSize:true,printBackground:true,displayHeaderFooter:false});
+async function renderLocalPdf(){
+  if(!mainWindow||mainWindow.isDestroyed())throw Error('No active document window');
+  const pdf=await mainWindow.webContents.printToPDF(PDF_OPTIONS);
+  if(pdf.length<1024||pdf.subarray(0,5).toString('ascii')!=='%PDF-')
+    throw Error('PDF renderer returned an invalid document');
+  return pdf;
+}
+function registerPdfSaving(){
+  ipcMain.handle('astra:save-pdf',async(event)=>{
+    if(!mainWindow||event.sender!==mainWindow.webContents||
+       !isAppUrl(event.sender.getURL()))throw Error('Blocked untrusted PDF export request');
+    // Smoke mode uses an isolated test-only directory. It never opens the
+    // native picker or writes into the user's Documents directory.
+    if(SMOKE){
+      const output=path.join(app.getPath('userData'),'astra-desktop-smoke.pdf');
+      try{
+        const data=await renderLocalPdf();
+        await fs.mkdir(path.dirname(output),{recursive:true});
+        await fs.writeFile(output,data,{flag:'wx'});
+        const actual=await fs.readFile(output);
+        if(actual.length!==data.length||actual.subarray(0,5).toString('ascii')!=='%PDF-')
+          throw Error('Generated PDF did not persist correctly');
+        console.log('PASS ASTRA DESKTOP PDF EXPORT: Electron printToPDF and Windows filesystem, bytes='+actual.length);
+        return{status:'saved'};
+      }finally{await fs.rm(output,{force:true});}
+    }
+    const selection=await dialog.showSaveDialog(mainWindow,{
+      title:'PDF로 저장',
+      buttonLabel:'PDF 저장',
+      defaultPath:path.join(app.getPath('documents'),'ASTRA-문서.pdf'),
+      filters:[{name:'PDF 문서',extensions:['pdf']}],
+    });
+    if(selection.canceled||!selection.filePath)return{status:'cancelled'};
+    const output=/\.pdf$/i.test(selection.filePath)?selection.filePath:selection.filePath+'.pdf';
+    try{
+      const data=await renderLocalPdf();
+      await fs.writeFile(output,data);
+      return{status:'saved'};
+    }catch(error){
+      console.error('ASTRA desktop PDF export failed:',error instanceof Error?error.name:'unknown');
+      return{status:'error',message:'PDF 파일을 저장하지 못했습니다. 대상 폴더의 권한과 여유 공간을 확인하세요.'};
+    }
+  });
+}
+
 function createWindow(){
   mainWindow=new BrowserWindow({
     width:1360,height:900,minWidth:900,minHeight:620,
     show:!SMOKE,title:'ASTRA PDF Redesigner',
     backgroundColor:'#f4f5f6',
     webPreferences:{
+      preload:path.join(__dirname,'preload.cjs'),
       sandbox:true,contextIsolation:true,nodeIntegration:false,
       webviewTag:false,devTools:!app.isPackaged,webSecurity:true,
     },
@@ -108,6 +157,10 @@ async function runSmoke(win){
   await win.loadURL(APP_URL);
   const persisted=await evaluate("localStorage.getItem('__astra_desktop_ci__')==='ok'");
   if(!persisted)throw Error('Local storage lost after navigation');
+  const bridge=await evaluate("typeof window.astraDesktop?.savePdf==='function'");
+  if(!bridge)throw Error('Secure PDF export bridge unavailable');
+  const saved=await evaluate("window.astraDesktop.savePdf()");
+  if(saved?.status!=='saved')throw Error('Desktop PDF export failed: '+JSON.stringify(saved));
   await evaluate("localStorage.removeItem('__astra_desktop_ci__')");
   console.log('PASS DESKTOP ELECTRON SMOKE: React, secure protocol, IndexedDB, print API, storage reload');
 }
@@ -119,6 +172,7 @@ if(lock){
   app.whenReady().then(async()=>{
     try{
       configureSession();
+      registerPdfSaving();
       await createWindow();
       if(SMOKE){await runSmoke(mainWindow);app.exit(0);}
     }catch(error){console.error('ASTRA desktop startup failure:',error);app.exit(1);}

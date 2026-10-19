@@ -21,7 +21,7 @@ test('desktop local scheme denies escaping, query and remote origins',()=>{
 test('desktop Electron shell enforces isolated sandbox and network block',()=>{
   const s=fs.readFileSync(path.resolve(__dirname,'../desktop/main.cjs'),'utf8');
   for(const fragment of ['sandbox:true','contextIsolation:true','nodeIntegration:false',
-    'webSecurity:true','registerSchemesAsPrivileged',"app.setPath('userData'",'onBeforeRequest']){
+    'webSecurity:true',"preload:path.join(__dirname,'preload.cjs')",'registerSchemesAsPrivileged',"app.setPath('userData'",'onBeforeRequest',"ipcMain.handle('astra:save-pdf'",'printToPDF']){
     assert.ok(s.includes(fragment),'Missing '+fragment);
   }
   assert.doesNotMatch(s,/allowRunningInsecureContent:true|bypassCSP:true/);
