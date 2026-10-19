@@ -375,6 +375,19 @@
 9. **다음 한 단위·승인:** 중첩 Form/투명 SoftMask/Blend 실제 합성 PDF가 위험 수치를 감지하는지 확인, 필요 시 최소 코드만 수정하고 전수 회귀. 또는 고객 PDF는 사용자 동의·로컬 비공개 환경에서 실문서 5~10개와 Windows PDF/인쇄 육안 검수. 기능 main 병합 전 최신 main+feature 사전검사 및 사용자 **별도 명시 승인** 필요.
 10. **갱신/검증 기준:** 2026-10-19 14:19:35 KST; #39203639740 `completed/success` at 2026-10-19T05:18:05Z head_sha `1ebbb7958c477c309e22e24fed7255658f56b58b`. 새 기능과 CI PASS만 완료 표기. feature docs-only SHA `faec84e388da0f7a6d71f71c1b8d14e18d9f3098`는 CI 이후 작성한 보고서. main STATUS/HANDOFF/BOOK.md 쓰기·재조회 후 최신 HEAD 확정 필요.
 
+## 2026-10-19 20:06 KST — Windows 설치 Electron 동시 업그레이드 인수인계
+
+1. **범위:** 격리 브랜치 `codex/p5-windows-reliability`; 제품 IndexedDB schema version은 변경하지 않았다. 실제 NSIS 설치판/합성 데이터 검증은 GitHub Windows runner에서만 진행했다.
+2. **구현:** `desktop/step2-versionchange-acceptance.cjs`는 이미 연결된 v2 렌더러와 잠금 대기 중인 두 번째 렌더러를 같은 Electron 기본 session에서 실행하고, 두 번째 렌더러의 v2→v3 합성 업그레이드를 검증한다. `desktop/main.cjs`는 CI 전용 flag일 때만 이 검증을 실행한다.
+3. **보존 조건:** 업그레이드 전후 기존 모든 object store의 저장값을 deep compare한다. 문서, Blob PNG bytes 및 metadata, `migrationAudit`, `activeDocumentId`, 기존 화면의 텍스트/이미지 유지, 구 화면 편집 비활성화, 무차단 업그레이드를 확인한다.
+4. **임시 자료 안전:** `tests/windows-installer-version-upgrade.ps1`는 비어 있는 `RUNNER_TEMP` profile만 소유하고 실행 전 기존 경로를 거부한다. 테스트 후 지정된 단일 child path이며 reparse point가 아닌지 확인한 뒤 재귀 정리, 잔류 검사까지 수행한다. CI 로그에서 profile cleanup PASS 확인.
+5. **로컬 검증:** Node 19/19 PASS, TS/Vite build PASS, `desktop:verify` 7/7 PASS, PowerShell parser PASS. Electron 동시 renderer 실행은 CI/GitHub Actions에서만 가능하도록 제한되어 로컬 Windows 설치 EXE 검증으로 보고하지 않는다.
+6. **원격 증거:** 코드 SHA `cc7495fb1ccaf68277f884a9533d988785c8c0d4`. [Chrome/Edge Actions #39241620449](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39241620449) SUCCESS; [Windows installer Actions #39241620515](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39241620515) SUCCESS. Windows 로그는 installed v1→v2 migration 이후 `blocked=0`, 이전 store/document/PNG bytes/meta/active ID preservation, read-only recovery mode 및 profile cleanup을 직접 출력했다.
+7. **PR:** [Draft PR #7](https://github.com/hibi89/astra_pdf_redesigner/pull/7), base `test/windows-idb-v2-installed-upgrade`, open/draft/unmerged. PR #3~#6과 main 미변경. 제품 배포 없음.
+8. **남은 한계:** Windows Server 2025 합성 프로필 결과만 있다. 일반 사용자 Windows 10/11, 실사용 문서, 전원 장애, 서명·SmartScreen, 실기 설치 환경은 미검증. 로컬 cross-profile PDF 텍스트 검증은 Poppler `pdftotext` 미설치 한계가 이전 기록대로 남고 Ubuntu CI 교차 프로필은 PASS다.
+9. **다음 작업:** PR #7 CI 증거/변경 검토가 1순위. 사용자 데이터 사용, PR/main 병합, STEP4 착수는 별도 승인 전 금지.
+10. **문서 상태:** 이 기록을 포함한 docs-only 커밋 SHA는 검증 후 확정한다. Actions는 코드 SHA 기준이며 후속 문서 커밋과 구분한다.
+
 
 ## 2026-10-19 — Windows 설치판 실험: IndexedDB v1→v2 마이그레이션 검증
 - 별도 Draft [PR #6](https://github.com/hibi89/astra_pdf_redesigner/pull/6), `test/windows-idb-v2-installed-upgrade` (PR #4 Windows 설치판에서 분기). **main / PR #4 / PR #5 수정 없음, 병합 금지**.

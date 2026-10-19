@@ -318,3 +318,13 @@
 - [GitHub Actions #39239803359](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39239803359) attempt 2 SUCCESS: Chrome build-and-test 및 Edge 전체 회귀 PASS. 최초 Edge attempt는 기존 `browser-smoke`의 CDP WebSocket handshake timeout으로 실패했고, 재실행은 통과했다.
 - [Windows Actions #39239803360](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39239803360) SUCCESS: Windows Server 2025 Electron smoke, NSIS 설치·제거 및 설치된 0.1.0/IDB v1 → 0.1.1/IDB v2 덮어쓰기 검증. 문서·PNG·active ID 보존 PASS. v2 후보는 임시 CI checkout에서만 생성.
 - 실제 사용자 Windows PC·데이터, 서명/SmartScreen, 전원 중단 상황은 미검증. main, PR #3~#6, STEP4 변경 없음.
+
+## 2026-10-19 20:06 KST — 설치 Electron의 동시 versionchange 복구 검증
+
+- 구현 커밋 `cc7495fb1ccaf68277f884a9533d988785c8c0d4`에서 CI 전용 실제 Electron 검증을 추가했다. 설치된 v2 앱의 첫 렌더러가 STEP2 문서·PNG를 로드한 채 두 번째 렌더러가 합성 v3 스키마 업그레이드를 요청한다. 기존 연결은 `versionchange`에서 닫히고 편집 화면은 읽기 전용 복구 안내로 전환된다.
+- Windows 검증은 v1→v2 덮어 설치 테스트가 만든 합성 `RUNNER_TEMP` 프로필만 사용한다. 업그레이드 전후 기존 전체 object store 값을 비교하고 문서, PNG 원시 bytes·메타데이터, `migrationAudit`, active document ID의 동일성을 확인한다. 합성 v3 probe store는 임시 프로필과 함께 삭제하며 사용자 설치/데이터는 사용하지 않는다.
+- 로컬: `npm test` 19/19 PASS, `npm run build` PASS, `npm run desktop:verify` 7/7 PASS, PowerShell 구문 파싱 PASS. 최초 샌드박스 빌드는 esbuild의 상위 경로 접근 거부로 막혀 허용된 실행에서 재시도해 PASS; 테스트 조건은 완화하지 않았다.
+- [Chrome/Edge Actions #39241620449](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39241620449) SUCCESS: 두 브라우저 job, 19/19 단위 테스트, versionchange abort/재시도·멱등성 및 기존 STEP2 회귀 PASS.
+- [Windows Actions #39241620515](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39241620515) SUCCESS: 실제 Windows Server 2025 설치판에서 v1→v2 덮어 설치와 새 v2→v3 동시 renderer 검증 PASS. 로그에 `blocked=0`, 기존 편집기 read-only, 문서·PNG bytes·모든 기존 store·metadata·active ID 보존, 합성 프로필 정리 PASS 확인.
+- Draft PR [#7](https://github.com/hibi89/astra_pdf_redesigner/pull/7)는 `test/windows-idb-v2-installed-upgrade` 대상 open/draft/unmerged. main 및 PR #3~#6은 변경·병합하지 않았고 STEP4 미착수. 미검증: 일반 사용자 PC/데이터, 비정상 전원 차단, 코드 서명/SmartScreen.
+- 다음 1순위: Draft PR #7에서 CI 결과와 변경 범위를 검토한다. 사용자 PC 실데이터 시험, main 병합, STEP4는 별도 승인 전 하지 않는다.
