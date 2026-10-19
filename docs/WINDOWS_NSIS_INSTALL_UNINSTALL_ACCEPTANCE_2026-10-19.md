@@ -55,3 +55,9 @@
 - 다음 한 단위: A4/한글/이미지·여러 페이지 PDF의 실제 출력 구조/텍스트 검증 또는 설치형 업데이트 시 프로필 보존 검사. 고객 눈으로 확인하는 UX 검증은 별도.
 
 **판정:** Windows CI에서 실제 설치·앱 실행·로컬 PDF 저장·바로가기·제거·합성 데이터 보존 검증 완료. 상용 판매 준비/STEP3 포함 **아님**.
+
+### 생성된 PDF 내용 재분석 검증 추가 — 2026-10-19
+
+- [CI #39210319075](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39210319075) SUCCESS, 기능 SHA `3ed16c56fdb5820813fb6cae6ec81b958d4991d5`: Node19/19·desktop5/5, 실제 설치된 EXE의 합성 A4 **2페이지**, 한글/숫자/ASCII 마커 **6/6**, 이미지 draw **1건**을 `pdfjs-dist`로 파싱 확인. NSIS 설치·제거도 PASS.
+- 최신 EXE SHA256 `FC91757AA962C167BA8D814A3F939ECBE3562085C45F5C32C894E4D16D0158D7`, [최신 Artifact 12167606844](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39210319075/artifacts/12167606844), 2026-10-26 만료 예정.
+- 상세 [PDF 콘텐츠 검증](WINDOWS_PDF_CONTENT_ACCEPTANCE_2026-10-19.md). 미완료: 실제 STEP2 사용자 편집/장문·한글 시각 품질·수동 저장창·STEP3 통합. 이전 검증의 기존 Artifact URL은 구 시험 파일입니다.

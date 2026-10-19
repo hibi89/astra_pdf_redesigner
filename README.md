@@ -97,3 +97,9 @@ PR #2는 `main`에 병합되었으며 merge SHA는 `f1ad26320b12b07019b115f77f8c
 - [Windows Actions #39208406254](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39208406254): NSIS **실제 무인 설치/제거**, 두 바로가기 생성/정리, 설치된 Electron GUI+PDF 생성, 합성 앱 데이터 보존 **PASS**. Node19/19·desktop4/4.
 - 최신 개발용 unsigned [설치 파일 다운로드(7일 보존)](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39208406254/artifacts/12165714586).
 - [NSIS 실제 설치·제거 수용 기록](docs/WINDOWS_NSIS_INSTALL_UNINSTALL_ACCEPTANCE_2026-10-19.md). GUI 마법사·PDF 저장 대화상자 수동 조작 및 실제 A4/한글/장문 육안은 미검증. STEP3 PDF 가져오기는 미포함.
+
+### Windows 설치형 PDF 실제 내용 검증 — 2026-10-19
+
+- [Windows Actions #39210319075](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39210319075) **SUCCESS**: 설치된 Windows EXE에서 합성 한글 2페이지/이미지 PDF 생성 후 PDF.js 재검증. A4 2쪽·한글/숫자/라틴 마커 **6/6**, 래스터 이미지 그리기 1건. 기존 테스트 Node19/19·desktop5/5, 설치/제거 자동검증 PASS.
+- [최신 unsigned Windows 설치 파일 Artifact](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39210319075/artifacts/12167606844) — 7일 보존. 이전 설치 링크/해시는 이전 시험판 기록입니다.
+- [PDF 실제 내용 검증 기록](docs/WINDOWS_PDF_CONTENT_ACCEPTANCE_2026-10-19.md). 합성 미리보기 테스트이며 고객 실제 문서/STEP3 가져오기·한글 폰트와 표의 육안/수동 저장창은 여전히 미검증.
