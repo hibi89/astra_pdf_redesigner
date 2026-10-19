@@ -101,7 +101,9 @@ test('STEP3 vector risk: real PDF.js clipped/painted path mixtures retain actual
       const list=await page.getOperatorList();
       const count=countVectorPaintOps(list,OPS);
       const names=list.fnArray.map(code=>lookup.get(code)??String(code));
-      const trace=names.filter(name=>/constructPath|stroke|fill|clip|endPath/i.test(name)).join(' > ');
+      const trace=names.map((name,i)=>({name,args:list.argsArray[i]}))
+        .filter(item=>/constructPath|stroke|fill|clip|endPath/i.test(item.name))
+        .map(item=>item.name+'('+JSON.stringify(item.args)?.slice(0,300)+')').join(' > ');
       assert.equal(count>0,scenario.painted,
         scenario.name+' misclassified as '+count+' vector events; PDF.js actual path ops: '+trace);
     }finally{await task.destroy();}
