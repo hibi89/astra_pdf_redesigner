@@ -42,6 +42,9 @@ jobs:
           $proc = Start-Process -FilePath $apps[0].FullName -ArgumentList '--astra-desktop-smoke' -Wait -PassThru -NoNewWindow
           if ($proc.ExitCode -ne 0) { throw "Packaged application smoke failed with exit code $($proc.ExitCode)" }
           'PASS ASTRA PACKAGED EXE: bundled app launched and exited with verified smoke result'
+      - name: End-to-end silent install, shortcut, installed EXE and uninstall
+        shell: pwsh
+        run: ./tests/windows-installer-lifecycle.ps1
       - name: Verify installer exists and report SHA256
         shell: pwsh
         run: |

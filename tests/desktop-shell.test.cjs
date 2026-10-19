@@ -26,3 +26,16 @@ test('desktop Electron shell enforces isolated sandbox and network block',()=>{
   }
   assert.doesNotMatch(s,/allowRunningInsecureContent:true|bypassCSP:true/);
 });
+
+test('Windows CI invokes real NSIS install and uninstall with non-destructive guards',()=>{
+  const script=fs.readFileSync(path.resolve(__dirname,'windows-installer-lifecycle.ps1'),'utf8');
+  const ci=fs.readFileSync(path.resolve(__dirname,'../.github/workflows/windows-desktop.yml'),'utf8');
+  for(const required of ["$env:GITHUB_ACTIONS -ne 'true'","$env:RUNNER_TEMP",
+    "'/S'",'"/D=$installation"','--astra-desktop-smoke',
+    'PASS ASTRA NSIS INSTALL','PASS ASTRA NSIS UNINSTALL',
+    'PASS ASTRA INSTALLED EXE',"if (-not (Test-Path -LiteralPath $sentinel -PathType Leaf))"]){
+    assert.ok(script.includes(required),'NSIS lifecycle script missing '+required);
+  }
+  assert.match(ci,/run: \.\/tests\/windows-installer-lifecycle\.ps1/);
+  assert.doesNotMatch(script,/Remove-Item\s+-LiteralPath\s+\$appProfile\s+-Recurse/);
+});
