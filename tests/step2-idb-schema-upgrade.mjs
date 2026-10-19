@@ -60,6 +60,37 @@ try {
   await sleep(700);
   await send('Emulation.setScriptExecutionDisabled',{value:false});
   assert.equal(await evaluate(fixture),true);
+  // Force an actual versionchange transaction abort. IndexedDB must restore
+  // the old database version and stores, then allow the app to retry safely.
+  const rollback=`(async()=>{
+    const request=indexedDB.open('astra-pdf-redesigner:v2',2);
+    request.onupgradeneeded=()=>{
+      const db=request.result;
+      db.createObjectStore('migrationAudit',{keyPath:'id'});
+      request.transaction.abort();
+    };
+    const failure=await new Promise(resolve=>{
+      request.onsuccess=()=>{request.result.close();resolve('unexpected-success')};
+      request.onerror=()=>resolve(request.error?.name||'unknown-error');
+    });
+    const old=indexedDB.open('astra-pdf-redesigner:v2',1);
+    const db=await new Promise((resolve,reject)=>{old.onsuccess=()=>resolve(old.result);old.onerror=()=>reject(old.error)});
+    try {
+      const get=req=>new Promise((resolve,reject)=>{req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error)});
+      const docs=await get(db.transaction('documents').objectStore('documents').getAll());
+      const assets=await get(db.transaction('assets').objectStore('assets').getAll());
+      const active=await get(db.transaction('meta').objectStore('meta').get('activeDocumentId'));
+      return {failure,version:db.version,stores:[...db.objectStoreNames],docs,assets:assets.map(a=>({...a,bytes:[...a.bytes]})),active};
+    }finally{db.close()}
+  })()`;
+  const aborted=await evaluate(rollback);
+  assert.equal(aborted.failure,'AbortError');
+  assert.equal(aborted.version,1,'Aborted versionchange unexpectedly advanced DB version');
+  assert.deepEqual(aborted.stores,['assets','documents','meta'],'Aborted versionchange left a new store');
+  assert.deepEqual(aborted.docs,[{id:'ci-doc',name:'CI retained document',schemaVersion:2}]);
+  assert.deepEqual(aborted.assets,[{id:'ci-image',documentId:'ci-doc',bytes:[0,1,127,255]}]);
+  assert.equal(aborted.active,'ci-doc');
+  console.log('PASS IDB v2 ROLLBACK: forced versionchange abort retained v1 schema, document, binary asset and active ID');
   await send('Page.reload',{ignoreCache:true});
   const inspect=`(async()=>{
     const open=indexedDB.open('astra-pdf-redesigner:v2');
