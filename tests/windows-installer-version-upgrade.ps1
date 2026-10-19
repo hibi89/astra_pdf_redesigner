@@ -12,15 +12,23 @@ if (-not (Test-Path -LiteralPath $original -PathType Leaf) -or $upgrade.Count -n
   throw 'Expected exact original 0.1.0 and candidate 0.1.1 NSIS installers'
 }
 $installation=Join-Path $env:RUNNER_TEMP ("astra-version-upgrade-"+$PID)
-$env:ASTRA_STEP2_PROFILE_DIR=Join-Path $env:RUNNER_TEMP ("astra-step2-profile-"+$PID)
+$profileRoot=[IO.Path]::GetFullPath($env:RUNNER_TEMP).TrimEnd('\')
+$profilePath=[IO.Path]::GetFullPath((Join-Path $profileRoot ("astra-step2-profile-"+$PID)))
+$env:ASTRA_STEP2_PROFILE_DIR=$profilePath
 $projectPdf=Join-Path $env:RUNNER_TEMP ("astra-step2-project-"+$PID+".pdf")
 $env:ASTRA_STEP2_ACCEPTANCE_OUT=$projectPdf
 $installed=$false
+$profileOwned=$false
 try {
+  if([IO.Path]::GetDirectoryName($profilePath) -ne $profileRoot -or
+     [IO.Path]::GetFileName($profilePath) -notmatch '^astra-step2-profile-[A-Za-z0-9-]+$'){
+    throw 'Refusing profile path outside the isolated RUNNER_TEMP naming guard'
+  }
   foreach($p in @($installation,$env:ASTRA_STEP2_PROFILE_DIR,$projectPdf)){
     if(Test-Path -LiteralPath $p){throw "Refusing existing CI upgrade test path: $p"}
   }
   if($installation -match '\s'){throw 'NSIS /D path must not contain whitespace'}
+  $profileOwned=$true
   $args=@('/S',"/D=$installation")
   $first=Start-Process -FilePath $original -ArgumentList $args -Wait -PassThru -NoNewWindow
   if($first.ExitCode -ne 0){throw "Baseline installer failed: $($first.ExitCode)"}
@@ -41,6 +49,9 @@ try {
   $verify=Start-Process -FilePath $newApp -ArgumentList @('--astra-desktop-smoke','--astra-step2-schema-upgrade-verify') -Wait -PassThru -NoNewWindow
   if($verify.ExitCode -ne 0){throw "Upgraded STEP2 document/PNG verification failed: $($verify.ExitCode)"}
   Write-Host 'PASS ASTRA NSIS SCHEMA UPGRADE 0.1.0 (IDB v1) -> 0.1.1 (IDB v2): existing STEP2 document and PNG readable after in-place installer upgrade'
+  $concurrent=Start-Process -FilePath $newApp -ArgumentList @('--astra-desktop-smoke','--astra-step2-schema-upgrade-verify','--astra-step2-versionchange-verify') -Wait -PassThru -NoNewWindow
+  if($concurrent.ExitCode -ne 0){throw "Installed Electron versionchange acceptance failed: $($concurrent.ExitCode)"}
+  Write-Host 'PASS ASTRA INSTALLED ELECTRON VERSIONCHANGE: concurrent renderer upgrade preserved v2 profile in read-only recovery mode'
   $uninstaller=Join-Path $installation 'Uninstall ASTRA PDF Redesigner.exe'
   if(-not (Test-Path -LiteralPath $uninstaller)){
     $options=@(Get-ChildItem -LiteralPath $installation -Filter 'Uninstall*.exe' -File)
@@ -57,6 +68,14 @@ try {
   Remove-Item Env:ASTRA_STEP2_ACCEPTANCE_OUT -ErrorAction SilentlyContinue
   Remove-Item Env:ASTRA_STEP2_PROFILE_DIR -ErrorAction SilentlyContinue
   if(Test-Path -LiteralPath $projectPdf){Remove-Item -LiteralPath $projectPdf -Force}
+  if($profileOwned -and (Test-Path -LiteralPath $profilePath)){
+    $profileItem=Get-Item -LiteralPath $profilePath -Force
+    if($profileItem.Attributes -band [IO.FileAttributes]::ReparsePoint){throw 'Refusing to recursively remove a reparse-point CI profile'}
+    if([IO.Path]::GetDirectoryName([IO.Path]::GetFullPath($profilePath)) -ne $profileRoot){throw 'Refusing CI profile cleanup outside RUNNER_TEMP'}
+    Remove-Item -LiteralPath $profilePath -Recurse -Force
+    if(Test-Path -LiteralPath $profilePath){throw 'Isolated CI profile cleanup left files behind'}
+    Write-Host 'PASS ASTRA VERSIONCHANGE PROFILE CLEANUP: synthetic Electron profile removed'
+  }
   if($installed -and (Test-Path -LiteralPath $installation)){
     $un=@(Get-ChildItem -LiteralPath $installation -Filter 'Uninstall*.exe' -File -ErrorAction SilentlyContinue)
     if($un.Count -eq 1){try{$null=Start-Process -FilePath $un[0].FullName -ArgumentList '/S' -Wait -PassThru -NoNewWindow}catch{Write-Warning 'CI upgrade cleanup failed'}}

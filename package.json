@@ -10,9 +10,10 @@
     "test": "node --experimental-strip-types --test tests/*.test.ts",
     "desktop:run": "npm run build && electron .",
     "desktop:smoke": "electron . --astra-desktop-smoke",
-    "desktop:test": "node --test tests/desktop-shell.test.cjs",
+    "desktop:test": "node --test tests/desktop-shell.test.cjs tests/desktop-personal-profile.test.cjs",
     "desktop:verify": "node desktop/verify-bundle.cjs && npm run desktop:test",
-    "desktop:package": "npm run build && electron-builder --win nsis --x64 --publish never"
+    "desktop:package": "npm run build && electron-builder --win nsis --x64 --publish never",
+    "desktop:personal-test": "npm run build && electron . --astra-personal-test"
   },
   "dependencies": {
     "react": "^19.2.0",

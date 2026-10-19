@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { blankProject, cloneProject, documentAssetIds, isProjectDocument, newIdentifier, type ImageAsset, type ProjectDocument } from './model.ts';
-import { ACTIVE, deleteDocument, initialize, listDocuments, openDatabase, readAssets, readDocument, readMeta, saveDocument, setActive, writeTransaction } from './idb.ts';
+import { ACTIVE, VERSION_CHANGE_EVENT, deleteDocument, initialize, listDocuments, openDatabase, readAssets, readDocument, readMeta, saveDocument, setActive, writeTransaction } from './idb.ts';
 import { validateImage } from './images.ts';
 import { exportProject, importProject } from './projectFile.ts';
 import { createMutationGate } from './mutationGate.ts';
@@ -17,7 +17,7 @@ export function useWorkspace(){
     try{return await action();}
     finally{setOperating(false);}
   }),[]);
-  const dbRef=useRef<IDBDatabase|null>(null),draft=useRef<ProjectDocument|null>(null),dirty=useRef(0),saved=useRef(0),timer=useRef<ReturnType<typeof setTimeout>|null>(null);
+  const dbRef=useRef<IDBDatabase|null>(null),draft=useRef<ProjectDocument|null>(null),dirty=useRef(0),saved=useRef(0),timer=useRef<ReturnType<typeof setTimeout>|null>(null),versionChanged=useRef(false);
   const tail=useRef<Promise<void>>(Promise.resolve()),released=useRef<null|(()=>void)>(null),allowWrites=useRef(false);
   const setCurrent=useCallback((doc:ProjectDocument,all:ImageAsset[])=>{draft.current=doc;dirty.current=0;saved.current=0;setDocument(doc);setAssets(all);setStatus('저장됨');},[]);
   const flush=useCallback(async()=>{
@@ -28,8 +28,8 @@ export function useWorkspace(){
     setStatus('저장 중');
     const snapshot=structuredClone(doc);
     const task=tail.current.catch(()=>{}).then(()=>saveDocument(db,snapshot));tail.current=task;
-    try{await task;if(draft.current?.id===doc.id){saved.current=Math.max(saved.current,seq);setStatus(saved.current===dirty.current?'저장됨':'저장 중');await listDocuments(db).then(setDocuments);setError('');}}
-    catch(e){setStatus('저장 실패');setError(e instanceof Error?e.message:'저장에 실패했습니다.');throw e;}
+    try{await task;if(draft.current?.id===doc.id){saved.current=Math.max(saved.current,seq);setStatus(versionChanged.current?'저장 실패':saved.current===dirty.current?'저장됨':'저장 중');await listDocuments(db).then(setDocuments);if(!versionChanged.current)setError('');}}
+    catch(e){setStatus('저장 실패');if(!versionChanged.current)setError(e instanceof Error?e.message:'저장에 실패했습니다.');throw e;}
   },[]);
   const edit=useCallback((update:(doc:ProjectDocument)=>ProjectDocument)=>{
     if(!allowWrites.current||!draft.current||mutationGate.current.busy)return;
@@ -54,6 +54,19 @@ export function useWorkspace(){
       }).catch(()=>{if(!disposed){setError('탭 편집 잠금을 확인할 수 없습니다.');setReady(true);}});
     }else{allowWrites.current=true;setWritable(true);setError('이 브라우저는 여러 탭 편집 충돌 방지 기능이 없습니다. 한 탭에서만 편집하세요.');}
     return()=>{disposed=true;allowWrites.current=false;released.current?.();if(timer.current)clearTimeout(timer.current);dbRef.current?.close();};
+  },[]);
+  useEffect(()=>{
+    const onVersionChange=()=>{
+      versionChanged.current=true;
+      allowWrites.current=false;
+      if(timer.current){clearTimeout(timer.current);timer.current=null;}
+      released.current?.();released.current=null;
+      setWritable(false);
+      if(dirty.current!==saved.current)setStatus('저장 실패');
+      setError('저장소가 다른 앱 버전에서 업데이트되었습니다. 이 탭은 저장할 수 없습니다. 저장되지 않은 내용이 보이면 복사한 뒤 최신 앱을 다시 시작하세요.');
+    };
+    window.addEventListener(VERSION_CHANGE_EVENT,onVersionChange);
+    return()=>window.removeEventListener(VERSION_CHANGE_EVENT,onVersionChange);
   },[]);
   useEffect(()=>{
     if(!writable)return;

@@ -75,3 +75,21 @@ test('Windows CI exercises real STEP2 UI and IndexedDB before installed PDF outp
   assert.ok(verifier.includes('ASTRA_LIBRARY_ONLY_8310'));
   assert.ok(verifier.includes('realStep2'));
 });
+
+test('installed Electron versionchange check is synthetic, isolated, and verifies existing store data',()=>{
+  const fixture=fs.readFileSync(path.resolve(__dirname,'../desktop/step2-versionchange-acceptance.cjs'),'utf8');
+  const runtime=fs.readFileSync(path.resolve(__dirname,'../desktop/main.cjs'),'utf8');
+  const installer=fs.readFileSync(path.resolve(__dirname,'windows-installer-version-upgrade.ps1'),'utf8');
+  const workflow=fs.readFileSync(path.resolve(__dirname,'../.github/workflows/windows-desktop.yml'),'utf8');
+  for(const required of ["process.env.GITHUB_ACTIONS!=='true'","process.env.RUNNER_TEMP",
+    "--astra-step2-schema-upgrade-verify",'electronVersionchangeProbe','isDeepStrictEqual',
+    'versionchange warning','activeDocumentId','migrationAudit',"body:document.querySelector('.project-paper')?.textContent"]){
+    assert.ok(fixture.includes(required),'Electron versionchange acceptance missing '+required);
+  }
+  assert.ok(runtime.includes('--astra-step2-versionchange-verify'));
+  assert.ok(runtime.includes('runStep2VersionchangeAcceptance(mainWindow,BrowserWindow)'));
+  assert.ok(installer.includes('--astra-step2-versionchange-verify'));
+  assert.ok(installer.includes('PASS ASTRA VERSIONCHANGE PROFILE CLEANUP'));
+  assert.ok(installer.includes('Refusing to recursively remove a reparse-point CI profile'));
+  assert.match(workflow,/In-place 0\.1\.0 IDB v1 to 0\.1\.1 IDB v2 Windows upgrade preserves STEP2 IndexedDB/);
+});
