@@ -7,11 +7,13 @@ const {pathToFileURL}=require('node:url');
 const {resolveBundleAsset}=require('./bundle-path.cjs');
 const {acceptanceDomSource,MARKERS}=require('./pdf-acceptance-fixture.cjs');
 const {runStep2ProjectAcceptance}=require('./step2-project-acceptance.cjs');
+const {runStep2VersionchangeAcceptance}=require('./step2-versionchange-acceptance.cjs');
 
 const APP_URL='astra://app/index.html';
 const SMOKE=process.argv.includes('--astra-desktop-smoke');
 const PDF_ACCEPTANCE=SMOKE&&process.argv.includes('--astra-pdf-acceptance');
 const STEP2_ACCEPTANCE=SMOKE&&(process.argv.includes('--astra-step2-acceptance')||process.argv.includes('--astra-step2-preservation-verify')||process.argv.includes('--astra-step2-schema-upgrade-verify'));
+const STEP2_VERSIONCHANGE_ACCEPTANCE=SMOKE&&process.argv.includes('--astra-step2-versionchange-verify');
 protocol.registerSchemesAsPrivileged([{
   scheme:'astra',
   privileges:{standard:true,secure:true,supportFetchAPI:true,stream:true},
@@ -208,6 +210,7 @@ if(lock){
         await runSmoke(mainWindow);
         if(PDF_ACCEPTANCE)await runPdfContentAcceptance(mainWindow);
         if(STEP2_ACCEPTANCE)await runStep2ProjectAcceptance(mainWindow,renderLocalPdf);
+        if(STEP2_VERSIONCHANGE_ACCEPTANCE)await runStep2VersionchangeAcceptance(mainWindow,BrowserWindow);
         app.exit(0);
       }
     }catch(error){console.error('ASTRA desktop startup failure:',error);app.exit(1);}
