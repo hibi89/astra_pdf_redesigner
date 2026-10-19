@@ -11,14 +11,18 @@ const {runStep2ProjectAcceptance}=require('./step2-project-acceptance.cjs');
 const APP_URL='astra://app/index.html';
 const SMOKE=process.argv.includes('--astra-desktop-smoke');
 const PDF_ACCEPTANCE=SMOKE&&process.argv.includes('--astra-pdf-acceptance');
-const STEP2_ACCEPTANCE=SMOKE&&process.argv.includes('--astra-step2-acceptance');
+const STEP2_ACCEPTANCE=SMOKE&&(process.argv.includes('--astra-step2-acceptance')||process.argv.includes('--astra-step2-preservation-verify'));
 protocol.registerSchemesAsPrivileged([{
   scheme:'astra',
   privileges:{standard:true,secure:true,supportFetchAPI:true,stream:true},
 }]);
 app.setName('ASTRA PDF Redesigner');
 app.setPath('userData',SMOKE
-  ?path.join(os.tmpdir(),'astra-desktop-ci-'+process.pid)
+  ?(process.env.GITHUB_ACTIONS==='true'&&process.env.ASTRA_STEP2_PROFILE_DIR&&
+    path.dirname(path.resolve(process.env.ASTRA_STEP2_PROFILE_DIR))===path.resolve(process.env.RUNNER_TEMP||'')&&
+    /^astra-step2-profile-[A-Za-z0-9-]+$/.test(path.basename(process.env.ASTRA_STEP2_PROFILE_DIR))
+    ?path.resolve(process.env.ASTRA_STEP2_PROFILE_DIR)
+    :path.join(os.tmpdir(),'astra-desktop-ci-'+process.pid))
   :path.join(app.getPath('appData'),'AstraPDFRedesigner'));
 if(process.platform==='win32')app.setAppUserModelId('com.astra.pdfredesigner');
 
