@@ -170,6 +170,28 @@ try{
     'Clipped PDF review must preserve the existing active document');
   console.log('PASS STEP3 CLIPPED XOBJECT PDF: real clipped raster triggers a review warning without premature persistence');
 
+  // A separate real-PDF scenario: the same path clips AND paints (W S).
+  // PDF.js packs the terminal paint op into constructPath's arguments.
+  const paintedClipBytes=makeClippedImagePdf({strokeClipPath:true});
+  await evaluate("(()=>{const encoded="+JSON.stringify(paintedClipBytes.toString('base64'))+";"+
+    "const bytes=Uint8Array.from(atob(encoded),c=>c.charCodeAt(0));"+
+    "const file=new File([bytes],'step3-clip-and-stroke.pdf',{type:'application/pdf'});"+
+    "const dt=new DataTransfer();dt.items.add(file);"+
+    "const input=document.querySelector('.step3-import-panel input[type=file]');"+
+    "input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}));})()");
+  const paintedClipRisk=await eventually(
+    ()=>evaluate("document.querySelector('[data-step3-vector-count]')?.textContent"),
+    value=>/벡터 경로 관련 명령 [1-9][0-9]*회/.test(value??'')
+  );
+  assert.ok(paintedClipRisk.includes('도형/셀 개수 아님'));
+  const paintedClipWarnings=await evaluate("[...document.querySelectorAll('.step3-import-panel details li')].map(x=>x.textContent)");
+  assert.ok(paintedClipWarnings.some(line=>line?.includes('이미지에 클리핑 경로가 적용됐습니다')),
+    'Actual clipped image warning must remain visible beside vector paint risk');
+  assert.equal(await evaluate("document.querySelectorAll('.doc-list-item').length"),clipBefore,
+    'Mixed clip/stroke review cannot persist original documents without confirmation');
+  console.log('PASS STEP3 CLIP+STROKE PDF: same path is painted and clipped; vector risk plus image warning');
+
+
   // Source/output acceptance matrix for a known-difficult layout: two columns,
   // vector table rules, raster image and a second PDF page. Compare exact
   // content markers (not pixels, page-count equality, or table geometry).

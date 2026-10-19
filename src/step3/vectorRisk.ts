@@ -9,7 +9,7 @@ export interface VectorPaintOpCodes {
   closeFillStroke?:number;closeEOFillStroke?:number;
 }
 export function countVectorPaintOps(
-  fn:{fnArray:readonly number[]},ops:VectorPaintOpCodes
+  fn:{fnArray:readonly number[];argsArray?:readonly unknown[]},ops:VectorPaintOpCodes
 ):number{
   const candidates=[
     ops.stroke,ops.closeStroke,ops.fill,ops.eoFill,
@@ -26,6 +26,21 @@ export function countVectorPaintOps(
     const code=commands[i];
     if(paintCodes.has(code))painted++;
     if(ops.constructPath===undefined||code!==ops.constructPath)continue;
+    // PDF.js 6.x packs the original terminal path operation into the
+    // first constructPath argument. For real PDFs: endPath means the path
+    // is not painted (common W n clip), while stroke/fill means it IS
+    // painted even if clip preceded constructPath (W S, W f).
+    // This is more reliable than inspecting only neighboring OPS.clip.
+    const packedArgs=fn.argsArray?.[i];
+    if(Array.isArray(packedArgs)){
+      const terminal=packedArgs[0];
+      if(typeof terminal==='number'&&Number.isInteger(terminal)){
+        if(ops.endPath!==undefined&&terminal===ops.endPath)continue;
+        if(paintCodes.has(terminal)){constructed++;continue;}
+      }
+    }
+    // Older/partial operator lists without packed terminal op retain the
+    // conservative clip-neighbor fallback rather than claiming precision.
     // PDF.js 6.x can emit "clip > constructPath" (not just
     // "constructPath > clip"). Both forms occur in real operator lists.
     const precedingClip=i>0&&(

@@ -109,3 +109,19 @@ test('STEP3 vector risk: real PDF.js clipped/painted path mixtures retain actual
     }finally{await task.destroy();}
   }
 });
+
+test('STEP3 vector risk: packed constructPath terminal separates W n from W S and W f',()=>{
+  const codes={...op,constructPath:91,clip:92,eoClip:93,endPath:94};
+  const packed=(ops:number[],terminals:unknown[])=>({
+    fnArray:ops,
+    argsArray:terminals.map(value=>typeof value==='number'?[value,[],[]]:null),
+  });
+  assert.equal(countVectorPaintOps(packed([92,91],[null,94]),codes),0,
+    'W n clipping path does not paint');
+  assert.equal(countVectorPaintOps(packed([92,91],[null,op.stroke]),codes),1,
+    'W S paints the same clipping path');
+  assert.equal(countVectorPaintOps(packed([93,91],[null,op.fill]),codes),1,
+    'W f fills the clipping path');
+  assert.equal(countVectorPaintOps(packed([92,91,91],[null,94,op.stroke]),codes),1,
+    'clip-only and stroke path must be distinguished in a mixed document');
+});
