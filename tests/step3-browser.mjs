@@ -6,6 +6,7 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {launchBrowser} from './browser-process.mjs';
 import {makeClippedImagePdf} from './fixtures/step3-clipped-pdf.mjs';
+import {makeMixedLayoutPdf,MIXED_LAYOUT_MARKERS} from './fixtures/step3-mixed-layout-pdf.mjs';
 const binary=process.env.CHROME_PATH||'chromium',url=process.env.SMOKE_URL||'http://127.0.0.1:4173';
 const dir=mkdtempSync(join(tmpdir(),'astra-step3-'));
 const browser=launchBrowser(binary,dir,'STEP3 PDF import');
@@ -162,6 +163,86 @@ try{
   assert.equal(await evaluate("document.querySelector('.doc-list-item.active strong')?.textContent"),clipActiveTitle,
     'Clipped PDF review must preserve the existing active document');
   console.log('PASS STEP3 CLIPPED XOBJECT PDF: real clipped raster triggers a review warning without premature persistence');
+
+  // Source/output acceptance matrix for a known-difficult layout: two columns,
+  // vector table rules, raster image and a second PDF page. Compare exact
+  // content markers (not pixels, page-count equality, or table geometry).
+  const mixedBytes=makeMixedLayoutPdf(),mixedSource=join(dir,'step3-mixed-source.pdf');
+  writeFileSync(mixedSource,mixedBytes);
+  const mixedInfo=execFileSync('pdfinfo',[mixedSource],{encoding:'utf8'});
+  const mixedText=execFileSync('pdftotext',[mixedSource,'-'],{encoding:'utf8'});
+  const mixedImages=execFileSync('pdfimages',['-list',mixedSource],{encoding:'utf8'});
+  assert.match(mixedInfo,/Pages:\s+2\b/,'Source fixture must be two pages');
+  assert.ok(mixedInfo.includes('(A4)'),'Source fixture must be A4');
+  for(const marker of MIXED_LAYOUT_MARKERS){
+    assert.equal(mixedText.split(marker).length-1,1,'Source fixture marker mismatch: '+marker);
+  }
+  assert.equal(mixedImages.split('\n').filter(line=>/^\s*\d+\s+\d+\s+image/.test(line)).length,1,
+    'Source fixture must embed one raster image');
+  console.log('PASS STEP3 MIXED SOURCE: verified 2 A4 pages, 13 exact text markers, one raster image');
+
+  const mixedBefore=await evaluate("document.querySelectorAll('.doc-list-item').length");
+  const previousTitles=await evaluate("[...document.querySelectorAll('.doc-list-item strong')].map(x=>x.textContent)");
+  await evaluate("(()=>{const encoded="+JSON.stringify(mixedBytes.toString('base64'))+";"+
+    "const data=Uint8Array.from(atob(encoded),c=>c.charCodeAt(0));"+
+    "const file=new File([data],'step3-mixed-layout.pdf',{type:'application/pdf'});"+
+    "const dt=new DataTransfer();dt.items.add(file);"+
+    "const input=document.querySelector('.step3-import-panel input[type=file]');"+
+    "input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}));})()");
+  const reviewText=await eventually(
+    ()=>evaluate("[...document.querySelectorAll('.step3-block-review textarea')].map(x=>x.value).join('\\n')"),
+    txt=>MIXED_LAYOUT_MARKERS.every(marker=>txt?.includes(marker))
+  );
+  for(const marker of MIXED_LAYOUT_MARKERS)
+    assert.equal(reviewText.split(marker).length-1,1,'Missing or duplicated review marker: '+marker);
+  const mixedWarnings=await evaluate("[...document.querySelectorAll('.step3-import-panel details li')].map(x=>x.textContent)");
+  assert.ok(mixedWarnings.some(w=>w?.includes('열 또는 넓은 텍스트 간격')),
+    'The actual multi-column PDF must warn about uncertain reading order');
+  assert.ok(await evaluate("document.querySelector('.step3-import-panel')?.textContent?.includes('이미지·표·도형이 누락될 수 있습니다')"),
+    'Vector table/graphics fidelity limitation must remain visible');
+  const mixedSummary=await evaluate("document.querySelector('[data-step3-image-count]')?.textContent");
+  assert.match(mixedSummary??'',/이미지 감지 1건/);
+  assert.match(mixedSummary??'',/PNG 복원 1건/);
+  assert.match(mixedSummary??'',/미복원 0건/);
+  assert.equal(await evaluate("document.querySelectorAll('.step3-block-review details').length"),2,
+    'Both source PDF pages must be independently reviewable');
+  assert.equal(await evaluate("document.querySelectorAll('.doc-list-item').length"),mixedBefore,
+    'Review must not write to the existing document list');
+  console.log('PASS STEP3 MIXED REVIEW: source markers 13/13, multi-column warning, raster recovery, unchanged persisted docs');
+
+  await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').click()");
+  await evaluate("(()=>{const button=[...document.querySelectorAll('.step3-import-panel button')].find(b=>b.textContent.includes('검수 결과를 새 문서로 저장'));if(!button||button.disabled)throw Error('Mixed PDF confirm disabled');button.click();})()");
+  await eventually(()=>evaluate("document.querySelectorAll('.doc-list-item').length"),n=>n===mixedBefore+1);
+  await eventually(()=>evaluate("document.querySelector('.project-paper')?.textContent"),
+    txt=>txt?.includes('STEP3_SOURCE_P1_BEGIN_901')&&txt.includes('STEP3_SOURCE_P2_END_913'));
+  await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),x=>x==='저장됨');
+  await send('Page.reload',{ignoreCache:true});
+  await eventually(()=>evaluate("document.querySelector('.project-paper')?.textContent"),
+    txt=>txt?.includes('STEP3_SOURCE_P2_END_913'));
+  await eventually(()=>evaluate("document.querySelectorAll('.project-paper img').length"),n=>n>=1);
+  assert.ok(await evaluate("Promise.all([...document.querySelectorAll('.project-paper img')].map(img=>img.decode().then(()=>true,()=>false))).then(x=>x.every(Boolean))"),
+    'Restored raster image did not decode after reload');
+  const afterTitles=await evaluate("[...document.querySelectorAll('.doc-list-item strong')].map(x=>x.textContent)");
+  for(const title of previousTitles)assert.ok(afterTitles.includes(title),'Prior document vanished: '+title);
+
+  const mixedOutput=await send('Page.printToPDF',{preferCSSPageSize:true,printBackground:false});
+  const mixedPrinted=join(dir,'step3-mixed-reprinted.pdf');
+  writeFileSync(mixedPrinted,Buffer.from(mixedOutput.data,'base64'));
+  const mixedPrintedInfo=execFileSync('pdfinfo',[mixedPrinted],{encoding:'utf8'});
+  const mixedPrintedText=execFileSync('pdftotext',[mixedPrinted,'-'],{encoding:'utf8'});
+  const mixedPrintedImages=execFileSync('pdfimages',['-list',mixedPrinted],{encoding:'utf8'});
+  assert.ok(mixedPrintedInfo.includes('(A4)'),'Redesigned print must use A4, without requiring the same page count');
+  for(const marker of MIXED_LAYOUT_MARKERS){
+    assert.equal(mixedPrintedText.split(marker).length-1,1,'Source→reprint marker loss/duplication: '+marker);
+  }
+  assert.ok(mixedPrintedText.indexOf('STEP3_SOURCE_P1_BEGIN_901')<
+    mixedPrintedText.indexOf('STEP3_SOURCE_P2_BEGIN_911'),'PDF page sequence was inverted');
+  assert.ok(mixedPrintedImages.split('\n').some(line=>/^\s*\d+\s+\d+\s+image/.test(line)),
+    'Redesigned print must embed a raster image');
+  console.log('PASS STEP3 SOURCE/REPRINT COMPARISON: 13/13 exact markers once, source page sequence, output raster, A4, original documents intact');
+  // Intentionally unverified: original vector grid lines, column/table cell
+  // geometry, pixel-for-pixel image content and Windows print fidelity.
+
 }finally{
   if(ws)ws.close();
   await browser.close();
