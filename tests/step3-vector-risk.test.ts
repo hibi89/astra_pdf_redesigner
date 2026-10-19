@@ -61,3 +61,19 @@ test('STEP3 vector risk: mixed table paths and clip mask do not inflate count',(
   assert.equal(countVectorPaintOps({fnArray:[91,91,91]},ops),3,
     'unknown bundled paths remain conservatively flagged');
 });
+
+test('STEP3 vector risk: real PDF.js clip-only fixture operator trace',async()=>{
+  const {getDocument,OPS}=await import('pdfjs-dist/legacy/build/pdf.mjs');
+  const {makeClippedImagePdf}=await import('./fixtures/step3-clipped-pdf.mjs');
+  const bytes=new Uint8Array(makeClippedImagePdf());
+  const task=getDocument({data:bytes,useSystemFonts:true});
+  try{
+    const pdf=await task.promise;
+    const page=await pdf.getPage(1);
+    const list=await page.getOperatorList();
+    const lookup=new Map(Object.entries(OPS).filter(([,n])=>Number.isInteger(n)).map(([name,n])=>[n,name]));
+    const names=list.fnArray.map(code=>lookup.get(code)??String(code));
+    const count=countVectorPaintOps(list,OPS);
+    assert.equal(count,0,'Clip-only PDF path should not claim vector table loss. Operators: '+names.join(' > '));
+  }finally{await task.destroy();}
+});
