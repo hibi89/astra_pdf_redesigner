@@ -89,6 +89,22 @@ try {
   if ($LASTEXITCODE -ne 0) { throw "Installed PDF content verification failed: $LASTEXITCODE" }
   Write-Host 'PASS ASTRA WINDOWS PDF STRUCTURE: installed Electron PDF parsed and verified'
 
+  # Second isolated installed-app run: actual STEP2 UI edits -> IndexedDB
+  # commit -> reload -> PDF output. This does not inject preview HTML.
+  $projectPdf = Join-Path $env:RUNNER_TEMP ("astra-step2-project-$PID.pdf")
+  if (Test-Path -LiteralPath $projectPdf) { throw 'Refusing to overwrite STEP2 project PDF' }
+  $env:ASTRA_STEP2_ACCEPTANCE_OUT = $projectPdf
+  try {
+    $projectProcess = Start-Process -FilePath $installedExe -ArgumentList @('--astra-desktop-smoke','--astra-step2-acceptance') -PassThru -Wait -NoNewWindow
+    if ($projectProcess.ExitCode -ne 0) { throw "Installed STEP2 project acceptance failed: $($projectProcess.ExitCode)" }
+    & node tests/verify-desktop-pdf.mjs $projectPdf --step2-project
+    if ($LASTEXITCODE -ne 0) { throw "Installed STEP2 project PDF verification failed: $LASTEXITCODE" }
+    Write-Host 'PASS ASTRA INSTALLED STEP2 PROJECT PDF: actual editor, IDB, reload, A4 text/image PDF'
+  } finally {
+    Remove-Item Env:ASTRA_STEP2_ACCEPTANCE_OUT -ErrorAction SilentlyContinue
+    if (Test-Path -LiteralPath $projectPdf) { Remove-Item -LiteralPath $projectPdf -Force }
+  }
+
   # Uninstall must not silently erase independent user data. The marker is
   # synthetic and confined to the CI runner's disposable userData folder.
   New-Item -ItemType Directory -Force -Path $appProfile | Out-Null

@@ -6,10 +6,12 @@ const path=require('node:path');
 const {pathToFileURL}=require('node:url');
 const {resolveBundleAsset}=require('./bundle-path.cjs');
 const {acceptanceDomSource,MARKERS}=require('./pdf-acceptance-fixture.cjs');
+const {runStep2ProjectAcceptance}=require('./step2-project-acceptance.cjs');
 
 const APP_URL='astra://app/index.html';
 const SMOKE=process.argv.includes('--astra-desktop-smoke');
 const PDF_ACCEPTANCE=SMOKE&&process.argv.includes('--astra-pdf-acceptance');
+const STEP2_ACCEPTANCE=SMOKE&&process.argv.includes('--astra-step2-acceptance');
 protocol.registerSchemesAsPrivileged([{
   scheme:'astra',
   privileges:{standard:true,secure:true,supportFetchAPI:true,stream:true},
@@ -201,6 +203,7 @@ if(lock){
       if(SMOKE){
         await runSmoke(mainWindow);
         if(PDF_ACCEPTANCE)await runPdfContentAcceptance(mainWindow);
+        if(STEP2_ACCEPTANCE)await runStep2ProjectAcceptance(mainWindow,renderLocalPdf);
         app.exit(0);
       }
     }catch(error){console.error('ASTRA desktop startup failure:',error);app.exit(1);}
