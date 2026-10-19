@@ -2,7 +2,8 @@
 // painted inside a PDF path clip. No user data, network or binary assets.
 import {deflateSync} from 'node:zlib';
 
-export function makeClippedImagePdf(){
+export function makeClippedImagePdf({paintInsideClip=false,paintOutsideClip=false,
+  fillOutsideClip=false,strokeClipPath=false}={}){
   const dim=24,rgb=Buffer.alloc(dim*dim*3);
   for(let y=0;y<dim;y++)for(let x=0;x<dim;x++){
     const i=(y*dim+x)*3;
@@ -16,8 +17,13 @@ export function makeClippedImagePdf(){
     'Q',
     'q',
     '85 455 70 44 re W n',
+    ...(paintInsideClip?['1 w 86 470 m 154 470 l S']:[]),
     '140 0 0 90 55 435 cm /Im1 Do',
     'Q',
+    ...(paintOutsideClip?['1 w 80 365 m 182 365 l S']:[]),
+    ...(fillOutsideClip?['0.3 0.5 0.8 rg 220 330 45 20 re f']:[]),
+    // A single path used for clipping and painting is an important boundary.
+    ...(strokeClipPath?['q 310 95 70 40 re W S Q']:[]),
     'BT /F1 12 Tf 50 380 Td (STEP3_CLIP_END_842) Tj ET','',
   ].join('\n');
   const stream=(dict,raw)=>Buffer.concat([

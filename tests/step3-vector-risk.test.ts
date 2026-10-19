@@ -80,3 +80,30 @@ test('STEP3 vector risk: real PDF.js clip-only fixture operator trace',async()=>
     assert.equal(count,0,'Clip-only PDF path should not claim vector table loss. Operators: '+names.join(' > '));
   }finally{await task.destroy();}
 });
+
+test('STEP3 vector risk: real PDF.js clipped/painted path mixtures retain actual painting',async()=>{
+  const {getDocument,OPS}=await import('pdfjs-dist/legacy/build/pdf.mjs');
+  const {makeClippedImagePdf}=await import('./fixtures/step3-clipped-pdf.mjs');
+  const lookup=new Map(Object.entries(OPS).filter(([,n])=>Number.isInteger(n)).map(([name,n])=>[n,name]));
+  const scenarios=[
+    {name:'clipping image only',args:{},painted:false},
+    {name:'stroke inside active clip',args:{paintInsideClip:true},painted:true},
+    {name:'stroke outside clip',args:{paintOutsideClip:true},painted:true},
+    {name:'colored fill outside clip',args:{fillOutsideClip:true},painted:true},
+    {name:'same PDF path clip plus stroke',args:{strokeClipPath:true},painted:true},
+    {name:'clip with multiple real paints',args:{paintInsideClip:true,paintOutsideClip:true,fillOutsideClip:true},painted:true},
+  ];
+  for(const scenario of scenarios){
+    const task=getDocument({data:new Uint8Array(makeClippedImagePdf(scenario.args)),useSystemFonts:true});
+    try{
+      const pdf=await task.promise;
+      const page=await pdf.getPage(1);
+      const list=await page.getOperatorList();
+      const count=countVectorPaintOps(list,OPS);
+      const names=list.fnArray.map(code=>lookup.get(code)??String(code));
+      const trace=names.filter(name=>/constructPath|stroke|fill|clip|endPath/i.test(name)).join(' > ');
+      assert.equal(count>0,scenario.painted,
+        scenario.name+' misclassified as '+count+' vector events; PDF.js actual path ops: '+trace);
+    }finally{await task.destroy();}
+  }
+});
