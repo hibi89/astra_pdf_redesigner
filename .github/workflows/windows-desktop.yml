@@ -45,6 +45,23 @@ jobs:
       - name: End-to-end silent install, shortcut, installed EXE and uninstall
         shell: pwsh
         run: ./tests/windows-installer-lifecycle.ps1
+      - name: Prepare version-specific upgrade pair on disposable runner
+        shell: pwsh
+        run: |
+          $base = @(Get-ChildItem -LiteralPath release -Filter 'ASTRA-PDF-Redesigner-Setup-0.1.0-x64.exe' -File)
+          if ($base.Count -ne 1) { throw 'Expected one 0.1.0 installer before upgrade fixture' }
+          $dest = Join-Path $env:RUNNER_TEMP 'astra-baseline-0.1.0.exe'
+          if (Test-Path -LiteralPath $dest) { throw 'Refusing to overwrite baseline fixture' }
+          Move-Item -LiteralPath $base[0].FullName -Destination $dest
+          node tests/prepare-upgrade-candidate.cjs
+          if ($LASTEXITCODE -ne 0) { throw 'Failed to prepare ephemeral upgrade version' }
+      - name: Build version 0.1.1 NSIS candidate with same application code
+        run: npx electron-builder --win nsis --x64 --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: In-place 0.1.0 to 0.1.1 Windows upgrade preserves STEP2 IndexedDB
+        shell: pwsh
+        run: ./tests/windows-installer-version-upgrade.ps1
       - name: Verify installer exists and report SHA256
         shell: pwsh
         run: |
