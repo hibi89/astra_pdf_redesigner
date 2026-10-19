@@ -79,3 +79,51 @@ test('STEP3 images: offset twin columns warn rather than claiming reliable readi
   assert.ok(draft.warnings.some(w=>w.includes('열 또는 넓은 텍스트 간격')));
   assert.equal(draft.pages[0].charCount,pieces.reduce((n,p)=>n+p.text.length,0));
 });
+
+test('STEP3 images: repeat/group/mask operators remain visible in detected and missing counts',async()=>{
+  const extended:ImageOpCodes={...op,paintImageXObjectRepeat:7,
+    paintInlineImageXObjectGroup:8,paintImageMaskXObjectRepeat:9};
+  const fn={fnArray:[extended.save,extended.transform,extended.paintImageMaskXObject,
+    extended.paintImageXObjectRepeat!,extended.paintInlineImageXObjectGroup!,
+    extended.paintImageMaskXObjectRepeat!,extended.restore],
+    argsArray:[[],[120,0,0,90,45,600],['mask'],['repeat'],['group'],['mask-repeat'],[]]};
+  const placements=scanImagePlacements(3,fn,[1,0,0,-1,0,842],595,842,extended);
+  assert.equal(placements.length,4);
+  assert.ok(placements.every(item=>item.kind==='unsupported'&&item.reason?.includes('복원하지')));
+  const {recoverPageImages}=await import('../src/step3/imageRecovery.ts');
+  const recovered=await recoverPageImages(3,fn,[1,0,0,-1,0,842],595,842,extended,{
+    objs:{get:()=>{throw Error('Unsupported op must not request pixel data');}},
+  });
+  assert.equal(recovered.detected,4);
+  assert.equal(recovered.images.length,0);
+  assert.equal(recovered.problems.length,4);
+  const draft=makePdfDraft('unsupported.pdf',[{number:1,width:595,height:842,
+    pieces:[pixel('보존되는 문단',1,40,80)],imageDetected:true,imageRecovery:recovered}]);
+  assert.equal(draft.pages[0].omittedImages,4);
+  assert.ok(draft.warnings.some(w=>w.includes('미복원 이미지 4건')));
+});
+test('STEP3 images: off-page and zero-area placements are reported instead of imported',async()=>{
+  const fn={fnArray:[op.save,op.transform,op.paintImageXObject,op.restore,
+    op.save,op.transform,op.paintInlineImageXObject,op.restore],
+    argsArray:[[],[100,0,0,80,590,600],['off-page'],[],[],[0,0,0,80,30,600],[{}],[]]};
+  const placements=scanImagePlacements(1,fn,[1,0,0,-1,0,842],595,842,op);
+  assert.equal(placements.length,2);
+  assert.ok(placements.every(p=>p.origin===null&&p.reason?.includes('위치가 불확실')));
+  const {recoverPageImages}=await import('../src/step3/imageRecovery.ts');
+  const result=await recoverPageImages(1,fn,[1,0,0,-1,0,842],595,842,op,{
+    objs:{get:()=>{throw Error('Invalid placement must not retrieve image');}},
+  });
+  assert.equal(result.detected,2);
+  assert.equal(result.images.length,0);
+  assert.equal(result.problems.length,2);
+});
+test('STEP3 images: rejected placement does not corrupt following graphics-state placement',()=>{
+  const fn={fnArray:[op.save,op.transform,op.paintImageXObject,op.restore,
+    op.save,op.transform,op.paintImageXObject,op.restore],
+    argsArray:[[],[100,0,0,50,700,500],['rejected'],[],[],[100,0,0,60,45,600],['good'],[]]};
+  const result=scanImagePlacements(2,fn,[1,0,0,-1,0,842],595,842,op);
+  assert.equal(result.length,2);
+  assert.equal(result[0].origin,null);
+  assert.deepEqual(result[1].origin,{page:2,x:45,y:182,width:100,height:60});
+  assert.equal(result[1].reason,undefined);
+});
