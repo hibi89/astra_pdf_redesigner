@@ -7,6 +7,7 @@ const {isDeepStrictEqual}=require('node:util');
 const DB_NAME='astra-pdf-redesigner:v2';
 const APP_URL='astra://app/index.html';
 const BODY_MARKER='ASTRA_STEP2_BODY_8308';
+const UNSAVED_MARKER='ASTRA_STEP2_UNSAVED_VERSIONCHANGE_8308';
 const ACTIVE_KEY='activeDocumentId';
 
 async function waitFor(evaluate,predicate,label){
@@ -99,6 +100,7 @@ async function runStep2VersionchangeAcceptance(primary,BrowserWindow){
       webviewTag:false,devTools:false,webSecurity:true,
     },
   });
+  let draftTimerControlAttempted=false;
   try{
     competing.webContents.setWindowOpenHandler(()=>({action:'deny'}));
     competing.webContents.on('will-navigate',(event,url)=>{
@@ -109,6 +111,49 @@ async function runStep2VersionchangeAcceptance(primary,BrowserWindow){
     await waitFor(()=>evaluate("Boolean(document.querySelector('#root')?.firstElementChild)"),Boolean,'secondary Electron renderer mount');
     await waitFor(()=>evaluate("document.querySelector('.warning[role=alert]')?.textContent||''"),
       message=>message.includes('다른 탭에서 문서함을 편집'),'secondary renderer edit lock');
+
+    draftTimerControlAttempted=true;
+    const draft=await primary.webContents.executeJavaScript(`(()=>{
+      const textarea=document.querySelector('.section-editor textarea');
+      if(!textarea||textarea.disabled)throw Error('Primary renderer has no editable synthetic paragraph');
+      const nativeSet=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set;
+      const control={
+        originalSetTimeout:window.setTimeout.bind(window),
+        originalClearTimeout:window.clearTimeout.bind(window),
+        setTimeoutDescriptor:Object.getOwnPropertyDescriptor(window,'setTimeout'),
+        heldHandles:new Set(),heldSaveTimers:0,firedSaveTimers:0,
+      };
+      window.__astraVersionchangeTimerControl=control;
+      window.__astraVersionchangeDraftTimers=()=>({
+        heldSaveTimers:control.heldSaveTimers,firedSaveTimers:control.firedSaveTimers,
+      });
+      window.setTimeout=(callback,delay,...args)=>{
+        if(delay===450){
+          control.heldSaveTimers++;
+          const handle=control.originalSetTimeout(()=>{control.firedSaveTimers++;},60*60*1000);
+          control.heldHandles.add(handle);
+          return handle;
+        }
+        return control.originalSetTimeout(callback,delay,...args);
+      };
+      nativeSet.call(textarea,textarea.value+'\\n'+${JSON.stringify(UNSAVED_MARKER)});
+      textarea.dispatchEvent(new Event('input',{bubbles:true}));
+      return{value:textarea.value};
+    })()`,true);
+    if(!draft.value.includes(UNSAVED_MARKER))throw Error('Synthetic unsaved edit was not applied');
+    await waitFor(()=>primary.webContents.executeJavaScript(`(()=>({
+      value:document.querySelector('.section-editor textarea')?.value||'',
+      preview:document.querySelector('.project-paper')?.textContent||'',
+      status:document.querySelector('.save-chip')?.textContent||'',
+      timers:window.__astraVersionchangeDraftTimers?.(),
+    }))()`,true),state=>state.value.includes(UNSAVED_MARKER)&&state.status==='저장 중'&&
+      state.preview.includes(UNSAVED_MARKER)&&state.timers?.heldSaveTimers===1&&
+      state.timers?.firedSaveTimers===0,'React state reflected the unsaved edit before autosave');
+
+    const beforeUpgrade=await snapshot(primary);
+    if(beforeUpgrade.version!==2||!isDeepStrictEqual(before.records,beforeUpgrade.records)||
+       JSON.stringify(beforeUpgrade.records).includes(UNSAVED_MARKER))
+      throw Error('Unsaved synthetic draft was persisted before the competing schema upgrade');
 
     const upgrade=await evaluate(`(async()=>{
       let blocked=0,upgradedFrom=null;
@@ -138,13 +183,18 @@ async function runStep2VersionchangeAcceptance(primary,BrowserWindow){
     message=>message.includes('저장소가 다른 앱 버전에서 업데이트되었습니다'),'primary renderer versionchange warning');
     const primaryAfter=await primary.webContents.executeJavaScript(`(()=>({
       body:document.querySelector('.project-paper')?.textContent||'',
+      draft:document.querySelector('.section-editor textarea')?.value||'',
+      saveStatus:document.querySelector('.save-chip')?.textContent||'',
+      timerState:window.__astraVersionchangeDraftTimers?.(),
       imageWidth:document.querySelector('.project-paper figure img')?.naturalWidth||0,
       disabled:document.querySelector('.section-editor textarea')?.disabled===true,
       warning:document.querySelector('.warning[role=alert]')?.textContent||'',
     }))()`,true);
     if(!primaryAfter.body.includes(BODY_MARKER)||primaryAfter.imageWidth!==2||!primaryAfter.disabled||
+       !primaryAfter.draft.includes(UNSAVED_MARKER)||primaryAfter.saveStatus!=='저장 실패'||
+       primaryAfter.timerState?.firedSaveTimers!==0||
        !primaryAfter.warning.includes('저장되지 않은 내용이 보이면'))
-      throw Error('Primary Electron renderer did not retain the project in read-only recovery mode');
+      throw Error('Primary Electron renderer did not retain its unsaved draft in read-only recovery mode');
 
     const after=await snapshot(competing);
     if(after.version!==3||!after.stores.includes('electronVersionchangeProbe'))
@@ -153,15 +203,35 @@ async function runStep2VersionchangeAcceptance(primary,BrowserWindow){
       if(!after.stores.includes(store)||!isDeepStrictEqual(before.records[store],after.records[store]))
         throw Error('Electron versionchange changed existing IndexedDB store data: '+store);
     }
+    if(JSON.stringify(after.records).includes(UNSAVED_MARKER))
+      throw Error('Unsaved synthetic draft appeared in IndexedDB after the schema upgrade');
     if(findActiveDocument(after)?.id!==activeBefore.id||after.records.assets?.length!==1||
        after.records.assets[0]?.blob?.bytes?.length!==before.records.assets[0]?.blob?.bytes?.length)
       throw Error('Electron versionchange lost the active document or image bytes');
     await evaluate('window.__electronVersionchangeDb.close();window.__electronVersionchangeDb=null');
     console.log('PASS ASTRA ELECTRON VERSIONCHANGE: concurrent v2 renderer upgrade closed the old connection without blocking');
-    console.log('PASS ASTRA ELECTRON VERSIONCHANGE: old editor became read-only and retained its loaded project');
+    console.log('PASS ASTRA ELECTRON VERSIONCHANGE: old editor retained its unsaved draft and became read-only before autosave');
     console.log('PASS ASTRA ELECTRON VERSIONCHANGE: all prior stores, document, PNG bytes, metadata, and active ID survived');
   }finally{
+    let cleanupError;
+    if(draftTimerControlAttempted&&!primary.isDestroyed()){
+      try{
+        const restored=await primary.webContents.executeJavaScript(`(()=>{
+          const control=window.__astraVersionchangeTimerControl;
+          if(!control)return true;
+          for(const handle of control.heldHandles)control.originalClearTimeout(handle);
+          if(control.setTimeoutDescriptor)
+            Object.defineProperty(window,'setTimeout',control.setTimeoutDescriptor);
+          else delete window.setTimeout;
+          delete window.__astraVersionchangeDraftTimers;
+          delete window.__astraVersionchangeTimerControl;
+          return true;
+        })()`,true);
+        if(!restored)throw Error('Electron test did not restore the primary renderer timer');
+      }catch(error){cleanupError=error;}
+    }
     if(!competing.isDestroyed())competing.destroy();
+    if(cleanupError)throw cleanupError;
   }
 }
 
