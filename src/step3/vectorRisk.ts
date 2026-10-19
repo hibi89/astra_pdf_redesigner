@@ -26,18 +26,26 @@ export function countVectorPaintOps(
     const code=commands[i];
     if(paintCodes.has(code))painted++;
     if(ops.constructPath===undefined||code!==ops.constructPath)continue;
-    let clipOnly=false;
+    // PDF.js 6.x can emit "clip > constructPath" (not just
+    // "constructPath > clip"). Both forms occur in real operator lists.
+    const precedingClip=i>0&&(
+      (ops.clip!==undefined&&commands[i-1]===ops.clip)||
+      (ops.eoClip!==undefined&&commands[i-1]===ops.eoClip)
+    );
+    let followingClip=false,explicitPaintAfter=false;
     for(let j=i+1;j<commands.length;j++){
       const next=commands[j];
-      if(next===ops.constructPath||paintCodes.has(next))break;
+      if(next===ops.constructPath)break;
+      if(paintCodes.has(next)){explicitPaintAfter=true;break;}
       if((ops.clip!==undefined&&next===ops.clip)||
          (ops.eoClip!==undefined&&next===ops.eoClip)){
-        clipOnly=true;break;
+        followingClip=true;break;
       }
-      // A path ended without an explicit paint is still a conservative
-      // risk signal unless positively classified as a clip-only path.
       if(ops.endPath!==undefined&&next===ops.endPath)break;
     }
+    // Only skip paths positively connected to a clip with no visible
+    // paint. Ambiguous paths remain counted so damage isn't hidden.
+    const clipOnly=(precedingClip||followingClip)&&!explicitPaintAfter;
     if(!clipOnly)constructed++;
   }
   // Keep this a risk indicator, not a claimed count of vector objects.

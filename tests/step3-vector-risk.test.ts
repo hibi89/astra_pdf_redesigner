@@ -47,6 +47,9 @@ test('STEP3 vector risk: clipping-only paths followed by image painting are excl
   // Common PDF.js W n pattern: construct, clip, endPath, image.
   assert.equal(countVectorPaintOps({fnArray:[91,92,94,99]},ops),0);
   assert.equal(countVectorPaintOps({fnArray:[91,93,94,99]},ops),0);
+  assert.equal(countVectorPaintOps({fnArray:[92,91,99]},ops),0,
+    'Actual PDF.js ordering can be clip before constructPath');
+  assert.equal(countVectorPaintOps({fnArray:[93,91,99]},ops),0);
   // Path paint in the same page should still be detected.
   assert.equal(countVectorPaintOps({fnArray:[91,92,94,99,91,op.stroke]},ops),1);
   assert.equal(countVectorPaintOps({fnArray:[91,op.stroke,91,92,94]},ops),1);
