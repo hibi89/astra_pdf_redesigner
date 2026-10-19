@@ -300,3 +300,11 @@
 - **산출/문서:** `tests/fixtures/step3-transparency-form-pdf.mjs`, `tests/step3-transparency-form.test.ts`, `tests/step3-browser.mjs`. [상세보고서](https://github.com/hibi89/astra_pdf_redesigner/blob/feature/step3-pdf-import-20261019/docs/STEP3_TRANSPARENCY_FORM_RISK_VALIDATION_2026-10-19.md) feature docs-only SHA `faec84e388da0f7a6d71f71c1b8d14e18d9f3098` (CI 검증 대상은 이전 코드 SHA와 구분).
 - **제한/상태:** 실제 5~10 사용자 PDF/Windows Chrome·Edge 장문·인쇄/육안, 투명도 픽셀·Form 내부 조합 보존/SoftMask 실물 수용·주석/복잡 Form 미검증. Risk 0이라도 완전 복원 보장하지 않음. [Draft PR #3](https://github.com/hibi89/astra_pdf_redesigner/pull/3) open/draft/**main STEP3 기능 미병합**; STEP4 미착수, Production/Vercel 미적용. 비공식 STEP3 약65~70%/전체 약38% 유지.
 - **다음 `ㄱ`:** 중첩 Form·SoftMask·BlendMode 합성 실제 PDF 오탐/누락 경계 또는 실문서 acceptance 평가 단계 1단위. main 병합 및 STEP4는 사용자 별도 승인 전 금지.
+
+
+## 2026-10-19 — Windows 설치판 실험: IndexedDB v1→v2 마이그레이션 검증
+- 별도 Draft [PR #6](https://github.com/hibi89/astra_pdf_redesigner/pull/6), `test/windows-idb-v2-installed-upgrade` (PR #4 Windows 설치판에서 분기). **main / PR #4 / PR #5 수정 없음, 병합 금지**.
+- [Windows Actions #39223771185](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39223771185) **completed/SUCCESS**, 검증 기능 SHA `0e5198341d4a708af20a3be3c481f058fecbfaf2`. Windows EXE 0.1.0(IDB v1)로 STEP2 합성 문서/PNG 저장, **재빌드한 0.1.1(IDB v2)** NSIS 설치판으로 같은 경로 덮어 설치; DB version 2·`migrationAudit` 생성·문서/PNG/active ID/캡션 보존, 설치판 제거까지 실제 CI 로그 PASS.
+- v2 코드는 Windows CI 작업 중 임시로 적용·빌드됨. Git 브랜치 제품 소스는 v1 유지하며 PR #5의 additive schema patch와 동일 형태. 브라우저 롤백 검증 [#39222517425](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39222517425) 별도 성공.
+- **미검증:** 일반 사용자 Windows 10/11 설치판, 실고객 문서, 코드 서명/SmartScreen, 비정상 전원종료 복구 및 장문 PDF 육안. unsigned 설치 artifact는 7일 한정 테스트용. 상세 `docs/WINDOWS_IDB_SCHEMA_V2_INSTALLED_UPGRADE_2026-10-19.md`.
+- **다음:** 해당 성공을 제품 main 병합 승인으로 간주하지 말 것. PR #4/#5/#6 모두 Draft 그대로, STEP4 금지.

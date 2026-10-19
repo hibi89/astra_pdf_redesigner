@@ -1,6 +1,6 @@
-# CI-only actual NSIS 0.1.0 -> 0.1.1 in-place upgrade acceptance.
-# Both builds share application code; this checks installer/version replacement,
-# not an older application schema's migration.
+# CI-only actual NSIS 0.1.0 (IDB v1) -> 0.1.1 (IDB v2) upgrade.
+# Both installers are built on the same disposable Windows runner from distinct
+# compiled app versions. Never touches an end-user profile or installation.
 Set-StrictMode -Version Latest
 $ErrorActionPreference='Stop'
 if ($env:GITHUB_ACTIONS -ne 'true' -or [string]::IsNullOrWhiteSpace($env:RUNNER_TEMP)) {
@@ -31,16 +31,16 @@ try {
   if($created.ExitCode -ne 0){throw "Baseline STEP2 data generation failed: $($created.ExitCode)"}
   & node tests/verify-desktop-pdf.mjs $projectPdf --step2-project
   if($LASTEXITCODE -ne 0){throw "Baseline project PDF failed parsing: $LASTEXITCODE"}
-  Write-Host 'PASS ASTRA UPGRADE BASELINE 0.1.0: installed EXE saved STEP2 document/PNG and generated parsed PDF'
+  Write-Host 'PASS ASTRA UPGRADE BASELINE 0.1.0 IDB V1: installed EXE saved STEP2 document/PNG and generated parsed PDF'
 
   # Actually run a separate 0.1.1 NSIS executable over same install path.
   $second=Start-Process -FilePath $upgrade[0].FullName -ArgumentList $args -Wait -PassThru -NoNewWindow
   if($second.ExitCode -ne 0){throw "Candidate upgrade installer failed: $($second.ExitCode)"}
   $newApp=Join-Path $installation 'ASTRA PDF Redesigner.exe'
   if(-not (Test-Path -LiteralPath $newApp)){throw 'Upgraded installed EXE missing'}
-  $verify=Start-Process -FilePath $newApp -ArgumentList @('--astra-desktop-smoke','--astra-step2-preservation-verify') -Wait -PassThru -NoNewWindow
+  $verify=Start-Process -FilePath $newApp -ArgumentList @('--astra-desktop-smoke','--astra-step2-schema-upgrade-verify') -Wait -PassThru -NoNewWindow
   if($verify.ExitCode -ne 0){throw "Upgraded STEP2 document/PNG verification failed: $($verify.ExitCode)"}
-  Write-Host 'PASS ASTRA NSIS VERSION UPGRADE 0.1.0 -> 0.1.1: existing STEP2 document and PNG readable after in-place installer upgrade'
+  Write-Host 'PASS ASTRA NSIS SCHEMA UPGRADE 0.1.0 (IDB v1) -> 0.1.1 (IDB v2): existing STEP2 document and PNG readable after in-place installer upgrade'
   $uninstaller=Join-Path $installation 'Uninstall ASTRA PDF Redesigner.exe'
   if(-not (Test-Path -LiteralPath $uninstaller)){
     $options=@(Get-ChildItem -LiteralPath $installation -Filter 'Uninstall*.exe' -File)

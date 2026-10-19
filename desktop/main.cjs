@@ -11,7 +11,7 @@ const {runStep2ProjectAcceptance}=require('./step2-project-acceptance.cjs');
 const APP_URL='astra://app/index.html';
 const SMOKE=process.argv.includes('--astra-desktop-smoke');
 const PDF_ACCEPTANCE=SMOKE&&process.argv.includes('--astra-pdf-acceptance');
-const STEP2_ACCEPTANCE=SMOKE&&(process.argv.includes('--astra-step2-acceptance')||process.argv.includes('--astra-step2-preservation-verify'));
+const STEP2_ACCEPTANCE=SMOKE&&(process.argv.includes('--astra-step2-acceptance')||process.argv.includes('--astra-step2-preservation-verify')||process.argv.includes('--astra-step2-schema-upgrade-verify'));
 protocol.registerSchemesAsPrivileged([{
   scheme:'astra',
   privileges:{standard:true,secure:true,supportFetchAPI:true,stream:true},
