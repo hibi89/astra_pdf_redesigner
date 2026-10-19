@@ -34,6 +34,14 @@ jobs:
         run: npx electron-builder --win nsis --x64 --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Launch packaged Windows EXE in isolated smoke mode
+        shell: pwsh
+        run: |
+          $apps = @(Get-ChildItem -Path 'release/win-unpacked' -Filter '*.exe' -File | Where-Object { $_.Name -like 'ASTRA*' })
+          if ($apps.Count -ne 1) { throw "Expected one packaged ASTRA executable, found $($apps.Count)" }
+          $proc = Start-Process -FilePath $apps[0].FullName -ArgumentList '--astra-desktop-smoke' -Wait -PassThru -NoNewWindow
+          if ($proc.ExitCode -ne 0) { throw "Packaged application smoke failed with exit code $($proc.ExitCode)" }
+          'PASS ASTRA PACKAGED EXE: bundled app launched and exited with verified smoke result'
       - name: Verify installer exists and report SHA256
         shell: pwsh
         run: |
