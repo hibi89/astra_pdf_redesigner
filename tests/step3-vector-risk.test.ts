@@ -41,3 +41,23 @@ test('STEP3 vector paint risk: image-only and unknown operator-analysis cases do
   assert.ok(draft.warnings.some(w=>w.includes('미복원 이미지 1건')));
   assert.ok(!draft.warnings.some(w=>w.includes('벡터 경로 관련 명령')));
 });
+
+test('STEP3 vector risk: clipping-only paths followed by image painting are excluded',()=>{
+  const ops={...op,constructPath:91,clip:92,eoClip:93,endPath:94};
+  // Common PDF.js W n pattern: construct, clip, endPath, image.
+  assert.equal(countVectorPaintOps({fnArray:[91,92,94,99]},ops),0);
+  assert.equal(countVectorPaintOps({fnArray:[91,93,94,99]},ops),0);
+  // Path paint in the same page should still be detected.
+  assert.equal(countVectorPaintOps({fnArray:[91,92,94,99,91,op.stroke]},ops),1);
+  assert.equal(countVectorPaintOps({fnArray:[91,op.stroke,91,92,94]},ops),1);
+});
+
+test('STEP3 vector risk: mixed table paths and clip mask do not inflate count',()=>{
+  const ops={...op,constructPath:91,clip:92,eoClip:93,endPath:94};
+  assert.equal(countVectorPaintOps({
+    fnArray:[91,op.stroke,91,op.stroke,91,92,94,99,91,op.stroke],
+  },ops),3);
+  assert.equal(countVectorPaintOps({fnArray:[91,op.stroke,91,op.stroke,91,op.stroke]},ops),3);
+  assert.equal(countVectorPaintOps({fnArray:[91,91,91]},ops),3,
+    'unknown bundled paths remain conservatively flagged');
+});

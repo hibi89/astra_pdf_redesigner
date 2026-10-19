@@ -158,6 +158,12 @@ try{
   const clipSummary=await evaluate("document.querySelector('[data-step3-image-count]')?.textContent");
   assert.match(clipSummary??'',/이미지 감지 [1-9]/);
   assert.match(clipSummary??'',/PNG 복원 [1-9]/);
+  const clipVectorSummary=await evaluate("document.querySelector('[data-step3-vector-count]')?.textContent");
+  assert.match(clipVectorSummary??'',/벡터 경로 관련 명령 0회/,
+    'Image-only clipping path must not be misclassified as painted vector table lines');
+  assert.ok(await evaluate("document.querySelector('[data-step3-acceptance-checklist]')?.textContent?.includes('그래픽 보존을 증명하지 않습니다')),
+    'Zero-risk operator count must not imply source graphics were preserved');
+  console.log('PASS STEP3 CLIP-ONLY VECTOR CONTROL: clipping mask excluded, image warning retained');
   assert.equal(await evaluate("document.querySelectorAll('.doc-list-item').length"),clipBefore,
     'Clipped PDF review must not persist a document before confirmation');
   assert.equal(await evaluate("document.querySelector('.doc-list-item.active strong')?.textContent"),clipActiveTitle,
@@ -207,6 +213,13 @@ try{
     'Review must disclose page-local vector batches without claiming preserved table lines');
   assert.ok((vectorRiskSummary??'').includes('도형/셀 개수 아님'),
     'Risk count must never masquerade as recovered table cells');
+  const mixedChecklist=await evaluate("document.querySelector('[data-step3-acceptance-checklist]')?.textContent");
+  for(const label of ['텍스트·숫자·기호','다단·표의 읽기 순서','표 선·벡터 도형','이미지']){
+    assert.ok(mixedChecklist?.includes(label),'Missing source comparison item: '+label);
+  }
+  assert.ok(mixedChecklist?.includes('경로 관련 명령 '),
+    'Checklist should call out vector-path risk when it is detected');
+  console.log('PASS STEP3 CHECKLIST: text/number, reading order, vector table and bitmap review');
   console.log('PASS STEP3 MIXED VECTOR RISK:',vectorRiskSummary,'; explicit table/shape loss advisory');
   assert.ok(await evaluate("document.querySelector('.step3-import-panel')?.textContent?.includes('이미지·표·도형이 누락될 수 있습니다')"),
     'Vector table/graphics fidelity limitation must remain visible');

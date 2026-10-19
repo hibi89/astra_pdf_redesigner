@@ -80,6 +80,16 @@ export default function PdfImportPanel({disabled,onImport}:Props){
       <p className="help-text" data-step3-image-count>이미지 감지 {detected}건 · PNG 복원 {recovered}건 · 저장 선택 {included}건 · 미복원 {Math.max(0,detected-recovered)}건</p>
       <p className="help-text" data-step3-vector-count>원본 벡터 경로 관련 명령 {vectorPaints}회 · 선/도형·표 구조 자동 복원 미지원 (명령 수, 도형/셀 개수 아님)</p>
       <div className="warning" role="status"><strong>완전 복원이 아닙니다.</strong> 텍스트 분류·위치·줄바꿈·공백은 추정입니다. 이미지·표·도형이 누락될 수 있습니다. 원본을 대조해 수정하세요.</div>
+      <details data-step3-acceptance-checklist open>
+        <summary>원본 대조 체크리스트 · 저장 전 확인</summary>
+        <ul>
+          <li>텍스트·숫자·기호: 각 페이지의 누락·중복·줄바꿈을 원본과 비교하세요.</li>
+          <li>다단·표의 읽기 순서: 좌우 열과 표 셀의 내용 순서를 확인하세요. {draft.warnings.some(w=>w.includes('열 또는 넓은 텍스트 간격'))?'순서 위험 경고가 있습니다.':'자동 검사에서 경고가 없어도 정확한 순서는 보장되지 않습니다.'}</li>
+          <li>표 선·벡터 도형: 원본에 있는 격자·셀 경계와 표시되지 않은 도형을 확인하세요. {vectorPaints>0?'경로 관련 명령 '+vectorPaints+'회 감지됐습니다.':'관련 명령 0회는 그래픽 보존을 증명하지 않습니다.'}</li>
+          <li>이미지: 원본과 PNG 복원·색상·자르기·위치를 대조하세요. 감지 {detected}건, 복원 {recovered}건, 미복원 {Math.max(0,detected-recovered)}건.</li>
+        </ul>
+        <p className="help-text">경고 및 자동 집계는 손실 위험을 안내할 뿐 복원 정확도나 표 구조 보존을 보증하지 않습니다.</p>
+      </details>
       <details open><summary>추출 경고·검토 사항 {draft.warnings.length}건</summary>
         <ul>{draft.warnings.map((message,i)=><li key={i}>{message}</li>)}</ul>
       </details>
