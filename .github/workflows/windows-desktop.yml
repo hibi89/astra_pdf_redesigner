@@ -1,0 +1,79 @@
+name: ASTRA Windows desktop installer verification
+on:
+  push:
+    branches:
+      - 'feature/windows-electron-*'
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-installer:
+    runs-on: windows-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Existing STEP1/STEP2 unit regressions
+        run: npm test
+      - name: Build React and verify desktop assets
+        run: |
+          npm run build
+          npm run desktop:verify
+      - name: Native Electron renderer smoke (isolated temp profile)
+        run: npm run desktop:smoke
+      - name: Build unsigned Windows x64 NSIS installer
+        run: npx electron-builder --win nsis --x64 --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: Launch packaged Windows EXE in isolated smoke mode
+        shell: pwsh
+        run: |
+          $apps = @(Get-ChildItem -Path 'release/win-unpacked' -Filter '*.exe' -File | Where-Object { $_.Name -like 'ASTRA*' })
+          if ($apps.Count -ne 1) { throw "Expected one packaged ASTRA executable, found $($apps.Count)" }
+          $proc = Start-Process -FilePath $apps[0].FullName -ArgumentList '--astra-desktop-smoke' -Wait -PassThru -NoNewWindow
+          if ($proc.ExitCode -ne 0) { throw "Packaged application smoke failed with exit code $($proc.ExitCode)" }
+          'PASS ASTRA PACKAGED EXE: bundled app launched and exited with verified smoke result'
+      - name: End-to-end silent install, shortcut, installed EXE and uninstall
+        shell: pwsh
+        run: ./tests/windows-installer-lifecycle.ps1
+      - name: Prepare version-specific upgrade pair on disposable runner
+        shell: pwsh
+        run: |
+          $base = @(Get-ChildItem -LiteralPath release -Filter 'ASTRA-PDF-Redesigner-Setup-0.1.0-x64.exe' -File)
+          if ($base.Count -ne 1) { throw 'Expected one 0.1.0 installer before upgrade fixture' }
+          $dest = Join-Path $env:RUNNER_TEMP 'astra-baseline-0.1.0.exe'
+          if (Test-Path -LiteralPath $dest) { throw 'Refusing to overwrite baseline fixture' }
+          Move-Item -LiteralPath $base[0].FullName -Destination $dest
+          node tests/prepare-upgrade-candidate.cjs
+          if ($LASTEXITCODE -ne 0) { throw 'Failed to prepare ephemeral upgrade version' }
+      - name: Build version 0.1.1 NSIS candidate with same application code
+        run: npx electron-builder --win nsis --x64 --publish never
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+      - name: In-place 0.1.0 to 0.1.1 Windows upgrade preserves STEP2 IndexedDB
+        shell: pwsh
+        run: ./tests/windows-installer-version-upgrade.ps1
+      - name: Verify installer exists and report SHA256
+        shell: pwsh
+        run: |
+          $setup = @(Get-ChildItem -Path release -Filter 'ASTRA-PDF-Redesigner-Setup-*-x64.exe' -File)
+          if ($setup.Count -ne 1) { throw "Expected one NSIS installer, found $($setup.Count)" }
+          if ($setup[0].Length -lt 10000000) { throw "Installer too small: $($setup[0].Length)" }
+          Get-FileHash $setup[0].FullName -Algorithm SHA256 | Format-List
+          "PASS ASTRA WINDOWS INSTALLER: $($setup[0].Name)"
+      - name: Upload unsigned test installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: astra-windows-installer-unsigned-test
+          path: release/ASTRA-PDF-Redesigner-Setup-*-x64.exe
+          if-no-files-found: error
+          retention-days: 7
