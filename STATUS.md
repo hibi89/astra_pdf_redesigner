@@ -242,3 +242,10 @@
 - STEP3 이미지 복원 및 기존 CI 성공의 이전 근거는 `53c56e47...` / run `39162038601`이며 신규 커밋 검사 결과가 아님.
 - PR #3 Draft 및 main STEP3 기능 미병합 유지. 실제 사용자 PDF 5~10개/Windows Edge·다페이지 이미지는 미검증. 단계 추정 STEP3 약65~70%, 전체 약38% 유지.
 - 다음 1단위: **신규 SHA에 대한 CI 로그/테스트 확인**, FAIL이면 최소 수정과 재검증, 그 후 실제 복잡 이미지 누락 fixture 확대.
+
+## 2026-10-19 10:48:52 KST — STEP3 신규 이미지 회귀 29/29 검증 및 Edge CI 복구
+- **검증 출처:** 이전 기능+테스트 SHA `2200836cc529f4272e78456783d36e50f6b0142c`에서 [GitHub Actions #39185454384](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39185454384) **FAILURE**: Node **29/29 PASS**, `npm run build` PASS, Chrome STEP1~3 전체 스모크 PASS; 독립 Edge job의 STEP1 초기 CDP WebSocket handshake가 35초 제한에 걸려 **실행 시작 전에 실패**. Edge stderr의 D-Bus 경고는 근본원인 미확정. 해당 실패는 신규 3개 이미지 테스트 실패가 아님.
+- **최소 수정:** `tests/browser-process.mjs`의 `launchBrowser().connect`에서 **Microsoft Edge만 60초**, Chrome 및 그 외 브라우저는 기존 **35초** 초기 연결 제한 유지. 앱 `src/**` / 사용자 데이터 / PDF 이미지 처리 알고리즘 수정 없음. 기능/CI SHA `aa63fc262d0a2db080be4be82bd91d7b4a5b3976` (GitHub 계정 `hibi89` 커밋 신원 연결 확인).
+- **재검증:** [Actions #39186875371](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39186875371) **SUCCESS**, 해당 head SHA `aa63fc262d0a2db080be4be82bd91d7b4a5b3976` 고정 확인, 두 job **build-and-test / Microsoft Edge A4 PDF and IndexedDB 모두 success**. Node **29 PASS / 0 FAIL / 0 SKIP**, TypeScript/Vite build PASS, Chrome STEP1/2/3 회귀(프로필 분리·2탭·JSON A→B·마이그레이션·이미지 포함 PDF) PASS. Linux Edge 155 STEP1 A4 PDF→STEP2 저장/출력→STEP3 이미지 복원·2페이지 순서·A4 재출력 PASS. Edge STEP1 CDP 연결 로그 5번째 시도 성공. `ENOTEMPTY` 테스트용 임시 프로필 정리 경고는 비치명적.
+- **안전·범위:** 신규 STEP3 회귀 3건 모두 포함한 29/29 성공. 기능 브랜치 `feature/step3-pdf-import-20261019`, Draft PR #3 **open / draft / unmerged**; STEP3 main 미병합. Linux 자동 검증은 **Windows Edge 실제 인쇄나 사용자 실제 PDF 5~10개·복잡 클리핑/회전/다단 PDF 검수에 해당하지 않음**. STEP2 Windows 사용자 수용도 일부 미검증. Vercel/Production 미적용.
+- **현재 판정:** 이번 **CI 검증 1단위 완료**. 전체 단계 비공식 추정 약38%, STEP3 약65~70% 유지(실사용 정확도 증명 아님). 다음 `ㄱ`: 실제 복잡 그래픽/반복/투명 이미지 합성 fixture를 추가하고 최소 누락 감지·경고/복구 경계 검증, 또는 실제 사용자 PDF 별도 수용 검증(원본은 공개 GitHub 업로드 금지). 추가 기능/병합은 승인 조건 준수.
