@@ -5,9 +5,11 @@ const os=require('node:os');
 const path=require('node:path');
 const {pathToFileURL}=require('node:url');
 const {resolveBundleAsset}=require('./bundle-path.cjs');
+const {acceptanceDomSource,MARKERS}=require('./pdf-acceptance-fixture.cjs');
 
 const APP_URL='astra://app/index.html';
 const SMOKE=process.argv.includes('--astra-desktop-smoke');
+const PDF_ACCEPTANCE=SMOKE&&process.argv.includes('--astra-pdf-acceptance');
 protocol.registerSchemesAsPrivileged([{
   scheme:'astra',
   privileges:{standard:true,secure:true,supportFetchAPI:true,stream:true},
@@ -165,6 +167,28 @@ async function runSmoke(win){
   console.log('PASS DESKTOP ELECTRON SMOKE: React, secure protocol, IndexedDB, print API, storage reload');
 }
 
+
+async function runPdfContentAcceptance(win){
+  if(!SMOKE||!PDF_ACCEPTANCE||process.env.GITHUB_ACTIONS!=='true')
+    throw Error('PDF acceptance fixture is restricted to CI smoke');
+  const runnerRoot=path.resolve(process.env.RUNNER_TEMP||'');
+  const output=path.resolve(process.env.ASTRA_PDF_ACCEPTANCE_OUT||'');
+  if(!process.env.RUNNER_TEMP||!process.env.ASTRA_PDF_ACCEPTANCE_OUT||
+     path.dirname(output)!==runnerRoot||
+     !/^astra-pdf-acceptance-[A-Za-z0-9-]+\.pdf$/i.test(path.basename(output)))
+    throw Error('PDF acceptance output must be an isolated GitHub runner PDF');
+  const fixture=await win.webContents.executeJavaScript(acceptanceDomSource(),true);
+  if(!fixture?.imageLoaded||!fixture?.text?.includes(MARKERS.first)||
+     !fixture?.text?.includes(MARKERS.second)||!fixture?.text?.includes(MARKERS.korean))
+    throw Error('Synthetic printable preview was not ready');
+  const bytes=await renderLocalPdf();
+  await fs.writeFile(output,bytes,{flag:'wx'});
+  const written=await fs.readFile(output);
+  if(written.length!==bytes.length||written.subarray(0,5).toString('ascii')!=='%PDF-')
+    throw Error('Installed Electron did not persist the PDF acceptance output');
+  console.log('PASS ASTRA PDF CONTENT FIXTURE: installed renderer printed a two-page Korean/image synthetic preview');
+}
+
 if(lock){
   app.on('second-instance',()=>{
     if(mainWindow){if(mainWindow.isMinimized())mainWindow.restore();mainWindow.focus();}
@@ -174,7 +198,11 @@ if(lock){
       configureSession();
       registerPdfSaving();
       await createWindow();
-      if(SMOKE){await runSmoke(mainWindow);app.exit(0);}
+      if(SMOKE){
+        await runSmoke(mainWindow);
+        if(PDF_ACCEPTANCE)await runPdfContentAcceptance(mainWindow);
+        app.exit(0);
+      }
     }catch(error){console.error('ASTRA desktop startup failure:',error);app.exit(1);}
   });
   app.on('activate',()=>{if(BrowserWindow.getAllWindows().length===0)void createWindow();});

@@ -39,3 +39,22 @@ test('Windows CI invokes real NSIS install and uninstall with non-destructive gu
   assert.match(ci,/run: \.\/tests\/windows-installer-lifecycle\.ps1/);
   assert.doesNotMatch(script,/Remove-Item\s+-LiteralPath\s+\$appProfile\s+-Recurse/);
 });
+
+test('Windows acceptance fixture is synthetic PNG and requires runner-only PDF output',()=>{
+  const fixture=require('../desktop/pdf-acceptance-fixture.cjs');
+  const png=fixture.makeSyntheticPng();
+  assert.equal(png.subarray(0,8).toString('hex'),'89504e470d0a1a0a');
+  assert.ok(png.length>100);
+  const source=fixture.acceptanceDomSource();
+  assert.ok(source.includes(fixture.MARKERS.first));
+  assert.ok(source.includes(fixture.MARKERS.second));
+  assert.ok(source.includes(fixture.MARKERS.korean));
+  const main=fs.readFileSync(path.resolve(__dirname,'../desktop/main.cjs'),'utf8');
+  const lifecycle=fs.readFileSync(path.resolve(__dirname,'windows-installer-lifecycle.ps1'),'utf8');
+  assert.ok(main.includes("process.env.GITHUB_ACTIONS!=='true'"));
+  assert.ok(main.includes("path.dirname(output)!==runnerRoot"));
+  assert.ok(main.includes("await fs.writeFile(output,bytes,{flag:'wx'})"));
+  assert.ok(lifecycle.includes('verify-desktop-pdf.mjs'));
+  assert.ok(lifecycle.includes('--astra-pdf-acceptance'));
+  assert.ok(lifecycle.includes('Remove-Item -LiteralPath $acceptancePdf -Force'));
+});

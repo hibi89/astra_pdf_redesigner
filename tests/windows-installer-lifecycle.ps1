@@ -16,6 +16,7 @@ $appProfile = Join-Path $env:APPDATA 'AstraPDFRedesigner'
 $sentinelName = "astra-ci-preservation-$PID.marker"
 $sentinel = Join-Path $appProfile $sentinelName
 $markerValue = "CI-KEEP-$PID"
+$acceptancePdf = $null
 $wasInstalled = $false
 $removed = $false
 $links = @()
@@ -78,9 +79,15 @@ try {
   # The smoke app writes a PDF under its own isolated PID-specific profile.
   # That test file is immediately checked and deleted by the Electron main
   # process; no personal PDF or interactive Save dialog is used.
-  $appProcess = Start-Process -FilePath $installedExe -ArgumentList '--astra-desktop-smoke' -PassThru -Wait -NoNewWindow
+  $acceptancePdf = Join-Path $env:RUNNER_TEMP ("astra-pdf-acceptance-$PID.pdf")
+  if (Test-Path -LiteralPath $acceptancePdf) { throw 'Refusing to overwrite an existing acceptance PDF' }
+  $env:ASTRA_PDF_ACCEPTANCE_OUT = $acceptancePdf
+  $appProcess = Start-Process -FilePath $installedExe -ArgumentList @('--astra-desktop-smoke', '--astra-pdf-acceptance') -PassThru -Wait -NoNewWindow
   if ($appProcess.ExitCode -ne 0) { throw "Installed app smoke failed with exit code $($appProcess.ExitCode)" }
   Write-Host 'PASS ASTRA INSTALLED EXE: Electron renderer, local storage and native PDF file write verified'
+  & node tests/verify-desktop-pdf.mjs $acceptancePdf
+  if ($LASTEXITCODE -ne 0) { throw "Installed PDF content verification failed: $LASTEXITCODE" }
+  Write-Host 'PASS ASTRA WINDOWS PDF STRUCTURE: installed Electron PDF parsed and verified'
 
   # Uninstall must not silently erase independent user data. The marker is
   # synthetic and confined to the CI runner's disposable userData folder.
@@ -107,6 +114,10 @@ try {
   Write-Host 'PASS ASTRA NSIS UNINSTALL: app and both shortcuts removed; synthetic userData preserved'
 }
 finally {
+  if ($acceptancePdf -and (Test-Path -LiteralPath $acceptancePdf)) {
+    Remove-Item -LiteralPath $acceptancePdf -Force
+  }
+  Remove-Item Env:ASTRA_PDF_ACCEPTANCE_OUT -ErrorAction SilentlyContinue
   # Never recursively remove userData. Only delete this test's own marker.
   if (Test-Path -LiteralPath $sentinel) {
     Remove-Item -LiteralPath $sentinel -Force
