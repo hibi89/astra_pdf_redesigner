@@ -2,10 +2,11 @@ import { blankProject, isProjectDocument, LIMITS, type ImageAsset, type ProjectD
 import { parseStored, STORAGE_KEY } from '../storage.ts';
 import { migrateStep1Document } from './model.ts';
 
-const NAME='astra-pdf-redesigner:v2';
+export const NAME='astra-pdf-redesigner:v2';
 const VERSION=1; // IndexedDB upgrade version, independent from document schemaVersion.
 const DOCS='documents', ASSETS='assets', META='meta';
 export const ACTIVE='activeDocumentId', MIGRATION='v1MigrationFinished';
+export const VERSION_CHANGE_EVENT='astra:idb-versionchange';
 
 export function request<T>(req: IDBRequest<T>): Promise<T> {
   return new Promise((resolve,reject)=>{req.onsuccess=()=>resolve(req.result);req.onerror=()=>reject(req.error??new Error('IndexedDB request failed'));});
@@ -15,6 +16,8 @@ export function complete(tx: IDBTransaction): Promise<void> {
 }
 export function openDatabase(): Promise<IDBDatabase> {
   return new Promise((resolve,reject)=>{
+    let settled=false;
+    const fail=(error:Error)=>{if(settled)return;settled=true;reject(error);};
     const req=indexedDB.open(NAME,VERSION);
     req.onupgradeneeded=()=>{
       const db=req.result;
@@ -22,9 +25,24 @@ export function openDatabase(): Promise<IDBDatabase> {
       if(!db.objectStoreNames.contains(ASSETS)){const store=db.createObjectStore(ASSETS,{keyPath:'id'});store.createIndex('documentId','documentId',{unique:false});}
       if(!db.objectStoreNames.contains(META))db.createObjectStore(META);
     };
-    req.onsuccess=()=>resolve(req.result);
-    req.onerror=()=>reject(req.error??new Error('IndexedDB opening failed'));
-    req.onblocked=()=>reject(new Error('기존 탭에서 데이터베이스를 사용 중입니다. 다른 탭을 닫아 주세요.'));
+    req.onsuccess=()=>{
+      const db=req.result;
+      db.onversionchange=()=>{
+        db.close();
+        window.dispatchEvent(new Event(VERSION_CHANGE_EVENT));
+      };
+      // A blocked open request cannot be canceled. If it succeeds after its
+      // caller has already moved on, close the late connection immediately.
+      if(settled){db.close();return;}
+      settled=true;resolve(db);
+    };
+    req.onerror=()=>{
+      const error=req.error;
+      fail(error?.name==='VersionError'
+        ?new Error('문서 저장소가 이 앱보다 높은 버전으로 업데이트되었습니다. 최신 앱 버전을 실행해 주세요.')
+        :error??new Error('IndexedDB opening failed'));
+    };
+    req.onblocked=()=>fail(new Error('기존 탭에서 데이터베이스를 사용 중입니다. 다른 탭을 닫아 주세요.'));
   });
 }
 
