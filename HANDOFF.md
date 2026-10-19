@@ -404,3 +404,16 @@
 - 결과: `npm test` 19/19, `npm run build`, `npm run desktop:verify` 6/6 PASS. Chrome·Edge Actions #39239803359 attempt 2와 Windows 설치판 Actions #39239803360 모두 SUCCESS. 최초 Edge attempt 실패는 CDP 연결 일시 실패이며 같은 run 재시도 성공으로 기록했다.
 - 로컬 `tests/step2-cross-profile.mjs`는 마지막 PDF 텍스트 검사에서 `pdftotext` 누락으로 중단했다. Ubuntu Actions 전체 Chrome 교차 프로필 검증은 PASS다. 추후 로컬 재실행이 필요하면 Poppler `pdftotext`가 있는 환경에서 기준을 유지해 실행한다.
 - 다음 우선순위: Draft PR #7 검토 대기. 필요 시 다른/손상된 외부 연결 환경을 추가로 점검하되 제품 schema bump는 별도 요구가 있기 전 하지 않는다. 실제 일반 사용자 설치판/전원 장애 검증은 미완료로 유지한다. PR #3~#6 및 main 병합, STEP4 착수 금지.
+
+## 2026-10-19 20:28 KST — 미저장 초안 versionchange 후속 검증
+
+1. **범위/브랜치:** `codex/p5-windows-reliability`, 코드 커밋 `9fbf467a7d7bfe1ecd84611298094595197e626f`. Draft PR #7은 base `test/windows-idb-v2-installed-upgrade`; main 및 PR #3~#6 미변경, STEP4 미착수.
+2. **구현:** `desktop/step2-versionchange-acceptance.cjs`에 미저장 초안 시나리오 추가. 합성 marker를 편집기에 입력하고 React 미리보기에도 반영되는지 확인한다. 450ms autosave만 테스트 중 지연시키며 native 타이머를 보존, `finally`에서 예약된 테스트 타이머를 취소하고 기존 `window.setTimeout` descriptor를 복원한다.
+3. **저장 전·후 경계:** 경쟁 업그레이드 직전 snapshot이 baseline과 같고 marker가 DB에 없음을 확인. v2→v3 완료 뒤 초안이 화면에 남고 편집기가 disabled, 저장 칩이 `저장 실패`, 미저장 타이머 callback은 실행되지 않았는지 확인한다. 기존 모든 store·문서·PNG bytes·metadata·active ID deep compare도 유지한다.
+4. **한글 검사:** `저장 중`, `저장 실패`, versionchange 안내 문자열을 `src/step2/useWorkspace.ts`와 비교했다. UTF-8 file bytes/text와 Unicode codepoints가 정상 일치하며 손상은 없다. 터미널 렌더링 인코딩 차이로 판정.
+5. **로컬 검증:** `node --check desktop/step2-versionchange-acceptance.cjs` PASS, `git diff --check` PASS, `npm test` 19/19 PASS, `npm run build` PASS, `npm run desktop:verify` 7/7 PASS. 빌드에서 사전 존재하던 dynamic/static import 경고가 표시되었으나 빌드는 성공했다.
+6. **원격 검증:** Windows 설치/업그레이드 workflow [#39244383974](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39244383974) SUCCESS; Windows Server 2025 NSIS 설치판의 v1→v2 설치와 v2→v3 경쟁 renderer, 미저장 초안 보존, 기존 DB 값, profile cleanup 확인. Chrome/Edge workflow [#39244384031](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39244384031) 두 job SUCCESS.
+7. **오류/복구:** 이 단위에서 테스트 실패 없음. 최초 sandbox 내 커밋은 `.git/index.lock` 생성 권한 거부; 사용자 요청된 단일 파일만 권한 검토 실행으로 커밋한 뒤 지정 브랜치 push 성공. 다른 미추적 파일은 보존했고 커밋하지 않았다.
+8. **PR/운영:** PR #7 open/draft/unmerged. Actions artifact는 unsigned test installer로 7일 보관; 제품 배포 없음.
+9. **미검증:** 실제 Windows 10/11, 사용자 설치/데이터, 전원 장애, 서명/SmartScreen, 실제 고객 문서. 로컬에서 설치 EXE 시나리오를 실행하지 않았으며 Windows Actions에서 합성 프로필로 실행했다.
+10. **다음 우선순위:** PR #7 Draft에서 코드 및 CI evidence를 검토하고 사용자 환경 검증 계획을 수립한다. 승인 없이 병합·STEP4 착수 금지.

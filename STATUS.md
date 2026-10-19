@@ -328,3 +328,13 @@
 - [Windows Actions #39241620515](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39241620515) SUCCESS: 실제 Windows Server 2025 설치판에서 v1→v2 덮어 설치와 새 v2→v3 동시 renderer 검증 PASS. 로그에 `blocked=0`, 기존 편집기 read-only, 문서·PNG bytes·모든 기존 store·metadata·active ID 보존, 합성 프로필 정리 PASS 확인.
 - Draft PR [#7](https://github.com/hibi89/astra_pdf_redesigner/pull/7)는 `test/windows-idb-v2-installed-upgrade` 대상 open/draft/unmerged. main 및 PR #3~#6은 변경·병합하지 않았고 STEP4 미착수. 미검증: 일반 사용자 PC/데이터, 비정상 전원 차단, 코드 서명/SmartScreen.
 - 다음 1순위: Draft PR #7에서 CI 결과와 변경 범위를 검토한다. 사용자 PC 실데이터 시험, main 병합, STEP4는 별도 승인 전 하지 않는다.
+
+## 2026-10-19 20:28 KST — 미저장 초안의 Windows Electron versionchange 보존
+
+- 코드 커밋 `9fbf467a7d7bfe1ecd84611298094595197e626f`: 설치된 Electron 두 렌더러가 동시 연결된 상태에서 초안 입력 후 v2→v3 합성 schema 업그레이드를 수행한다. 테스트는 450ms 자동 저장 콜백만 보류하고, `finally`에서 보류 타이머를 취소하고 원래 `window.setTimeout` descriptor를 복구한다.
+- React 상태 반영(편집기 값과 미리보기), 업그레이드 직전 IndexedDB에 미저장 marker가 없고 저장값이 기존 snapshot과 동일함, 업그레이드 뒤 초안 화면 유지·편집기 비활성·`저장 실패` 상태를 검사한다. 기존 store 전체·문서·PNG bytes·메타데이터·active ID 비교는 유지한다.
+- 한글 상태/경고 문자열은 `src/step2/useWorkspace.ts`와 acceptance fixture를 UTF-8로 읽어 확인했다. 문자열과 코드포인트가 일치하며 소스 손상은 없었다. 터미널 표시 문제로 보인다.
+- 로컬: `node --check desktop/step2-versionchange-acceptance.cjs`, `git diff --check` PASS; `npm test` 19/19 PASS; `npm run build` PASS; `npm run desktop:verify` 7/7 PASS.
+- 실제 설치판 Windows Actions [#39244383974](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39244383974) SUCCESS, Windows Server 2025. 로그에서 초안 보존·읽기 전용·저장 실패·기존 저장 데이터 비교·합성 프로필 정리 PASS 확인. 브라우저 Chrome/Edge Actions [#39244384031](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39244384031) 두 job SUCCESS; versionchange abort/retry/idempotence와 STEP1/2 회귀 PASS.
+- 격리 브랜치 `codex/p5-windows-reliability`; Draft PR [#7](https://github.com/hibi89/astra_pdf_redesigner/pull/7), base `test/windows-idb-v2-installed-upgrade`. main/PR #3~#6 병합 없음, STEP4 미착수.
+- 남은 미검증: 실제 사용자 Windows 10/11과 사용자 데이터, 전원 중단, 서명/SmartScreen. Windows 검증은 CI의 합성 RUNNER_TEMP 프로필로만 수행했다.
