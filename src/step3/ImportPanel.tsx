@@ -65,6 +65,7 @@ export default function PdfImportPanel({disabled,onImport}:Props){
   const detected=draft?.pages.reduce((s,p)=>s+p.imageCount,0)??0;
   const recovered=draft?.pages.reduce((s,p)=>s+p.images.length,0)??0;
   const included=draft?.pages.reduce((s,p)=>s+p.images.filter(i=>i.include).length,0)??0;
+  const vectorPaints=draft?.pages.reduce((s,p)=>s+p.vectorPaintCount,0)??0;
   return <section className="panel step3-import-panel no-print" aria-labelledby="pdf-import-title">
     <div className="panel-heading"><h2 id="pdf-import-title">STEP 3 · 기존 PDF 가져오기</h2><span className="panel-caption">텍스트 선택 가능한 단일 열 PDF</span></div>
     <p className="help-text">파일은 이 브라우저에서만 분석합니다. 외부로 전송하지 않고, 검수·확정 전에는 기존 문서함을 변경하지 않습니다.</p>
@@ -77,6 +78,7 @@ export default function PdfImportPanel({disabled,onImport}:Props){
     {draft&&<>
       <p className="help-text">원본: {draft.fileName} · {draft.pageCount}페이지 · 추출 {draft.totalChars.toLocaleString('ko-KR')}자 · 편집 가능한 텍스트 블록 {totalBlocks}개</p>
       <p className="help-text" data-step3-image-count>이미지 감지 {detected}건 · PNG 복원 {recovered}건 · 저장 선택 {included}건 · 미복원 {Math.max(0,detected-recovered)}건</p>
+      <p className="help-text" data-step3-vector-count>원본 벡터 경로 페인팅 {vectorPaints}회 · 선/도형·표 구조 자동 복원 미지원 (도형/셀 개수 아님)</p>
       <div className="warning" role="status"><strong>완전 복원이 아닙니다.</strong> 텍스트 분류·위치·줄바꿈·공백은 추정입니다. 이미지·표·도형이 누락될 수 있습니다. 원본을 대조해 수정하세요.</div>
       <details open><summary>추출 경고·검토 사항 {draft.warnings.length}건</summary>
         <ul>{draft.warnings.map((message,i)=><li key={i}>{message}</li>)}</ul>
@@ -88,7 +90,7 @@ export default function PdfImportPanel({disabled,onImport}:Props){
         </details>}
         <div className="step3-block-review">
           {draft.pages.map(page=><details key={page.number} open={page.number===1}>
-            <summary>원본 {page.number}페이지 — {page.blocks.length}개 텍스트 · 이미지 {page.images.length}/{page.imageCount}복원{page.omittedImages?' · 미복원 '+page.omittedImages+'건':''}</summary>
+            <summary>원본 {page.number}페이지 — {page.blocks.length}개 텍스트 · 이미지 {page.images.length}/{page.imageCount}복원{page.omittedImages?' · 미복원 '+page.omittedImages+'건':''}{page.vectorPaintCount?' · 벡터 경로 '+page.vectorPaintCount+'회':''}</summary>
             {page.images.length>0&&<div className="step3-image-review">
               <p className="help-text">PDF.js가 디코딩한 이미지를 PNG로 재구성했습니다. 원본 비트스트림·마스크/클리핑 효과가 그대로 보존된 것은 아닙니다. 위치는 근사치이며 저장 후 STEP2 편집기에서 크기·순서를 바꿀 수 있습니다.</p>
               {page.images.map((image,i)=><div className="section-editor" key={image.id}>

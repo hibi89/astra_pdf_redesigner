@@ -1,0 +1,41 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {countVectorPaintOps} from '../src/step3/vectorRisk.ts';
+import {makePdfDraft,type PdfPageInput} from '../src/step3/structure.ts';
+
+const op={stroke:1,closeStroke:2,fill:3,eoFill:4,
+  fillStroke:5,eoFillStroke:6,closeFillStroke:7,closeEOFillStroke:8};
+const base:PdfPageInput={number:1,width:595,height:842,pieces:[{
+  text:'TABLE_A_906',page:1,x:40,y:60,width:100,height:12,fontSize:12,
+}],imageDetected:false};
+
+test('STEP3 vector paint risk: count distinct fill and stroke events, not path construction or images',()=>{
+  const ops=[91,op.stroke,91,op.stroke,88,op.closeStroke,11,12,op.eoFillStroke];
+  const count=countVectorPaintOps({fnArray:ops},op);
+  assert.equal(count,4);
+  assert.equal(countVectorPaintOps({fnArray:[91,88,11,12]},op),0);
+  assert.equal(countVectorPaintOps({fnArray:[91,88]},{}),0);
+});
+
+test('STEP3 vector paint risk: per-page warnings expose structural loss but preserve text',()=>{
+  const draft=makePdfDraft('table.pdf',[
+    {...base,vectorPaintCount:3},
+    {...base,number:2,pieces:[{...base.pieces[0],page:2,text:'END_907'}],vectorPaintCount:0},
+  ]);
+  assert.equal(draft.pages[0].vectorPaintCount,3);
+  assert.equal(draft.pages[1].vectorPaintCount,0);
+  assert.ok(draft.warnings.some(w=>w.includes('1페이지 벡터 경로 페인팅 3회')));
+  assert.ok(!draft.warnings.some(w=>w.includes('2페이지 벡터 경로 페인팅')));
+  assert.ok(draft.warnings.some(w=>w.includes('도형/셀 개수가 아닙니다')));
+  assert.equal(draft.pages[0].blocks[0].text,'TABLE_A_906');
+  assert.equal(draft.pages[1].blocks[0].text,'END_907');
+});
+
+test('STEP3 vector paint risk: image-only and unknown operator-analysis cases do not claim vector loss',()=>{
+  const draft=makePdfDraft('image.pdf',[
+    {...base,imageDetected:true,vectorPaintCount:0,imageRecovery:{detected:1,images:[],problems:['synthetic image unavailable']}},
+  ]);
+  assert.equal(draft.pages[0].vectorPaintCount,0);
+  assert.ok(draft.warnings.some(w=>w.includes('미복원 이미지 1건')));
+  assert.ok(!draft.warnings.some(w=>w.includes('벡터 경로 페인팅')));
+});
