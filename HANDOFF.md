@@ -456,3 +456,10 @@
 - GitHub Actions run [39219644702](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39219644702) completed SUCCESS: `build-and-test` and Edge jobs passed. Chrome log explicitly states `PASS IDB v1 -> v2: documents, binary asset, active ID preserved; audit store added; reload idempotent`.
 - Scope: isolated synthetic Chrome v1→v2 upgrade; not yet real customer PDF/Windows installed upgrade, nor rollback fault injection for the v2 schema transaction. No STEP4 or merge approval.
 - Next: review upgrade edge cases and rollback coverage, then obtain explicit approval before merging.
+
+
+## 2026-10-19 — IDB rollback CI #101
+- GitHub Actions run [39221951751](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39221951751) SUCCESS at commit `bad7de659292a6d7f9ae5005799c059c9faf364c`: both build-and-test and Microsoft Edge jobs passed.
+- Chrome logs confirmed `PASS IDB v2 ROLLBACK` (forced versionchange abort leaves v1 schema, document, binary asset, active ID unchanged) and `PASS IDB v1 -> v2` (successful retry and reload idempotency).
+- Residual warning: Chrome temporary profile cleanup returned `ENOTEMPTY` even after retry; isolated temp directory may remain on ephemeral CI runner. Treat as test-harness hygiene debt, not fully resolved.
+- Synthetic isolated browser test only; actual Windows installed-app upgrade on user data remains untested. Draft PR #5 must remain unmerged pending explicit approval.
