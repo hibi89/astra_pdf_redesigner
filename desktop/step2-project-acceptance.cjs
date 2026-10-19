@@ -67,7 +67,7 @@ async function editStep2InBrowser(encoded) {
      !output.includes('ASTRA_STEP2_CAPTION_8309'))throw Error('Incomplete STEP2 document preview');
   return {image:true,editorSaved:true};
 }
-async function verifyReloadedProject(){
+async function verifyReloadedProject(expectedVersion=1){
   const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   for(let i=0;i<140;i++){
     const paper=document.querySelector('.project-paper');
@@ -88,6 +88,9 @@ async function verifyReloadedProject(){
     req.onerror=()=>reject(req.error||Error('IndexedDB read failed'));
   });
   try{
+    if(db.version!==expectedVersion)throw Error('Installed STEP2 IDB version mismatch: expected '+expectedVersion+', got '+db.version);
+    for(const store of ['documents','assets','meta'])if(!db.objectStoreNames.contains(store))throw Error('Missing legacy STEP2 store: '+store);
+    if(db.objectStoreNames.contains('migrationAudit')!==(expectedVersion===2))throw Error('Installed STEP2 migrationAudit store inconsistent with version '+expectedVersion);
     const metaTx=db.transaction('meta','readonly');
     const active=await request(metaTx.objectStore('meta').get('activeDocumentId'));
     const tx=db.transaction(['documents','assets'],'readonly');
@@ -108,7 +111,8 @@ async function verifyReloadedProject(){
   }finally{db.close();}
 }
 async function runStep2ProjectAcceptance(win,renderLocalPdf){
-  const verifyOnly=process.argv.includes('--astra-step2-preservation-verify');
+  const schemaUpgrade=process.argv.includes('--astra-step2-schema-upgrade-verify');
+  const verifyOnly=process.argv.includes('--astra-step2-preservation-verify')||schemaUpgrade;
   if(process.env.GITHUB_ACTIONS!=='true'||!process.env.RUNNER_TEMP)
     throw Error('STEP2 acceptance allowed on GitHub Actions only');
   const root=path.resolve(process.env.RUNNER_TEMP);
@@ -124,10 +128,11 @@ async function runStep2ProjectAcceptance(win,renderLocalPdf){
   }
   await win.loadURL(APP_URL);
   const persisted=await win.webContents.executeJavaScript(
-    '('+verifyReloadedProject.toString()+')()',true);
+    '('+verifyReloadedProject.toString()+')('+(schemaUpgrade?2:1)+')',true);
   if(!persisted?.saved||persisted.assets!==1)throw Error('STEP2 IndexedDB reload failed');
   if(verifyOnly){
-    console.log('PASS ASTRA STEP2 PROFILE PRESERVED: stored document and PNG survived installed EXE restart');
+    if(schemaUpgrade)console.log('PASS ASTRA WINDOWS IDB V1 TO V2: installed EXE migrated real STEP2 document, PNG and active ID; audit store present');
+    else console.log('PASS ASTRA STEP2 PROFILE PRESERVED: stored document and PNG survived installed EXE restart');
     return;
   }
   const bytes=await renderLocalPdf();
