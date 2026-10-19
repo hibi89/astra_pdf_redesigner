@@ -417,3 +417,10 @@
 8. **PR/운영:** PR #7 open/draft/unmerged. Actions artifact는 unsigned test installer로 7일 보관; 제품 배포 없음.
 9. **미검증:** 실제 Windows 10/11, 사용자 설치/데이터, 전원 장애, 서명/SmartScreen, 실제 고객 문서. 로컬에서 설치 EXE 시나리오를 실행하지 않았으며 Windows Actions에서 합성 프로필로 실행했다.
 10. **다음 우선순위:** PR #7 Draft에서 코드 및 CI evidence를 검토하고 사용자 환경 검증 계획을 수립한다. 승인 없이 병합·STEP4 착수 금지.
+
+
+## 2026-10-19 — 우선순위 변경 인수인계 (개인 Windows 실사용)
+- 사용자 요청으로 상용 배포용 검증 확대를 중단하고 개인용 빠른 완성으로 전환. 지침: [docs/PERSONAL_WINDOWS_FINISH_PLAN_2026-10-19.md](docs/PERSONAL_WINDOWS_FINISH_PLAN_2026-10-19.md).
+- 다음 작업: **로컬 git status 확인 후**, 격리 프로필에서 Electron 실행 → 합성 문서 편집·이미지 → 종료/재실행 복원 → 실제 PDF 육안 확인 → JSON 백업. 치명적 결함만 우선 수정.
+- 현 구현 STEP1/STEP2 문서 제작·PDF 출력과 **미구현 STEP3 기존 PDF 리디자인**을 혼동하지 말 것. STEP4 금지.
+- PR #7 Draft 유지, main/PR #3~#6/사용자 실데이터/설치 앱 불변. 로컬 미추적 파일 보존. 사용자 Windows 실제 검증은 미완료.
