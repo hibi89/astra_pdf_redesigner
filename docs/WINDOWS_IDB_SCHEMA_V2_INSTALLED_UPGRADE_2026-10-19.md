@@ -15,7 +15,10 @@
 
 ## 증거 및 상태
 
-- Windows CI: [Actions run #39223771185](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39223771185). **작성 시점에 진행 중; PASS 미확정**.
+- **Windows CI: [Actions run #39223771185](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39223771185) completed/SUCCESS**, 기능 코드 SHA `0e5198341d4a708af20a3be3c481f058fecbfaf2`, `windows-installer` job `117965002594` SUCCESS. 로그에서 `PASS ASTRA EPHEMERAL UPGRADE CANDIDATE`, `PASS ASTRA UPGRADE BASELINE 0.1.0 IDB V1`, `PASS ASTRA WINDOWS IDB V1 TO V2`, `PASS ASTRA NSIS SCHEMA UPGRADE`, `PASS ASTRA UPGRADE UNINSTALL` 각각 확인. 문서-only 커밋은 기능 검증 SHA와 구분.
 - 실험용 Draft PR: https://github.com/hibi89/astra_pdf_redesigner/pull/6
 - 기존 브라우저 기반 v1→v2 및 롤백 검증: [Actions #39222517425](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39222517425) SUCCESS.
 - 두 Draft PR 병합, `main` 수정, STEP4 착수는 사용자 명시 승인 전 금지.
+
+- Artifact `12172004954` (`astra-windows-idb-v2-upgrade-unsigned-test`, SHA256 ZIP digest `b7dbcd87c2435c66efa17f2b439d796eeceeaa9c343b5ebd82efe9219a12e340`, 2026-10-26 08:38:51 UTC 만료). **unsigned 실험용 빌드이며 배포판 아님**.
+- 검증 범위는 CI 합성 데이터로 생성한 Windows Electron 설치판의 실제 마이그레이션이다. Windows 10/11 일반 사용자 실제 문서, 장기 운영 프로필, 시스템 종료 중 오류, SmartScreen/코드서명 및 수동 육안 인수는 별도 미검증.
