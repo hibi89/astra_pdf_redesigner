@@ -3,6 +3,7 @@ on:
   push:
     branches:
       - 'feature/windows-electron-*'
+      - 'test/windows-idb-v2-*'
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
@@ -55,11 +56,15 @@ jobs:
           Move-Item -LiteralPath $base[0].FullName -Destination $dest
           node tests/prepare-upgrade-candidate.cjs
           if ($LASTEXITCODE -ne 0) { throw 'Failed to prepare ephemeral upgrade version' }
-      - name: Build version 0.1.1 NSIS candidate with same application code
-        run: npx electron-builder --win nsis --x64 --publish never
+      - name: Rebuild application with IDB schema v2 and create Windows 0.1.1 NSIS candidate
+        run: |
+          npm test
+          npm run build
+          npm run desktop:verify
+          npx electron-builder --win nsis --x64 --publish never
         env:
           CSC_IDENTITY_AUTO_DISCOVERY: 'false'
-      - name: In-place 0.1.0 to 0.1.1 Windows upgrade preserves STEP2 IndexedDB
+      - name: In-place 0.1.0 IDB v1 to 0.1.1 IDB v2 Windows upgrade preserves STEP2 IndexedDB
         shell: pwsh
         run: ./tests/windows-installer-version-upgrade.ps1
       - name: Verify installer exists and report SHA256
@@ -73,7 +78,7 @@ jobs:
       - name: Upload unsigned test installer
         uses: actions/upload-artifact@v4
         with:
-          name: astra-windows-installer-unsigned-test
+          name: astra-windows-idb-v2-upgrade-unsigned-test
           path: release/ASTRA-PDF-Redesigner-Setup-*-x64.exe
           if-no-files-found: error
           retention-days: 7
