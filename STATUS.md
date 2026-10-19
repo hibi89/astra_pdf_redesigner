@@ -338,3 +338,11 @@
 - 실제 설치판 Windows Actions [#39244383974](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39244383974) SUCCESS, Windows Server 2025. 로그에서 초안 보존·읽기 전용·저장 실패·기존 저장 데이터 비교·합성 프로필 정리 PASS 확인. 브라우저 Chrome/Edge Actions [#39244384031](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39244384031) 두 job SUCCESS; versionchange abort/retry/idempotence와 STEP1/2 회귀 PASS.
 - 격리 브랜치 `codex/p5-windows-reliability`; Draft PR [#7](https://github.com/hibi89/astra_pdf_redesigner/pull/7), base `test/windows-idb-v2-installed-upgrade`. main/PR #3~#6 병합 없음, STEP4 미착수.
 - 남은 미검증: 실제 사용자 Windows 10/11과 사용자 데이터, 전원 중단, 서명/SmartScreen. Windows 검증은 CI의 합성 RUNNER_TEMP 프로필로만 수행했다.
+
+
+## 2026-10-19 — 개인용 빠른 완성으로 우선순위 변경
+- 사용자 승인: 상용 배포가 아닌 본인 Windows PC의 개인 사용용으로 최단 시간 완성. 기존 STEP1/STEP2/Electron 기능 보존.
+- 실행·편집·이미지·종료 후 저장 복원·Windows PDF 실제 출력·백업을 1차 완료 조건으로 설정. STEP3 기존 PDF 가져오기/리디자인은 **미구현·별도 후속**.
+- 배포/코드 서명/자동 업데이트/고급 회귀 확대/STEP4 보류. 기존 데이터 손실·실행·PDF 치명 결함은 계속 차단.
+- 작업 지침: [개인용 완성 계획](docs/PERSONAL_WINDOWS_FINISH_PLAN_2026-10-19.md). PR #7 Draft 유지, main 및 기존 PR 변경 금지.
+- Windows Server 2025 CI 성공은 기존 증거이며 **사용자 Windows PC 실사용 검증은 아직 미완료**. 새 테스트를 실행했다고 주장하지 않음.
