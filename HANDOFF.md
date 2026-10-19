@@ -278,3 +278,15 @@
 6. **추가 수용:** 실제 사용자 PDF 5~10개 대조 및 Windows Chrome/Edge 실 PDF·장문/이미지·키보드 육안 NOT RUN. STEP2 Windows 미완료 검수 별도 유지. 실제 사용자 PDF를 공개 저장소에 올리지 않음.
 7. **다음 `ㄱ`:** 누락/복잡 이미지 합성 fixture 확대, 페이지 순서 모호성·오류 계측, 실문서 샘플 수용 검증 기준 강화. PR #3은 Draft 유지. STEP4 선착수 금지.
 8. **진척도:** STEP3 비공식 약65~70%, 전체 단계 동등비중 약38%(이전35% 대비 +3%p). 기능/CI 검증 SHA와 문서만 갱신된 feature HEAD는 구분. STEP3 최종 전체 수용 아님.
+
+## 2026-10-19 10:29:29 KST — STEP3 이미지 실패 경계 테스트 1단위 인수인계
+1. **목표·용도·기술**: 로컬 PDF 업로드→내용 확인→재디자인 PDF, 이번은 PDF.js operator list 미지원 이미지·위치 오류의 무음 누락 방지 회귀 테스트에 한정.
+2. **변경/판단**: 기능 수정 없이 `tests/step3-image-recovery.test.ts`에 3건 추가. 실제 클리핑/벡터 이미지 복원을 주장하지 않으며, 미지원/위치 오류는 검수 경고로 집계하도록 기존 구조를 검사.
+3. **검증/미검증**: GitHub commit `2200836cc529f4272e78456783d36e50f6b0142c`, blob `794a361b114df268390a8163b86dbd756fcf72d6` 재조회 완료. commit workflow 조회 결과 0건, status 빈 배열. **신규 테스트 실행·빌드·브라우저 CI 미검증**. 기존 CI #39162038601 성공은 이전 SHA에만 적용.
+4. **상태/중단 지점**: STEP3 기능 브랜치 Draft PR #3 유지, main 병합 금지. 테스트 반영 완료 / 실행 확인 대기 / 실제 문서·Windows 현장 검수 대기.
+5. **오류/원인/재시도 금지**: 신규 코드 오류는 아직 관측되지 않음. GitHub Actions 실행 결과를 커넥터가 제공하지 않아 합격 판정 불가. 같은 조회 방식 반복만으로 합격 주장 금지. 추후 CI 런 ID 또는 사용 가능한 실행환경 확보 후 테스트.
+6. **저장소/브랜치/SHA/경로**: `hibi89/astra_pdf_redesigner` / `feature/step3-pdf-import-20261019` / `2200836cc529f4272e78456783d36e50f6b0142c`; `tests/step3-image-recovery.test.ts`, 기존 `src/step3/imageRecovery.ts` 변경 없음. main 인수인계 문서만 별도 갱신.
+7. **배포/환경**: Vercel/Production 미적용. Node22 `npm test` → `npm run build`, CI Chrome/Edge 스모크는 실행 확인 대기.
+8. **원본/백업/보안**: 원본 Git SHA와 Git history로 복구. 브라우저 localStorage/IndexedDB, PDF/이미지 사용자 원본, 로드맵·PNG 보호. 합성 테스트만 사용; 민감 데이터·토큰 미출력.
+9. **다음 확정 작업/완료 기준**: 이번 신규 커밋의 3개 Node 테스트 및 종전 회귀 전체 CI를 검증한다. 통과 근거 없으면 테스트 완료나 진행률 상승 주장하지 않는다. Windows 실사용/사용자 PDF 수용 검사는 별도.
+10. **시각·검증 범위**: 2026-10-19 10:29:29 KST. 이번 검증은 소스 반영과 blob 재조회까지. 문서 자체의 최신 HEAD는 저장 후 별도 확인. STEP3 65~70%, 전체 약38%는 종전 비공식 추정 유지.
