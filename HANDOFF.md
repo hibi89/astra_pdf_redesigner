@@ -374,3 +374,11 @@
 8. **원본·보안·복구:** STEP1 localStorage v1, STEP2 IndexedDB v2·설계 원본 PNG/TXT 및 실제 사용자 PDF/민감정보·토큰 노출/수정 없음. 합성 데이터만 CI 사용. Git SHA `90b7e995f263701e57aede91a8bf0e44b2778d80`는 이 단위 전 기준; 비교/복구 가능. main 기능 파일 무변경·원본 문서 검수 전 저장 금지 회귀 유지.
 9. **다음 한 단위·승인:** 중첩 Form/투명 SoftMask/Blend 실제 합성 PDF가 위험 수치를 감지하는지 확인, 필요 시 최소 코드만 수정하고 전수 회귀. 또는 고객 PDF는 사용자 동의·로컬 비공개 환경에서 실문서 5~10개와 Windows PDF/인쇄 육안 검수. 기능 main 병합 전 최신 main+feature 사전검사 및 사용자 **별도 명시 승인** 필요.
 10. **갱신/검증 기준:** 2026-10-19 14:19:35 KST; #39203639740 `completed/success` at 2026-10-19T05:18:05Z head_sha `1ebbb7958c477c309e22e24fed7255658f56b58b`. 새 기능과 CI PASS만 완료 표기. feature docs-only SHA `faec84e388da0f7a6d71f71c1b8d14e18d9f3098`는 CI 이후 작성한 보고서. main STATUS/HANDOFF/BOOK.md 쓰기·재조회 후 최신 HEAD 확정 필요.
+
+
+## 2026-10-19 — Windows 설치판 실험: IndexedDB v1→v2 마이그레이션 검증
+- 별도 Draft [PR #6](https://github.com/hibi89/astra_pdf_redesigner/pull/6), `test/windows-idb-v2-installed-upgrade` (PR #4 Windows 설치판에서 분기). **main / PR #4 / PR #5 수정 없음, 병합 금지**.
+- [Windows Actions #39223771185](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39223771185) **completed/SUCCESS**, 검증 기능 SHA `0e5198341d4a708af20a3be3c481f058fecbfaf2`. Windows EXE 0.1.0(IDB v1)로 STEP2 합성 문서/PNG 저장, **재빌드한 0.1.1(IDB v2)** NSIS 설치판으로 같은 경로 덮어 설치; DB version 2·`migrationAudit` 생성·문서/PNG/active ID/캡션 보존, 설치판 제거까지 실제 CI 로그 PASS.
+- v2 코드는 Windows CI 작업 중 임시로 적용·빌드됨. Git 브랜치 제품 소스는 v1 유지하며 PR #5의 additive schema patch와 동일 형태. 브라우저 롤백 검증 [#39222517425](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39222517425) 별도 성공.
+- **미검증:** 일반 사용자 Windows 10/11 설치판, 실고객 문서, 코드 서명/SmartScreen, 비정상 전원종료 복구 및 장문 PDF 육안. unsigned 설치 artifact는 7일 한정 테스트용. 상세 `docs/WINDOWS_IDB_SCHEMA_V2_INSTALLED_UPGRADE_2026-10-19.md`.
+- **다음:** 해당 성공을 제품 main 병합 승인으로 간주하지 말 것. PR #4/#5/#6 모두 Draft 그대로, STEP4 금지.
