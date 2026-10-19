@@ -1,0 +1,128 @@
+'use strict';
+const {app,BrowserWindow,dialog,net,protocol,session}=require('electron');
+const os=require('node:os');
+const path=require('node:path');
+const {pathToFileURL}=require('node:url');
+const {resolveBundleAsset}=require('./bundle-path.cjs');
+
+const APP_URL='astra://app/index.html';
+const SMOKE=process.argv.includes('--astra-desktop-smoke');
+protocol.registerSchemesAsPrivileged([{
+  scheme:'astra',
+  privileges:{standard:true,secure:true,supportFetchAPI:true,stream:true},
+}]);
+app.setName('ASTRA PDF Redesigner');
+app.setPath('userData',SMOKE
+  ?path.join(os.tmpdir(),'astra-desktop-ci-'+process.pid)
+  :path.join(app.getPath('appData'),'AstraPDFRedesigner'));
+if(process.platform==='win32')app.setAppUserModelId('com.astra.pdfredesigner');
+
+const lock=app.requestSingleInstanceLock();
+if(!lock)app.quit();
+let mainWindow;
+const isAppUrl=(input)=>{
+  try{const u=new URL(input);return u.protocol==='astra:'&&u.hostname==='app';}
+  catch{return false;}
+};
+
+function configureSession(){
+  const ses=session.defaultSession;
+  const root=path.resolve(app.getAppPath(),'dist');
+  ses.protocol.handle('astra',request=>{
+    if(request.method!=='GET'&&request.method!=='HEAD')
+      return new Response('Method not allowed',{status:405});
+    const target=resolveBundleAsset(root,request.url);
+    if(!target)return new Response('Not found',{status:404});
+    return net.fetch(pathToFileURL(target).toString());
+  });
+  // No external HTTP requests; PDF bytes and documents remain local.
+  ses.webRequest.onBeforeRequest({urls:['http://*/*','https://*/*']},(_details,callback)=>{
+    callback({cancel:true});
+  });
+  ses.setPermissionRequestHandler((_contents,_permission,callback)=>callback(false));
+  ses.webRequest.onHeadersReceived({urls:['astra://app/*']},(details,callback)=>{
+    callback({responseHeaders:{
+      ...details.responseHeaders,
+      'Content-Security-Policy':[
+        "default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';"+
+        " img-src 'self' blob: data:; font-src 'self' data:;"+
+        " worker-src 'self' blob:; connect-src 'self'; frame-src 'self' blob:;"+
+        " object-src 'none'; base-uri 'self'; form-action 'none'",
+      ],
+    }});
+  });
+  ses.on('will-download',(event,item)=>{
+    const target=dialog.showSaveDialogSync(mainWindow,{
+      title:'내보낼 파일 저장',
+      defaultPath:item.getFilename(),
+    });
+    if(!target){event.preventDefault();return;}
+    item.setSavePath(target);
+  });
+}
+
+function createWindow(){
+  mainWindow=new BrowserWindow({
+    width:1360,height:900,minWidth:900,minHeight:620,
+    show:!SMOKE,title:'ASTRA PDF Redesigner',
+    backgroundColor:'#f4f5f6',
+    webPreferences:{
+      sandbox:true,contextIsolation:true,nodeIntegration:false,
+      webviewTag:false,devTools:!app.isPackaged,webSecurity:true,
+    },
+  });
+  mainWindow.webContents.setWindowOpenHandler(()=>({action:'deny'}));
+  mainWindow.webContents.on('will-navigate',(event,url)=>{
+    if(!isAppUrl(url))event.preventDefault();
+  });
+  mainWindow.webContents.on('will-attach-webview',event=>event.preventDefault());
+  return mainWindow.loadURL(APP_URL);
+}
+
+async function runSmoke(win){
+  const evaluate=(source)=>win.webContents.executeJavaScript(source,true);
+  let mounted=false;
+  for(let i=0;i<40;i++){
+    mounted=await evaluate("Boolean(document.querySelector('#root')?.firstElementChild)");
+    if(mounted)break;
+    await new Promise(resolve=>setTimeout(resolve,250));
+  }
+  if(!mounted)throw Error('React renderer did not mount');
+  const source=[
+    "(async()=>{",
+    "if(location.protocol!=='astra:')throw Error('Wrong scheme');",
+    "if(typeof window.print!=='function')throw Error('Print API missing');",
+    "localStorage.setItem('__astra_desktop_ci__','ok');",
+    "const valid=await new Promise((resolve,reject)=>{",
+    "const request=indexedDB.open('__astra_desktop_ci__',1);",
+    "request.onerror=()=>reject(request.error);",
+    "request.onupgradeneeded=()=>request.result.createObjectStore('pings');",
+    "request.onsuccess=()=>{request.result.close();resolve(true);};",
+    "});",
+    "indexedDB.deleteDatabase('__astra_desktop_ci__');",
+    "return{valid,title:document.title};",
+    "})()",
+  ].join('');
+  const checked=await evaluate(source);
+  if(!checked.valid||!checked.title)throw Error('Desktop storage or title failure');
+  await win.loadURL(APP_URL);
+  const persisted=await evaluate("localStorage.getItem('__astra_desktop_ci__')==='ok'");
+  if(!persisted)throw Error('Local storage lost after navigation');
+  await evaluate("localStorage.removeItem('__astra_desktop_ci__')");
+  console.log('PASS DESKTOP ELECTRON SMOKE: React, secure protocol, IndexedDB, print API, storage reload');
+}
+
+if(lock){
+  app.on('second-instance',()=>{
+    if(mainWindow){if(mainWindow.isMinimized())mainWindow.restore();mainWindow.focus();}
+  });
+  app.whenReady().then(async()=>{
+    try{
+      configureSession();
+      await createWindow();
+      if(SMOKE){await runSmoke(mainWindow);app.exit(0);}
+    }catch(error){console.error('ASTRA desktop startup failure:',error);app.exit(1);}
+  });
+  app.on('activate',()=>{if(BrowserWindow.getAllWindows().length===0)void createWindow();});
+  app.on('window-all-closed',()=>app.quit());
+}

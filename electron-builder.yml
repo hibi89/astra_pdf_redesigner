@@ -1,0 +1,22 @@
+appId: com.astra.pdfredesigner
+productName: ASTRA PDF Redesigner
+asar: true
+directories:
+  output: release
+files:
+  - dist/**
+  - desktop/**
+  - package.json
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+nsis:
+  oneClick: false
+  perMachine: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  artifactName: "ASTRA-PDF-Redesigner-Setup-${version}-${arch}.${ext}"
+publish: null
