@@ -528,11 +528,11 @@ try{
   const scanOnly=makeScannedPagesPdf();
   const scannedPath=join(dir,'m08-scanned-only.pdf');
   writeFileSync(scannedPath,scanOnly);
-  assert.match(execFileSync('pdfinfo',[scannedPath],{encoding:'utf8'}),/Pages:\\s+2\\b/);
+  assert.match(execFileSync('pdfinfo',[scannedPath],{encoding:'utf8'}),/Pages:\s+2\b/);
   assert.equal(execFileSync('pdftotext',[scannedPath,'-'],{encoding:'utf8'}).trim(),'',
     'M08-B source must have zero selectable text');
   assert.equal(execFileSync('pdfimages',['-list',scannedPath],{encoding:'utf8'})
-    .split('\\n').filter(x=>/^\\s*\\d+\\s+\\d+\\s+image/.test(x)).length,2,
+    .split('\n').filter(x=>/^\s*\d+\s+\d+\s+image/.test(x)).length,2,
     'M08-B source must have raster on both scan-only pages');
   const uploadM08=async(bytes,name)=>evaluate("(()=>{const encoded="+JSON.stringify(bytes.toString('base64'))+
     ",name="+JSON.stringify(name)+";const data=Uint8Array.from(atob(encoded),x=>x.charCodeAt(0));"+
