@@ -1,5 +1,7 @@
 # Astra PDF Redesigner — STEP 1 회고록 PDF 제작기
 
+> **LATEST M05 VERIFIED — 2026-10-26 KST:** Actual 1600×1000 Chrome screenshot from [#40205522431](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40205522431) reviewed; app SHA `31b499182ade86717a82ff4e8960401a96ab4c0f` Linux Chrome/Edge SUCCESS (58/58 unit), Windows NSIS [#40205522595](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40205522595) SUCCESS. **Restricted internal PDF→2 designs→new A4 demo GO; commercial sale NO-GO**. M01/M02/M03-A/M03-B0/M04/M05 scoped work complete; real local LLM, page/block click verification, true 8/20/30 SKU features, buyer PDF/Windows tests remain unverified. **NEXT ONE READY M06-A:** click source origin page/coordinate from editable block, navigation/highlight and explicit completeness-review state with synthetic browser tests. Actual model acquisition M03-B1 remains approval-gated. Report `docs/commercial/M05_MVP_REVIEW_20261026.md`; main/PR3/PR4 unchanged, Draft PR9. **Older M01/M03/M04 NEXT lines below are historical.**
+
 국비학원 제출용 회고록을 입력하고 3가지 디자인 중 하나로 꾸며, 브라우저의 인쇄 기능으로 PDF를 저장하는 **개인용 로컬 웹앱**입니다. 내용 수정·요약·교정은 수행하지 않습니다.
 
 ## 실행
