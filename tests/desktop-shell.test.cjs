@@ -27,6 +27,22 @@ test('desktop Electron shell enforces isolated sandbox and network block',()=>{
   assert.doesNotMatch(s,/allowRunningInsecureContent:true|bypassCSP:true/);
 });
 
+test('M03-B IPC never accepts executable paths from renderer',()=>{
+  const main=fs.readFileSync(path.resolve(__dirname,'../desktop/main.cjs'),'utf8');
+  const preload=fs.readFileSync(path.resolve(__dirname,'../desktop/preload.cjs'),'utf8');
+  const engine=fs.readFileSync(path.resolve(__dirname,'../desktop/local-model-controller.cjs'),'utf8');
+  for(const item of ["ipcMain.handle('astra:local-model-status'","ipcMain.handle('astra:local-model-propose'","ipcMain.handle('astra:local-model-cancel'",'const trusted=event']){
+    assert.ok(main.includes(item),'Missing safe IPC: '+item);
+  }
+  assert.ok(preload.includes('localModelStatus:'));
+  assert.ok(preload.includes('localModelPropose:text=>'));
+  assert.ok(engine.includes('RELEASE_MANIFEST=null'));
+  assert.ok(engine.includes('shell:false'));
+  assert.ok(engine.includes("mode:0o600"));
+  assert.ok(engine.includes('sha256'));
+  assert.doesNotMatch(preload,/nodeIntegration|require\('fs'\)|exec\(/);
+});
+
 test('Windows CI invokes real NSIS install and uninstall with non-destructive guards',()=>{
   const script=fs.readFileSync(path.resolve(__dirname,'windows-installer-lifecycle.ps1'),'utf8');
   const ci=fs.readFileSync(path.resolve(__dirname,'../.github/workflows/windows-desktop.yml'),'utf8');

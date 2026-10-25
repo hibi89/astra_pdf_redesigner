@@ -52,6 +52,16 @@ interface Props {onLegacy:()=>void}
 export default function Workspace({onLegacy}:Props){
   const w=useWorkspace();
   const [docsOpen,setDocsOpen]=useState(true),[busy,setBusy]=useState(false),[printBusy,setPrintBusy]=useState(false);
+  const [localModelStatus,setLocalModelStatus]=useState('모델 미설치 · 로컬 규칙 검수만 사용 가능');
+  useEffect(()=>{
+    let active=true;
+    const check=window.astraDesktop?.localModelStatus;
+    if(!check)return;
+    void check().then(result=>{
+      if(active)setLocalModelStatus(result.status==='available'?'로컬 모델 감지됨 · 품질 검증 전':'모델 미설치 · 로컬 규칙 검수만 사용 가능');
+    }).catch(()=>{if(active)setLocalModelStatus('모델 상태 확인 실패 · 규칙 검수는 가능');});
+    return()=>{active=false;};
+  },[]);
   const fileRef=useRef<HTMLInputElement|null>(null);
   const [sourceReview,setSourceReview]=useState<ImportedPdfSource|null>(null);
   const sourceReviewRef=useRef<ImportedPdfSource|null>(null);
@@ -177,6 +187,11 @@ export default function Workspace({onLegacy}:Props){
       </div>
       <aside className="studio-style-column no-print" aria-label="디자인 스튜디오">
         <div className="studio-style-intro"><span className="studio-label">DESIGN STUDIO</span><h2>문서를 새롭게</h2><p>원문을 그대로 두고 출력 디자인만 변경합니다. 최소 두 가지 조판을 실제 PDF로 확인할 수 있습니다.</p></div>
+        <section className="panel m03-local-model-status" aria-label="오프라인 AI 연결 상태">
+          <h3>오프라인 AI 연결</h3>
+          <p role="status" data-m03-model-status>{localModelStatus}</p>
+          <p className="help-text">현재 배포에는 AI 모델이 포함되지 않습니다. 규칙 교정은 AI 윤문과 다르며, 실제 모델 품질·라이선스 검증 전에는 사용하지 않습니다.</p>
+        </section>
         {doc ? <>
           <section className="panel settings-panel"><div className="panel-heading"><h2>디자인 설정</h2><span className="panel-caption">원문은 변경하지 않습니다</span></div>
             <div className="setting-block"><h3>테마</h3><div className="theme-options">{allThemes.map(theme=><label className={`theme-option ${doc.design.theme===theme.id?'selected':''}`} key={theme.id}><input disabled={!editable} type="radio" name="v2theme" checked={doc.design.theme===theme.id} onChange={()=>editDoc(d=>({...d,design:{...d.design,theme:theme.id}}))}/><span><strong>{theme.label}</strong><small>{theme.description}</small></span></label>)}</div></div>

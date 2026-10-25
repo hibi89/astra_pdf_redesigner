@@ -6,7 +6,12 @@ export interface DesktopPdfResponse {
 }
 declare global {
   interface Window {
-    astraDesktop?:Readonly<{savePdf:()=>Promise<DesktopPdfResponse>}>;
+    astraDesktop?:Readonly<{
+      savePdf:()=>Promise<DesktopPdfResponse>;
+      localModelStatus?:()=>Promise<{status:'available'|'unavailable';modelId?:string;reason?:string}>;
+      localModelPropose?:(text:string)=>Promise<{status:string;suggested?:string;reason?:string}>;
+      localModelCancel?:()=>Promise<{status:string}>;
+    }>;
   }
 }
 export function hasDesktopPdfExport():boolean{

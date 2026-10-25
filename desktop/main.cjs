@@ -8,6 +8,8 @@ const {resolveBundleAsset}=require('./bundle-path.cjs');
 const {acceptanceDomSource,MARKERS}=require('./pdf-acceptance-fixture.cjs');
 const {runStep2ProjectAcceptance}=require('./step2-project-acceptance.cjs');
 const {runStep3ProjectAcceptance}=require('./step3-project-acceptance.cjs');
+const {createLocalModelController}=require('./local-model-controller.cjs');
+const localModel=createLocalModelController({resourcesDir:process.resourcesPath});
 
 const APP_URL='astra://app/index.html';
 const SMOKE=process.argv.includes('--astra-desktop-smoke');
@@ -131,6 +133,23 @@ function registerPdfSaving(){
   });
 }
 
+function registerLocalModel(){
+  const trusted=event=>mainWindow&&!mainWindow.isDestroyed()&&
+    event.sender===mainWindow.webContents&&isAppUrl(event.sender.getURL());
+  ipcMain.handle('astra:local-model-status',async event=>{
+    if(!trusted(event))throw Error('Untrusted model status request');
+    return localModel.status();
+  });
+  ipcMain.handle('astra:local-model-propose',async(event,text)=>{
+    if(!trusted(event))throw Error('Untrusted model proposal request');
+    return localModel.propose(text);
+  });
+  ipcMain.handle('astra:local-model-cancel',async event=>{
+    if(!trusted(event))throw Error('Untrusted model cancellation request');
+    return localModel.cancel();
+  });
+}
+
 function createWindow(){
   mainWindow=new BrowserWindow({
     width:1360,height:900,minWidth:900,minHeight:620,
@@ -181,6 +200,10 @@ async function runSmoke(win){
   if(!persisted)throw Error('Local storage lost after navigation');
   const bridge=await evaluate("typeof window.astraDesktop?.savePdf==='function'");
   if(!bridge)throw Error('Secure PDF export bridge unavailable');
+  const modelStatus=await evaluate('window.astraDesktop.localModelStatus()');
+  if(modelStatus.status!=='unavailable')throw Error('Model must fail closed without shipped weights');
+  const unavailableProposal=await evaluate("window.astraDesktop.localModelPropose('synthetic CI text')");
+  if(unavailableProposal.status!=='unavailable')throw Error('Unshipped model unexpectedly executed');
   const saved=await evaluate("window.astraDesktop.savePdf()");
   if(saved?.status!=='saved')throw Error('Desktop PDF export failed: '+JSON.stringify(saved));
   await evaluate("localStorage.removeItem('__astra_desktop_ci__')");
@@ -217,6 +240,7 @@ if(lock){
     try{
       configureSession();
       registerPdfSaving();
+      registerLocalModel();
       await createWindow();
       if(SMOKE){
         await runSmoke(mainWindow);
