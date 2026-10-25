@@ -9,7 +9,11 @@ import RuleReview from '../humanize/RuleReview.tsx';
 import SourceAnchorPreview from '../step3/SourceAnchorPreview.tsx';
 import {isReviewed,reviewableBlocks,reviewableOrigin,reviewSignature} from '../step3/sourceReview.ts';
 
-const allThemes=[...THEMES,{id:'compact' as const,label:'컴팩트 리포트',description:'짧은 제목과 밀도 높은 문서'}];
+const allThemes=[...THEMES,
+  {id:'compact' as const,label:'컴팩트 리포트',description:'짧은 제목과 밀도 높은 문서'},
+  {id:'editorial' as const,label:'에디토리얼',description:'중앙 정렬 제목과 넓은 호흡의 본문'},
+  {id:'ledger' as const,label:'장부형 요약',description:'작은 제목·구획선·촘촘한 정보 배치'},
+];
 function useAssetUrls(assets:readonly ImageAsset[]):Record<string,string>{
   const [urls,setUrls]=useState<Record<string,string>>({});
   useEffect(()=>{
@@ -24,6 +28,8 @@ export function ProjectPreview({doc,urls}: {doc:ProjectDocument;urls:Record<stri
       {design.theme==='diary'&&<span className="document-eyebrow">LEARNING JOURNAL</span>}
       {design.theme==='report'&&<span className="document-eyebrow">DOCUMENT REPORT</span>}
       {design.theme==='compact'&&<span className="document-eyebrow">REPORT · {doc.content.date}</span>}
+      {design.theme==='editorial'&&<span className="document-eyebrow">EDITORIAL · FEATURE</span>}
+      {design.theme==='ledger'&&<span className="document-eyebrow">SUMMARY · DOCUMENT</span>}
       <h1>{doc.content.title||' '}</h1>
       {(doc.content.author.trim()||doc.content.date)&&<div className="document-meta">
         {doc.content.date&&<time dateTime={doc.content.date}>{doc.content.date}</time>}

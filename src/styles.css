@@ -150,3 +150,30 @@ button:disabled{cursor:not-allowed;opacity:.48}select{min-height:38px;padding:7p
  .studio-steps button{font-size:11px}
 }
 @media print{.step3-dropzone,.studio-steps{display:none!important}}
+
+/* M07-A BASIC proof candidates: intentional print geometry differences.
+   These classes change placement/measure, not only a palette color. */
+.paper-theme-editorial{padding:19mm 24mm 24mm;line-height:1.89}
+.paper-theme-editorial .document-heading{text-align:center;margin:0 0 22mm;padding:15mm 0 11mm;border-bottom:3px double #617681}
+.paper-theme-editorial .document-heading h1{font-size:2.65em;line-height:1.22;letter-spacing:-.055em;font-weight:650;margin:8mm 0 6mm}
+.paper-theme-editorial .document-meta{justify-content:center}
+.paper-theme-editorial .document-section{margin-bottom:14mm}
+.paper-theme-editorial .document-section h2{font-size:1.12em;font-weight:650;justify-content:center;
+  border-bottom:1px solid #9eabb4;padding-bottom:3mm;margin-bottom:7mm}
+.paper-theme-editorial .block-prose{line-height:2.03}
+.paper-theme-ledger{padding:14mm 11mm 18mm;line-height:1.5}
+.paper-theme-ledger .document-heading{margin:0 0 7mm;padding:3mm 4mm 4mm;border:1.5px solid #657b8b;
+  border-left:7px solid var(--accent);background:#f2f5f6}
+.paper-theme-ledger .document-heading h1{font-size:1.33em;font-weight:780;margin:2mm 0;letter-spacing:-.015em;line-height:1.35}
+.paper-theme-ledger .document-meta{font-size:.7em;border-top:1px solid #c4ced2;padding-top:2mm}
+.paper-theme-ledger .document-section{margin-bottom:5mm}
+.paper-theme-ledger .document-section h2{font-size:.86em;text-transform:none;border-bottom:1px solid #becbd1;
+  border-left:4px solid var(--accent);padding:1mm 2mm;margin-bottom:2mm;background:#f7f9fa}
+.paper-theme-ledger .block-prose{font-size:.92em;line-height:1.58}
+.paper-theme-ledger .document-figure{margin:3mm 0 5mm}
+@media print{
+ .paper-theme-editorial{padding-left:24mm!important;padding-right:24mm!important}
+ .paper-theme-editorial .document-heading{break-inside:avoid-page}
+ .paper-theme-ledger{padding-left:11mm!important;padding-right:11mm!important}
+ .paper-theme-ledger .document-heading{break-inside:avoid-page}
+}

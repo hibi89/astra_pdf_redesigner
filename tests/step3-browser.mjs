@@ -217,6 +217,49 @@ try{
   assert.ok(Math.abs(reportBox.yMin-minimalBox.yMin)>8||Math.abs(reportBox.xMin-minimalBox.xMin)>8,
     'M02 requires actual PDF title positions to differ, not only color/theme ID');
   console.log('PASS M02 ACTUAL A4 DESIGN PARITY: report/minimal PDFs retain source markers with distinct title coordinates',reportBox,minimalBox);
+
+  // M07-A: test every displayed theme against real printed PDF structure, not
+  // class names or palette alone. A4/source markers/bitmap and bbox features
+  // come from independent PDF parsers and are recorded for each design.
+  const themes=[
+    {id:'report',index:0,path:reportPath},
+    {id:'minimal',index:1,path:minimalPath},
+    {id:'diary',index:2},
+    {id:'compact',index:3},
+    {id:'editorial',index:4},
+    {id:'ledger',index:5},
+  ];
+  const signatures=[];
+  for(const theme of themes){
+    if(!theme.path){
+      await evaluate("document.querySelectorAll('input[name=v2theme]')["+theme.index+"].click()");
+      await eventually(()=>evaluate("document.querySelector('.project-paper')?.className"),x=>x?.includes('paper-theme-"+theme.id+"'));
+      await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),x=>x==='저장됨');
+      await evaluate("Promise.all([...document.querySelectorAll('.project-paper img')].map(i=>i.decode().catch(()=>{})))");
+      const output=await send('Page.printToPDF',{preferCSSPageSize:true,printBackground:true});
+      theme.path=join(dir,'m07-'+theme.id+'.pdf');
+      writeFileSync(theme.path,Buffer.from(output.data,'base64'));
+    }
+    const bytes=Buffer.from(await import('node:fs').then(fs=>fs.readFileSync(theme.path)));
+    const audit=await auditPdfBytes(bytes,{markers:['STEP3_TEST_BEGIN_7519','STEP3_PAGE2_BEGIN_7519','STEP3_TEST_END_7519'],
+      requireRaster:true,label:'M07-A '+theme.id});
+    const pdfInfo=execFileSync('pdfinfo',[theme.path],{encoding:'utf8'});
+    assert.ok(pdfInfo.includes('(A4)'),theme.id+' output must be A4');
+    const box=wordPosition(theme.path);
+    assert.ok(box.xMin>=0&&box.yMin>=0&&box.xMax<=595.28&&box.yMax<=841.89,
+      theme.id+' first-page title extent outside A4');
+    const signature=[box.xMin,box.yMin,box.xMax-box.xMin].map(x=>Math.round(x/3));
+    signatures.push({id:theme.id,...audit,box,signature});
+    console.log('PASS M07-A A4 DESIGN',theme.id,JSON.stringify({pages:audit.pages,markers:audit.markers,
+      raster:audit.rasterDraws,title:box,signature}));
+  }
+  for(let a=0;a<signatures.length;a++)for(let b=a+1;b<signatures.length;b++){
+    const left=signatures[a],right=signatures[b];
+    assert.ok(left.signature.some((v,i)=>v!==right.signature[i]),
+      'M07-A requires distinct printed title x/y/width geometry, not color-only: '+left.id+' vs '+right.id);
+  }
+  assert.equal(signatures.length,6,'M07-A six theme proof, BASIC target is eight');
+  console.log('PASS M07-A VERIFIED 6 DISTINCT A4 LAYOUTS: title geometry pairwise distinct, exact source order, raster retained; 2 BASIC templates remain');
   if(process.env.GITHUB_ACTIONS==='true'&&process.env.M02_SCREENSHOT_OUT){
     await send('Emulation.setDeviceMetricsOverride',{width:1600,height:1000,deviceScaleFactor:1,mobile:false});
     const paneGeometry=await evaluate("(()=>{const a=document.querySelector('.studio-layout'),l=document.querySelector('.editor-column'),c=document.querySelector('.preview-column'),r=document.querySelector('.studio-style-column');if(!a||!l||!c||!r)return null;return {display:getComputedStyle(a).display,left:l.getBoundingClientRect().left,center:c.getBoundingClientRect().left,right:r.getBoundingClientRect().left,centerWidth:c.getBoundingClientRect().width}})()");
