@@ -1,6 +1,6 @@
 # M06-A — 출처 좌표 연결 및 세션 수동 검수 상태
 
-Status: Code implemented, GitHub CI confirmation pending (2026-10-26 KST).
+Status: **M06-A internal synthetic UX VERIFIED** on Chrome/Edge and Windows regression CI (2026-10-26 KST); customer PC and real PDF unverified.
 
 ## 실제 구현
 - `src/step3/sourceReview.ts`: PDF.js 추출 시 기록된 `origin.page/x/y/width/height`의 유효성 검사, 좌상단 기준 좌표→표시 사각형, 개별 블록 검수 서명. 블록 텍스트/이미지 설명/출처 데이터가 바뀌면 기존 '검수 완료' 표시는 일치하지 않아 자동 무효.
@@ -20,3 +20,12 @@ Status: Code implemented, GitHub CI confirmation pending (2026-10-26 KST).
 - M03-B1 실제 GGUF 오프라인 추론·모델 라이선스·Windows CPU benchmark는 별도 승인 전 BLOCKED.
 - NEXT candidate M06-B: 클릭 가능한 4단계 작업 네비게이션, 900/1100/1600px responsive + keyboard UX 테스트. 유료판매 NO-GO: 모델/고객 PDF/PC/3 SKU 배포 검증 미완료.
 - Main/PR3/PR4 보호, PR #9 Draft 유지.
+
+## VERIFIED M06-A — 2026-10-26
+- Tested implementation SHA: `e351fab774eb8e3de9caab8aae4039fc6185fcd9`.
+- [Linux Chrome and Microsoft Edge #40207916153](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40207916153): **SUCCESS**, `npm test` **60/60 PASS**, build PASS. Both Chrome/Edge E2E log `PASS M06 CLICK-THROUGH`: real locally imported synthetic PDF page **2**, actual PDF.js canvas + coordinate rectangle, selected editor block highlight, **0/7 → 1/7** manually acknowledged blocks; preexisting source hash/revoke, Korean rule review, A4 print and 13/13 source markers also passed.
+- [Windows NSIS #40207916086](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40207916086): **SUCCESS** installed EXE, native PDF export, Step2/Step3 integrity, uninstall and in-place upgrade persistence. **M06 canvas page-click itself was not directly driven in Windows E2E**; UI direct proof is Chrome+Edge Linux.
+- Real screenshot: #40207916153, synthetic-only artifact `astra-m02-studio-chrome-synthetic` ID **12604421593**, visibly shows selected page thumbnail with orange coordinate marker and `수동 대조 1/7` status next to actual redesigned A4. Captured by running Chromium, not a concept render; artifact retention is limited.
+- Resolved CI iterations: initial `5c77dcb7` E2E had a missing assertion parenthesis; added `node --check`. Later `f3fa4f73` E2E changed established source-label text; restored `원본 PDF 출처`. Another E2E accidentally evaluated the Node `chosen` variable inside browser scope; fixed at tested `e351fab7`. Some intermediate Windows isolated runs failed/recovered; use **both final same-source SUCCESS links above**, not stale failure runs.
+- No PDF original bytes stored in IDB, no review status persisted, no network upload, no paid service or model installed. Review acknowledgement is **manual only / soft warning**; it is not content equality, geometry parity, export hard-stop, commercial approval, or all-PDF support.
+- **M06-A DONE** within internal source-review synthetic scope. Next **M06-B READY**: interactive four-step guidance and real 900/1100/1600px visual/keyboard tests. **M03-B1 actual offline LLM BLOCKED** pending approved license/model/runtime download and CPU quality benchmark; customer sale NO-GO.
