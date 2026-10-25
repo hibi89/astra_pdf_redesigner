@@ -50,3 +50,7 @@
 - **V07 PARTIAL:** cards, steps and A4 canvas visually real, but 01–04 are static labels (`nav span`), not interactive tabs; source iframe narrow and actual printed pagination must be checked at export.
 - **V08 PASS only synthetic source-preservation subset:** independent IDB project, original PDF Blob session SHA equality, no user approval until explicit save, CI rollback and browser network block. Customer PDF/consumer Windows machine and code signing NOT VERIFIED.
 - **Verdict:** restricted internal PDF→2-design→A4 demo **GO**; original full commercial UI promise and 30k/60k/90k SKUs **NO-GO**. **NEXT READY M06-A:** block source page/coordinate click navigation + explicit completeness review; genuine AI M03-B1 separately owner-approved download/benchmark (BLOCKED).
+
+## Post-M05 M06-A verified progress (2026-10-26 KST)
+- M05 gap #1 is now **partially addressed**: clicking an extracted block's origin opens a locally rendered PDF.js source page with a top-left coordinate highlight and an explicit user-set review state. Chrome/Edge #40207916153 SUCCESS (60/60 tests), Windows packaging/regressions #40207916086 SUCCESS. Test SHA `e351fab774eb8e3de9caab8aae4039fc6185fcd9`.
+- This does **not** constitute complete source-to-output semantic equivalence, a final export hard gate, original file persistence or Windows-specific coordinate-click acceptance. Next user-facing UX remains interactive four-step flow/responsive/keyboard checks, **M06-B READY**. Actual offline LLM remains unimplemented; sale NO-GO. See `M06_A_SOURCE_REVIEW_20261026.md`.
