@@ -113,6 +113,26 @@ try{
   assert.equal(await evaluate("document.querySelector('.section-editor .help-text')?.textContent?.includes('원본 PDF 출처')"),true);
   console.log('PASS STEP3 IMPORT: review creates independent active V2 document with PDF source provenance');
 
+  // M03 actual React user flow: opt-in proposal -> reject -> accept -> undo.
+  const extraParagraph=await evaluate("(()=>{const section=document.querySelector('.project-layout .section-editor');if(!section)throw Error('No editable section');const before=section.querySelectorAll('.block-editor').length;const add=[...section.querySelectorAll('.add-block button')].find(b=>b.textContent.includes('본문'));if(!add||add.disabled)throw Error('No enabled add paragraph button');add.click();return before})()");
+  await eventually(()=>evaluate("document.querySelector('.project-layout .section-editor')?.querySelectorAll('.block-editor').length"),n=>n===extraParagraph+1);
+  await evaluate("(()=>{const section=document.querySelector('.project-layout .section-editor');const last=[...section.querySelectorAll('.block-editor')].at(-1);const textarea=last?.querySelector('textarea');if(!textarea)throw Error('New paragraph textarea missing');Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set.call(textarea,'문서를  확인하였습니다.');textarea.dispatchEvent(new Event('input',{bubbles:true}))})()");
+  await eventually(()=>evaluate("[...document.querySelectorAll('.project-layout .section-editor .block-editor textarea')].at(-1)?.value"),v=>v==='문서를  확인하였습니다.');
+  await evaluate("(()=>{const last=[...document.querySelectorAll('.project-layout .section-editor .block-editor')].at(-1);const b=last?.querySelector('[data-m03-check]');if(!b||b.disabled)throw Error('Missing opt-in rule review');b.click()})()");
+  await eventually(()=>evaluate("[...document.querySelectorAll('[data-m03-proposal] [data-m03-after]')].at(-1)?.textContent"),v=>v==='문서를 확인했습니다.');
+  assert.ok(await evaluate("Boolean(document.querySelector('[data-m03-before] del')&&document.querySelector('[data-m03-after] ins'))"),
+    'M03 must show an actual inline before/after difference');
+  await evaluate("document.querySelector('[data-m03-reject]').click()");
+  assert.equal(await evaluate("[...document.querySelectorAll('.project-layout .section-editor .block-editor textarea')].at(-1)?.value"),'문서를  확인하였습니다.');
+  await evaluate("([...document.querySelectorAll('[data-m03-check]')].at(-1)).click()");
+  await eventually(()=>evaluate("Boolean(document.querySelector('[data-m03-accept]'))"));
+  await evaluate("document.querySelector('[data-m03-accept]').click()");
+  await eventually(()=>evaluate("[...document.querySelectorAll('.project-layout .section-editor .block-editor textarea')].at(-1)?.value"),v=>v==='문서를 확인했습니다.');
+  await evaluate("([...document.querySelectorAll('[data-m03-undo]')].at(-1)).click()");
+  await eventually(()=>evaluate("[...document.querySelectorAll('.project-layout .section-editor .block-editor textarea')].at(-1)?.value"),v=>v==='문서를  확인하였습니다.');
+  await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),v=>v==='저장됨');
+  console.log('PASS M03 OPT-IN RULE REVIEW: real React rejection, explicit acceptance, visible diff, undo, persisted original restored; no LLM claim');
+
   // M02: source survives a successful commit but only as a temporary Blob URL.
   const initialSource=await eventually(()=>evaluate("(()=>{const panel=document.querySelector('.studio-source-panel');return panel&&{id:panel.getAttribute('data-source-document-id'),title:panel.querySelector('iframe')?.title,url:panel.querySelector('iframe')?.src,visible:!!panel.querySelector('iframe')}})()"));
   assert.ok(initialSource.id&&initialSource.title==='가져온 원본 PDF'&&

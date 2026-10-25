@@ -86,3 +86,19 @@ button:disabled{cursor:not-allowed;opacity:.48}select{min-height:38px;padding:7p
  .studio-steps,.studio-style-column{display:none!important}
  .studio-layout .paper-surface{padding:0!important;border:0!important;background:none!important;box-shadow:none!important}
 }
+
+/* M03: local deterministic rule review; no AI engine or network. */
+.m03-rule-review{margin-top:9px;border-top:1px dashed #dae3e7;padding-top:9px}
+.m03-rule-toolbar{display:flex;flex-wrap:wrap;gap:7px;align-items:center}
+.m03-rule-toolbar .secondary-button,.m03-rule-toolbar .text-button{font-size:11px;padding:7px 9px}
+.m03-proposal{margin-top:9px;padding:10px;background:#f5f9fa;border:1px solid #b9ced9;border-radius:8px;font-size:12px}
+.m03-proposal p{margin:5px 0;line-height:1.6;overflow-wrap:anywhere}
+.m03-proposal-note{color:#536775}
+.m03-rule-diff{padding:8px;background:#fff;border:1px solid #d7e1e7;border-radius:6px}
+.m03-diff-label{font-size:10px;font-weight:700;color:#506575}
+.m03-rule-diff p{white-space:pre-wrap}
+.m03-rule-diff del{background:#ffdfdd;text-decoration:line-through}
+.m03-rule-diff ins{background:#d5f1dd;text-decoration:none}
+.m03-proposal .toolbar{margin-top:9px;justify-content:flex-start;flex-wrap:wrap}
+.m03-proposal .toolbar button{font-size:11px;padding:8px}
+@media print{.m03-rule-review{display:none!important}}

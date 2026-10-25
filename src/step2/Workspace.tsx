@@ -5,6 +5,7 @@ import { downloadProject } from './projectFile.ts';
 import { useWorkspace } from './useWorkspace.ts';
 import PdfImportPanel, {type ImportedPdfSource} from '../step3/ImportPanel.tsx';
 import {hasDesktopPdfExport,savePdfFromEditor} from '../desktopPdf.ts';
+import RuleReview from '../humanize/RuleReview.tsx';
 
 const allThemes=[...THEMES,{id:'compact' as const,label:'컴팩트 리포트',description:'짧은 제목과 밀도 높은 문서'}];
 function useAssetUrls(assets:readonly ImageAsset[]):Record<string,string>{
@@ -149,6 +150,8 @@ export default function Workspace({onLegacy}:Props){
                 </div>
                 {(block.kind==='paragraph'||block.kind==='caption')&&<label className="field"><span className="visually-hidden">{block.kind==='caption'?'캡션':'본문'} {bi+1}</span><textarea disabled={!editable} rows={block.kind==='caption'?2:4} value={block.text} onChange={e=>changeBlock(section.id,block.id,b=>b.kind==='paragraph'||b.kind==='caption'?{...b,text:e.target.value}:b)}/></label>}
                 {block.kind==='heading'&&<label className="field"><span className="visually-hidden">소제목 {bi+1}</span><input disabled={!editable} value={block.text} onChange={e=>changeBlock(section.id,block.id,b=>b.kind==='heading'?{...b,text:e.target.value}:b)}/></label>}
+                {block.kind==='paragraph'&&<RuleReview text={block.text} disabled={!editable}
+                  onApply={value=>changeBlock(section.id,block.id,b=>b.kind==='paragraph'?{...b,text:value}:b)}/>}
                 {block.kind!=='image'&&block.origin&&<p className="help-text">원본 PDF 출처: {block.origin.page}페이지 · x={block.origin.x}pt · y={block.origin.y}pt (추정)</p>}
                 {block.kind==='image'&&<>
                   {urls[block.assetId]&&<img className="edit-image-preview" alt="첨부 이미지 미리보기" src={urls[block.assetId]}/>}
