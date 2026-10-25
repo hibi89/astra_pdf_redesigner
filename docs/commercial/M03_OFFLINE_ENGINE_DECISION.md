@@ -30,3 +30,6 @@
 
 ## 다음 개발 작업
 M03-A 최신 코드의 unit/Chrome/Edge/Windows E2E PASS 판정 후, M03-B **실제 GGUF+런타임 패키지 확보·라이선스/CPU 검증을 승인받아** 구현. 승인 전에는 오프라인 모델 연동을 막고 안전한 규칙 검사만 유지. 모델 실패 시 'AI 완료' 판정 금지.
+
+## M03-A PASS (2026-10-25 23:41 KST)
+- Verified source `768fc0183e8aa2f6f09d1a87458b8cb9347b6e73`, Linux #40203100279 success (51/51 unit tests, Chrome+Edge) and Windows NSIS #40203100297 success. Browser test explicitly drove rule proposal/rejection/approval/revert. **No LLM weight downloaded and no real LLM generation tested.** One-step undo is in-memory only and source PDF remains preserved.

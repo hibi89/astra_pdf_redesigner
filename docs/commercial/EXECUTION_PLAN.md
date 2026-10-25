@@ -1,5 +1,7 @@
 # ASTRA — 72시간 MVP 우선 실행계획 (CURRENT SSOT)
 
+> **Progress 2026-10-25 23:41 KST:** M01 and M02 targeted internal MVP slices verified; **M03-A deterministic proofreading proposal UI complete** (not an AI model); M03-B actual offline LLM still unimplemented/untested. Test SHA `768fc0183e8aa2f6f09d1a87458b8cb9347b6e73`; next M03-B feasibility and actual model-only upon cost/data/asset consent. The D1/D2 rows below are initial schedule, not current.
+
 > **Current checkpoint (2026-10-25 23:25 KST):** M01 + M02 MVP slices **DONE and verified** at tested code `0671fde98b0fc91fc6b4bb6eb43fca6e5411621f`; next **M03 READY**. The original timeline table below is a baseline/history. See latest STATUS/HANDOFF/Mockup parity for current evidence. M03 rewrite and local LLM have NOT been verified or shipped.
 
 **사용자 최종 지시 2026-10-25 KST:** 먼저 돌아가는 앱을 만들고 이전 목업 화면과 비교하면서 부족한 부분을 채운다. 고급 QA/보안·SKU 부가기능은 MVP 이후로 이월. **시작 10/25 → 목표 10/28 (72시간 도전 목표, 완료 보장 아님).**
