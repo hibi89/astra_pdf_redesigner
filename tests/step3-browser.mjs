@@ -111,10 +111,41 @@ try{
   assert.equal(await evaluate("document.querySelector('.doc-list-item.active strong')?.textContent?.includes('step3-sample')"),true);
   assert.equal(await evaluate("document.querySelector('.section-editor .help-text')?.textContent?.includes('원본 PDF 출처')"),true);
   console.log('PASS STEP3 IMPORT: review creates independent active V2 document with PDF source provenance');
+  // M02: Capture actual REPORT print before switching to MINIMAL, not CSS-only assertions.
+  const reportPdf=await send('Page.printToPDF',{preferCSSPageSize:true,printBackground:true});
+  const reportPath=join(dir,'m02-report.pdf');
+  writeFileSync(reportPath,Buffer.from(reportPdf.data,'base64'));
+  const reportText=execFileSync('pdftotext',[reportPath,'-'],{encoding:'utf8'});
+  assert.ok(reportText.includes('STEP3_TEST_BEGIN_7519')&&reportText.includes('STEP3_TEST_END_7519'));
   const themeBefore=await evaluate("document.querySelector('.project-paper')?.className");
   await evaluate("document.querySelectorAll('input[name=v2theme]')[1].click()");
   await eventually(()=>evaluate("document.querySelector('.project-paper')?.className"),v=>v!==themeBefore);
   await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),x=>x==='저장됨');
+  const minimalPdf=await send('Page.printToPDF',{preferCSSPageSize:true,printBackground:true});
+  const minimalPath=join(dir,'m02-minimal.pdf');
+  writeFileSync(minimalPath,Buffer.from(minimalPdf.data,'base64'));
+  const minimalText=execFileSync('pdftotext',[minimalPath,'-'],{encoding:'utf8'});
+  for(const marker of ['STEP3_TEST_BEGIN_7519','STEP3_PAGE2_BEGIN_7519','STEP3_TEST_END_7519']){
+    assert.ok(reportText.includes(marker)&&minimalText.includes(marker),
+      'PDF source content must survive both layouts: '+marker);
+  }
+  const wordPosition=file=>{
+    const bbox=execFileSync('pdftotext',['-bbox',file,'-'],{encoding:'utf8'});
+    const match=bbox.match(/<word\\s+([^>]+)>STEP3_TEST_BEGIN_7519<\\/word>/);
+    if(!match)throw Error('Cannot locate title bbox in themed A4 PDF');
+    const attributes=Object.fromEntries([...match[1].matchAll(/(xMin|yMin|xMax|yMax)="([^"]+)"/g)].map(m=>[m[1],Number(m[2])]));
+    return attributes;
+  };
+  const reportBox=wordPosition(reportPath),minimalBox=wordPosition(minimalPath);
+  assert.ok(Math.abs(reportBox.yMin-minimalBox.yMin)>8||Math.abs(reportBox.xMin-minimalBox.xMin)>8,
+    'M02 requires actual PDF title positions to differ, not only color/theme ID');
+  console.log('PASS M02 ACTUAL A4 DESIGN PARITY: report/minimal PDFs retain source markers with distinct title coordinates',reportBox,minimalBox);
+  if(process.env.GITHUB_ACTIONS==='true'&&process.env.M02_SCREENSHOT_OUT){
+    await send('Emulation.setDeviceMetricsOverride',{width:1600,height:1000,deviceScaleFactor:1,mobile:false});
+    const capture=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
+    writeFileSync(process.env.M02_SCREENSHOT_OUT,Buffer.from(capture.data,'base64'));
+    console.log('PASS M02 ACTUAL CHROME SCREENSHOT: synthetic imported document and 3-pane studio');
+  }
   await send('Page.reload',{ignoreCache:true});
   await eventually(()=>evaluate("document.querySelector('.project-paper')?.textContent"),v=>v?.includes('STEP3_TEST_END_7519'));
   await eventually(()=>evaluate("document.querySelectorAll('.doc-list-item').length"),n=>n===before+1);

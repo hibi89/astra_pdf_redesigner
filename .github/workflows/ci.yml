@@ -44,7 +44,14 @@ jobs:
           CHROME_PATH="$CHROME_BIN" node tests/step2-cold-migration.mjs
           CHROME_PATH="$CHROME_BIN" STEP2_INJECT_MIGRATION_ABORT=1 node tests/step2-cold-migration.mjs
           CHROME_PATH="$CHROME_BIN" node tests/step2-cross-profile.mjs
-          CHROME_PATH="$CHROME_BIN" node tests/step3-browser.mjs
+          M02_SCREENSHOT_OUT="$RUNNER_TEMP/astra-m02-studio.png" CHROME_PATH="$CHROME_BIN" node tests/step3-browser.mjs
+      - name: Upload actual M02 studio screenshot (synthetic-only CI content)
+        uses: actions/upload-artifact@v4
+        with:
+          name: astra-m02-studio-chrome-synthetic
+          path: ${{ runner.temp }}/astra-m02-studio.png
+          if-no-files-found: error
+          retention-days: 7
   # A new GitHub-hosted VM prevents leftover Chrome helpers and long-running
   # profile cleanup from exhausting Edge browser resources.
   edge-validation:

@@ -75,7 +75,10 @@ export default function Workspace({onLegacy}:Props){
       <div className="print-actions"><button className="secondary-button" disabled={!editable} onClick={()=>void operation(async()=>{await w.flush();onLegacy();})}>기존 회고록 편집</button>
       <button className="print-button" disabled={!editable} onClick={()=>void print()}>{printBusy?'준비 중…':hasDesktopPdfExport()?'PDF 파일 저장':'PDF 저장 / 인쇄'}</button><span>{hasDesktopPdfExport()?'저장할 PDF 파일의 위치를 선택하세요.':'인쇄 창에서 ‘PDF로 저장’을 선택하세요.'}</span></div>
     </header>
-    <main className="app-layout project-layout">
+    <main className="app-layout project-layout studio-layout">
+      <nav className="studio-steps no-print" aria-label="PDF 리디자인 작업 순서">
+        <span><b>01</b> PDF 불러오기</span><span><b>02</b> 원본 대조</span><span><b>03</b> 디자인 선택</span><span><b>04</b> 새 PDF 저장</span>
+      </nav>
       <aside className="editor-column no-print">
         {!w.ready&&<div className="panel">브라우저 로컬 문서함을 여는 중입니다…</div>}
         {w.locked&&<p className="warning" role="alert">다른 탭에서 문서함을 편집하고 있습니다. 해당 탭을 닫은 뒤 새로고침하세요. 이 탭에서는 편집할 수 없습니다.</p>}
@@ -122,12 +125,6 @@ export default function Workspace({onLegacy}:Props){
               <div className="add-block"><button disabled={!editable} className="secondary-button" onClick={()=>editSection(section.id,s=>({...s,blocks:[...s.blocks,newBlock('paragraph')]}))}>+ 본문</button><button disabled={!editable} className="secondary-button" onClick={()=>editSection(section.id,s=>({...s,blocks:[...s.blocks,newBlock('heading')]}))}>+ 소제목</button><button disabled={!editable} className="secondary-button" onClick={()=>editSection(section.id,s=>({...s,blocks:[...s.blocks,newBlock('caption')]}))}>+ 캡션</button><label className={`secondary-button file-trigger ${!editable?'disabled':''}`}>+ 이미지<input disabled={!editable} type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)void operation(()=>w.insertImage(file,section.id));}}/></label></div>
             </div>)}
           </section>
-          <section className="panel settings-panel"><div className="panel-heading"><h2>디자인 설정</h2><span className="panel-caption">원문은 변경하지 않습니다</span></div>
-            <div className="setting-block"><h3>테마</h3><div className="theme-options">{allThemes.map(theme=><label className={`theme-option ${doc.design.theme===theme.id?'selected':''}`} key={theme.id}><input disabled={!editable} type="radio" name="v2theme" checked={doc.design.theme===theme.id} onChange={()=>editDoc(d=>({...d,design:{...d.design,theme:theme.id}}))}/><span><strong>{theme.label}</strong><small>{theme.description}</small></span></label>)}</div></div>
-            <div className="setting-block"><h3>포인트 색상</h3><div className="swatches">{PALETTE.map(color=><label title={color.label} className={`swatch-wrap ${doc.design.accent===color.value?'active':''}`} key={color.value}><input disabled={!editable} type="radio" name="v2accent" aria-label={color.label} checked={doc.design.accent===color.value} onChange={()=>editDoc(d=>({...d,design:{...d.design,accent:color.value}}))}/><span className="swatch" style={{backgroundColor:color.value}}/></label>)}</div></div>
-            <div className="setting-block"><h3>본문 크기</h3><div className="segmented">{(['small','medium','large'] as const).map((size,i)=><label className={doc.design.textSize===size?'on':''} key={size}><input disabled={!editable} type="radio" name="v2size" checked={doc.design.textSize===size} onChange={()=>editDoc(d=>({...d,design:{...d.design,textSize:size}}))}/>{['작게','보통','크게'][i]}</label>)}</div></div>
-            <div className="setting-block"><h3>폰트</h3><div className="segmented">{(['sans','serif'] as const).map((font,i)=><label className={doc.design.font===font?'on':''} key={font}><input disabled={!editable} type="radio" name="v2font" checked={doc.design.font===font} onChange={()=>editDoc(d=>({...d,design:{...d.design,font}}))}/>{['고딕','명조'][i]}</label>)}</div><p className="help-text">설치된 시스템 글꼴에 따라 표시가 달라집니다.</p></div>
-          </section>
           <section className="panel"><div className="panel-heading"><h2>프로젝트 파일</h2><span className="panel-caption">현재 문서와 이미지 전체를 백업합니다.</span></div>
             <div className="toolbar project-toolbar"><button className="secondary-button" disabled={!editable} onClick={()=>void operation(async()=>{const json=await w.exportCurrent();downloadProject(json,doc.name);})}>프로젝트 내보내기</button><button className="secondary-button" disabled={!editable} onClick={()=>fileRef.current?.click()}>프로젝트 가져오기</button></div>
             <input className="hidden-input" ref={fileRef} type="file" accept=".json,.localdoc.json,application/json" onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)void operation(()=>w.importCurrent(file));}}/>
@@ -136,10 +133,21 @@ export default function Workspace({onLegacy}:Props){
           <p className="privacy-note">문서는 현재 브라우저 프로필·주소의 IndexedDB에 저장됩니다. 사이트 데이터 삭제 시 유실될 수 있습니다. 여러 탭 동시 편집은 지원하지 않습니다. 이미지 원본에는 메타데이터가 포함될 수 있습니다. 외부 서버로 전송하지 않습니다.</p>
         </>}
       </aside>
-      <div className="preview-column"><div className="preview-heading no-print"><div><h2>문서 미리보기</h2><p>A4 기준 · 최종 페이지 나눔은 인쇄 창에서 확인</p></div><span className="size-tag">A4</span></div>
+      <div className="preview-column"><div className="preview-heading no-print"><div><h2>새 디자인 미리보기</h2><p>A4 기준 · 최종 페이지 나눔은 인쇄 창에서 확인</p></div><span className="size-tag">A4</span></div>
         <div className="paper-surface">{doc?<ProjectPreview doc={doc} urls={urls}/>:<div className="document">{w.ready?'문서를 열 수 없습니다.':'불러오는 중…'}</div>}</div>
         <p className="print-tip no-print">Chrome/Edge에서 PDF로 저장, A4, 머리글·바닥글 해제를 확인하세요. 인쇄는 이미지 로딩이 완료될 때까지 기다립니다.</p>
       </div>
+      <aside className="studio-style-column no-print" aria-label="디자인 스튜디오">
+        <div className="studio-style-intro"><span className="studio-label">DESIGN STUDIO</span><h2>문서를 새롭게</h2><p>원문을 그대로 두고 출력 디자인만 변경합니다. 최소 두 가지 조판을 실제 PDF로 확인할 수 있습니다.</p></div>
+        {doc ? <>
+          <section className="panel settings-panel"><div className="panel-heading"><h2>디자인 설정</h2><span className="panel-caption">원문은 변경하지 않습니다</span></div>
+            <div className="setting-block"><h3>테마</h3><div className="theme-options">{allThemes.map(theme=><label className={`theme-option ${doc.design.theme===theme.id?'selected':''}`} key={theme.id}><input disabled={!editable} type="radio" name="v2theme" checked={doc.design.theme===theme.id} onChange={()=>editDoc(d=>({...d,design:{...d.design,theme:theme.id}}))}/><span><strong>{theme.label}</strong><small>{theme.description}</small></span></label>)}</div></div>
+            <div className="setting-block"><h3>포인트 색상</h3><div className="swatches">{PALETTE.map(color=><label title={color.label} className={`swatch-wrap ${doc.design.accent===color.value?'active':''}`} key={color.value}><input disabled={!editable} type="radio" name="v2accent" aria-label={color.label} checked={doc.design.accent===color.value} onChange={()=>editDoc(d=>({...d,design:{...d.design,accent:color.value}}))}/><span className="swatch" style={{backgroundColor:color.value}}/></label>)}</div></div>
+            <div className="setting-block"><h3>본문 크기</h3><div className="segmented">{(['small','medium','large'] as const).map((size,i)=><label className={doc.design.textSize===size?'on':''} key={size}><input disabled={!editable} type="radio" name="v2size" checked={doc.design.textSize===size} onChange={()=>editDoc(d=>({...d,design:{...d.design,textSize:size}}))}/>{['작게','보통','크게'][i]}</label>)}</div></div>
+            <div className="setting-block"><h3>폰트</h3><div className="segmented">{(['sans','serif'] as const).map((font,i)=><label className={doc.design.font===font?'on':''} key={font}><input disabled={!editable} type="radio" name="v2font" checked={doc.design.font===font} onChange={()=>editDoc(d=>({...d,design:{...d.design,font}}))}/>{['고딕','명조'][i]}</label>)}</div><p className="help-text">설치된 시스템 글꼴에 따라 표시가 달라집니다.</p></div>
+          </section>
+        </> : <p className="panel">문서를 불러오면 스타일을 선택할 수 있습니다.</p>}
+      </aside>
     </main>
   </>;
 }

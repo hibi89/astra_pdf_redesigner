@@ -32,3 +32,50 @@ button:disabled{cursor:not-allowed;opacity:.48}select{min-height:38px;padding:7p
 .step3-image-review { border: 1px dashed #b7c3d3; padding: 10px; margin: 10px 0; border-radius: 8px; }
 .step3-image-thumbnail { display: block; object-fit: contain; max-height: 170px; max-width: 100%; margin: 10px 0; border: 1px solid #d9dee6; background: white; }
 @media print { .step3-image-review { display: none !important; } }
+
+
+/* M02 guided three-zone studio. The editor/export uses the existing project model. */
+.studio-layout{grid-template-columns:minmax(260px,340px) minmax(0,1fr) minmax(245px,280px);gap:18px;max-width:1920px;padding:20px clamp(12px,1.8vw,32px) 52px;align-items:start}
+.studio-steps{grid-column:1/-1;display:flex;align-items:center;gap:9px;padding:12px 17px;border:1px solid #d6e1e7;border-radius:14px;background:#fff;box-shadow:0 2px 15px rgb(30 59 77 / 5%)}
+.studio-steps span{display:flex;align-items:center;gap:7px;color:#3d5968;font-size:12px;font-weight:650;padding:0 13px;border-right:1px solid #dbe4e9}
+.studio-steps span:last-child{border-right:0}
+.studio-steps b{display:inline-grid;place-items:center;background:#e5eff5;color:#245772;border-radius:50%;height:24px;width:24px;font-size:10px}
+.studio-layout .editor-column{gap:14px;min-width:0}
+.studio-layout .editor-column .panel{padding:15px}
+.studio-layout .preview-column{min-width:0;position:sticky;top:18px}
+.studio-layout .preview-heading{padding:3px 5px 0}
+.studio-layout .paper-surface{background:#e7edf1;border-radius:14px;padding:16px;box-shadow:inset 0 0 0 1px #d9e2e8}
+.studio-layout .project-paper{box-shadow:0 5px 18px rgb(23 39 50 / 10%)}
+.studio-style-column{min-width:0;display:flex;flex-direction:column;gap:13px}
+.studio-style-column .panel{padding:17px}
+.studio-style-column .settings-panel{margin:0}
+.studio-style-column .theme-options{display:grid;gap:8px}
+.studio-style-column .theme-option{margin:0}
+.studio-style-intro{padding:18px;border-radius:14px;background:#183c51;color:#fff}
+.studio-style-intro .studio-label{font-size:10px;letter-spacing:.18em;color:#a8d7e9}
+.studio-style-intro h2{font-size:19px;margin:7px 0}
+.studio-style-intro p{font-size:12px;line-height:1.55;margin:0;color:#e0ebf0}
+@media screen and (max-width:1260px){
+ .studio-layout{grid-template-columns:minmax(260px,340px) minmax(0,1fr)}
+ .studio-style-column{grid-column:2;grid-row:auto;display:grid;grid-template-columns:1fr}
+ .studio-layout .preview-column{position:static}
+}
+@media screen and (max-width:780px){
+ .studio-layout{display:flex;flex-direction:column}
+ .studio-steps{flex-wrap:wrap;width:100%}
+ .studio-steps span{padding:4px 6px}
+ .studio-layout .editor-column,.studio-layout .preview-column,.studio-style-column{width:100%}
+ .studio-layout .paper-surface{padding:8px}
+}
+/* Genuine print styles, not palette-only variants: report uses a structured
+   colored masthead, minimal uses an airy unboxed title and separated sections. */
+.paper-theme-report .document-heading{background:#eef4f7;border-top:6px solid var(--accent);border-bottom:1px solid #a3b5c0;padding:7mm 7mm 6mm;margin:0 0 10mm}
+.paper-theme-report .document-heading h1{font-size:1.9em;letter-spacing:-.025em;margin:3mm 0}
+.paper-theme-report .document-section h2{border-left:4px solid var(--accent);border-bottom:1px solid #d1dfe7;padding:1mm 0 2mm 4mm}
+.paper-theme-minimal .document-heading{background:none;border:0;padding:10mm 0 0;margin-bottom:21mm}
+.paper-theme-minimal .document-heading h1{font-size:2.4em;letter-spacing:-.05em;font-weight:500;line-height:1.25}
+.paper-theme-minimal .document-section h2{border-left:0;border-bottom:1px solid #9ba8ae;padding:0 0 3mm}
+@media print{
+ .studio-steps,.studio-style-column{display:none!important}
+ .studio-layout .paper-surface{padding:0!important;border:0!important;background:none!important;box-shadow:none!important}
+}
