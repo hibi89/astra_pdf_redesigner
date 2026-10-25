@@ -1,5 +1,8 @@
 # ASTRA PDF Redesigner — 크몽 상품화 총괄 시작점 (2026-10-25)
 
+> **최신 확정 M01 완료 / M02 READY — 2026-10-25 22:55 KST:** 통합 브랜치 코드 `4b5be85a8e7e0fb26d4be3bca58f423477e49c48`의 [Linux Chrome/Edge #40199604164](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40199604164) 및 [Windows NSIS #40199604265](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40199604265) **최종 SUCCESS**. Windows 설치 앱에서 합성 2p PDF→PDF.js 원본 대조·승인→IDB 신규 문서→테마 변경→재로드→Electron native 저장→A4 1p 출력·원문 표식 6개·이미지 1회 검증. **현재 다음 작업은 M02 실제 3영역 스튜디오·조판이 실제로 다른 2가지 디자인 및 목업 실물 비교**. 문서 하단의 오래된 M01 'READY'와 in_progress 기록은 과거 이력이다. 실제 고객문서/로컬AI/상용화는 여전히 미검증이다.
+
+
 > **한 문장 재개 요청 (사용자 최종 2026-10-25):** `[astra_pdf_redesigner 깃헙 레포지토리 보고 작업이어가셈]` 입력 즉시 `WORKER_START_HERE.md`를 먼저 읽고 GitHub/CI 최신 원격을 확인해 다음 READY 실제 개발 작업을 수행한다. **새 채팅에서 추가 인수인계 질문·승인 요청 금지(차단 사항은 BLOCKED 후 다른 READY)**. 진입점은 [WORKER_START_HERE.md](WORKER_START_HERE.md).
 
 
