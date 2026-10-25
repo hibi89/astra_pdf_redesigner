@@ -197,7 +197,7 @@ export default function Workspace({onLegacy}:Props){
                 {block.kind==='paragraph'&&<RuleReview text={block.text} disabled={!editable}
                   onApply={value=>changeBlock(section.id,block.id,b=>b.kind==='paragraph'?{...b,text:value}:b)}/>}
                 {reviewableOrigin(block.origin)&&<div className="m06-block-origin no-print" data-m06-origin data-m06-page={block.origin.page}>
-                  <span className="help-text">출처 {block.origin.page}페이지 · x={block.origin.x}pt · y={block.origin.y}pt (추정)</span>
+                  <span className="help-text">원본 PDF 출처: {block.origin.page}페이지 · x={block.origin.x}pt · y={block.origin.y}pt (추정)</span>
                   <button type="button" className="secondary-button" disabled={!currentSource} data-m06-open
                     onClick={()=>focusSource(block)}>원본 위치 보기</button>
                   <button type="button" className="secondary-button" disabled={!currentSource||!editable||focusedOrigin?.blockId!==block.id}
