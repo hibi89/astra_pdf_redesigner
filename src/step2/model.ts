@@ -68,7 +68,7 @@ const text = (v: unknown, max: number = LIMITS.text): v is string => typeof v ==
 const identifier = (v: unknown): v is string => text(v, 150) && v.length > 0;
 const idUnique = (items: {id: string}[]) => new Set(items.map(item => item.id)).size === items.length;
 export function isDesign(value: unknown): value is DesignSettings {
-  return record(value) && ['report', 'minimal', 'diary', 'compact', 'editorial', 'ledger'].includes(String(value.theme)) &&
+  return record(value) && ['report', 'minimal', 'diary', 'compact', 'editorial', 'ledger', 'brief', 'folio'].includes(String(value.theme)) &&
     PALETTE.some(color => color.value === value.accent) &&
     ['small', 'medium', 'large'].includes(String(value.textSize)) && ['sans', 'serif'].includes(String(value.font));
 }

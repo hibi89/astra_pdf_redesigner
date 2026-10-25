@@ -95,3 +95,10 @@
 - [Windows NSIS #40211494855](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40211494855) **SUCCESS** installed native PDF/NSIS/uninstall/in-place upgrade and V2 project+PNG retention. **Six-by-six layout differentiation not directly exercised on Windows.**
 - Document: [M07_A_BASIC_LAYOUTS_20261026.md](M07_A_BASIC_LAYOUTS_20261026.md). Actual running Chrome synthetic screenshot artifact ID 12605672977 in Linux run: visible ledger design/editor/source; artifact retention limited. **M07-A scoped DONE; BASIC actual synthetic layouts 6/8 = 75% of its own 8-design target only**. 2 BASIC templates pending. Full application and sale NOT 75%.
 - **NEXT READY M07-B:** add 2 further clearly distinct A4 print layouts and verify 8/8 in Chrome+Edge with PDF.js/Poppler; no model binaries/paid APIs. True offline Korean LLM M03-B1 remains BLOCKED pending explicit user approval. Customer PDFs/device QA, PRO20/BUSINESS30/entitlements/code signing incomplete; **SALE NO-GO**.
+
+
+## M07-B code checkpoint — 2026-10-26 KST (CI PENDING)
+- Starting integration SHA `c6922bd6204dd271ca78935cee4d40b4aa50b4c2`. Added two original BASIC themes: `brief` (executive inset masthead, numbered and bordered sections) and `folio` (large right-aligned editorial-serif title, ruled sections). STEP1 chooser, V1/V2 storage schemas, original user PDF and source bytes untouched.
+- STEP2/3 6→8 selectable styles, strict eight-ID V2 validation and negative unknown-theme test. Browser E2E now prints **all 8** to independently generated PDF and verifies each A4, ordered exact 3 synthetic markers, raster, bounds, and pairwise distinct title x/y/width geometry. This is not color-only ID testing.
+- **IMPLEMENTED/UNVERIFIED** pending exact code SHA Linux Chrome+Edge / Windows NSIS CI. Old 6/8 PASS cannot establish 8/8. Windows per-design print comparison is not in this regression.
+- NEXT READY: examine exact-head GitHub CI (test failure → isolate and minimally fix; success → document scoped 8/8 internal synthetic evidence), then customer PDF/device gate. Offline Korean LLM M03-B1 approval-gated; real 30/60/90k SKUs **SALE NO-GO**.

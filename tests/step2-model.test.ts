@@ -36,9 +36,9 @@ test('schema validation rejects invalid, unknown or duplicate IDs',()=>{
   assert.equal(isProjectDocument({...doc,schemaVersion:4}),false);
 });
 
-test('M07-A added layout identifiers pass V2 schema validation and keep old IDB themes',()=>{
+test('M07-B eight layout identifiers pass V2 schema validation and keep old IDB themes',()=>{
   const base=migrateStep1Document(legacy());
-  for(const theme of ['report','minimal','diary','compact','editorial','ledger'] as const){
+  for(const theme of ['report','minimal','diary','compact','editorial','ledger','brief','folio'] as const){
     const candidate={...base,design:{...base.design,theme}};
     assert.equal(isProjectDocument(candidate),true,'Valid theme: '+theme);
     assert.equal(isDocumentCollection({schemaVersion:2,activeDocumentId:candidate.id,documents:[candidate]}),true);

@@ -177,3 +177,33 @@ button:disabled{cursor:not-allowed;opacity:.48}select{min-height:38px;padding:7p
  .paper-theme-ledger{padding-left:11mm!important;padding-right:11mm!important}
  .paper-theme-ledger .document-heading{break-inside:avoid-page}
 }
+
+/* M07-B: two distinct print compositions; normal flow preserves multi-page text/images. */
+.paper-theme-brief{padding:17mm 18mm 22mm;line-height:1.66}
+.paper-theme-brief .document-heading{margin:0 0 16mm;padding:8mm 9mm 10mm;
+  background:#edf4f7;border-top:8px solid var(--accent);border-bottom:1px solid #9fb2bf}
+.paper-theme-brief .document-heading h1{font-size:2.05em;font-weight:760;letter-spacing:-.03em;line-height:1.28;margin:4mm 0 5mm}
+.paper-theme-brief .document-meta{padding-top:3mm;border-top:1px solid #c6d5df}
+.paper-theme-brief .document-sections{counter-reset:brief-section}
+.paper-theme-brief .document-section{counter-increment:brief-section;margin-bottom:12mm;
+  padding:3mm 0 0 8mm;border-left:3px solid #a4bdc9}
+.paper-theme-brief .document-section h2{font-size:1.05em;margin-bottom:4mm;border-bottom:1px solid #d9e3e8;padding-bottom:2mm}
+.paper-theme-brief .document-section h2::before{content:counter(brief-section,decimal-leading-zero);
+  font:700 .85em system-ui,sans-serif;color:var(--accent);margin-right:2mm}
+.paper-theme-brief .block-prose{line-height:1.78}
+.paper-theme-folio{padding:22mm 13mm 22mm 28mm;line-height:1.84}
+.paper-theme-folio .document-heading{text-align:right;margin:0 0 20mm;padding:12mm 6mm 7mm 0;
+  border-right:5px solid var(--accent);border-bottom:1px solid #c6c2bb}
+.paper-theme-folio .document-heading h1{font-family:"Batang","Noto Serif CJK KR",serif;
+  font-size:2.8em;line-height:1.2;font-weight:650;margin:7mm 0 7mm;letter-spacing:-.04em}
+.paper-theme-folio .document-meta{justify-content:flex-end}
+.paper-theme-folio .document-section{margin-bottom:15mm}
+.paper-theme-folio .document-section h2{padding:3mm 0 2mm;font-size:1.16em;
+  border-top:2px solid #374b54;border-bottom:1px solid #ccd2d3;letter-spacing:.02em}
+.paper-theme-folio .block-heading{font-family:"Batang","Noto Serif CJK KR",serif}
+.paper-theme-folio .block-prose{line-height:2.02}
+@media print{
+  .paper-theme-brief{padding-left:18mm!important;padding-right:18mm!important}
+  .paper-theme-folio{padding-left:28mm!important;padding-right:13mm!important}
+  .paper-theme-brief .document-heading,.paper-theme-folio .document-heading{break-inside:avoid-page}
+}
