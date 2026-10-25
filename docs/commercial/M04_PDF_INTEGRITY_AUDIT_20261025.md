@@ -5,7 +5,7 @@ Scope: internal MVP acceptance hardening, not customer-document QA.
 ## Tested implementation
 - GitHub source: `31b499182ade86717a82ff4e8960401a96ab4c0f`.
 - Linux Chrome+Edge: [Actions #40205522431](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40205522431) **SUCCESS** (58 unit tests passed, 0 failed; Chrome and Edge end-to-end).
-- Windows installed NSIS: [Actions #40205522595](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40205522595) — final conclusion must be verified separately.
+- Windows installed NSIS: [Actions #40205522595](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40205522595) **SUCCESS**; the installed A4 PDFs passed the independent audit repeatedly.
 - Original `main` and PR3/PR4 untouched; only integration branch changed.
 
 ## Real verification introduced
