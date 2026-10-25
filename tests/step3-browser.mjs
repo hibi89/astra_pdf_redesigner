@@ -56,8 +56,10 @@ try{
   await eventually(()=>evaluate("Boolean(document.querySelector('.step3-import-panel input[type=file]')&&document.querySelector('.doc-list-item.active'))"));
   const navigation=await evaluate("(()=>({count:document.querySelectorAll('[data-m06b-stage]').length,sourceDisabled:document.querySelector('.studio-steps button:nth-child(2)').disabled,pickerAccessible:!!document.querySelector('[data-m06b-dropzone] input[type=file]')}))()");
   assert.deepEqual(navigation,{count:4,sourceDisabled:true,pickerAccessible:true});
+  await send('Page.bringToFront');
   await evaluate("document.querySelector('.studio-steps button:nth-child(3)').focus()");
-  await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
+  assert.equal(await evaluate("document.activeElement?.getAttribute('data-m06b-stage')"),'3');
+  await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13,nativeVirtualKeyCode:13});
   await send('Input.dispatchKeyEvent',{type:'keyUp',key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
   await eventually(()=>evaluate("document.querySelector('[aria-current=step]')?.getAttribute('data-m06b-stage')"),x=>x==='3');
   assert.equal(await evaluate("document.activeElement?.classList.contains('studio-style-column')"),true);
