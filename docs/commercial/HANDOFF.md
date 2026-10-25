@@ -11,3 +11,11 @@
 
 ## 재개 단문
 `[아스트라 깃헙 확인하고 작업이어가셈]` / `ㄱ` → `COMMERCE_START_HERE.md`와 본 HANDOFF, `integration/astra-commercial-core` 최신 코드, 현재 CI를 확인하고 M01 다음 작업 하나 실제 수행. 결과를 실제 SHA/테스트 기준으로 본 문서와 STATUS에 기록.
+
+
+## [새 채팅 단일 명령 인수인계] 2026-10-25
+- **정확한 사용 문구:** `[astra_pdf_redesigner 깃헙 레포지토리 보고 작업이어가셈]`.
+- 읽기: `WORKER_START_HERE.md` → `COMMERCE_START_HERE.md` → `EXECUTION_PLAN.md` → `STATUS.md`/`HANDOFF.md` → 원격 CI·PR9·코드.
+- **즉시 다음 READY:** M01 통합 코드 커밋 `978fe4fc469935e7d04c42151de931fb45c66107`에 대해 Chrome/Edge·Windows 실행 #40198529770/#40198529742 **최종 상태 재조회** → 실패 수정 → 새 Windows STEP3 PDF import→native PDF export E2E 추가. 초기 조회 기준 Edge job success, 나머지 in_progress. CI 전체 성공 미확정.
+- **원본 보호:** `main`·Draft PR3/4, 기존 STEP1·2 저장 데이터 불변. 코드 작업은 `integration/astra-commercial-core`에서만. 72시간 내부 MVP 우선/판매 전 최종 QA 별개.
+- 이 핸드오프는 날짜 고정 스냅샷. 새 대화마다 현재 HEAD/CI와 대조해 덮어쓰고 DONE 과장 금지.
