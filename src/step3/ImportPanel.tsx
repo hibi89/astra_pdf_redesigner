@@ -19,6 +19,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
   const [draft,setDraft]=useState<PdfDraft|null>(null);
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[confirmed,setConfirmed]=useState(false);
   const [previewUrl,setPreviewUrl]=useState('');
+  const [dragging,setDragging]=useState(false);
   const [imageUrls,setImageUrls]=useState<Record<string,string>>({});
   const urlRef=useRef('');
   const imageUrlRef=useRef<Record<string,string>>({});
@@ -42,6 +43,13 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
       setDraft(parsed);
     }catch(e){setError(e instanceof Error?e.message:'PDF에서 내용을 추출할 수 없습니다.');}
     finally{setBusy(false);}
+  };
+  const dropFiles=(files:FileList)=>{
+    setDragging(false);
+    if(disabled||busy)return;
+    if(files.length!==1){setError('PDF 파일 하나만 놓아 주세요.');return;}
+    if(!/\.pdf$/i.test(files[0].name)){setError('확장자가 .pdf인 파일 하나만 놓아 주세요.');return;}
+    void choose(files[0]);
   };
   const change=(page:number,id:string,fn:(old:PdfDraftBlock)=>PdfDraftBlock)=>{
     setDraft(prev=>prev?{...prev,pages:prev.pages.map(p=>p.number===page?{...p,
@@ -86,13 +94,20 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
   const vectorPaints=draft?.pages.reduce((s,p)=>s+p.vectorPaintCount,0)??0;
   const transparencySignals=draft?.pages.reduce((s,p)=>s+p.compositionRisk.transparencySignals,0)??0;
   const formScopes=draft?.pages.reduce((s,p)=>s+p.compositionRisk.formScopes,0)??0;
-  return <section className="panel step3-import-panel no-print" aria-labelledby="pdf-import-title">
+  return <section id="astra-pdf-import" tabIndex={-1} className="panel step3-import-panel no-print" aria-labelledby="pdf-import-title">
     <div className="panel-heading"><h2 id="pdf-import-title">STEP 3 · 기존 PDF 가져오기</h2><span className="panel-caption">텍스트 선택 가능한 단일 열 PDF</span></div>
     <p className="help-text">파일은 이 브라우저에서만 분석합니다. 외부로 전송하지 않고, 검수·확정 전에는 기존 문서함을 변경하지 않습니다.</p>
-    <label className="field">원본 PDF 선택
-      <input aria-label="원본 PDF 선택" type="file" accept=".pdf,application/pdf" disabled={disabled||busy}
-        onChange={e=>{const f=e.target.files?.[0];e.target.value='';if(f)void choose(f);}}/>
-    </label>
+    <div className={`step3-dropzone ${dragging?'is-dragging':''}`} data-m06b-dropzone
+      onDragOver={e=>{if(!e.dataTransfer.types.includes('Files'))return;e.preventDefault();
+        e.dataTransfer.dropEffect=disabled||busy?'none':'copy';if(!disabled&&!busy)setDragging(true);}}
+      onDragLeave={e=>{if(!e.currentTarget.contains(e.relatedTarget as Node|null))setDragging(false);}}
+      onDrop={e=>{e.preventDefault();dropFiles(e.dataTransfer.files);}}>
+      <p>여기로 PDF 한 개를 끌어 놓거나 파일 선택으로 불러오세요.</p>
+      <label className="field">원본 PDF 선택
+        <input aria-label="원본 PDF 선택" type="file" accept=".pdf,application/pdf" disabled={disabled||busy}
+          onChange={e=>{const f=e.target.files?.[0];e.target.value='';if(f)void choose(f);}}/>
+      </label>
+    </div>
     {busy&&<p role="status">PDF를 분석하거나 새 문서를 저장하는 중입니다…</p>}
     {!!error&&<p className="warning" role="alert">{error}</p>}
     {draft&&<>

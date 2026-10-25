@@ -54,6 +54,16 @@ try{
   };
   await send('Runtime.enable');await send('Page.enable');
   await eventually(()=>evaluate("Boolean(document.querySelector('.step3-import-panel input[type=file]')&&document.querySelector('.doc-list-item.active'))"));
+  const navigation=await evaluate("(()=>({count:document.querySelectorAll('[data-m06b-stage]').length,sourceDisabled:document.querySelector('[data-m06b-stage=2]').disabled,pickerAccessible:!!document.querySelector('[data-m06b-dropzone] input[aria-label=\'원본 PDF 선택\']')}))()");
+  assert.deepEqual(navigation,{count:4,sourceDisabled:true,pickerAccessible:true});
+  await evaluate("document.querySelector('[data-m06b-stage=3]').focus()");
+  await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
+  await send('Input.dispatchKeyEvent',{type:'keyUp',key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
+  await eventually(()=>evaluate("document.querySelector('[aria-current=step]')?.getAttribute('data-m06b-stage')"),x=>x==='3');
+  assert.equal(await evaluate("document.activeElement?.classList.contains('studio-style-column')"),true);
+  await evaluate("document.querySelector('[data-m06b-stage=1]').click()");
+  assert.equal(await evaluate("document.activeElement?.id"),'astra-pdf-import');
+  console.log('PASS M06-B KEYBOARD: native Enter activates guided stage and moves focus to design; return focuses file import');
   const before=await evaluate("document.querySelectorAll('.doc-list-item').length");
   const original=await evaluate("document.querySelector('.doc-list-item.active strong')?.textContent");
 
@@ -82,12 +92,16 @@ try{
   console.log('PASS STEP3 FIXTURE: selectable PDF generated with actual browser');
   await send('Page.navigate',{url});
   await eventually(()=>evaluate("Boolean(document.querySelector('.step3-import-panel input[type=file]')&&document.querySelector('.doc-list-item.active'))"));
+  await evaluate("(()=>{const dt=new DataTransfer();dt.items.add(new File(['bad'],'not-pdf.txt',{type:'text/plain'}));document.querySelector('[data-m06b-dropzone]').dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:dt}));})()");
+  await eventually(()=>evaluate("document.querySelector('.step3-import-panel .warning')?.textContent"),v=>v?.includes('확장자가 .pdf'));
+  assert.equal(await evaluate("document.querySelectorAll('.doc-list-item').length"),before);
   await evaluate("(()=>{const str=atob("+JSON.stringify(pdf.data)+");const arr=Uint8Array.from(str,c=>c.charCodeAt(0));"+
     "const file=new File([arr],'step3-sample.pdf',{type:'application/pdf'});"+
     "const dt=new DataTransfer();dt.items.add(file);"+
-    "const input=document.querySelector('.step3-import-panel input[type=file]');"+
-    "input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}));})()");
+    "document.querySelector('[data-m06b-dropzone]').dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:dt}));})()");
   await eventually(()=>evaluate("document.querySelector('.step3-import-panel')?.textContent"),txt=>txt?.includes('STEP3_TEST_BEGIN_7519')&&txt.includes('STEP3_TEST_END_7519'));
+  assert.ok(await evaluate("Boolean(document.querySelector('.step3-import-panel input[aria-label=\'원본 PDF 선택\']'))"));
+  console.log('PASS M06-B DRAG DROP: malformed file rejected, actual local PDF parsed; native file picker remains accessible');
   const recoveredSummary=await evaluate("document.querySelector('[data-step3-image-count]')?.textContent");
   console.log('STEP3 IMAGE SUMMARY:',recoveredSummary);
   assert.match(recoveredSummary??'',/PNG 복원 [1-9]/,'PDF.js must recover a bitmap from actual Chrome/Edge-generated PDF');
@@ -113,6 +127,14 @@ try{
   assert.equal(await evaluate("document.querySelector('.doc-list-item.active strong')?.textContent?.includes('step3-sample')"),true);
   assert.equal(await evaluate("document.querySelector('.section-editor .help-text')?.textContent?.includes('원본 PDF 출처')"),true);
   console.log('PASS STEP3 IMPORT: review creates independent active V2 document with PDF source provenance');
+  await eventually(()=>evaluate("document.querySelector('[data-m06b-stage=2]')?.disabled"),x=>x===false);
+  await evaluate("document.querySelector('[data-m06b-stage=2]').click()");
+  await eventually(()=>evaluate("document.querySelector('[aria-current=step]')?.getAttribute('data-m06b-stage')"),x=>x==='2');
+  assert.equal(await evaluate("document.activeElement?.classList.contains('studio-source-panel')"),true);
+  await evaluate("document.querySelector('[data-m06b-stage=4]').click()");
+  assert.equal(await evaluate("document.activeElement?.classList.contains('print-button')"),true);
+  assert.ok(await evaluate("Boolean(document.querySelector('.project-paper'))"));
+  console.log('PASS M06-B STAGES: source-review and save actions focus real elements; save is never triggered by navigating');
 
   // M06-A source coordinate → genuine PDF.js page canvas with positional
   // overlay; review remains opt-in and cannot mark content as verified by itself.
@@ -203,6 +225,17 @@ try{
     const capture=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
     writeFileSync(process.env.M02_SCREENSHOT_OUT,Buffer.from(capture.data,'base64'));
     console.log('PASS M02 ACTUAL CHROME SCREENSHOT: synthetic imported document and 3-pane studio');
+  }
+  // Test actual responsive geometry at the widths in the product brief.
+  for(const width of [900,1100,1600]){
+    await send('Emulation.setDeviceMetricsOverride',{width,height:1000,deviceScaleFactor:1,mobile:false});
+    const layout=await evaluate("(()=>{const g=document.querySelector('.studio-layout'),l=document.querySelector('.editor-column'),c=document.querySelector('.preview-column'),r=document.querySelector('.studio-style-column');return {horizontal:document.documentElement.scrollWidth,viewport:innerWidth,display:getComputedStyle(g).display,left:l.getBoundingClientRect().left,center:c.getBoundingClientRect().left,right:r.getBoundingClientRect().left,buttons:document.querySelectorAll('[data-m06b-stage]').length}})()");
+    assert.ok(layout.horizontal<=width+3,'M06-B horizontal overflow at '+width+': '+JSON.stringify(layout));
+    assert.equal(layout.buttons,4);
+    if(width===900)assert.ok(layout.display==='flex'&&Math.abs(layout.center-layout.left)<5,'900px requires stacked full-width editor/preview');
+    if(width===1100)assert.ok(layout.display==='grid'&&layout.center>layout.left+180,'1100px requires two-column editor/preview');
+    if(width===1600)assert.ok(layout.left<layout.center&&layout.center<layout.right,'1600px requires three columns');
+    console.log('PASS M06-B RESPONSIVE '+width+'px',layout);
   }
   // Project switch must close/revoke the transient original, with no
   // incorrect source association if the imported project is reopened.

@@ -55,6 +55,7 @@ export default function Workspace({onLegacy}:Props){
   const w=useWorkspace();
   const [docsOpen,setDocsOpen]=useState(true),[busy,setBusy]=useState(false),[printBusy,setPrintBusy]=useState(false);
   const [localModelStatus,setLocalModelStatus]=useState('모델 미설치 · 로컬 규칙 검수만 사용 가능');
+  const [activeStage,setActiveStage]=useState<1|2|3|4>(1);
   useEffect(()=>{
     let active=true;
     const check=window.astraDesktop?.localModelStatus;
@@ -70,8 +71,18 @@ export default function Workspace({onLegacy}:Props){
   const [focusedOrigin,setFocusedOrigin]=useState<{blockId:string;page:number}|null>(null);
   const [reviewMarks,setReviewMarks]=useState<Record<string,string>>({});
   const sourcePanel=useRef<HTMLElement|null>(null);
+  const navigateStage=(stage:1|2|3|4)=>{
+    const selector=stage===1?'#astra-pdf-import':stage===2?'.studio-source-panel':
+      stage===3?'.studio-style-column':'.print-button';
+    const target=document.querySelector<HTMLElement>(selector);
+    if(!target)return;
+    setActiveStage(stage);
+    target.scrollIntoView({block:'start',behavior:'auto'});
+    target.focus({preventScroll:true});
+  };
   const clearReview=()=>{setFocusedOrigin(null);setReviewMarks({});};
   const closeSourceReview=()=>{
+    if(activeStage===2)setActiveStage(1);
     const source=sourceReviewRef.current;
     sourceReviewRef.current=null;
     if(source)URL.revokeObjectURL(source.url);
@@ -84,6 +95,7 @@ export default function Workspace({onLegacy}:Props){
     sourceReviewRef.current=source;
     clearReview();
     setSourceReview(source);
+    setActiveStage(2);
   };
   // Unlike editable blocks, original PDF bytes are never stored in IndexedDB.
   // Revoke the preview immediately on document identity change or unmount.
@@ -138,7 +150,13 @@ export default function Workspace({onLegacy}:Props){
     </header>
     <main className="app-layout project-layout studio-layout">
       <nav className="studio-steps no-print" aria-label="PDF 리디자인 작업 순서">
-        <span><b>01</b> PDF 불러오기</span><span><b>02</b> 원본 대조</span><span><b>03</b> 디자인 선택</span><span><b>04</b> 새 PDF 저장</span>
+        {([[1,'PDF 불러오기'],[2,'원본 대조'],[3,'디자인 선택'],[4,'새 PDF 저장']] as const)
+          .map(([number,label])=><button type="button" key={number}
+          data-m06b-stage={number} aria-current={activeStage===number?'step':undefined}
+          disabled={number===2?!currentSource:number===3?!doc:number===4?!editable:false}
+          onClick={()=>navigateStage(number)}>
+          <b aria-hidden="true">{String(number).padStart(2,'0')}</b><span>{label}</span>
+        </button>)}
       </nav>
       <aside className="editor-column no-print">
         {!w.ready&&<div className="panel">브라우저 로컬 문서함을 여는 중입니다…</div>}
@@ -152,7 +170,7 @@ export default function Workspace({onLegacy}:Props){
         </section>
         <PdfImportPanel disabled={!editable} onImport={w.importPdfDraft} onSourceCommitted={onSourceCommitted}/>
         {sourceReview&&sourceReview.documentId===doc?.id&&
-          <section ref={sourcePanel} className="panel studio-source-panel no-print" aria-label="원본 PDF와 새 디자인 대조"
+          <section ref={sourcePanel} tabIndex={-1} className="panel studio-source-panel no-print" aria-label="원본 PDF와 새 디자인 대조"
             data-source-document-id={sourceReview.documentId}>
             <div className="panel-heading project-heading-row">
               <h2>원본 ↔ 결과 대조</h2>
@@ -228,7 +246,7 @@ export default function Workspace({onLegacy}:Props){
         <div className="paper-surface">{doc?<ProjectPreview doc={doc} urls={urls}/>:<div className="document">{w.ready?'문서를 열 수 없습니다.':'불러오는 중…'}</div>}</div>
         <p className="print-tip no-print">Chrome/Edge에서 PDF로 저장, A4, 머리글·바닥글 해제를 확인하세요. 인쇄는 이미지 로딩이 완료될 때까지 기다립니다.</p>
       </div>
-      <aside className="studio-style-column no-print" aria-label="디자인 스튜디오">
+      <aside tabIndex={-1} className="studio-style-column no-print" aria-label="디자인 스튜디오">
         <div className="studio-style-intro"><span className="studio-label">DESIGN STUDIO</span><h2>문서를 새롭게</h2><p>원문을 그대로 두고 출력 디자인만 변경합니다. 최소 두 가지 조판을 실제 PDF로 확인할 수 있습니다.</p></div>
         <section className="panel m03-local-model-status" aria-label="오프라인 AI 연결 상태">
           <h3>오프라인 AI 연결</h3>
