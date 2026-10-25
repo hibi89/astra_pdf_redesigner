@@ -46,3 +46,8 @@ BASIC 8/8 synthetic templates have print/layout evidence, but this content matri
 ## NEXT
 
 After M08-B CI, target single known missing fixture: corrupt/locked PDF rejection, or genuine missing-glyph mapping. Prioritize boundary with highest possible data-loss risk, maintain no-write guarantee. Real customer files and buyer PC are separate owner supplied evidence.
+
+
+## Verified M08-B outcome — 2026-10-26 KST
+
+At exact code SHA `c67045e888543b5751de5971a2e0dfbac564e6f2`, [Chrome + Edge CI #40216084632](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40216084632) and [Windows installed CI #40216084673](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40216084673) both **SUCCESS**. The fully scanned (zero selectable text) two-page PDF was rejected with no V2 write in browser and Windows. Partially scanned first page warned, and the text-bearing second page saved only after explicit consent in Chrome/Edge and printed A4 retaining two exact tokens plus raster; installed Windows specifically tested warning/disabled save/cancel, **not** mixed scan native export. Details: [M08_B_TEST_VERDICT_20261026.md](M08_B_TEST_VERDICT_20261026.md). Commercial sale **NO-GO**, next M08-C corrupt/encrypted source guard.

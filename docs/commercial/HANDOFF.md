@@ -183,3 +183,16 @@
 8. Data/costs: all PDFs synthetic generated in memory, no external API, LLM weights, user original files or paid services.
 9. NEXT READY after success: next PDF source high-risk boundary fixture (encrypted/corrupt glyph). Actual customer PC/LLM requires explicit separate approval.
 10. Timestamp: 2026-10-26 KST; this is implementation checkpoint, not verified-success report.
+
+
+## M08-B verified handoff — 2026-10-26 KST (next M08-C READY)
+1. **Goal:** prove the original PDF input boundary avoids silent irreversible scan-data loss and protects V2 documents using actual PDF.js/React Windows/browser UI; not OCR.
+2. **Done:** matrix of SUPPORTED/WARN/REJECT/NOT VERIFIED; two synthetic scan PDFs in `desktop/step3-scanned-fixture.cjs`; scan-only 2-page (no text) input rejects with no V2 write; mixed first raster-only page + selectable page warns/checkbox gates new browser A4 print retaining image and two source strings. Windows installed warns, cancel/no-write. Existing M08-A Windows 8 layouts unchanged.
+3. **Exact tested SHA `c67045e888543b5751de5971a2e0dfbac564e6f2`**: Chrome+Edge [#40216084632](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40216084632) SUCCESS 2/2, 61 unit PASS, build, old 8 print and NEW M08-B source flows; Windows [#40216084673](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40216084673) SUCCESS, new scan boundary, old installed 8/8 PDF audit and 0.1.0→0.1.1 STEP2+PNG upgrade persistence. Source test log messages `PASS M08-B CHROME/EDGE SCAN-ONLY REJECT`, `PASS M08-B MIXED SCAN REVIEW/IMPORT`, `PASS M08-B WINDOWS INSTALLED SCAN`.
+4. **Status:** M08-B scoped DONE (synthetic), M08-C READY actual encrypted/corrupt boundary; 3SKU sale still NO-GO and true offline proofreading model owner approval BLOCKED.
+5. **Failures/recovery:** intermediate 427a scan regex overescaping and 0615 expected per-line paragraphs caused CI failure. Both fixed in c670 final success. Do not weaken per-page text-loss warning or no-write assertion; do not claim 100% source restoration.
+6. **Version/branch:** integration exact code `c67045e888543b5751de5971a2e0dfbac564e6f2`; documentation checkpoint SHA to be read after this update. Major new source `desktop/step3-scanned-fixture.cjs`; tests `tests/step3-browser.mjs`, `desktop/step3-project-acceptance.cjs`, `tests/desktop-shell.test.cjs`; docs `M08_B_PDF_SOURCE_ACCEPTANCE_MATRIX_20261026.md`, `M08_B_TEST_VERDICT_20261026.md`. GitHub PR9 Draft.
+7. **Environment:** local browser/Windows Electron+NSIS, no production URL/Vercel; CI Linux Chrome/Edge and Windows hosted runners.
+8. **Originals/security:** actual `main`, PR3/PR4, STEP1 localStorage, existing STEP2 V2 untouched; only in-memory synthetic PDFs and isolated runner output; no OCR/GGUF/paid model or API.
+9. **NEXT M08-C:** use real encrypted/corrupt synthetic PDF input and verify visible rejection + existing V2 no-write on Chrome/Edge and installed Windows. If extra binaries/tooling needed, prefer current CI-installed tooling; require user consent for new paid/model binaries only. Customer originals/consumer PCs separate.
+10. **Timestamp:** 2026-10-26 KST; final CI conclusions and exact-code SHA verified; documentation changes are not a newly tested build.
