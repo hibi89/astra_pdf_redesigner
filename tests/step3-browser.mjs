@@ -125,7 +125,7 @@ try{
   const m06View=await eventually(()=>evaluate("(()=>{const p=document.querySelector('[data-m06-preview][data-m06-rendered-page]');const c=p?.querySelector('canvas');const marker=p?.querySelector('[data-m06-anchor-rect]');return p&&c?.width>0&&c?.height>0&&marker?{id:p.getAttribute('data-m06-block-id'),page:p.getAttribute('data-m06-rendered-page'),width:c.width,height:c.height,rect:marker.getBoundingClientRect().width}:null})()"),
     x=>x&&x.id===chosen&&x.page==='2'&&x.rect>0);
   assert.ok(m06View.width>300&&m06View.height>500,'PDF.js must rasterize the actual source page');
-  assert.ok(await evaluate("Boolean(document.querySelector('.m06-focused-block[data-m06-block-id='+JSON.stringify(chosen)+']'))"),
+  assert.equal(await evaluate("document.querySelector('.m06-focused-block')?.getAttribute('data-m06-block-id')"),chosen,
     'Selected extracted editor block must be highlighted');
   assert.equal(await evaluate("document.querySelector('[data-m06-progress]')?.textContent.includes('수동 대조 0/')"),true);
   await evaluate("document.querySelector('.m06-focused-block [data-m06-check]').click()");
