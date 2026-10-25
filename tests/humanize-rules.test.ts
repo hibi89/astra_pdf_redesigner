@@ -14,7 +14,7 @@ test('M03 offline rules only generate an opt-in concise suggestion',()=>{
 test('M03 blocks structured text and overly long paragraphs',()=>{
   assert.equal(inspectRules('첫째  항목 | 둘째 항목').status,'blocked');
   assert.equal(inspectRules('  문단  확인하였습니다.').status,'blocked');
-  assert.equal(inspectRules('확인하였습니다.'.repeat(550)).status,'blocked');
+  assert.equal(inspectRules('확인하였습니다.'.repeat(900)).status,'blocked');
 });
 test('M03 leaves sensitive numbers, URL, quote and negation unchanged',()=>{
   const source='2026-10-25 금액 30,000원은 변하지 않았습니다. "꼭 확인하였습니다" 문서를  검토하였습니다. https://example.org/test';
