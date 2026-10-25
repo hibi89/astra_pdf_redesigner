@@ -32,3 +32,9 @@
 - 3만원/6만원/9만원 세 요금제 및 전 등급 동일 AI 윤문은 **목표이지 출시 검증이 아님**.
 - 최초 콘셉트 목업의 원본 이미지 자체가 저장소에 없으므로 정밀한 이미지 비교는 NOT VERIFIED. 실제 Chromium 화면 증거만 인정.
 - 이 문서는 **M02 1차 반복의 갭 분석**, 원본 비교 지속 UX가 해결되지 않아 M02는 PARTIAL이며 다음 READY는 위 1번.
+
+## VERIFIED M02 Source-Comparison Closing Note (2026-10-25 23:25 KST)
+- Earlier table row V03 and gap #1 are **superseded for in-session MVP**: active imported document now keeps the uploaded original PDF in a left-side iframe beside center redesigned A4 after explicit approval. Correct doc ID association, original byte SHA-256 equality, closing/revoking after switch and no stale original on returning were tested in real Chrome.
+- [Final Linux Chrome/Edge #40201817319](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40201817319): SUCCESS; [Windows installed NSIS #40201817273](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40201817273): SUCCESS. Real screenshot only with synthetic fixture: download `astra-m02-studio-chrome-synthetic` from Linux workflow artifacts. This is an actual running app, **not** a generated concept image.
+- **Remaining gap #1 becomes** original PDF session disappears on app restart by design; a user must choose the original again. Storing original bytes persistently is NOT authorized. Block anchor synchronized scrolling/highlights are later UX work and not falsely marked complete.
+- M02 core 3-pane+report/minimal A4 print+source vs result is DONE. M03 local optional AI, deeper per-block alignment, responsive polish, customer sample proof and sellable QA remain separate.
