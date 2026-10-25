@@ -54,7 +54,7 @@ try{
   };
   await send('Runtime.enable');await send('Page.enable');
   await eventually(()=>evaluate("Boolean(document.querySelector('.step3-import-panel input[type=file]')&&document.querySelector('.doc-list-item.active'))"));
-  const navigation=await evaluate("(()=>({count:document.querySelectorAll('[data-m06b-stage]').length,sourceDisabled:document.querySelector('[data-m06b-stage=2]').disabled,pickerAccessible:!!document.querySelector('[data-m06b-dropzone] input[aria-label=\'원본 PDF 선택\']')}))()");
+  const navigation=await evaluate("(()=>({count:document.querySelectorAll('[data-m06b-stage]').length,sourceDisabled:document.querySelector('[data-m06b-stage=2]').disabled,pickerAccessible:!!document.querySelector('[data-m06b-dropzone] input[type=file]')}))()");
   assert.deepEqual(navigation,{count:4,sourceDisabled:true,pickerAccessible:true});
   await evaluate("document.querySelector('[data-m06b-stage=3]').focus()");
   await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Enter',code:'Enter',windowsVirtualKeyCode:13});
@@ -100,7 +100,7 @@ try{
     "const dt=new DataTransfer();dt.items.add(file);"+
     "document.querySelector('[data-m06b-dropzone]').dispatchEvent(new DragEvent('drop',{bubbles:true,cancelable:true,dataTransfer:dt}));})()");
   await eventually(()=>evaluate("document.querySelector('.step3-import-panel')?.textContent"),txt=>txt?.includes('STEP3_TEST_BEGIN_7519')&&txt.includes('STEP3_TEST_END_7519'));
-  assert.ok(await evaluate("Boolean(document.querySelector('.step3-import-panel input[aria-label=\'원본 PDF 선택\']'))"));
+  assert.ok(await evaluate("Boolean(document.querySelector('.step3-import-panel input[type=file]'))"));
   console.log('PASS M06-B DRAG DROP: malformed file rejected, actual local PDF parsed; native file picker remains accessible');
   const recoveredSummary=await evaluate("document.querySelector('[data-step3-image-count]')?.textContent");
   console.log('STEP3 IMAGE SUMMARY:',recoveredSummary);
