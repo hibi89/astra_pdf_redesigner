@@ -62,3 +62,8 @@
 
 ## M03-B0 progress (2026-10-25 KST)
 Tested implementation a94f0b291dbda209ecaccab350111a09f2836764. Linux Chrome/Edge Actions #40204570884: SUCCESS, 55 unit tests passed. Windows NSIS Actions #40204570893: SUCCESS. Electron local model IPC was added but the release manifest stays null; no real model or inference was used. M03-B0 prepared; M03-B1 blocked for actual weights/runtime approval. Next READY: M04 synthetic PDF acceptance. See M03_B0_HANDOFF_20261025.md.
+
+## LATEST M04 (2026-10-25 KST) — synthetic PDF accuracy hardening DONE
+- Verified source SHA `31b499182ade86717a82ff4e8960401a96ab4c0f`. [Linux Chrome/Edge #40205522431](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40205522431) SUCCESS (58/58 unit); [Windows NSIS #40205522595](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40205522595) SUCCESS (installed PDF output independently audited; native STEP3 PDF A4 pages=2, source markers 6/6, raster 1; upgrade data preserved).
+- M04: `tests/pdf-integrity-audit.mjs` independently checks A4 media boxes, text coordinate extents, 13 synthetic source/output markers present exactly once/in order, actual raster drawing. Added 3 unit tests and installed Windows PDF second pass. **M04 internal synthetic acceptance DONE; customer-document/consumer-PC acceptance NOT RUN**. Rotation is explicitly unverified and not silently accepted.
+- Details: `docs/commercial/M04_PDF_INTEGRITY_AUDIT_20261025.md`. **NEXT READY M05** actual screenshot vs mockup gap/release blocker report; real local LLM still not installed, 3 SKU AI unfulfilled, **NO SALE**.
