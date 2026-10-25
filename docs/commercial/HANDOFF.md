@@ -82,3 +82,10 @@
 
 ## M03-B0 handoff (2026-10-25 KST)
 Source a94f0b291dbda209ecaccab350111a09f2836764. Linux #40204570884 and Windows #40204570893 both SUCCESS. The installed app has an unavailable-by-default local model status/proposal/cancellation interface, synthetic SHA256 and process tests, and no shipped weights. This is not genuine AI rewriting or a sales-ready product. Current next READY M04 independent synthetic PDF acceptance; real model acquisition is separately approval-gated. Detailed technical record: M03_B0_HANDOFF_20261025.md. Main and source PRs untouched.
+
+## LATEST M04 handoff (2026-10-25 KST)
+1. Tested implementation `31b499182ade86717a82ff4e8960401a96ab4c0f`: Linux Actions #40205522431 SUCCESS (Chrome and Edge, node 58/58 tests); Windows NSIS Actions #40205522595 SUCCESS. New tests in `tests/pdf-integrity-audit.mjs`, `tests/pdf-integrity-audit.test.cjs`; `tests/step3-browser.mjs`, `tests/verify-desktop-pdf.mjs` now call independent PDF.js structural audit; `package.json` added unit test.
+2. Actual two-page synthetic source/reflow (13 markers) independently verified for occurrence exactly once, order, A4 dimensions, horizontal text bounds and one bitmap draw. Windows installed STEP3 saved PDF passed additional second-pass audit (2 output pages in this fixture, 6 source markers and image). Existing STEP1/STEP2 preservation/Windows upgrade pass.
+3. Earlier bad test fixtures at `ce4fdcc6` (overlapping single-char tokens, coordinate not outside A4) were corrected by `31b49918`; both CI now success. This is *synthetic verification*, not all PDF quality. No scan/OCR, vector/table geometry, rotation, customer PDFs, end-user PC or SmartScreen proof.
+4. MAIN/PR3/PR4 unchanged; PR #9 draft. Actual GGUF model absent and not tested, customer sale NOT APPROVED. Detailed `docs/commercial/M04_PDF_INTEGRITY_AUDIT_20261025.md`.
+5. **NEXT READY M05:** factual product status / actual Chrome screenshot vs design blueprint gap / five highest priority deficiencies / internal MVP GO or NO-GO. Do not confuse synthetic M04 acceptance with commercial release gates. Update both branches and PR9, inspect fresh CI for any concurrent edits.
