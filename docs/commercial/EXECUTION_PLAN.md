@@ -1,5 +1,7 @@
 # ASTRA — 72시간 MVP 우선 실행계획 (CURRENT SSOT)
 
+> **Current checkpoint (2026-10-25 23:25 KST):** M01 + M02 MVP slices **DONE and verified** at tested code `0671fde98b0fc91fc6b4bb6eb43fca6e5411621f`; next **M03 READY**. The original timeline table below is a baseline/history. See latest STATUS/HANDOFF/Mockup parity for current evidence. M03 rewrite and local LLM have NOT been verified or shipped.
+
 **사용자 최종 지시 2026-10-25 KST:** 먼저 돌아가는 앱을 만들고 이전 목업 화면과 비교하면서 부족한 부분을 채운다. 고급 QA/보안·SKU 부가기능은 MVP 이후로 이월. **시작 10/25 → 목표 10/28 (72시간 도전 목표, 완료 보장 아님).**
 
 ## MVP의 진짜 완료 정의
