@@ -125,3 +125,10 @@
 - Detailed per-design bytes/pages/geometry [M08_A_WINDOWS_EIGHT_LAYOUTS_20261026.md](M08_A_WINDOWS_EIGHT_LAYOUTS_20261026.md). Prior 'M08-A CI pending' checkpoint now superseded; this docs-only commit is not the tested app binary.
 - **M08-A scoped DONE (synthetic)**. Real customer PDF, real buyer hardware, OCR/vector/multicolumn fidelity, true offline local LLM, PRO20/BUSINESS30, SKU licensing/signing still unverified. **Sale NO-GO**; original main and PR3/4 unchanged; PR9 Draft.
 - **NEXT READY M08-B**: build source-PDF acceptance matrix against current tests, then one missing high-priority synthetic fixture and browser/Windows regression; no customer data or GGUF download without approval.
+
+
+## M08-B IMPLEMENTED — 2026-10-26 KST (exact-head CI pending)
+- Started from integration docs SHA `1f10b97a2a43eb37f2bc7f188dd21e1ffee6ee42`. New [M08_B_PDF_SOURCE_ACCEPTANCE_MATRIX_20261026.md](M08_B_PDF_SOURCE_ACCEPTANCE_MATRIX_20261026.md) records supported/review/warn/reject/not-verified classes with tests and caveats.
+- Added two-page **actual raster-only** and **partial scanned page + selectable text** minimal source PDFs in `desktop/step3-scanned-fixture.cjs`, Browser STEP3 after prior 13-token mixed test verifies full scan reject without V2 insert, mixed warnings and consent→A4 text+raster reprint, prior projects preserved. Windows installed STEP3 test checks same sources for full-scan reject, mixed warning/disabled approval/cancel preserving existing V2 project; all previous 8/8 installed print and installer preservation checks remain.
+- **PENDING:** final Linux Chrome/Edge and Windows NSIS CI at new source code SHA, do not claim these tests passed before logs. M08-B DONE only after both workflows succeed.
+- Customer scans, real extracted OCR, complex table geometry, true local LLM and PRO/BUSINESS launch are still unverified/blocked. Commercial sale **NO-GO**, PR9 Draft; no schema/prod behavior change.

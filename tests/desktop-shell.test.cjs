@@ -128,3 +128,24 @@ test('M08-A installed Windows prints and independently audits eight actual theme
   assert.ok(verifier.includes('auditPdfBytes')&&verifier.includes('requireRaster:true'));
   assert.ok(verifier.includes('signature')&&verifier.includes('manifest.title'));
 });
+
+test('M08-B installed full scan reject and mixed-scan review cannot modify saved V2 project',()=>{
+  const fixture=require('../desktop/step3-scanned-fixture.cjs');
+  const main=fs.readFileSync(path.resolve(__dirname,'../desktop/step3-project-acceptance.cjs'),'utf8');
+  const browser=fs.readFileSync(path.resolve(__dirname,'step3-browser.mjs'),'utf8');
+  for(const selected of [false,true]){
+    const pdf=fixture.makeScannedPagesPdf({selectableSecondPage:selected});
+    assert.ok(pdf.subarray(0,5).toString('ascii')==='%PDF-'&&pdf.length>1000);
+    assert.ok(pdf.includes(Buffer.from('/Subtype /Image')));
+    if(selected){
+      assert.ok(pdf.includes(Buffer.from(fixture.SCAN_MARKERS.first)));
+      assert.ok(pdf.includes(Buffer.from(fixture.SCAN_MARKERS.end)));
+    }else assert.ok(!pdf.includes(Buffer.from(fixture.SCAN_MARKERS.first)));
+  }
+  for(const required of ['verifyInstalledScanBoundary','makeScannedPagesPdf','M08-B WINDOWS INSTALLED SCAN',
+    'cancel.click()','SCAN_MARKERS','선택 가능한 텍스트가 없습니다'])
+    assert.ok(main.includes(required),'Missing installed M08-B guard: '+required);
+  for(const required of ['M08-B CHROME/EDGE SCAN-ONLY REJECT','M08-B MIXED SCAN REVIEW/IMPORT',
+    'requireRaster:true','SCAN_MARKERS','manual approval'])
+    assert.ok(browser.includes(required),'Missing real browser M08-B guard: '+required);
+});

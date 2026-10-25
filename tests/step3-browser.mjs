@@ -10,6 +10,8 @@ import {makeClippedImagePdf} from './fixtures/step3-clipped-pdf.mjs';
 import {makeMixedLayoutPdf,MIXED_LAYOUT_MARKERS} from './fixtures/step3-mixed-layout-pdf.mjs';
 import {makeTransparencyFormPdf} from './fixtures/step3-transparency-form-pdf.mjs';
 import {auditPdfBytes} from './pdf-integrity-audit.mjs';
+import scannedFixture from '../desktop/step3-scanned-fixture.cjs';
+const {makeScannedPagesPdf,SCAN_MARKERS}=scannedFixture;
 const binary=process.env.CHROME_PATH||'chromium',url=process.env.SMOKE_URL||'http://127.0.0.1:4173';
 const dir=mkdtempSync(join(tmpdir(),'astra-step3-'));
 const browser=launchBrowser(binary,dir,'STEP3 PDF import');
@@ -517,6 +519,75 @@ try{
   console.log('PASS STEP3 SOURCE/REPRINT COMPARISON: 13/13 exact markers once, source page sequence, output raster, A4, original documents intact');
   // Intentionally unverified: original vector grid lines, column/table cell
   // geometry, pixel-for-pixel image content and Windows print fidelity.
+
+  // M08-B: actual PDF.js scan boundary (not a mocked PdfPageInput):
+  // fully scanned pages must be rejected without a new V2 document; mixed
+  // scanned/selectable pages must warn before explicit approval and keep raster.
+  const scanBefore=await evaluate("document.querySelectorAll('.doc-list-item').length");
+  const scanTitles=await evaluate("[...document.querySelectorAll('.doc-list-item strong')].map(x=>x.textContent)");
+  const scanOnly=makeScannedPagesPdf();
+  const scannedPath=join(dir,'m08-scanned-only.pdf');
+  writeFileSync(scannedPath,scanOnly);
+  assert.match(execFileSync('pdfinfo',[scannedPath],{encoding:'utf8'}),/Pages:\\s+2\\b/);
+  assert.equal(execFileSync('pdftotext',[scannedPath,'-'],{encoding:'utf8'}).trim(),'',
+    'M08-B source must have zero selectable text');
+  assert.equal(execFileSync('pdfimages',['-list',scannedPath],{encoding:'utf8'})
+    .split('\\n').filter(x=>/^\\s*\\d+\\s+\\d+\\s+image/.test(x)).length,2,
+    'M08-B source must have raster on both scan-only pages');
+  const uploadM08=async(bytes,name)=>evaluate("(()=>{const encoded="+JSON.stringify(bytes.toString('base64'))+
+    ",name="+JSON.stringify(name)+";const data=Uint8Array.from(atob(encoded),x=>x.charCodeAt(0));"+
+    "const file=new File([data],name,{type:'application/pdf'});const dt=new DataTransfer();dt.items.add(file);"+
+    "const input=document.querySelector('.step3-import-panel input[type=file]');input.files=dt.files;"+
+    "input.dispatchEvent(new Event('change',{bubbles:true}));})()");
+  await uploadM08(scanOnly,'m08-scan-only.pdf');
+  await eventually(()=>evaluate("document.querySelector('.step3-import-panel [role=alert]')?.textContent"),
+    value=>value?.includes('선택 가능한 텍스트가 없습니다'));
+  assert.equal(await evaluate("document.querySelectorAll('.doc-list-item').length"),scanBefore,
+    'Rejecting image-only source must never insert a project');
+  assert.equal(await evaluate("Boolean(document.querySelector('.step3-import-panel .step3-block-review'))"),false);
+  assert.equal(await evaluate("Boolean(document.querySelector('.step3-import-panel iframe[src^=blob]'))"),false,
+    'Rejected scan must not retain a source URL');
+  console.log('PASS M08-B CHROME/EDGE SCAN-ONLY REJECT: actual 2p image-only PDF, no extracted text, V2 document untouched');
+
+  const partialScan=makeScannedPagesPdf({selectableSecondPage:true});
+  const partialPath=join(dir,'m08-mixed-scanned-source.pdf');
+  writeFileSync(partialPath,partialScan);
+  const partialText=execFileSync('pdftotext',[partialPath,'-'],{encoding:'utf8'});
+  for(const token of Object.values(SCAN_MARKERS))assert.ok(partialText.includes(token));
+  await uploadM08(partialScan,'m08-partial-scan.pdf');
+  await eventually(()=>evaluate("document.querySelector('.step3-import-panel')?.textContent"),
+    value=>value?.includes(SCAN_MARKERS.first)&&value.includes(SCAN_MARKERS.end));
+  const scanWarnings=await evaluate("[...document.querySelectorAll('.step3-import-panel details li')].map(x=>x.textContent)");
+  assert.ok(scanWarnings.some(x=>x?.includes('1페이지에서 선택 가능한 문자를 찾지 못했습니다')),
+    'First image-only page must be identified as unextracted; do not claim OCR');
+  assert.ok(scanWarnings.some(x=>x?.includes('이미지가 감지됐습니다')),
+    'Mixed source must disclose image raster approximation');
+  assert.equal(await evaluate("document.querySelectorAll('.step3-block-review details').length"),2,
+    'Image-only and selectable pages must be separately reviewable');
+  assert.equal(await evaluate("document.querySelectorAll('.step3-block-review textarea').length"),2,
+    'Only second page has two actual selectable text blocks');
+  assert.equal(await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input').checked"),false);
+  assert.equal(await evaluate("([...document.querySelectorAll('.step3-import-panel button')].find(x=>x.textContent.includes('검수 결과를 새 문서로 저장'))).disabled"),true,
+    'Partial scan must never bypass manual approval');
+  assert.equal(await evaluate("document.querySelectorAll('.doc-list-item').length"),scanBefore);
+  await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input').click()");
+  await evaluate("([...document.querySelectorAll('.step3-import-panel button')].find(x=>x.textContent.includes('검수 결과를 새 문서로 저장'))).click()");
+  await eventually(()=>evaluate("document.querySelectorAll('.doc-list-item').length"),n=>n===scanBefore+1);
+  await eventually(()=>evaluate("document.querySelector('.project-paper')?.textContent"),
+    value=>value?.includes(SCAN_MARKERS.first)&&value.includes(SCAN_MARKERS.end));
+  await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),x=>x==='저장됨');
+  const restored=await evaluate("Promise.all([...document.querySelectorAll('.project-paper img')].map(x=>x.decode().then(()=>true,()=>false)))");
+  assert.ok(restored.length>=1&&restored.every(Boolean),
+    'A mixed scanned/selectable source must still render a recovered raster');
+  const reprinted=await send('Page.printToPDF',{preferCSSPageSize:true,printBackground:true});
+  const m08Audit=await auditPdfBytes(Buffer.from(reprinted.data,'base64'),
+    {markers:Object.values(SCAN_MARKERS),requireRaster:true,label:'M08-B partially scanned A4'});
+  assert.equal(m08Audit.markers,2);
+  assert.equal(m08Audit.skippedRotation,0);
+  const afterScanTitles=await evaluate("[...document.querySelectorAll('.doc-list-item strong')].map(x=>x.textContent)");
+  for(const label of scanTitles)assert.ok(afterScanTitles.includes(label),'Import overwrote previous document '+label);
+  console.log('PASS M08-B MIXED SCAN REVIEW/IMPORT: page-1 no text warning, manual consent, page-2 exact source markers, retained image, A4 native browser PDF, V2 documents preserved');
+
 
 }finally{
   if(ws)ws.close();

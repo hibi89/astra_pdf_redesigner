@@ -5,6 +5,7 @@
 const fs=require('node:fs/promises');
 const {acceptanceDomSource,MARKERS}=require('./pdf-acceptance-fixture.cjs');
 const {runInstalledEightLayoutAcceptance}=require('./step3-eight-layout-acceptance.cjs');
+const {makeScannedPagesPdf,SCAN_MARKERS}=require('./step3-scanned-fixture.cjs');
 const APP_URL='astra://app/index.html';
 async function waitFor(check,label){
   for(let i=0;i<160;i++){
@@ -85,6 +86,61 @@ async function verifyPersisted(data){
   }
   throw Error('Imported STEP3 document/theme not restored after reload');
 }
+
+async function verifyInstalledScanBoundary(scanOnlyB64,partialB64,markers){
+  const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+  async function until(test,label){
+    for(let i=0;i<160;i++){
+      const answer=await test();
+      if(answer)return answer;
+      await pause(200);
+    }
+    throw Error('M08-B installed scan boundary timed out: '+label);
+  }
+  await until(()=>document.querySelector('.step3-import-panel input[type=file]')&&
+    document.querySelector('.doc-list-item.active'),'source upload ready');
+  const before=document.querySelectorAll('.doc-list-item').length;
+  const current=document.querySelector('.doc-list-item.active strong')?.textContent;
+  async function upload(encoded,name){
+    const bytes=Uint8Array.from(atob(encoded),x=>x.charCodeAt(0));
+    const transfer=new DataTransfer();
+    transfer.items.add(new File([bytes],name,{type:'application/pdf'}));
+    const input=document.querySelector('.step3-import-panel input[type=file]');
+    input.files=transfer.files;
+    input.dispatchEvent(new Event('change',{bubbles:true}));
+  }
+  await upload(scanOnlyB64,'m08-windows-scan-only.pdf');
+  await until(()=>document.querySelector('.step3-import-panel [role=alert]')?.textContent
+    .includes('선택 가능한 텍스트가 없습니다'),'full-scan rejection alert');
+  if(document.querySelectorAll('.doc-list-item').length!==before||
+    document.querySelector('.doc-list-item.active strong')?.textContent!==current||
+    document.querySelector('.step3-import-panel .step3-block-review')||
+    document.querySelector('.step3-import-panel iframe[src^="blob:"]'))
+    throw Error('M08-B scan-only rejection changed user project/source state');
+  await upload(partialB64,'m08-windows-partial-scan.pdf');
+  await until(()=>document.querySelector('.step3-import-panel')?.textContent?.includes(markers.first)&&
+    document.querySelector('.step3-import-panel')?.textContent?.includes(markers.end),
+    'mixed scan local PDF.js review');
+  const warnings=[...document.querySelectorAll('.step3-import-panel details li')].map(x=>x.textContent);
+  if(!warnings.some(x=>x.includes('1페이지에서 선택 가능한 문자를 찾지 못했습니다'))||
+     document.querySelectorAll('.step3-block-review details').length!==2||
+     document.querySelectorAll('.step3-block-review textarea').length!==2)
+    throw Error('M08-B installed mixed-scan loss warning or page review missing');
+  const checkbox=document.querySelector('.step3-import-panel > label.step3-confirm input');
+  const save=[...document.querySelectorAll('.step3-import-panel button')].find(x=>
+    x.textContent.includes('검수 결과를 새 문서로 저장'));
+  if(!checkbox||checkbox.checked||!save||!save.disabled)
+    throw Error('M08-B partial scan bypasses explicit review approval');
+  const cancel=[...document.querySelectorAll('.step3-import-panel button')].find(x=>x.textContent.includes('가져오기 취소'));
+  if(!cancel)throw Error('M08-B cancel source review button missing');
+  cancel.click();
+  await until(()=>!document.querySelector('.step3-import-panel .step3-block-review'),'cancel clears draft');
+  if(document.querySelectorAll('.doc-list-item').length!==before||
+    document.querySelector('.doc-list-item.active strong')?.textContent!==current)
+    throw Error('M08-B cancel damaged existing persisted project');
+  return {rejectedWithoutWrite:true,mixedWarnedWithoutApproval:true,cancelPreserved:true};
+}
+
 async function runStep3ProjectAcceptance(win,renderLocalPdf,armNativeCapture,output){
   if(process.env.GITHUB_ACTIONS!=='true'||!process.env.RUNNER_TEMP)
     throw Error('STEP3 installed acceptance requires GitHub Actions');
@@ -123,6 +179,19 @@ async function runStep3ProjectAcceptance(win,renderLocalPdf,armNativeCapture,out
   const actual=await fs.readFile(output);
   if(actual.subarray(0,5).toString('ascii')!=='%PDF-')
     throw Error('Native PDF export produced invalid file');
+  // M08-B: separate installed renderer navigation after the successful native
+  // export; synth scanned image-only PDF must refuse import, partial scan warns
+  // and cancel must preserve the formerly imported V2 project.
+  await win.loadURL(APP_URL);
+  const scanResult=await win.webContents.executeJavaScript(
+    '('+verifyInstalledScanBoundary.toString()+')('+[
+      JSON.stringify(makeScannedPagesPdf().toString('base64')),
+      JSON.stringify(makeScannedPagesPdf({selectableSecondPage:true}).toString('base64')),
+      JSON.stringify(SCAN_MARKERS),
+    ].join(',')+')',true);
+  if(!scanResult?.rejectedWithoutWrite||!scanResult.mixedWarnedWithoutApproval||
+     !scanResult.cancelPreserved)throw Error('M08-B installed scan boundary failed');
+  console.log('PASS M08-B WINDOWS INSTALLED SCAN: full scan rejected; mixed scanned page warned and approval blocked; cancel and prior project retained');
   console.log('PASS ASTRA INSTALLED STEP3 E2E: local generated PDF -> review approval -> independent document -> changed theme -> reload -> native IPC PDF save');
 }
 module.exports={runStep3ProjectAcceptance};

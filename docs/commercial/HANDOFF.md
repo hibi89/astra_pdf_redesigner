@@ -170,3 +170,16 @@
 8. **Data/security:** main, PR3/4, STEP1 V1 and STEP2 V2 user datasets and raw PDF original unmodified. Eight output files generated only in disposable RUNNER_TEMP, cleaned after run, no model acquired or API called.
 9. **NEXT READY:** M08-B synth acceptance matrix, add highest-value missing source fixture without weakening current 8/8 evidence. Customer original PDFs and real buyer PC sample require separate owner input/approval; true model binary download approval-gated. Keep PR9 Draft.
 10. **Timestamp/evidence:** 2026-10-26 KST, exact workflow conclusions and Windows eight-design job logs reviewed at app SHA `a7f0796e391fcb0920a63669601cbcf7cfe99387`. Docs-only latest GitHub SHA should be rechecked after commit.
+
+
+## M08-B source-PDF acceptance matrix implementation — 2026-10-26 KST, CI PENDING
+1. Objective: actual PDF.js scan risk boundary without customer data. Full 2-page image-only scan REJECT no-write; first-page scan + second-page selectable text WARN/manual opt-in, browser output A4 raster and original text; Windows installed rejection/warning/cancel. Keep previous M08-A eight native print proof.
+2. Deliverables: `docs/commercial/M08_B_PDF_SOURCE_ACCEPTANCE_MATRIX_20261026.md` status vs content risk table; `desktop/step3-scanned-fixture.cjs` deterministic source; `tests/step3-browser.mjs` true Chrome/Edge import, review/accept/print; `desktop/step3-project-acceptance.cjs` actual installed EXE UI rejection/cancel, `tests/desktop-shell.test.cjs` fixture/CI guard.
+3. Verification: **CI PENDING** exact new code SHA. Known previous M08-A app `a7f0796e391fcb0920a63669601cbcf7cfe99387` Windows 8/8 and Linux 8/8 success. Browser workflow must show M08-B SCAN-ONLY and MIXED SCAN markers; Windows log M08-B WINDOWS INSTALLED SCAN and old eight 8/8/upgrade logs.
+4. Limits: mixed scan Windows **cancel** only, not mixed source Windows print; real customer files and hardware NOT RUN, no OCR or password fixture, 3SKU commercial NO-GO.
+5. Recovery: if external/native fixture PDF.js doesn't decode image, inspect actual operator trace then fix deterministic fixture or strict assertions; never remove missing-text warning or silently create a doc.
+6. Branch: integration from `1f10b97a2a43eb37f2bc7f188dd21e1ffee6ee42`, main/PR3/PR4 untouched, PR9 draft. Record exact CI SHA and subsequent docs checkpoint separately; no force push.
+7. Platform: local Vite/browser and Windows NSIS Electron; no Vercel/production URL, CI expected npm test/build + Browser Chrome/Edge + installed Windows.
+8. Data/costs: all PDFs synthetic generated in memory, no external API, LLM weights, user original files or paid services.
+9. NEXT READY after success: next PDF source high-risk boundary fixture (encrypted/corrupt glyph). Actual customer PC/LLM requires explicit separate approval.
+10. Timestamp: 2026-10-26 KST; this is implementation checkpoint, not verified-success report.
