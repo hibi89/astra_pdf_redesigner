@@ -130,7 +130,7 @@ try{
   assert.equal(await evaluate("document.querySelector('[data-m06-progress]')?.textContent.includes('수동 대조 0/')"),true);
   await evaluate("document.querySelector('.m06-focused-block [data-m06-check]').click()");
   await eventually(()=>evaluate("document.querySelector('[data-m06-progress]')?.textContent"),t=>t?.includes('수동 대조 1/'));
-  assert.ok(await evaluate("document.querySelector('.m06-focused-block [data-m06-check]')?.getAttribute('aria-pressed')==='true'");
+  assert.ok(await evaluate("document.querySelector('.m06-focused-block [data-m06-check]')?.getAttribute('aria-pressed')==='true'"));
   console.log('PASS M06 CLICK-THROUGH: actual PDF.js rendered page 2; viewport bbox highlight; explicit 1/'+m06Count+' manual-review badge');
 
 
