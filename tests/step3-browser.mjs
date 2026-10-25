@@ -142,6 +142,11 @@ try{
   console.log('PASS M02 ACTUAL A4 DESIGN PARITY: report/minimal PDFs retain source markers with distinct title coordinates',reportBox,minimalBox);
   if(process.env.GITHUB_ACTIONS==='true'&&process.env.M02_SCREENSHOT_OUT){
     await send('Emulation.setDeviceMetricsOverride',{width:1600,height:1000,deviceScaleFactor:1,mobile:false});
+    const paneGeometry=await evaluate("(()=>{const a=document.querySelector('.studio-layout'),l=document.querySelector('.editor-column'),c=document.querySelector('.preview-column'),r=document.querySelector('.studio-style-column');if(!a||!l||!c||!r)return null;return {display:getComputedStyle(a).display,left:l.getBoundingClientRect().left,center:c.getBoundingClientRect().left,right:r.getBoundingClientRect().left,centerWidth:c.getBoundingClientRect().width}})()");
+    assert.ok(paneGeometry?.display==='grid'&&paneGeometry.left<paneGeometry.center&&
+      paneGeometry.center<paneGeometry.right&&paneGeometry.centerWidth>450,
+      'Studio must render as real left/center/right columns at 1600px, not only DOM wrappers: '+JSON.stringify(paneGeometry));
+    console.log('PASS M02 THREE-PANE ACTUAL BROWSER GEOMETRY:',paneGeometry);
     const capture=await send('Page.captureScreenshot',{format:'png',captureBeyondViewport:false});
     writeFileSync(process.env.M02_SCREENSHOT_OUT,Buffer.from(capture.data,'base64'));
     console.log('PASS M02 ACTUAL CHROME SCREENSHOT: synthetic imported document and 3-pane studio');
