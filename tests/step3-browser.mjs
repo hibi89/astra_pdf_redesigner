@@ -168,7 +168,7 @@ try{
   await evaluate("(()=>{const old=[...document.querySelectorAll('.doc-list-item')].find(b=>!b.classList.contains('active'));if(!old)throw Error('No older project for comparison guard');old.click()})()");
   await eventually(()=>evaluate("document.querySelector('.doc-list-item.active strong')?.textContent"),v=>v===original);
   await eventually(()=>evaluate("!document.querySelector('.studio-source-panel')"));
-  const revoked=await evaluate("(async()=>{try{await fetch("+JSON.stringify("REPLACE_BLOB_URL")+");return false}catch{return true}})()".replace("REPLACE_BLOB_URL",JSON.stringify(initialSource.url)));
+  const revoked=await evaluate("(async()=>{try{await fetch("+JSON.stringify(initialSource.url)+");return false}catch{return true}})()");
   assert.equal(revoked,true,'Source Blob URL must be revoked on document switch');
   await evaluate("(()=>{const imported=[...document.querySelectorAll('.doc-list-item')].find(b=>b.textContent.includes('step3-sample'));if(!imported)throw Error('Imported document missing after switch');imported.click()})()");
   await eventually(()=>evaluate("document.querySelector('.project-paper')?.textContent"),v=>v?.includes('STEP3_TEST_END_7519'));
