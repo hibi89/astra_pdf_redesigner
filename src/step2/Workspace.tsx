@@ -154,7 +154,9 @@ export default function Workspace({onLegacy}:Props){
           .map(([number,label])=><button type="button" key={number}
           data-m06b-stage={number} aria-current={activeStage===number?'step':undefined}
           disabled={number===2?!currentSource:number===3?!doc:number===4?!editable:false}
-          onClick={()=>navigateStage(number)}>
+          onClick={()=>navigateStage(number)}
+          onKeyDown={event=>{if(event.key==='Enter'||event.key===' '){
+            event.preventDefault();navigateStage(number);}}}>
           <b aria-hidden="true">{String(number).padStart(2,'0')}</b><span>{label}</span>
         </button>)}
       </nav>
