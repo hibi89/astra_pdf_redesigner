@@ -165,7 +165,7 @@ export default function Workspace({onLegacy}:Props){
             </div>
             {focusedBlock&&focusedBlock.origin&&<SourceAnchorPreview url={sourceReview.url}
               origin={focusedBlock.origin} blockId={focusedBlock.id}/>}
-            <details className="m06-original-full"><summary>원본 PDF 전체 뷰 펼치기</summary>
+            <details open className="m06-original-full"><summary>원본 PDF 전체 뷰 접기/펼치기</summary>
               <iframe title="가져온 원본 PDF" src={sourceReview.url} width="100%" height="430"/>
             </details>
             <p className="help-text">블록의 ‘원본 위치 보기’를 누르면 이 패널에 원본 페이지와 추정 영역이 표시됩니다. 대조 완료는 사용자가 직접 선택한 기록이며, 자동 정확도 합격 판정이 아닙니다. 다른 문서로 이동하거나 앱을 닫으면 초기화됩니다. 원본 파일 자체를 문서함에 저장하지 않습니다.</p>
