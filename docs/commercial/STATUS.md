@@ -1,12 +1,12 @@
 # ASTRA Commercial STATUS — 72h MVP (CURRENT)
 
 - **기준:** 2026-10-25 KST. **3일 MVP 우선 목표 2026-10-28 KST (도전 목표 / 정식 판매 아님)**.
-- **M01:** **IN_PROGRESS**. 초기 통합 소스 커밋 `978fe4fc469935e7d04c42151de931fb45c66107` on `integration/astra-commercial-core`; [Draft PR #9](https://github.com/hibi89/astra_pdf_redesigner/pull/9).
+- **M01:** **DONE (installed STEP3 E2E synthetic fixture verified)**. 초기 통합 소스 커밋 `978fe4fc469935e7d04c42151de931fb45c66107` on `integration/astra-commercial-core`; [Draft PR #9](https://github.com/hibi89/astra_pdf_redesigner/pull/9).
 - **M01 지금 완료:** PR3의 PDF.js importer + STEP2 모델·테스트, PR4의 Electron save dialog/NSIS/테스트 코드를 독립 브랜치에 결합하고 `Workspace` import/print bridge 접합. **이 단계는 SOURCE INTEGRATED, NOT VERIFIED**.
 - **Linux Actions:** [#40198529770](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40198529770), `in_progress` 최초 확인. **PASS/FAIL 아직 검수 전**.
 - **Windows Actions:** [#40198529742](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40198529742), `in_progress` 최초 확인. **PASS/FAIL 아직 검수 전**.
 - **M01 마감 전 남은 필수:** CI 완료 결과·코드 SHA 확인, 실패 수정, 설치형 STEP3 import→native export 실제 E2E 추가, 원본/STEP1·2 데이터 보존.
-- **M02 WAIT:** 원본/출력 3영역 화면 및 디자인 2종 실물→목업 비교 [MOCKUP_PARITY.md](MOCKUP_PARITY.md).
+- **M02 READY:** 원본/출력 3영역 화면 및 디자인 2종 실물→목업 비교 [MOCKUP_PARITY.md](MOCKUP_PARITY.md).
 - **M03 WAIT:** 동일 기능의 선택형 offline 윤문/로컬 소형모델 1문단 시연. 미검증이면 완료 주장/판매 금지.
 - **M04 WAIT:** Windows NSIS 고객 경로 설치·PDF import/export·재시작, SHA.
 - **M05 WAIT:** 실제 스크린샷/PDF 기반 차이표와 핵심 결함 보고.
@@ -28,3 +28,9 @@
 - Test scenario: create a synthetic PDF in installed Electron → PDF.js upload and source review → explicit confirmation → independent IndexedDB document → change layout → reload → native Electron PDF save → verify new A4 PDF text and source marker order. Runs in disposable GitHub-hosted Windows runner only, source/customer files never committed.
 - **Verification pending:** new [Windows #40199604265](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40199604265) and [Linux #40199604164](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40199604164) were `in_progress` when this checkpoint was written. No claim of new Windows STEP3 E2E PASS yet.
 - **M01 remains IN_PROGRESS; NEXT READY:** inspect both run conclusions/jobs and the STEP3 installed log. If test fails, isolate root cause and fix only that test/product boundary; if green, mark M01 verified and start M02 true 2-layout A4 preview and 3-pane UI. No main/PR3/PR4 merge, no production release.
+
+## [LATEST / FINAL CI] 2026-10-25 22:55 KST — M01 DONE, M02 READY
+- **M01 DONE (verified synthetic installed-Windows vertical slice):** implementation commit `4b5be85a8e7e0fb26d4be3bca58f423477e49c48`. [Linux Chrome + Edge #40199604164](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40199604164) = **SUCCESS**, both jobs; [Windows NSIS #40199604265](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40199604265) = **SUCCESS**, all Windows steps including new installed STEP3 E2E.
+- **Actual Windows E2E job log (2026-10-25 22:55 KST):** `PASS ASTRA INSTALLED STEP3 E2E` (new synthetic local PDF → PDF.js extraction and manual approval → new IDB document → changed theme → reload → native IPC PDF export); `PASS ASTRA INSTALLED STEP3 PDF CONTENT` (A4 **1 output page**, 6 markers and their order verified, **1 raster draw**). [Job log](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40199604265/job/121187756373).
+- **Verified scope limit:** two-page synthetic source to reflowed one-page A4 output, not customer document sampling; complex tables, OCR, pixel-exact source, real Windows customer PC, 2 distinct designed output styles, local LLM and three SKU enforcement remain NOT VERIFIED / NOT IMPLEMENTED.
+- **NEXT READY M02:** actual three-pane PDF review/preview/style UI, at least 2 demonstrably different real A4 layout prints, browser and Windows smoke, capture actual UI then fill the 5 highest mockup parity gaps. M03 local optional AI then M04 real installer/customer path then M05 final internal MVP verdict. **No commercial sale approval.**
