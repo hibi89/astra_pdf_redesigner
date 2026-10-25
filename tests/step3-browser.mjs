@@ -131,7 +131,7 @@ try{
   }
   const wordPosition=file=>{
     const bbox=execFileSync('pdftotext',['-bbox',file,'-'],{encoding:'utf8'});
-    const match=bbox.match(/<word\\s+([^>]+)>STEP3_TEST_BEGIN_7519<\\/word>/);
+    const match=bbox.match(/<word\s+([^>]+)>STEP3_TEST_BEGIN_7519<\/word>/);
     if(!match)throw Error('Cannot locate title bbox in themed A4 PDF');
     const attributes=Object.fromEntries([...match[1].matchAll(/(xMin|yMin|xMax|yMax)="([^"]+)"/g)].map(m=>[m[1],Number(m[2])]));
     return attributes;
