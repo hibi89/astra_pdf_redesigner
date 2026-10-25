@@ -461,3 +461,16 @@
 8. **Originals/data/security:** Main and feature PR3/PR4 untouched, STEP1 V1 storage and STEP2 IndexedDB V2 preserved, synthetic-only testing, no API, no GGUF/credentials or customer PDF committed.
 9. **NEXT READY:** M08-A installed Windows 8-theme per-style output tests + A4, content markers and raster, then actual customer PDF + ordinary Windows acceptance plan. Model/runtime downloads and paid service need explicit approval. Continue using user's one-sentence restart or `ㄱ` with integration code branch.
 10. **Timestamp/evidence:** 2026-10-26 KST; verified CI against exact tested code SHA, docs-only lead/integration commits are not newly built. See two workflows and integration M07-B report.
+
+
+## M08-A verified lead handoff — 2026-10-26 KST
+1. **Goal:** Windows local-first PDF content preserved while reflowed into distinct BASIC 8 printed templates; true AI proofreading and commercial tiers remain eventual product requirements.
+2. **Done:** Installed Windows Electron printed all eight distinct synthetic A4 templates with independent PDF.js on-disk validation; original native export, NSIS install/uninstall/upgrade and V2 IDB/PNG preserved.
+3. **Tests:** app SHA `a7f0796e391fcb0920a63669601cbcf7cfe99387`: Linux Chrome+Edge #40214408684 SUCCESS 2/2, 61/61 tests/build; Windows #40214414020 SUCCESS (61 Node+9 desktop shell, 8/8 native A4, 6 markers/raster/title geometry), 0 final CI failure. Real customer PDFs/consumer device NOT RUN.
+4. **Status:** internal synthetic M08-A DONE, M08-B READY source-PDF support/warning/rejection matrix. M03-B1 true local LLM approval BLOCKED, 3SKU sale NO-GO.
+5. **Risk/evidence:** Printed title uniqueness is not full-source pixel fidelity or OCR/complex-table proof. No unexpected regression in final exact-head CI. Recovery via previous Git SHAs; no force push.
+6. **Branch/SHA:** integration tested app `a7f0796e391fcb0920a63669601cbcf7cfe99387`, integration docs `1f10b97a2a43eb37f2bc7f188dd21e1ffee6ee42`, new lead docs SHA after this write must be read. Major source desktop/step3-eight-layout-acceptance.cjs, tests/verify-eight-desktop-layouts.mjs, evidence docs/commercial/M08_A_WINDOWS_EIGHT_LAYOUTS_20261026.md.
+7. **Deployment/environment:** no Production/Vercel URL; React/Vite + Windows Electron/NSIS local app; GitHub Actions Linux browser/Windows installed EXE.
+8. **Originals/security:** main and PR3/4/old STEP1/STEP2 data unchanged; synthetic runner-only files cleaned; no external API/LLM model downloaded.
+9. **Next READY:** M08-B content-class acceptance table plus highest-risk synthetic fixture/regression, preserving full 8/8 Windows proof. Actual customer files and normal 8GB/16GB PC input/approval needed separately; do not advertise ready-for-sale.
+10. **Timestamp:** 2026-10-26 KST; both Actions conclusions, job evidence and source SHA confirmed, docs-only updates not retested binaries.
