@@ -233,7 +233,7 @@ try{
   for(const theme of themes){
     if(!theme.path){
       await evaluate("document.querySelectorAll('input[name=v2theme]')["+theme.index+"].click()");
-      await eventually(()=>evaluate("document.querySelector('.project-paper')?.className"),x=>x?.includes('paper-theme-"+theme.id+"'));
+      await eventually(()=>evaluate("document.querySelector('.project-paper')?.className"),x=>x?.includes('paper-theme-'+theme.id));
       await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),x=>x==='저장됨');
       await evaluate("Promise.all([...document.querySelectorAll('.project-paper img')].map(i=>i.decode().catch(()=>{})))");
       const output=await send('Page.printToPDF',{preferCSSPageSize:true,printBackground:true});
