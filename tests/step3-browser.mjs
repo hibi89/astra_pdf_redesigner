@@ -114,6 +114,26 @@ try{
   assert.equal(await evaluate("document.querySelector('.section-editor .help-text')?.textContent?.includes('원본 PDF 출처')"),true);
   console.log('PASS STEP3 IMPORT: review creates independent active V2 document with PDF source provenance');
 
+  // M06-A source coordinate → genuine PDF.js page canvas with positional
+  // overlay; review remains opt-in and cannot mark content as verified by itself.
+  const m06Before=await eventually(()=>evaluate("document.querySelector('[data-m06-progress]')?.textContent"),
+    s=>s?.includes('수동 대조 0/'));
+  const m06Count=await evaluate("document.querySelectorAll('.m06-block-origin[data-m06-page]').length");
+  assert.ok(m06Count>=2,'M06 expects imported source coordinate blocks');
+  assert.ok(m06Before.includes('검수 미완료'),'Unreviewed source must be flagged');
+  const chosen=await evaluate("(()=>{const hit=[...document.querySelectorAll('.m06-block-origin')].find(x=>x.getAttribute('data-m06-page')==='2');if(!hit)throw Error('No page 2 source block');hit.querySelector('[data-m06-open]').click();return hit.parentElement.getAttribute('data-m06-block-id')})()");
+  const m06View=await eventually(()=>evaluate("(()=>{const p=document.querySelector('[data-m06-preview][data-m06-rendered-page]');const c=p?.querySelector('canvas');const marker=p?.querySelector('[data-m06-anchor-rect]');return p&&c?.width>0&&c?.height>0&&marker?{id:p.getAttribute('data-m06-block-id'),page:p.getAttribute('data-m06-rendered-page'),width:c.width,height:c.height,rect:marker.getBoundingClientRect().width}:null})()"),
+    x=>x&&x.id===chosen&&x.page==='2'&&x.rect>0);
+  assert.ok(m06View.width>300&&m06View.height>500,'PDF.js must rasterize the actual source page');
+  assert.ok(await evaluate("Boolean(document.querySelector('.m06-focused-block[data-m06-block-id='+JSON.stringify(chosen)+']'))"),
+    'Selected extracted editor block must be highlighted');
+  assert.equal(await evaluate("document.querySelector('[data-m06-progress]')?.textContent.includes('수동 대조 0/')"),true);
+  await evaluate("document.querySelector('.m06-focused-block [data-m06-check]').click()");
+  await eventually(()=>evaluate("document.querySelector('[data-m06-progress]')?.textContent"),t=>t?.includes('수동 대조 1/'));
+  assert.ok(await evaluate("document.querySelector('.m06-focused-block [data-m06-check]')?.getAttribute('aria-pressed')==='true'");
+  console.log('PASS M06 CLICK-THROUGH: actual PDF.js rendered page 2; viewport bbox highlight; explicit 1/'+m06Count+' manual-review badge');
+
+
   // M03 actual React user flow: opt-in proposal -> reject -> accept -> undo.
   const extraParagraph=await evaluate("(()=>{const section=document.querySelector('.project-layout .section-editor');if(!section)throw Error('No editable section');const before=section.querySelectorAll('.block-editor').length;const add=[...section.querySelectorAll('.add-block button')].find(b=>b.textContent.includes('본문'));if(!add||add.disabled)throw Error('No enabled add paragraph button');add.click();return before})()");
   await eventually(()=>evaluate("document.querySelector('.project-layout .section-editor')?.querySelectorAll('.block-editor').length"),n=>n===extraParagraph+1);
