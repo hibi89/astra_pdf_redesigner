@@ -11,16 +11,23 @@
 - 기존 STEP1 localStorage / STEP2 IndexedDB / 원본 로드맵 및 두 PNG 보존. `main`의 기존 앱과 Draft PR #3/#4는 무단 병합·수정하지 않는다.
 - 2026-10-25 사용자가 브랜치 설계·전체 작업계획과 GitHub 문서화, 총괄 역할을 위임했다. 상품화 설계 문서는 새 브랜치에서 작성하며, 실제 출시는 품질·라이선스·고객 수용 게이트를 요구한다.
 
+## **최신 지시 우선: 72시간 MVP (2026-10-25)**
+- 177~370h 전체 완성 계획은 **활성 일정에서 해제**. 먼저 최소 PDF→새 PDF 실제 동작, 다음 실제 화면 vs 목업 비교, 이후 설치형·윤문, 심화 QA는 뒤에.
+- 목표 2026-10-28 KST까지 **내부 MVP 도전**. 3만/6만/9만원 세 등급 정식 출시·8/20/30 템플릿 완성은 72시간 MVP와 별개.
+- 작업 순서/검증: [72시간 실행표](docs/commercial/EXECUTION_PLAN.md), [목업 실제비교표](docs/commercial/MOCKUP_PARITY.md).
+- 기본 파일 보호/외부전송 금지·초기 smoke는 즉시 유지. 심화 보안·설치 서명·정식 라이선스/고객 QA는 **MVP 이후지만 유료 판매 이전**.
+
 ## 읽는 순서
 1. `docs/commercial/STATUS.md` — **상품화 기준 현재 상태** (구 STEP 로드맵 진행률과 혼동 금지)
 2. `docs/commercial/EXECUTION_PLAN.md` — 전량 WBS / 작업 의존성·견적·AC
-3. `docs/commercial/PRODUCT_SPEC_V1.md` — 고객 여정·SKU·기능 범위
-4. `docs/commercial/ARCHITECTURE_AND_DATA_CONTRACT.md` — 코드 재사용·PDF·윤문·데이터 무결성
-5. `docs/commercial/QA_RELEASE_GATES.md` — 테스트·판매 중단 조건
-6. `docs/commercial/BRANCH_AND_DISPATCH.md` — 브랜치·단일 태스크·기록 규칙
-7. `docs/commercial/PRICING_LICENSING_SUPPORT.md` — 판매·설치·고객지원·저작권
-8. `docs/commercial/HANDOFF.md` — 최신 실작업 증거·다음 작업
-9. 과거 기준: `REQUIREMENTS.md`, `docs/BLUEPRINT.md`, `docs/ASTRA_ORIGINAL_ROADMAP.txt`, `AGENTS.md`, 구 `STATUS.md`/`HANDOFF.md`.
+3. `docs/commercial/MOCKUP_PARITY.md` — 최초 목표와 실제 앱의 차이
+4. `docs/commercial/PRODUCT_SPEC_V1.md` — 고객 여정·SKU·기능 범위
+5. `docs/commercial/ARCHITECTURE_AND_DATA_CONTRACT.md` — 코드 재사용·PDF·윤문·데이터 무결성
+6. `docs/commercial/QA_RELEASE_GATES.md` — 테스트·판매 중단 조건
+7. `docs/commercial/BRANCH_AND_DISPATCH.md` — 브랜치·단일 태스크·기록 규칙
+8. `docs/commercial/PRICING_LICENSING_SUPPORT.md` — 판매·설치·고객지원·저작권
+9. `docs/commercial/HANDOFF.md` — 최신 실작업 증거·다음 작업
+10. 과거 기준: `REQUIREMENTS.md`, `docs/BLUEPRINT.md`, `docs/ASTRA_ORIGINAL_ROADMAP.txt`, `AGENTS.md`, 구 `STATUS.md`/`HANDOFF.md`.
 
 ## 기준 사실 / 외부 제약
 - `main` 2026-10-25 조회 HEAD `2d1b29595f78653d5d53464e7dad747d61c35fc2`: STEP1/2 제품 기초.
@@ -30,7 +37,7 @@
 - 컨셉 이미지와 UI 예시는 **미구현 시안**이다. 7단계 완성, 8/20/30 템플릿 수, 8GB에서 로컬 모델 원활 가동, 고객 PC 설치 성공 등은 아직 검증 사실이 아니다.
 
 ## 지금의 다음 작업
-**A01 원격 GitHub 변경 파일·코드 의존성 감사 완료**(테스트 **NOT RUN**; 실제 병합 시뮬레이션은 A02로 보류). [실사 비교표](docs/commercial/INTEGRATION_A01_AUDIT.md)를 먼저 읽고 **A02**: `integration/astra-commercial-core`에서 PR3 + PR4를 안전하게 통합하여 테스트한다. `main`과 기존 Draft PR을 보호한다.
+**M01 READY**: `integration/astra-commercial-core`에 PR3 PDF import와 PR4 Windows export를 가능한 최소한으로 연결, 단순 PDF→새 A4 PDF부터 실제 테스트한다. A02는 M01로 편입. 기존 PR3/PR4와 `main` 보호.
 
 ## 종료/재개 규칙
 각 작업은 `TASK_ID` / 브랜치 / 시작 SHA / 바뀐 파일 / 테스트 실제 명령·PASS·FAIL·NOT RUN / 위험 / 새 SHA / 다음 1개 READY 를 `docs/commercial/STATUS.md`·`HANDOFF.md`에 append 또는 최신화하고 커밋한다. 완료를 추측하지 않는다. 사용자의 `ㄱ`은 **READY 작업 하나를 실제 실행**한다는 뜻이며, 손댈 수 없는 외부 입력이 필요한 경우 BLOCKED로 남기고 준비된 다음 작업으로 진행한다.
