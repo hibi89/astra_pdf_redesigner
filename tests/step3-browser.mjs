@@ -564,8 +564,10 @@ try{
     'Mixed source must disclose image raster approximation');
   assert.equal(await evaluate("document.querySelectorAll('.step3-block-review details').length"),2,
     'Image-only and selectable pages must be separately reviewable');
-  assert.equal(await evaluate("document.querySelectorAll('.step3-block-review textarea').length"),2,
-    'Only second page has two actual selectable text blocks');
+  const pageTexts=await evaluate("[...document.querySelectorAll('.step3-block-review details')].map(p=>[...p.querySelectorAll('textarea')].map(t=>t.value))");
+  assert.equal(pageTexts[0].length,0,'First scanned page must have zero editable text blocks');
+  assert.ok(pageTexts[1].length>=1&&Object.values(SCAN_MARKERS).every(t=>pageTexts[1].join('\\n').includes(t)),
+    'Second page must hold both exact selectable markers even if consecutive lines are one paragraph');
   assert.equal(await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input').checked"),false);
   assert.equal(await evaluate("([...document.querySelectorAll('.step3-import-panel button')].find(x=>x.textContent.includes('검수 결과를 새 문서로 저장'))).disabled"),true,
     'Partial scan must never bypass manual approval');

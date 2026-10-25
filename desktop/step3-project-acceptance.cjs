@@ -123,9 +123,14 @@ async function verifyInstalledScanBoundary(scanOnlyB64,partialB64,markers){
     'mixed scan local PDF.js review');
   const warnings=[...document.querySelectorAll('.step3-import-panel details li')].map(x=>x.textContent);
   if(!warnings.some(x=>x.includes('1페이지에서 선택 가능한 문자를 찾지 못했습니다'))||
-     document.querySelectorAll('.step3-block-review details').length!==2||
-     document.querySelectorAll('.step3-block-review textarea').length!==2)
+     document.querySelectorAll('.step3-block-review details').length!==2)
     throw Error('M08-B installed mixed-scan loss warning or page review missing');
+  const sections=[...document.querySelectorAll('.step3-block-review details')];
+  if(sections[0].querySelectorAll('textarea').length!==0||
+     sections[1].querySelectorAll('textarea').length<1||
+     ![markers.first,markers.end].every(t=>
+       [...sections[1].querySelectorAll('textarea')].some(x=>x.value.includes(t))))
+    throw Error('M08-B scanned first page must have zero editable text and second page both markers');
   const checkbox=document.querySelector('.step3-import-panel > label.step3-confirm input');
   const save=[...document.querySelectorAll('.step3-import-panel button')].find(x=>
     x.textContent.includes('검수 결과를 새 문서로 저장'));
