@@ -381,7 +381,13 @@ try{
   await eventually(()=>evaluate("document.querySelectorAll('.project-paper img').length"),n=>n>=1);
   assert.ok(await evaluate("Promise.all([...document.querySelectorAll('.project-paper img')].map(img=>img.decode().then(()=>true,()=>false))).then(x=>x.every(Boolean))"),
     'Restored raster image did not decode after reload');
-  const afterTitles=await evaluate("[...document.querySelectorAll('.doc-list-item strong')].map(x=>x.textContent)");
+  // Renderer hydration may populate the active document before the sidebar
+  // list has finished refreshing; require the complete prior list, not an
+  // instantaneous snapshot taken during that transition.
+  const afterTitles=await eventually(
+    ()=>evaluate("[...document.querySelectorAll('.doc-list-item strong')].map(x=>x.textContent)"),
+    titles=>previousTitles.every(title=>titles?.includes(title))
+  );
   for(const title of previousTitles)assert.ok(afterTitles.includes(title),'Prior document vanished: '+title);
 
   const mixedOutput=await send('Page.printToPDF',{preferCSSPageSize:true,printBackground:false});
