@@ -1,5 +1,8 @@
 # ASTRA — 72시간 MVP 우선 실행계획 (CURRENT SSOT)
 
+> **M05 LATEST ACTUAL VERDICT (2026-10-26 KST):** The 72-hour *internal technical demo* core (supported selectable-PDF synthetic import→review→two printed layouts→new A4 file, installed Windows) is **GO** after Chrome/Edge [#40205522431](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40205522431) and Windows [#40205522595](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40205522595) both SUCCESS (source `31b499182ade86717a82ff4e8960401a96ab4c0f`, 58/58 unit). M05 actual screenshot/blueprint gap audit **DONE**, detailed [M05_MVP_REVIEW_20261026.md](M05_MVP_REVIEW_20261026.md). **Commercial sale NO-GO**: genuine offline AI model, linked source/block completeness, real customer PDFs, all 8/20/30 SKU layouts and licensing/PC release gates not done. **NEXT READY M06-A** source-origin navigation/completeness gate; M03-B1 real GGUF/runtime remains approval-gated. Historical D1–D3 goals below are schedule baselines, not current READY states.
+
+
 > **Progress 2026-10-25 23:41 KST:** M01 and M02 targeted internal MVP slices verified; **M03-A deterministic proofreading proposal UI complete** (not an AI model); M03-B actual offline LLM still unimplemented/untested. Test SHA `768fc0183e8aa2f6f09d1a87458b8cb9347b6e73`; next M03-B feasibility and actual model-only upon cost/data/asset consent. The D1/D2 rows below are initial schedule, not current.
 
 > **Current checkpoint (2026-10-25 23:25 KST):** M01 + M02 MVP slices **DONE and verified** at tested code `0671fde98b0fc91fc6b4bb6eb43fca6e5411621f`; next **M03 READY**. The original timeline table below is a baseline/history. See latest STATUS/HANDOFF/Mockup parity for current evidence. M03 rewrite and local LLM have NOT been verified or shipped.
