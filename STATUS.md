@@ -374,3 +374,9 @@
 - [Windows NSIS #40214414020](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40214414020) SUCCESS: installed EXE actual native A4 printed all 8 theme PDFs; each PDF independently had six ordered exact synthetic source markers and raster, all 8 title coordinate signatures pairwise distinct; previous installed import/upgrade/IDB+PNG preserved.
 - **M08-A DONE within synthetic installed-output scope**. Real customer PDF/physical buyer PC, OCR/complex tables/true offline LLM/PRO20/BUSINESS30/entitlements/SmartScreen are unverified; commercial sale NO-GO. Main, PR3/4 protected; PR9 Draft.
 - **NEXT READY M08-B**: inspect existing PDF-source tests and define acceptance matrix (supported/warn/reject), then test one highest-priority unsupported synthetic source and response; no model download, external user data or paid API.
+
+
+## 2026-10-26 KST — M08-B verified, lead dispatch M08-C
+- Tested source `c67045e888543b5751de5971a2e0dfbac564e6f2`, docs SHA `32456354c7f5a2afc75f03907c45913fcfa9a0b4`. [Chrome+Edge #40216084632](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40216084632) **SUCCESS 2/2**, 61/61 Node and build, 8/8 A4 design regression, new scan-only reject/no V2 write, new partial-scan warning/opt-in A4 text+raster output, existing projects preserved.
+- [Windows installed #40216084673](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40216084673) **SUCCESS**: actual Electron rejected full scan, warned/blocked and canceled partial scan without old project alteration; installed eight theme PDF output and version upgrade still PASS.
+- **M08-B DONE (synthetic). M08-C READY** actual password-locked/corrupt synthetic source rejected with no V2 mutation. Real customer files/PC, OCR, true Korean GGUF LLM, PRO20/BUSINESS30/entitlements and commercial shipping **NOT VERIFIED, sale NO-GO**. PR9 Draft.

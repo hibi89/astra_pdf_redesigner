@@ -474,3 +474,16 @@
 8. **Originals/security:** main and PR3/4/old STEP1/STEP2 data unchanged; synthetic runner-only files cleaned; no external API/LLM model downloaded.
 9. **Next READY:** M08-B content-class acceptance table plus highest-risk synthetic fixture/regression, preserving full 8/8 Windows proof. Actual customer files and normal 8GB/16GB PC input/approval needed separately; do not advertise ready-for-sale.
 10. **Timestamp:** 2026-10-26 KST; both Actions conclusions, job evidence and source SHA confirmed, docs-only updates not retested binaries.
+
+
+## M08-B verified lead handoff — 2026-10-26 KST
+1. Goal: local first PDF.js extraction guard for fully scanned / partially scanned original source with safe rejection/explicit review.
+2. Done: 2p scan-only real XObject source rejects UI import without V2 write; mixed scan page1 with selectable page2 warns + explicit approval in Chrome/Edge and A4 reprint with 2 markers and raster; Windows installed warning/disabled save/cancel no-write, prior M08-A native 8/8, NSIS upgrade persisted STEP2+PNG.
+3. Test: app code `c67045e888543b5751de5971a2e0dfbac564e6f2`, [Chrome+Edge #40216084632](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40216084632) SUCCESS both jobs and unit 61/61; [Windows installed #40216084673](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40216084673) SUCCESS. User customer files/PC, OCR/true offline LLM NOT RUN.
+4. State: M08-B scoped DONE, M08-C READY; 3 SKU BASIC 30k/PRO 60k/BUSINESS 90k SALE NO-GO.
+5. Intermediate 427a and 0615 CI failures were fixed (double regex slash and assuming per-line text blocks); final c670 CI GREEN and no unresolved M08-B CI issue.
+6. Branch: integration docs SHA `32456354c7f5a2afc75f03907c45913fcfa9a0b4`, lead docs new SHA should be rechecked. Files source desktop/step3-scanned-fixture.cjs, desktop/step3-project-acceptance.cjs, tests/step3-browser.mjs, desktop-shell.test.cjs; detailed docs/commercial/M08_B_TEST_VERDICT_20261026.md.
+7. Environment: GitHub Actions Linux Chrome/Edge and packaged offline Windows Electron/NSIS. No production URL/Vercel.
+8. Security/originals: main, PR3/4, existing user STEP1/V2 preserved; synthetic only no user file cloud copy, no paid services/model weights/OCR.
+9. NEXT M08-C: test actually encrypted/corrupt PDF via real PDF.js input in both browsers/Windows, preserve no-write and no stale review; customer/physical device input separate. Avoid false fidelity/OCR claims.
+10. Verified 2026-10-26 KST; latest docs are not an independent new tested runtime binary.
