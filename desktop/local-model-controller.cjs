@@ -69,14 +69,16 @@ function createLocalModelController({resourcesDir,manifest=RELEASE_MANIFEST,spaw
     if(typeof text!=='string'||!text.trim()||text.length>2400)
       return{status:'error',reason:'invalid-input'};
     if(running)return{status:'busy'};
-    const files=await verify();
-    if(!files)return{...unavailable};
-    // No original document or prompt appears in command-line args, stdout logs
-    // or a network service. The per-request input file is mode 0600 and deleted.
-    let dir=null,child=null,timer=null;
-    const task={cancel:()=>{if(child&&!child.killed)child.kill('SIGKILL');}};
+    // Acquire the single-flight gate BEFORE any awaited checksum work.
+    let dir=null,child=null,timer=null,cancelled=false;
+    const task={cancel:()=>{cancelled=true;if(child&&!child.killed)child.kill('SIGKILL');}};
     running=task;
     try{
+      const files=await verify();
+      if(cancelled)return{status:'error',reason:'cancelled'};
+      if(!files)return{...unavailable};
+      // No original document or prompt appears in command-line args, stdout
+      // logs or network services. Per-request prompt file is deleted.
       dir=await fsp.mkdtemp(path.join(os.tmpdir(),'astra-llm-'));
       await fsp.chmod(dir,0o700);
       const promptFile=path.join(dir,'prompt.txt');

@@ -26,6 +26,10 @@ test('M03-B is disabled by default: no external weights, downloads or spawn',asy
   assert.equal((await c.status()).status,'unavailable');
   assert.equal((await c.propose('synthetic paragraph')).status,'unavailable');
   assert.equal(launches,0);
+  const first=c.propose('synthetic paragraph');
+  const second=await c.propose('synthetic second paragraph');
+  assert.equal(second.status,'busy','Concurrent request must fail closed while checking availability');
+  assert.equal((await first).status,'unavailable');
 });
 test('M03-B requires exact SHA256 manifest and bundled resources',async()=>{
   const f=fixture();
