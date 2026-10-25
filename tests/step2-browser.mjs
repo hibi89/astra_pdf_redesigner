@@ -26,7 +26,7 @@ try{
   await fill('.section-editor .section-editor-heading input','검증용 섹션');
   await fill('.section-editor .block-editor textarea','STEP2_BEGIN 한글 원문\n\n123% STEP2_END','HTMLTextAreaElement');
   await eventually(()=>evaluate("document.querySelector('.project-paper .section-body')?.textContent"),x=>x==='STEP2_BEGIN 한글 원문\n\n123% STEP2_END');
-  await evaluate("[...document.querySelectorAll('input[name=v2theme]')].at(-1).click()");
+  await evaluate("document.querySelectorAll('input[name=v2theme]')[3].click()");
   await eventually(()=>evaluate("document.querySelector('.project-paper').classList.contains('paper-theme-compact')"));
   await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),x=>x==='저장됨');
   await reload();
