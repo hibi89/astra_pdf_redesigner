@@ -1,0 +1,46 @@
+# ASTRA PDF Redesigner — 크몽 상품화 총괄 시작점 (2026-10-25)
+
+> **한 문장 재개 요청 (사용자 최종 2026-10-25):** `[astra_pdf_redesigner 깃헙 레포지토리 보고 작업이어가셈]` 입력 즉시 `WORKER_START_HERE.md`를 먼저 읽고 GitHub/CI 최신 원격을 확인해 다음 READY 실제 개발 작업을 수행한다. **새 채팅에서 추가 인수인계 질문·승인 요청 금지(차단 사항은 BLOCKED 후 다른 READY)**. 진입점은 [WORKER_START_HERE.md](WORKER_START_HERE.md).
+
+
+> **이 파일이 상품화 트랙의 SSOT 진입점이다.** 새 채팅에서 `[아스트라 깃헙 확인하고 작업이어가셈]` 또는 `ㄱ`을 받으면 아래를 최신 원격 브랜치 기준으로 읽는다. 이 문서의 존재만으로 백그라운드 작업이 실행되는 것은 아니다.
+
+## 사용자 확정 결정
+- 기준 저장소: `hibi89/astra_pdf_redesigner` 유지; **새 저장소·전면 재작성 불필요**.
+- 플랫폼: 고객용 **Windows x64 설치형 / 로컬 우선 / 추가 API 구독료 없는 제품**.
+- 핵심: **기존 PDF 불러오기 → 원문 구조화·보존·누락 검수 → 선택적 윤문 → 새 스타일 재조판 → 검수·PDF 저장**.
+- **윤문 기본 제공: BASIC 30,000원 / PRO 60,000원 / BUSINESS 90,000원 전체**. 모델/윤문 품질을 등급별로 인위적으로 낮추지 않는다.
+- 원문 유지는 디폴트. 윤문은 opt-in이며 수치·이름·인용·당위/추측의 의미를 침범하면 승인 불가. 원본과 수정안은 구분 저장.
+- 기존 STEP1 localStorage / STEP2 IndexedDB / 원본 로드맵 및 두 PNG 보존. `main`의 기존 앱과 Draft PR #3/#4는 무단 병합·수정하지 않는다.
+- 2026-10-25 사용자가 브랜치 설계·전체 작업계획과 GitHub 문서화, 총괄 역할을 위임했다. 상품화 설계 문서는 새 브랜치에서 작성하며, 실제 출시는 품질·라이선스·고객 수용 게이트를 요구한다.
+
+## **최신 지시 우선: 72시간 MVP (2026-10-25)**
+- 177~370h 전체 완성 계획은 **활성 일정에서 해제**. 먼저 최소 PDF→새 PDF 실제 동작, 다음 실제 화면 vs 목업 비교, 이후 설치형·윤문, 심화 QA는 뒤에.
+- 목표 2026-10-28 KST까지 **내부 MVP 도전**. 3만/6만/9만원 세 등급 정식 출시·8/20/30 템플릿 완성은 72시간 MVP와 별개.
+- 작업 순서/검증: [72시간 실행표](docs/commercial/EXECUTION_PLAN.md), [목업 실제비교표](docs/commercial/MOCKUP_PARITY.md).
+- 기본 파일 보호/외부전송 금지·초기 smoke는 즉시 유지. 심화 보안·설치 서명·정식 라이선스/고객 QA는 **MVP 이후지만 유료 판매 이전**.
+
+## 읽는 순서
+1. `docs/commercial/STATUS.md` — **상품화 기준 현재 상태** (구 STEP 로드맵 진행률과 혼동 금지)
+2. `docs/commercial/EXECUTION_PLAN.md` — 전량 WBS / 작업 의존성·견적·AC
+3. `docs/commercial/MOCKUP_PARITY.md` — 최초 목표와 실제 앱의 차이
+4. `docs/commercial/PRODUCT_SPEC_V1.md` — 고객 여정·SKU·기능 범위
+5. `docs/commercial/ARCHITECTURE_AND_DATA_CONTRACT.md` — 코드 재사용·PDF·윤문·데이터 무결성
+6. `docs/commercial/QA_RELEASE_GATES.md` — 테스트·판매 중단 조건
+7. `docs/commercial/BRANCH_AND_DISPATCH.md` — 브랜치·단일 태스크·기록 규칙
+8. `docs/commercial/PRICING_LICENSING_SUPPORT.md` — 판매·설치·고객지원·저작권
+9. `docs/commercial/HANDOFF.md` — 최신 실작업 증거·다음 작업
+10. 과거 기준: `REQUIREMENTS.md`, `docs/BLUEPRINT.md`, `docs/ASTRA_ORIGINAL_ROADMAP.txt`, `AGENTS.md`, 구 `STATUS.md`/`HANDOFF.md`.
+
+## 기준 사실 / 외부 제약
+- `main` 2026-10-25 조회 HEAD `2d1b29595f78653d5d53464e7dad747d61c35fc2`: STEP1/2 제품 기초.
+- [Draft PR #3](https://github.com/hibi89/astra_pdf_redesigner/pull/3) `feature/step3-pdf-import-20261019` `faec84e388da0f7a6d71f71c1b8d14e18d9f3098`: 브라우저 로컬 PDF.js 추출·이미지 PNG 복원 부분·원본 대조, **실문서 합격 미확인**.
+- [Draft PR #4](https://github.com/hibi89/astra_pdf_redesigner/pull/4) `feature/windows-electron-package-20261019` `057ccef81b97dd741c46002c28292bfdf544362f`: Electron·NSIS 설치·STEP2 PDF 저장 검증, **STEP3 미포함·고객 PC/서명 미수용**.
+- `im-not-ai` 출처: https://github.com/epoko77-ai/im-not-ai, MIT (고지 조건). 규칙/메트릭/검증은 코드로 실행 가능하지만 **전체 윤문 스킬은 LLM 호출 전제**. 자체 경량 로컬 LLM·정확한 라이선스·성능 테스트 전에는 완성 주장 금지.
+- 컨셉 이미지와 UI 예시는 **미구현 시안**이다. 7단계 완성, 8/20/30 템플릿 수, 8GB에서 로컬 모델 원활 가동, 고객 PC 설치 성공 등은 아직 검증 사실이 아니다.
+
+## 지금의 다음 작업
+**M01 READY**: `integration/astra-commercial-core`에 PR3 PDF import와 PR4 Windows export를 가능한 최소한으로 연결, 단순 PDF→새 A4 PDF부터 실제 테스트한다. A02는 M01로 편입. 기존 PR3/PR4와 `main` 보호.
+
+## 종료/재개 규칙
+각 작업은 `TASK_ID` / 브랜치 / 시작 SHA / 바뀐 파일 / 테스트 실제 명령·PASS·FAIL·NOT RUN / 위험 / 새 SHA / 다음 1개 READY 를 `docs/commercial/STATUS.md`·`HANDOFF.md`에 append 또는 최신화하고 커밋한다. 완료를 추측하지 않는다. 사용자의 `ㄱ`은 **READY 작업 하나를 실제 실행**한다는 뜻이며, 손댈 수 없는 외부 입력이 필요한 경우 BLOCKED로 남기고 준비된 다음 작업으로 진행한다.
