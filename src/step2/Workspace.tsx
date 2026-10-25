@@ -3,6 +3,9 @@ import { PALETTE, THEMES } from '../types.ts';
 import { LIMITS, documentAssetIds, moveItem, newBlock, newSection, visibleSections, type ContentBlock, type DocumentSection, type ImageAsset, type ProjectDocument } from './model.ts';
 import { downloadProject } from './projectFile.ts';
 import { useWorkspace } from './useWorkspace.ts';
+import PdfImportPanel, {type ImportedPdfSource} from '../step3/ImportPanel.tsx';
+import {hasDesktopPdfExport,savePdfFromEditor} from '../desktopPdf.ts';
+import RuleReview from '../humanize/RuleReview.tsx';
 
 const allThemes=[...THEMES,{id:'compact' as const,label:'컴팩트 리포트',description:'짧은 제목과 밀도 높은 문서'}];
 function useAssetUrls(assets:readonly ImageAsset[]):Record<string,string>{
@@ -32,6 +35,7 @@ export function ProjectPreview({doc,urls}: {doc:ProjectDocument;urls:Record<stri
         {section.blocks.map(block=>{
           if(block.kind==='heading')return block.text.trim()?<h3 className="block-heading" key={block.id}>{block.text}</h3>:null;
           if(block.kind==='paragraph')return block.text.trim()?<div className="section-body block-prose" key={block.id}>{block.text}</div>:null;
+          if(block.kind==='caption')return block.text.trim()?<p className="block-caption" key={block.id}>{block.text}</p>:null;
           if (block.kind !== 'image') return null;
           const url=urls[block.assetId];
           return <figure className={`document-figure align-${block.alignment} figure-${block.size}`} key={block.id}>
@@ -48,7 +52,41 @@ interface Props {onLegacy:()=>void}
 export default function Workspace({onLegacy}:Props){
   const w=useWorkspace();
   const [docsOpen,setDocsOpen]=useState(true),[busy,setBusy]=useState(false),[printBusy,setPrintBusy]=useState(false);
+  const [localModelStatus,setLocalModelStatus]=useState('모델 미설치 · 로컬 규칙 검수만 사용 가능');
+  useEffect(()=>{
+    let active=true;
+    const check=window.astraDesktop?.localModelStatus;
+    if(!check)return;
+    void check().then(result=>{
+      if(active)setLocalModelStatus(result.status==='available'?'로컬 모델 감지됨 · 품질 검증 전':'모델 미설치 · 로컬 규칙 검수만 사용 가능');
+    }).catch(()=>{if(active)setLocalModelStatus('모델 상태 확인 실패 · 규칙 검수는 가능');});
+    return()=>{active=false;};
+  },[]);
   const fileRef=useRef<HTMLInputElement|null>(null);
+  const [sourceReview,setSourceReview]=useState<ImportedPdfSource|null>(null);
+  const sourceReviewRef=useRef<ImportedPdfSource|null>(null);
+  const closeSourceReview=()=>{
+    const source=sourceReviewRef.current;
+    sourceReviewRef.current=null;
+    if(source)URL.revokeObjectURL(source.url);
+    setSourceReview(null);
+  };
+  const onSourceCommitted=(source:ImportedPdfSource)=>{
+    const previous=sourceReviewRef.current;
+    if(previous)URL.revokeObjectURL(previous.url);
+    sourceReviewRef.current=source;
+    setSourceReview(source);
+  };
+  // Unlike editable blocks, original PDF bytes are never stored in IndexedDB.
+  // Revoke the preview immediately on document identity change or unmount.
+  useEffect(()=>()=>{if(sourceReviewRef.current){
+    URL.revokeObjectURL(sourceReviewRef.current.url);
+    sourceReviewRef.current=null;
+  }},[]);
+  useEffect(()=>{
+    const source=sourceReviewRef.current;
+    if(w.ready&&source&&source.documentId!==w.document?.id)closeSourceReview();
+  },[w.ready,w.document?.id]);
   const urls=useAssetUrls(w.assets);
   const doc=w.document;
   const imageRefs=useMemo(()=>doc?documentAssetIds(doc):[],[doc]);
@@ -64,15 +102,18 @@ export default function Workspace({onLegacy}:Props){
       const missing=imageRefs.filter(id=>!w.assets.some(a=>a.id===id)||!urls[id]);if(missing.length)throw new Error('일부 이미지 파일이 누락되었습니다. 인쇄 전 문서를 확인해 주세요.');
       await Promise.all([...document.querySelectorAll<HTMLImageElement>('.project-paper img')].map(image=>image.decode()));
       await document.fonts.ready;
-      window.print();
+      await savePdfFromEditor();
     }catch(e){w.setError(e instanceof Error?`인쇄 준비 실패: ${e.message}`:'인쇄를 준비할 수 없습니다.');}finally{setPrintBusy(false);}
   };
   return <>
-    <header className="app-header no-print"><div className="brand"><span className="brand-icon">A</span><div><h1>아스트라 PDF 리디자이너</h1><p>STEP 2 · 개인 문서 제작기</p></div></div>
+    <header className="app-header no-print"><div className="brand"><span className="brand-icon">A</span><div><h1>아스트라 PDF 리디자이너</h1><p>STEP 2·3 · 로컬 문서 및 PDF 가져오기</p></div></div>
       <div className="print-actions"><button className="secondary-button" disabled={!editable} onClick={()=>void operation(async()=>{await w.flush();onLegacy();})}>기존 회고록 편집</button>
-      <button className="print-button" disabled={!editable} onClick={()=>void print()}>{printBusy?'준비 중…':'PDF 저장 / 인쇄'}</button><span>인쇄 창에서 ‘PDF로 저장’을 선택하세요.</span></div>
+      <button className="print-button" disabled={!editable} onClick={()=>void print()}>{printBusy?'준비 중…':hasDesktopPdfExport()?'PDF 파일 저장':'PDF 저장 / 인쇄'}</button><span>{hasDesktopPdfExport()?'저장할 PDF 파일의 위치를 선택하세요.':'인쇄 창에서 ‘PDF로 저장’을 선택하세요.'}</span></div>
     </header>
-    <main className="app-layout project-layout">
+    <main className="app-layout project-layout studio-layout">
+      <nav className="studio-steps no-print" aria-label="PDF 리디자인 작업 순서">
+        <span><b>01</b> PDF 불러오기</span><span><b>02</b> 원본 대조</span><span><b>03</b> 디자인 선택</span><span><b>04</b> 새 PDF 저장</span>
+      </nav>
       <aside className="editor-column no-print">
         {!w.ready&&<div className="panel">브라우저 로컬 문서함을 여는 중입니다…</div>}
         {w.locked&&<p className="warning" role="alert">다른 탭에서 문서함을 편집하고 있습니다. 해당 탭을 닫은 뒤 새로고침하세요. 이 탭에서는 편집할 수 없습니다.</p>}
@@ -83,6 +124,18 @@ export default function Workspace({onLegacy}:Props){
             <div className="document-list" role="list">{w.documents.map(item=><button role="listitem" key={item.id} disabled={!editable||item.id===doc?.id} className={`doc-list-item ${item.id===doc?.id?'active':''}`} onClick={()=>void operation(()=>w.switchTo(item.id))}><strong>{item.name||'(이름 없음)'}</strong><small>{new Date(item.updatedAt).toLocaleString('ko-KR')}</small></button>)}</div>
           </>}
         </section>
+        <PdfImportPanel disabled={!editable} onImport={w.importPdfDraft} onSourceCommitted={onSourceCommitted}/>
+        {sourceReview&&sourceReview.documentId===doc?.id&&
+          <section className="panel studio-source-panel no-print" aria-label="원본 PDF와 새 디자인 대조"
+            data-source-document-id={sourceReview.documentId}>
+            <div className="panel-heading project-heading-row">
+              <h2>원본 ↔ 결과 대조</h2>
+              <button className="text-button" type="button" onClick={closeSourceReview}>원본 비교 닫기</button>
+            </div>
+            <p className="help-text">원본: {sourceReview.fileName} · 현재 문서 전용 임시 미리보기입니다. 오른쪽 A4 결과와 비교하세요.</p>
+            <iframe title="가져온 원본 PDF" src={sourceReview.url} width="100%" height="430"/>
+            <p className="help-text">다른 문서로 이동하거나 앱을 닫으면 원본 미리보기가 해제됩니다. 원본 파일 자체를 문서함에 저장하지 않습니다.</p>
+          </section>}
         {doc&&<>
           <section className="panel"><div className="panel-heading project-heading-row"><h2>문서 정보</h2><span className="save-group"><span className="save-chip" role="status" aria-live="polite">{w.status}</span><button className="text-button" disabled={!editable} onClick={()=>void operation(()=>w.flush())}>지금 저장 / 재시도</button></span></div>
             <div className="form-grid">
@@ -102,11 +155,14 @@ export default function Workspace({onLegacy}:Props){
                 <div className="mini-actions"><button aria-label={`${section.title||'이름 없는 섹션'} 위로 이동`} disabled={!editable||si===0} onClick={()=>editDoc(d=>({...d,content:{...d.content,sections:moveItem(d.content.sections,section.id,-1)}}))}>↑</button><button aria-label={`${section.title||'이름 없는 섹션'} 아래로 이동`} disabled={!editable||si===doc.content.sections.length-1} onClick={()=>editDoc(d=>({...d,content:{...d.content,sections:moveItem(d.content.sections,section.id,1)}}))}>↓</button><button className="danger" aria-label={`${section.title||'이름 없는 섹션'} 삭제`} disabled={!editable} onClick={()=>{if(window.confirm(`‘${section.title||'이름 없는 섹션'}’과 포함된 본문·이미지 ${section.blocks.length}개를 삭제하시겠습니까?`))void operation(()=>w.removeSection(section.id));}}>삭제</button></div>
               </div>
               {section.blocks.map((block,bi)=><div key={block.id} className="block-editor">
-                <div className="block-header"><strong>{block.kind==='paragraph'?'본문':block.kind==='heading'?'소제목':'이미지'}</strong>
+                <div className="block-header"><strong>{block.kind==='paragraph'?'본문':block.kind==='heading'?'소제목':block.kind==='caption'?'캡션':'이미지'}</strong>
                   <div className="mini-actions"><button aria-label={`${bi+1}번 블록 위로 이동`} disabled={!editable||bi===0} onClick={()=>editSection(section.id,s=>({...s,blocks:moveItem(s.blocks,block.id,-1)}))}>↑</button><button aria-label={`${bi+1}번 블록 아래로 이동`} disabled={!editable||bi===section.blocks.length-1} onClick={()=>editSection(section.id,s=>({...s,blocks:moveItem(s.blocks,block.id,1)}))}>↓</button><button className="danger" aria-label={`${bi+1}번 블록 삭제`} disabled={!editable} onClick={()=>{if(!window.confirm('이 블록을 삭제하시겠습니까?'))return;if(block.kind==='image')void operation(()=>w.removeImage(section.id,block.id));else editSection(section.id,s=>({...s,blocks:s.blocks.filter(b=>b.id!==block.id)}));}}>삭제</button></div>
                 </div>
-                {block.kind==='paragraph'&&<label className="field"><span className="visually-hidden">본문 {bi+1}</span><textarea disabled={!editable} rows={4} value={block.text} onChange={e=>changeBlock(section.id,block.id,b=>b.kind==='paragraph'?{...b,text:e.target.value}:b)}/></label>}
+                {(block.kind==='paragraph'||block.kind==='caption')&&<label className="field"><span className="visually-hidden">{block.kind==='caption'?'캡션':'본문'} {bi+1}</span><textarea disabled={!editable} rows={block.kind==='caption'?2:4} value={block.text} onChange={e=>changeBlock(section.id,block.id,b=>b.kind==='paragraph'||b.kind==='caption'?{...b,text:e.target.value}:b)}/></label>}
                 {block.kind==='heading'&&<label className="field"><span className="visually-hidden">소제목 {bi+1}</span><input disabled={!editable} value={block.text} onChange={e=>changeBlock(section.id,block.id,b=>b.kind==='heading'?{...b,text:e.target.value}:b)}/></label>}
+                {block.kind==='paragraph'&&<RuleReview text={block.text} disabled={!editable}
+                  onApply={value=>changeBlock(section.id,block.id,b=>b.kind==='paragraph'?{...b,text:value}:b)}/>}
+                {block.kind!=='image'&&block.origin&&<p className="help-text">원본 PDF 출처: {block.origin.page}페이지 · x={block.origin.x}pt · y={block.origin.y}pt (추정)</p>}
                 {block.kind==='image'&&<>
                   {urls[block.assetId]&&<img className="edit-image-preview" alt="첨부 이미지 미리보기" src={urls[block.assetId]}/>}
                   <label className="field">이미지 교체<input disabled={!editable} type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)void operation(()=>w.insertImage(file,section.id,block.id));}}/></label>
@@ -114,14 +170,8 @@ export default function Workspace({onLegacy}:Props){
                   <div className="image-options"><label className="field">정렬<select disabled={!editable} value={block.alignment} onChange={e=>changeBlock(section.id,block.id,b=>b.kind==='image'?{...b,alignment:e.target.value as 'left'|'center'|'right'}:b)}><option value="left">왼쪽</option><option value="center">가운데</option><option value="right">오른쪽</option></select></label><label className="field">크기<select disabled={!editable} value={block.size} onChange={e=>changeBlock(section.id,block.id,b=>b.kind==='image'?{...b,size:e.target.value as 'small'|'medium'|'large'}:b)}><option value="small">작게 (35%)</option><option value="medium">보통 (65%)</option><option value="large">크게 (100%)</option></select></label></div>
                 </>}
               </div>)}
-              <div className="add-block"><button disabled={!editable} className="secondary-button" onClick={()=>editSection(section.id,s=>({...s,blocks:[...s.blocks,newBlock('paragraph')]}))}>+ 본문</button><button disabled={!editable} className="secondary-button" onClick={()=>editSection(section.id,s=>({...s,blocks:[...s.blocks,newBlock('heading')]}))}>+ 소제목</button><label className={`secondary-button file-trigger ${!editable?'disabled':''}`}>+ 이미지<input disabled={!editable} type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)void operation(()=>w.insertImage(file,section.id));}}/></label></div>
+              <div className="add-block"><button disabled={!editable} className="secondary-button" onClick={()=>editSection(section.id,s=>({...s,blocks:[...s.blocks,newBlock('paragraph')]}))}>+ 본문</button><button disabled={!editable} className="secondary-button" onClick={()=>editSection(section.id,s=>({...s,blocks:[...s.blocks,newBlock('heading')]}))}>+ 소제목</button><button disabled={!editable} className="secondary-button" onClick={()=>editSection(section.id,s=>({...s,blocks:[...s.blocks,newBlock('caption')]}))}>+ 캡션</button><label className={`secondary-button file-trigger ${!editable?'disabled':''}`}>+ 이미지<input disabled={!editable} type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)void operation(()=>w.insertImage(file,section.id));}}/></label></div>
             </div>)}
-          </section>
-          <section className="panel settings-panel"><div className="panel-heading"><h2>디자인 설정</h2><span className="panel-caption">원문은 변경하지 않습니다</span></div>
-            <div className="setting-block"><h3>테마</h3><div className="theme-options">{allThemes.map(theme=><label className={`theme-option ${doc.design.theme===theme.id?'selected':''}`} key={theme.id}><input disabled={!editable} type="radio" name="v2theme" checked={doc.design.theme===theme.id} onChange={()=>editDoc(d=>({...d,design:{...d.design,theme:theme.id}}))}/><span><strong>{theme.label}</strong><small>{theme.description}</small></span></label>)}</div></div>
-            <div className="setting-block"><h3>포인트 색상</h3><div className="swatches">{PALETTE.map(color=><label title={color.label} className={`swatch-wrap ${doc.design.accent===color.value?'active':''}`} key={color.value}><input disabled={!editable} type="radio" name="v2accent" aria-label={color.label} checked={doc.design.accent===color.value} onChange={()=>editDoc(d=>({...d,design:{...d.design,accent:color.value}}))}/><span className="swatch" style={{backgroundColor:color.value}}/></label>)}</div></div>
-            <div className="setting-block"><h3>본문 크기</h3><div className="segmented">{(['small','medium','large'] as const).map((size,i)=><label className={doc.design.textSize===size?'on':''} key={size}><input disabled={!editable} type="radio" name="v2size" checked={doc.design.textSize===size} onChange={()=>editDoc(d=>({...d,design:{...d.design,textSize:size}}))}/>{['작게','보통','크게'][i]}</label>)}</div></div>
-            <div className="setting-block"><h3>폰트</h3><div className="segmented">{(['sans','serif'] as const).map((font,i)=><label className={doc.design.font===font?'on':''} key={font}><input disabled={!editable} type="radio" name="v2font" checked={doc.design.font===font} onChange={()=>editDoc(d=>({...d,design:{...d.design,font}}))}/>{['고딕','명조'][i]}</label>)}</div><p className="help-text">설치된 시스템 글꼴에 따라 표시가 달라집니다.</p></div>
           </section>
           <section className="panel"><div className="panel-heading"><h2>프로젝트 파일</h2><span className="panel-caption">현재 문서와 이미지 전체를 백업합니다.</span></div>
             <div className="toolbar project-toolbar"><button className="secondary-button" disabled={!editable} onClick={()=>void operation(async()=>{const json=await w.exportCurrent();downloadProject(json,doc.name);})}>프로젝트 내보내기</button><button className="secondary-button" disabled={!editable} onClick={()=>fileRef.current?.click()}>프로젝트 가져오기</button></div>
@@ -131,10 +181,26 @@ export default function Workspace({onLegacy}:Props){
           <p className="privacy-note">문서는 현재 브라우저 프로필·주소의 IndexedDB에 저장됩니다. 사이트 데이터 삭제 시 유실될 수 있습니다. 여러 탭 동시 편집은 지원하지 않습니다. 이미지 원본에는 메타데이터가 포함될 수 있습니다. 외부 서버로 전송하지 않습니다.</p>
         </>}
       </aside>
-      <div className="preview-column"><div className="preview-heading no-print"><div><h2>문서 미리보기</h2><p>A4 기준 · 최종 페이지 나눔은 인쇄 창에서 확인</p></div><span className="size-tag">A4</span></div>
+      <div className="preview-column"><div className="preview-heading no-print"><div><h2>새 디자인 미리보기</h2><p>A4 기준 · 최종 페이지 나눔은 인쇄 창에서 확인</p></div><span className="size-tag">A4</span></div>
         <div className="paper-surface">{doc?<ProjectPreview doc={doc} urls={urls}/>:<div className="document">{w.ready?'문서를 열 수 없습니다.':'불러오는 중…'}</div>}</div>
         <p className="print-tip no-print">Chrome/Edge에서 PDF로 저장, A4, 머리글·바닥글 해제를 확인하세요. 인쇄는 이미지 로딩이 완료될 때까지 기다립니다.</p>
       </div>
+      <aside className="studio-style-column no-print" aria-label="디자인 스튜디오">
+        <div className="studio-style-intro"><span className="studio-label">DESIGN STUDIO</span><h2>문서를 새롭게</h2><p>원문을 그대로 두고 출력 디자인만 변경합니다. 최소 두 가지 조판을 실제 PDF로 확인할 수 있습니다.</p></div>
+        <section className="panel m03-local-model-status" aria-label="오프라인 AI 연결 상태">
+          <h3>오프라인 AI 연결</h3>
+          <p role="status" data-m03-model-status>{localModelStatus}</p>
+          <p className="help-text">현재 배포에는 AI 모델이 포함되지 않습니다. 규칙 교정은 AI 윤문과 다르며, 실제 모델 품질·라이선스 검증 전에는 사용하지 않습니다.</p>
+        </section>
+        {doc ? <>
+          <section className="panel settings-panel"><div className="panel-heading"><h2>디자인 설정</h2><span className="panel-caption">원문은 변경하지 않습니다</span></div>
+            <div className="setting-block"><h3>테마</h3><div className="theme-options">{allThemes.map(theme=><label className={`theme-option ${doc.design.theme===theme.id?'selected':''}`} key={theme.id}><input disabled={!editable} type="radio" name="v2theme" checked={doc.design.theme===theme.id} onChange={()=>editDoc(d=>({...d,design:{...d.design,theme:theme.id}}))}/><span><strong>{theme.label}</strong><small>{theme.description}</small></span></label>)}</div></div>
+            <div className="setting-block"><h3>포인트 색상</h3><div className="swatches">{PALETTE.map(color=><label title={color.label} className={`swatch-wrap ${doc.design.accent===color.value?'active':''}`} key={color.value}><input disabled={!editable} type="radio" name="v2accent" aria-label={color.label} checked={doc.design.accent===color.value} onChange={()=>editDoc(d=>({...d,design:{...d.design,accent:color.value}}))}/><span className="swatch" style={{backgroundColor:color.value}}/></label>)}</div></div>
+            <div className="setting-block"><h3>본문 크기</h3><div className="segmented">{(['small','medium','large'] as const).map((size,i)=><label className={doc.design.textSize===size?'on':''} key={size}><input disabled={!editable} type="radio" name="v2size" checked={doc.design.textSize===size} onChange={()=>editDoc(d=>({...d,design:{...d.design,textSize:size}}))}/>{['작게','보통','크게'][i]}</label>)}</div></div>
+            <div className="setting-block"><h3>폰트</h3><div className="segmented">{(['sans','serif'] as const).map((font,i)=><label className={doc.design.font===font?'on':''} key={font}><input disabled={!editable} type="radio" name="v2font" checked={doc.design.font===font} onChange={()=>editDoc(d=>({...d,design:{...d.design,font}}))}/>{['고딕','명조'][i]}</label>)}</div><p className="help-text">설치된 시스템 글꼴에 따라 표시가 달라집니다.</p></div>
+          </section>
+        </> : <p className="panel">문서를 불러오면 스타일을 선택할 수 있습니다.</p>}
+      </aside>
     </main>
   </>;
 }

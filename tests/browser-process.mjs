@@ -35,7 +35,9 @@ export function launchBrowser(binary,profile,label='browser') {
     // Use the WebSocket path written by this exact browser into its own profile.
     // Edge sometimes announces "DevTools listening" while /json/version hangs;
     // HTTP discovery is unnecessary and was the source of the flaky timeout.
-    async connect(timeoutMs=35000){
+    // Linux Edge cold starts have taken ~24s in successful CI; allow a bounded
+    // 60s readiness window for Edge only. Chrome retains the 35s limit.
+    async connect(timeoutMs=/microsoft-edge/i.test(binary)?60000:35000){
       const file=join(profile,'DevToolsActivePort');
       const deadline=Date.now()+timeoutMs;
       let last='DevToolsActivePort not yet available';

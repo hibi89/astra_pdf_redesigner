@@ -1,7 +1,7 @@
 name: Astra STEP 1 + STEP 2 validation
 on:
   push:
-    branches: [main, 'feature/step2-*']
+    branches: [main, 'feature/step2-*', 'feature/step3-*', 'integration/astra-commercial-core']
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
@@ -17,6 +17,14 @@ jobs:
       - run: npm install --no-audit --no-fund
       - run: npm test
       - run: npm run build
+      - name: Install Korean fonts for visual comparison on CI only
+        run: |
+          if ! fc-list :lang=ko family | grep -q .; then
+            sudo apt-get update -qq
+            sudo apt-get install -y fonts-noto-cjk
+            fc-cache -f
+          fi
+          fc-list :lang=ko family | head -n 2
       - name: Chrome print and persistence smoke
         run: |
           CHROME_BIN=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)
@@ -44,6 +52,14 @@ jobs:
           CHROME_PATH="$CHROME_BIN" node tests/step2-cold-migration.mjs
           CHROME_PATH="$CHROME_BIN" STEP2_INJECT_MIGRATION_ABORT=1 node tests/step2-cold-migration.mjs
           CHROME_PATH="$CHROME_BIN" node tests/step2-cross-profile.mjs
+          M02_SCREENSHOT_OUT="$RUNNER_TEMP/astra-m02-studio.png" CHROME_PATH="$CHROME_BIN" node tests/step3-browser.mjs
+      - name: Upload actual M02 studio screenshot (synthetic-only CI content)
+        uses: actions/upload-artifact@v4
+        with:
+          name: astra-m02-studio-chrome-synthetic
+          path: ${{ runner.temp }}/astra-m02-studio.png
+          if-no-files-found: error
+          retention-days: 7
   # A new GitHub-hosted VM prevents leftover Chrome helpers and long-running
   # profile cleanup from exhausting Edge browser resources.
   edge-validation:
@@ -80,5 +96,6 @@ jobs:
           echo "Running STEP 1 A4 print and STEP 2 IndexedDB, images, JSON and long-caption PDF regressions with actual Edge"
           CHROME_PATH="$EDGE_BIN" node tests/browser-smoke.mjs
           CHROME_PATH="$EDGE_BIN" node tests/step2-browser.mjs
+          CHROME_PATH="$EDGE_BIN" node tests/step3-browser.mjs
           echo "PASS EDGE: STEP1 A4 PDF and STEP2 print, persistence, images, import/export and pagination checks"
 
