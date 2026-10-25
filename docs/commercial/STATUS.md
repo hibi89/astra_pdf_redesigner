@@ -21,3 +21,10 @@
 - 점검 중 CI source SHA `978fe4fc469935e7d04c42151de931fb45c66107`: Chrome/Edge workflow #40198529770, Windows #40198529742 최초 in_progress, Edge 개별 job SUCCESS. **최종 상태 재조회 필수**.
 - M01 **IN_PROGRESS**, 현재 Windows STEP3 import→native PDF export 실통합 E2E **NOT RUN/NOT VERIFIED**.
 - 다음 작업 READY = CI 완료/실패 검사 및 Windows STEP3 통합 E2E 추가. 테스트 결과 기록 뒤 M02.
+
+## 2026-10-25 KST — M01 installed STEP3 E2E test added (evidence-based checkpoint)
+- Legacy integration SHA `978fe4fc469935e7d04c42151de931fb45c66107`: [Linux Chrome/Edge #40198529770](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40198529770) **SUCCESS** (both jobs); [Windows #40198529742](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40198529742) **SUCCESS**. These runs do **not** cover STEP3 installed import/export.
+- New code SHA `4b5be85a8e7e0fb26d4be3bca58f423477e49c48` on `integration/astra-commercial-core`: added `desktop/step3-project-acceptance.cjs` and wired test-only CI acceptance path in `desktop/main.cjs`, `tests/windows-installer-lifecycle.ps1`, `tests/verify-desktop-pdf.mjs`, and static regression in `tests/desktop-shell.test.cjs`.
+- Test scenario: create a synthetic PDF in installed Electron → PDF.js upload and source review → explicit confirmation → independent IndexedDB document → change layout → reload → native Electron PDF save → verify new A4 PDF text and source marker order. Runs in disposable GitHub-hosted Windows runner only, source/customer files never committed.
+- **Verification pending:** new [Windows #40199604265](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40199604265) and [Linux #40199604164](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40199604164) were `in_progress` when this checkpoint was written. No claim of new Windows STEP3 E2E PASS yet.
+- **M01 remains IN_PROGRESS; NEXT READY:** inspect both run conclusions/jobs and the STEP3 installed log. If test fails, isolate root cause and fix only that test/product boundary; if green, mark M01 verified and start M02 true 2-layout A4 preview and 3-pane UI. No main/PR3/PR4 merge, no production release.
