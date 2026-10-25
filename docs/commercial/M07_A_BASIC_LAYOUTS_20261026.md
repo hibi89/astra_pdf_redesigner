@@ -28,7 +28,7 @@
 
 ## 한계 / 출시 보류
 - Chrome/Edge CI의 합성 텍스트·PNG 문서 검증 결과이지 구매자 Windows PC·실제 고객 문서에서 모든 요소가 정밀 복원됐다는 뜻이 아님. 특히 OCR, 어려운 표, 다단, 폰트 재현, 원본 픽셀 동일, 특수 그래픽 복원은 별도 수용 시험 필요.
-- Windows installer CI는 설치/출력/업그레이드 회귀이며 6종을 각각 Windows 렌더러에서 출력해 배치 비교한 증거가 아니다. 결과는 CI 완료 후 별도 확인.
+- Windows installer CI [#40211494855](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40211494855) **SUCCESS**: 설치형 PDF 가져오기/변경/네이티브 저장, 제거, 0.1.0→0.1.1 업그레이드 시 STEP2 IndexedDB·PNG 보존. 다만 6종을 각각 Windows 렌더러에서 출력해 배치 비교한 증거는 아니다.
 - AI 윤문은 실제 LLM 없이 규칙 검수와 비활성 IPC만 있으며 30,000/60,000/90,000원 모든 상품에 동일 모델을 포함한다는 상품 목표는 **현재 미충족**. 실제 GGUF·런타임 다운로드/품질·라이선스·CPU 실측은 명시적 사용자 승인 이전 BLOCKED.
 - **현 단계:** BASIC 템플릿 6/8 synthetic design proof만 완료. 앱 전체, AI 제공, SKU 판매, 전 기능 75% 완료 주장 불가.
 
