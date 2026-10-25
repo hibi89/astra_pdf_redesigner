@@ -9,14 +9,14 @@
 | `feature/step3-pdf-import-20261019` | **기존 Draft PR3** | 원본 브랜치 변경 금지, 안전한 통합은 새로운 별도 브랜치에서 |
 | `feature/windows-electron-package-20261019` | **기존 Draft PR4** | 원본 브랜치 변경 금지, STEP3 아직 포함 안 됨 |
 | `lead/astra-commercial-20261025` | main 2026-10-25 HEAD에서 신규 총괄 설계 | 상품 요구·WBS·기록 단일 출처, 테스트 사실과 계획 구분 |
-| `feature/astra-pdf-fidelity-20261025` | **예정** PR3 HEAD에서 신규 파생 | B01~B04 PDF 정확도 독립 개선; PR3 본체 보호 |
-| `integration/astra-commercial-core` | **예정** 총괄 검증된 기능만 순차 수용 | PR3/PR4 충돌 검증 A02 이후 생성, main 미병합 |
+| `feature/astra-pdf-fidelity-20261025` | **생성** PR3 HEAD `faec84e...`에서 2026-10-25 분기 | B01~B04 PDF 정확도 독립 개선; PR3 본체 보호 |
+| `integration/astra-commercial-core` | **생성** 총괄 문서 첫 커밋 `c0ef9882...`에서 2026-10-25 분기 | A02에서 코드 통합 착수, main 미병합 |
 | `feature/astra-studio-ui` | **예정** integration 기반 | C 작업 UI/design |
 | `feature/astra-local-humanize` | **예정** integration 기반 | D 작업 deterministic + on-device LLM |
 | `feature/astra-sku-batch-brand` | **예정** integration 기반 | E 작업 SKU/배치/브랜딩 |
 | `release/astra-windows-v1` | **예정** 통합 완료 후 | NSIS·서명/검증/배포 아티팩트, 배포 전 no-go 체크 |
 
-기능 브랜치들은 **필요한 시점에 최신 통합 HEAD에서** 만들고, 현재 존재하지 않으면 '예정'이라고 기록한다. 빈 브랜치를 여럿 미리 생성해 기능 병합 충돌을 키우지 않는다. 실행 시 새 브랜치가 생성되면 이 표에 HEAD·PR 번호 갱신.
+아직 미생성 기능 브랜치들은 **필요한 시점에 최신 통합 HEAD에서** 만들고, 현재 존재하지 않으면 '예정'이라고 기록한다. 빈 브랜치를 여럿 미리 생성해 기능 병합 충돌을 키우지 않는다. 실행 시 새 브랜치가 생성되면 이 표에 HEAD·PR 번호 갱신.
 
 ## 총괄 업무 규칙
 1. 매번 `COMMERCE_START_HERE.md` → STATUS → WBS → ARCHITECTURE → HANDOFF → 해당 코드 branch latest SHA 확인.

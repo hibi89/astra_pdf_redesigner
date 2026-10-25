@@ -11,8 +11,8 @@
 ## A — 인수·통합 설계 (12~25h)
 | ID | 우선 | 작업 | 완료증거 |
 |---|---|---|---|
-| A01 | P0 READY | PR3·PR4·main 3자 tree/API/의존성/데이터 변경 비교와 안전한 통합 후보 브랜치 설계 | 충돌표, 최소 3개 위험, 테스트 매트릭스, SHA 기록 |
-| A02 | P0 WAIT(A01) | 독립 통합 브랜치 구성, pdfjs + Electron 공존 컴파일/기능 smoke | 신규 코드 브랜치에서 npm test/build + Windows CI; main/PR3/4 불변 |
+| A01 | **DONE (원격 코드/파일 감사)** | PR3·PR4·main 3자 tree/API/의존성/데이터 변경 비교와 안전한 통합 후보 브랜치 설계 | [실사 감사](INTEGRATION_A01_AUDIT.md) / 병합·실행 NOT RUN |
+| A02 | **P0 READY** | 생성된 `integration/astra-commercial-core`에서 pdfjs + Electron 공존 실제 통합/컴파일/기능 smoke | 신규 코드 브랜치에서 npm test/build + Windows CI; main/PR3/4 불변 |
 | A03 | P0 WAIT(A02) | 기존 STEP1/2 localStorage/IndexedDB/JSON non-destructive regression baseline | 합성 이관/충돌/롤백/복원 수용 통과 |
 
 ## B — PDF 추출 정확도·원본 보존 (30~60h)

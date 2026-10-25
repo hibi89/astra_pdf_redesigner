@@ -30,7 +30,7 @@
 - 컨셉 이미지와 UI 예시는 **미구현 시안**이다. 7단계 완성, 8/20/30 템플릿 수, 8GB에서 로컬 모델 원활 가동, 고객 PC 설치 성공 등은 아직 검증 사실이 아니다.
 
 ## 지금의 다음 작업
-`docs/commercial/EXECUTION_PLAN.md`의 **A01**: PR3/PR4 코드·CI를 기준으로 공통 통합 전략 및 충돌/보존 목록을 실제 비교하고, 재현 가능한 스모크 테스트를 실행한다. `main`과 기존 Draft PR을 보호한다.
+**A01 원격 GitHub 변경 파일·코드 의존성 감사 완료**(테스트 **NOT RUN**; 실제 병합 시뮬레이션은 A02로 보류). [실사 비교표](docs/commercial/INTEGRATION_A01_AUDIT.md)를 먼저 읽고 **A02**: `integration/astra-commercial-core`에서 PR3 + PR4를 안전하게 통합하여 테스트한다. `main`과 기존 Draft PR을 보호한다.
 
 ## 종료/재개 규칙
 각 작업은 `TASK_ID` / 브랜치 / 시작 SHA / 바뀐 파일 / 테스트 실제 명령·PASS·FAIL·NOT RUN / 위험 / 새 SHA / 다음 1개 READY 를 `docs/commercial/STATUS.md`·`HANDOFF.md`에 append 또는 최신화하고 커밋한다. 완료를 추측하지 않는다. 사용자의 `ㄱ`은 **READY 작업 하나를 실제 실행**한다는 뜻이며, 손댈 수 없는 외부 입력이 필요한 경우 BLOCKED로 남기고 준비된 다음 작업으로 진행한다.
