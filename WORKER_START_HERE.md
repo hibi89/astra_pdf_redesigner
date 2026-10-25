@@ -1,5 +1,8 @@
 # ASTRA PDF Redesigner — 새 채팅 자동 복원 / 작업 시작점
 
+> **CURRENT M02 state — 2026-10-25 23:13 KST:** On `integration/astra-commercial-core` tested implementation `383d2a63e1b91a32389ce75eeb7c9ceb4622d3ba`, [Linux Chrome/Edge #40200891875](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40200891875) + [Windows NSIS #40200891742](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40200891742) **both SUCCESS**. M02 actual 3-pane studio and **two distinct actual A4 PDFs**, screenshot artifact with Korean Noto CJK, achieved. **M02 remains IN_PROGRESS** because the source-PDF Blob URL is revoked on successful import: the next `ㄱ` or one-line restart MUST first implement *in-session original PDF vs new A4 comparison after commit*, with document-ID guard and cleanup; do NOT persist original bytes into IDB without approval. Then verify/close M02 → M03 local opt-in AI. The older M01 READY instructions below are historical, not current. `main`/PR3/PR4 remain untouched; no sale approval.
+
+
 > **최신 확정 M01 완료 / M02 READY — 2026-10-25 22:55 KST:** 통합 브랜치 코드 `4b5be85a8e7e0fb26d4be3bca58f423477e49c48`의 [Linux Chrome/Edge #40199604164](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40199604164) 및 [Windows NSIS #40199604265](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40199604265) **최종 SUCCESS**. Windows 설치 앱에서 합성 2p PDF→PDF.js 원본 대조·승인→IDB 신규 문서→테마 변경→재로드→Electron native 저장→A4 1p 출력·원문 표식 6개·이미지 1회 검증. **현재 다음 작업은 M02 실제 3영역 스튜디오·조판이 실제로 다른 2가지 디자인 및 목업 실물 비교**. 문서 하단의 오래된 M01 'READY'와 in_progress 기록은 과거 이력이다. 실제 고객문서/로컬AI/상용화는 여전히 미검증이다.
 
 
