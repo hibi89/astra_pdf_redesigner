@@ -144,3 +144,16 @@
 8. **Originals/security:** `main`/PR3/PR4 and source blueprint files untouched; STEP1 localStorage V1 and STEP2 IndexedDB V2 kept. Tests use synthetic PDFs, no real user file or outside API; source remains in session. No GGUF binary acquired.
 9. **Next READY/acceptance:** M08-A installed Windows all eight template print tests for A4/source marker order/raster, installed storage preservation; then supported customer PDF and ordinary Windows PC empirical quality gates. User approval required for external model download, paid API, sharing sensitive real documents or release.
 10. **Timestamp/checkpoint:** 2026-10-26 KST, verified both workflow final conclusions and job logs at code SHA `ed9061b0e7878d06e9b36518df9a5fe68c4ea3a7`; detailed [M07-B report](M07_B_BASIC_LAYOUTS_20261026.md). Post-doc remote HEAD to be verified separately.
+
+
+## M08-A implementation handoff — 2026-10-26 KST (CI PENDING)
+1. Objective: close Linux-browser vs installed-Windows 8-theme proof gap, not full commercial release. Prior 8/8 Chrome/Edge and generic Windows installer pass remain valid for old tested SHA.
+2. Done in source: `desktop/step3-eight-layout-acceptance.cjs` (CI/Windows-only real Electron A4 printToPDF for eight themes after same imported PDF V2 persistence); PowerShell installed EXE flag and eight-output cleanup, `tests/verify-eight-desktop-layouts.mjs` independent PDF.js audit of each actual output. No changes to app product runtime, schema, IPC or external services.
+3. Tests: runner static guard via `npm run desktop:verify` and installed Windows full workflow required; new CI **PENDING**. Validation defines 8 generated PDFs, 6 exact original markers ordered, >=1 raster each, A4 all pages, nonrotated text, distinct heading geometry. Linux regression unchanged. Real customer PDFs/hardware NOT RUN.
+4. State: M08-A code implemented, not DONE until exact-head CI. M03-B1 licensed true offline Korean AI binary download and CPU quality needs approval; 3 tier product sale NO-GO.
+5. Failure recovery: If PDF.js extraction of heading differs between Chromium/Electron, inspect actual output, revise fixture matching with evidence, not relax required source/raster/A4 checks. Temp files isolated under RUNNER_TEMP only and cleanup on failure; no existing user data deletion.
+6. Branch: `hibi89/astra_pdf_redesigner` integration from `fe87f2fee0422b4ec7364fe789fbfaf0d93dfb59`, files: desktop step3 acceptance + new eight helper, tests lifecycle + new independent verifier/static test, docs STATUS/HANDOFF. GitHub exact future commit SHA and CI log must be rechecked.
+7. Production URL/Vercel not applicable: offline Windows Electron NSIS app, GitHub Windows runner verifies installed executable. Commands `npm test`, `npm run build`, `npm run desktop:verify` and Windows Actions workflow.
+8. Originals/storage: main, PR3/PR4, STEP1 localStorage and STEP2 IDB unchanged, synthetic fixture only, source PDF never exported to third-party; no model download or paid API.
+9. Next: CI verdict → fix only actual failing boundary → M08-A DONE if all eight independent installed prints pass; otherwise block/plan alternative. Then customer-file matrix and consumer PC validation separately.
+10. Timestamp: 2026-10-26 KST code staged from `fe87f2fee0422b4ec7364fe789fbfaf0d93dfb59`; docs checkpoint does NOT attest passed tests.

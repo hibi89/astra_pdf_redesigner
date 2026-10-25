@@ -18,6 +18,7 @@ $sentinel = Join-Path $appProfile $sentinelName
 $markerValue = "CI-KEEP-$PID"
 $acceptancePdf = $null
 $step3Pdf = $null
+$eightFolder = $null
 $wasInstalled = $false
 $removed = $false
 $links = @()
@@ -117,14 +118,24 @@ try {
   $step3Pdf = Join-Path $env:RUNNER_TEMP ("astra-step3-import-$PID.pdf")
   if (Test-Path -LiteralPath $step3Pdf) { throw 'Refusing to overwrite STEP3 output' }
   $env:ASTRA_STEP3_ACCEPTANCE_OUT = $step3Pdf
+  $eightFolder = Join-Path $env:RUNNER_TEMP ("astra-step3-layouts-$PID")
+  if (Test-Path -LiteralPath $eightFolder) { throw 'Refusing to overwrite existing M08-A PDF folder' }
+  $env:ASTRA_STEP3_EIGHT_DIR = $eightFolder
   try {
-    $step3 = Start-Process -FilePath $installedExe -ArgumentList @('--astra-desktop-smoke','--astra-step3-acceptance') -PassThru -Wait -NoNewWindow
+    $step3 = Start-Process -FilePath $installedExe -ArgumentList @('--astra-desktop-smoke','--astra-step3-acceptance','--astra-step3-eight-layouts') -PassThru -Wait -NoNewWindow
     if ($step3.ExitCode -ne 0) { throw "Installed STEP3 import/export failed with exit code $($step3.ExitCode)" }
     & node tests/verify-desktop-pdf.mjs $step3Pdf --step3-import
     if ($LASTEXITCODE -ne 0) { throw "Installed STEP3 PDF content failed verification: $LASTEXITCODE" }
+    & node tests/verify-eight-desktop-layouts.mjs $eightFolder
+    if ($LASTEXITCODE -ne 0) { throw "Installed eight-template actual PDF audit failed: $LASTEXITCODE" }
+    Write-Host 'PASS M08-A NSIS INSTALLED 8/8 A4 PDF AUDIT'
     Write-Host 'PASS ASTRA INSTALLED STEP3: PDF.js import, source review, persisted design and native A4 PDF output'
   } finally {
     Remove-Item Env:ASTRA_STEP3_ACCEPTANCE_OUT -ErrorAction SilentlyContinue
+    Remove-Item Env:ASTRA_STEP3_EIGHT_DIR -ErrorAction SilentlyContinue
+    if ($eightFolder -and (Test-Path -LiteralPath $eightFolder)) {
+      Remove-Item -LiteralPath $eightFolder -Recurse -Force
+    }
     if (Test-Path -LiteralPath $step3Pdf) { Remove-Item -LiteralPath $step3Pdf -Force }
   }
 
@@ -153,6 +164,10 @@ try {
   Write-Host 'PASS ASTRA NSIS UNINSTALL: app and both shortcuts removed; synthetic userData preserved'
 }
 finally {
+  Remove-Item Env:ASTRA_STEP3_EIGHT_DIR -ErrorAction SilentlyContinue
+  if ($eightFolder -and (Test-Path -LiteralPath $eightFolder)) {
+    Remove-Item -LiteralPath $eightFolder -Recurse -Force
+  }
   if ($step3Pdf -and (Test-Path -LiteralPath $step3Pdf)) {
     Remove-Item -LiteralPath $step3Pdf -Force
   }

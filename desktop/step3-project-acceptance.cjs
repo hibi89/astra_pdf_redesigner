@@ -4,6 +4,7 @@
 // No customer PDF is read, uploaded or committed.
 const fs=require('node:fs/promises');
 const {acceptanceDomSource,MARKERS}=require('./pdf-acceptance-fixture.cjs');
+const {runInstalledEightLayoutAcceptance}=require('./step3-eight-layout-acceptance.cjs');
 const APP_URL='astra://app/index.html';
 async function waitFor(check,label){
   for(let i=0;i<160;i++){
@@ -109,6 +110,10 @@ async function runStep3ProjectAcceptance(win,renderLocalPdf,armNativeCapture,out
   const verified=await win.webContents.executeJavaScript(
     '('+verifyPersisted.toString()+')('+JSON.stringify(imported)+')',true);
   if(!verified?.buttonReady)throw Error('STEP3 installed project reload failed');
+  // M08-A opt-in: use actual installed renderer, with the same committed source;
+  // independent PDF.js audit runs only after the process exits.
+  if(process.argv.includes('--astra-step3-eight-layouts'))
+    await runInstalledEightLayoutAcceptance(win,renderLocalPdf);
   armNativeCapture();
   await win.webContents.executeJavaScript(
     "document.querySelector('header .print-button').click(); true",true);

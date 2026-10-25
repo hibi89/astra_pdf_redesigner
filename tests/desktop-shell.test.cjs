@@ -109,3 +109,22 @@ test('Windows CI exercises real STEP2 UI and IndexedDB before installed PDF outp
   assert.ok(verifier.includes('ASTRA_LIBRARY_ONLY_8310'));
   assert.ok(verifier.includes('realStep2'));
 });
+
+test('M08-A installed Windows prints and independently audits eight actual themed A4 PDFs',()=>{
+  const helper=fs.readFileSync(path.resolve(__dirname,'../desktop/step3-eight-layout-acceptance.cjs'),'utf8');
+  const verifier=fs.readFileSync(path.resolve(__dirname,'verify-eight-desktop-layouts.mjs'),'utf8');
+  const accept=fs.readFileSync(path.resolve(__dirname,'../desktop/step3-project-acceptance.cjs'),'utf8');
+  const lifecycle=fs.readFileSync(path.resolve(__dirname,'windows-installer-lifecycle.ps1'),'utf8');
+  const themes=require('../desktop/step3-eight-layout-acceptance.cjs').BASIC_THEMES;
+  assert.deepEqual(themes,['report','minimal','diary','compact','editorial','ledger','brief','folio']);
+  for(const required of ['GITHUB_ACTIONS','process.platform',"flag:'wx'",'await renderLocalPdf()',
+    'win.webContents.executeJavaScript','manifest.json','ASTRA_STEP3_EIGHT_DIR'])
+    assert.ok(helper.includes(required),'M08-A installed output missing '+required);
+  assert.ok(accept.includes('runInstalledEightLayoutAcceptance(win,renderLocalPdf)'));
+  assert.ok(accept.includes('--astra-step3-eight-layouts'));
+  assert.ok(lifecycle.includes('--astra-step3-eight-layouts'));
+  assert.ok(lifecycle.includes('verify-eight-desktop-layouts.mjs'));
+  assert.ok(lifecycle.includes('Remove-Item -LiteralPath $eightFolder -Recurse -Force'));
+  assert.ok(verifier.includes('auditPdfBytes')&&verifier.includes('requireRaster:true'));
+  assert.ok(verifier.includes('signature')&&verifier.includes('manifest.title'));
+});
