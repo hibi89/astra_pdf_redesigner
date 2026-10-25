@@ -1,7 +1,7 @@
 name: Astra STEP 1 + STEP 2 validation
 on:
   push:
-    branches: [main, 'feature/step2-*']
+    branches: [main, 'feature/step2-*', 'feature/step3-*', 'integration/astra-commercial-core']
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
@@ -44,6 +44,7 @@ jobs:
           CHROME_PATH="$CHROME_BIN" node tests/step2-cold-migration.mjs
           CHROME_PATH="$CHROME_BIN" STEP2_INJECT_MIGRATION_ABORT=1 node tests/step2-cold-migration.mjs
           CHROME_PATH="$CHROME_BIN" node tests/step2-cross-profile.mjs
+          CHROME_PATH="$CHROME_BIN" node tests/step3-browser.mjs
   # A new GitHub-hosted VM prevents leftover Chrome helpers and long-running
   # profile cleanup from exhausting Edge browser resources.
   edge-validation:
@@ -80,5 +81,6 @@ jobs:
           echo "Running STEP 1 A4 print and STEP 2 IndexedDB, images, JSON and long-caption PDF regressions with actual Edge"
           CHROME_PATH="$EDGE_BIN" node tests/browser-smoke.mjs
           CHROME_PATH="$EDGE_BIN" node tests/step2-browser.mjs
+          CHROME_PATH="$EDGE_BIN" node tests/step3-browser.mjs
           echo "PASS EDGE: STEP1 A4 PDF and STEP2 print, persistence, images, import/export and pagination checks"
 

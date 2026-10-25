@@ -3,6 +3,8 @@ import { PALETTE, THEMES } from '../types.ts';
 import { LIMITS, documentAssetIds, moveItem, newBlock, newSection, visibleSections, type ContentBlock, type DocumentSection, type ImageAsset, type ProjectDocument } from './model.ts';
 import { downloadProject } from './projectFile.ts';
 import { useWorkspace } from './useWorkspace.ts';
+import PdfImportPanel from '../step3/ImportPanel.tsx';
+import {hasDesktopPdfExport,savePdfFromEditor} from '../desktopPdf.ts';
 
 const allThemes=[...THEMES,{id:'compact' as const,label:'컴팩트 리포트',description:'짧은 제목과 밀도 높은 문서'}];
 function useAssetUrls(assets:readonly ImageAsset[]):Record<string,string>{
@@ -32,6 +34,7 @@ export function ProjectPreview({doc,urls}: {doc:ProjectDocument;urls:Record<stri
         {section.blocks.map(block=>{
           if(block.kind==='heading')return block.text.trim()?<h3 className="block-heading" key={block.id}>{block.text}</h3>:null;
           if(block.kind==='paragraph')return block.text.trim()?<div className="section-body block-prose" key={block.id}>{block.text}</div>:null;
+          if(block.kind==='caption')return block.text.trim()?<p className="block-caption" key={block.id}>{block.text}</p>:null;
           if (block.kind !== 'image') return null;
           const url=urls[block.assetId];
           return <figure className={`document-figure align-${block.alignment} figure-${block.size}`} key={block.id}>
@@ -64,13 +67,13 @@ export default function Workspace({onLegacy}:Props){
       const missing=imageRefs.filter(id=>!w.assets.some(a=>a.id===id)||!urls[id]);if(missing.length)throw new Error('일부 이미지 파일이 누락되었습니다. 인쇄 전 문서를 확인해 주세요.');
       await Promise.all([...document.querySelectorAll<HTMLImageElement>('.project-paper img')].map(image=>image.decode()));
       await document.fonts.ready;
-      window.print();
+      await savePdfFromEditor();
     }catch(e){w.setError(e instanceof Error?`인쇄 준비 실패: ${e.message}`:'인쇄를 준비할 수 없습니다.');}finally{setPrintBusy(false);}
   };
   return <>
-    <header className="app-header no-print"><div className="brand"><span className="brand-icon">A</span><div><h1>아스트라 PDF 리디자이너</h1><p>STEP 2 · 개인 문서 제작기</p></div></div>
+    <header className="app-header no-print"><div className="brand"><span className="brand-icon">A</span><div><h1>아스트라 PDF 리디자이너</h1><p>STEP 2·3 · 로컬 문서 및 PDF 가져오기</p></div></div>
       <div className="print-actions"><button className="secondary-button" disabled={!editable} onClick={()=>void operation(async()=>{await w.flush();onLegacy();})}>기존 회고록 편집</button>
-      <button className="print-button" disabled={!editable} onClick={()=>void print()}>{printBusy?'준비 중…':'PDF 저장 / 인쇄'}</button><span>인쇄 창에서 ‘PDF로 저장’을 선택하세요.</span></div>
+      <button className="print-button" disabled={!editable} onClick={()=>void print()}>{printBusy?'준비 중…':hasDesktopPdfExport()?'PDF 파일 저장':'PDF 저장 / 인쇄'}</button><span>{hasDesktopPdfExport()?'저장할 PDF 파일의 위치를 선택하세요.':'인쇄 창에서 ‘PDF로 저장’을 선택하세요.'}</span></div>
     </header>
     <main className="app-layout project-layout">
       <aside className="editor-column no-print">
@@ -83,6 +86,7 @@ export default function Workspace({onLegacy}:Props){
             <div className="document-list" role="list">{w.documents.map(item=><button role="listitem" key={item.id} disabled={!editable||item.id===doc?.id} className={`doc-list-item ${item.id===doc?.id?'active':''}`} onClick={()=>void operation(()=>w.switchTo(item.id))}><strong>{item.name||'(이름 없음)'}</strong><small>{new Date(item.updatedAt).toLocaleString('ko-KR')}</small></button>)}</div>
           </>}
         </section>
+        <PdfImportPanel disabled={!editable} onImport={w.importPdfDraft}/>
         {doc&&<>
           <section className="panel"><div className="panel-heading project-heading-row"><h2>문서 정보</h2><span className="save-group"><span className="save-chip" role="status" aria-live="polite">{w.status}</span><button className="text-button" disabled={!editable} onClick={()=>void operation(()=>w.flush())}>지금 저장 / 재시도</button></span></div>
             <div className="form-grid">
@@ -102,11 +106,12 @@ export default function Workspace({onLegacy}:Props){
                 <div className="mini-actions"><button aria-label={`${section.title||'이름 없는 섹션'} 위로 이동`} disabled={!editable||si===0} onClick={()=>editDoc(d=>({...d,content:{...d.content,sections:moveItem(d.content.sections,section.id,-1)}}))}>↑</button><button aria-label={`${section.title||'이름 없는 섹션'} 아래로 이동`} disabled={!editable||si===doc.content.sections.length-1} onClick={()=>editDoc(d=>({...d,content:{...d.content,sections:moveItem(d.content.sections,section.id,1)}}))}>↓</button><button className="danger" aria-label={`${section.title||'이름 없는 섹션'} 삭제`} disabled={!editable} onClick={()=>{if(window.confirm(`‘${section.title||'이름 없는 섹션'}’과 포함된 본문·이미지 ${section.blocks.length}개를 삭제하시겠습니까?`))void operation(()=>w.removeSection(section.id));}}>삭제</button></div>
               </div>
               {section.blocks.map((block,bi)=><div key={block.id} className="block-editor">
-                <div className="block-header"><strong>{block.kind==='paragraph'?'본문':block.kind==='heading'?'소제목':'이미지'}</strong>
+                <div className="block-header"><strong>{block.kind==='paragraph'?'본문':block.kind==='heading'?'소제목':block.kind==='caption'?'캡션':'이미지'}</strong>
                   <div className="mini-actions"><button aria-label={`${bi+1}번 블록 위로 이동`} disabled={!editable||bi===0} onClick={()=>editSection(section.id,s=>({...s,blocks:moveItem(s.blocks,block.id,-1)}))}>↑</button><button aria-label={`${bi+1}번 블록 아래로 이동`} disabled={!editable||bi===section.blocks.length-1} onClick={()=>editSection(section.id,s=>({...s,blocks:moveItem(s.blocks,block.id,1)}))}>↓</button><button className="danger" aria-label={`${bi+1}번 블록 삭제`} disabled={!editable} onClick={()=>{if(!window.confirm('이 블록을 삭제하시겠습니까?'))return;if(block.kind==='image')void operation(()=>w.removeImage(section.id,block.id));else editSection(section.id,s=>({...s,blocks:s.blocks.filter(b=>b.id!==block.id)}));}}>삭제</button></div>
                 </div>
-                {block.kind==='paragraph'&&<label className="field"><span className="visually-hidden">본문 {bi+1}</span><textarea disabled={!editable} rows={4} value={block.text} onChange={e=>changeBlock(section.id,block.id,b=>b.kind==='paragraph'?{...b,text:e.target.value}:b)}/></label>}
+                {(block.kind==='paragraph'||block.kind==='caption')&&<label className="field"><span className="visually-hidden">{block.kind==='caption'?'캡션':'본문'} {bi+1}</span><textarea disabled={!editable} rows={block.kind==='caption'?2:4} value={block.text} onChange={e=>changeBlock(section.id,block.id,b=>b.kind==='paragraph'||b.kind==='caption'?{...b,text:e.target.value}:b)}/></label>}
                 {block.kind==='heading'&&<label className="field"><span className="visually-hidden">소제목 {bi+1}</span><input disabled={!editable} value={block.text} onChange={e=>changeBlock(section.id,block.id,b=>b.kind==='heading'?{...b,text:e.target.value}:b)}/></label>}
+                {block.kind!=='image'&&block.origin&&<p className="help-text">원본 PDF 출처: {block.origin.page}페이지 · x={block.origin.x}pt · y={block.origin.y}pt (추정)</p>}
                 {block.kind==='image'&&<>
                   {urls[block.assetId]&&<img className="edit-image-preview" alt="첨부 이미지 미리보기" src={urls[block.assetId]}/>}
                   <label className="field">이미지 교체<input disabled={!editable} type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)void operation(()=>w.insertImage(file,section.id,block.id));}}/></label>
@@ -114,7 +119,7 @@ export default function Workspace({onLegacy}:Props){
                   <div className="image-options"><label className="field">정렬<select disabled={!editable} value={block.alignment} onChange={e=>changeBlock(section.id,block.id,b=>b.kind==='image'?{...b,alignment:e.target.value as 'left'|'center'|'right'}:b)}><option value="left">왼쪽</option><option value="center">가운데</option><option value="right">오른쪽</option></select></label><label className="field">크기<select disabled={!editable} value={block.size} onChange={e=>changeBlock(section.id,block.id,b=>b.kind==='image'?{...b,size:e.target.value as 'small'|'medium'|'large'}:b)}><option value="small">작게 (35%)</option><option value="medium">보통 (65%)</option><option value="large">크게 (100%)</option></select></label></div>
                 </>}
               </div>)}
-              <div className="add-block"><button disabled={!editable} className="secondary-button" onClick={()=>editSection(section.id,s=>({...s,blocks:[...s.blocks,newBlock('paragraph')]}))}>+ 본문</button><button disabled={!editable} className="secondary-button" onClick={()=>editSection(section.id,s=>({...s,blocks:[...s.blocks,newBlock('heading')]}))}>+ 소제목</button><label className={`secondary-button file-trigger ${!editable?'disabled':''}`}>+ 이미지<input disabled={!editable} type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)void operation(()=>w.insertImage(file,section.id));}}/></label></div>
+              <div className="add-block"><button disabled={!editable} className="secondary-button" onClick={()=>editSection(section.id,s=>({...s,blocks:[...s.blocks,newBlock('paragraph')]}))}>+ 본문</button><button disabled={!editable} className="secondary-button" onClick={()=>editSection(section.id,s=>({...s,blocks:[...s.blocks,newBlock('heading')]}))}>+ 소제목</button><button disabled={!editable} className="secondary-button" onClick={()=>editSection(section.id,s=>({...s,blocks:[...s.blocks,newBlock('caption')]}))}>+ 캡션</button><label className={`secondary-button file-trigger ${!editable?'disabled':''}`}>+ 이미지<input disabled={!editable} type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>{const file=e.target.files?.[0];e.target.value='';if(file)void operation(()=>w.insertImage(file,section.id));}}/></label></div>
             </div>)}
           </section>
           <section className="panel settings-panel"><div className="panel-heading"><h2>디자인 설정</h2><span className="panel-caption">원문은 변경하지 않습니다</span></div>
