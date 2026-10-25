@@ -7,11 +7,24 @@ const {pathToFileURL}=require('node:url');
 const {resolveBundleAsset}=require('./bundle-path.cjs');
 const {acceptanceDomSource,MARKERS}=require('./pdf-acceptance-fixture.cjs');
 const {runStep2ProjectAcceptance}=require('./step2-project-acceptance.cjs');
+const {runStep3ProjectAcceptance}=require('./step3-project-acceptance.cjs');
 
 const APP_URL='astra://app/index.html';
 const SMOKE=process.argv.includes('--astra-desktop-smoke');
 const PDF_ACCEPTANCE=SMOKE&&process.argv.includes('--astra-pdf-acceptance');
 const STEP2_ACCEPTANCE=SMOKE&&(process.argv.includes('--astra-step2-acceptance')||process.argv.includes('--astra-step2-preservation-verify'));
+const STEP3_ACCEPTANCE=SMOKE&&process.argv.includes('--astra-step3-acceptance');
+let step3NativeCaptureArmed=false;
+function step3OutputPath(){
+  if(process.env.GITHUB_ACTIONS!=='true'||!process.env.RUNNER_TEMP||!process.env.ASTRA_STEP3_ACCEPTANCE_OUT)
+    throw Error('STEP3 acceptance is restricted to ephemeral GitHub Actions runners');
+  const root=path.resolve(process.env.RUNNER_TEMP);
+  const output=path.resolve(process.env.ASTRA_STEP3_ACCEPTANCE_OUT);
+  if(path.dirname(output)!==root||
+     !/^astra-step3-import-[A-Za-z0-9-]+\.pdf$/i.test(path.basename(output)))
+    throw Error('STEP3 output must be an isolated runner PDF');
+  return output;
+}
 protocol.registerSchemesAsPrivileged([{
   scheme:'astra',
   privileges:{standard:true,secure:true,supportFetchAPI:true,stream:true},
@@ -86,7 +99,8 @@ function registerPdfSaving(){
     // Smoke mode uses an isolated test-only directory. It never opens the
     // native picker or writes into the user's Documents directory.
     if(SMOKE){
-      const output=path.join(app.getPath('userData'),'astra-desktop-smoke.pdf');
+      const persistentTestOutput=STEP3_ACCEPTANCE&&step3NativeCaptureArmed;
+      const output=persistentTestOutput?step3OutputPath():path.join(app.getPath('userData'),'astra-desktop-smoke.pdf');
       try{
         const data=await renderLocalPdf();
         await fs.mkdir(path.dirname(output),{recursive:true});
@@ -96,7 +110,7 @@ function registerPdfSaving(){
           throw Error('Generated PDF did not persist correctly');
         console.log('PASS ASTRA DESKTOP PDF EXPORT: Electron printToPDF and Windows filesystem, bytes='+actual.length);
         return{status:'saved'};
-      }finally{await fs.rm(output,{force:true});}
+      }finally{if(!persistentTestOutput)await fs.rm(output,{force:true});}
     }
     const selection=await dialog.showSaveDialog(mainWindow,{
       title:'PDF로 저장',
@@ -208,6 +222,8 @@ if(lock){
         await runSmoke(mainWindow);
         if(PDF_ACCEPTANCE)await runPdfContentAcceptance(mainWindow);
         if(STEP2_ACCEPTANCE)await runStep2ProjectAcceptance(mainWindow,renderLocalPdf);
+        if(STEP3_ACCEPTANCE)await runStep3ProjectAcceptance(mainWindow,renderLocalPdf,
+          ()=>{step3NativeCaptureArmed=true;},step3OutputPath());
         app.exit(0);
       }
     }catch(error){console.error('ASTRA desktop startup failure:',error);app.exit(1);}

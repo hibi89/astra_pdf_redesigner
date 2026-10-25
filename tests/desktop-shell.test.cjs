@@ -59,6 +59,24 @@ test('Windows acceptance fixture is synthetic PNG and requires runner-only PDF o
   assert.ok(lifecycle.includes('Remove-Item -LiteralPath $acceptancePdf -Force'));
 });
 
+test('Windows CI exercises installed STEP3 PDF.js approval, reload and native export',()=>{
+  const fixture=fs.readFileSync(path.resolve(__dirname,'../desktop/step3-project-acceptance.cjs'),'utf8');
+  const main=fs.readFileSync(path.resolve(__dirname,'../desktop/main.cjs'),'utf8');
+  const lifecycle=fs.readFileSync(path.resolve(__dirname,'windows-installer-lifecycle.ps1'),'utf8');
+  const verifier=fs.readFileSync(path.resolve(__dirname,'verify-desktop-pdf.mjs'),'utf8');
+  for(const required of ['uploadAndConfirm','verifyPersisted',
+    'ASTRA_PDF_PAGE_ONE_7401','ASTRA_PDF_PAGE_TWO_7402',
+    'armNativeCapture','new DataTransfer()']){
+    assert.ok(fixture.includes(required),'STEP3 installed acceptance missing '+required);
+  }
+  assert.ok(main.includes('--astra-step3-acceptance'));
+  assert.ok(main.includes('step3NativeCaptureArmed'));
+  assert.ok(main.includes('path.dirname(output)!==root'));
+  assert.ok(lifecycle.includes('--astra-step3-acceptance'));
+  assert.ok(lifecycle.includes('--step3-import'));
+  assert.ok(verifier.includes('importedStep3'));
+});
+
 test('Windows CI exercises real STEP2 UI and IndexedDB before installed PDF output',()=>{
   const fixture=fs.readFileSync(path.resolve(__dirname,'../desktop/step2-project-acceptance.cjs'),'utf8');
   const runtime=fs.readFileSync(path.resolve(__dirname,'../desktop/main.cjs'),'utf8');

@@ -17,6 +17,7 @@ $sentinelName = "astra-ci-preservation-$PID.marker"
 $sentinel = Join-Path $appProfile $sentinelName
 $markerValue = "CI-KEEP-$PID"
 $acceptancePdf = $null
+$step3Pdf = $null
 $wasInstalled = $false
 $removed = $false
 $links = @()
@@ -111,6 +112,22 @@ try {
     if (Test-Path -LiteralPath $projectPdf) { Remove-Item -LiteralPath $projectPdf -Force }
   }
 
+  # Third isolated installed EXE run: PDF.js import -> approval -> persisted
+  # redesigned document -> native save -> actual exported PDF parsing.
+  $step3Pdf = Join-Path $env:RUNNER_TEMP ("astra-step3-import-$PID.pdf")
+  if (Test-Path -LiteralPath $step3Pdf) { throw 'Refusing to overwrite STEP3 output' }
+  $env:ASTRA_STEP3_ACCEPTANCE_OUT = $step3Pdf
+  try {
+    $step3 = Start-Process -FilePath $installedExe -ArgumentList @('--astra-desktop-smoke','--astra-step3-acceptance') -PassThru -Wait -NoNewWindow
+    if ($step3.ExitCode -ne 0) { throw "Installed STEP3 import/export failed with exit code $($step3.ExitCode)" }
+    & node tests/verify-desktop-pdf.mjs $step3Pdf --step3-import
+    if ($LASTEXITCODE -ne 0) { throw "Installed STEP3 PDF content failed verification: $LASTEXITCODE" }
+    Write-Host 'PASS ASTRA INSTALLED STEP3: PDF.js import, source review, persisted design and native A4 PDF output'
+  } finally {
+    Remove-Item Env:ASTRA_STEP3_ACCEPTANCE_OUT -ErrorAction SilentlyContinue
+    if (Test-Path -LiteralPath $step3Pdf) { Remove-Item -LiteralPath $step3Pdf -Force }
+  }
+
   # Uninstall must not silently erase independent user data. The marker is
   # synthetic and confined to the CI runner's disposable userData folder.
   New-Item -ItemType Directory -Force -Path $appProfile | Out-Null
@@ -136,6 +153,10 @@ try {
   Write-Host 'PASS ASTRA NSIS UNINSTALL: app and both shortcuts removed; synthetic userData preserved'
 }
 finally {
+  if ($step3Pdf -and (Test-Path -LiteralPath $step3Pdf)) {
+    Remove-Item -LiteralPath $step3Pdf -Force
+  }
+  Remove-Item Env:ASTRA_STEP3_ACCEPTANCE_OUT -ErrorAction SilentlyContinue
   if ($acceptancePdf -and (Test-Path -LiteralPath $acceptancePdf)) {
     Remove-Item -LiteralPath $acceptancePdf -Force
   }

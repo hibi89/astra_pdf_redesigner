@@ -7,6 +7,8 @@ import {getDocument,OPS} from 'pdfjs-dist/legacy/build/pdf.mjs';
 
 const source=process.argv[2];
 const realStep2=process.argv.includes('--step2-project');
+const importedStep3=process.argv.includes('--step3-import');
+assert.ok(!(realStep2&&importedStep3),'Specify exactly one acceptance variant');
 if(!source||process.env.GITHUB_ACTIONS!=='true'){
   throw Error('PDF acceptance requires a generated file path on GitHub Actions');
 }
@@ -16,7 +18,7 @@ assert.equal(data.subarray(0,5).toString('ascii'),'%PDF-','Output is not a PDF f
 const task=getDocument({data:new Uint8Array(data),useSystemFonts:true});
 try{
   const doc=await task.promise;
-  if(realStep2)assert.ok(doc.numPages>=1,'STEP2 document must print at least one page');
+  if(realStep2||importedStep3)assert.ok(doc.numPages>=1&&doc.numPages<=15,'Imported document must yield 1-15 A4 pages');
   else assert.equal(doc.numPages,2,'Synthetic document must print on exactly two pages');
   const text=[];
   let bitmapDraws=0;
@@ -46,6 +48,18 @@ try{
     }
     assert.ok(!normalized.join('').includes('ASTRA_LIBRARY_ONLY_8310'),
       'Document library/editor UI leaked into printed PDF');
+  }else if(importedStep3){
+    const tokens=['ASTRA_PDF_PAGE_ONE_7401','ASTRA_PDF_PAGE_TWO_7402',
+      '한글문서검증','마지막페이지확인','12345','67890'];
+    const combined=normalized.join('');
+    for(const marker of tokens){
+      assert.equal(combined.split(marker).length-1,1,
+        'STEP3 import/export marker missing or duplicated: '+marker);
+    }
+    assert.ok(combined.indexOf('ASTRA_PDF_PAGE_ONE_7401')<
+      combined.indexOf('ASTRA_PDF_PAGE_TWO_7402'),'STEP3 imported source order changed');
+    assert.ok(!combined.includes('STEP 3 · 기존 PDF 가져오기'),
+      'Editor UI leaked into installed STEP3 PDF');
   }else{
     const tokens=[
       'ASTRA_PDF_PAGE_ONE_7401',
@@ -65,8 +79,10 @@ try{
     assert.ok(!normalized[0].includes('ASTRA_PDF_PAGE_TWO_7402'),
       'Page 2 content leaked into page 1');
   }
-  assert.ok(bitmapDraws>=1,'Printed image does not appear in PDF operator list');
-  console.log(realStep2
+  if(!importedStep3)assert.ok(bitmapDraws>=1,'Printed image does not appear in PDF operator list');
+  console.log(importedStep3
+    ?'PASS ASTRA INSTALLED STEP3 PDF CONTENT: native A4 pages='+doc.numPages+', six source markers verified, raster draw '+bitmapDraws
+    :realStep2
     ?'PASS ASTRA INSTALLED STEP2 PDF CONTENT: A4 pages='+doc.numPages+', persisted Korean/numeric markers 5/5, raster draw '+bitmapDraws
     :'PASS ASTRA INSTALLED PDF CONTENT: A4 x 2, Korean/numeric markers 6/6, raster draw '+bitmapDraws);
 }finally{
