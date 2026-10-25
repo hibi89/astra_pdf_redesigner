@@ -18,12 +18,20 @@ export function inspectRules(original:string):RuleResult{
   if(original.length>5000)return{status:'blocked',reason:'긴 문단은 5,000자 이하로 나누어 검수하세요.'};
   if(/(^|\n)[ \t]{2,}|[|\t]/.test(original))
     return{status:'blocked',reason:'표·들여쓰기 구조가 감지되어 자동 제안을 보류합니다.'};
-  let candidate=original;
+  // Quoted expressions are immutable. Only transform surrounding prose.
+  // Avoid changing legal citations, names or user-supplied quotations.
+  const segments=original.split(/("[^"\n]*"|'[^'\n]*')/g);
   const appliedRules:string[]=[];
-  const spaced=candidate.replace(/([가-힣]) {2,}(?=[가-힣])/g,'$1 ');
-  if(spaced!==candidate){candidate=spaced;appliedRules.push('한글 단어 사이 중복 공백');}
-  const concise=candidate.replace(/(확인|진행|수행|검토|완료)하였습니다/g,'$1했습니다');
-  if(concise!==candidate){candidate=concise;appliedRules.push('한정된 문체 간결화');}
+  const candidate=segments.map((part,index)=>{
+    if(index%2!==0)return part;
+    const spaced=part.replace(/([가-힣]) {2,}(?=[가-힣])/g,'$1 ');
+    if(spaced!==part&&!appliedRules.includes('한글 단어 사이 중복 공백'))
+      appliedRules.push('한글 단어 사이 중복 공백');
+    const concise=spaced.replace(/(확인|진행|수행|검토|완료)하였습니다/g,'$1했습니다');
+    if(concise!==spaced&&!appliedRules.includes('한정된 문체 간결화'))
+      appliedRules.push('한정된 문체 간결화');
+    return concise;
+  }).join('');
   if(candidate===original)return{status:'unchanged',reason:'이 문단에서 검증된 규칙의 수정 후보를 찾지 못했습니다.'};
   if(JSON.stringify(anchors(original))!==JSON.stringify(anchors(candidate)))
     return{status:'blocked',reason:'숫자·URL·영문 약어·인용문 변화가 감지되어 제안을 차단했습니다.'};
