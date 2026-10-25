@@ -14,3 +14,10 @@
 - **최종 사업:** BASIC ₩30,000 / PRO ₩60,000 / BUSINESS ₩90,000; 전 SKU 동일 로컬 윤문은 **최종 제품 계약**이며 MVP SKU 구현 아님.
 - **A01:** 기존 3자 비교 감사 완료. [감사문서](INTEGRATION_A01_AUDIT.md). 구 177~370h [확장 백로그](EXPANDED_BACKLOG_20261025.md)로 이관.
 - **NEXT READY:** M01 CI 완료 확인 → 실패 수정 또는 새로운 Windows STEP3 E2E.
+
+
+## [RESUME HANDOFF] 2026-10-25 최신 단문 재개 트리거
+- `[astra_pdf_redesigner 깃헙 레포지토리 보고 작업이어가셈]` → `WORKER_START_HERE.md`를 읽고 질문 없이 즉시 M01 다음 실제 작업.
+- 점검 중 CI source SHA `978fe4fc469935e7d04c42151de931fb45c66107`: Chrome/Edge workflow #40198529770, Windows #40198529742 최초 in_progress, Edge 개별 job SUCCESS. **최종 상태 재조회 필수**.
+- M01 **IN_PROGRESS**, 현재 Windows STEP3 import→native PDF export 실통합 E2E **NOT RUN/NOT VERIFIED**.
+- 다음 작업 READY = CI 완료/실패 검사 및 Windows STEP3 통합 E2E 추가. 테스트 결과 기록 뒤 M02.
