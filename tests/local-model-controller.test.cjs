@@ -1,7 +1,7 @@
 'use strict';
 const test=require('node:test');
 const assert=require('node:assert/strict');
-const {mkdtempSync,mkdirSync,writeFileSync,rmSync,readFileSync,readdirSync}=require('node:fs');
+const {mkdtempSync,mkdirSync,writeFileSync,rmSync,readFileSync,existsSync}=require('node:fs');
 const os=require('node:os');
 const path=require('node:path');
 const crypto=require('node:crypto');
@@ -62,7 +62,7 @@ test('M03-B fixed CLI has no input in argv; uses temporary 0600 prompt and no sh
     assert.ok(argv.includes('--no-display-prompt'));
     assert.ok(!argv.join(' ').includes('문서를'));
     assert.ok(content.includes('문서를  확인하였습니다.'));
-    assert.ok(!readdirSync(path.dirname(prompt)).includes(path.basename(prompt)));
+    assert.equal(existsSync(prompt),false,'Transient prompt file must be deleted on completion');
   }finally{f.cleanup();}
 });
 test('M03-B validation blocks numbers, quoted spans, URLs and empty output',()=>{
