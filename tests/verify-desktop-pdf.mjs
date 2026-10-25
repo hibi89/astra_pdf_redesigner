@@ -4,6 +4,7 @@ import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
 import {resolve} from 'node:path';
 import {getDocument,OPS} from 'pdfjs-dist/legacy/build/pdf.mjs';
+import {auditPdfBytes} from './pdf-integrity-audit.mjs';
 
 const source=process.argv[2];
 const realStep2=process.argv.includes('--step2-project');
@@ -80,6 +81,20 @@ try{
       'Page 2 content leaked into page 1');
   }
   if(!importedStep3)assert.ok(bitmapDraws>=1,'Printed image does not appear in PDF operator list');
+  // M04 second-pass audit: media-box geometry, source marker parity/order and
+  // actual Windows output raster, independent of the first PDF.js text pass.
+  const m04Expected=importedStep3?
+    ['ASTRA_PDF_PAGE_ONE_7401','한글문서검증','12345',
+      'ASTRA_PDF_PAGE_TWO_7402','마지막페이지확인','67890']:
+    realStep2?
+    ['ASTRA_STEP2_PRINT_8307','ASTRA_STEP2_BODY_8308',
+      'ASTRA_STEP2_CAPTION_8309']:
+    ['ASTRA_PDF_PAGE_ONE_7401','한글문서검증','12345',
+      'ASTRA_PDF_PAGE_TWO_7402','마지막페이지확인','67890'];
+  const m04=await auditPdfBytes(data,{markers:m04Expected,requireRaster:true,
+    label:importedStep3?'M04 installed imported PDF':'M04 installed native PDF'});
+  assert.equal(m04.skippedRotation,0,'Rotated text requires separate review');
+  console.log('PASS M04 INSTALLED PDF AUDIT:',m04);
   console.log(importedStep3
     ?'PASS ASTRA INSTALLED STEP3 PDF CONTENT: native A4 pages='+doc.numPages+', six source markers verified, raster draw '+bitmapDraws
     :realStep2

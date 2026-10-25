@@ -9,6 +9,7 @@ import {launchBrowser} from './browser-process.mjs';
 import {makeClippedImagePdf} from './fixtures/step3-clipped-pdf.mjs';
 import {makeMixedLayoutPdf,MIXED_LAYOUT_MARKERS} from './fixtures/step3-mixed-layout-pdf.mjs';
 import {makeTransparencyFormPdf} from './fixtures/step3-transparency-form-pdf.mjs';
+import {auditPdfBytes} from './pdf-integrity-audit.mjs';
 const binary=process.env.CHROME_PATH||'chromium',url=process.env.SMOKE_URL||'http://127.0.0.1:4173';
 const dir=mkdtempSync(join(tmpdir(),'astra-step3-'));
 const browser=launchBrowser(binary,dir,'STEP3 PDF import');
@@ -321,6 +322,10 @@ try{
   }
   assert.equal(mixedImages.split('\n').filter(line=>/^\s*\d+\s+\d+\s+image/.test(line)).length,1,
     'Source fixture must embed one raster image');
+  const m04Source=await auditPdfBytes(mixedBytes,{markers:MIXED_LAYOUT_MARKERS,requireRaster:true,label:'M04 synthetic source'});
+  assert.equal(m04Source.pages,2);
+  assert.equal(m04Source.skippedRotation,0,'Rotated source text geometry remains unverified');
+  console.log('PASS M04 INDEPENDENT SOURCE AUDIT:',m04Source);
   console.log('PASS STEP3 MIXED SOURCE: verified 2 A4 pages, 13 exact text markers, one raster image');
 
   const mixedBefore=await evaluate("document.querySelectorAll('.doc-list-item').length");
@@ -404,6 +409,11 @@ try{
     mixedPrintedText.indexOf('STEP3_SOURCE_P2_BEGIN_911'),'PDF page sequence was inverted');
   assert.ok(mixedPrintedImages.split('\n').some(line=>/^\s*\d+\s+\d+\s+image/.test(line)),
     'Redesigned print must embed a raster image');
+  const m04Output=await auditPdfBytes(Buffer.from(mixedOutput.data,'base64'),
+    {markers:MIXED_LAYOUT_MARKERS,requireRaster:true,label:'M04 reflowed PDF'});
+  assert.equal(m04Output.markers,13);
+  assert.equal(m04Output.skippedRotation,0,'Rotated output geometry requires manual review');
+  console.log('PASS M04 OUTPUT A4 TEXT GEOMETRY / CONTENT:',m04Output);
   console.log('PASS STEP3 SOURCE/REPRINT COMPARISON: 13/13 exact markers once, source page sequence, output raster, A4, original documents intact');
   // Intentionally unverified: original vector grid lines, column/table cell
   // geometry, pixel-for-pixel image content and Windows print fidelity.
