@@ -1,5 +1,8 @@
 # ASTRA PDF Redesigner — 새 채팅 자동 복원 / 작업 시작점
 
+> **최신 확정 M01 완료 / M02 READY — 2026-10-25 22:55 KST:** 통합 브랜치 코드 `4b5be85a8e7e0fb26d4be3bca58f423477e49c48`의 [Linux Chrome/Edge #40199604164](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40199604164) 및 [Windows NSIS #40199604265](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40199604265) **최종 SUCCESS**. Windows 설치 앱에서 합성 2p PDF→PDF.js 원본 대조·승인→IDB 신규 문서→테마 변경→재로드→Electron native 저장→A4 1p 출력·원문 표식 6개·이미지 1회 검증. **현재 다음 작업은 M02 실제 3영역 스튜디오·조판이 실제로 다른 2가지 디자인 및 목업 실물 비교**. 문서 하단의 오래된 M01 'READY'와 in_progress 기록은 과거 이력이다. 실제 고객문서/로컬AI/상용화는 여전히 미검증이다.
+
+
 **트리거 (이 한 줄 그대로):** `[astra_pdf_redesigner 깃헙 레포지토리 보고 작업이어가셈]`
 
 > 이 저장소의 **기본 브랜치 main은 기존 STEP1·2 원본 보호용**이다. 새 작업은 반드시 최신 원격 `integration/astra-commercial-core`로 이어간다. **새 채팅에서 사용자에게 인수인계 프롬프트·승인·추가 설명을 요구하지 말고, GitHub 최신 문서를 읽고 첫 READY 작업을 바로 실행**한다. 별도 자동 백그라운드 작업이 켜져 있다는 뜻은 아니다.
