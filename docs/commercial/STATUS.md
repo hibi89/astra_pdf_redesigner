@@ -6,7 +6,7 @@
 - **Linux Actions:** [#40198529770](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40198529770), `in_progress` 최초 확인. **PASS/FAIL 아직 검수 전**.
 - **Windows Actions:** [#40198529742](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40198529742), `in_progress` 최초 확인. **PASS/FAIL 아직 검수 전**.
 - **M01 마감 전 남은 필수:** CI 완료 결과·코드 SHA 확인, 실패 수정, 설치형 STEP3 import→native export 실제 E2E 추가, 원본/STEP1·2 데이터 보존.
-- **M02 READY:** 원본/출력 3영역 화면 및 디자인 2종 실물→목업 비교 [MOCKUP_PARITY.md](MOCKUP_PARITY.md).
+- **M02 IN_PROGRESS:** 원본/출력 3영역 화면 및 디자인 2종 실물→목업 비교 [MOCKUP_PARITY.md](MOCKUP_PARITY.md).
 - **M03 WAIT:** 동일 기능의 선택형 offline 윤문/로컬 소형모델 1문단 시연. 미검증이면 완료 주장/판매 금지.
 - **M04 WAIT:** Windows NSIS 고객 경로 설치·PDF import/export·재시작, SHA.
 - **M05 WAIT:** 실제 스크린샷/PDF 기반 차이표와 핵심 결함 보고.
@@ -34,3 +34,12 @@
 - **Actual Windows E2E job log (2026-10-25 22:55 KST):** `PASS ASTRA INSTALLED STEP3 E2E` (new synthetic local PDF → PDF.js extraction and manual approval → new IDB document → changed theme → reload → native IPC PDF export); `PASS ASTRA INSTALLED STEP3 PDF CONTENT` (A4 **1 output page**, 6 markers and their order verified, **1 raster draw**). [Job log](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40199604265/job/121187756373).
 - **Verified scope limit:** two-page synthetic source to reflowed one-page A4 output, not customer document sampling; complex tables, OCR, pixel-exact source, real Windows customer PC, 2 distinct designed output styles, local LLM and three SKU enforcement remain NOT VERIFIED / NOT IMPLEMENTED.
 - **NEXT READY M02:** actual three-pane PDF review/preview/style UI, at least 2 demonstrably different real A4 layout prints, browser and Windows smoke, capture actual UI then fill the 5 highest mockup parity gaps. M03 local optional AI then M04 real installer/customer path then M05 final internal MVP verdict. **No commercial sale approval.**
+
+## [LATEST / 2026-10-25 23:13 KST] M02 FIRST ITERATION VERIFIED, M02 PARITY GAP STILL OPEN
+- **M01 DONE** from prior synthetic installed STEP3 E2E. **M02 IN_PROGRESS (implemented layout+2 prints, source-after-commit comparison gap)**. Keep M03 optional AI next in queue but not claim it has begun.
+- **New tested app commit** `383d2a63e1b91a32389ce75eeb7c9ceb4622d3ba` on `integration/astra-commercial-core`. Updated `src/step2/Workspace.tsx`, `src/styles.css`, `tests/step3-browser.mjs`, `.github/workflows/ci.yml`. Prior commits `0bf61af6` initial layout and `c24c3d0a` test regex fix.
+- **CI final:** [Linux Chrome/Edge #40200891875](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40200891875) = **SUCCESS** (2 jobs), [Windows NSIS #40200891742](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40200891742) = **SUCCESS** (full installed STEP3+upgrade smoke).
+- **Actual evidence:** 1600px Chromium 3-column geometry PASS, `Page.printToPDF` report vs minimal preserved 3 marker texts and distinct PDF header coordinates. First verified run had bbox title Y `246.861318pt` vs `276.111317pt` (29.25pt difference). Korean screenshot initially showed tofu on Linux; latest CI installed Noto CJK and produced **legible actual screenshot**. [Screenshot workflow artifact](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40200891875) name `astra-m02-studio-chrome-synthetic`. Source is synthetic, never customer PDF.
+- **Why not M02 DONE:** original PDF iframe exists during import review but current `ImportPanel.tsx` calls `forget()` on successful commit and releases the Blob URL; persistent before/after original vs redesigned A4 comparison not yet implemented. Original blueprint graphic is not in GitHub, so exact pixel mockup parity NOT VERIFIED.
+- **NEXT READY:** M02 original-after-import **in-session** comparison with per-active-document identity guard; never persist original PDF into IndexedDB without approval, revoke source Blob URLs on close/switch; test that output remains independent and source unchanged. Then close M02 and start M03 opt-in offline rewriting.
+- **Main/PR3/PR4** unchanged; no Vercel, production or customer Windows desktop accepted; 3SKU feature gating and AI remain NOT IMPLEMENTED / no-sale.
