@@ -2,9 +2,20 @@ import {useEffect,useRef,useState} from 'react';
 import type {PdfDraft,PdfDraftBlock,PdfRole} from './structure.ts';
 import {extractLocalPdf} from './pdf.ts';
 
-interface Props {disabled:boolean;onImport:(draft:PdfDraft)=>Promise<boolean>}
+export interface ImportedPdfSource {
+  documentId:string;
+  fileName:string;
+  url:string;
+}
+// A committed source is kept in memory only for the active document. The
+// caller takes sole ownership of the already-created Blob URL on success.
+interface Props {
+  disabled:boolean;
+  onImport:(draft:PdfDraft)=>Promise<string|false>;
+  onSourceCommitted:(source:ImportedPdfSource)=>void;
+}
 const ROLES:[PdfRole,string][]=[['paragraph','본문'],['heading','소제목'],['caption','캡션']];
-export default function PdfImportPanel({disabled,onImport}:Props){
+export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Props){
   const [draft,setDraft]=useState<PdfDraft|null>(null);
   const [busy,setBusy]=useState(false),[error,setError]=useState(''),[confirmed,setConfirmed]=useState(false);
   const [previewUrl,setPreviewUrl]=useState('');
@@ -56,8 +67,15 @@ export default function PdfImportPanel({disabled,onImport}:Props){
     setBusy(true);
     try{
       if(!draft.pages.some(p=>p.blocks.some(b=>b.text.trim())))throw Error('확인된 본문이 비어 있습니다.');
-      const success=await onImport(draft);
-      if(success)forget();else setError('문서함 저장에 실패했습니다. 추출 결과는 유지됩니다. 기존 문서는 변경하지 않았습니다.');
+      const documentId=await onImport(draft);
+      if(documentId){
+        const url=urlRef.current;
+        if(!url)throw Error('원본 PDF 비교 주소가 없습니다.');
+        onSourceCommitted({documentId,fileName:draft.fileName,url});
+        // Ownership transferred to the studio; do not revoke this one URL.
+        urlRef.current='';
+        forget();
+      }else setError('문서함 저장에 실패했습니다. 추출 결과는 유지됩니다. 기존 문서는 변경하지 않았습니다.');
     }catch(e){setError(e instanceof Error?e.message:'PDF 문서 저장 실패');}
     finally{setBusy(false);}
   };

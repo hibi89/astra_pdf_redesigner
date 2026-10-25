@@ -3,7 +3,7 @@ import { PALETTE, THEMES } from '../types.ts';
 import { LIMITS, documentAssetIds, moveItem, newBlock, newSection, visibleSections, type ContentBlock, type DocumentSection, type ImageAsset, type ProjectDocument } from './model.ts';
 import { downloadProject } from './projectFile.ts';
 import { useWorkspace } from './useWorkspace.ts';
-import PdfImportPanel from '../step3/ImportPanel.tsx';
+import PdfImportPanel, {type ImportedPdfSource} from '../step3/ImportPanel.tsx';
 import {hasDesktopPdfExport,savePdfFromEditor} from '../desktopPdf.ts';
 
 const allThemes=[...THEMES,{id:'compact' as const,label:'컴팩트 리포트',description:'짧은 제목과 밀도 높은 문서'}];
@@ -52,6 +52,30 @@ export default function Workspace({onLegacy}:Props){
   const w=useWorkspace();
   const [docsOpen,setDocsOpen]=useState(true),[busy,setBusy]=useState(false),[printBusy,setPrintBusy]=useState(false);
   const fileRef=useRef<HTMLInputElement|null>(null);
+  const [sourceReview,setSourceReview]=useState<ImportedPdfSource|null>(null);
+  const sourceReviewRef=useRef<ImportedPdfSource|null>(null);
+  const closeSourceReview=()=>{
+    const source=sourceReviewRef.current;
+    sourceReviewRef.current=null;
+    if(source)URL.revokeObjectURL(source.url);
+    setSourceReview(null);
+  };
+  const onSourceCommitted=(source:ImportedPdfSource)=>{
+    const previous=sourceReviewRef.current;
+    if(previous)URL.revokeObjectURL(previous.url);
+    sourceReviewRef.current=source;
+    setSourceReview(source);
+  };
+  // Unlike editable blocks, original PDF bytes are never stored in IndexedDB.
+  // Revoke the preview immediately on document identity change or unmount.
+  useEffect(()=>()=>{if(sourceReviewRef.current){
+    URL.revokeObjectURL(sourceReviewRef.current.url);
+    sourceReviewRef.current=null;
+  }},[]);
+  useEffect(()=>{
+    const source=sourceReviewRef.current;
+    if(w.ready&&source&&source.documentId!==w.document?.id)closeSourceReview();
+  },[w.ready,w.document?.id]);
   const urls=useAssetUrls(w.assets);
   const doc=w.document;
   const imageRefs=useMemo(()=>doc?documentAssetIds(doc):[],[doc]);
@@ -89,7 +113,18 @@ export default function Workspace({onLegacy}:Props){
             <div className="document-list" role="list">{w.documents.map(item=><button role="listitem" key={item.id} disabled={!editable||item.id===doc?.id} className={`doc-list-item ${item.id===doc?.id?'active':''}`} onClick={()=>void operation(()=>w.switchTo(item.id))}><strong>{item.name||'(이름 없음)'}</strong><small>{new Date(item.updatedAt).toLocaleString('ko-KR')}</small></button>)}</div>
           </>}
         </section>
-        <PdfImportPanel disabled={!editable} onImport={w.importPdfDraft}/>
+        <PdfImportPanel disabled={!editable} onImport={w.importPdfDraft} onSourceCommitted={onSourceCommitted}/>
+        {sourceReview&&sourceReview.documentId===doc?.id&&
+          <section className="panel studio-source-panel no-print" aria-label="원본 PDF와 새 디자인 대조"
+            data-source-document-id={sourceReview.documentId}>
+            <div className="panel-heading project-heading-row">
+              <h2>원본 ↔ 결과 대조</h2>
+              <button className="text-button" type="button" onClick={closeSourceReview}>원본 비교 닫기</button>
+            </div>
+            <p className="help-text">원본: {sourceReview.fileName} · 현재 문서 전용 임시 미리보기입니다. 오른쪽 A4 결과와 비교하세요.</p>
+            <iframe title="가져온 원본 PDF" src={sourceReview.url} width="100%" height="430"/>
+            <p className="help-text">다른 문서로 이동하거나 앱을 닫으면 원본 미리보기가 해제됩니다. 원본 파일 자체를 문서함에 저장하지 않습니다.</p>
+          </section>}
         {doc&&<>
           <section className="panel"><div className="panel-heading project-heading-row"><h2>문서 정보</h2><span className="save-group"><span className="save-chip" role="status" aria-live="polite">{w.status}</span><button className="text-button" disabled={!editable} onClick={()=>void operation(()=>w.flush())}>지금 저장 / 재시도</button></span></div>
             <div className="form-grid">

@@ -34,6 +34,13 @@ button:disabled{cursor:not-allowed;opacity:.48}select{min-height:38px;padding:7p
 @media print { .step3-image-review { display: none !important; } }
 
 
+/* M02 in-session source comparison; hidden from print, never persisted. */
+.studio-source-panel{border:1px solid #abc9d5;background:#f8fcfe}
+.studio-source-panel iframe{display:block;width:100%;min-height:360px;border:1px solid #c8d8df;border-radius:8px;background:#fff}
+.studio-source-panel .panel-heading{gap:6px;flex-wrap:wrap}
+.studio-source-panel .help-text{overflow-wrap:anywhere}
+@media print{.studio-source-panel{display:none!important}}
+
 /* M02 guided three-zone studio. The editor/export uses the existing project model. */
 .studio-layout{grid-template-columns:minmax(260px,340px) minmax(0,1fr) minmax(245px,280px);gap:18px;max-width:1920px;padding:20px clamp(12px,1.8vw,32px) 52px;align-items:start}
 .studio-steps{grid-column:1/-1;display:flex;align-items:center;gap:9px;padding:12px 17px;border:1px solid #d6e1e7;border-radius:14px;background:#fff;box-shadow:0 2px 15px rgb(30 59 77 / 5%)}

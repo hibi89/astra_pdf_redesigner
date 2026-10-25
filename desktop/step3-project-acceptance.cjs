@@ -50,6 +50,8 @@ async function uploadAndConfirm(encoded){
   save.click();
   await until(()=>document.querySelectorAll('.doc-list-item').length===count+1,
     'new independent IndexedDB document');
+  await until(()=>Boolean(document.querySelector('.studio-source-panel iframe[src^="blob:"]')),
+    'active original PDF stays visible after successful installed import');
   await until(()=>{const paper=document.querySelector('.project-paper');
     return paper?.textContent?.includes('ASTRA_PDF_PAGE_ONE_7401')&&
       paper.textContent.includes('ASTRA_PDF_PAGE_TWO_7402');},
@@ -101,6 +103,9 @@ async function runStep3ProjectAcceptance(win,renderLocalPdf,armNativeCapture,out
   if(!imported?.count||!imported?.themeClass)
     throw Error('STEP3 UI commit and layout selection failed');
   await win.loadURL(APP_URL);
+  const stale=await win.webContents.executeJavaScript(
+    "Boolean(document.querySelector('.studio-source-panel'))",true);
+  if(stale)throw Error('Original Blob URL unexpectedly persisted after installed app reload');
   const verified=await win.webContents.executeJavaScript(
     '('+verifyPersisted.toString()+')('+JSON.stringify(imported)+')',true);
   if(!verified?.buttonReady)throw Error('STEP3 installed project reload failed');

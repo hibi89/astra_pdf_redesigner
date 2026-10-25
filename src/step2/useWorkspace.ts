@@ -149,7 +149,7 @@ export function useWorkspace(){
       // Do not change current draft, active ID, or any previous image until
       // the new document, decoded PNG assets and active ID atomically commit.
       await writeTransaction(db,next,images,[],{[ACTIVE]:next.id});
-      setCurrent(next,images);await refresh();setError('');return true;
+      setCurrent(next,images);await refresh();setError('');return next.id;
     }catch(error){
       setError(error instanceof Error?error.message:'PDF 문서를 저장하지 못했습니다.');
       return false;

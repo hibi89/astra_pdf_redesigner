@@ -1,6 +1,7 @@
 // STEP3 true browser upload: synth PDF -> PDF.js review -> new IndexedDB doc -> themed A4 print.
 import assert from 'node:assert/strict';
 import {spawnSync,execFileSync} from 'node:child_process';
+import {createHash} from 'node:crypto';
 import {mkdtempSync,rmSync,writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
@@ -111,6 +112,17 @@ try{
   assert.equal(await evaluate("document.querySelector('.doc-list-item.active strong')?.textContent?.includes('step3-sample')"),true);
   assert.equal(await evaluate("document.querySelector('.section-editor .help-text')?.textContent?.includes('원본 PDF 출처')"),true);
   console.log('PASS STEP3 IMPORT: review creates independent active V2 document with PDF source provenance');
+
+  // M02: source survives a successful commit but only as a temporary Blob URL.
+  const initialSource=await eventually(()=>evaluate("(()=>{const panel=document.querySelector('.studio-source-panel');return panel&&{id:panel.getAttribute('data-source-document-id'),title:panel.querySelector('iframe')?.title,url:panel.querySelector('iframe')?.src,visible:!!panel.querySelector('iframe')}})()"));
+  assert.ok(initialSource.id&&initialSource.title==='가져온 원본 PDF'&&
+    initialSource.url.startsWith('blob:')&&initialSource.visible,'Source comparison must show alongside the active output');
+  const importedDocId=await evaluate("(async()=>{const db=await new Promise((resolve,reject)=>{const r=indexedDB.open('astra-pdf-redesigner:v2');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});try{return await new Promise((resolve,reject)=>{const r=db.transaction('meta','readonly').objectStore('meta').get('activeDocumentId');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}finally{db.close()}})()");
+  assert.equal(initialSource.id,importedDocId,'Visible source must be tied to the active project id');
+  const sourceHash=await evaluate("(async()=>{const url=document.querySelector('.studio-source-panel iframe').src;const data=await (await fetch(url)).arrayBuffer();const digest=await crypto.subtle.digest('SHA-256',data);return [...new Uint8Array(digest)].map(x=>x.toString(16).padStart(2,'0')).join('')})()");
+  assert.equal(sourceHash,createHash('sha256').update(Buffer.from(pdf.data,'base64')).digest('hex'),
+    'Retained in-memory original differs byte-for-byte from uploaded PDF');
+  console.log('PASS M02 SOURCE AFTER COMMIT: same document id, active iframe, byte-identical local PDF; no source DB storage');
   // M02: Capture actual REPORT print before switching to MINIMAL, not CSS-only assertions.
   const reportPdf=await send('Page.printToPDF',{preferCSSPageSize:true,printBackground:true});
   const reportPath=join(dir,'m02-report.pdf');
@@ -151,6 +163,18 @@ try{
     writeFileSync(process.env.M02_SCREENSHOT_OUT,Buffer.from(capture.data,'base64'));
     console.log('PASS M02 ACTUAL CHROME SCREENSHOT: synthetic imported document and 3-pane studio');
   }
+  // Project switch must close/revoke the transient original, with no
+  // incorrect source association if the imported project is reopened.
+  await evaluate("(()=>{const old=[...document.querySelectorAll('.doc-list-item')].find(b=>!b.classList.contains('active'));if(!old)throw Error('No older project for comparison guard');old.click()})()");
+  await eventually(()=>evaluate("document.querySelector('.doc-list-item.active strong')?.textContent"),v=>v===original);
+  await eventually(()=>evaluate("!document.querySelector('.studio-source-panel')"));
+  const revoked=await evaluate("(async()=>{try{await fetch("+JSON.stringify("REPLACE_BLOB_URL")+");return false}catch{return true}})()".replace("REPLACE_BLOB_URL",JSON.stringify(initialSource.url)));
+  assert.equal(revoked,true,'Source Blob URL must be revoked on document switch');
+  await evaluate("(()=>{const imported=[...document.querySelectorAll('.doc-list-item')].find(b=>b.textContent.includes('step3-sample'));if(!imported)throw Error('Imported document missing after switch');imported.click()})()");
+  await eventually(()=>evaluate("document.querySelector('.project-paper')?.textContent"),v=>v?.includes('STEP3_TEST_END_7519'));
+  assert.equal(await evaluate("Boolean(document.querySelector('.studio-source-panel'))"),false,
+    'Switching back must not resurrect an unowned source PDF');
+  console.log('PASS M02 ACTIVE-SOURCE GUARD: close/revoke on switch and no stale source on return');
   await send('Page.reload',{ignoreCache:true});
   await eventually(()=>evaluate("document.querySelector('.project-paper')?.textContent"),v=>v?.includes('STEP3_TEST_END_7519'));
   await eventually(()=>evaluate("document.querySelectorAll('.doc-list-item').length"),n=>n===before+1);
