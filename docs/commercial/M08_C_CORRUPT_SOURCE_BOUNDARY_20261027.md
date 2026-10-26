@@ -23,3 +23,9 @@
 - No real customer PDF, scanned handwriting OCR, password-protected PDF, true offline Korean LLM or physical consumer Windows device tested.
 - M08-C tests malformed document handling, not general PDF source completeness/pixel fidelity.
 - `main`, PR3/PR4, production/credentials/user data stay unchanged. PR9 remains Draft; 3 SKU commercial sale **NO-GO**.
+
+## 2026-10-27 KST — Windows CI false-negative diagnosis and minimal repair (verification pending)
+- At `274845f04760377aacb98f320450535e41ff9849`, [Windows #40347906006](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40347906006) completed **FAILURE** in installed STEP3 smoke: `Imported STEP3 document/theme not restored after reload`. Earlier installed app startup, STEP2 persistence, STEP3 native printing, and all M08-A eight layout output logs showed PASS. The final M08-C Windows success marker was **not reached**; this failure is not proof of a damaged user V2 database.
+- Root cause from test control flow: M08-A cycles and persists eight themes, ending on a different theme than the initial imported value. The newly introduced M08-C final reload compared to stale pre-M08-A `imported.themeClass` and timed out, independent of malformed PDF parsing itself.
+- Minimal test-only change `a1cf97736e9278e11e14c4f42bd540206e82126e`: after eight-template and corrupt/recovery sequence, wait for Saved state and capture actual current `project-paper.className`, then reload and verify stored project/count against **that** observed final theme. Do not alter app runtime, data, source PDF, or old tests.
+- [New Linux CI #40348815412](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40348815412) and [new Windows CI #40348815406](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40348815406) triggered for exact fix SHA; both conclusions **PENDING** at this entry. If failed, diagnose actual logs before any further write. Sale stays NO-GO.
