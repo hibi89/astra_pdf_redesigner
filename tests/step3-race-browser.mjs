@@ -44,6 +44,23 @@ try{
   await eventually(()=>evaluate("Boolean(document.querySelector('.step3-import-panel input[type=file]') && document.querySelector('.doc-list-item.active'))"));
   const original=await evaluate("(()=>({count:document.querySelectorAll('.doc-list-item').length,active:document.querySelector('.doc-list-item.active strong')?.textContent}))()");
   assert.ok(original.count>=1&&original.active);
+  // STEP1 legacy editor may create a v1 localStorage document. On returning
+  // to STEP2, the existing automatic non-destructive V1->V2 migration can add
+  // exactly one new document. Compare existing document IDs/content instead
+  // of assuming the document count stays identical across that mode switch.
+  const readStored=()=>evaluate("(()=>new Promise((resolve,reject)=>{"+
+    "const req=indexedDB.open('astra-pdf-redesigner:v2');"+
+    "req.onerror=()=>reject(Error('M09-B IndexedDB open failed'));"+
+    "req.onsuccess=()=>{const db=req.result;"+
+      "const tx=db.transaction(['documents','meta'],'readonly');"+
+      "const documents=tx.objectStore('documents').getAll();"+
+      "const migration=tx.objectStore('meta').get('v1MigrationFinished');"+
+      "tx.oncomplete=()=>{db.close();resolve({docs:documents.result, migrated:migration.result===true});};"+
+      "tx.onerror=()=>reject(Error('M09-B IndexedDB snapshot failed'));"+
+    "};"+
+  "}))()");
+  const originalDb=await readStored();
+  assert.equal(originalDb.docs.length,original.count);
 
   const source=makeMixedLayoutPdf();
   const data=JSON.stringify(source.toString('base64'));
@@ -84,8 +101,20 @@ try{
   await evaluate("([...document.querySelectorAll('.mode-bar button')].find(b=>b.textContent.includes('개인 문서 제작기로'))).click()");
   await eventually(()=>evaluate("Boolean(document.querySelector('.step3-import-panel input[type=file]') && document.querySelector('.doc-list-item.active'))"));
   const after=await evaluate("(()=>({count:document.querySelectorAll('.doc-list-item').length,active:document.querySelector('.doc-list-item.active strong')?.textContent,hasDraft:Boolean(document.querySelector('.step3-block-review'))}))()");
-  assert.deepEqual(after,{...original,hasDraft:false},'stale async extract must not recreate a draft or mutate saved V2');
-  console.log('PASS M09-B CHROME/EDGE STALE UNMOUNT: delayed real PDF bytes ignored after navigation, no original URL allocated, saved V2 unchanged');
+  const afterDb=await readStored();
+  assert.equal(after.hasDraft,false,'stale async extract must not recreate its review draft');
+  assert.equal(after.active,original.active,'original active project must remain selected');
+  assert.equal(after.count,afterDb.docs.length,'document list must match persisted V2 records');
+  for(const oldDoc of originalDb.docs){
+    const persisted=afterDb.docs.find(doc=>doc.id===oldDoc.id);
+    assert.deepEqual(persisted,oldDoc,'original V2 document must stay byte-for-byte equivalent');
+  }
+  assert.equal(afterDb.docs.some(doc=>JSON.stringify(doc).includes('STEP3_SOURCE_P1_BEGIN_901')),false,
+    'unapproved stale source must not appear in any persisted V2 document');
+  const added=afterDb.docs.length-originalDb.docs.length;
+  assert.ok(added===0||(added===1&&!originalDb.migrated&&afterDb.migrated),
+    'only the existing STEP1-to-STEP2 legacy migration may add one document');
+  console.log('PASS M09-B CHROME/EDGE STALE UNMOUNT: delayed real PDF bytes ignored after navigation, no original URL allocated, original V2 unchanged (legacy migration allowed)');
 }finally{
   if(ws)ws.close();
   await browser.close();
