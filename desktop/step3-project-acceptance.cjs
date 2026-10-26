@@ -6,6 +6,7 @@ const fs=require('node:fs/promises');
 const {acceptanceDomSource,MARKERS}=require('./pdf-acceptance-fixture.cjs');
 const {runInstalledEightLayoutAcceptance}=require('./step3-eight-layout-acceptance.cjs');
 const {makeScannedPagesPdf,SCAN_MARKERS}=require('./step3-scanned-fixture.cjs');
+const {makeCorruptRootPdf}=require('./step3-invalid-fixture.cjs');
 const APP_URL='astra://app/index.html';
 async function waitFor(check,label){
   for(let i=0;i<160;i++){
@@ -87,7 +88,7 @@ async function verifyPersisted(data){
   throw Error('Imported STEP3 document/theme not restored after reload');
 }
 
-async function verifyInstalledScanBoundary(scanOnlyB64,partialB64,markers){
+async function verifyInstalledScanBoundary(scanOnlyB64,partialB64,corruptB64,markers){
   const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   async function until(test,label){
     for(let i=0;i<160;i++){
@@ -143,7 +144,34 @@ async function verifyInstalledScanBoundary(scanOnlyB64,partialB64,markers){
   if(document.querySelectorAll('.doc-list-item').length!==before||
     document.querySelector('.doc-list-item.active strong')?.textContent!==current)
     throw Error('M08-B cancel damaged existing persisted project');
-  return {rejectedWithoutWrite:true,mixedWarnedWithoutApproval:true,cancelPreserved:true};
+
+  // M08-C: valid pending review -> damaged xref Catalog -> valid retry. A failed
+  // parse must clear old draft/Blob/approval and preserve the stored V2 project.
+  await upload(partialB64,'m08-valid-before-corrupt.pdf');
+  await until(()=>document.querySelector('.step3-import-panel')?.textContent?.includes(markers.first),
+    'pre-corruption valid source review');
+  await upload(corruptB64,'m08-corrupt-root.pdf');
+  await until(()=>Boolean(document.querySelector('.step3-import-panel [role=alert]')?.textContent?.trim()),
+    'corrupt Catalog PDF visible failure');
+  if(document.querySelector('.step3-import-panel .step3-block-review')||
+    document.querySelector('.step3-import-panel iframe[src^="blob:"]')||
+    document.querySelectorAll('.doc-list-item').length!==before||
+    document.querySelector('.doc-list-item.active strong')?.textContent!==current)
+    throw Error('M08-C corrupt PDF preserved stale review or damaged persisted V2 project');
+  await upload(partialB64,'m08-recovered-after-corrupt.pdf');
+  await until(()=>document.querySelector('.step3-import-panel')?.textContent?.includes(markers.end),
+    'valid source reopens after corrupt PDF');
+  const approval=document.querySelector('.step3-import-panel > label.step3-confirm input');
+  if(!approval||approval.checked||document.querySelector('.step3-import-panel [role=alert]'))
+    throw Error('M08-C recovery retained error or stale manual approval');
+  const discard=[...document.querySelectorAll('.step3-import-panel button')].find(x=>x.textContent.includes('가져오기 취소'));
+  if(!discard)throw Error('M08-C recovery missing cancel');
+  discard.click();
+  if(document.querySelectorAll('.doc-list-item').length!==before||
+    document.querySelector('.doc-list-item.active strong')?.textContent!==current)
+    throw Error('M08-C retry and cancel modified persisted project');
+  return {rejectedWithoutWrite:true,mixedWarnedWithoutApproval:true,cancelPreserved:true,
+    corruptRejected:true,corruptRecoveryWithoutWrite:true};
 }
 
 async function runStep3ProjectAcceptance(win,renderLocalPdf,armNativeCapture,output){
@@ -192,10 +220,17 @@ async function runStep3ProjectAcceptance(win,renderLocalPdf,armNativeCapture,out
     '('+verifyInstalledScanBoundary.toString()+')('+[
       JSON.stringify(makeScannedPagesPdf().toString('base64')),
       JSON.stringify(makeScannedPagesPdf({selectableSecondPage:true}).toString('base64')),
+      JSON.stringify(makeCorruptRootPdf().toString('base64')),
       JSON.stringify(SCAN_MARKERS),
     ].join(',')+')',true);
   if(!scanResult?.rejectedWithoutWrite||!scanResult.mixedWarnedWithoutApproval||
      !scanResult.cancelPreserved)throw Error('M08-B installed scan boundary failed');
+  if(!scanResult.corruptRejected||!scanResult.corruptRecoveryWithoutWrite)
+    throw Error('M08-C installed corrupt PDF boundary failed');
+  await win.loadURL(APP_URL);
+  await win.webContents.executeJavaScript(
+    '('+verifyPersisted.toString()+')('+JSON.stringify(imported)+')',true);
+  console.log('PASS M08-C WINDOWS INSTALLED CORRUPT CATALOG: parser rejects, stale draft/Blob cleared, valid retry canceled, V2 persisted across reload');
   console.log('PASS M08-B WINDOWS INSTALLED SCAN: full scan rejected; mixed scanned page warned and approval blocked; cancel and prior project retained');
   console.log('PASS ASTRA INSTALLED STEP3 E2E: local generated PDF -> review approval -> independent document -> changed theme -> reload -> native IPC PDF save');
 }
