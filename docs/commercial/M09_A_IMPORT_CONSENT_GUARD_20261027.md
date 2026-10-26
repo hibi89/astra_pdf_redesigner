@@ -30,3 +30,8 @@ Only `src/step3/ImportPanel.tsx` changes:
 
 ## Next decision
 If browser red, inspect exact failing assertion and fix minimally once; if still blocked, STOP & PIVOT with verified partial status, do not claim PASS. If both workflows green, add final exact SHA/log evidence to STATUS/HANDOFF and lead branch. Next owner-free improvement candidate: concurrent PDF import selection stale-async response protection; do not start without verifying M09-A.
+
+
+## Expanded strict reorder coverage — 2026-10-27 KST
+- First version exact code `657e8adf59d6ff0b1ba8a84b1611939e2f8f247b` [Chrome+Edge #40362547385](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40362547385) **SUCCESS 2/2**: both logs `PASS M09-A CHROME/EDGE REVIEW CONSENT: text/role changes ...`; Node **61/61 PASS**, build passed. Real textarea and role edits, rejected bad drop, prior V2 across reload validated. **Block move was not exercised** because that first synthetic mixed-scan fixture yielded no movable block (the log omits `/order`).
+- Tightened test *only*, switching to existing **2p synthetic multicolumn/multiblock** fixture `tests/fixtures/step3-mixed-layout-pdf.mjs` with all exact source markers, and requiring **moveCount > 0** before asserting a real block move revokes approval. No more conditional omission. **Latest exact functional/test source `575373799324c79cac6134edc28f72a00303d88e`**, [Chrome+Edge #40363162008](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40363162008) **QUEUED**, [Windows #40363162195](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40363162195) **QUEUED** at writing. Prior Windows #40362547537 for older SHA was in progress; not proof for this stricter test source. M09-A **overall verification pending**.
