@@ -542,3 +542,12 @@
 3. [Windows #40354394703](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40354394703) **SUCCESS**, named Windows M08-D PASS, 8/8 printed layouts, M08-A/B/C and upgrade preservation. [Linux #40354394704](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40354394704) Edge job **SUCCESS** with real M08-D PASS, Chrome job **in progress** at font setup. Final Chrome PASS must be proven before marking M08-D DONE.
 4. Original customer documents and model not acquired, no secrets/API/transmission, only synthetic test; no main or PR3/PR4 merge. PR9 stays Draft, commercial sale NO-GO.
 5. Next: inspect Linux Chrome final job log and combined run; if pass finalize all docs and PR. If setup fails, record environmental issue; do not claim actual Chrome. Physical buyer PC/customer PDF and Korean model are owner-led approvals.
+
+
+## 2026-10-27 KST — M08-D final verified lead handoff
+1. Goal: ASTRA offline PDF.js AES-256 synthetic locked PDF fail-closed, visible guidance, transient source/draft cleanup, preserve existing V2, retry requires explicit approval.
+2. Complete at code SHA `e80aa0643f27485d46a883645385816956cd70a2`: standalone browser fixture test and installed Electron NSIS source acceptance; no app source/schema changes.
+3. Proof: [Linux Chrome+Edge #40354394704](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40354394704) **SUCCESS 2/2**, both browser marker `PASS M08-D CHROME/EDGE AES-256 PASSWORD`, Node 61/61, build PASS. [Windows #40354394703](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40354394703) **SUCCESS**, desktop 12/12, actual `PASS M08-D WINDOWS INSTALLED AES-256 PASSWORD`, eight distinct A4 native outputs and STEP2+PNG install-upgrade preserved.
+4. Result: scoped M08-D DONE; earlier Windows UI rehydrate test race resolved. Overall physical customer PDF/PC and true local Korean LLM, SKU 20/30, signing/licensing remain NOT VERIFIED and sale NO-GO.
+5. Repo `hibi89/astra_pdf_redesigner` integration + lead; PR9 remains Draft; main/PR3/PR4 not merged. Current branch HEAD later docs-only, do not mistake for tested binary.
+6. NEXT owner-free READY: targeted input/review guard tightening or unsupported synthetic source integrity tests. Owner consent required for real customer PDF/hardware and actual GGUF binary/paid services. Do not upload real files to public CI.
