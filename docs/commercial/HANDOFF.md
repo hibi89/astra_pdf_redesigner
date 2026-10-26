@@ -242,3 +242,12 @@
 8. **Original/backup/security:** Original public repo sources retained in Git history. Actual customer sources never copied; synthetic passwords only, no real secrets. STEP1 localStorage v1 and STEP2 IndexedDB V2 preservation intended and must be verified. No model/network/paid API.
 9. **NEXT:** confirm exact-head workflows #40352669870 and #40352669611 with log markers `PASS M08-D CHROME/EDGE AES-256 PASSWORD` / `PASS M08-D WINDOWS INSTALLED AES-256 PASSWORD`, plus older M08-A/B/C regression and SHA fixture; then update STATUS/HANDOFF lead PR9. If fail, record exact failing assertion and fix only root cause once before STOP & PIVOT. Physical customer file/Windows acceptance and true LLM separate owner gates.
 10. **Time/evidence boundary:** 2026-10-27 KST; project state until new tests finish is **partial/verification pending**, not completed.
+
+
+## M08-D Windows failure → test hydration correction handoff (2026-10-27 KST)
+1. Goal remains authentic AES-256 password-protected PDF rejection with no V2 writes in browser and installed Windows app.
+2. Source unchanged except `desktop/step3-password-acceptance.cjs` test-only hydration wait; old immediate reload check raced React/IndexedDB.
+3. Evidence: [Windows #40352546255](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40352546255) **FAIL**, log after `PASS M08-C WINDOWS INSTALLED CORRUPT CATALOG` says `M08-D existing project list or selection changed after reload`. This does **not** prove PDF import wrote records. 8/8 Windows A4 prints were PASS. Earlier exact `0fb3...` CI pending but no longer final.
+4. Latest functional source SHA `e80aa0643f27485d46a883645385816956cd70a2`; [Linux browser #40354394703](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40354394703) and [Windows NSIS #40354394704](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40354394704) **PENDING**. Need actual successful results and PASS M08-D markers before DONE.
+5. No application production logic, original PDF, user DB or private customer data changed; old baseline recoverable through prior Git commits. Main/PR3/PR4 left untouched; PR9 Draft and commercial NO-GO.
+6. Next: inspect two exact-code workflows. If Windows still fails capture last hydration state to distinguish genuine persisted V2 mutation; one further blind retry forbidden—investigate root cause and stop/pivot. If both green, update docs/lead PR with verified success. No GGUF download or real customer material without owner approval.
