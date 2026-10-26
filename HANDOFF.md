@@ -526,3 +526,11 @@
 8. **Original/data/security:** no real customer PDFs/model binaries/API; step1 V1 and step2 V2 expected intact and checked by tests when they run; no external transmission. Backups via Git prior SHA, do not force push or leak credentials.
 9. **NEXT:** inspect final conclusions + exact SHA and pass markers `PASS M08-D CHROME/EDGE AES-256 PASSWORD`, `PASS M08-D WINDOWS INSTALLED AES-256 PASSWORD`; if both green update integration/lead docs and PR9. If red, document log and one minimum fix. For end-user market, real device/source acceptance and actual model assets need separate owner involvement.
 10. **Timestamp:** 2026-10-27 KST, implementation status not final CI verification; docs-only commit is not a validated app binary.
+
+
+## 2026-10-27 KST M08-D hydration test handoff
+1. **Current:** AES-256 synthetic two-page PDF browser+installed Windows no-write tests implemented; original M08-C previously scoped verified. M08-D not yet verified.
+2. **Actual failure:** [Windows #40352546255](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40352546255) pre-final commit failed new M08-D reload verification immediately after loadURL, after M08-A eight outputs and M08-C completed; exact error `M08-D existing project list or selection changed after reload`. No proven record mutation.
+3. **Change:** Small test-only hydration wait in `desktop/step3-password-acceptance.cjs` at code SHA `e80aa0643f27485d46a883645385816956cd70a2`; wait up to 160*200ms for actual expected document list and selection, fail with last observed state if missing.
+4. **Current final runs:** [Linux Chrome/Edge #40354394703](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40354394703) and [Windows NSIS #40354394704](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40354394704) queued/pending. Prior #40352669870/#40352669611 not exact current source.
+5. **Next:** inspect both exact-code conclusions and `PASS M08-D CHROME/EDGE AES-256 PASSWORD` / `PASS M08-D WINDOWS INSTALLED AES-256 PASSWORD` log markers. If one still fails, diagnose actual state and stop blind retries; if both succeed update integration/lead docs+Draft PR9. Real customer PC/PDF and Korean GGUF model remain approval gates and commercial NO-GO. Main and PR3/PR4 untouched.
