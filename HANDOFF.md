@@ -513,3 +513,16 @@
 8. **Original/security:** STEP1 v1 and STEP2 V2 data preserved, no customer PDF uploaded, synthetic only, no secrets/API/model assets, git history recovery, repo public and customer originals must remain outside Git.
 9. **NEXT:** M08-D password PDF (choose built-in synthetic/tool with no new paid deps) OR 5–10 permissioned actual source PDFs+owner PC visual test. Keep PR Draft; do not merge/main release or claim Korean LLM/PRO20/BUSINESS30 complete. Owner consent for model binaries, paid/external transmission.
 10. **Timestamp/validation:** 2026-10-27 KST; two exact app-SHA workflows and pass logs observed. Docs-only SHA updated separately from app-tested code. Read latest integration and lead HEAD before next change.
+
+
+## M08-D pending lead handoff — 2026-10-27 KST
+1. **Goal/stack:** ASTRA offline PDF content-preserving redesign (React/PDF.js + Windows Electron NSIS) and safe handling of encrypted originals without V2 writes.
+2. **Implemented:** Frozen 1964-byte authentic synthetic AES-256 PDF + SHA pin; standalone Chrome/Edge actual PDF.js password no-write regression, Windows installed after M08-C regression, and workflow wiring. No application runtime/DB changes.
+3. **Verification:** local PyMuPDF says correct synthetic unlocks, wrong locked, but latest Node/build/browsers/Windows CI **PENDING** at source SHA `0fb3f82151d550bfbd963c51b8fce49cc50bc365`. [Linux #40352669870](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40352669870), [Windows #40352669611](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40352669611).
+4. **State:** M08-C prior scoped DONE, M08-D implemented/pending; true local GGUF M03-B1 remains approval-blocked and all three commercial SKU sales NO-GO.
+5. **Failure/pivot:** Attempted modifying 54KB original browser test was blocked by tool safety; implemented standalone E2E instead. CI queue likely contention, not established app failure. One diagnosable correction permitted after logging actual failure, then Stop & Pivot if no progress.
+6. **Code/branches:** `hibi89/astra_pdf_redesigner`, `integration/astra-commercial-core`; tested pending functional SHA above, key `desktop/step3-encrypted-fixture.cjs`, `desktop/step3-password-acceptance.cjs`, `desktop/step3-project-acceptance.cjs`, `tests/step3-password-browser.mjs`, `tests/desktop-shell.test.cjs`, `.github/workflows/ci.yml`, `docs/commercial/M08_D_PASSWORD_PDF_ACCEPTANCE_20261027.md`. PR9 Draft, main and PR3/PR4 untouched.
+7. **Deployment:** No Production or Vercel (local product), Linux Chrome/Edge and Windows NSIS Actions, `npm test` `npm run build` + E2E required.
+8. **Original/data/security:** no real customer PDFs/model binaries/API; step1 V1 and step2 V2 expected intact and checked by tests when they run; no external transmission. Backups via Git prior SHA, do not force push or leak credentials.
+9. **NEXT:** inspect final conclusions + exact SHA and pass markers `PASS M08-D CHROME/EDGE AES-256 PASSWORD`, `PASS M08-D WINDOWS INSTALLED AES-256 PASSWORD`; if both green update integration/lead docs and PR9. If red, document log and one minimum fix. For end-user market, real device/source acceptance and actual model assets need separate owner involvement.
+10. **Timestamp:** 2026-10-27 KST, implementation status not final CI verification; docs-only commit is not a validated app binary.
