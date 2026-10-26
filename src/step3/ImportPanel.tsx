@@ -140,6 +140,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
       </label>
     </div>
     {busy&&<p role="status">PDF를 분석하거나 새 문서를 저장하는 중입니다…</p>}
+    {busy&&parsing&&<div className="toolbar"><button className="secondary-button" onClick={cancel}>가져오기 취소</button></div>}
     {!!error&&<p className="warning" role="alert">{error}</p>}
     {draft&&<>
       <p className="help-text">원본: {draft.fileName} · {draft.pageCount}페이지 · 추출 {draft.totalChars.toLocaleString('ko-KR')}자 · 편집 가능한 텍스트 블록 {totalBlocks}개</p>
