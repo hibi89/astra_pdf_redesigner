@@ -597,3 +597,16 @@
 8. **Protection:** original assets and user localStorage V1/IDB V2 untouched; only synthetic CI fixtures, no customer source upload/model/secrets/network.
 9. **Next:** verify exact fix code Chrome/Edge 2/2 and real `PASS M09-B CHROME/EDGE STALE UNMOUNT`; if not green, isolate runner font vs app assertion, correct minimally. After that update docs, recommend next task. Customer acceptance/model download owner gated.
 10. **Checkpoint:** 2026-10-27 KST; tested Windows and baseline Edge failure; corrected browser outcome **not yet observed**.
+
+
+## M09-B FINAL lead ten-point handoff — 2026-10-27 KST
+1. **Goal:** ASTRA offline Windows PDF review/redesign content safety and future 30/60/90k tier plan; React/Vite/PDF.js/IndexedDB/Electron, original PDF always separate.
+2. **Completed:** stale unmounted PDF extraction after navigating to STEP1 no longer creates orphan source Blob URL; minimal request generation and unmount guard in integration code. Synthetic test holds actual `File.arrayBuffer` then resumes it after navigation.
+3. **Verification:** corrected exact implementation+test SHA `1abe28f6b7751ec6d0483d0b55095e006608ff93`, [Chrome+Edge #40371859883](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40371859883) SUCCESS 2/2 explicit `PASS M09-B CHROME/EDGE STALE UNMOUNT`, Chrome Node61/61 and build; [Windows #40371859794](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40371859794) SUCCESS unit61 desktop12 + eight installed A4 outputs/native import-export/upgrade. No real end-user Windows M09-B GUI action.
+4. **State:** M09-A + M09-B scoped DONE. Real buyer PDF/PC, actual licensed Korean local GGUF/CPU, 20/30 layouts, distribution signature/entitlement/support remain unverified and commercial NO-GO.
+5. **Failure/repair:** initial old app Edge test-only baseline `179a11b7` leaked one URL after unmount. Candidate `fd5bbe` fixed URL=0 but test mistakenly rejected legitimate V1→V2 migration extra doc; corrected test compares IDs/content + no synthetic markers, success final. Avoid repeating obsolete document-count assertion.
+6. **Repo:** `hibi89/astra_pdf_redesigner`, `integration/astra-commercial-core` exact code SHA and docs-only SHA `461a2057f9e7c5a6a329793536dcd0fb708b3962`. Lead branch HEAD must be rechecked after this update. Draft PR9, main and Draft PR3/PR4 protected.
+7. **Runtime:** Linux GitHub-hosted Chrome/Edge, Windows NSIS x64, developer `npm test`/`npm run build`; no Vercel Production URL, unsigned CI installer not commercial release.
+8. **Assets/secrets:** only synthetic PDF, never buyer document/secret/model/paid API; STEP1 localStorage/STEP2 IDB originals and initial PNG designs unchanged. Git SHA rollback.
+9. **Next:** owner consent for GGUF model download/license/CPU and actual confidential PDF+physical Windows acceptance, otherwise limited synthetic edge-case QA. No automatic release or sales-ready claim.
+10. **Time/evidence:** 2026-10-27 KST, final three exact job conclusions and browser pass strings reviewed; docs-only commits not treated as code tests.
