@@ -11,7 +11,9 @@ import {makeMixedLayoutPdf,MIXED_LAYOUT_MARKERS} from './fixtures/step3-mixed-la
 import {makeTransparencyFormPdf} from './fixtures/step3-transparency-form-pdf.mjs';
 import {auditPdfBytes} from './pdf-integrity-audit.mjs';
 import scannedFixture from '../desktop/step3-scanned-fixture.cjs';
+import invalidFixture from '../desktop/step3-invalid-fixture.cjs';
 const {makeScannedPagesPdf,SCAN_MARKERS}=scannedFixture;
+const {makeCorruptRootPdf}=invalidFixture;
 const binary=process.env.CHROME_PATH||'chromium',url=process.env.SMOKE_URL||'http://127.0.0.1:4173';
 const dir=mkdtempSync(join(tmpdir(),'astra-step3-'));
 const browser=launchBrowser(binary,dir,'STEP3 PDF import');
@@ -589,6 +591,46 @@ try{
   const afterScanTitles=await evaluate("[...document.querySelectorAll('.doc-list-item strong')].map(x=>x.textContent)");
   for(const label of scanTitles)assert.ok(afterScanTitles.includes(label),'Import overwrote previous document '+label);
   console.log('PASS M08-B MIXED SCAN REVIEW/IMPORT: page-1 no text warning, manual consent, page-2 exact source markers, retained image, A4 native browser PDF, V2 documents preserved');
+
+  // M08-C: keep one valid, unapproved review pending, then upload a complete
+  // PDF whose xref/trailer points to a nonexistent Catalog. Its selectable
+  // strings/image distinguish PDF parsing failure from empty-text rejection.
+  const corruptBefore=await evaluate("document.querySelectorAll('.doc-list-item').length");
+  const corruptTitles=await evaluate("[...document.querySelectorAll('.doc-list-item strong')].map(x=>x.textContent)");
+  const corruptActive=await evaluate("document.querySelector('.doc-list-item.active strong')?.textContent");
+  await uploadM08(partialScan,'m08-valid-before-corruption.pdf');
+  await eventually(()=>evaluate("document.querySelector('.step3-import-panel')?.textContent"),
+    txt=>txt?.includes(SCAN_MARKERS.first)&&txt.includes(SCAN_MARKERS.end));
+  assert.equal(await evaluate("document.querySelectorAll('.doc-list-item').length"),corruptBefore);
+  const corruptSource=makeCorruptRootPdf();
+  assert.ok(corruptSource.subarray(0,5).toString('ascii')==='%PDF-');
+  assert.ok(corruptSource.includes(Buffer.from('/Root 9 0 R')));
+  assert.ok(corruptSource.includes(Buffer.from(SCAN_MARKERS.first)),
+    'M08-C corrupt PDF must still hold selectable content in a real page stream');
+  await uploadM08(corruptSource,'m08-corrupt-catalog.pdf');
+  const corruptAlert=await eventually(()=>evaluate(
+    "document.querySelector('.step3-import-panel [role=alert]')?.textContent"),
+    message=>typeof message==='string'&&message.trim().length>0);
+  assert.ok(corruptAlert.trim().length>0,'Corrupt PDF must show a visible rejection');
+  assert.equal(await evaluate("Boolean(document.querySelector('.step3-import-panel .step3-block-review'))"),false,
+    'Failed parse must clear preceding successful but uncommitted review');
+  assert.equal(await evaluate("Boolean(document.querySelector('.step3-import-panel iframe[src^=blob]'))"),false,
+    'Failed parse must not retain previous source Blob URL');
+  assert.equal(await evaluate("document.querySelectorAll('.doc-list-item').length"),corruptBefore,
+    'M08-C parser rejection inserted or removed a persisted document');
+  assert.deepEqual(await evaluate("[...document.querySelectorAll('.doc-list-item strong')].map(x=>x.textContent)"),corruptTitles);
+  assert.equal(await evaluate("document.querySelector('.doc-list-item.active strong')?.textContent"),corruptActive);
+  await uploadM08(partialScan,'m08-after-corruption-recovery.pdf');
+  await eventually(()=>evaluate("document.querySelector('.step3-import-panel')?.textContent"),
+    txt=>txt?.includes(SCAN_MARKERS.first)&&txt.includes(SCAN_MARKERS.end));
+  assert.equal(await evaluate("Boolean(document.querySelector('.step3-import-panel [role=alert]'))"),false,
+    'Valid source after malformed PDF should clear parser alert');
+  assert.equal(await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input').checked"),false,
+    'Parser failure must not carry over review approval');
+  await evaluate("([...document.querySelectorAll('.step3-import-panel button')].find(x=>x.textContent.includes('가져오기 취소'))).click()");
+  assert.equal(await evaluate("document.querySelectorAll('.doc-list-item').length"),corruptBefore);
+  console.log('PASS M08-C CHROME/EDGE CORRUPT CATALOG: actual parsed PDF failure visible, stale review/Blob cleared, original V2 project preserved, valid source retry unapproved and canceled');
+
 
 
 }finally{
