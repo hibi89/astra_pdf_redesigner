@@ -17,7 +17,8 @@ interface Props {
 const ROLES:[PdfRole,string][]=[['paragraph','본문'],['heading','소제목'],['caption','캡션']];
 export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Props){
   const [draft,setDraft]=useState<PdfDraft|null>(null);
-  const [busy,setBusy]=useState(false),[error,setError]=useState(''),[confirmed,setConfirmed]=useState(false);
+  const [busy,setBusy]=useState(false),[parsing,setParsing]=useState(false);
+  const [error,setError]=useState(''),[confirmed,setConfirmed]=useState(false);
   const [previewUrl,setPreviewUrl]=useState('');
   const [dragging,setDragging]=useState(false);
   const [imageUrls,setImageUrls]=useState<Record<string,string>>({});
@@ -49,6 +50,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
     const version=requestVersion.current;
     const isCurrent=()=>!unmounted.current&&requestVersion.current===version;
     setBusy(true);
+    setParsing(true);
     try{
       const parsed=await extractLocalPdf(file);
       if(!isCurrent())return; // switched/closed/superseded; never own an orphan Blob
@@ -61,8 +63,14 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
     }catch(e){
       if(isCurrent())setError(e instanceof Error?e.message:'PDF에서 내용을 추출할 수 없습니다.');
     }finally{
-      if(isCurrent())setBusy(false);
+      if(isCurrent()){setBusy(false);setParsing(false);}
     }
+  };
+  const cancel=()=>{
+    // Parsing is still read-only. Invalidate the outstanding request and let
+    // users choose a replacement immediately; never interrupt a saving write.
+    if(busy&&!parsing)return;
+    forget();setParsing(false);setBusy(false);
   };
   const dropFiles=(files:FileList)=>{
     setDragging(false);
@@ -197,7 +205,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
         원본과 추출 결과 및 이미지 복원·누락 개수를 확인했습니다. 미복원 그래픽은 새 PDF에서 누락될 수 있으며, 포함 선택 이미지는 PNG 근사 복원임을 인지하고 새 문서로 추가합니다.
       </label>
       <div className="toolbar">
-        <button className="secondary-button" disabled={busy} onClick={forget}>가져오기 취소</button>
+        <button className="secondary-button" disabled={busy&&!parsing} onClick={cancel}>가져오기 취소</button>
         <button className="print-button" disabled={disabled||busy||!confirmed} onClick={()=>void commit()}>검수 결과를 새 문서로 저장</button>
       </div>
     </>}
