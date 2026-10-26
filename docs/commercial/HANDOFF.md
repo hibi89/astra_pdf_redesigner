@@ -272,3 +272,16 @@
 8. **Security/data:** Frozen offline synthetic PDF with no personal content/password; STEP1/2 original user data, DB schema and customer files unchanged; no real content uploaded or external APIs/LLM weights. Git SHA retains rollback.
 9. **Next:** Prioritize new small READY offline synthetic source fidelity/unsupported-input coverage or actual owner-only local customer PDF/Windows acceptance; licensed GGUF model acquisition needs explicit approval; no public customer materials. Always record exact new code SHA and real CI pass separately from docs.
 10. **Evidence time:** 2026-10-27 KST, exact final M08-D Windows and 2 Linux browser jobs completed and pass marker logs checked. Docs commit ≠ tested app binary.
+
+
+## M09-A active implementation handoff — 2026-10-27 KST
+1. **Goal:** PDF.js review consent remains tied to the approved draft; text/role/order mutations and invalid replacement drop must revoke approval and prevent silent stale Save.
+2. **Implemented:** Minimal `src/step3/ImportPanel.tsx` update `setConfirmed(false)` for text/role and block move, `forget()` before invalid dropped file error; prior draft/temporary Blob/consent cleared without database updates. Browser `tests/step3-consent-browser.mjs` added and `.github/workflows/ci.yml` runs actual Chrome+Edge new regression.
+3. **Exact code SHA `657e8adf59d6ff0b1ba8a84b1611939e2f8f247b`**, [Linux Chrome/Edge #40362547385](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40362547385) **IN PROGRESS**, [Windows installed #40362547537](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40362547537) **IN PROGRESS**. No M09-A PASS established.
+4. **Earlier stable baseline:** M08-D full success at `e80aa0643f27485d46a883645385816956cd70a2`: real Chrome/Edge and installed Windows no-write and all previous eight templates.
+5. **Validation rules:** require `PASS M09-A CHROME/EDGE REVIEW CONSENT` in both actual browser job logs; full 2/2 Linux jobs + Windows workflow success; no fake pass from fixture-only or docs-only SHA. Windows tests do NOT exercise M09-A UI specifically.
+6. **Production:** local React/PDF.js and Electron/NSIS, no Vercel. Existing V2/STEP1 original user data, model runtime/asset, credentials or paid API unchanged. Git prior code available for rollback.
+7. **Repo:** `hibi89/astra_pdf_redesigner` integration branch, `lead/astra-commercial-20261025`, Draft PR9, main/PR3/PR4 protected. New report `docs/commercial/M09_A_IMPORT_CONSENT_GUARD_20261027.md`.
+8. **Current blockers:** real customer PDFs on owner PC, true licensed offline Korean GGUF, full 8/20/30 commercial SKU gates, entitlement/licensing/signing. Sale NO-GO remains even if M09-A passes.
+9. **NEXT:** confirm CI and fix only real failing assertion minimally if any. After M09-A green, independent small READY M09-B is async stale imported PDF response guard; if red classify exact test failure with limited retry then STOP/PIVOT.
+10. **Time:** 2026-10-27 KST, current source SHA evidence only CI in progress, not DONE.
