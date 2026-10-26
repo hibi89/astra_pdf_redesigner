@@ -623,3 +623,16 @@
 8. **Data/security:** no customer PDF/model/token uploaded, no STEP1/STEP2 original data or main/PR3/4 touched; Git parent SHAs recoverable.
 9. **Next:** verify corrected exact browser jobs M09-C marker, 2/2 green and matching Windows installed regression; update status to scoped DONE only on proof. Owner-only real customer PDF/PC and GGUF approval separately gated.
 10. **Verification boundary:** 2026-10-27 KST, Windows app CI success confirmed; corrected test CI queued, physical Windows and commercial sale unverified.
+
+
+## M09-C FINAL lead 10-point checkpoint — 2026-10-27 KST
+1. **Objective/requirements/stack:** local PDF.js parser, React/TS/Vite IndexedDB V2, Windows Electron/NSIS. Preserve original PDF and explicit review, 30/60/90k SKU plans with equal actual offline AI rewrite later.
+2. **Completed:** separate cancellation control visible while `busy&&parsing` even with empty draft, request generation invalidates in-flight parse on cancellation and allows immediate new PDF; old completion cannot publish Blob URL/draft; save/commit operation noncancellable. No PDF.js worker cancellation.
+3. **Verified exact source `2ba0b4e57f7d521ba9482a6d626411f10961f9b9`:** Chrome+Edge [#40376435854](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40376435854) completed/success 2/2, both M09-C CANCEL/RETRY markers, Node61/61/build; Windows [#40376435967](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40376435967) success Node61/desktop12, actual installed STEP3/native A4 and 8/8 designs/STEP2 PNG upgrade. No direct Windows M09-C UI interaction/buyer PC run.
+4. **State:** M09-A/B/C scoped DONE; PR9 Draft/unmerged; real customer/PC/model/PRO20-BUSINESS30/signing/entitlement commercial NO-GO. No Production URL.
+5. **Failures/pivot:** first browser test broken IDB Promise expression, test-only corrected at `02c905`, then actual cancel button missing in React because `draft&&` footer not rendered during parse. Moved parse-only Cancel to loading region, final full green. These failure run(s) are historical, not final app regressions. Do not repeat previous broken harness.
+6. **Repo/branch/SHA/paths:** `hibi89/astra_pdf_redesigner`, integration tested code above, docs-only integration `7f979530778dac68cd16cc60111c05c88c95a379`, lead current docs head to recheck, Draft PR9; `src/step3/ImportPanel.tsx`, `tests/step3-cancel-browser.mjs`, workflows, `docs/commercial/M09_C_PARSE_CANCEL_RECOVERY_20261027.md`.
+7. **Runtime:** npm test, build, GitHub Chrome+Edge+Windows NSIS installed tests. Vercel/Production N/A. Unsigned CI installer not for paid customers.
+8. **Data/originals:** main and existing PR3/PR4 unchanged, user STEP1 localStorage v1/STEP2 IDB V2 preserved, customer content never sent/uploaded, synthetic PDF only. Git history rollback available, no paid model/API/secrets.
+9. **Next:** M09-D possible direct Windows Electron UI synthetic parse cancel E2E or owner-approved real PDF/Windows acceptance; require exact CI SHA, use minimal changes. Model/license purchase/downloading and release require consent.
+10. **Verified at:** 2026-10-27 KST, inspected final exact-source 2 Linux browser and 1 Windows workflow conclusions and marker logs; doc commits not considered executable tests.
