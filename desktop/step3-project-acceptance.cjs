@@ -227,9 +227,18 @@ async function runStep3ProjectAcceptance(win,renderLocalPdf,armNativeCapture,out
      !scanResult.cancelPreserved)throw Error('M08-B installed scan boundary failed');
   if(!scanResult.corruptRejected||!scanResult.corruptRecoveryWithoutWrite)
     throw Error('M08-C installed corrupt PDF boundary failed');
+  // M08-A's real eight-layout sequence intentionally ends on a different
+  // persisted theme than the first imported theme. Capture that later state,
+  // instead of comparing reload against the stale pre-M08-A class.
+  await waitFor(()=>win.webContents.executeJavaScript(
+    "document.querySelector('.save-chip')?.textContent==='저장됨'",true),
+    'M08-A selected theme is saved before M08-C persistence audit');
+  const finalTheme=await win.webContents.executeJavaScript(
+    "document.querySelector('.project-paper')?.className",true);
+  if(!finalTheme)throw Error('M08-C missing final theme before reload');
   await win.loadURL(APP_URL);
   await win.webContents.executeJavaScript(
-    '('+verifyPersisted.toString()+')('+JSON.stringify(imported)+')',true);
+    '('+verifyPersisted.toString()+')('+JSON.stringify({...imported,themeClass:finalTheme})+')',true);
   console.log('PASS M08-C WINDOWS INSTALLED CORRUPT CATALOG: parser rejects, stale draft/Blob cleared, valid retry canceled, V2 persisted across reload');
   console.log('PASS M08-B WINDOWS INSTALLED SCAN: full scan rejected; mixed scanned page warned and approval blocked; cancel and prior project retained');
   console.log('PASS ASTRA INSTALLED STEP3 E2E: local generated PDF -> review approval -> independent document -> changed theme -> reload -> native IPC PDF save');
