@@ -346,3 +346,15 @@
 8. **Originals/security/backup:** main/PR3/PR4 untouched; raw original designs, STEP1 localStorage v1 and STEP2 IDB V2 regression guarded. Only synthetic PDF in CI, never customer file/token/model acquisition, no external transmission. Git SHA history enables rollback.
 9. **Next:** incremental source integrity/cancel stress QA if self-contained, or owner-authorized real PDF/Windows manual acceptance. Genuine GGUF download/model/license/CPU is a separate explicit approval and proof gate. Maintain current 8/8 BASIC, no 20/30 SKU or AI marketing.
 10. **Confirmed:** 2026-10-27 KST, exact Chrome/Edge/Windows final workflow conclusions and all M09-B markers inspected; later docs-only changes are not retested app source.
+
+## M09-C pending 10-point handoff — 2026-10-27 KST
+1. **Purpose/stack:** ASTRA Windows-local React/TypeScript/PDF.js/IndexedDB/Electron PDF redesign, keep source immutable and human review mandatory; final BASIC/PRO/BUSINESS 30/60/90k plans not production.
+2. **Changes:** parsing-only cancel now enabled; M09-B generation ref invalidates async result so stale read can't publish URL/draft; saving phase keeps cancel disabled. Real-browser regression for invalid source→cancel pending source→successful replacement→late completion. No PDF.js worker termination.
+3. **Tests:** implementation exact SHA `c780e007b92028fb380e3b721ed060e9ce3cd1e0`, [Chrome+Edge #40374128104](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40374128104), [Windows NSIS #40374128200](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40374128200) initiated; **final conclusions pending**. Do not mark verified until both Chrome+Edge exact M09-C PASS and Windows regression success.
+4. **State:** M09-A/B DONE, M09-C IMPLEMENTED/VERIFY WAIT, customer sale NO-GO.
+5. **Decision/failure recovery:** minimal separate parsing state chosen over deep PDF.js cancellation (cost/complexity/risks). If red, inspect failing assertion rather than guessing; one meaningful corrective retry, then stop/pivot. Older M09-B test false count due v1→v2 migration already resolved; do not repeat.
+6. **Repository/branch/files:** `hibi89/astra_pdf_redesigner` `integration/astra-commercial-core`, Draft PR9 to lead; files `src/step3/ImportPanel.tsx`, `tests/step3-cancel-browser.mjs`, `.github/workflows/ci.yml`, `docs/commercial/M09_C_PARSE_CANCEL_RECOVERY_20261027.md`.
+7. **Production/deployment:** local browser/Windows Electron NSIS, developer npm tests and CI Node22; Vercel/Production N/A, unsigned CI installer not commercial release.
+8. **Originals/security/rollback:** main/PR3/PR4 and STEP1 localStorage/V2 IndexedDB unchanged, original PDFs never altered or sent externally; synthetic CI PDF only; source pre-fix SHA `461a2057f9e7c5a6a329793536dcd0fb708b3962` retained for rollback, no credentials/paid APIs/models.
+9. **Next:** verify both browser logs exact marker and Windows; on green update integration+lead STATUS/HANDOFF and mark M09-C scoped DONE; future real customer Windows/PDF/model requires explicit owner approval.
+10. **Timestamp:** 2026-10-27 KST; code committed, verification evidence incomplete at checkpoint.
