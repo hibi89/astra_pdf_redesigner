@@ -209,3 +209,10 @@
 8. **Data/backup/security:** STEP1 V1 and STEP2 V2 data and original design assets preserved; synthetic-only ephemeral PDF, no real user file, credentials, paid APIs, GGUF weights or OCR. Existing source recoverable via prior Git SHA, no force push.
 9. **Next/check gates:** Inspect both latest exact-code workflow conclusions and Windows `PASS M08-C WINDOWS INSTALLED CORRUPT CATALOG`/Chrome `PASS M08-C CHROME/EDGE...`; if successful upgrade report/STATUS/HANDOFF/lead and PR9 wording to scoped DONE. If failed record actual command/log, minimal repair once. Real customer PDF/device and actual LLM assets require separate user decision.
 10. **Timestamp/proof bounds:** 2026-10-27 KST, recorded from exact-code job statuses before Chrome/Windows finished. This docs-only commit is not a re-tested app binary.
+
+
+## M08-C retry checkpoint — 2026-10-27 KST
+- **Failure/root cause:** Windows #40347906006 failed at the new final `verifyPersisted` check after eight layouts changed and persisted document theme. The comparison used the initial `imported.themeClass`, not the last observed saved theme. Existing eight PDF prints and STEP2 checks passed; no database loss was observed/proven.
+- **Improved method (one retry):** test-only `a1cf97736e9278e11e14c4f42bd540206e82126e` saves/checks current theme after the eight-theme sequence, then reloads and verifies same previous document/count/theme. No app algorithm, schema, original or secrets changed; no force push.
+- **Pending verification:** [Chrome/Edge #40348815412](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40348815412), [Windows #40348815406](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40348815406). If second method fails without new verified progress, STOP & PIVOT; report the exact failure, avoid repeated blind CI. The old `274845...` all-green verdict is invalid.
+- **Next after green:** inspect exact logs incl. `PASS M08-C WINDOWS INSTALLED CORRUPT CATALOG`, update evidence docs, lead STATUS/HANDOFF, PR9 Draft. If red, preserve partial success (Edge M08-C passed) and classify remaining Windows blocker. Sale NO-GO.
