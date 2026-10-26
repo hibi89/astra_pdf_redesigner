@@ -149,3 +149,24 @@ test('M08-B installed full scan reject and mixed-scan review cannot modify saved
     'requireRaster:true','SCAN_MARKERS','manual approval'])
     assert.ok(browser.includes(required),'Missing real browser M08-B guard: '+required);
 });
+
+
+test('M08-C corrupt xref Catalog PDF is substantive and tested in browsers and installed Windows',()=>{
+  const {makeCorruptRootPdf,SCAN_MARKERS}=require('../desktop/step3-invalid-fixture.cjs');
+  const source=makeCorruptRootPdf();
+  assert.equal(source.subarray(0,5).toString('ascii'),'%PDF-');
+  assert.ok(source.length>1000&&source.includes(Buffer.from('xref\n0 9\n')));
+  assert.ok(source.includes(Buffer.from('/Root 9 0 R')));
+  assert.ok(!source.includes(Buffer.from('/Root 1 0 R')));
+  assert.ok(source.includes(Buffer.from('/Subtype /Image')));
+  assert.ok(source.includes(Buffer.from(SCAN_MARKERS.first)));
+  assert.ok(source.includes(Buffer.from(SCAN_MARKERS.end)));
+  const runner=fs.readFileSync(path.resolve(__dirname,'../desktop/step3-project-acceptance.cjs'),'utf8');
+  const chromeEdge=fs.readFileSync(path.resolve(__dirname,'step3-browser.mjs'),'utf8');
+  for(const marker of ['makeCorruptRootPdf','corruptRecoveryWithoutWrite','M08-C WINDOWS INSTALLED CORRUPT CATALOG',
+    'verifyPersisted.toString()'])
+    assert.ok(runner.includes(marker),'Missing installed M08-C acceptance: '+marker);
+  for(const marker of ['makeCorruptRootPdf','M08-C CHROME/EDGE CORRUPT CATALOG',
+    'm08-valid-before-corruption.pdf','m08-after-corruption-recovery.pdf'])
+    assert.ok(chromeEdge.includes(marker),'Missing browser M08-C acceptance: '+marker);
+});
