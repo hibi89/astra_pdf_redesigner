@@ -571,3 +571,16 @@
 2. [First real browser #40362547385](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40362547385) SUCCESS 2/2, Node 61/61, build, Chrome/Edge real text/role/drop tested, V2 unchanged. Block reorder **not executed** on old fixture.
 3. Latest test-only revision at code SHA `575373799324c79cac6134edc28f72a00303d88e` switches new standalone UI regression to mixed-column PDF and **requires actual move down** to revoke approval. [Linux #40363162008](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40363162008), [Windows #40363162195](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40363162195) queued/pending. No final verdict.
 4. NEXT check both browser PASS logs for 'text/role/order' and full 2/2 CI, plus installed Windows green. Previous M08-D Windows/Chrome/Edge green; owner models, real PDFs/physical hardware, 20/30 designs, licensing/signing and commercial NO-GO unchanged. Main/PR3/PR4 untouched, PR9 Draft.
+
+
+## M09-A final verified / M09-B scoped analysis handoff — 2026-10-27 KST
+1. **Goal:** offline PDF source content preservation, explicit human review and stable Windows A4 output; paid 30/60/90k plans remain future scope.
+2. **Done:** integration M09-A consent revoked after text/role/actual block reordering and invalid replacement. No STEP1 localStorage or STEP2 IndexedDB user data changes; test-only strict fixture added to original runtime guard.
+3. **Tests:** exact integration code SHA `575373799324c79cac6134edc28f72a00303d88e`, Chrome+Edge [#40363162008](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40363162008) 2/2 SUCCESS with explicit text/role/order log and Node 61/61 + build; Windows [#40363162195](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40363162195) SUCCESS installed regressions/8 native A4 layouts. Real Windows M09-A GUI edit untested.
+4. **Status:** M09-A DONE at synthetic browser scope; M09-B only investigation/possible next design. Customer acceptance/model/SKU/release gate commercial NO-GO.
+5. **Failure & decision:** earlier browser fixture had no move targets, so its green signal alone did not prove reorder; stronger multicolumn target required and passed. Compare (A) generation counter on async results/cleanup (low cost) vs (B) cancellation integrated with PDF.js loading/recovery (higher complexity). Only modify if realistic race reproduced.
+6. **Repo:** `hibi89/astra_pdf_redesigner`, integration code above, documentation integration `093c46eec8824e47138a33c090885b08349f0e7b`, lead current docs commit to be checked; Draft PR9 (lead <- integration), main and Draft PR3/4 not merged.
+7. **Environment:** Node 22 CI Ubuntu Chrome/Edge, Windows Electron NSIS x64, local `npm test`/`npm run build`; Vercel/Production N/A. Unsigned test installer is not consumer release.
+8. **Originals/rollback:** Git history retains original PDF code, source designs, schema; no customer PDF, personal data, credential or model downloaded/transferred.
+9. **Next:** minimal synthetic race reproducer or proceed with higher-priority actual owner-led Windows/PDF acceptance when permitted; store exact verified SHA, preserve existing features.
+10. **Check time:** 2026-10-27 KST; 3 exact job logs inspected. Direct actual customer PC and commercial licensing not verified.
