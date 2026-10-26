@@ -70,9 +70,17 @@ async function runInstalledPasswordPdfAcceptance(win){
       JSON.stringify(SCAN_MARKERS)
     ].join(',')+')',true);
   await win.loadURL(APP_URL);
+  // The loadURL promise resolves before React/IndexedDB rehydrates the saved
+  // project. Checking document.querySelector immediately races first render.
+  // Poll for the actual expected persisted state instead of comparing an empty
+  // initial DOM with the saved document. This does not alter product behavior.
   const restored=await win.webContents.executeJavaScript(
-    "(()=>({names:[...document.querySelectorAll('.doc-list-item strong')].map(x=>x.textContent),"+
-    "active:document.querySelector('.doc-list-item.active strong')?.textContent}))()",true);
+    '(async()=>{const expected='+JSON.stringify(state)+';let last;'+
+    'for(let n=0;n<160;n++){last={names:[...document.querySelectorAll(".doc-list-item strong")].map(x=>x.textContent),'+
+    'active:document.querySelector(".doc-list-item.active strong")?.textContent};'+
+    'if(JSON.stringify(last)===JSON.stringify(expected))return last;'+
+    'await new Promise(resolve=>setTimeout(resolve,200));}'+
+    'throw Error("M08-D persisted V2 mismatch after hydration: "+JSON.stringify(last));})()',true);
   if(JSON.stringify(state)!==JSON.stringify(restored))
     throw Error('M08-D existing project list or selection changed after reload');
   console.log('PASS M08-D WINDOWS INSTALLED AES-256 PASSWORD: clear local rejection, stale draft/Blob removed, V2 documents preserved after reload, valid retry unapproved');
