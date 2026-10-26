@@ -551,3 +551,16 @@
 4. Result: scoped M08-D DONE; earlier Windows UI rehydrate test race resolved. Overall physical customer PDF/PC and true local Korean LLM, SKU 20/30, signing/licensing remain NOT VERIFIED and sale NO-GO.
 5. Repo `hibi89/astra_pdf_redesigner` integration + lead; PR9 remains Draft; main/PR3/PR4 not merged. Current branch HEAD later docs-only, do not mistake for tested binary.
 6. NEXT owner-free READY: targeted input/review guard tightening or unsupported synthetic source integrity tests. Owner consent required for real customer PDF/hardware and actual GGUF binary/paid services. Do not upload real files to public CI.
+
+
+## M09-A approval guard integration handoff — 2026-10-27 KST
+1. **Scope:** PDF.js import review consent must be revoked after user edits text/classification/reorder or unsuccessfully drops a replacement source; prevent import of stale approved draft.
+2. **Implemented:** `src/step3/ImportPanel.tsx` sets `confirmed=false` on content/role/move; invalid file drop calls existing `forget()` to remove old draft/Blob/review and then explicit error. New standalone `tests/step3-consent-browser.mjs` drives real Chrome/Edge with synthetic 2p scanned+selectable PDF; old V2 remains after reload.
+3. **Current exact candidate source:** `657e8adf59d6ff0b1ba8a84b1611939e2f8f247b`, [Linux Chrome/Edge #40362547385](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40362547385) / [Windows NSIS #40362547537](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40362547537) **IN PROGRESS** at this checkpoint. No completed result yet.
+4. **Old baseline:** M08-D final green at `e80aa064...` Chrome+Edge #40354394704 SUCCESS, Windows #40354394703 SUCCESS. New runtime source not yet verified.
+5. **Proof gate:** both real Chrome and Edge `PASS M09-A CHROME/EDGE REVIEW CONSENT` + full two-job Linux workflow and Windows NSIS success. Existing Windows suite does not click M09-A UI.
+6. **No source disclosure:** User originals/STEP1 localStorage and STEP2 V2 DB unchanged in code. Synthetic test content only; no weights/model, real PDF, customer secrets, paid API.
+7. **Repo:** integration branch code+report `docs/commercial/M09_A_IMPORT_CONSENT_GUARD_20261027.md`, lead docs, Draft PR9; main/PR3/PR4 untouched.
+8. **Risk:** CI browser event simulator may surface real React input-event issue; inspect exact failure and correct only root cause once. Never call pending test success.
+9. **Next:** check exact runs, fix test/regression if needed; then consider async stale-file result M09-B. Owner must approve physical PC/customer PDF/model download.
+10. **2026-10-27 KST**, commercial NO-GO.
