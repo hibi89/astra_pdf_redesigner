@@ -584,3 +584,16 @@
 8. **Originals/rollback:** Git history retains original PDF code, source designs, schema; no customer PDF, personal data, credential or model downloaded/transferred.
 9. **Next:** minimal synthetic race reproducer or proceed with higher-priority actual owner-led Windows/PDF acceptance when permitted; store exact verified SHA, preserve existing features.
 10. **Check time:** 2026-10-27 KST; 3 exact job logs inspected. Direct actual customer PC and commercial licensing not verified.
+
+
+## M09-B pending evidence lead handoff — 2026-10-27 KST
+1. **Target:** local-only PDF analysis/edit design workflow and safe Windows A4; commercial 30/60/90k final contract remains pending.
+2. **Implementation:** existing UI allows mode change while import parses; on unmount a stale `await` continuation created an orphan original PDF Blob URL. Integration now invalidates request version in cleanup/forget and drops late results before object URL allocation.
+3. **Proof:** older synthetic Edge `179a11b7` [#40369980500](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40369980500) expected **FAIL 1 !== 0**; fix SHA `fd5bbe077b84dd6422e20673e9a70efd9b0e076f`; installed Windows [#40370193990](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40370193990) **SUCCESS** 61 Node/12 desktop + 8/8 native PDF; browser [#40370194342](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40370194342) QUEUED at checkpoint, no fix M09-B PASS claim.
+4. **Status:** M09-A DONE. M09-B code implemented but browser race test **VERIFICATION PENDING**; sale NO-GO.
+5. **Failure/alternatives:** code-inspected and browser-observed orphan URL after React unmount. Simple generation guard selected over expensive cancellation through PDF.js worker/parsing. No blind CI retries.
+6. **Refs:** `hibi89/astra_pdf_redesigner`, integration test source above, docs-only integration `eac38f0`, Draft PR9 to lead; main PR3 PR4 untouched. `tests/step3-race-browser.mjs` and `src/step3/ImportPanel.tsx`.
+7. **Runtime:** Chrome+Edge Linux, Windows NSIS Electron local program; no Vercel production; Node/npm for developer only.
+8. **Protection:** original assets and user localStorage V1/IDB V2 untouched; only synthetic CI fixtures, no customer source upload/model/secrets/network.
+9. **Next:** verify exact fix code Chrome/Edge 2/2 and real `PASS M09-B CHROME/EDGE STALE UNMOUNT`; if not green, isolate runner font vs app assertion, correct minimally. After that update docs, recommend next task. Customer acceptance/model download owner gated.
+10. **Checkpoint:** 2026-10-27 KST; tested Windows and baseline Edge failure; corrected browser outcome **not yet observed**.
