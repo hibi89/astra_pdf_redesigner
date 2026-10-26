@@ -47,16 +47,19 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
   const dropFiles=(files:FileList)=>{
     setDragging(false);
     if(disabled||busy)return;
-    if(files.length!==1){setError('PDF 파일 하나만 놓아 주세요.');return;}
-    if(!/\.pdf$/i.test(files[0].name)){setError('확장자가 .pdf인 파일 하나만 놓아 주세요.');return;}
+    if(files.length!==1){forget();setError('PDF 파일 하나만 놓아 주세요.');return;}
+    if(!/\.pdf$/i.test(files[0].name)){forget();setError('확장자가 .pdf인 파일 하나만 놓아 주세요.');return;}
     void choose(files[0]);
   };
   const change=(page:number,id:string,fn:(old:PdfDraftBlock)=>PdfDraftBlock)=>{
+    // Review consent describes a specific draft; editing revokes that consent.
+    setConfirmed(false);
     setDraft(prev=>prev?{...prev,pages:prev.pages.map(p=>p.number===page?{...p,
       blocks:p.blocks.map(b=>b.id===id?fn(b):b),
     }:p)}:prev);
   };
   const move=(page:number,id:string,delta:-1|1)=>{
+    setConfirmed(false);
     setDraft(prev=>prev?{...prev,pages:prev.pages.map(p=>{
       if(p.number!==page)return p;
       const i=p.blocks.findIndex(b=>b.id===id),to=i+delta;
