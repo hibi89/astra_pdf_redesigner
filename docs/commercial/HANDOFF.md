@@ -251,3 +251,11 @@
 4. Latest functional source SHA `e80aa0643f27485d46a883645385816956cd70a2`; [Linux browser #40354394703](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40354394703) and [Windows NSIS #40354394704](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40354394704) **PENDING**. Need actual successful results and PASS M08-D markers before DONE.
 5. No application production logic, original PDF, user DB or private customer data changed; old baseline recoverable through prior Git commits. Main/PR3/PR4 left untouched; PR9 Draft and commercial NO-GO.
 6. Next: inspect two exact-code workflows. If Windows still fails capture last hydration state to distinguish genuine persisted V2 mutation; one further blind retry forbidden—investigate root cause and stop/pivot. If both green, update docs/lead PR with verified success. No GGUF download or real customer material without owner approval.
+
+
+## M08-D final candidate Windows+Edge evidence (2026-10-27 KST)
+1. Functional/source SHA `e80aa0643f27485d46a883645385816956cd70a2`, integration branch; subsequent documentation commits are not separate app builds.
+2. [Windows #40354394703](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40354394703) **SUCCESS**; actual `PASS M08-D WINDOWS INSTALLED AES-256 PASSWORD`, old V2 restored, valid source retry not auto-approved; existing 8/8 layouts and M08-C PASS, NSIS install/update/uninstall and STEP2 persistence PASS.
+3. [Linux #40354394704](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40354394704) **Edge SUCCESS** with actual `PASS M08-D CHROME/EDGE AES-256 PASSWORD`, old M08-B/C regression PASS. **Chrome still IN PROGRESS** (Korean-font CI step) last checked. Do not claim global M08-D DONE yet.
+4. Previous Windows failure due stale DOM rehydrate on reload was resolved by test-only hydration wait. No source/user DB/schema/private file changed. Main and PR3/PR4 protected; PR9 Draft.
+5. NEXT: read exact Chrome job outcome and M08-D log marker; if SUCCESS, finalize full report, integration and lead docs and Draft PR9. If FAIL in CI font setup, distinguish environmental gating from app test; avoid claiming tested Chrome. Physical Windows buyer/customer PDFs and true Korean GGUF license/download remain approval and sale NO-GO.
