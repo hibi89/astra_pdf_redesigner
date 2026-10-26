@@ -35,3 +35,9 @@ Pass markers to confirm in actual logs: `PASS M08-D CHROME/EDGE AES-256 PASSWORD
 ## NEXT after verification
 
 If successful, update this verdict and commercial STATUS/HANDOFF + lead STATUS/HANDOFF + PR #9 with precise two-run evidence. Further work should prioritize 5–10 consented customer PDFs and real Windows QA or blocker-free UI/reflow improvements; do not download model assets without owner approval.
+
+
+## Real Windows feedback and bounded correction — 2026-10-27 KST
+- Pre-final commit `60f99227af7d00756006692db9c923ff8fbd1c62` [Windows NSIS #40352546255](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40352546255) **FAIL**. Exact log: `PASS M08-C WINDOWS INSTALLED CORRUPT CATALOG`, then `ASTRA desktop startup failure: Error: M08-D existing project list or selection changed after reload` in `desktop/step3-password-acceptance.cjs:77`. This is a test verification gap, not proof of customer data loss: the test read the React document list immediately after `loadURL`, before awaited IDB hydration.
+- Test-only correction at **`e80aa0643f27485d46a883645385816956cd70a2`** waits/polls up to 32s for the full expected saved document names and selected document after reload. A genuine mismatch still throws with the last actual state, and does not silently pass. No `src/**`, DB schema, source PDF or original records touched.
+- New exact-head [Linux Chrome/Edge #40354394703](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40354394703) and [Windows NSIS #40354394704](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40354394704) **queued/pending** at this update. Prior #40352669870/#40352669611 are the now-superseded M08-D code SHA and cannot validate the fix. Do not claim M08-D DONE without exact-final SHA two-workflow pass.
