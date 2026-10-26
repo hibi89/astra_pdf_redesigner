@@ -170,3 +170,25 @@ test('M08-C corrupt xref Catalog PDF is substantive and tested in browsers and i
     'm08-valid-before-corruption.pdf','m08-after-corruption-recovery.pdf'])
     assert.ok(chromeEdge.includes(marker),'Missing browser M08-C acceptance: '+marker);
 });
+
+
+test('M08-D AES-256 fixture is encrypted, immutable and wired into browser/Windows regression',()=>{
+  const crypto=require('node:crypto');
+  const {makePasswordProtectedPdf,SHA256}=require('../desktop/step3-encrypted-fixture.cjs');
+  const pdf=makePasswordProtectedPdf();
+  assert.equal(pdf.subarray(0,8).toString('ascii'),'%PDF-1.7');
+  assert.equal(pdf.length,1964);
+  assert.ok(pdf.includes(Buffer.from('/Encrypt'))&&pdf.includes(Buffer.from('/Standard')));
+  assert.equal(crypto.createHash('sha256').update(pdf).digest('hex'),SHA256,
+    'Synthetic encrypted fixture differs from verified local AES-256 original');
+  const installed=fs.readFileSync(path.resolve(__dirname,'../desktop/step3-password-acceptance.cjs'),'utf8');
+  const entry=fs.readFileSync(path.resolve(__dirname,'../desktop/step3-project-acceptance.cjs'),'utf8');
+  const browser=fs.readFileSync(path.resolve(__dirname,'step3-password-browser.mjs'),'utf8');
+  const ci=fs.readFileSync(path.resolve(__dirname,'../.github/workflows/ci.yml'),'utf8');
+  for(const marker of ['runInstalledPasswordPdfAcceptance','M08-D WINDOWS INSTALLED AES-256 PASSWORD','STEP3'])
+    assert.ok(installed.includes(marker),'Missing installed M08-D check: '+marker);
+  assert.ok(entry.includes('await runInstalledPasswordPdfAcceptance(win)'));
+  for(const marker of ['M08-D CHROME/EDGE AES-256 PASSWORD','Page.reload','valid-retry'])
+    assert.ok(browser.includes(marker),'Missing browser M08-D regression: '+marker);
+  assert.equal(ci.split('node tests/step3-password-browser.mjs').length-1,2);
+});
