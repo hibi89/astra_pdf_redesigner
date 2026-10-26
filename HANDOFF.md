@@ -610,3 +610,16 @@
 8. **Assets/secrets:** only synthetic PDF, never buyer document/secret/model/paid API; STEP1 localStorage/STEP2 IDB originals and initial PNG designs unchanged. Git SHA rollback.
 9. **Next:** owner consent for GGUF model download/license/CPU and actual confidential PDF+physical Windows acceptance, otherwise limited synthetic edge-case QA. No automatic release or sales-ready claim.
 10. **Time/evidence:** 2026-10-27 KST, final three exact job conclusions and browser pass strings reviewed; docs-only commits not treated as code tests.
+
+
+## M09-C lead 10-point checkpoint (2026-10-27 KST) — verified Windows, browser pending
+1. **Goal/stack:** offline original PDF review/edit/new A4 output, React/PDF.js/TS/Vite/IndexedDB/Electron NSIS; 30/60/90k SKU plan later.
+2. **Change:** parsing cancellation now enabled, reuses M09-B generation invalidation; cancel permits immediate retry while previous PDF read completes stale; saving-to-DB phase still blocked from cancel; no new parser/DB dependency.
+3. **Tests:** runtime code `c780e007...`; Windows #40374128200 SUCCESS 61 unit/12 desktop, 8/8 A4. First Edge #40374128104 failed harness snapshot Promise grouping before validating cancel, not a proved app defect. Test-only correction code SHA `02c9051ba93d81f3d6cac82d35ac067dffaa8617`; Linux #40375087842 + Windows #40375087864 pending, no M09-C browser PASS yet.
+4. **State:** M09-A/B DONE, M09-C implemented but **VERIFY PENDING**, commercial NO-GO.
+5. **Failure and pivot:** snapshot expression `})())` yielded a function, corrected `}))()` to call outer arrow and await IDB promise. One meaningful correction used; inspect actual logs if failure before any further change.
+6. **Repo/branch:** `hibi89/astra_pdf_redesigner`, integration latest docs `94937fafafec2324ba30ad3807c152319a648f29`, code test SHA `02c9051b`, Draft PR9 targeting lead; files `src/step3/ImportPanel.tsx`, `tests/step3-cancel-browser.mjs`, `.github/workflows/ci.yml`, M09-C report.
+7. **Runtime:** Ubuntu Chrome/Edge GitHub CI, installed Windows Electron NSIS, no Vercel deployment. Unsigned installer test only.
+8. **Data/security:** no customer PDF/model/token uploaded, no STEP1/STEP2 original data or main/PR3/4 touched; Git parent SHAs recoverable.
+9. **Next:** verify corrected exact browser jobs M09-C marker, 2/2 green and matching Windows installed regression; update status to scoped DONE only on proof. Owner-only real customer PDF/PC and GGUF approval separately gated.
+10. **Verification boundary:** 2026-10-27 KST, Windows app CI success confirmed; corrected test CI queued, physical Windows and commercial sale unverified.
