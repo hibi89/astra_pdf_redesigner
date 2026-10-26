@@ -23,26 +23,46 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
   const [imageUrls,setImageUrls]=useState<Record<string,string>>({});
   const urlRef=useRef('');
   const imageUrlRef=useRef<Record<string,string>>({});
-  useEffect(()=>()=>{if(urlRef.current)URL.revokeObjectURL(urlRef.current);
-    Object.values(imageUrlRef.current).forEach(u=>URL.revokeObjectURL(u));},[]);
+  // A PDF.js parse can finish after a workspace mode switch. Its result must
+  // not allocate temporary Blob URLs or update a discarded review session.
+  const requestVersion=useRef(0);
+  const unmounted=useRef(false);
+  useEffect(()=>{
+    unmounted.current=false;
+    return()=>{
+      unmounted.current=true;
+      requestVersion.current++;
+      if(urlRef.current)URL.revokeObjectURL(urlRef.current);
+      Object.values(imageUrlRef.current).forEach(u=>URL.revokeObjectURL(u));
+    };
+  },[]);
   const forget=()=>{
+    // Also invalidates any in-flight PDF extraction before it can publish.
+    requestVersion.current++;
     if(urlRef.current)URL.revokeObjectURL(urlRef.current);
     Object.values(imageUrlRef.current).forEach(u=>URL.revokeObjectURL(u));
     imageUrlRef.current={};setImageUrls({});
     urlRef.current='';setPreviewUrl('');setDraft(null);setError('');setConfirmed(false);
   };
   const choose=async(file:File)=>{
-    forget();setBusy(true);
+    forget();
+    const version=requestVersion.current;
+    const isCurrent=()=>!unmounted.current&&requestVersion.current===version;
+    setBusy(true);
     try{
       const parsed=await extractLocalPdf(file);
+      if(!isCurrent())return; // switched/closed/superseded; never own an orphan Blob
       // The source file remains an ephemeral browser Blob URL only during review.
       const url=URL.createObjectURL(file);urlRef.current=url;setPreviewUrl(url);
       const imageMap:Record<string,string>={};
       for(const page of parsed.pages)for(const image of page.images)imageMap[image.id]=URL.createObjectURL(image.blob);
       imageUrlRef.current=imageMap;setImageUrls(imageMap);
       setDraft(parsed);
-    }catch(e){setError(e instanceof Error?e.message:'PDF에서 내용을 추출할 수 없습니다.');}
-    finally{setBusy(false);}
+    }catch(e){
+      if(isCurrent())setError(e instanceof Error?e.message:'PDF에서 내용을 추출할 수 없습니다.');
+    }finally{
+      if(isCurrent())setBusy(false);
+    }
   };
   const dropFiles=(files:FileList)=>{
     setDragging(false);
