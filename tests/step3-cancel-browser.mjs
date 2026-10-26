@@ -44,7 +44,7 @@ try{
     "const tx=db.transaction(['documents','meta'],'readonly');"+
     "const docs=tx.objectStore('documents').getAll();const active=tx.objectStore('meta').get('activeDocumentId');"+
     "tx.oncomplete=()=>{db.close();resolve({docs:docs.result,active:active.result});};"+
-    "tx.onerror=()=>reject(Error('IDB snapshot failed'));};})())");
+    "tx.onerror=()=>reject(Error('IDB snapshot failed'));};}))()");
   const before=await snapshot();
   assert.equal(before.docs.length,original.count);
   const originalPdf=makeMixedLayoutPdf();
