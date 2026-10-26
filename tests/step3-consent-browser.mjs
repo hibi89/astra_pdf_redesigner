@@ -4,9 +4,7 @@ import {mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {launchBrowser} from './browser-process.mjs';
-import fixture from '../desktop/step3-scanned-fixture.cjs';
-
-const {makeScannedPagesPdf,SCAN_MARKERS}=fixture;
+import {makeMixedLayoutPdf,MIXED_LAYOUT_MARKERS} from './fixtures/step3-mixed-layout-pdf.mjs';
 const profile=mkdtempSync(join(tmpdir(),'astra-m09a-'));
 const browser=launchBrowser(process.env.CHROME_PATH||'chromium',profile,'M09-A review approval');
 let ws,sequence=0;const waiting=new Map();
@@ -44,7 +42,7 @@ try{
   await eventually(()=>evaluate("Boolean(document.querySelector('.step3-import-panel input[type=file]')&&document.querySelector('.doc-list-item.active'))"));
   const original=await evaluate("(()=>({count:document.querySelectorAll('.doc-list-item').length,active:document.querySelector('.doc-list-item.active strong')?.textContent}))()");
   assert.ok(original.count>=1&&original.active);
-  const pdf=makeScannedPagesPdf({selectableSecondPage:true});
+  const pdf=makeMixedLayoutPdf();
   const upload=async(name)=>evaluate("(()=>{const bytes=Uint8Array.from(atob("+
     JSON.stringify(pdf.toString('base64'))+"),c=>c.charCodeAt(0));"+
     "const input=document.querySelector('.step3-import-panel input[type=file]');"+
@@ -52,7 +50,7 @@ try{
     JSON.stringify(name)+",{type:'application/pdf'}));"+
     "input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));})()");
   const ready=async()=>eventually(()=>evaluate("(()=>({text:document.querySelector('.step3-import-panel')?.textContent,blocks:document.querySelectorAll('.step3-block-review textarea').length}))()"),
-    x=>x?.text?.includes(SCAN_MARKERS.first)&&x.text.includes(SCAN_MARKERS.end)&&x.blocks>0);
+    x=>x?.text?.includes(MIXED_LAYOUT_MARKERS[0])&&x.text.includes(MIXED_LAYOUT_MARKERS.at(-1))&&x.blocks>1);
   const assertUnapproved=async label=>{
     const x=await eventually(()=>evaluate("(()=>({checked:document.querySelector("+JSON.stringify(approvalSelector)+")?.checked,saveDisabled:("+saveExpression+")?.disabled}))()"),
       x=>x?.checked===false&&x.saveDisabled===true);
@@ -76,9 +74,11 @@ try{
     "select.dispatchEvent(new Event('change',{bubbles:true}));})()");
   await assertUnapproved('classification edit');
 
-  // The second text line is a separate fragment; test order changes if available.
+  // This synthetic multicolumn PDF has multiple distinct editable blocks.
+  // Reordering must be exercised, not merely skipped when no target exists.
   const moveCount=await evaluate("document.querySelectorAll('.step3-block-review button[aria-label$=\"아래로 이동\"]:not(:disabled)').length");
-  if(moveCount>0){
+  assert.ok(moveCount>0,'M09-A source needs at least two movable blocks');
+  {
     await evaluate("document.querySelector("+JSON.stringify(approvalSelector)+").click()");
     await evaluate("document.querySelector('.step3-block-review button[aria-label$=\"아래로 이동\"]:not(:disabled)').click()");
     await assertUnapproved('reading-order edit');
@@ -104,7 +104,7 @@ try{
   const reloaded=await eventually(()=>evaluate("(()=>({count:document.querySelectorAll('.doc-list-item').length,active:document.querySelector('.doc-list-item.active strong')?.textContent}))()"),
     x=>x?.count===original.count&&Boolean(x.active));
   assert.deepEqual(reloaded,original,'Edits/rejected drop must not change saved V2 documents');
-  console.log('PASS M09-A CHROME/EDGE REVIEW CONSENT: text/role'+(moveCount>0?'/order':'')+
+  console.log('PASS M09-A CHROME/EDGE REVIEW CONSENT: text/role/order'+
     ' changes revoke approval; rejected drop clears stale approved draft; V2 preserved after reload');
 }finally{
   if(ws)ws.close();
