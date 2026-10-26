@@ -564,3 +564,10 @@
 8. **Risk:** CI browser event simulator may surface real React input-event issue; inspect exact failure and correct only root cause once. Never call pending test success.
 9. **Next:** check exact runs, fix test/regression if needed; then consider async stale-file result M09-B. Owner must approve physical PC/customer PDF/model download.
 10. **2026-10-27 KST**, commercial NO-GO.
+
+
+## M09-A first green / strict reordered-doc test follow-up — 2026-10-27 KST
+1. Product code change remains `src/step3/ImportPanel.tsx` invalidate `confirmed` after text/role/move, `forget()` on invalid replacement drop; no original DB/schema or customer file changed.
+2. [First real browser #40362547385](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40362547385) SUCCESS 2/2, Node 61/61, build, Chrome/Edge real text/role/drop tested, V2 unchanged. Block reorder **not executed** on old fixture.
+3. Latest test-only revision at code SHA `575373799324c79cac6134edc28f72a00303d88e` switches new standalone UI regression to mixed-column PDF and **requires actual move down** to revoke approval. [Linux #40363162008](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40363162008), [Windows #40363162195](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40363162195) queued/pending. No final verdict.
+4. NEXT check both browser PASS logs for 'text/role/order' and full 2/2 CI, plus installed Windows green. Previous M08-D Windows/Chrome/Edge green; owner models, real PDFs/physical hardware, 20/30 designs, licensing/signing and commercial NO-GO unchanged. Main/PR3/PR4 untouched, PR9 Draft.
