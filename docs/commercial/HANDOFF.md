@@ -285,3 +285,10 @@
 8. **Current blockers:** real customer PDFs on owner PC, true licensed offline Korean GGUF, full 8/20/30 commercial SKU gates, entitlement/licensing/signing. Sale NO-GO remains even if M09-A passes.
 9. **NEXT:** confirm CI and fix only real failing assertion minimally if any. After M09-A green, independent small READY M09-B is async stale imported PDF response guard; if red classify exact test failure with limited retry then STOP/PIVOT.
 10. **Time:** 2026-10-27 KST, current source SHA evidence only CI in progress, not DONE.
+
+
+## M09-A strict reorder test follow-up — 2026-10-27 KST
+1. **Already verified subset:** initial code `657e8ad...` [Linux Chrome+Edge #40362547385](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40362547385) SUCCESS 2/2, actual text and role edits revoke approval; wrong file drop clears stale approved draft and existing V2 untouched after reload. Node 61/61/build PASS. This run did **not** reach a movable block.
+2. **Latest test-only change:** `tests/step3-consent-browser.mjs` uses existing `makeMixedLayoutPdf` 2p multicolumn synthetic markers and asserts at least one live Move Down button, clicks it after reapproval, then demands checkbox reset and Save disabled. App `src/step3/ImportPanel.tsx` unaffected.
+3. **Exact latest code SHA `575373799324c79cac6134edc28f72a00303d88e`**, [Linux #40363162008](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40363162008) and [Windows #40363162195](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40363162195) QUEUED. **M09-A overall VERIFY PENDING**. Prior test SHA/Windows run not a final-code proof.
+4. **Next:** check both Chrome and Edge new logs for `PASS M09-A ... text/role/order` and 2/2 success, Windows installed regression PASS. If failure, inspect exact assertion, fix minimally once, then stop/pivot on repeat. Do not change release gate: real buyer PCs/PDFs, licensed true GGUF, PRO20/BUSINESS30 and signed distribution remain unmet; Draft PR9 and main/PR3/4 unmerged.
