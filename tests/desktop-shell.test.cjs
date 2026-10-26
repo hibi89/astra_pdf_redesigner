@@ -185,7 +185,7 @@ test('M08-D AES-256 fixture is encrypted, immutable and wired into browser/Windo
   const entry=fs.readFileSync(path.resolve(__dirname,'../desktop/step3-project-acceptance.cjs'),'utf8');
   const browser=fs.readFileSync(path.resolve(__dirname,'step3-password-browser.mjs'),'utf8');
   const ci=fs.readFileSync(path.resolve(__dirname,'../.github/workflows/ci.yml'),'utf8');
-  for(const marker of ['runInstalledPasswordPdfAcceptance','M08-D WINDOWS INSTALLED AES-256 PASSWORD','STEP3'])
+  for(const marker of ['runInstalledPasswordPdfAcceptance','M08-D WINDOWS INSTALLED AES-256 PASSWORD','V2'])
     assert.ok(installed.includes(marker),'Missing installed M08-D check: '+marker);
   assert.ok(entry.includes('await runInstalledPasswordPdfAcceptance(win)'));
   for(const marker of ['M08-D CHROME/EDGE AES-256 PASSWORD','Page.reload','valid-retry'])
