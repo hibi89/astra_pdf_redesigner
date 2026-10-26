@@ -534,3 +534,11 @@
 3. **Change:** Small test-only hydration wait in `desktop/step3-password-acceptance.cjs` at code SHA `e80aa0643f27485d46a883645385816956cd70a2`; wait up to 160*200ms for actual expected document list and selection, fail with last observed state if missing.
 4. **Current final runs:** [Linux Chrome/Edge #40354394703](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40354394703) and [Windows NSIS #40354394704](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40354394704) queued/pending. Prior #40352669870/#40352669611 not exact current source.
 5. **Next:** inspect both exact-code conclusions and `PASS M08-D CHROME/EDGE AES-256 PASSWORD` / `PASS M08-D WINDOWS INSTALLED AES-256 PASSWORD` log markers. If one still fails, diagnose actual state and stop blind retries; if both succeed update integration/lead docs+Draft PR9. Real customer PC/PDF and Korean GGUF model remain approval gates and commercial NO-GO. Main and PR3/PR4 untouched.
+
+
+## 2026-10-27 KST — M08-D Windows and Edge green, Chrome pending
+1. Goal: real synthetic AES-256 2-page password source rejection and existing V2 no-write in Chrome/Edge and installed Windows Electron.
+2. Source tested SHA `e80aa0643f27485d46a883645385816956cd70a2`, test only hydration repair, production source and V2 schema unchanged.
+3. [Windows #40354394703](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40354394703) **SUCCESS**, named Windows M08-D PASS, 8/8 printed layouts, M08-A/B/C and upgrade preservation. [Linux #40354394704](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40354394704) Edge job **SUCCESS** with real M08-D PASS, Chrome job **in progress** at font setup. Final Chrome PASS must be proven before marking M08-D DONE.
+4. Original customer documents and model not acquired, no secrets/API/transmission, only synthetic test; no main or PR3/PR4 merge. PR9 stays Draft, commercial sale NO-GO.
+5. Next: inspect Linux Chrome final job log and combined run; if pass finalize all docs and PR. If setup fails, record environmental issue; do not claim actual Chrome. Physical buyer PC/customer PDF and Korean model are owner-led approvals.
