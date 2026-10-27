@@ -135,19 +135,22 @@ async function runInstalledM09DCancelAcceptance(win,pdfBytes,markers){
       "p.textContent.includes("+JSON.stringify(markers.first)+")&&p.querySelector('.step3-block-review');})()"),
       'new valid source selected and reviewed in the installed app');
     const review=await evaluate("(()=>{const p=document.querySelector('.step3-import-panel');"+
-      "const approval=p.querySelector('.step3-confirm input[type=checkbox]');"+
+      "const consent=[...p.querySelectorAll('label.step3-confirm')].find(x=>x.textContent.includes('원본과 추출 결과'));"+
+      "const approval=consent?.querySelector('input[type=checkbox]');"+
       "const save=[...p.querySelectorAll('button')].find(x=>x.textContent.includes('검수 결과를 새 문서로 저장'));"+
       "return{text:p.textContent,approved:approval?.checked??null,saveDisabled:save?.disabled??null};})()",true);
     if(!review.text.includes('m09d-new.pdf')||review.text.includes('m09d-old.pdf')||
        review.approved!==false||review.saveDisabled!==true)
-      throw Error('M09-D new review must be distinct, unapproved and unsaved before late completion');
+      throw Error('M09-D new review state mismatch: '+JSON.stringify({newName:review.text.includes('m09d-new.pdf'),
+        oldName:review.text.includes('m09d-old.pdf'),approved:review.approved,saveDisabled:review.saveDisabled}));
     await evaluate("if(!window.__astraM09D?.releaseOld)throw Error('M09-D held old parse cannot be released');"+
       "window.__astraM09D.releaseOld();true");
     await waitFor(()=>evaluate('window.__astraM09D?.oldBytesDelivered===true'),
       'old PDF bytes are released after the newer file has been reviewed');
     await wait(4500); // Give the stale PDF.js continuation time to finish after its bytes arrive.
     const late=await evaluate("(()=>{const s=window.__astraM09D,p=document.querySelector('.step3-import-panel');"+
-      "const approval=p.querySelector('.step3-confirm input[type=checkbox]');"+
+      "const consent=[...p.querySelectorAll('label.step3-confirm')].find(x=>x.textContent.includes('원본과 추출 결과'));"+
+      "const approval=consent?.querySelector('input[type=checkbox]');"+
       "const save=[...p.querySelectorAll('button')].find(x=>x.textContent.includes('검수 결과를 새 문서로 저장'));"+
       "return{text:p.textContent,approved:approval?.checked??null,saveDisabled:save?.disabled??null,"+
       "oldUrls:s.created.filter(x=>x.name==='m09d-old.pdf'),newUrls:s.created.filter(x=>x.name==='m09d-new.pdf'),"+
@@ -155,7 +158,10 @@ async function runInstalledM09DCancelAcceptance(win,pdfBytes,markers){
     if(!late.released||!late.bytesDelivered||late.oldUrls.length!==0||late.newUrls.length!==1||
        !late.text.includes('m09d-new.pdf')||late.text.includes('m09d-old.pdf')||
        late.approved!==false||late.saveDisabled!==true)
-      throw Error('M09-D late old parse replaced or approved the newer review, or created an orphan source URL');
+      throw Error('M09-D stale-parse review state mismatch: '+JSON.stringify({released:late.released,
+        bytesDelivered:late.bytesDelivered,oldUrlCount:late.oldUrls.length,newUrlCount:late.newUrls.length,
+        newName:late.text.includes('m09d-new.pdf'),oldName:late.text.includes('m09d-old.pdf'),
+        approved:late.approved,saveDisabled:late.saveDisabled}));
     await evaluate("[...document.querySelectorAll('.step3-import-panel button')].find(x=>x.textContent.includes('가져오기 취소')).click();true");
     await waitFor(()=>evaluate("!document.querySelector('.step3-import-panel .step3-block-review')"),
       'user cancels the newer unapproved source review');
