@@ -267,3 +267,12 @@
 - **실패 원인 및 수정:** 이전 테스트 SHA `77f1fa3a708548ee9bcc891b1770a1cd7404f6d7` Edge run [#40465870933](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40465870933) timed out after clicking `+ 빈 문서`; the harness had not yet waited for a new document/editor. No product data-loss evidence. The test now synchronizes on the new document ID and blank editor; exact-SHA Chrome and Edge runs both passed.
 - **로컬 검증:** `npm test` **61/61 PASS**, `npm run build` PASS, `node --check tests/step2-browser.mjs` PASS, `git diff --check` PASS. Full local PDF browser extraction is **미검증** because this Windows environment lacks `pdftotext`/`pdfimages`; exact-SHA GitHub Chrome and Edge runs completed those PDF checks.
 - M09-D direct Windows installed-app interaction was also re-run at this exact SHA and passed the marker above. No application source, storage schema, original roadmap, customer data, paid API, model download, merge, production/deployment settings, `main`, PR #3, or PR #4 changed. Roadmap estimate remains ~43%; all-SKU sale/public production remains **NO-GO**.
+
+## 2026-10-27 18:40 KST — GPT-6 총괄 새 개발 순서 확정
+
+- **사용자 최신 지시:** MVP 완성 → 최초 설계도와 비교하면서 부족한 기능 구현 → 종합 보안·안정성·호환성 검수 → 완성·상품화. 상세: [MVP_TO_BLUEPRINT_COMPLETION_20261027.md](MVP_TO_BLUEPRINT_COMPLETION_20261027.md).
+- **현재 상태:** 내부 기술 시연 MVP는 합성 PDF 지원 범위에서 제한 GO. 최초 7단계 약 43% 추정, 실고객 수용/모델/PRO20/BUSINESS30/상용 배포 NO-GO. 브랜치 integration/astra-commercial-core / Draft PR #9 / main·PR3·PR4 보존.
+- **최근 검증 기능 SHA:** cc157cba4b442f44b88c3631a72686fdfe8f8af9. Chrome+Edge [#40479935848](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935848) SUCCESS, Windows NSIS [#40479935852](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935852) SUCCESS. 문서 반영만으로 신규 기능 PASS 주장 금지.
+- **즉시 다음 개발:** STEP4 검증된 스타일 토큰/프리셋·복수 스타일 비교·저장/재사용·PDF 원문 보존. 설계 대안 2개 비교 후 기존 데이터 모델 변경/주요 설계 변경은 승인. 이후 승인 범위 내 STEP5 로컬 레퍼런스, STEP7 지원성 점검. 필수 안전 회귀는 기능과 동시에 진행.
+- **차단·미검증:** OCR, STEP6 외부 검색, 로컬 모델/런타임 다운로드, 유료 서비스, 실제 사용자 PDF/구매자 Windows 실기기, 서명/라이선스, PR 병합/배포. 사용자가 승인·자료 제공하기 전 외부 전송/변경 금지. Codex 로컬 Electron 시각 테스트 종료코드 2147483651은 CI 성공으로 덮지 말 것.
+- **지시 전달:** [PR #9 GPT-6 운영 재설계 댓글](https://github.com/hibi89/astra_pdf_redesigner/pull/9#issuecomment-6438610031). 진행 중인 Codex 세션 자동 수신 보장은 없으므로 다음 작업 시 직접 참조.
