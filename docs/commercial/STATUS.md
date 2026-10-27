@@ -246,3 +246,15 @@
 - Cause/fix chronology: initial app `c780e007...` implemented parsing state/cancel but button remained inside `{draft&&...}`, not visible while parse begins after `forget()`. First Edge CI failed newly added harness expression returning function instead of IDB Promise (`c780`); test-only `02c9051b...` then surfaced genuine UI absent cancel button at pending parse. Explicit layout pivot `2ba0b4e5...`: separate `busy&&parsing` cancel control in loading region, old review footer still available, saving phase non-cancellable. Existing M09-B generation guard discards stale parser completion. No PDF.js worker termination, new DB schema, source byte mutation, external call or customer file.
 - **M09-C scoped DONE** only for synthetic real Chrome/Edge cancel/retry and Windows installed regressions. Draft PR9 remains unmerged; protected `main`/PR3/PR4 unchanged. No public production/Vercel URL, unsigned test NSIS not sold. Actual buyer PC/customer files, genuine licensed local Korean GGUF, PRO20/BUSINESS30, signing/entitlements/support **NOT VERIFIED**, commercial sale **NO-GO**.
 - **NEXT candidate M09-D:** direct Windows installed Electron UI cancellation acceptance using synthetic PDF and existing temporary profile, verify no V2 writes; or owner-approved real Windows/PDF manual acceptance. No new licensed model download or release without explicit approval. For any new task start from latest `HANDOFF.md` and actual Git SHA; older PENDING historical notes are superseded by this verified checkpoint.
+
+## M09-D FINAL VERIFIED — 2026-10-27 16:01 KST
+
+- **검증 코드 SHA:** `1ead660ce57ec55dc1c612256aaa0e38e5a76d3c` on `integration/astra-commercial-core`; Draft PR #9, 미병합.
+- **Linux Chrome·Edge #40463905080:** SUCCESS. Node **61/61**, Vite build 성공, Chrome 출력/IndexedDB job 및 Edge 출력/IndexedDB job 성공.
+- **Windows NSIS #40463905117:** SUCCESS. Node **61/61**, build/패키징, desktop shell **13/13**, NSIS 설치·실행·제거 및 업그레이드 회귀 성공. 로그에 `PASS M09-D WINDOWS INSTALLED UI` 확인.
+- **직접 UI 시나리오:** 분석 중 취소 버튼 표시/클릭 → 새 합성 PDF 선택 및 미승인 검수 유지 → 이전 비동기 분석 바이트를 나중에 전달 → 새 검수 결과 유지 → 취소 후 새 source URL 회수 → IndexedDB 전체 stores의 취소 전·후·앱 재시작 후 스냅샷 동일.
+- **실패 분리:** `3c5004e`는 harness가 DB upgrade version과 document `schemaVersion`을 혼동(실제 upgrade version=1, document schemaVersion=2). `67c533c`는 기본 체크된 이미지 포함 상자를 최종 승인 상자로 오인. 둘 다 테스트 harness만 고쳤고 제품 DB/런타임 변경 없음. 최종 `1ead660`에서 통과.
+- [설계 갭 매트릭스](ASTRA_DESIGN_GAP_MATRIX_20261027.md): 원본 7단계 약 **43%**(STEP1·2 완료, STEP3·4·7 부분, STEP5 미구현, STEP6 승인대기, STEP7 OCR 승인대기). 72시간 내부 MVP와 가격 SKU 준비도는 별도 항목으로 평가.
+- **출시 판정:** BASIC ₩30,000 부분, PRO ₩60,000 미구현, BUSINESS ₩90,000 미구현. 전 SKU 판매 및 public production **NO-GO**. 실제 고객 PDF/구매자 PC, 로컬 한국어 모델 실행·라이선스, SKU 권한, 서명/지원은 미검증 또는 미완료.
+- 사용한 PDF는 CI의 합성 fixture만이며 고객 문서 전송·모델 다운로드·비용 발생 없음. `main`, PR #3/#4와 배포 설정은 변경하지 않음.
+- **다음 작업:** 갭 매트릭스의 원본 문서와 정확한 매핑을 GPT-6 재검수 → 소유자 승인 전에는 STEP5/6 외부 참조 연동, OCR 확대, 모델/런타임 다운로드, 병합/출시를 진행하지 않음. 승인 가능한 범위에서는 QA 게이트에 따라 샘플 기반 원문·표·이미지·페이지 분할 검증을 준비.

@@ -391,3 +391,18 @@
 8. **Originals/backup/secrets:** Existing STEP1 localStorage v1, STEP2 IndexedDB V2, two design PNG, customer PDFs and original repository branches protected. Only synthetic data generated in CI, no customer API/paid/model asset/token. Git pre-fix `461a2057...` / working base revisions for rollback, no force push.
 9. **Next priority/procedure/completion:** M09-D candidate installed Windows UI synthetic cancellation test or owner-approved real PDF/PC user acceptance. Ensure source-review consent/DB unchanged; require Chrome/Edge and Windows green exact SHA; major model acquisition or release gated by explicit owner approval. No unsupported claims of Windows M09-C direct click.
 10. **Checked evidence:** 2026-10-27 KST. Exact final jobs #40376435854 and #40376435967 completed/success and named browser/native markers inspected; document-only later commits do not change code or independently constitute a test.
+
+## M09-D FINAL VERIFIED HANDOFF — 2026-10-27 16:01 KST
+
+1. **목표와 범위:** PR #9에서 GPT-6 지정 M09-D를 수행했다. 합성 PDF로 Windows NSIS 설치 앱의 실제 취소 UI, 파일 교체, 지연된 이전 분석 완료, source URL 정리, 기존 저장 데이터 비변경을 검증했다. 원본 설계 문서는 수정하지 않았다.
+2. **완료 기능:** 설치 Electron renderer에서 분석 중 `가져오기 취소` 버튼을 실제 클릭했다. 이전 파일 바이트를 보류한 동안 새 파일을 선택하고 새 미승인 review가 만들어짐을 확인한 뒤 이전 바이트를 해제했다. 새 review가 대체되지 않았고, 새 파일 검수 취소 때 Blob URL을 해제했으며 IndexedDB 전 stores를 앱 재시작 전후까지 비교했다.
+3. **저장소와 SHA:** `hibi89/astra_pdf_redesigner`, `integration/astra-commercial-core`, Draft PR #9. **M09-D 정확 테스트 코드 SHA `1ead660ce57ec55dc1c612256aaa0e38e5a76d3c`**. 해당 커밋은 테스트 harness와 static regression만 변경한다. `main`, PR #3/#4 미병합.
+4. **로컬 테스트:** `npm test` 61/61 PASS, `npm run build` PASS, `npm run desktop:verify` PASS (bundle 및 desktop-shell 13/13).
+5. **GitHub exact-SHA 결과:** [Chrome·Edge #40463905080](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40463905080) SUCCESS — Node 61/61, build, Chrome 및 Edge PDF/IndexedDB. [Windows NSIS #40463905117](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40463905117) SUCCESS — Node 61/61, build, desktop 13/13, NSIS 설치형 회귀, `PASS M09-D WINDOWS INSTALLED UI`, 기존 8개 A4 디자인·STEP2 업그레이드 보존.
+6. **실패와 원인:** `3c5004e`에서 테스트가 DB version=2를 기대했으나 현행 IndexedDB upgrade version은 1이고 저장 문서 schemaVersion은 2였다. `67c533c`에서는 `.step3-confirm` 첫 체크가 기본 true인 이미지 포함 체크였고 사용자 승인 체크가 아니었다. 현행 `ImportPanel` label 문구로 사용자 승인 checkbox를 찾아 두 오류를 해결했다. 두 수정 모두 테스트 전용이며 M09-C 보호 코드/DB schema는 바꾸지 않았다. 최종 `1ead660` 검증에서 통과했다.
+7. **설계 대비 갭:** [ASTRA_DESIGN_GAP_MATRIX_20261027.md](ASTRA_DESIGN_GAP_MATRIX_20261027.md)에 원본 일곱 단계의 기능명·현재 증거·누락을 기록했다. 추정은 약 43% (STEP1·2 완료; STEP3·4·7 부분; STEP5 미구현; STEP6/STEP7 OCR 승인대기). 이 숫자는 품질/출시 준비율이 아니다.
+8. **제품/가격:** 72시간 내부 MVP는 부분. BASIC ₩30,000은 8개 디자인 합성 Windows 검증까지만 부분. PRO ₩60,000(20개), BUSINESS ₩90,000(30개)은 미구현. 모든 SKU가 요구하는 검증된 동일 오프라인 윤문은 승인대기. 상용 전체 판매/public production **NO-GO**.
+9. **미검증:** 실제 고객 PDF 5–10건, 복잡한 표/다단/장문 한글 및 실제 페이지 분할, 구매자 Windows PC, 실제 로컬 한국어 모델/라이선스, PRO/BUSINESS 권한, 코드 서명/지원. CI는 synthetic fixture만 사용했다. Vercel/production 배포는 없음/변경하지 않음.
+10. **다음 순서와 승인 필요:** (a) GPT-6에 matrix와 exact test logs 재검수 요청, (b) 실제 PDF/구매자 PC 검수는 사용자가 자산과 장치/테스트 동의를 제공한 후, (c) OCR·STEP5/6 외부 참조/검색·모델/런타임 다운로드·유료 API/비용·브랜치 병합·배포는 각각 사전 승인과 라이선스/데이터 범위 확인 후 진행. 승인 전 안전한 synthetic 회귀와 문서 추적만 계속한다.
+
+**갱신 시각:** 2026-10-27 16:01 KST. PR head는 이후 docs-only 기록 커밋으로 전진할 수 있으며, 위 SHA는 M09-D app/test exact-SHA 검증 기준이다.
