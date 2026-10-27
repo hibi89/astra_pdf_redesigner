@@ -1,4 +1,19 @@
-# HANDOFF — Astra PDF Redesigner (2026-10-18)
+# HANDOFF — Astra PDF Redesigner
+
+## 최신 인수인계 — 2026-10-27 18:26 KST
+
+1. **목표·승인:** 로컬 PDF 재디자인 도구. STEP3 PDF 가져오기 개발은 사용자 승인 범위이며 OCR은 별도 승인 전 제외한다. 원본 기준은 `docs/ASTRA_ORIGINAL_ROADMAP.txt`, `docs/BLUEPRINT.md`, `REQUIREMENTS.md`.
+2. **이번 작업:** STEP3 텍스트 블록마다 새 문서 포함 체크를 제공한다. 제외 블록은 메모리 검수 초안/원본 비교 화면에 남고 변환 결과에서만 제외된다. 전체 블록 제외 시 저장을 차단하고, 편집 후 검수 동의를 재확인한다. 사용자 저장 스키마 및 원본 PDF를 수정하지 않았다.
+3. **기능·테스트 SHA:** `cc157cba4b442f44b88c3631a72686fdfe8f8af9`; 브랜치 `integration/astra-commercial-core`; PR #9 Draft/open/unmerged. 최신 문서/PR head는 GitHub PR #9에서 확인한다.
+4. **자동 검증:** exact-SHA Chrome+Edge [#40479935848](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935848) SUCCESS 2/2; Node 22 `npm test` 67/67 PASS, `npm run build` PASS. 합성 A4 PDF에서 원본 17개 표식, 제외 머리글/바닥글 4개, 결과 본문 13개, raster 이미지, 취소·Undo를 확인했다.
+5. **Windows/M09-D:** exact-SHA Windows NSIS [#40479935852](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935852) SUCCESS. 설치형 UI 취소→파일 교체→이전 비동기 결과 무시→V2 데이터 보존, STEP3 A4 출력, 설치/제거 및 0.1.0→0.1.1 보존을 확인했다. Hosted runner와 synthetic fixture이며 구매자 물리 PC가 아니다.
+6. **남은 STEP3 수용:** 사용자 자주 쓰는 단순 텍스트 PDF 5–10건을 소유자 PC에서 비교·수정·출력하고, 구매자 물리 Windows PC GUI/인쇄 수용을 확인해야 한다. 고객 파일을 CI/PR로 올리지 않는다. OCR 및 복잡 표/다단 완벽 복원은 범위 밖이다.
+7. **전체 완성도/상용화:** 최초 7단계 약 43% (STEP1·2 완료, STEP3·4·7 부분, STEP5 미구현, STEP6 승인대기). 72시간 내부 기술 시연은 M05의 제한 GO일 뿐 상용 판매는 NO-GO. BASIC 부분, PRO 20/BUSINESS 30 미구현, 공통 오프라인 AI 승인대기.
+8. **보존·제한:** `main`, PR #3/#4, 사용자 데이터, 배포 설정은 미변경·미병합. OCR, 외부 전송, 모델/런타임 다운로드, 비용 서비스, 배포는 실행하지 않았다.
+9. **실패 이력:** 최신 기능 코드 이전의 CI 중간 실패와 원인/수정은 STATUS 및 gap matrix 최신 기록에 남겼다. 최종 exact-SHA 체크는 모두 성공했다.
+10. **다음 순서:** 실제 단순 PDF 묶음의 로컬 수용 비교 → 구매자 물리 Windows 수용 → 결함 수정 및 exact-SHA Chrome/Edge/Windows 회귀 → 상용 게이트 재평가. 원본 설계/요구와 충돌하는 구현은 진행하지 않는다.
+
+## 과거 인수인계 스냅샷 — 2026-10-18
 
 1. **목표·용도·확정 요구·기술**: PDF 콘텐츠와 디자인을 분리하여 새로운 스타일로 재조판하는 로컬 도구. STEP 1은 국비학원 회고록 입력→테마→실시간 A4 기준 미리보기→브라우저 PDF. React/TypeScript/Vite/CSS, 로컬 저장, 백엔드/API/CDN 없음. 확정 원본은 `REQUIREMENTS.md`, `docs/BLUEPRINT.md`, `docs/ASTRA_ORIGINAL_ROADMAP.txt`.
 2. **완료 기능·변경·결정 근거**: 4개 본문+제목/날짜/선택 작성자, 3개 분리된 테마, 6색, 3 크기, 시스템 고딕/명조, 공통 DocumentView, `window.print()`, `@page` A4, 빈 섹션 숨김, 로컬 `schemaVersion:1` 자동 복원/초기화. 외부 API와 PDF 라이브러리를 쓰지 않은 것은 STEP 1 경량·오프라인 우선 요구 때문이다. 원본 설계 PNG 2개와 원본 텍스트를 `docs/`에 변경 없이 저장함.
