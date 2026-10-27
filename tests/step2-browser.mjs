@@ -237,10 +237,14 @@ try{
 
   // A4 pagination: large portrait image at a paragraph boundary, short caption
   // kept on same page, then a long caption split across several pages.
+  const previousDoc=await evaluate(persistedDocumentCode);
   await evaluate("[...document.querySelectorAll('button')].find(b=>b.textContent.includes('+ 빈 문서')).click()");
+  await eventually(()=>evaluate(persistedDocumentCode),doc=>doc?.id&&doc.id!==previousDoc.id);
+  await eventually(()=>evaluate("document.querySelector('.section-editor .block-editor textarea')?.value"),value=>value==='');
   await eventually(()=>evaluate("document.querySelectorAll('.project-paper figure img').length"),n=>n===0);
   const preceding=Array.from({length:37},(_,i)=>'BEFORE_IMAGE_LINE_'+String(i+1).padStart(3,'0')).join('\n');
   await fill('.section-editor .block-editor textarea',preceding,'HTMLTextAreaElement');
+  await eventually(()=>evaluate("document.querySelector('.section-editor .block-editor textarea')?.value"),value=>value===preceding);
   await eventually(()=>evaluate("document.querySelector('.project-paper .section-body')?.textContent"),text=>
     text?.includes('BEFORE_IMAGE_LINE_001')&&text.includes('BEFORE_IMAGE_LINE_037'));
   await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),v=>v==='저장됨');
