@@ -440,3 +440,14 @@
 - **Windows NSIS:** [Actions #40477533758](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40477533758) SUCCESS. 설치형 M09-D 취소→대체 파일→이전 분석 무시→V2 불변, STEP3 native A4 출력 2쪽/marker 6개/raster 1개 확인.
 - 합성 PDF만 사용했다. 고객 PDF/물리 구매자 PC 수용은 미검증으로 유지한다. OCR 미승인, 7단계 완료율 추정 ~43%, 상용 판매 NO-GO.
 - main/PR #3/#4/사용자 저장 데이터/배포는 변경·병합하지 않았다. 외부 전송, 모델 다운로드, 비용 서비스, Production 배포 없음.
+
+## 2026-10-27 18:26 KST — STEP3 텍스트 블록 제외와 exact-SHA 검증
+
+- **설계 근거:** 최초 STEP3의 “머리글·바닥글 제거는 원문을 확인할 수 있게 처리” 요구를 보강했다. 검수 화면의 각 텍스트 블록에 새 문서 포함 체크를 제공한다. 제외한 텍스트는 검수 초안과 원본 PDF 비교 화면에 남고, 새 프로젝트에만 포함되지 않는다. 전체 텍스트를 제외하면 저장이 막힌다. 기존 저장 스키마·사용자 문서·원본 PDF는 변경하지 않았다.
+- **최종 검증 SHA:** `cc157cba4b442f44b88c3631a72686fdfe8f8af9` (integration/astra-commercial-core, Draft PR #9).
+- **GitHub Actions:** Chrome+Edge [#40479935848](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935848) SUCCESS 2/2. Node 22 `npm test` 67/67 PASS, `npm run build` PASS. 브라우저 로그: 원본 검수 17개 표식 유지, 머리글·바닥글 4개 제외, 결과 PDF 본문 표식 13개 유지, A4/이미지 출력, 동의 취소 및 Undo PASS.
+- **Windows NSIS:** [#40479935852](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935852) SUCCESS. 설치형 M09-D 취소→대체 파일 선택→늦은 분석 무시→V2 저장소 불변, STEP3 native A4(2페이지·6개 표식·래스터 1개), 설치/제거 및 0.1.0→0.1.1 STEP2 데이터 보존 확인.
+- **수정 이력:** 중간 exact-SHA에서 테스트가 실제 읽기 순서(40479291489/435), 17개 fixture 표식 기대값(40479424192/232), 표식 수와 통합 블록 수 혼동(40479582180), 브라우저 테스트 문법(40479877233/246)으로 실패했다. 각 원인을 확인해 fixture·테스트만 고쳤고, 우회·생략하지 않은 최종 SHA에서 위 전체 검증을 통과했다. 0.1.0 기준 Windows run [#40479582087](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479582087)은 SUCCESS였다.
+- **남은 검증:** 고객 동의 실제 텍스트 중심 PDF 5–10개를 사용자 PC에서만 비교하고, 구매자 물리 Windows PC에서 GUI/인쇄 수용은 아직 미검증. 이 파일들을 CI/PR에 올리지 않는다.
+- **진척 구분:** 아스트라 7단계 약 43%. 72시간 내부 기술 시연은 M05 기준 핵심 경로만 제한 GO이며 완성품/판매 허가가 아니다. BASIC은 부분, PRO 20종·BUSINESS 30종은 미구현, 전 SKU 오프라인 윤문은 승인대기. 상용 판매/Production은 NO-GO.
+- **보존/승인:** main, PR #3/#4, 사용자 저장 데이터, 배포 설정 변경·병합 없음. OCR, 모델/런타임 다운로드, 외부 문서 전송, 유료 서비스, 배포 없음. OCR은 별도 승인 전 제외.

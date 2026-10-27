@@ -15,7 +15,7 @@
 |---|---|---|
 | STEP 1 — 회고록 꾸미기 | 완료 | 기존 글 작성·테마/색상/폰트·미리보기·PDF 저장 기능이 통합 제품의 기반으로 유지된다. 이 작업에서 해당 경로를 수정하지 않았다. |
 | STEP 2 — 개인 문서 제작기 | 완료 | 섹션/이미지/테마 편집 및 작성 데이터 보존 경로가 있다. `5d2265414f971fcc8d78b5f4cec11370a61756a1`에서 네 디자인 설정 변경·재로드에도 원문 보존, `1099b794f32da3e0bc467898e12b0ee7e7e71146`에서 JSON 내보내기/가져오기·잘못된 JSON 거부·복사본 삭제 뒤 원본 보존을 Edge 실제 브라우저로 확인했다. |
-| STEP 3 — PDF 가져오기 | 부분 | 원본 기준 기능(로컬 추출·좌표 출처·이미지·역할/순서 수동 검수·원문 대조·경고·새 문서/A4 출력)이 합성 fixture로 검증됐다. 손상 PDF는 M08-C에서 명확히 거부되고 기존 V2 데이터/초안이 보존된다. PDF 내부 복구는 최초 STEP3 완료 기준이 아니므로 누락 기능으로 계산하지 않는다. 실제 단순 PDF 5~10건 및 구매자 PC 수용은 미검증이다. |
+| STEP 3 — PDF 가져오기 | 부분 | 원본 기준 기능(로컬 추출·좌표 출처·이미지·역할/순서 수동 검수·원문 대조·경고·텍스트 포함/제외·새 문서/A4 출력)이 합성 fixture로 검증됐다. 선택 제외한 헤더/푸터도 원본 검수에는 유지되고 변환 출력에서 빠지는 것을 Chrome/Edge에서 확인했다. 손상 PDF는 M08-C에서 거부되고 V2 데이터/초안이 보존된다. PDF 내부 복구는 원래 STEP3 완료 기준이 아니다. | 실제 단순 PDF 5–10건 및 구매자 물리 PC 수용 미검증. |
 | STEP 4 — 디자인 조합 엔진 | 부분 | BASIC 8개 사전 디자인의 출력·선택 경로는 Windows 회귀에서 8/8 확인됐다. 임의 레이아웃/폰트/색상/여백 조합, 여러 스타일 비교·즐겨찾기까지 완료했다는 증거는 없다. |
 | STEP 5 — 레퍼런스 따라 꾸미기 | 미구현 | 레퍼런스 이미지/PDF/URL 입력, 색상·구성 분석, 레퍼런스 기반 스타일 변환의 구현·검증 증거가 없다. 사용자 레퍼런스 파일을 받거나 URL을 연결하는 기능은 데이터 처리 범위 확정이 필요하다. |
 | STEP 6 — 레퍼런스 탐색 연동 | 승인대기 | 앱 내 인터넷 검색·썸네일 탐색·레퍼런스 저장/선택·조합의 구현 증거가 없다. 외부 검색이나 전송은 현재 허가 범위에 포함되지 않으므로 구현 전 사용자 승인과 데이터 경계가 필요하다. |
@@ -28,7 +28,7 @@
 
 | 영역 | 판정 | 현재 증거 | 남은 기준 |
 |---|---|---|---|
-| 72시간 내부 MVP | 부분 | Draft PR #9의 합성 입력 기반 브라우저·Windows 설치형 흐름과 회귀 테스트가 누적돼 있다. M09-D는 코드 SHA `1ead660ce57ec55dc1c612256aaa0e38e5a76d3c`에서 Chrome·Edge 및 Windows 설치형 CI가 모두 성공했다. | 원문 정확성, 다양한 실제 PDF, 실제 사용자 PC 수용은 별도 검증이 필요하다. 내부 MVP 기록은 상용 출시 판정이 아니다. |
+| 72시간 내부 기술 시연 핵심 경로 | GO — 제한 범위 | M05 검수에서 지원 텍스트 PDF→검수→2개 실조판→새 A4 PDF와 Windows 설치형 핵심 여정을 Chrome/Edge/NSIS 합성 테스트로 확인했다. 현재 exact-SHA `cc157cba4b442f44b88c3631a72686fdfe8f8af9`에서도 Node 67/67, build, 브라우저 A4/블록 제외, Windows M09-D/설치 업그레이드 회귀가 통과했다. | 이 제한된 기술 시연 GO는 상용 판매 판정이 아니다. 실제 PDF, 소스 위치 연계 완전성, 고객 PC, AI, 서명/라이선스는 별도 미완료다. |
 | 원문·숫자·표·이미지 보존 및 누락 경고 | 부분 | 합성 PDF 텍스트 마커, 일부 이미지/페이지 구조와 보존 경계에 대한 검증이 있다. | QA 게이트가 요구하는 실제 문서 여러 건의 텍스트·표·이미지 비교와 누락/변형 경고 품질은 미검증이다. |
 | 한글 A4 배치·페이지 분할·디자인 | 부분 | 합성 PDF A4 출력 및 BASIC 디자인 8/8의 설치형 회귀 기록이 있다. | 복잡한 표·폰트·긴 문서의 실제 한글 배치, 페이지 분할, 고객 기준 시각 품질은 미검증이다. |
 | 오프라인 한국어 AI 윤문 | 승인대기 | 검증된 로컬 모델 실행·라이선스 증거가 없다. 규칙 기반 제안은 AI 윤문 완료로 간주하지 않는다. | 적합한 모델/런타임 라이선스 확인, 소유자 승인, 오프라인 실행 및 정확도 검수 필요. 모델 다운로드·외부 전송·비용은 별도 승인 대상이다. |
@@ -106,3 +106,10 @@
 - Exact code/test SHA 4e5cdbb300153dc81e7374956030cae751148415: PDF.js text fragments are now counted against the existing 500,000-character document limit before appending them to retained page structures; overflow aborts further extraction, while final reconstructed text validation remains active.
 - Local Node 24 65/65 PASS, build and diff-check PASS. Chrome+Edge [#40477533937](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40477533937) SUCCESS 2/2; Windows NSIS [#40477533758](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40477533758) SUCCESS, with M09-D installed UI and STEP3 A4 output markers.
 - User text PDFs 5–10 and physical buyer PC remain NOT VERIFIED. OCR remains separately unapproved; no model/cost/external transmission/deployment. Seven-step estimate ~43%, sale NO-GO.
+
+
+## STEP3 헤더·푸터 텍스트 제외 — 2026-10-27 18:26 KST
+
+- 최초 설계의 머리글·바닥글 제거/원문 대조 요구를 텍스트 블록 포함 체크로 구현했다. 제외한 블록의 원문은 검수 초안과 원본 PDF 뷰에서 확인 가능하고, 새 프로젝트 변환에서만 빠진다. 모든 블록 제외 시 저장은 차단한다.
+- Exact-SHA `cc157cba4b442f44b88c3631a72686fdfe8f8af9`: Chrome+Edge [#40479935848](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935848) SUCCESS 2/2, 67/67 Node 22 tests and build PASS; Windows NSIS [#40479935852](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935852) SUCCESS with M09-D and native STEP3 PDF markers.
+- 7-step estimate ~43%; M05 72-hour internal technical demo is limited GO; SKU readiness remains BASIC partial / PRO and BUSINESS unimplemented / shared offline AI approval-gated. Sale remains NO-GO until customer-local 5–10 PDF and buyer physical PC checks.

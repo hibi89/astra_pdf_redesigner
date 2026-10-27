@@ -545,3 +545,16 @@
 8. **미검증:** Consented customer-local text-centered PDF samples (5–10), buyer physical Windows PC GUI/print acceptance, complex real document visual QA. No customer files were sent to CI/PR. OCR, local model download/license, cost, merge, deployment remain approval gates.
 9. **다음:** Continue standalone STEP3 omissions only when requirements support them. For release acceptance, one batch of owner-side work remains: run 5–10 consented PDFs locally and a buyer-PC manual GUI/print review, then report only outcomes/defect categories. Sale remains NO-GO.
 10. **동기화:** GitHub is authoritative. Local nested clone is stale/divergent and contains uncommitted changes; direct git fetch has previously failed due DNS. Do not push that local ref. Remote CI checked out exact SHA above.
+
+## 최신 인수인계 — 2026-10-27 18:26 KST
+
+1. **목표·승인 범위:** `hibi89/astra_pdf_redesigner`, 사용자가 승인한 STEP3 PDF 가져오기 개발. OCR은 별도 승인 전 금지. 최초 설계 원본은 `docs/ASTRA_ORIGINAL_ROADMAP.txt` 및 `docs/BLUEPRINT.md`.
+2. **이번 완료 기능:** 각 텍스트 블록을 검수 화면에서 새 프로젝트에 포함/제외할 수 있다. 제외 표식은 메모리 내 검수 초안과 원본 PDF 비교 화면에 유지하고, 프로젝트 변환에서만 빠진다. 모든 텍스트를 제외하면 새 문서 저장을 막는다. 편집 시 검수 동의를 취소하고 Undo로 제외 상태를 복원한다. 사용자 저장 스키마/원문/원본 PDF는 수정하지 않았다.
+3. **최종 기능·테스트 SHA:** `cc157cba4b442f44b88c3631a72686fdfe8f8af9`, 브랜치 `integration/astra-commercial-core`, Draft PR #9. 뒤따르는 문서 전용 커밋은 PR head를 변경할 수 있다.
+4. **단위·빌드:** exact-SHA GitHub Ubuntu Node 22 [#40479935848](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935848): `npm test` **67/67 PASS**, `npm run build` PASS.
+5. **실제 Chrome/Edge 흐름:** 동일 run SUCCESS 2/2. 브라우저가 합성 A4 PDF를 실제로 가져와 검수했으며 원본 17개 표식은 검수 초안에 유지, 선택한 헤더/푸터 4개는 출력에서 제외, 본문 표식 13개·A4·래스터 이미지 보존, 동의 취소 및 Undo를 로그로 확인했다.
+6. **Windows 설치형 / M09-D:** exact-SHA Windows NSIS [#40479935852](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935852) SUCCESS. 설치형 창의 분석 중 취소, 교체 파일 선택, 이전 비동기 결과 무시, source URL 정리, V2 전체 저장 불변, STEP3 native A4 출력(2쪽/6개 표식/래스터 1개), 설치/제거와 0.1.0→0.1.1 업그레이드 보존을 확인했다. 이는 합성 파일·hosted Windows runner 증거이며 구매자 물리 PC 수용은 아니다.
+7. **중간 실패와 수정:** `deff78f`는 새 fixture 표식 순서, `c067f79`는 17개 표식에 대한 기존 13개 기대값, `e0d6bbb`는 표식과 통합 텍스트 블록 개수 혼동, `b7e642e`는 수정한 테스트의 닫는 괄호 누락으로 실패했다. 각 실패는 로그에서 확인해 테스트 입력/기대값/문법을 고쳤다. 최종 `cc157cba`에서 모든 체크가 성공했다. 실패 테스트를 삭제하거나 생략하지 않았다.
+8. **현재 완성도/상용화:** 7단계 기준 약 43%. 72시간 내부 기술 시연 핵심 경로는 M05 판정의 제한된 GO이며, 상용제품은 별도 기준이다. BASIC 8개 디자인은 부분, PRO 20개와 BUSINESS 30개는 미구현, 전 SKU 오프라인 생성형 윤문은 승인대기. 상품 판매/Production NO-GO.
+9. **미검증·다음 순서:** 사용자 동의 실제 텍스트 PDF 5–10개를 사용자의 PC에서만 대조하고 결과/결함 종류만 공유한다. 고객 PDF를 CI/PR에 업로드하지 않는다. 이어 구매자 물리 Windows PC의 GUI·인쇄를 확인한다. OCR 승인, 유료 모델·런타임, 외부 전송, merge, 배포는 별도 승인 전 하지 않는다.
+10. **보존/환경/갱신:** main, PR #3/#4, V2 사용자 데이터, 원본 설계, 배포 설정은 변경·병합되지 않았다. Production 미배포. GitHub가 기준 원격이며 로컬 clone은 stale/divergent이고 fetch는 DNS 오류였으므로 해당 ref를 push하지 않는다. 갱신 시각 2026-10-27 18:26 KST, 기능/테스트 SHA 위와 같음.
