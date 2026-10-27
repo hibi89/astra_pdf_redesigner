@@ -282,7 +282,18 @@ try{
   assert.deepEqual(comparedRestored.design,compareBefore.design,'Apply undo must restore the exact prior design tokens');
   assert.deepEqual(comparedRestored.content,compareBefore.content,'Apply undo must preserve all content and image references');
   assert.deepEqual(comparedRestored.stores,compareBefore.stores,'STEP4 comparison must not change the IndexedDB schema');
+  const normalThemeIndex=originalThemeIndex===0?1:0;
+  await evaluate("document.querySelectorAll('input[name=v2theme]')["+normalThemeIndex+"].click()");
+  await eventually(()=>evaluate("document.querySelector('.project-paper')?.classList.contains('paper-theme-"+styleThemeIds[normalThemeIndex]+"')"),x=>x===true);
+  await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),x=>x==='저장됨');
+  await evaluate("document.querySelectorAll('input[name=v2theme]')["+originalThemeIndex+"].click()");
+  await eventually(()=>evaluate("document.querySelector('.project-paper')?.classList.contains('paper-theme-"+styleThemeIds[originalThemeIndex]+"')"),x=>x===true);
+  await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),x=>x==='저장됨');
+  assert.deepEqual((await readStyleSnapshot()).design,compareBefore.design,
+    'Existing design controls must stay synchronized while comparison is open');
+  await evaluate("document.querySelector('[data-style-compare-toggle]').click()");
   console.log('PASS STEP4 SAME-DOCUMENT COMPARE/APPLY/UNDO: eight presets, ephemeral PDF parity, exact content/store preservation');
+
 
   const compareBox=wordPosition(comparePath);
   const reportBox=wordPosition(reportPath),minimalBox=wordPosition(minimalPath);
