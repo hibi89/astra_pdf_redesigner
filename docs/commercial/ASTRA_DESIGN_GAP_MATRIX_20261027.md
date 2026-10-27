@@ -15,7 +15,7 @@
 |---|---|---|
 | STEP 1 — 회고록 꾸미기 | 완료 | 기존 글 작성·테마/색상/폰트·미리보기·PDF 저장 기능이 통합 제품의 기반으로 유지된다. 이 작업에서 해당 경로를 수정하지 않았다. |
 | STEP 2 — 개인 문서 제작기 | 완료 | 섹션/이미지/테마 편집 및 작성 데이터 보존 경로가 있다. `5d2265414f971fcc8d78b5f4cec11370a61756a1`에서 네 디자인 설정 변경·재로드에도 원문 보존, `1099b794f32da3e0bc467898e12b0ee7e7e71146`에서 JSON 내보내기/가져오기·잘못된 JSON 거부·복사본 삭제 뒤 원본 보존을 Edge 실제 브라우저로 확인했다. |
-| STEP 3 — PDF 가져오기 | 부분 | 텍스트·이미지 추출, 사용자 검수 후 새 문서 저장, A4 출력, 손상·암호·스캔 입력 경계, 취소·재시도가 합성 fixture로 검증됐다. 깨진 구조를 복구하는 기능, 복잡한 실제 문서 품질, 고객 수용은 미검증이다. |
+| STEP 3 — PDF 가져오기 | 부분 | 원본 기준 기능(로컬 추출·좌표 출처·이미지·역할/순서 수동 검수·원문 대조·경고·새 문서/A4 출력)이 합성 fixture로 검증됐다. 손상 PDF는 M08-C에서 명확히 거부되고 기존 V2 데이터/초안이 보존된다. PDF 내부 복구는 최초 STEP3 완료 기준이 아니므로 누락 기능으로 계산하지 않는다. 실제 단순 PDF 5~10건 및 구매자 PC 수용은 미검증이다. |
 | STEP 4 — 디자인 조합 엔진 | 부분 | BASIC 8개 사전 디자인의 출력·선택 경로는 Windows 회귀에서 8/8 확인됐다. 임의 레이아웃/폰트/색상/여백 조합, 여러 스타일 비교·즐겨찾기까지 완료했다는 증거는 없다. |
 | STEP 5 — 레퍼런스 따라 꾸미기 | 미구현 | 레퍼런스 이미지/PDF/URL 입력, 색상·구성 분석, 레퍼런스 기반 스타일 변환의 구현·검증 증거가 없다. 사용자 레퍼런스 파일을 받거나 URL을 연결하는 기능은 데이터 처리 범위 확정이 필요하다. |
 | STEP 6 — 레퍼런스 탐색 연동 | 승인대기 | 앱 내 인터넷 검색·썸네일 탐색·레퍼런스 저장/선택·조합의 구현 증거가 없다. 외부 검색이나 전송은 현재 허가 범위에 포함되지 않으므로 구현 전 사용자 승인과 데이터 경계가 필요하다. |
@@ -82,3 +82,12 @@
 - 통합 브랜치 기능/테스트 SHA `3a704921b24b83b05701c6a48c9526d8580f9a6a`에서 PDF 검수 초안 Undo/Redo(최대 8단계, 메모리 내, 확인 동의 재요구)를 구현·검증했다. Node 62/62, build PASS. [Chrome+Edge #40472988885](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40472988885) 및 [Windows NSIS #40472988943](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40472988943) 모두 SUCCESS. 로그에서 실제 Undo/Redo 표식, Step3 PDF 출력, Windows M09-D 설치 UI 확인.
 - 7단계 완료율 추정 ~43%는 변하지 않는다. STEP3는 합성 fixture 검증에서 부분 구현 상태를 유지하며, 동의받은 실PDF 5~10개와 구매자 PC 수동 수용은 미검증이다. OCR/복잡 표·다단 완전 재현은 승인·지원 범위 바깥이다. 판매 NO-GO.
 - main/PR #3/#4/사용자 데이터/배포 설정은 변경·병합하지 않았다.
+
+
+## 최신 STEP3 갱신 — 2026-10-27 17:45 KST
+
+- 검증 코드 SHA 009966b57cc2e30397da5607b9429020c400e513에서 PDF 전체 이미지 복원 예산(50개·40MP·PNG 40MiB)을 적용하고, 한도 초과는 누락 집계와 사용자 경고로 노출한다. STEP3 추출 데이터/저장 스키마를 바꾸지 않는다.
+- 로컬 Node 24: 63/63 PASS, production build PASS, diff check PASS. Chrome+Edge [#40475046652](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40475046652) SUCCESS 2/2; Windows NSIS [#40475046789](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40475046789) SUCCESS.
+- Windows exact-SHA 로그에 PASS M09-D WINDOWS INSTALLED UI, installed STEP3 import/review/native A4 (2 pages, 6 markers, raster 1) 확인. 이는 합성 PDF 및 hosted Windows VM 결과이며 구매자 물리 PC 검수가 아니다.
+- 원본 STEP3의 완료 기준을 기준으로 손상 PDF 내부 복구는 필수 기능이 아니다. 잘못된 구조를 거부하고, 실패를 성공으로 표시하지 않으며, 기존 사용자 데이터와 미확정 검수 초안을 보존하면 된다(M08-C 검증). 위 STEP3 요약 행을 이에 맞게 바로잡았다.
+- 미완료 인수 조건: 동의된 실제 텍스트 중심 PDF 5~10건의 고객 로컬 비교 및 구매자 Windows PC GUI/인쇄 수용. OCR은 별도 승인 전까지 제외. 전체 7단계 보수 추정 ~43%, 상품 판매 NO-GO.

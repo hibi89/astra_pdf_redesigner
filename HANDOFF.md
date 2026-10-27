@@ -503,3 +503,18 @@
 8. **Data/safety:** No OCR/model downloads, paid API, customer PDF, external transmission, schema migration, production deployment, or merge. Existing data and refs preserved. Generated fixtures are synthetic only; unsigned Windows artifact is a CI test build.
 9. **Next:** (a) collect one batch of safe, consented customer-local PDF samples and Windows buyer-PC manual results; (b) continue self-contained synthetic Step3 gaps without claiming real acceptance; (c) OCR/model/major design or merge/release only after separate owner approval. Sale remains NO-GO.
 10. **Environment sync:** Direct shell fetch/push remains blocked by DNS; GitHub connector API wrote the exact tested commit. Do not push local branch `codex/m09d-review-docs` (local `b72d0dc2bd051562775cd65bde82b1ae529ab088`) because it does not descend from remote PR head. Refetch/re-align when DNS is restored.
+
+
+## 최신 인수인계 — 2026-10-27 17:45 KST
+
+1. 목표·확정 범위: 최초 STEP3 PDF 가져오기 흐름을 완성 방향으로 보강한다. OCR은 별도 승인 전까지 제외한다. 기존 STEP1/2 기능과 사용자 데이터를 보존하고 main/PR #3/#4를 변경·병합하지 않는다.
+2. 이번 구현: PDF 이미지 복원에 문서 단위 누적 예산을 추가했다(최대 복원 이미지 50개, 누적 40MP, PNG 40MiB). 기존 이미지별 20MP/10MiB 및 페이지별 15개 제한을 유지한다. 누적 한도에 도달하면 해당 이미지와 이후 이미지를 제외하고 PDF 검수 경고/미복원 집계로 알린다. 데이터베이스·프로젝트 JSON·원본 문서 형식 변경은 없다.
+3. 로컬 결과: exact code/test SHA 009966b57cc2e30397da5607b9429020c400e513; Node 24 npm test 63/63 PASS, npm run build PASS, git diff --check PASS. 첫 추가 테스트는 경계값 기대 오류로 실패했으나 수정 후 전체 통과했다. 기존 model.ts chunk 경고는 미해결이며 이번 변경과 무관하다.
+4. 브라우저 exact-SHA: [Chrome+Edge #40475046652](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40475046652) SUCCESS 2/2. 두 브라우저의 PDF import/review/undo-redo/A4 output, malformed/encrypted/scan-only 경계, M09-A/B/C 회귀 표식을 확인했다.
+5. Windows/M09-D exact-SHA: [NSIS #40475046789](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40475046789) SUCCESS. 설치형 UI에서 취소 중 대체 PDF 선택·이전 늦은 결과 무시·URL 정리·V2 불변이 통과했다. STEP3 PDF review 후 실제 native A4 출력은 2페이지/원문 marker 6개/raster 1개로 확인됐다. 설치·제거·0.1.0→0.1.1 STEP2 저장 데이터 업그레이드 보존도 성공했다.
+6. 실패/재시도 기록: 로컬 첫 추가 테스트는 maxImages=2에서 한 이미지만 사용한 테스트 기대값 오류였다. 기대 테스트 상태를 고쳐 재실행했고 63/63 모두 통과했다. exact-SHA CI에서는 실패한 작업이 없다. 테스트 assertion은 완화하지 않았다.
+7. 설계 대조/완료율: 원본 STEP3의 로컬 PDF 텍스트·좌표 추출, 가능한 이미지, 제목/본문/캡션 추정, 읽기 순서 경고, 원문 대조, 블록 수정·순서 변경, 새 테마 출력, 미지원 요소 경고는 코드와 합성 PDF/browser 검증을 확인했다. 손상 PDF 내부를 복구하는 기능은 원본 STEP3 요구가 아니며, M08-C는 실패를 보이고 저장 데이터/초안을 보존하는 것을 확인한다. 전체 7단계 보수 추정은 약 43%이며 STEP3 실문서 수용 때문에 부분 상태다.
+8. 저장소·브랜치·PR: hibi89/astra_pdf_redesigner, integration/astra-commercial-core, 기능 검증 SHA 009966b57cc2e30397da5607b9429020c400e513; PR #9는 lead/astra-commercial-20261025 대상으로 Draft/open/unmerged. 문서 커밋 뒤 PR head가 추가로 움직일 수 있으므로 최종 head는 GitHub에서 재조회한다.
+9. 배포/승인: Production 배포 없음. GitHub Windows 설치 파일은 unsigned CI 시험 산출물이다. 사용자 PC 직접 확인, OCR, 로컬 모델 다운로드, 비용 서비스, 외부 PDF 전송, 주요 설계 변경, PR 병합/배포는 수행하지 않았다.
+10. 다음 순서: (a) 동의받은 단순 텍스트 PDF 5~10개를 고객 로컬에서만 비교하고 결과 수치/누락만 기록, (b) 구매자 Windows PC에서 실제 파일 선택·취소·검수·인쇄 GUI를 수동 확인, (c) 그 결과로 STEP3 gap matrix/판매 게이트 재판정. 그 밖의 자율 STEP3 버그 수정은 합성 fixture와 exact-SHA CI를 유지하며 계속할 수 있다. OCR/모델·배포/병합은 별도 승인 대기.
+11. 로컬 복제 동기화: API 경유로 커밋했으며 이 실행환경의 git fetch는 이전에 GitHub DNS 문제로 실패했다. .codex-m09d-remote 체크아웃은 stale/divergent 로컬 ancestry와 미커밋 변경이 있으므로 직접 push하지 않는다. root codex/p5-windows-reliability도 기존 변경이 있으므로 건드리지 않는다. CI는 GitHub에서 exact SHA를 checkout해 수행했다.
