@@ -1,7 +1,12 @@
 name: Astra STEP 1 + STEP 2 validation
 on:
   push:
-    branches: [main, 'feature/step2-*']
+    branches: [main, 'feature/step2-*', 'test/idb-schema-v2-preservation']
+    paths-ignore:
+      - '**/*.md'
+      - 'docs/**'
+  pull_request:
+    branches: [main]
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
@@ -41,6 +46,7 @@ jobs:
           CHROME_PATH="$CHROME_BIN" node tests/browser-smoke.mjs
           CHROME_PATH="$CHROME_BIN" node tests/step2-browser.mjs
           CHROME_PATH="$CHROME_BIN" node tests/step2-multitab.mjs
+          CHROME_PATH="$CHROME_BIN" node tests/step2-idb-schema-upgrade.mjs
           CHROME_PATH="$CHROME_BIN" node tests/step2-cold-migration.mjs
           CHROME_PATH="$CHROME_BIN" STEP2_INJECT_MIGRATION_ABORT=1 node tests/step2-cold-migration.mjs
           CHROME_PATH="$CHROME_BIN" node tests/step2-cross-profile.mjs
@@ -80,5 +86,6 @@ jobs:
           echo "Running STEP 1 A4 print and STEP 2 IndexedDB, images, JSON and long-caption PDF regressions with actual Edge"
           CHROME_PATH="$EDGE_BIN" node tests/browser-smoke.mjs
           CHROME_PATH="$EDGE_BIN" node tests/step2-browser.mjs
+          CHROME_PATH="$EDGE_BIN" node tests/step2-idb-schema-upgrade.mjs
           echo "PASS EDGE: STEP1 A4 PDF and STEP2 print, persistence, images, import/export and pagination checks"
 
