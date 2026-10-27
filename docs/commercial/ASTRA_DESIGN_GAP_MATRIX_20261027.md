@@ -59,7 +59,7 @@
 
 - Test-only SHA `1099b794f32da3e0bc467898e12b0ee7e7e71146`: exported project JSON must preserve exact document content and all four design values; invalid JSON must leave the active record unchanged; valid import must retain design values; deleting the imported copy must leave the original record unchanged.
 - Local unit suite 61/61 and build PASS. GitHub Edge job [#122069789553](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40468551454/job/122069789553) SUCCESS with exact JSON export/import markers. Windows NSIS run [#40468551485](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40468551485) SUCCESS, including M09-D installed UI and STEP2 upgrade data preservation.
-- Chrome job [#122069789889](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40468551454/job/122069789889): unit/build passed; CI-only Korean font installation was still running at 2026-10-27 16:51 KST, so Chrome exact-SHA smoke remains **pending/unverified**. The evidence does not change the ~43% roadmap estimate or NO-GO release assessment.
+- Chrome+Edge run [#40468551454](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40468551454) completed **SUCCESS 2/2** at 2026-10-27 17:04 KST after the CI-only Korean font installation delay. Chrome logs confirm exact JSON content/design export, invalid import rejection, original preservation after deleting the imported copy, A4 PDF/text extraction, and M09-A/B/C regressions. Combined with Windows NSIS [#40468551485](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40468551485), the tested STEP2/M09-D regression set is green on this exact source SHA. This does not change the ~43% roadmap estimate or NO-GO release assessment.
 
 ## 검토 근거
 
