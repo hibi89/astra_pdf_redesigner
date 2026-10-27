@@ -8,6 +8,7 @@ const {runInstalledEightLayoutAcceptance}=require('./step3-eight-layout-acceptan
 const {makeScannedPagesPdf,SCAN_MARKERS}=require('./step3-scanned-fixture.cjs');
 const {makeCorruptRootPdf}=require('./step3-invalid-fixture.cjs');
 const {runInstalledPasswordPdfAcceptance}=require('./step3-password-acceptance.cjs');
+const {runInstalledM09DCancelAcceptance}=require('./step3-m09d-cancel-acceptance.cjs');
 const APP_URL='astra://app/index.html';
 async function waitFor(check,label){
   for(let i=0;i<160;i++){
@@ -242,6 +243,7 @@ async function runStep3ProjectAcceptance(win,renderLocalPdf,armNativeCapture,out
     '('+verifyPersisted.toString()+')('+JSON.stringify({...imported,themeClass:finalTheme})+')',true);
   console.log('PASS M08-C WINDOWS INSTALLED CORRUPT CATALOG: parser rejects, stale draft/Blob cleared, valid retry canceled, V2 persisted across reload');
   await runInstalledPasswordPdfAcceptance(win);
+  await runInstalledM09DCancelAcceptance(win,bytes,MARKERS);
   console.log('PASS M08-B WINDOWS INSTALLED SCAN: full scan rejected; mixed scanned page warned and approval blocked; cancel and prior project retained');
   console.log('PASS ASTRA INSTALLED STEP3 E2E: local generated PDF -> review approval -> independent document -> changed theme -> reload -> native IPC PDF save');
 }

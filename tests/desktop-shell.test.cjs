@@ -192,3 +192,19 @@ test('M08-D AES-256 fixture is encrypted, immutable and wired into browser/Windo
     assert.ok(browser.includes(marker),'Missing browser M08-D regression: '+marker);
   assert.equal(ci.split('node tests/step3-password-browser.mjs').length-1,2);
 });
+
+test('M09-D drives installed Windows cancel/retry UI and compares every V2 store',()=>{
+  const helper=fs.readFileSync(path.resolve(__dirname,'../desktop/step3-m09d-cancel-acceptance.cjs'),'utf8');
+  const entry=fs.readFileSync(path.resolve(__dirname,'../desktop/step3-project-acceptance.cjs'),'utf8');
+  const lifecycle=fs.readFileSync(path.resolve(__dirname,'windows-installer-lifecycle.ps1'),'utf8');
+  const ci=fs.readFileSync(path.resolve(__dirname,'../.github/workflows/windows-desktop.yml'),'utf8');
+  for(const marker of ['process.platform!==\'win32\'','GITHUB_ACTIONS','snapshotInstalledV2',
+    'File.prototype.arrayBuffer','m09d-old.pdf','m09d-new.pdf','oldBytesDelivered',
+    "getClientRects().length>0","textContent.includes('가져오기 취소')).click()",'URL.revokeObjectURL','SHA-256',
+    'V2 stores differ after installed-app reload','PASS M09-D WINDOWS INSTALLED UI'])
+    assert.ok(helper.includes(marker),'Missing M09-D installed UI assertion: '+marker);
+  assert.ok(entry.includes("require('./step3-m09d-cancel-acceptance.cjs')"));
+  assert.ok(entry.includes('await runInstalledM09DCancelAcceptance(win,bytes,MARKERS)'));
+  assert.ok(lifecycle.includes('--astra-step3-acceptance'));
+  assert.ok(ci.includes('windows-installer-lifecycle.ps1'));
+});
