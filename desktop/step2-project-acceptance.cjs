@@ -2,6 +2,7 @@
 // Tests actual STEP2 UI edits, IndexedDB persistence, reload and installed
 // Electron PDF output. CI-only, isolated smoke profile; no customer data.
 const fs=require('node:fs/promises');
+const os=require('node:os');
 const path=require('node:path');
 const PNG64='iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAFklEQVR4nGOUS3nGwMDAxMDAwMDAAAAQQgFsBOs6hwAAAABJRU5ErkJggg==';
 const TOKENS=Object.freeze({
@@ -110,17 +111,26 @@ async function verifyReloadedProject(expectedVersion=1){
     return {saved:true,assets:assets.length,imageWidth:assets[0].width};
   }finally{db.close();}
 }
-async function runStep2ProjectAcceptance(win,renderLocalPdf){
+async function runStep2ProjectAcceptance(win,renderLocalPdf,{local=false,localOutput}={}){
   const schemaUpgrade=process.argv.includes('--astra-step2-schema-upgrade-verify');
   const verifyOnly=process.argv.includes('--astra-step2-preservation-verify')||schemaUpgrade;
-  if(process.env.GITHUB_ACTIONS!=='true'||!process.env.RUNNER_TEMP)
-    throw Error('STEP2 acceptance allowed on GitHub Actions only');
-  const root=path.resolve(process.env.RUNNER_TEMP);
-  const output=path.resolve(process.env.ASTRA_STEP2_ACCEPTANCE_OUT||'');
-  if(!process.env.ASTRA_STEP2_ACCEPTANCE_OUT||
-     path.dirname(output)!==root||
-     !/^astra-step2-project-[A-Za-z0-9-]+\.pdf$/i.test(path.basename(output)))
-    throw Error('STEP2 PDF output must be directly under isolated RUNNER_TEMP');
+  let root,output;
+  if(local){
+    root=path.resolve(os.tmpdir());
+    output=path.resolve(localOutput||'');
+    if(!localOutput||path.dirname(output)!==root||
+       !/^astra-p5-pdf-visual-[A-Za-z0-9-]+\.pdf$/i.test(path.basename(output)))
+      throw Error('Local STEP2 PDF output must be directly under the isolated OS temp folder');
+  }else{
+    if(process.env.GITHUB_ACTIONS!=='true'||!process.env.RUNNER_TEMP)
+      throw Error('STEP2 acceptance allowed on GitHub Actions only');
+    root=path.resolve(process.env.RUNNER_TEMP);
+    output=path.resolve(process.env.ASTRA_STEP2_ACCEPTANCE_OUT||'');
+    if(!process.env.ASTRA_STEP2_ACCEPTANCE_OUT||
+       path.dirname(output)!==root||
+       !/^astra-step2-project-[A-Za-z0-9-]+\.pdf$/i.test(path.basename(output)))
+      throw Error('STEP2 PDF output must be directly under isolated RUNNER_TEMP');
+  }
   if(!verifyOnly){
     const before=await win.webContents.executeJavaScript(
       '('+editStep2InBrowser.toString()+')('+JSON.stringify(PNG64)+')',true);
@@ -139,6 +149,7 @@ async function runStep2ProjectAcceptance(win,renderLocalPdf){
   await fs.writeFile(output,bytes,{flag:'wx'});
   const restored=await fs.readFile(output);
   if(!restored.equals(bytes))throw Error('STEP2 PDF bytes changed on disk');
-  console.log('PASS ASTRA REAL STEP2 PROJECT: UI edit, IndexedDB document+PNG, reload, installed Electron PDF output');
+  console.log('PASS ASTRA REAL STEP2 PROJECT: UI edit, IndexedDB document+PNG, reload, Electron PDF output'+
+    (local?'; path='+output:''));
 }
 module.exports={runStep2ProjectAcceptance,TOKENS};
