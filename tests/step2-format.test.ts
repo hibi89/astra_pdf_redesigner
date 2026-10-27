@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { blankProject, documentAssetIds, type ImageAsset } from '../src/step2/model.ts';
+import { blankProject, documentAssetIds, LIMITS, type ImageAsset } from '../src/step2/model.ts';
 import { imageDimensions, imageType } from '../src/step2/images.ts';
 import { exportProject, fromBase64, safeFilename, toBase64, importProject } from '../src/step2/projectFile.ts';
 
@@ -30,6 +30,12 @@ test('import rejects damaged JSON, unknown version, invalid doc and wrong image 
   doc.content.sections[0].blocks.push({id:'im',kind:'image',assetId:'missing',caption:'',size:'small',alignment:'left'});
   await assert.rejects(importProject(new Blob([JSON.stringify({format:'astra-local-document',formatVersion:1,document:doc,assets:[]})])),/개수/);
 });
+test('project import rejects oversized input before reading its text',async()=>{
+  let textRead=false;
+  const oversized={size:LIMITS.importBytes+1,text:async()=>{textRead=true;return '';}} as unknown as Blob;
+  await assert.rejects(importProject(oversized),/100MiB/);
+  assert.equal(textRead,false,'Oversized input must be rejected before allocating/parsing its text');
+});
 test('image signature and dimensional limit prefilter',()=>{
   const png=Uint8Array.from([137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82,0,0,0,2,0,0,0,3]);
   assert.equal(imageType(png),'image/png');assert.deepEqual(imageDimensions(png,'image/png'),{width:2,height:3});
@@ -46,3 +52,4 @@ test('validated import strips unrecognized keys and preserves exact known text',
   assert.ok(!('other' in imported.document.content.sections[0]));
   assert.ok(!('evil' in imported.document.design));
 });
+
