@@ -573,3 +573,16 @@
 8. **현재 완성도/상용화:** 7단계 기준 약 43%. 72시간 내부 기술 시연 핵심 경로는 M05 판정의 제한된 GO이며, 상용제품은 별도 기준이다. BASIC 8개 디자인은 부분, PRO 20개와 BUSINESS 30개는 미구현, 전 SKU 오프라인 생성형 윤문은 승인대기. 상품 판매/Production NO-GO.
 9. **미검증·다음 순서:** 사용자 동의 실제 텍스트 PDF 5–10개를 사용자의 PC에서만 대조하고 결과/결함 종류만 공유한다. 고객 PDF를 CI/PR에 업로드하지 않는다. 이어 구매자 물리 Windows PC의 GUI·인쇄를 확인한다. OCR 승인, 유료 모델·런타임, 외부 전송, merge, 배포는 별도 승인 전 하지 않는다.
 10. **보존/환경/갱신:** main, PR #3/#4, V2 사용자 데이터, 원본 설계, 배포 설정은 변경·병합되지 않았다. Production 미배포. GitHub가 기준 원격이며 로컬 clone은 stale/divergent이고 fetch는 DNS 오류였으므로 해당 ref를 push하지 않는다. 갱신 시각 2026-10-27 18:26 KST, 기능/테스트 SHA 위와 같음.
+
+## 2026-10-27 18:40 KST — 총괄 새 운영 순서 인수인계 (최신 내용)
+
+1. **목표/기술/확정 요구:** 사용자 지시로 MVP → 최초 설계 대비 미구현 기능 완성 → 보안/안정/호환/판매 QA의 단계 운영으로 변경. 로컬 React/TS/Vite/PDF.js/IndexedDB/Electron NSIS PDF 리디자인, 원본·사용자 데이터 보존. [실행계획](docs/commercial/MVP_TO_BLUEPRINT_COMPLETION_20261027.md).
+2. **완료/결정:** 내부 기술 시연 제한 GO, 7단계 추정 약 43%. 기존 PDF→검수→A4 설치형 경로를 재구현하지 않고 STEP4 스타일 조합/비교/저장 재사용부터 설계도 갭을 줄인다. CSS 방식 vs 허용 디자인 토큰+프리셋 2안 비교, 후자 권고.
+3. **검증/미검증:** 최종 기능·테스트 SHA cc157cba4b442f44b88c3631a72686fdfe8f8af9, Chrome+Edge [#40479935848](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935848) success 2/2, Windows NSIS [#40479935852](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935852) success, Node 67/67. 물리 구매자 PC/실 PDF·로컬 Electron visual 성공 미검증.
+4. **진행/대기/차단:** PHASE2 STEP4 우선 착수; PHASE3 전체 QA 및 판매는 NO-GO. STEP5 일부 로컬 합성 참조 기능 가능 여부 검토, STEP6 외부 검색/OCR/진짜 한국어 LLM 모델 획득은 승인대기.
+5. **오류/원인/대안:** Codex 로컬 미커밋 브랜치 codex/p5-windows-reliability에서 Electron 시각 테스트 종료 코드 2147483651; Windows 이벤트 로그 권한 거부로 원인 미상. hosted CI 성공과 혼동 금지; 중복 실패 반복 대신 환경 분석 가능할 때 피벗.
+6. **저장소/브랜치/SHA/경로:** hibi89/astra_pdf_redesigner / integration/astra-commercial-core / Draft PR9; 새 계획 문서 커밋 5e455ce9eec372d99954f23fc24ff970b171ab33. 변경된 STATUS/HANDOFF로 HEAD가 전진하므로 최신 원격 SHA 재조회. main/PR3/PR4 보존.
+7. **배포/환경:** 로컬 제품, Vercel/Production 미적용. npm test/build, Chrome/Edge 및 Windows NSIS CI. 무단 머지·배포 금지.
+8. **원본/백업/비밀:** docs/ASTRA_ORIGINAL_ROADMAP.txt, docs/BLUEPRINT.md, 원본 2 PNG, STEP1 v1/STEP2 V2 및 Codex 로컬 미커밋 원본 유지. 고객 파일 CI 업로드·외부 전송 금지. Git 이력으로 복원 가능.
+9. **다음 작업/완료/승인:** 실제 STEP4 코드/저장 구조 확인 → 2개 설계안 비용/안전/유지보수 비교 → 안전한 최소 사용자 동선 한 단위 구현·실PDF 출력 테스트. 주요 설계/스키마 변경 전 승인, 테스트 exact SHA 기록, 현재 43%는 품질/판매율이 아님. 사용자 실PDF 5~10개/물리 PC는 자료 동의 후 검증하되 독립 개발 계속.
+10. **기록 시각/범위:** 2026-10-27 18:40 KST, Codex [보고 댓글](https://github.com/hibi89/astra_pdf_redesigner/pull/9#issuecomment-6438491093)·기능 SHA/CI 직접 확인. [GPT-6 지시](https://github.com/hibi89/astra_pdf_redesigner/pull/9#issuecomment-6438610031). 본 작업은 문서/운영 체계 갱신, 신규 기능 검증은 아직 수행하지 않음.
