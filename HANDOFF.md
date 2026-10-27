@@ -477,3 +477,17 @@
 9. **미검증/다음 순서:** 사용자 Windows 10/11 설치판에서의 별도 수동 수용, 실제 사진·고객 PDF 미관/색상, 전원 중단 복구, signing/SmartScreen은 미검증. 먼저 GPT-6 총괄이 원래 STEP 2 완료 기준과 CI/렌더 근거를 검토하고, 결함 발견 때만 수정한다. PR 병합 또는 다음 단계 착수 전 사용자 승인 필요.
 10. **완성률 참고:** STEP 2 자동/기술 기준 약 **99%**, 7단계 전체 약 **38%**라는 비공식 동등가중 추정이며, 남은 개발 시간이나 판매 가능 판정이 아니다. 38% 근거는 STEP 1 완료·STEP 2 대부분 구현/검증·Draft STEP 3 부분 구현·STEP 4~7 미착수다.
 11. **문서/시각:** `STATUS.md` commit `0d10882aaab51b2820b3c516abd16e5a2465fe6a`; 이 인계 commit 이후 GitHub head를 다시 조회한다. 작성 시각 2026-10-27 15:05 KST.
+
+## 최신 인수인계 — 2026-10-27 15:17 KST (교차 프로필 프로젝트 백업·복원)
+1. **목표/범위:** STEP 2 개인 문서 제작기의 실제 파일 이식, 데이터 보존, 이미지 레이아웃 및 PDF 출력을 검증한다. 현재 AGENTS 승인 범위는 STEP 2; STEP 3 PDF/OCR와 STEP 4~7은 착수하지 않는다.
+2. **저장소/SHA/PR:** `hibi89/astra_pdf_redesigner`, branch `codex/p5-windows-reliability`, 검증 코드 SHA `574001a6e9a8a6af2b1cdee0c49ebace4b5f3ac5`. [PR #7](https://github.com/hibi89/astra_pdf_redesigner/pull/7)는 Draft/open/unmerged이며 main/Production 미변경.
+3. **이번 테스트 개선:** `tests/step2-cross-profile.mjs`에서 `pdfinfo/pdftotext/pdfimages` 실행을 제거하고 프로젝트 내 `pdfjs-dist`로 A4 치수, 텍스트, 이미지 렌더 op를 검사한다. UI에서 portrait PNG를 right/small, landscape WebP를 left/large로 바꾸고 그 설정이 IndexedDB → 내보낸 JSON → 다른 프로필 가져오기 후 보존되는지도 확인한다. 제품 UI/데이터 모델은 변경하지 않았다.
+4. **실제 E2E 결과:** Windows 이 워크스테이션의 hidden Chrome과 Edge에서 각각 성공. 프로필 A에서 합성 한국어 문서·PNG/WebP·레이아웃/디자인을 저장하고 실제 `.localdoc.json` 파일을 다운로드. 프로필 B는 빈 문서가 남은 상태에서 실제 파일 입력으로 import; 문서/섹션/블록/asset ID는 새로 발급되고, 원문 text/공백·날짜·테마·색·font·image dimensions/bytes·alignment/size는 동일하게 보존됐다. B에서 reload 후 동일성을 재확인하고 A4 PDF 출력, 본문 시작/끝, PNG/WebP 이미지 2개 이상을 PDF.js로 확인했다.
+5. **PDF 육안:** 동일 code lineage의 headless Electron visual acceptance에서 144×216 합성 세로 패턴 PNG를 포함한 A4 3페이지 PDF를 생성해 직접 열었다. 한국어, 비율 유지, caption/page edge 및 image draw를 확인했고 눈에 띄는 잘림은 없었다. 실고객 사진/문서 시각 품질은 대신하지 않는다.
+6. **검증:** `npm test` 19/19 PASS; `npm run desktop:verify` 11/11 PASS; cross-profile Chrome PASS; cross-profile Edge PASS; `npm run desktop:pdf-visual` PASS; `node --check` 및 `git diff --check` PASS. GitHub Actions SHA `574001a`: [#40459695822](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40459695822) build/Chrome/Edge SUCCESS, [#40459695839](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40459695839) Windows installer/IDB migration SUCCESS. Actions의 Node.js 20 deprecation warnings은 실패가 아니었다.
+7. **실패 및 해결:** 첫 cross-profile 실행은 headless Chrome이 CDP에는 연결됐으나 sandbox 세션에서 띄운 preview가 escalated browser와 통신하지 못해 DOM wait timeout됐다. 로컬 HTTP 요청에서도 권한 거부를 확인했다. Vite preview와 Chrome/Edge를 같은 격리 Node 프로세스 컨텍스트에서 실행하자 두 browser에서 성공했다. 애플리케이션 결함은 재현되지 않았으며, 원인은 sandbox loopback isolation으로 추정한다.
+8. **보안/데이터:** 합성 테스트 데이터·전용 Temp workspace와 profiles만 사용. 테스트 후 임시 JSON/PDF/프로필/서버를 정리했고, 사용자 문서·브라우저 프로필·일반 AppData/설치 앱 프로필은 건드리지 않았다. 원본 roadmap/blueprint 파일 변경 없음.
+9. **미검증:** 실사용 Windows 10/11 설치 사용자 수용, 실제 고객 PDF/사진, 전원 손실 복구, signing/SmartScreen, Production. 이 항목은 합성 CI/desktop smoke와 구분한다.
+10. **다음 순서/승인:** GPT-6가 최초 STEP 2 기준과 근거를 재검수한다. GitHub 기록상 PR #7/main 통합에는 별도 명시 승인 필요하며, 승인 전 merge 하지 않는다. STEP 3는 현재 승인 범위가 아니다.
+11. **완성률/로컬 상태:** STEP 2 자동·기술 검증 약 **99%**, 전체 7단계 약 **38%**는 비공식 동일 가중 추정이며 일정/판매 준비도를 뜻하지 않는다. GitHub API commit 때문에 workspace의 local Git HEAD는 `062360b50e3033654df656e84a2ce26cc3aa4061`에 남았고, unrelated untracked `ershaeinastra-step2-check`, `package-lock.json`은 보존했다.
+12. **문서:** `STATUS.md` update commit `d77e756a2ddacdf6b39c5af0e51806ed5bfc7a99`; 이 handoff 저장 뒤 final GitHub branch head를 조회해 기록한다. 갱신 시각 2026-10-27 15:17 KST.
