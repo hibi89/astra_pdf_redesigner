@@ -8,3 +8,10 @@
 ## 최신 단계 상태 보충 (2026-10-19)
 - 위의 “현재 승인 단계 STEP 2 / STEP 3 범위 밖”은 초기 main 안정화 규칙이다. 이후 사용자의 순차 `ㄱ` 승인에 따른 **독립** STEP3 PDF 가져오기 [Draft PR #3](https://github.com/hibi89/astra_pdf_redesigner/pull/3)와 STEP1/2 Windows 설치형 [Draft PR #4](https://github.com/hibi89/astra_pdf_redesigner/pull/4)가 존재한다. 두 PR은 현재 **main 미병합**이며 승인 없이 병합·STEP4 착수 금지.
 - 최신 검증 사실/남은 수동 인수 조건은 `STATUS.md`와 `HANDOFF.md`의 마지막 시점 기록을 따른다. 이전 시점의 “미착수” 표현으로 최근 feature 진행을 덮어쓰지 않는다. main의 사용자 기존 데이터 보존·원본 변경/외부 전송 금지 원칙은 유지한다.
+
+
+## 승인 범위 갱신 — 2026-10-27
+- 실제 저장소 이력에서 사용자는 단계별 `ㄱ` 승인으로 독립 STEP3 PDF 가져오기 [Draft PR #3](https://github.com/hibi89/astra_pdf_redesigner/pull/3)를 진행했고, STEP1/2 설치형은 별도 Draft PR #4로 분리했다. 둘 다 `main`에는 병합하지 않았다. 과거 STEP2-only 문구는 초기 main 안정화 체크포인트를 설명한다.
+- 최신 사용자 지시로 기존 STEP3 PDF 가져오기 개발 범위를 계속 진행하는 것이 승인되었다. 현재 `integration/astra-commercial-core`의 구현·회귀를 기준으로 부족한 기능만 보강하며, 검증된 PDF.js 추출·원본 대조·이미지 경고/복원·승인 후 신규 문서 저장·취소/오래된 결과 방어를 처음부터 재작성하지 않는다.
+- **OCR/스캔 인식은 별도 승인 전까지 제외**한다. STEP3 원 설계의 나머지 경계(브라우저 로컬, 단일 열 중심, 복잡한 표/다단·원본 레이아웃 동일성 보장 제외 및 불확실성 경고)는 유지한다.
+- STEP1/2 기존 기능·사용자 데이터 및 `main`/PR #3/#4 보존. 비용, 외부 모델/런타임 다운로드, 외부 PDF 전송, 주요 설계 변경, branch merge 및 배포는 각각 별도 승인 없이는 금지한다. 원본 요구/설계 문서는 수정하지 않는다.
