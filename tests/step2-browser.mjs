@@ -241,6 +241,8 @@ try{
   await eventually(()=>evaluate("document.querySelectorAll('.project-paper figure img').length"),n=>n===0);
   const preceding=Array.from({length:37},(_,i)=>'BEFORE_IMAGE_LINE_'+String(i+1).padStart(3,'0')).join('\n');
   await fill('.section-editor .block-editor textarea',preceding,'HTMLTextAreaElement');
+  await eventually(()=>evaluate("document.querySelector('.project-paper .section-body')?.textContent"),text=>
+    text?.includes('BEFORE_IMAGE_LINE_001')&&text.includes('BEFORE_IMAGE_LINE_037'));
   await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),v=>v==='저장됨');
   const uploadPortrait="(async()=>{const c=document.createElement('canvas');c.width=1200;c.height=2500;const ctx=c.getContext('2d');ctx.fillStyle='#e7b35a';ctx.fillRect(0,0,1200,2500);ctx.fillStyle='#315183';ctx.fillRect(0,0,1200,200);ctx.fillStyle='#c13b68';ctx.fillRect(0,2300,1200,200);const blob=await new Promise(resolve=>c.toBlob(resolve,'image/png'));if(!blob)throw Error('Canvas encode failed');const dt=new DataTransfer();dt.items.add(new File([blob],'a4-portrait-1200x2500.png',{type:'image/png'}));const input=document.querySelector('.section-editor .add-block input[type=file]');input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}))})()";
   await evaluate(uploadPortrait);
@@ -265,8 +267,8 @@ try{
     return{path,pages,fullText,imagePages};
   };
   const shortPrint=await printA4('step2-short-caption.pdf');
-  assert.ok(shortPrint.fullText.includes('BEFORE_IMAGE_LINE_001'));
-  assert.ok(shortPrint.fullText.includes('BEFORE_IMAGE_LINE_037'));
+  for(const marker of ['BEFORE_IMAGE_LINE_001','BEFORE_IMAGE_LINE_037'])
+    assert.ok(shortPrint.fullText.includes(marker),'A4 print omitted '+marker+': '+JSON.stringify({pages:shortPrint.pages,text:shortPrint.fullText.slice(0,1800)}));
   assert.equal(shortPrint.fullText.split(shortCaption).length-1,1);
   const captionPage=Array.from({length:shortPrint.pages},(_,i)=>i+1).find(n=>execFileSync('pdftotext',['-f',String(n),'-l',String(n),shortPrint.path,'-'],{encoding:'utf8'}).includes(shortCaption));
   assert.ok(shortPrint.imagePages.includes(captionPage),'Image and short caption must share the same printable page');
