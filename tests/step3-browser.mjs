@@ -510,7 +510,7 @@ try{
     assert.equal(state.included,false,'Header/footer should toggle out of the new document: '+marker);
     assert.ok(state.text.includes(marker),'Excluded source text must remain reviewable: '+marker);
   }
-  assert.equal(await evaluate("document.querySelectorAll('[data-step3-block-included]:not(:checked)').length"),4,
+  assert.equal(await evaluate("document.querySelectorAll('[data-step3-block-included]:not(:checked)').length"),4);
   await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').click()");
   assert.equal(await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').checked"),true);
   const historyMarker=RUNNING_MARKERS[0];
