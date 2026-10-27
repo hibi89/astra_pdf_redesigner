@@ -424,3 +424,16 @@
 - 다음 작업: **로컬 git status 확인 후**, 격리 프로필에서 Electron 실행 → 합성 문서 편집·이미지 → 종료/재실행 복원 → 실제 PDF 육안 확인 → JSON 백업. 치명적 결함만 우선 수정.
 - 현 구현 STEP1/STEP2 문서 제작·PDF 출력과 **미구현 STEP3 기존 PDF 리디자인**을 혼동하지 말 것. STEP4 금지.
 - PR #7 Draft 유지, main/PR #3~#6/사용자 실데이터/설치 앱 불변. 로컬 미추적 파일 보존. 사용자 Windows 실제 검증은 미완료.
+
+
+## 2026-10-27 14:20:46 KST — 개인 Windows GUI 인수시험 실행 실패
+1. **목표/범위:** `hibi89/astra_pdf_redesigner`의 개인용 Windows 완료 계획에 따라 Electron을 격리된 합성 프로필에서 실행하고 편집·이미지·재실행·PDF·JSON 백업 흐름을 검증하려 했다. STEP3 PDF 가져오기와 상용화는 이 작업 범위에 포함하지 않았다.
+2. **기준 상태:** GitHub 브랜치 `codex/p5-windows-reliability`, 작업 시작 코드/문서 HEAD `062360b50e3033654df656e84a2ce26cc3aa4061`. 최신 원격 브랜치와 로컬 HEAD가 일치했다. main 및 PR #3~#7에 변경을 가하지 않았고 병합도 하지 않았다.
+3. **자동 테스트 결과:** `npm test` 19/19 PASS; `npm run build` PASS(모듈 동적/정적 import 경고 1건); `npm run desktop:verify` bundle 검사 PASS, 데스크톱 테스트 10/10 PASS. 이번 실행에서 코드 또는 테스트 파일은 변경하지 않았다.
+4. **실행 시도/관측:** `npm run desktop:personal-test`의 빌드는 성공했으나 Electron 프로세스가 코드 1로 즉시 종료되어 창이 뜨지 않았고 앱이 출력할 사용자 데이터 경로 로그도 보이지 않았다. 로그 옵션을 붙인 직접 Electron 실행도 코드 1/진단 출력 없음이었다. Electron `--version`도 코드 1/출력 없음이었다.
+5. **실패 원인/재시도:** Electron 바이너리 시작 단계 문제로 보이나 확정 원인은 **미확인**. 동일한 실행 경로를 더 반복하지 않았다. Application 이벤트 로그 조회는 권한 거부되어 수행할 수 없었다. Electron 앱 로직 버그라고 단정하지 않는다.
+6. **데이터/파일 안전:** `%TEMP%\\astra-p5-personal-test-profile`은 생성되지 않았으며 일반 AppData 설치 앱 프로필/브라우저 프로필/사용자 문서를 열거나 변경하지 않았다. 기존 로컬 미추적 `package-lock.json` 및 `ershaeinastra-step2-check`를 보존했다. 원본 로드맵/설계 자료를 변경하지 않았다.
+7. **배포/브랜치:** Production/Vercel 없음. GitHub에는 이 검증 결과를 `STATUS.md`, `HANDOFF.md`에 문서화하는 변경만 기록한다. PR #7 Draft 유지, main/PR #3~#6 미변경, STEP4 미착수.
+8. **완료/미완료:** 자동 단위·빌드·데스크톱 보안 확인만 완료. 앱 UI·합성 문서/이미지 입력·재실행 복원·Windows PDF 저장/육안·JSON export/import는 **미검증**이며 개인용 1차 완료 판정은 보류다.
+9. **다음 작업:** 먼저 호환 Windows 환경에서 Electron 44.9.0 단독 실행 원인을 확인한다. 앱을 띄울 수 있게 되면 계획된 전용 temp 프로필만 사용해 합성 한국어 문서+이미지를 저장하고 재실행 보존, PDF A4/한글/마지막 문단/이미지 확인, 테스트용 JSON 백업 복원을 검증한다. 실패 시 원인과 범위만 기록한다.
+10. **갱신/검증 시각:** 2026-10-27 14:20:46 KST. 테스트는 현재 workspace에서 수행했으며, 사용자 실데이터나 설치 앱은 건드리지 않았다.
