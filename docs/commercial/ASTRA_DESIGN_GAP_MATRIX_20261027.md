@@ -86,8 +86,16 @@
 
 ## 최신 STEP3 갱신 — 2026-10-27 17:45 KST
 
-- 검증 코드 SHA 009966b57cc2e30397da5607b9429020c400e513에서 PDF 전체 이미지 복원 예산(50개·40MP·PNG 40MiB)을 적용하고, 한도 초과는 누락 집계와 사용자 경고로 노출한다. STEP3 추출 데이터/저장 스키마를 바꾸지 않는다.
+- 검증 코드 SHA 009966b57cc2e30397da5607b9429020c400e513에서 PDF 전체 이미지 복원 예산(복원 시도 50개·누적 40MP·성공 PNG 40MiB)을 적용하고, 한도 초과는 누락 집계와 사용자 경고로 노출한다. STEP3 추출 데이터/저장 스키마를 바꾸지 않는다.
 - 로컬 Node 24: 63/63 PASS, production build PASS, diff check PASS. Chrome+Edge [#40475046652](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40475046652) SUCCESS 2/2; Windows NSIS [#40475046789](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40475046789) SUCCESS.
 - Windows exact-SHA 로그에 PASS M09-D WINDOWS INSTALLED UI, installed STEP3 import/review/native A4 (2 pages, 6 markers, raster 1) 확인. 이는 합성 PDF 및 hosted Windows VM 결과이며 구매자 물리 PC 검수가 아니다.
 - 원본 STEP3의 완료 기준을 기준으로 손상 PDF 내부 복구는 필수 기능이 아니다. 잘못된 구조를 거부하고, 실패를 성공으로 표시하지 않으며, 기존 사용자 데이터와 미확정 검수 초안을 보존하면 된다(M08-C 검증). 위 STEP3 요약 행을 이에 맞게 바로잡았다.
 - 미완료 인수 조건: 동의된 실제 텍스트 중심 PDF 5~10건의 고객 로컬 비교 및 구매자 Windows PC GUI/인쇄 수용. OCR은 별도 승인 전까지 제외. 전체 7단계 보수 추정 ~43%, 상품 판매 NO-GO.
+
+
+## 최신 STEP3 경계 정정 및 exact-SHA — 2026-10-27 17:55 KST
+
+- 최종 functional SHA 9ae962eb825e4baa3a8d84b650926355258c9148. 문서당 이미지 복원 시도는 최대 50개, 누적 시도 디코딩은 40MP, 성공 PNG 누적은 40MiB로 제한한다. 누적 픽셀/이미지 수/PNG 출력량 중 하나라도 도달하면 PDF 전체 복원을 exhausted 상태로 전환하고 다음 페이지 이미지 객체 접근을 포함해 후속 복원을 멈춘다.
+- 로컬 Node 24 64/64 PASS, build/diff-check PASS. Chrome+Edge [#40476342313](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40476342313) SUCCESS 2/2, Windows NSIS [#40476342230](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40476342230) SUCCESS. 설치형 M09-D 및 STEP3 A4 output 로그 확인.
+- 최초 설계 STEP3는 오류 문서를 거짓 성공 처리하지 말고 원문과 출력 비교/수정이 가능해야 한다. corrupt catalog 입력은 명확히 거부되고 초안/V2 데이터 보존(M08-C)하므로 PDF internals 복구는 단계 요구 누락이 아니다.
+- 남은 검증은 customer-local 동의 PDF 5~10건 및 buyer physical Windows PC 수용. OCR 별도 승인 전 제외, overall roadmap estimate ~43%, sales NO-GO.

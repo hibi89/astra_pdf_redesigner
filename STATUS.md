@@ -413,10 +413,20 @@
 
 ## 2026-10-27 17:45 KST — STEP 3 PDF 이미지 누적 자원 한도
 
-- 구현 SHA: 009966b57cc2e30397da5607b9429020c400e513 (integration/astra-commercial-core, PR #9). 기존 per-image/per-page 기준은 유지하고, 한 PDF 전체 복원 PNG에 50개·40MP·40MiB 누적 상한을 적용했다. 상한에 닿으면 후속 이미지는 복원하지 않고 기존 미복원 개수·검수 경고에 표시한다. 초안/문서 저장 스키마, 원본 PDF, 사용자 V2 데이터는 변경하지 않았다.
+- 구현 SHA: 009966b57cc2e30397da5607b9429020c400e513 (integration/astra-commercial-core, PR #9). 기존 per-image/per-page 기준은 유지하고, 문서당 이미지 복원 시도 최대 50개·누적 40MP·성공 PNG 40MiB 상한을 적용했다. 상한에 닿으면 후속 이미지는 복원하지 않고 기존 미복원 개수·검수 경고에 표시한다. 초안/문서 저장 스키마, 원본 PDF, 사용자 V2 데이터는 변경하지 않았다.
 - 로컬 검증: Node 24 npm test 63/63 PASS, npm run build PASS, git diff --check PASS. 첫 추가 테스트에서 이미지 개수 경계 기대값 오류로 1회 실패했고, 테스트 입력만 바로잡은 후 전체 통과했다. 기존 빌드의 model.ts chunk 경고는 남아 있다.
 - exact-SHA Chrome·Edge: [Actions #40475046652](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40475046652) SUCCESS 2/2. Chrome·Edge에서 PDF 가져오기/Undo·Redo/A4 재출력, 스캔·손상·암호 PDF 거부, M09-A/B/C 회귀 통과 로그 확인.
 - exact-SHA Windows NSIS: [Actions #40475046789](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40475046789) SUCCESS. 설치형 M09-D 취소→대체 선택→늦은 분석 무시→저장소 불변, STEP3 가져오기/검수/새 A4 PDF(2쪽, 원문 표식 6개, 래스터 1개), 설치·업그레이드 로그 확인.
 - 최초 STEP3 기준 재대조: PDF 내부 복구는 원본 로드맵의 STEP3 요구가 아니다. 손상 파일을 성공으로 위장하지 않고 거부하며 기존 문서와 미확정 검수 초안을 보존하는 편이 범위에 맞다. 갭 매트릭스에 이 판단을 반영했다.
 - 미검증/남은 작업: 합성 fixture만 사용했다. 고객 동의 실제 단순 PDF 5~10개 내용 비교, 구매자 Windows PC 직접 GUI/인쇄 수용은 미검증. 복잡한 표·다단·OCR은 원본 범위를 벗어나거나 별도 승인이 필요하다. 7단계 추정은 ~43%, 판매/Production NO-GO.
 - 보존/최신성: main, PR #3/#4, 배포 설정, 사용자 저장 데이터는 변경·병합되지 않았다. OCR·모델 다운로드·비용·외부 PDF 전송·배포 없음. 기능 테스트 SHA는 위 코드 SHA이며, 문서 전용 갱신이 뒤따른다.
+
+
+## 2026-10-27 17:55 KST — STEP3 이미지 누적 한도 최종 경계 검증
+
+- 최종 기능·테스트 SHA: 9ae962eb825e4baa3a8d84b650926355258c9148. 앞선 검토에서 첫 한도 초과 뒤 작은 이미지 시도가 계속될 수 있음을 확인해 동작을 바로잡았다. 이제 PDF 단위 예산에 도달하면 exhausted 상태로 두고 이후 페이지의 이미지 객체를 읽거나 복원하지 않는다. 시도 이미지 수와 디코딩 픽셀은 복원 실패도 예산에 포함하며, 성공 PNG bytes는 별도 집계한다.
+- 새 회귀 테스트는 첫 페이지 누적 픽셀 한도 도달 시 경고가 나오고 다음 페이지 이미지 객체 접근이 일어나지 않는지 확인한다. 로컬 Node 24 npm test 64/64 PASS, npm run build PASS, git diff --check PASS. 기존 model.ts chunk warning 지속.
+- Exact-SHA Chrome·Edge [#40476342313](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40476342313) SUCCESS 2/2; Windows NSIS [#40476342230](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40476342230) SUCCESS. Windows installed test에서 M09-D 실제 UI 취소·대체 파일·늦은 결과 무시·V2 불변, STEP3 실제 앱 출력 A4 2페이지/marker 6개/raster 1개 확인.
+- 이전 exact-SHA 009966b도 녹색이었으며, 그 뒤 최종 코드 검토로 경계 조건을 추가 보완한 것이다. 실패를 숨기거나 테스트를 생략하지 않았다.
+- 제한 설명 정정: 50개는 실제 회수 성공 개수가 아니라 문서 전체 복원 시도 상한이다. 40MP는 시도된 이미지 디코딩 픽셀 상한, 40MiB는 성공 PNG 누적 출력 상한이다. 최초 경고 뒤 모든 후속 복원을 중단한다.
+- 이 보완은 추출/프로젝트 스키마를 바꾸지 않는다. OCR/외부 전송/모델 다운로드/비용/배포/merge 없음. 고객 동의 실제 PDF 5~10개와 구매자 Windows PC 수용은 계속 미검증. 상용 판매 NO-GO.

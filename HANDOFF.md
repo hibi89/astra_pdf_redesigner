@@ -508,7 +508,7 @@
 ## 최신 인수인계 — 2026-10-27 17:45 KST
 
 1. 목표·확정 범위: 최초 STEP3 PDF 가져오기 흐름을 완성 방향으로 보강한다. OCR은 별도 승인 전까지 제외한다. 기존 STEP1/2 기능과 사용자 데이터를 보존하고 main/PR #3/#4를 변경·병합하지 않는다.
-2. 이번 구현: PDF 이미지 복원에 문서 단위 누적 예산을 추가했다(최대 복원 이미지 50개, 누적 40MP, PNG 40MiB). 기존 이미지별 20MP/10MiB 및 페이지별 15개 제한을 유지한다. 누적 한도에 도달하면 해당 이미지와 이후 이미지를 제외하고 PDF 검수 경고/미복원 집계로 알린다. 데이터베이스·프로젝트 JSON·원본 문서 형식 변경은 없다.
+2. 이번 구현: PDF 이미지 복원에 문서 단위 누적 예산을 추가했다(이미지 복원 시도 최대 50개, 누적 시도 40MP, 성공 PNG 40MiB). 기존 이미지별 20MP/10MiB 및 페이지별 15개 제한을 유지한다. 누적 한도에 도달하면 해당 이미지와 이후 이미지를 제외하고 PDF 검수 경고/미복원 집계로 알린다. 데이터베이스·프로젝트 JSON·원본 문서 형식 변경은 없다.
 3. 로컬 결과: exact code/test SHA 009966b57cc2e30397da5607b9429020c400e513; Node 24 npm test 63/63 PASS, npm run build PASS, git diff --check PASS. 첫 추가 테스트는 경계값 기대 오류로 실패했으나 수정 후 전체 통과했다. 기존 model.ts chunk 경고는 미해결이며 이번 변경과 무관하다.
 4. 브라우저 exact-SHA: [Chrome+Edge #40475046652](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40475046652) SUCCESS 2/2. 두 브라우저의 PDF import/review/undo-redo/A4 output, malformed/encrypted/scan-only 경계, M09-A/B/C 회귀 표식을 확인했다.
 5. Windows/M09-D exact-SHA: [NSIS #40475046789](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40475046789) SUCCESS. 설치형 UI에서 취소 중 대체 PDF 선택·이전 늦은 결과 무시·URL 정리·V2 불변이 통과했다. STEP3 PDF review 후 실제 native A4 출력은 2페이지/원문 marker 6개/raster 1개로 확인됐다. 설치·제거·0.1.0→0.1.1 STEP2 저장 데이터 업그레이드 보존도 성공했다.
@@ -518,3 +518,16 @@
 9. 배포/승인: Production 배포 없음. GitHub Windows 설치 파일은 unsigned CI 시험 산출물이다. 사용자 PC 직접 확인, OCR, 로컬 모델 다운로드, 비용 서비스, 외부 PDF 전송, 주요 설계 변경, PR 병합/배포는 수행하지 않았다.
 10. 다음 순서: (a) 동의받은 단순 텍스트 PDF 5~10개를 고객 로컬에서만 비교하고 결과 수치/누락만 기록, (b) 구매자 Windows PC에서 실제 파일 선택·취소·검수·인쇄 GUI를 수동 확인, (c) 그 결과로 STEP3 gap matrix/판매 게이트 재판정. 그 밖의 자율 STEP3 버그 수정은 합성 fixture와 exact-SHA CI를 유지하며 계속할 수 있다. OCR/모델·배포/병합은 별도 승인 대기.
 11. 로컬 복제 동기화: API 경유로 커밋했으며 이 실행환경의 git fetch는 이전에 GitHub DNS 문제로 실패했다. .codex-m09d-remote 체크아웃은 stale/divergent 로컬 ancestry와 미커밋 변경이 있으므로 직접 push하지 않는다. root codex/p5-windows-reliability도 기존 변경이 있으므로 건드리지 않는다. CI는 GitHub에서 exact SHA를 checkout해 수행했다.
+
+
+## 최신 인수인계 보충 — 2026-10-27 17:55 KST
+
+1. 현재 코드/테스트 검증 SHA 9ae962eb825e4baa3a8d84b650926355258c9148; integration/astra-commercial-core, PR #9는 Draft/open/unmerged이며 docs-only commit이 이어진다.
+2. PDF 이미지 예산: 문서 전체 복원 시도 최대 50개, 시도 픽셀 최대 40MP, 성공 PNG bytes 최대 40MiB. 첫 누적 제한에 닿으면 exhausted 상태로 전환해 이후 페이지 이미지 객체 읽기/변환을 중단한다. 미복원 감지 수와 안전 경고는 사용자에게 계속 표시된다.
+3. 추가 경계 regression: 첫 페이지 픽셀 예산을 넘은 뒤 다음 페이지에서 이미지 object API를 다시 호출하지 않는 것을 확인했다. Local npm test 64/64, production build, diff-check PASS.
+4. Exact CI: Chrome+Edge [#40476342313](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40476342313) SUCCESS 2/2; Windows installer [#40476342230](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40476342230) SUCCESS. Exact Windows logs contain M09-D UI pass and installed STEP3 native A4 output 2 pages/6 markers/1 raster.
+5. Earlier candidate 009966b had green CI, but review found the first threshold-exceeding image was skipped while later smaller images could still be processed despite the warning. Follow-up 9ae962e made exhaustion explicit, bounded failed attempts too, added the next-page no-read test, and repeated all CI. No failed check remains on final code SHA.
+6. Design gap matrix now says corrupt-PDF repair is not required by original STEP3; visible rejection/data preservation is the required safe boundary. PDF import, local extraction, manual edit/review, image warnings, and A4 export synthetic regressions are verified. Overall roadmap remains ~43% and STEP3 remains partial due actual sample/customer acceptance.
+7. Still unverified: consented customer-local 5–10 text-centered PDFs, buyer physical Windows PC GUI/print acceptance, complex real document visual QA. OCR stays separate/unapproved. Do not upload customer PDFs to CI/PR.
+8. Preserve main, PR #3/#4, user data, original design docs, and deployment config. No OCR, model download, paid service, external PDF transfer, deployment, or branch merge occurred.
+9. Next work: continue independent STEP3 gaps only when original design supports them; batch owner-side acceptance is real PDF sample comparison performed locally plus buyer-PC GUI/print review. Sale/production remains NO-GO until acceptance/release gates pass.
