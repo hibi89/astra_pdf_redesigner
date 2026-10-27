@@ -1,6 +1,7 @@
 'use strict';
 const {app,BrowserWindow,dialog,ipcMain,net,protocol,session}=require('electron');
 const fs=require('node:fs/promises');
+const fsSync=require('node:fs');
 const os=require('node:os');
 const path=require('node:path');
 const {pathToFileURL}=require('node:url');
@@ -12,17 +13,47 @@ const {runStep2VersionchangeAcceptance}=require('./step2-versionchange-acceptanc
 const APP_URL='astra://app/index.html';
 const SMOKE=process.argv.includes('--astra-desktop-smoke');
 const PERSONAL_TEST=process.argv.includes('--astra-personal-test');
+const LOCAL_PDF_ACCEPTANCE_ARG=process.argv.includes('--astra-local-pdf-acceptance');
+const LOCAL_PDF_ACCEPTANCE=SMOKE&&LOCAL_PDF_ACCEPTANCE_ARG;
+const LOCAL_STEP2_ACCEPTANCE_ARG=process.argv.includes('--astra-local-step2-acceptance');
+const LOCAL_STEP2_ACCEPTANCE=SMOKE&&LOCAL_STEP2_ACCEPTANCE_ARG;
+const LOCAL_ACCEPTANCE=LOCAL_PDF_ACCEPTANCE||LOCAL_STEP2_ACCEPTANCE;
 if(SMOKE&&PERSONAL_TEST)throw Error('Smoke and personal-test profiles are mutually exclusive');
+if((LOCAL_PDF_ACCEPTANCE_ARG||LOCAL_STEP2_ACCEPTANCE_ARG)&&!SMOKE)
+  throw Error('Local PDF acceptance requires hidden desktop smoke mode');
+if(LOCAL_PDF_ACCEPTANCE&&LOCAL_STEP2_ACCEPTANCE)
+  throw Error('Local synthetic and STEP2 PDF acceptance modes are mutually exclusive');
 const PDF_ACCEPTANCE=SMOKE&&process.argv.includes('--astra-pdf-acceptance');
+if(LOCAL_PDF_ACCEPTANCE&&PDF_ACCEPTANCE)throw Error('CI and local PDF acceptance modes are mutually exclusive');
 const STEP2_ACCEPTANCE=SMOKE&&(process.argv.includes('--astra-step2-acceptance')||process.argv.includes('--astra-step2-preservation-verify')||process.argv.includes('--astra-step2-schema-upgrade-verify'));
 const STEP2_VERSIONCHANGE_ACCEPTANCE=SMOKE&&process.argv.includes('--astra-step2-versionchange-verify');
+function validateLocalPdfAcceptancePaths(){
+  const tempRoot=path.resolve(os.tmpdir());
+  const profile=path.resolve(process.env.ASTRA_LOCAL_PDF_PROFILE||'');
+  const output=path.resolve(process.env.ASTRA_LOCAL_PDF_OUTPUT||'');
+  if(!process.env.ASTRA_LOCAL_PDF_PROFILE||path.dirname(profile)!==tempRoot||
+     !/^astra-p5-pdf-visual-profile-[A-Za-z0-9-]+$/.test(path.basename(profile))||
+     !fsSync.existsSync(profile))
+    throw Error('Local PDF acceptance profile must be a new, isolated directory directly under the OS temp folder');
+  const profileInfo=fsSync.lstatSync(profile);
+  if(!profileInfo.isDirectory()||profileInfo.isSymbolicLink()||fsSync.readdirSync(profile).length!==0)
+    throw Error('Local PDF acceptance profile must be an empty, non-linked directory');
+  if(!process.env.ASTRA_LOCAL_PDF_OUTPUT||path.dirname(output)!==tempRoot||
+     !/^astra-p5-pdf-visual-[A-Za-z0-9-]+\.pdf$/i.test(path.basename(output))||
+     fsSync.existsSync(output))
+    throw Error('Local PDF acceptance output must be a new, isolated PDF directly under the OS temp folder');
+  return{profile,output};
+}
+const LOCAL_PDF_PATHS=LOCAL_ACCEPTANCE?validateLocalPdfAcceptancePaths():null;
 protocol.registerSchemesAsPrivileged([{
   scheme:'astra',
   privileges:{standard:true,secure:true,supportFetchAPI:true,stream:true},
 }]);
 app.setName('ASTRA PDF Redesigner');
 app.setPath('userData',SMOKE
-  ?(process.env.GITHUB_ACTIONS==='true'&&process.env.ASTRA_STEP2_PROFILE_DIR&&
+  ?(LOCAL_ACCEPTANCE
+    ?LOCAL_PDF_PATHS.profile
+    :process.env.GITHUB_ACTIONS==='true'&&process.env.ASTRA_STEP2_PROFILE_DIR&&
     path.dirname(path.resolve(process.env.ASTRA_STEP2_PROFILE_DIR))===path.resolve(process.env.RUNNER_TEMP||'')&&
     /^astra-step2-profile-[A-Za-z0-9-]+$/.test(path.basename(process.env.ASTRA_STEP2_PROFILE_DIR))
     ?path.resolve(process.env.ASTRA_STEP2_PROFILE_DIR)
@@ -182,15 +213,23 @@ async function runSmoke(win){
 }
 
 
-async function runPdfContentAcceptance(win){
-  if(!SMOKE||!PDF_ACCEPTANCE||process.env.GITHUB_ACTIONS!=='true')
-    throw Error('PDF acceptance fixture is restricted to CI smoke');
-  const runnerRoot=path.resolve(process.env.RUNNER_TEMP||'');
-  const output=path.resolve(process.env.ASTRA_PDF_ACCEPTANCE_OUT||'');
-  if(!process.env.RUNNER_TEMP||!process.env.ASTRA_PDF_ACCEPTANCE_OUT||
-     path.dirname(output)!==runnerRoot||
-     !/^astra-pdf-acceptance-[A-Za-z0-9-]+\.pdf$/i.test(path.basename(output)))
-    throw Error('PDF acceptance output must be an isolated GitHub runner PDF');
+async function runPdfContentAcceptance(win,{local=false}={}){
+  if(!SMOKE)throw Error('PDF acceptance fixture requires hidden desktop smoke mode');
+  let output;
+  if(local){
+    if(!LOCAL_PDF_ACCEPTANCE||!LOCAL_PDF_PATHS)
+      throw Error('Local PDF acceptance requires its explicit isolated test mode');
+    output=LOCAL_PDF_PATHS.output;
+  }else{
+    if(!PDF_ACCEPTANCE||process.env.GITHUB_ACTIONS!=='true')
+      throw Error('PDF acceptance fixture is restricted to CI smoke');
+    const runnerRoot=path.resolve(process.env.RUNNER_TEMP||'');
+    output=path.resolve(process.env.ASTRA_PDF_ACCEPTANCE_OUT||'');
+    if(!process.env.RUNNER_TEMP||!process.env.ASTRA_PDF_ACCEPTANCE_OUT||
+       path.dirname(output)!==runnerRoot||
+       !/^astra-pdf-acceptance-[A-Za-z0-9-]+\.pdf$/i.test(path.basename(output)))
+      throw Error('PDF acceptance output must be an isolated GitHub runner PDF');
+  }
   const fixture=await win.webContents.executeJavaScript(acceptanceDomSource(),true);
   if(!fixture?.imageLoaded||!fixture?.text?.includes(MARKERS.first)||
      !fixture?.text?.includes(MARKERS.second)||!fixture?.text?.includes(MARKERS.korean))
@@ -200,7 +239,8 @@ async function runPdfContentAcceptance(win){
   const written=await fs.readFile(output);
   if(written.length!==bytes.length||written.subarray(0,5).toString('ascii')!=='%PDF-')
     throw Error('Installed Electron did not persist the PDF acceptance output');
-  console.log('PASS ASTRA PDF CONTENT FIXTURE: installed renderer printed a two-page Korean/image synthetic preview');
+  console.log('PASS ASTRA PDF CONTENT FIXTURE: installed renderer printed a two-page Korean/image synthetic preview'+
+    (local?'; output='+output:''));
 }
 
 if(lock){
@@ -215,7 +255,11 @@ if(lock){
       if(SMOKE){
         await runSmoke(mainWindow);
         if(PDF_ACCEPTANCE)await runPdfContentAcceptance(mainWindow);
-        if(STEP2_ACCEPTANCE)await runStep2ProjectAcceptance(mainWindow,renderLocalPdf);
+        if(LOCAL_PDF_ACCEPTANCE)await runPdfContentAcceptance(mainWindow,{local:true});
+        if(LOCAL_STEP2_ACCEPTANCE)
+          await runStep2ProjectAcceptance(mainWindow,renderLocalPdf,
+            {local:true,localOutput:LOCAL_PDF_PATHS.output});
+        else if(STEP2_ACCEPTANCE)await runStep2ProjectAcceptance(mainWindow,renderLocalPdf);
         if(STEP2_VERSIONCHANGE_ACCEPTANCE)await runStep2VersionchangeAcceptance(mainWindow,BrowserWindow);
         app.exit(0);
       }
