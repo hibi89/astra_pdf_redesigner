@@ -10,6 +10,8 @@ test('project export keeps text, design and refuses missing referenced assets',a
   await assert.rejects(exportProject(doc,[]),/이미지가 누락/);
   const a:ImageAsset={id:'asset-1',documentId:doc.id,byteSize:4,mimeType:'image/png',width:1,height:1,originalName:'test.png',blob:new Blob(['1234'])};
   const data=JSON.parse(await exportProject(doc,[a]));
+  assert.deepEqual(data.document.content,doc.content,'Project export must preserve exact content');
+  assert.deepEqual(data.document.design,doc.design,'Project export must preserve every design setting');
   assert.equal(data.document.content.sections[0].blocks[0].text,'한글\n\n123%');
   assert.equal(data.assets[0].base64,'MTIzNA==');assert.deepEqual(documentAssetIds(doc),['asset-1']);
   assert.equal(data.format,'astra-local-document');assert.equal(data.formatVersion,1);
