@@ -12,6 +12,7 @@
 - 로컬 exact-SHA 검증: `npm test` 61/61 PASS, `npm run build` PASS, `node --check tests/step2-browser.mjs` PASS, `git diff --check` PASS.
 - GitHub exact-SHA: Edge job [#122069789553](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40468551454/job/122069789553) SUCCESS; `PASS STEP2: portable project JSON includes exact text and image bytes`, `PASS STEP2: JSON import, invalid import rejection, independent copy survives delete` 확인. Windows NSIS run [#40468551485](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40468551485) SUCCESS; `PASS M09-D WINDOWS INSTALLED UI`, STEP2 프로필 재실행 보존, 0.1.0→0.1.1 업그레이드 보존 및 설치기 업로드 확인.
 - Chrome job [#122069789889](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40468551454/job/122069789889)은 Node 테스트와 빌드는 PASS했으나, 16:51 KST 현재 CI 전용 한글 폰트 설치 단계에서 실행 중이며 Chrome 검증은 아직 시작되지 않았다. **Chrome exact-SHA 결과 미검증/대기**; 성공으로 간주하지 않는다.
+- 후속 조회 16:58 KST에도 Chrome 폰트 단계는 실행 중이었다. 로컬 `git push`/`git fetch`는 `Could not resolve host: github.com`으로 실패했으나 GitHub 연결을 통해 문서와 PR은 원격 반영했다. 로컬 문서 커밋 `b72d0dc2bd051562775cd65bde82b1ae529ab088`은 원격 PR HEAD `7d0962bc077152f3a0c718db1ea8cf10187cf798`의 조상이 아니므로, DNS가 복구되기 전 로컬 커밋을 PR 브랜치에 직접 push하지 않는다.
 - 합성 데이터만 사용. 고객 PDF, 외부 모델 다운로드, 유료 서비스, 배포·병합 없음. 전체 7단계 약 43%, 판매 및 public production NO-GO.
 
 ## 완료 기능
