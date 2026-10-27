@@ -406,3 +406,18 @@
 10. **다음 순서와 승인 필요:** (a) GPT-6에 matrix와 exact test logs 재검수 요청, (b) 실제 PDF/구매자 PC 검수는 사용자가 자산과 장치/테스트 동의를 제공한 후, (c) OCR·STEP5/6 외부 참조/검색·모델/런타임 다운로드·유료 API/비용·브랜치 병합·배포는 각각 사전 승인과 라이선스/데이터 범위 확인 후 진행. 승인 전 안전한 synthetic 회귀와 문서 추적만 계속한다.
 
 **갱신 시각:** 2026-10-27 16:01 KST. PR head는 이후 docs-only 기록 커밋으로 전진할 수 있으며, 위 SHA는 M09-D app/test exact-SHA 검증 기준이다.
+
+## STEP2 회귀 추가 및 최신 exact-SHA 인수인계 — 2026-10-27 16:24 KST
+
+1. **목표/범위:** PR #9에서 저장된 문서 내용과 디자인 설정의 분리 불변식을 실제 브라우저/IndexedDB로 검증하고, 페이지 분할 fixture의 문서 전환 타이밍을 안정화했다. 승인 단계 STEP2 범위이며 원본 요구사항·설계 파일을 수정하지 않았다.
+2. **변경 내용:** 테스트 전용 변경 `tests/step2-browser.mjs`. 테마 변경 전후의 정확한 content 동등성, 디자인 테마 값 변경, reload 후 둘 다 보존을 확인한다. 페이지 분할 테스트는 이전/새 문서 ID, 빈 편집기, 입력값과 미리보기 렌더링을 확인한 뒤 실제 A4 PDF를 출력한다. 제품 코드와 IndexedDB schema 변경 없음.
+3. **저장소/브랜치/SHA:** `hibi89/astra_pdf_redesigner`, `integration/astra-commercial-core`, Draft PR #9. exact-SHA 기능/테스트 **`fbeb65da56e94f30ab1e8f06c610bcfdf7daa94c`**. 이 기록용 docs-only commit이 추가되면 PR head는 달라질 수 있으며 해당 functional/test SHA는 그대로다.
+4. **로컬 결과:** `npm test` 61/61 PASS; `npm run build` PASS; `node --check tests/step2-browser.mjs` PASS; `git diff --check` PASS. 로컬 Windows의 `pdftotext`/`pdfimages` 부재로 전체 로컬 PDF browser extraction은 미검증이다.
+5. **정확한 GitHub 결과:** [Chrome + Edge #40466302009](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40466302009) SUCCESS 2/2, content/design separation·A4 image pagination·STEP1–3 regressions 포함. [Windows NSIS #40466302024](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40466302024) SUCCESS, Node 61/61, desktop 13/13, install/uninstall/upgrade storage preservation, 실제 `PASS M09-D WINDOWS INSTALLED UI` marker. 테스트는 합성 fixture만 사용했다.
+6. **실패/수정 이력:** 이전 SHA `77f1fa3a...` Edge CI #40465870933가 `+ 빈 문서` 클릭 후 문서 전환 대기 누락으로 테스트 line 244에서 timeout. 제품 데이터 손상 증거는 없었다. 새 테스트가 ID 변경·빈 편집기 대기를 추가한 뒤 Chrome/Edge 모두 green. 반복 실패 전에 원인에 맞춘 단일 harness 수정으로 해결.
+7. **설계 갭/상품 상태:** 원본 설계 매트릭스의 7단계 추정 ~43% 유지(STEP1/2 완료, STEP3/4/7 부분, STEP5 미구현, STEP6 및 OCR 승인대기). 72h 내부 MVP와 BASIC/PRO/BUSINESS 준비도는 별도 평가다. 판매 및 public production은 여전히 **NO-GO**.
+8. **미검증:** 로컬 전체 PDF extraction, 실제 고객 PDF 5–10건, 구매자 물리 Windows PC, 한국어 모델 실행·라이선스, PRO20/BUSINESS30, 코드 서명/지원. CI runner 결과를 구매자 PC 결과로 간주하지 않는다.
+9. **다음 순서/승인:** 현 범위에서 STEP2의 기존 저장 데이터/내보내기/레이아웃 regressions를 계속 보강하고 설계 갭 매트릭스의 정확한 매핑을 GPT-6 재검수한다. 실제 고객 자료/구매자 장치, OCR/STEP5/6 확장, 모델·런타임 다운로드, 유료 API, 보안·설계 변경, 병합/배포는 각각 사전 승인 전에는 수행하지 않는다. 이번 테스트/문서 업데이트에는 추가 승인이 필요한 변경이 없다.
+10. **환경/배포/보존:** Draft PR9, 미병합. `main`, PR #3/#4, 배포 설정과 프로덕션은 변경하지 않음. 고객 파일·외부 전송·모델 다운로드·비용 없음.
+
+**갱신 시각:** 2026-10-27 16:24 KST.
