@@ -531,3 +531,17 @@
 7. Still unverified: consented customer-local 5–10 text-centered PDFs, buyer physical Windows PC GUI/print acceptance, complex real document visual QA. OCR stays separate/unapproved. Do not upload customer PDFs to CI/PR.
 8. Preserve main, PR #3/#4, user data, original design docs, and deployment config. No OCR, model download, paid service, external PDF transfer, deployment, or branch merge occurred.
 9. Next work: continue independent STEP3 gaps only when original design supports them; batch owner-side acceptance is real PDF sample comparison performed locally plus buyer-PC GUI/print review. Sale/production remains NO-GO until acceptance/release gates pass.
+
+
+## 최신 STEP3 인수인계 — 2026-10-27 18:06 KST
+
+1. **범위:** 사용자가 승인한 STEP3 PDF import. OCR은 별도 승인 전 제외. STEP1/2 기존 기능, V2 사용자 데이터, main 및 PR #3/#4를 보존한다.
+2. **이번 변경:** 500,000자 누적 텍스트 한도를 PDF.js 각 유효 fragment마다 검사해 초과 즉시 예외 처리한다. 이후 페이지의 text item 배열을 추가로 만들지 않는다. makePdfDraft의 최종 검사도 유지한다. 저장 스키마/원문 문서 형식은 변하지 않는다.
+3. **기능 SHA:** 4e5cdbb300153dc81e7374956030cae751148415. GitHub branch integration/astra-commercial-core; docs-only follow-up may advance PR head.
+4. **로컬:** Node 24 npm test 65/65 PASS, build PASS, diff-check PASS. 500,000자 경계 허용/초과 거부 단위 테스트가 추가됐다.
+5. **Chrome/Edge exact SHA:** [#40477533937](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40477533937) completed/success 2/2. Chrome test suite #fail 0. Browser logs show import/review/Undo-Redo/A4, corrupt/encrypted/scan-only rejection, M09-A/B/C.
+6. **Windows exact SHA:** [#40477533758](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40477533758) completed/success. Logs show M09-D installed UI and STEP3 native A4 output (2 pages, 6 source markers, 1 raster), NSIS lifecycle and STEP2 upgrade preservation.
+7. **원본 설계 대조:** STEP3 import/extract/coordinate/image/role/order/manual review/source compare/warning/new A4 flow is synthetic-fixture verified. Malformed PDF repair is not required by the original step; visible rejection with prior data preserved is the safe expected behavior. Total 7-step progress remains approximately 43%, STEP3 partial because real samples are not accepted.
+8. **미검증:** Consented customer-local text-centered PDF samples (5–10), buyer physical Windows PC GUI/print acceptance, complex real document visual QA. No customer files were sent to CI/PR. OCR, local model download/license, cost, merge, deployment remain approval gates.
+9. **다음:** Continue standalone STEP3 omissions only when requirements support them. For release acceptance, one batch of owner-side work remains: run 5–10 consented PDFs locally and a buyer-PC manual GUI/print review, then report only outcomes/defect categories. Sale remains NO-GO.
+10. **동기화:** GitHub is authoritative. Local nested clone is stale/divergent and contains uncommitted changes; direct git fetch has previously failed due DNS. Do not push that local ref. Remote CI checked out exact SHA above.

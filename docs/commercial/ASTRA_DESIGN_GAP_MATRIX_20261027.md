@@ -99,3 +99,10 @@
 - 로컬 Node 24 64/64 PASS, build/diff-check PASS. Chrome+Edge [#40476342313](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40476342313) SUCCESS 2/2, Windows NSIS [#40476342230](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40476342230) SUCCESS. 설치형 M09-D 및 STEP3 A4 output 로그 확인.
 - 최초 설계 STEP3는 오류 문서를 거짓 성공 처리하지 말고 원문과 출력 비교/수정이 가능해야 한다. corrupt catalog 입력은 명확히 거부되고 초안/V2 데이터 보존(M08-C)하므로 PDF internals 복구는 단계 요구 누락이 아니다.
 - 남은 검증은 customer-local 동의 PDF 5~10건 및 buyer physical Windows PC 수용. OCR 별도 승인 전 제외, overall roadmap estimate ~43%, sales NO-GO.
+
+
+## STEP3 최신 자원·정확성 보강 — 2026-10-27 18:06 KST
+
+- Exact code/test SHA 4e5cdbb300153dc81e7374956030cae751148415: PDF.js text fragments are now counted against the existing 500,000-character document limit before appending them to retained page structures; overflow aborts further extraction, while final reconstructed text validation remains active.
+- Local Node 24 65/65 PASS, build and diff-check PASS. Chrome+Edge [#40477533937](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40477533937) SUCCESS 2/2; Windows NSIS [#40477533758](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40477533758) SUCCESS, with M09-D installed UI and STEP3 A4 output markers.
+- User text PDFs 5–10 and physical buyer PC remain NOT VERIFIED. OCR remains separately unapproved; no model/cost/external transmission/deployment. Seven-step estimate ~43%, sale NO-GO.

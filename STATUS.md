@@ -430,3 +430,13 @@
 - 이전 exact-SHA 009966b도 녹색이었으며, 그 뒤 최종 코드 검토로 경계 조건을 추가 보완한 것이다. 실패를 숨기거나 테스트를 생략하지 않았다.
 - 제한 설명 정정: 50개는 실제 회수 성공 개수가 아니라 문서 전체 복원 시도 상한이다. 40MP는 시도된 이미지 디코딩 픽셀 상한, 40MiB는 성공 PNG 누적 출력 상한이다. 최초 경고 뒤 모든 후속 복원을 중단한다.
 - 이 보완은 추출/프로젝트 스키마를 바꾸지 않는다. OCR/외부 전송/모델 다운로드/비용/배포/merge 없음. 고객 동의 실제 PDF 5~10개와 구매자 Windows PC 수용은 계속 미검증. 상용 판매 NO-GO.
+
+
+## 2026-10-27 18:06 KST — STEP3 추출 텍스트 제한 조기 적용
+
+- **최종 기능·테스트 SHA:** 4e5cdbb300153dc81e7374956030cae751148415. PDF.js 텍스트 항목을 문서 전체 누적 500,000자 한도와 대조하면서 페이지별 fragment 배열에 추가하도록 변경했다. 초과 시 나머지 페이지/항목 추출을 진행하지 않고 기존 저장 데이터는 그대로 둔다. 구조 재구성 후에도 기존 최종 한도 검사를 유지한다.
+- **로컬 검증:** Node 24 npm test 65/65 PASS, npm run build PASS, git diff --check PASS. 정확한 경계 500,000자는 허용되고 다음 문자부터 거부되는 단위 테스트 포함.
+- **Chrome·Edge:** [Actions #40477533937](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40477533937) SUCCESS 2/2. Chrome/Edge PDF 가져오기, Undo/Redo, 실제 브라우저 A4 PDF, M08 corrupt/password/scan boundaries, M09-A/B/C 회귀 확인. Chrome test summary #fail 0.
+- **Windows NSIS:** [Actions #40477533758](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40477533758) SUCCESS. 설치형 M09-D 취소→대체 파일→이전 분석 무시→V2 불변, STEP3 native A4 출력 2쪽/marker 6개/raster 1개 확인.
+- 합성 PDF만 사용했다. 고객 PDF/물리 구매자 PC 수용은 미검증으로 유지한다. OCR 미승인, 7단계 완료율 추정 ~43%, 상용 판매 NO-GO.
+- main/PR #3/#4/사용자 저장 데이터/배포는 변경·병합하지 않았다. 외부 전송, 모델 다운로드, 비용 서비스, Production 배포 없음.
