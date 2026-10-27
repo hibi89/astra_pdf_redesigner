@@ -15,15 +15,20 @@ interface Props {
   onSourceCommitted:(source:ImportedPdfSource)=>void;
 }
 const ROLES:[PdfRole,string][]=[['paragraph','본문'],['heading','소제목'],['caption','캡션']];
+const DRAFT_HISTORY_LIMIT=8;
 export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Props){
   const [draft,setDraft]=useState<PdfDraft|null>(null);
   const [busy,setBusy]=useState(false),[parsing,setParsing]=useState(false);
   const [error,setError]=useState(''),[confirmed,setConfirmed]=useState(false);
+  const [historyRevision,setHistoryRevision]=useState(0);
   const [previewUrl,setPreviewUrl]=useState('');
   const [dragging,setDragging]=useState(false);
   const [imageUrls,setImageUrls]=useState<Record<string,string>>({});
   const urlRef=useRef('');
   const imageUrlRef=useRef<Record<string,string>>({});
+  const draftRef=useRef<PdfDraft|null>(null);
+  const undoStack=useRef<PdfDraft[]>([]);
+  const redoStack=useRef<PdfDraft[]>([]);
   // A PDF.js parse can finish after a workspace mode switch. Its result must
   // not allocate temporary Blob URLs or update a discarded review session.
   const requestVersion=useRef(0);
@@ -37,13 +42,44 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
       Object.values(imageUrlRef.current).forEach(u=>URL.revokeObjectURL(u));
     };
   },[]);
+  const clearHistory=()=>{
+    undoStack.current=[];redoStack.current=[];
+    setHistoryRevision(value=>value+1);
+  };
+  const publishDraft=(next:PdfDraft|null)=>{
+    draftRef.current=next;setDraft(next);
+  };
+  const reviseDraft=(update:(current:PdfDraft)=>PdfDraft)=>{
+    const current=draftRef.current;
+    if(!current)return;
+    const next=update(current);
+    if(next===current)return;
+    undoStack.current=[...undoStack.current,current].slice(-DRAFT_HISTORY_LIMIT);
+    redoStack.current=[];
+    publishDraft(next);setConfirmed(false);
+    setHistoryRevision(value=>value+1);
+  };
+  const undo=()=>{
+    const current=draftRef.current,previous=undoStack.current.pop();
+    if(!current||!previous)return;
+    redoStack.current=[...redoStack.current,current].slice(-DRAFT_HISTORY_LIMIT);
+    publishDraft(previous);setConfirmed(false);
+    setHistoryRevision(value=>value+1);
+  };
+  const redo=()=>{
+    const current=draftRef.current,next=redoStack.current.pop();
+    if(!current||!next)return;
+    undoStack.current=[...undoStack.current,current].slice(-DRAFT_HISTORY_LIMIT);
+    publishDraft(next);setConfirmed(false);
+    setHistoryRevision(value=>value+1);
+  };
   const forget=()=>{
     // Also invalidates any in-flight PDF extraction before it can publish.
     requestVersion.current++;
     if(urlRef.current)URL.revokeObjectURL(urlRef.current);
     Object.values(imageUrlRef.current).forEach(u=>URL.revokeObjectURL(u));
     imageUrlRef.current={};setImageUrls({});
-    urlRef.current='';setPreviewUrl('');setDraft(null);setError('');setConfirmed(false);
+    urlRef.current='';setPreviewUrl('');publishDraft(null);setError('');setConfirmed(false);clearHistory();
   };
   const choose=async(file:File)=>{
     forget();
@@ -59,7 +95,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
       const imageMap:Record<string,string>={};
       for(const page of parsed.pages)for(const image of page.images)imageMap[image.id]=URL.createObjectURL(image.blob);
       imageUrlRef.current=imageMap;setImageUrls(imageMap);
-      setDraft(parsed);
+      publishDraft(parsed);
     }catch(e){
       if(isCurrent())setError(e instanceof Error?e.message:'PDF에서 내용을 추출할 수 없습니다.');
     }finally{
@@ -81,25 +117,22 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
   };
   const change=(page:number,id:string,fn:(old:PdfDraftBlock)=>PdfDraftBlock)=>{
     // Review consent describes a specific draft; editing revokes that consent.
-    setConfirmed(false);
-    setDraft(prev=>prev?{...prev,pages:prev.pages.map(p=>p.number===page?{...p,
+    reviseDraft(current=>({...current,pages:current.pages.map(p=>p.number===page?{...p,
       blocks:p.blocks.map(b=>b.id===id?fn(b):b),
-    }:p)}:prev);
+    }:p)}));
   };
   const move=(page:number,id:string,delta:-1|1)=>{
-    setConfirmed(false);
-    setDraft(prev=>prev?{...prev,pages:prev.pages.map(p=>{
+    reviseDraft(current=>({...current,pages:current.pages.map(p=>{
       if(p.number!==page)return p;
       const i=p.blocks.findIndex(b=>b.id===id),to=i+delta;
       if(i<0||to<0||to>=p.blocks.length)return p;
       const copy=[...p.blocks];[copy[i],copy[to]]=[copy[to],copy[i]];
       return {...p,blocks:copy};
-    })}:prev);
+    })}));
   };
   const toggleImage=(page:number,id:string,include:boolean)=>{
-    setConfirmed(false);
-    setDraft(prev=>prev?{...prev,pages:prev.pages.map(p=>p.number===page?
-      {...p,images:p.images.map(img=>img.id===id?{...img,include}:img)}:p)}:prev);
+    reviseDraft(current=>({...current,pages:current.pages.map(p=>p.number===page?
+      {...p,images:p.images.map(img=>img.id===id?{...img,include}:img)}:p)}));
   };
   const commit=async()=>{
     if(!draft||!confirmed||busy||disabled)return;
@@ -161,6 +194,13 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
       <details open><summary>추출 경고·검토 사항 {draft.warnings.length}건</summary>
         <ul>{draft.warnings.map((message,i)=><li key={i}>{message}</li>)}</ul>
       </details>
+      <div className="toolbar" aria-label="PDF 추출 내용 편집 기록" data-step3-history-revision={historyRevision}>
+        <button type="button" className="secondary-button" data-step3-undo disabled={disabled||busy||undoStack.current.length===0}
+          onClick={undo}>실행 취소</button>
+        <button type="button" className="secondary-button" data-step3-redo disabled={disabled||busy||redoStack.current.length===0}
+          onClick={redo}>다시 실행</button>
+        <span className="help-text">검수 편집 최근 {DRAFT_HISTORY_LIMIT}단계까지 되돌릴 수 있습니다. 되돌리기/다시 실행 후에는 원본 확인 동의를 다시 선택해야 합니다.</span>
+      </div>
       <div className="step3-source-compare">
         {previewUrl&&<details><summary>원본 PDF 열어 대조</summary>
           <iframe title="원본 PDF 대조" src={previewUrl} width="100%" height="400"/>
@@ -212,3 +252,4 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
     </>}
   </section>;
 }
+

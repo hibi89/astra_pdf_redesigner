@@ -123,6 +123,30 @@ try{
   console.log('PASS STEP3 REVIEW: browser-local PDF.js extraction, preview, provenance and no premature document writes');
   const edits=await evaluate("document.querySelectorAll('.step3-block-review textarea').length");
   assert.ok(edits>=2,'Expected extracted text blocks');
+  const historySelector=".step3-import-panel [data-step3-undo]";
+  const redoSelector=".step3-import-panel [data-step3-redo]";
+  const editableText=await evaluate("document.querySelector('.step3-block-review textarea')?.value");
+  await evaluate("(()=>{const area=document.querySelector('.step3-block-review textarea');"+
+    "const set=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set;"+
+    "set.call(area,area.value+' STEP3_UNDO_SENTINEL');area.dispatchEvent(new Event('input',{bubbles:true}));})()");
+  await eventually(()=>evaluate("document.querySelector('.step3-block-review textarea')?.value"),
+    value=>value?.endsWith('STEP3_UNDO_SENTINEL'));
+  assert.equal(await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input').checked"),false,
+    'A text edit must revoke the PDF review approval');
+  await evaluate("document.querySelector("+JSON.stringify(historySelector)+").click()");
+  assert.equal(await evaluate("document.querySelector('.step3-block-review textarea')?.value"),editableText,
+    'Undo should restore the exact extracted text');
+  assert.equal(await evaluate("document.querySelector("+JSON.stringify(redoSelector)+").disabled"),false,
+    'Undo should enable redo');
+  await evaluate("document.querySelector("+JSON.stringify(redoSelector)+").click()");
+  assert.equal(await evaluate("document.querySelector('.step3-block-review textarea')?.value"),editableText+' STEP3_UNDO_SENTINEL',
+    'Redo should restore the exact edit');
+  await evaluate("document.querySelector("+JSON.stringify(historySelector)+").click()");
+  assert.equal(await evaluate("document.querySelector('.step3-block-review textarea')?.value"),editableText,
+    'A second undo should return to the original extracted text');
+  assert.equal(await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input').checked"),false,
+    'Undo/redo must still require explicit source review approval');
+  console.log('PASS STEP3 DRAFT UNDO/REDO: text edit restored exactly and review approval stayed revoked');
   await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').click()");
   await evaluate("(()=>{const b=[...document.querySelectorAll('.step3-import-panel button')].find(b=>b.textContent.includes('검수 결과를 새 문서로 저장'));if(!b||b.disabled)throw Error('PDF confirm disabled');b.click();})()");
   await eventually(()=>evaluate("document.querySelectorAll('.doc-list-item').length"),n=>n===before+1);
@@ -640,3 +664,4 @@ try{
   catch(error){if(!['ENOTEMPTY','EBUSY','EPERM'].includes(error?.code))throw error;
     console.warn('WARN STEP3: synthetic browser profile cleanup deferred ('+error.code+')');}
 }
+
