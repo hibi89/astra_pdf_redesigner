@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { scanImagePlacements, type ImageOpCodes } from '../src/step3/imageRecovery.ts';
+import { createImageRecoveryBudget, exceedsImageRecoveryBudget, scanImagePlacements, type ImageOpCodes } from '../src/step3/imageRecovery.ts';
 import { makePdfDraft, type PdfPageInput } from '../src/step3/structure.ts';
 import { pdfDraftToProject,pdfDraftAssets } from '../src/step3/convert.ts';
 import { isProjectDocument } from '../src/step2/model.ts';
@@ -8,6 +8,18 @@ const op:ImageOpCodes={save:1,restore:2,transform:3,paintImageXObject:4,
   paintInlineImageXObject:5,paintImageMaskXObject:6};
 const pixel=(text:string,page:number,x:number,y:number)=>({
   text,page,x,y,width:85,height:12,fontSize:12,
+});
+test('STEP3 images: per-document decoded-pixel, image-count and PNG-byte budgets stop cumulative recovery',()=>{
+  const budget=createImageRecoveryBudget();
+  budget.maxImages=2;budget.maxPixels=20;budget.maxBytes=12;
+  assert.equal(exceedsImageRecoveryBudget(budget,4,4),false);
+  budget.recoveredImages=1;budget.recoveredPixels=16;budget.recoveredBytes=8;
+  assert.equal(exceedsImageRecoveryBudget(budget,2,2,4),false);
+  assert.equal(exceedsImageRecoveryBudget(budget,2,3),true,'Cumulative decoded pixels must be bounded');
+  budget.recoveredImages=2;
+  assert.equal(exceedsImageRecoveryBudget(budget,1,1),true,'Cumulative image count must be bounded');
+  assert.equal(exceedsImageRecoveryBudget(budget,1,1,5),true,'Cumulative output bytes must be bounded');
+  assert.equal(exceedsImageRecoveryBudget(budget,Number.MAX_SAFE_INTEGER,4),true,'Unsafe dimensions must fail closed');
 });
 test('STEP3 images: PDF CTM stack maps two XObjects into independent top-left source regions',()=>{
   const ops={fnArray:[op.save,op.transform,op.paintImageXObject,op.restore,
@@ -168,3 +180,4 @@ test('STEP3 images: clipped and unsupported placements retain loss counts separa
   assert.ok(draft.warnings.some(t=>t.includes('클리핑 경로')));
   assert.equal(draft.pages[0].blocks[0].text,'원본 문장은 변하지 않습니다');
 });
+

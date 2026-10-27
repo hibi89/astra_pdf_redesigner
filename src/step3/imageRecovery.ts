@@ -21,7 +21,29 @@ export interface ImageOpCodes {
 export interface ImageOperatorList {
   fnArray:readonly number[];argsArray:readonly unknown[][];
 }
-const LIMIT={imageBytes:10*1024*1024,pixels:20_000_000,perPage:15};
+const LIMIT={imageBytes:10*1024*1024,pixels:20_000_000,perPage:15,
+  documentImages:50,documentPixels:40_000_000,documentPngBytes:40*1024*1024};
+export interface ImageRecoveryBudget {
+  maxImages:number;maxPixels:number;maxBytes:number;
+  recoveredImages:number;recoveredPixels:number;recoveredBytes:number;
+  limitWarningIssued:boolean;
+}
+export function createImageRecoveryBudget():ImageRecoveryBudget{
+  return{maxImages:LIMIT.documentImages,maxPixels:LIMIT.documentPixels,
+    maxBytes:LIMIT.documentPngBytes,recoveredImages:0,recoveredPixels:0,
+    recoveredBytes:0,limitWarningIssued:false};
+}
+export function exceedsImageRecoveryBudget(
+  budget:ImageRecoveryBudget,width:number,height:number,bytes=0,
+):boolean{
+  const pixels=width*height;
+  return !Number.isSafeInteger(width)||!Number.isSafeInteger(height)||
+    width<1||height<1||!Number.isSafeInteger(pixels)||
+    !Number.isSafeInteger(bytes)||bytes<0||
+    budget.recoveredImages+1>budget.maxImages||
+    budget.recoveredPixels+pixels>budget.maxPixels||
+    budget.recoveredBytes+bytes>budget.maxBytes;
+}
 type Matrix=[number,number,number,number,number,number];
 const identity:Matrix=[1,0,0,1,0,0];
 const multiply=(a:readonly number[],b:readonly number[]):Matrix=>[
@@ -146,17 +168,28 @@ async function obtainImage(obj:ObjectsApi,name:string):Promise<unknown>{
 export async function recoverPageImages(
   pageNumber:number,fn:ImageOperatorList,viewport:readonly number[],
   pageWidth:number,pageHeight:number,ops:ImageOpCodes,
-  objects:{objs:ObjectsApi;commonObjs?:ObjectsApi}
+  objects:{objs:ObjectsApi;commonObjs?:ObjectsApi},
+  budget:ImageRecoveryBudget=createImageRecoveryBudget(),
 ):Promise<ImageRecoveryResult>{
   const entries=scanImagePlacements(pageNumber,fn,viewport,pageWidth,pageHeight,ops);
   const images:RecoveredPdfImage[]=[],problems:string[]=[];
+  const reportBudgetLimit=()=>{
+    if(budget.limitWarningIssued)return;
+    budget.limitWarningIssued=true;
+    problems.push('PDF 전체 이미지 복원 안전 한도에 도달했습니다. 이후 이미지는 복원하지 않으므로 원본과 대조하세요.');
+  };
+  let pageLimitReported=false;
   for(const entry of entries){
     // Keep valid decoded images, but surface clip-parity risks for review.
     if(entry.clipWarning)problems.push(entry.clipWarning);
-    if(images.length>=LIMIT.perPage){problems.push('페이지당 복원 이미지 15개 제한 초과');continue;}
+    if(images.length>=LIMIT.perPage){
+      if(!pageLimitReported){problems.push('페이지당 복원 이미지 15개 제한 초과');pageLimitReported=true;}
+      continue;
+    }
     if(!entry.origin||entry.reason||entry.kind==='unsupported'){
       problems.push(entry.reason??'이미지 위치 또는 픽셀 복원 불가');continue;
     }
+    if(budget.recoveredImages>=budget.maxImages){reportBudgetLimit();continue;}
     try{
       let source:unknown;
       if(entry.kind==='inline'){source=entry.args[0];}
@@ -169,11 +202,30 @@ export async function recoverPageImages(
           source=await obtainImage(objects.commonObjs,key);
         }
       }
+      const value=(source&&typeof source==='object')?source as Record<string,unknown>:{};
+      const bitmap=typeof ImageBitmap!=='undefined'&&value.bitmap instanceof ImageBitmap
+        ?value.bitmap:typeof ImageBitmap!=='undefined'&&source instanceof ImageBitmap?source:null;
+      const width=bitmap?.width??(Number.isInteger(value.width)?value.width as number:0);
+      const height=bitmap?.height??(Number.isInteger(value.height)?value.height as number:0);
+      const pixels=width*height;
+      if(!Number.isSafeInteger(width)||!Number.isSafeInteger(height)||width<1||height<1||
+         !Number.isSafeInteger(pixels)||pixels>LIMIT.pixels)
+        throw Error('이미지 크기/픽셀 제한을 초과하거나 해독할 수 없습니다.');
+      if(exceedsImageRecoveryBudget(budget,width,height)){
+        reportBudgetLimit();continue;
+      }
       const png=await decodedToPng(source);
+      if(exceedsImageRecoveryBudget(budget,width,height,png.blob.size)){
+        reportBudgetLimit();continue;
+      }
       images.push({id:crypto.randomUUID(),origin:entry.origin,width:png.width,height:png.height,
         mimeType:'image/png',blob:png.blob,include:true,
         method:entry.kind==='inline'?'decoded-inline':'decoded-xobject'});
+      budget.recoveredImages++;
+      budget.recoveredPixels+=pixels;
+      budget.recoveredBytes+=png.blob.size;
     }catch(error){problems.push(error instanceof Error?error.message:'이미지 추출 실패');}
   }
   return{detected:entries.length,images,problems};
 }
+

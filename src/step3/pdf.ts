@@ -1,6 +1,6 @@
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import { PDF_IMPORT_LIMITS, makePdfDraft, type PdfDraft, type PdfFragment, type PdfPageInput } from './structure.ts';
-import { recoverPageImages, type ImageOpCodes } from './imageRecovery.ts';
+import { createImageRecoveryBudget, recoverPageImages, type ImageOpCodes } from './imageRecovery.ts';
 import { countVectorPaintOps, type VectorPaintOpCodes } from './vectorRisk.ts';
 import { scanGraphicsComposition, type GraphicsCompositionCodes } from './graphicsRisk.ts';
 
@@ -20,6 +20,7 @@ export async function extractLocalPdf(file:File):Promise<PdfDraft>{
     if(pdf.numPages<1||pdf.numPages>PDF_IMPORT_LIMITS.pages)throw Error('지원하는 PDF는 1~50페이지입니다.');
 
     const pages:PdfPageInput[]=[];
+    const imageBudget=createImageRecoveryBudget();
     for(let pageNum=1;pageNum<=pdf.numPages;pageNum++){
       const page=await pdf.getPage(pageNum);
       const view=page.getViewport({scale:1});
@@ -51,7 +52,7 @@ export async function extractLocalPdf(file:File):Promise<PdfDraft>{
         };
         imageRecovery=await recoverPageImages(
           pageNum,opList,view.transform,view.width,view.height,
-          OPS as unknown as ImageOpCodes,{objs:obj.objs,commonObjs:obj.commonObjs},
+          OPS as unknown as ImageOpCodes,{objs:obj.objs,commonObjs:obj.commonObjs},imageBudget,
         );
         imageDetected=imageRecovery.detected>0;
       }catch(error){operatorWarning=error instanceof Error?error.name:'그래픽 명령 분석 실패';}
@@ -67,3 +68,4 @@ export async function extractLocalPdf(file:File):Promise<PdfDraft>{
     await loading.destroy();
   }
 }
+

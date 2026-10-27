@@ -113,7 +113,10 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
       warnings.push(page.number+'페이지에 PDF 이미지가 감지됐습니다. '+detected+'건 중 '+images.length+'건 PNG 재구성, '+omitted+'건 미복원. 원본 비트스트림이 아니라 PDF.js가 디코딩한 픽셀을 PNG로 재구성하므로 색상·마스크·배치를 반드시 대조하세요.');
       if(omitted)warnings.push(page.number+'페이지 미복원 이미지 '+omitted+'건은 새 PDF에서 누락될 수 있습니다. 별도로 확인하고 수동 보완하세요.');
     }
-    for(const problem of page.imageRecovery?.problems??[])warnings.push(page.number+'페이지 PDF 이미지 제한/오류: '+problem.slice(0,140));
+    for(const problem of page.imageRecovery?.problems??[]){
+      const warning=page.number+'페이지 PDF 이미지 제한/오류: '+problem.slice(0,140);
+      if(!warnings.includes(warning))warnings.push(warning);
+    }
     if(page.operatorWarning)warnings.push(page.number+'페이지 그래픽 분석 일부 실패: '+page.operatorWarning.slice(0,100));
     if(multiColumn)warnings.push(page.number+'페이지에서 열 또는 넓은 텍스트 간격이 감지됐습니다. 자동 읽기 순서를 확인하세요.');
     for(const line of lines){
@@ -146,3 +149,4 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
   warnings.unshift('PDF의 읽기 순서·줄바꿈·공백·제목/캡션 분류는 추정입니다. 원본과 대조해 검수한 뒤 문서함에 추가하세요.');
   return{fileName,pageCount:pages.length,pages:outPages,warnings,totalChars};
 }
+
