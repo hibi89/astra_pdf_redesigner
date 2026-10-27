@@ -352,6 +352,6 @@
 - 저장소 기준: GitHub `hibi89/astra_pdf_redesigner`, 격리 브랜치 `codex/p5-windows-reliability`, 시작 HEAD `062360b50e3033654df656e84a2ce26cc3aa4061`. main, PR #3~#7 및 STEP4는 변경·병합하지 않았다.
 - 로컬 자동 검증: `npm test` **19/19 PASS**; `npm run build` **PASS**(동적/정적 import가 함께 있어 chunk 이동이 없다는 Vite 경고 1건); `npm run desktop:verify` bundle 검사 PASS 및 데스크톱 보안·격리 테스트 **10/10 PASS**.
 - 개인 GUI 인수시험 실행: `npm run desktop:personal-test`에서 빌드는 통과했으나 Electron 프로세스가 종료 코드 **1**로 종료되고 창·진단 출력이 나타나지 않았다. `electron.cmd . --astra-personal-test --enable-logging=stderr --v=1` 재현 시에도 종료 코드 1/출력 없음. `electron.cmd --version` 역시 종료 코드 1/출력 없음. 앱 코드 결함인지 로컬 Electron 실행환경 문제인지는 **원인 미확인**이며 추가 반복 실행은 하지 않았다.
-- 안전/범위: 격리 경로 `%TEMP%\\astra-p5-personal-test-profile`은 생성되지 않았다. 설치 앱의 일반 AppData 프로필을 열거나 변경하지 않았고 사용자 문서도 사용하지 않았다. Windows Application 이벤트 로그 읽기는 현재 권한으로 거부되어 원인 진단에 포함하지 못했다.
+- 안전/범위: 격리 경로 `%TEMP%\astra-p5-personal-test-profile`은 생성되지 않았다. 설치 앱의 일반 AppData 프로필을 열거나 변경하지 않았고 사용자 문서도 사용하지 않았다. Windows Application 이벤트 로그 읽기는 현재 권한으로 거부되어 원인 진단에 포함하지 못했다.
 - **미검증:** 앱 화면 편집, 합성 이미지 삽입, 저장 후 재실행 복원, PDF 생성·열기·A4/한글/페이지/이미지 육안 검사, JSON 백업/가져오기. 개인용 1차 완료로 판정하지 않는다.
 - 다음: Electron 실행 실패 원인을 권한이 있는 Windows 진단 또는 호환 환경에서 확인한 뒤, 동일 격리 프로필에서 개인용 계획의 합성 문서 저장·재실행·PDF·백업 흐름을 완료한다. PR #7 Draft와 main 병합 금지 상태는 유지한다.

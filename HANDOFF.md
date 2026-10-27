@@ -432,7 +432,7 @@
 3. **자동 테스트 결과:** `npm test` 19/19 PASS; `npm run build` PASS(모듈 동적/정적 import 경고 1건); `npm run desktop:verify` bundle 검사 PASS, 데스크톱 테스트 10/10 PASS. 이번 실행에서 코드 또는 테스트 파일은 변경하지 않았다.
 4. **실행 시도/관측:** `npm run desktop:personal-test`의 빌드는 성공했으나 Electron 프로세스가 코드 1로 즉시 종료되어 창이 뜨지 않았고 앱이 출력할 사용자 데이터 경로 로그도 보이지 않았다. 로그 옵션을 붙인 직접 Electron 실행도 코드 1/진단 출력 없음이었다. Electron `--version`도 코드 1/출력 없음이었다.
 5. **실패 원인/재시도:** Electron 바이너리 시작 단계 문제로 보이나 확정 원인은 **미확인**. 동일한 실행 경로를 더 반복하지 않았다. Application 이벤트 로그 조회는 권한 거부되어 수행할 수 없었다. Electron 앱 로직 버그라고 단정하지 않는다.
-6. **데이터/파일 안전:** `%TEMP%\\astra-p5-personal-test-profile`은 생성되지 않았으며 일반 AppData 설치 앱 프로필/브라우저 프로필/사용자 문서를 열거나 변경하지 않았다. 기존 로컬 미추적 `package-lock.json` 및 `ershaeinastra-step2-check`를 보존했다. 원본 로드맵/설계 자료를 변경하지 않았다.
+6. **데이터/파일 안전:** `%TEMP%\astra-p5-personal-test-profile`은 생성되지 않았으며 일반 AppData 설치 앱 프로필/브라우저 프로필/사용자 문서를 열거나 변경하지 않았다. 기존 로컬 미추적 `package-lock.json` 및 `ershaeinastra-step2-check`를 보존했다. 원본 로드맵/설계 자료를 변경하지 않았다.
 7. **배포/브랜치:** Production/Vercel 없음. GitHub에는 이 검증 결과를 `STATUS.md`, `HANDOFF.md`에 문서화하는 변경만 기록한다. PR #7 Draft 유지, main/PR #3~#6 미변경, STEP4 미착수.
 8. **완료/미완료:** 자동 단위·빌드·데스크톱 보안 확인만 완료. 앱 UI·합성 문서/이미지 입력·재실행 복원·Windows PDF 저장/육안·JSON export/import는 **미검증**이며 개인용 1차 완료 판정은 보류다.
 9. **다음 작업:** 먼저 호환 Windows 환경에서 Electron 44.9.0 단독 실행 원인을 확인한다. 앱을 띄울 수 있게 되면 계획된 전용 temp 프로필만 사용해 합성 한국어 문서+이미지를 저장하고 재실행 보존, PDF A4/한글/마지막 문단/이미지 확인, 테스트용 JSON 백업 복원을 검증한다. 실패 시 원인과 범위만 기록한다.
