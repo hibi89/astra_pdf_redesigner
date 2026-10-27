@@ -421,3 +421,16 @@
 10. **환경/배포/보존:** Draft PR9, 미병합. `main`, PR #3/#4, 배포 설정과 프로덕션은 변경하지 않음. 고객 파일·외부 전송·모델 다운로드·비용 없음.
 
 **갱신 시각:** 2026-10-27 16:37 KST.
+
+## 2026-10-27 18:40 KST — GPT-6 총괄 인수인계: MVP → 원설계 기능 완성 → 출시 QA
+
+1. **목표/확정 요구/기술:** 사용자 운영 순서 변경 승인. ASTRA는 로컬 PDF 원본 대조→디자인 재조판→새 PDF 출력 도구(React/TS/Vite/PDF.js/IndexedDB/Electron NSIS). [새 실행계획](MVP_TO_BLUEPRINT_COMPLETION_20261027.md), 원본 설계·PNG·REQUIREMENTS는 변경 금지.
+2. **완료 기능/결정:** 내부 합성 PDF MVP 제한 GO. STEP1·2 완료, STEP3/4/7 부분, STEP5 미구현, STEP6 및 OCR 승인 대기; 최초 7단계 전체 약 43% 보수 추정. 다음은 기존 기능 재구현이 아닌 STEP4 스타일 조합/비교/즐겨찾기 기능 갭 축소. CSS 테마 추가 vs 검증된 디자인 토큰 스키마 두 안 비교, 후자 권고.
+3. **테스트/성공·실패·미검증:** 검증 기능 SHA cc157cba4b442f44b88c3631a72686fdfe8f8af9, [Chrome+Edge #40479935848](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935848) completed/success, [Windows NSIS #40479935852](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935852) completed/success. Codex 보고 Node 67/67 PASS. **실구매자 PC·실고객 PDF/로컬 Electron 시각 검사 성공은 미검증**.
+4. **완료/진행/대기/중단 지점:** MVP 제한 GO; 현 실행체계는 PHASE2 최초설계 대비 기능 보강; 최종 상품판매 NO-GO. PHASE3 심화 보안/실기기/호환/판매 게이트는 독립 기능 보강 뒤 실행하되 필수 원본·저장 안전은 매 변경 검증.
+5. **오류/원인/재시도 금지/대안:** Codex 작업 폴더의 Electron 시각 검사는 종료코드 2147483651, Windows Application 이벤트 로그 권한 거부로 원인 미확인; GitHub hosted CI 성공과 구별. 무의미한 동일 시험 반복 없이 환경 진단 가능한 시점에 보완.
+6. **저장소/브랜치/SHA:** hibi89/astra_pdf_redesigner / integration/astra-commercial-core / Draft PR #9. 기반 코드 SHA 위, 이전 문서 HEAD 5d0d125b99ee097ace60bd38e5ac43e5028590a6; 이후 계획문서 커밋 5e455ce9eec372d99954f23fc24ff970b171ab33. 이 인수인계 최신 HEAD는 GitHub 재조회. main과 PR3/PR4 보존.
+7. **배포/환경:** 설치형 로컬 제품, Vercel/Production 미적용. Node npm test/build, Chrome/Edge 및 Windows CI/NSIS 실행. 새 배포/병합 미승인.
+8. **원본·백업·인증:** docs/ASTRA_ORIGINAL_ROADMAP.txt, docs/BLUEPRINT.md, docs/blueprints 2 PNG, STEP1 v1 localStorage/STEP2 V2 IndexedDB, Codex 로컬 미커밋 파일 보호. 외부 고객 문서/비밀 유출 금지. Git SHA로 코드 롤백.
+9. **다음 작업/완료조건/승인:** STEP4 현행 코드 조사 → 2설계 대안 비교 → 안전한 최소 동선 비교/저장/복원/A4 검증. 아키텍처·스키마 주요 변경/외부 API/모델 다운로드/OCR/검색/병합/배포는 별도 승인. 정확 SHA CI/실 PDF·실기기 미검증 분리하고 STATUS/갭매트릭스 최신화.
+10. **기록 시점/범위:** 2026-10-27 18:40 KST, PR #9 Codex 보고서 및 원격 SHA/CI·원본 설계·현재 gap matrix 검수. 계획 문서 및 [총괄 지시 댓글](https://github.com/hibi89/astra_pdf_redesigner/pull/9#issuecomment-6438610031) 기록. **이번 작업은 실행 순서/문서 갱신이며 새로운 기능/테스트 통과 아님**.
