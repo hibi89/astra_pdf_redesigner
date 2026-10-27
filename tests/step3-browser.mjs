@@ -14,6 +14,8 @@ import scannedFixture from '../desktop/step3-scanned-fixture.cjs';
 import invalidFixture from '../desktop/step3-invalid-fixture.cjs';
 const {makeScannedPagesPdf,SCAN_MARKERS}=scannedFixture;
 const {makeCorruptRootPdf}=invalidFixture;
+const RUNNING_MARKERS=['RUNNING_HEADER_P1_914','RUNNING_FOOTER_P1_915','RUNNING_HEADER_P2_916','RUNNING_FOOTER_P2_917'];
+const MIXED_OUTPUT_MARKERS=MIXED_LAYOUT_MARKERS.filter(marker=>!RUNNING_MARKERS.includes(marker));
 const binary=process.env.CHROME_PATH||'chromium',url=process.env.SMOKE_URL||'http://127.0.0.1:4173';
 const dir=mkdtempSync(join(tmpdir(),'astra-step3-'));
 const browser=launchBrowser(binary,dir,'STEP3 PDF import');
@@ -454,7 +456,7 @@ try{
   assert.equal(m04Source.pages,2);
   assert.equal(m04Source.skippedRotation,0,'Rotated source text geometry remains unverified');
   console.log('PASS M04 INDEPENDENT SOURCE AUDIT:',m04Source);
-  console.log('PASS STEP3 MIXED SOURCE: verified 2 A4 pages, 13 exact text markers, one raster image');
+  console.log('PASS STEP3 MIXED SOURCE: verified 2 A4 pages, 17 exact text markers, one raster image');
 
   const mixedBefore=await evaluate("document.querySelectorAll('.doc-list-item').length");
   const previousTitles=await evaluate("[...document.querySelectorAll('.doc-list-item strong')].map(x=>x.textContent)");
@@ -500,7 +502,27 @@ try{
     'Both source PDF pages must be independently reviewable');
   assert.equal(await evaluate("document.querySelectorAll('.doc-list-item').length"),mixedBefore,
     'Review must not write to the existing document list');
-  console.log('PASS STEP3 MIXED REVIEW: source markers 13/13, multi-column warning, raster recovery, unchanged persisted docs');
+  assert.equal(await evaluate("Boolean(document.querySelector('.step3-source-compare iframe[src^=blob]'))"),true,
+    'Original PDF preview must remain available while text is excluded');
+  for(const marker of RUNNING_MARKERS){
+    const expression="(()=>{const marker="+JSON.stringify(marker)+";const area=[...document.querySelectorAll('.step3-block-review textarea')].find(x=>x.value.includes(marker));const editor=area?.closest('.section-editor');const input=editor?.querySelector('[data-step3-block-included]');if(!area||!input)throw Error('Missing editable source block '+marker);input.click();return {included:input.checked,text:area.value};})()";
+    const state=await evaluate(expression);
+    assert.equal(state.included,false,'Header/footer should toggle out of the new document: '+marker);
+    assert.ok(state.text.includes(marker),'Excluded source text must remain reviewable: '+marker);
+  }
+  assert.match(await evaluate("document.querySelector('.step3-import-panel')?.textContent??''"),/새 문서 포함 13개 · 제외 4개/);
+  await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').click()");
+  assert.equal(await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').checked"),true);
+  const historyMarker=RUNNING_MARKERS[0];
+  const historyToggle="(()=>{const marker="+JSON.stringify(historyMarker)+";const area=[...document.querySelectorAll('.step3-block-review textarea')].find(x=>x.value.includes(marker));const input=area?.closest('.section-editor')?.querySelector('[data-step3-block-included]');input.click();return input.checked;})()";
+  await evaluate(historyToggle);
+  assert.equal(await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').checked"),false,
+    'Changing text inclusion must revoke review consent');
+  await evaluate("document.querySelector('[data-step3-undo]').click()");
+  await eventually(()=>evaluate("(()=>{const marker="+JSON.stringify(historyMarker)+";const area=[...document.querySelectorAll('.step3-block-review textarea')].find(x=>x.value.includes(marker));return area?.closest('.section-editor')?.querySelector('[data-step3-block-included]')?.checked;})()"),x=>x===false);
+  assert.equal(await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').checked"),false);
+  console.log('PASS STEP3 RUNNING HEADER/FOOTER: all four excluded, source retained, consent revoked, undo works');
+  console.log('PASS STEP3 MIXED REVIEW: source markers 17/17, multi-column warning, raster recovery, unchanged persisted docs');
 
   await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').click()");
   await evaluate("(()=>{const button=[...document.querySelectorAll('.step3-import-panel button')].find(b=>b.textContent.includes('검수 결과를 새 문서로 저장'));if(!button||button.disabled)throw Error('Mixed PDF confirm disabled');button.click();})()");
@@ -530,19 +552,21 @@ try{
   const mixedPrintedText=execFileSync('pdftotext',[mixedPrinted,'-'],{encoding:'utf8'});
   const mixedPrintedImages=execFileSync('pdfimages',['-list',mixedPrinted],{encoding:'utf8'});
   assert.ok(mixedPrintedInfo.includes('(A4)'),'Redesigned print must use A4, without requiring the same page count');
-  for(const marker of MIXED_LAYOUT_MARKERS){
-    assert.equal(mixedPrintedText.split(marker).length-1,1,'Source→reprint marker loss/duplication: '+marker);
+  for(const marker of MIXED_OUTPUT_MARKERS){
+    assert.equal(mixedPrintedText.split(marker).length-1,1,'Included source→reprint marker loss/duplication: '+marker);
   }
+  for(const marker of RUNNING_MARKERS)
+    assert.equal(mixedPrintedText.includes(marker),false,'Excluded running text appeared in output: '+marker);
   assert.ok(mixedPrintedText.indexOf('STEP3_SOURCE_P1_BEGIN_901')<
     mixedPrintedText.indexOf('STEP3_SOURCE_P2_BEGIN_911'),'PDF page sequence was inverted');
   assert.ok(mixedPrintedImages.split('\n').some(line=>/^\s*\d+\s+\d+\s+image/.test(line)),
     'Redesigned print must embed a raster image');
   const m04Output=await auditPdfBytes(Buffer.from(mixedOutput.data,'base64'),
-    {markers:MIXED_LAYOUT_MARKERS,requireRaster:true,label:'M04 reflowed PDF'});
+    {markers:MIXED_OUTPUT_MARKERS,requireRaster:true,label:'M04 reflowed PDF'});
   assert.equal(m04Output.markers,13);
   assert.equal(m04Output.skippedRotation,0,'Rotated output geometry requires manual review');
   console.log('PASS M04 OUTPUT A4 TEXT GEOMETRY / CONTENT:',m04Output);
-  console.log('PASS STEP3 SOURCE/REPRINT COMPARISON: 13/13 exact markers once, source page sequence, output raster, A4, original documents intact');
+  console.log('PASS STEP3 SOURCE/REPRINT COMPARISON: 13 included markers preserved, four running headers/footers excluded, source order, raster, A4, prior documents intact');
   // Intentionally unverified: original vector grid lines, column/table cell
   // geometry, pixel-for-pixel image content and Windows print fidelity.
 

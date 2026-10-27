@@ -138,7 +138,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
     if(!draft||!confirmed||busy||disabled)return;
     setBusy(true);
     try{
-      if(!draft.pages.some(p=>p.blocks.some(b=>b.text.trim())))throw Error('확인된 본문이 비어 있습니다.');
+      if(!draft.pages.some(p=>p.blocks.some(b=>!b.excluded&&b.text.trim())))throw Error('확인된 본문이 비어 있습니다.');
       const documentId=await onImport(draft);
       if(documentId){
         const url=urlRef.current;
@@ -152,6 +152,8 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
     finally{setBusy(false);}
   };
   const totalBlocks=draft?.pages.reduce((s,p)=>s+p.blocks.length,0)??0;
+  const includedTextBlocks=draft?.pages.reduce((s,p)=>s+p.blocks.filter(b=>!b.excluded&&b.text.trim()).length,0)??0;
+  const excludedTextBlocks=draft?.pages.reduce((s,p)=>s+p.blocks.filter(b=>b.excluded).length,0)??0;
   const detected=draft?.pages.reduce((s,p)=>s+p.imageCount,0)??0;
   const recovered=draft?.pages.reduce((s,p)=>s+p.images.length,0)??0;
   const included=draft?.pages.reduce((s,p)=>s+p.images.filter(i=>i.include).length,0)??0;
@@ -176,7 +178,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
     {busy&&parsing&&<div className="toolbar"><button className="secondary-button" onClick={cancel}>가져오기 취소</button></div>}
     {!!error&&<p className="warning" role="alert">{error}</p>}
     {draft&&<>
-      <p className="help-text">원본: {draft.fileName} · {draft.pageCount}페이지 · 추출 {draft.totalChars.toLocaleString('ko-KR')}자 · 편집 가능한 텍스트 블록 {totalBlocks}개</p>
+      <p className="help-text">원본: {draft.fileName} · {draft.pageCount}페이지 · 추출 {draft.totalChars.toLocaleString('ko-KR')}자 · 편집 가능한 텍스트 블록 {totalBlocks}개 · 새 문서 포함 {includedTextBlocks}개 · 제외 {excludedTextBlocks}개</p>
       <p className="help-text" data-step3-image-count>이미지 감지 {detected}건 · PNG 복원 {recovered}건 · 저장 선택 {included}건 · 미복원 {Math.max(0,detected-recovered)}건</p>
       <p className="help-text" data-step3-vector-count>원본 벡터 경로 관련 명령 {vectorPaints}회 · 선/도형·표 구조 자동 복원 미지원 (명령 수, 도형/셀 개수 아님)</p>
       <p className="help-text" data-step3-composition-count>투명도·합성 위험 신호 {transparencySignals}건 · Form XObject 범위 {formScopes}건 · 원본 합성 효과의 동일 복원 미보장 (객체 수·복원 성공률 아님)</p>
@@ -208,7 +210,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
         </details>}
         <div className="step3-block-review">
           {draft.pages.map(page=><details key={page.number} open={page.number===1}>
-            <summary>원본 {page.number}페이지 — {page.blocks.length}개 텍스트 · 이미지 {page.images.length}/{page.imageCount}복원{page.omittedImages?' · 미복원 '+page.omittedImages+'건':''}{page.vectorPaintCount?' · 벡터 경로 '+page.vectorPaintCount+'회':''}</summary>
+            <summary>원본 {page.number}페이지 — {page.blocks.length}개 텍스트 · 새 문서 제외 {page.blocks.filter(b=>b.excluded).length}개 · 이미지 {page.images.length}/{page.imageCount}복원{page.omittedImages?' · 미복원 '+page.omittedImages+'건':''}{page.vectorPaintCount?' · 벡터 경로 '+page.vectorPaintCount+'회':''}</summary>
             {page.images.length>0&&<div className="step3-image-review">
               <p className="help-text">PDF.js가 디코딩한 이미지를 PNG로 재구성했습니다. 원본 비트스트림·마스크/클리핑 효과가 그대로 보존된 것은 아닙니다. 위치는 근사치이며 저장 후 STEP2 편집기에서 크기·순서를 바꿀 수 있습니다.</p>
               {page.images.map((image,i)=><div className="section-editor" key={image.id}>
@@ -228,6 +230,12 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
                   <button aria-label={block.id+' 아래로 이동'} disabled={disabled||busy||i===page.blocks.length-1} onClick={()=>move(page.number,block.id,1)}>↓</button>
                 </div>
               </div>
+              <label className="field step3-confirm">
+                <input type="checkbox" data-step3-block-included aria-label={block.id+' 새 문서에 포함'}
+                  checked={!block.excluded} disabled={disabled||busy}
+                  onChange={e=>change(page.number,block.id,b=>({...b,excluded:!e.target.checked}))}/>
+                새 문서에 포함 (해제해도 원본 검수 화면에는 유지)
+              </label>
               <label className="field">추출 분류 (변경 가능)
                 <select disabled={disabled||busy} value={block.role} onChange={e=>change(page.number,block.id,b=>({...b,role:e.target.value as PdfRole}))}>
                   {ROLES.map(([role,label])=><option key={role} value={role}>{label}</option>)}
@@ -241,13 +249,14 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
           </details>)}
         </div>
       </div>
+      {totalBlocks>0&&includedTextBlocks===0&&<p className="warning" role="alert">새 문서에 포함할 텍스트가 없습니다. 최소 한 블록을 포함하세요. 원본 검수 내용은 그대로 유지됩니다.</p>}
       <label className="field step3-confirm"><input type="checkbox" checked={confirmed} disabled={disabled||busy}
         onChange={e=>setConfirmed(e.target.checked)}/>
-        원본과 추출 결과 및 이미지 복원·누락 개수를 확인했습니다. 미복원 그래픽은 새 PDF에서 누락될 수 있으며, 포함 선택 이미지는 PNG 근사 복원임을 인지하고 새 문서로 추가합니다.
+        원본과 추출 결과, 새 문서에 포함·제외할 텍스트, 이미지 복원·누락 개수를 확인했습니다. 미복원 그래픽은 새 PDF에서 누락될 수 있으며, 포함 선택 이미지는 PNG 근사 복원임을 인지하고 새 문서로 추가합니다.
       </label>
       <div className="toolbar">
         <button className="secondary-button" disabled={busy&&!parsing} onClick={cancel}>가져오기 취소</button>
-        <button className="print-button" disabled={disabled||busy||!confirmed} onClick={()=>void commit()}>검수 결과를 새 문서로 저장</button>
+        <button className="print-button" disabled={disabled||busy||!confirmed||includedTextBlocks===0} onClick={()=>void commit()}>검수 결과를 새 문서로 저장</button>
       </div>
     </>}
   </section>;

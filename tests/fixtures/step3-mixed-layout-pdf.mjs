@@ -5,6 +5,8 @@
 import { deflateSync } from 'node:zlib';
 
 export const MIXED_LAYOUT_MARKERS = Object.freeze([
+  'RUNNING_HEADER_P1_914', 'RUNNING_FOOTER_P1_915',
+  'RUNNING_HEADER_P2_916', 'RUNNING_FOOTER_P2_917',
   'STEP3_SOURCE_P1_BEGIN_901',
   'LEFT_ALPHA_902', 'RIGHT_ALPHA_903',
   'LEFT_BETA_904', 'RIGHT_BETA_905',
@@ -24,6 +26,7 @@ export function makeMixedLayoutPdf() {
     rgb[i] = x * 7; rgb[i + 1] = y * 7; rgb[i + 2] = (x + y) * 3;
   }
   const firstPage = [
+    'BT /F1 8 Tf 40 820 Td (RUNNING_HEADER_P1_914) Tj ET',
     'BT /F1 16 Tf 40 788 Td (STEP3_SOURCE_P1_BEGIN_901) Tj ET',
     'BT /F1 12 Tf 40 720 Td (LEFT_ALPHA_902) Tj ET',
     'BT /F1 12 Tf 333 713 Td (RIGHT_ALPHA_903) Tj ET',
@@ -39,12 +42,15 @@ export function makeMixedLayoutPdf() {
     'BT /F1 11 Tf 305 509 Td (TABLE_D_909) Tj ET',
     'q 170 0 0 110 70 319 cm /Im1 Do Q',
     'BT /F1 12 Tf 40 241 Td (STEP3_SOURCE_P1_END_910) Tj ET',
+    'BT /F1 8 Tf 40 20 Td (RUNNING_FOOTER_P1_915) Tj ET',
     '',
   ].join('\n');
   const secondPage = [
+    'BT /F1 8 Tf 45 820 Td (RUNNING_HEADER_P2_916) Tj ET',
     'BT /F1 18 Tf 45 760 Td (STEP3_SOURCE_P2_BEGIN_911) Tj ET',
     'BT /F1 12 Tf 45 675 Td (PAGE_TWO_TOKEN_912) Tj ET',
     'BT /F1 12 Tf 45 605 Td (STEP3_SOURCE_P2_END_913) Tj ET',
+    'BT /F1 8 Tf 45 20 Td (RUNNING_FOOTER_P2_917) Tj ET',
     '',
   ].join('\n');
   const stream = (dictionary, raw) => Buffer.concat([

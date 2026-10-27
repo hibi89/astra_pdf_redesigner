@@ -4,12 +4,12 @@ import type { PdfDraft } from './structure.ts';
 
 const imagesSelected=(source:PdfDraft)=>source.pages.flatMap(p=>p.images.filter(x=>x.include));
 export function pdfDraftToProject(draft:PdfDraft):ProjectDocument {
-  if(!draft.pages.length||!draft.pages.some(page=>page.blocks.some(block=>block.text.trim())))
+  if(!draft.pages.length||!draft.pages.some(page=>page.blocks.some(block=>!block.excluded&&block.text.trim())))
     throw Error('가져올 본문이 없습니다. PDF 추출 결과를 확인하세요.');
   const plain=draft.fileName.replace(/\.pdf$/i,'').replace(/[\u0000-\u001f]/g,'').slice(0,150)||'PDF 문서';
   const doc=blankProject();
   const sections=draft.pages.map(page=>{
-    const blocks:ContentBlock[]=page.blocks.map(block=>({
+    const blocks:ContentBlock[]=page.blocks.filter(block=>!block.excluded).map(block=>({
       id:newIdentifier(),kind:block.role,text:block.text,origin:{...block.origin},
     }));
     // Place decoded images near their source y position without rewriting

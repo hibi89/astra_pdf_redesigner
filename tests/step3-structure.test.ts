@@ -10,6 +10,32 @@ test('STEP3: cumulative extracted-text limit stops before later fragments are re
   assert.throws(()=>nextPdfTextCount(limit,'x'),/50만 자 제한/);
   assert.throws(()=>nextPdfTextCount(-1,'x'),/개수 상태/);
 });
+test('STEP3: excluded running text remains reviewable but is omitted from the imported document',()=>{
+  const draft=makePdfDraft('header-footer.pdf',[{number:1,width:595,height:842,imageDetected:false,pieces:[
+    piece('RUNNING_HEADER_101',1,40,820,8),
+    piece('BODY_MARKER_102',1,40,420,12),
+    piece('RUNNING_FOOTER_103',1,40,20,8),
+  ]}]);
+  const header=draft.pages[0].blocks.find(b=>b.text.includes('RUNNING_HEADER_101'))!;
+  const footer=draft.pages[0].blocks.find(b=>b.text.includes('RUNNING_FOOTER_103'))!;
+  header.excluded=true;footer.excluded=true;
+  const project=pdfDraftToProject(draft);
+  const output=project.content.sections.flatMap(section=>section.blocks)
+    .filter(block=>block.kind!=='image').map(block=>block.text).join('\n');
+  assert.ok(output.includes('BODY_MARKER_102'));
+  assert.ok(!output.includes('RUNNING_HEADER_101'));
+  assert.ok(!output.includes('RUNNING_FOOTER_103'));
+  assert.equal(header.text,'RUNNING_HEADER_101');
+  assert.equal(footer.text,'RUNNING_FOOTER_103');
+  assert.equal(header.excluded,true);assert.equal(footer.excluded,true);
+  assert.ok(isProjectDocument(project));
+});
+test('STEP3: import rejects a draft when all text blocks are explicitly excluded',()=>{
+  const draft=makePdfDraft('excluded.pdf',[{number:1,width:595,height:842,imageDetected:false,pieces:[piece('ONLY_HEADER_104',1,40,820,8)]}]);
+  draft.pages[0].blocks[0].excluded=true;
+  assert.throws(()=>pdfDraftToProject(draft),/가져올 본문이 없습니다/);
+  assert.equal(draft.pages[0].blocks[0].text,'ONLY_HEADER_104');
+});
 test('STEP3: Korean, numbers, punctuation and source coordinates survive single-column import',()=>{
   const source:PdfPageInput={number:1,width:595,height:842,imageDetected:false,pieces:[
     piece('두 번째 줄 2/3 100%',1,45,102),

@@ -16,7 +16,7 @@ export interface PdfOrigin {
   page:number; x:number; y:number; width:number; height:number;
 }
 export interface PdfDraftBlock {
-  id:string; text:string; role:PdfRole; origin:PdfOrigin;
+  id:string; text:string; role:PdfRole; origin:PdfOrigin; excluded?:boolean;
 }
 export interface PdfDraftPage {number:number; blocks:PdfDraftBlock[]; charCount:number; imageDetected:boolean; images:RecoveredPdfImage[];imageCount:number;omittedImages:number;vectorPaintCount:number;compositionRisk:GraphicsCompositionRisk;}
 export interface PdfDraft {
@@ -140,7 +140,7 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
         prev.origin.width=round(Math.max(prev.origin.x+prev.origin.width,line.x+line.width)-prev.origin.x);
         prev.origin.height=round(Math.max(prev.origin.y+prev.origin.height,line.y+line.height)-prev.origin.y);
       }else{
-        blocks.push({id:'p'+page.number+'-'+blocks.length,text:line.text,role,origin:{
+        blocks.push({id:'p'+page.number+'-'+blocks.length,text:line.text,role,excluded:false,origin:{
           page:page.number,x:round(line.x),y:round(line.y),width:round(line.width),height:round(line.height),
         }});
         totalBlocks++;
