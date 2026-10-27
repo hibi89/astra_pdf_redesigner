@@ -27,7 +27,7 @@ test('M04 independent PDF.js structural audit checks actual two-page mixed fixtu
   const {makeMixedLayoutPdf,MIXED_LAYOUT_MARKERS}=await import('./fixtures/step3-mixed-layout-pdf.mjs');
   const result=await auditPdfBytes(makeMixedLayoutPdf(),{markers:MIXED_LAYOUT_MARKERS,requireRaster:true,label:'M04 mixed source'});
   assert.equal(result.pages,2);
-  assert.equal(result.markers,13);
+  assert.equal(result.markers,17);
   assert.ok(result.textItemsChecked>=13);
   assert.ok(result.rasterDraws>=1);
 });
