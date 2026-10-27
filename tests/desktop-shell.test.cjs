@@ -75,6 +75,8 @@ test('local PDF visual acceptance is opt-in, hidden, synthetic, and temp-path gu
   assert.ok(runner.includes('windowsHide:true'));
   assert.ok(runner.includes('pdftoppm'));
   assert.ok(step2Fixture.includes('Local STEP2 PDF output must be directly under the isolated OS temp folder'));
+  assert.ok(step2Fixture.includes('local?{pattern:true,width:144,height:216}'));
+  assert.ok(step2Fixture.includes('picture.naturalHeight===expectedImage.height'));
   assert.ok(verifier.includes('--local-synthetic'));
   assert.ok(verifier.includes("assert.equal(doc.numPages,3"));
 });
