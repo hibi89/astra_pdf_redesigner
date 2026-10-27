@@ -437,3 +437,17 @@
 8. **완료/미완료:** 자동 단위·빌드·데스크톱 보안 확인만 완료. 앱 UI·합성 문서/이미지 입력·재실행 복원·Windows PDF 저장/육안·JSON export/import는 **미검증**이며 개인용 1차 완료 판정은 보류다.
 9. **다음 작업:** 먼저 호환 Windows 환경에서 Electron 44.9.0 단독 실행 원인을 확인한다. 앱을 띄울 수 있게 되면 계획된 전용 temp 프로필만 사용해 합성 한국어 문서+이미지를 저장하고 재실행 보존, PDF A4/한글/마지막 문단/이미지 확인, 테스트용 JSON 백업 복원을 검증한다. 실패 시 원인과 범위만 기록한다.
 10. **갱신/검증 시각:** 2026-10-27 14:20:46 KST. 테스트는 현재 workspace에서 수행했으며, 사용자 실데이터나 설치 앱은 건드리지 않았다.
+
+## 2026-10-27 14:33 KST — PC GUI 중단 후 인수인계
+
+1. **목표/승인 단계:** ASTRA STEP 2의 Windows 안정성·보존 흐름을 마무리한다. 현재 승인 범위는 STEP 2이며 STEP 3 PDF 가져오기/OCR과 STEP 4는 시작하지 않는다.
+2. **저장소 상태:** `hibi89/astra_pdf_redesigner`, 작업 브랜치 `codex/p5-windows-reliability`. 이 기록 전 문서 HEAD `012affe3ce1bc5b9d257d203e64262408ef887be`; 제품 코드 SHA `062360b50e3033654df656e84a2ce26cc3aa4061`. PR #7 `[Draft / Test Only] IndexedDB versionchange and recovery boundaries`는 open/draft/unmerged, base `test/windows-idb-v2-installed-upgrade`. main/PR #3~#6 미변경, 병합 없음.
+3. **완료 기능:** versionchange/blocked 후 연결 정리, 저장되지 않은 편집 초안의 읽기 전용 복구 경계, 문서/이미지/IndexedDB 보존 테스트, Windows 전용 테스트 프로필 시작 스크립트. 이 turn에서는 제품 코드나 테스트 코드를 변경하지 않았다.
+4. **최신 로컬 검증:** 코드 SHA `062360b`에서 `npm test` 19/19 PASS, `npm run build` PASS(Vite 동적/정적 import 경고 1건), `npm run desktop:verify` bundle 검증 및 desktop tests 10/10 PASS. Electron 44.9.0과 전용 개인 테스트 프로필 시작까지 확인했다.
+5. **PC 화면 테스트 결과:** 사용자 지시에 따라 GUI 조작을 중단했다. 전용 프로필에 합성 한국어 문서 저장까지 확인했으나, 파일 선택창이 테스트 PNG를 찾지 못했다. 이미지/caption, UI 재시작 후 복원, 이 로컬 문서의 PDF 저장·육안 검사, UI JSON export/import는 완료하지 않았으며 **미검증**이다. 일반 AppData·브라우저 프로필·개인 문서는 열지 않았다. 전용 프로필의 합성 초안은 보존되어 있다.
+6. **원격 Windows 증거:** [Actions #39244383974](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39244383974), 테스트 코드 SHA `9fbf467a7d7bfe1ecd84611298094595197e626f`, Windows Server 2025. 실제 NSIS 설치/업그레이드, STEP2 IndexedDB 문서/PNG 보존, PDF A4 3페이지와 한글/숫자 marker 5/5 및 raster draw 1건, 동시 versionchange/미저장 초안/read-only 복구가 PASS. 합성 프로필 및 설치판 정리 PASS.
+7. **원격 Chrome/Edge 증거:** [Actions #39244384031](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39244384031), 양쪽 job SUCCESS. STEP1/STEP2 렌더링, A4 PDF·한글·페이지 경계, PNG/JPEG/WebP 원본 바이트, JSON 파일 export와 native picker import 및 재로드 보존 PASS. Chrome 임시 프로필 cleanup에 `ENOTEMPTY` 지연 경고가 있었고 Edge CDP가 한 번 재시도 후 연결됐다. 두 실행은 폐기형 runner에서 수행했다.
+8. **SHA 경계와 실패:** 두 Actions run은 코드 `9fbf467` 기준이다. 후속 제품 코드 `062360b`에는 개인 테스트 프로필 지원 변경이 있고 그 SHA에서 로컬 테스트/build/desktop:verify를 통과했다. 그 이후 GitHub의 문서 커밋 3개는 문서만 변경했다. 이번 PC 파일 선택 시도는 표시된 Temp 위치에서 PNG를 찾지 못해 실패했으며 제품 기능 실패라고 판정하지 않는다.
+9. **배포/보안:** Production 배포 없음. unsigned test installer는 7일 보관용 산출물이었다. 일반 사용자 Windows 10/11, 전원 장애, 코드 서명/SmartScreen, 실제 사용자 문서는 미검증.
+10. **남은 일 우선순위:** (1) 사용자가 원하면 원격 synthetic CI의 PDF를 실제 렌더 이미지로 검사해 시각적 QA 완료, (2) 합성 데이터만으로 개인 전용 Windows 프로필 재실행/PDF/JSON UI 흐름 완료, (3) GPT-6가 최초 설계/요구사항과 구현·CI 증거를 재검수. 사용자는 이 PC UI 흐름 중단을 지시했으므로 현재는 원격 evidence 중심으로 인계한다. PR 병합/배포는 별도 승인 전 진행하지 않는다.
+11. **상태/시각:** `STATUS.md`의 보완 기록은 commit `012affe3ce1bc5b9d257d203e64262408ef887be`에 있다. 이 인계는 2026-10-27 14:33 KST에 작성했고, 마지막 docs-only commit SHA는 GitHub 갱신 후 확인한다.
