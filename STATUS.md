@@ -1,10 +1,18 @@
 # STATUS — Astra PDF Redesigner
 
-- 저장소: `hibi89/astra_pdf_redesigner` / `main`
-- 단계: **STEP 1 main 안정 / STEP 2 feature 편집기·저장·인쇄 스모크 검증 완료, 저장 경쟁 방어 추가, 추가 검수 대기**
-- 검증된 소스 커밋: `639b5e984e8ba711674a3b3d29fc6baf881a14d1`
-- 검증 GitHub Actions: [#39128155552](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39128155552), 결론 **success** (검증 종료 2026-10-18 21:39:37 KST)
+- 저장소: `hibi89/astra_pdf_redesigner` / `integration/astra-commercial-core` (Draft PR #9, main 미변경)
+- 단계: **STEP 1·2 회귀 확인 / STEP 3·4·7 부분 / M09-D Windows 직접 CI 검증 완료 / 상용 출시 NO-GO**
+- 최근 기능·테스트 커밋: `1099b794f32da3e0bc467898e12b0ee7e7e71146`
+- exact-SHA GitHub Actions: Edge `#122069789553` success, Windows `#40468551485` success; Chrome `#122069789889` 한글 폰트 준비 단계 실행 중(Chrome smoke 미완료)
 - 로컬/Vercel 배포: 로컬 전용. Vercel Production 없음(미적용).
+
+## 최신 상태 — 2026-10-27 16:51 KST
+- 저장소 `hibi89/astra_pdf_redesigner`, 검증 브랜치 `integration/astra-commercial-core`, Draft PR #9 미병합. 기능·테스트 SHA `1099b794f32da3e0bc467898e12b0ee7e7e71146`.
+- 이번 테스트 보강: 프로젝트 JSON 내보내기의 원문과 네 디자인 설정 일치, 잘못된 JSON 가져오기 시 활성 문서 무변경, 올바른 가져오기의 디자인 설정 유지, 가져온 복사본 삭제 뒤 원본 보존을 확인하도록 테스트를 강화했다.
+- 로컬 exact-SHA 검증: `npm test` 61/61 PASS, `npm run build` PASS, `node --check tests/step2-browser.mjs` PASS, `git diff --check` PASS.
+- GitHub exact-SHA: Edge job [#122069789553](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40468551454/job/122069789553) SUCCESS; `PASS STEP2: portable project JSON includes exact text and image bytes`, `PASS STEP2: JSON import, invalid import rejection, independent copy survives delete` 확인. Windows NSIS run [#40468551485](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40468551485) SUCCESS; `PASS M09-D WINDOWS INSTALLED UI`, STEP2 프로필 재실행 보존, 0.1.0→0.1.1 업그레이드 보존 및 설치기 업로드 확인.
+- Chrome job [#122069789889](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40468551454/job/122069789889)은 Node 테스트와 빌드는 PASS했으나, 16:51 KST 현재 CI 전용 한글 폰트 설치 단계에서 실행 중이며 Chrome 검증은 아직 시작되지 않았다. **Chrome exact-SHA 결과 미검증/대기**; 성공으로 간주하지 않는다.
+- 합성 데이터만 사용. 고객 PDF, 외부 모델 다운로드, 유료 서비스, 배포·병합 없음. 전체 7단계 약 43%, 판매 및 public production NO-GO.
 
 ## 완료 기능
 - 회고록 제목, 선택 작성자, 로컬 오늘 기본 작성일, 4개 본문 항목 실시간 편집.
@@ -386,3 +394,4 @@
 8. **Originals/backup/secrets:** Existing STEP1 localStorage v1, STEP2 IndexedDB V2, two design PNG, customer PDFs and original repository branches protected. Only synthetic data generated in CI, no customer API/paid/model asset/token. Git pre-fix `461a2057...` / working base revisions for rollback, no force push.
 9. **Next priority/procedure/completion:** M09-D candidate installed Windows UI synthetic cancellation test or owner-approved real PDF/PC user acceptance. Ensure source-review consent/DB unchanged; require Chrome/Edge and Windows green exact SHA; major model acquisition or release gated by explicit owner approval. No unsupported claims of Windows M09-C direct click.
 10. **Checked evidence:** 2026-10-27 KST. Exact final jobs #40376435854 and #40376435967 completed/success and named browser/native markers inspected; document-only later commits do not change code or independently constitute a test.
+
