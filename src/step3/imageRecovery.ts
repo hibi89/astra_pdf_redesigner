@@ -25,24 +25,27 @@ const LIMIT={imageBytes:10*1024*1024,pixels:20_000_000,perPage:15,
   documentImages:50,documentPixels:40_000_000,documentPngBytes:40*1024*1024};
 export interface ImageRecoveryBudget {
   maxImages:number;maxPixels:number;maxBytes:number;
-  recoveredImages:number;recoveredPixels:number;recoveredBytes:number;
-  limitWarningIssued:boolean;
+  attemptedImages:number;attemptedPixels:number;recoveredBytes:number;
+  exhausted:boolean;limitWarningIssued:boolean;
 }
 export function createImageRecoveryBudget():ImageRecoveryBudget{
   return{maxImages:LIMIT.documentImages,maxPixels:LIMIT.documentPixels,
-    maxBytes:LIMIT.documentPngBytes,recoveredImages:0,recoveredPixels:0,
-    recoveredBytes:0,limitWarningIssued:false};
+    maxBytes:LIMIT.documentPngBytes,attemptedImages:0,attemptedPixels:0,
+    recoveredBytes:0,exhausted:false,limitWarningIssued:false};
 }
 export function exceedsImageRecoveryBudget(
-  budget:ImageRecoveryBudget,width:number,height:number,bytes=0,
+  budget:ImageRecoveryBudget,width:number,height:number,
 ):boolean{
   const pixels=width*height;
   return !Number.isSafeInteger(width)||!Number.isSafeInteger(height)||
     width<1||height<1||!Number.isSafeInteger(pixels)||
-    !Number.isSafeInteger(bytes)||bytes<0||
-    budget.recoveredImages+1>budget.maxImages||
-    budget.recoveredPixels+pixels>budget.maxPixels||
-    budget.recoveredBytes+bytes>budget.maxBytes;
+    budget.exhausted||budget.attemptedImages>=budget.maxImages||
+    budget.attemptedPixels+pixels>budget.maxPixels;
+}
+export function exceedsImageRecoveryByteBudget(
+  budget:ImageRecoveryBudget,bytes:number,
+):boolean{
+  return !Number.isSafeInteger(bytes)||bytes<0||budget.recoveredBytes+bytes>budget.maxBytes;
 }
 type Matrix=[number,number,number,number,number,number];
 const identity:Matrix=[1,0,0,1,0,0];
@@ -174,6 +177,7 @@ export async function recoverPageImages(
   const entries=scanImagePlacements(pageNumber,fn,viewport,pageWidth,pageHeight,ops);
   const images:RecoveredPdfImage[]=[],problems:string[]=[];
   const reportBudgetLimit=()=>{
+    budget.exhausted=true;
     if(budget.limitWarningIssued)return;
     budget.limitWarningIssued=true;
     problems.push('PDF 전체 이미지 복원 안전 한도에 도달했습니다. 이후 이미지는 복원하지 않으므로 원본과 대조하세요.');
@@ -189,7 +193,8 @@ export async function recoverPageImages(
     if(!entry.origin||entry.reason||entry.kind==='unsupported'){
       problems.push(entry.reason??'이미지 위치 또는 픽셀 복원 불가');continue;
     }
-    if(budget.recoveredImages>=budget.maxImages){reportBudgetLimit();continue;}
+    if(budget.exhausted||budget.attemptedImages>=budget.maxImages){reportBudgetLimit();continue;}
+    budget.attemptedImages++;
     try{
       let source:unknown;
       if(entry.kind==='inline'){source=entry.args[0];}
@@ -214,15 +219,14 @@ export async function recoverPageImages(
       if(exceedsImageRecoveryBudget(budget,width,height)){
         reportBudgetLimit();continue;
       }
+      budget.attemptedPixels+=pixels;
       const png=await decodedToPng(source);
-      if(exceedsImageRecoveryBudget(budget,width,height,png.blob.size)){
+      if(exceedsImageRecoveryByteBudget(budget,png.blob.size)){
         reportBudgetLimit();continue;
       }
       images.push({id:crypto.randomUUID(),origin:entry.origin,width:png.width,height:png.height,
         mimeType:'image/png',blob:png.blob,include:true,
         method:entry.kind==='inline'?'decoded-inline':'decoded-xobject'});
-      budget.recoveredImages++;
-      budget.recoveredPixels+=pixels;
       budget.recoveredBytes+=png.blob.size;
     }catch(error){problems.push(error instanceof Error?error.message:'이미지 추출 실패');}
   }

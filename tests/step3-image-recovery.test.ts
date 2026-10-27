@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { createImageRecoveryBudget, exceedsImageRecoveryBudget, scanImagePlacements, type ImageOpCodes } from '../src/step3/imageRecovery.ts';
+import { createImageRecoveryBudget, exceedsImageRecoveryBudget, exceedsImageRecoveryByteBudget, recoverPageImages, scanImagePlacements, type ImageOpCodes } from '../src/step3/imageRecovery.ts';
 import { makePdfDraft, type PdfPageInput } from '../src/step3/structure.ts';
 import { pdfDraftToProject,pdfDraftAssets } from '../src/step3/convert.ts';
 import { isProjectDocument } from '../src/step2/model.ts';
@@ -13,13 +13,28 @@ test('STEP3 images: per-document decoded-pixel, image-count and PNG-byte budgets
   const budget=createImageRecoveryBudget();
   budget.maxImages=2;budget.maxPixels=20;budget.maxBytes=12;
   assert.equal(exceedsImageRecoveryBudget(budget,4,4),false);
-  budget.recoveredImages=1;budget.recoveredPixels=16;budget.recoveredBytes=8;
-  assert.equal(exceedsImageRecoveryBudget(budget,2,2,4),false);
+  budget.attemptedImages=1;budget.attemptedPixels=16;budget.recoveredBytes=8;
+  assert.equal(exceedsImageRecoveryBudget(budget,2,2),false);
   assert.equal(exceedsImageRecoveryBudget(budget,2,3),true,'Cumulative decoded pixels must be bounded');
-  budget.recoveredImages=2;
+  budget.attemptedImages=2;
   assert.equal(exceedsImageRecoveryBudget(budget,1,1),true,'Cumulative image count must be bounded');
-  assert.equal(exceedsImageRecoveryBudget(budget,1,1,5),true,'Cumulative output bytes must be bounded');
   assert.equal(exceedsImageRecoveryBudget(budget,Number.MAX_SAFE_INTEGER,4),true,'Unsafe dimensions must fail closed');
+  assert.equal(exceedsImageRecoveryByteBudget(budget,4),false);
+  assert.equal(exceedsImageRecoveryByteBudget(budget,5),true,'Cumulative output bytes must be bounded');
+});
+test('STEP3 images: reaching the document pixel limit warns once and stops later-page image decoding',async()=>{
+  const budget=createImageRecoveryBudget();budget.maxPixels=0;
+  let objectReads=0;
+  const objects={objs:{has:()=>true,get:()=>{objectReads++;return{width:2,height:2,data:new Uint8Array(16)};}}};
+  const fn={fnArray:[op.save,op.transform,op.paintImageXObject,op.restore],
+    argsArray:[[],[20,0,0,20,40,500],['pixel-limited'],[]]};
+  const first=await recoverPageImages(1,fn,[1,0,0,-1,0,842],595,842,op,objects,budget);
+  assert.equal(first.detected,1);assert.equal(first.images.length,0);
+  assert.ok(first.problems.some(value=>value.includes('전체 이미지 복원 안전 한도')));
+  assert.equal(budget.exhausted,true);
+  const second=await recoverPageImages(2,fn,[1,0,0,-1,0,842],595,842,op,objects,budget);
+  assert.equal(second.detected,1);assert.equal(second.images.length,0);
+  assert.equal(objectReads,1,'No later page image should be read after a document-wide limit is reached');
 });
 test('STEP3 images: PDF CTM stack maps two XObjects into independent top-left source regions',()=>{
   const ops={fnArray:[op.save,op.transform,op.paintImageXObject,op.restore,
