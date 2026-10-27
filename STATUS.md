@@ -1,12 +1,13 @@
 # STATUS — Astra PDF Redesigner
 
 - 저장소: `hibi89/astra_pdf_redesigner` / `integration/astra-commercial-core` (Draft PR #9, main 미변경)
-- 승인 범위: STEP 3 PDF 가져오기 개발 진행 승인, OCR 별도 승인 전 제외.
-- 제품 상태: STEP 1·2 완료, STEP 3·4·7 부분, STEP 5 미구현, STEP 6 승인대기. 7단계 추정 약 43%; 판매/Production NO-GO.
-- 최신 기능·테스트 SHA: `cc157cba4b442f44b88c3631a72686fdfe8f8af9` (STEP3 검수 중 텍스트 블록 포함/제외).
-- Exact-SHA Chrome+Edge [#40479935848](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935848): SUCCESS 2/2, Node 22 `npm test` 67/67 PASS, build PASS. Windows NSIS [#40479935852](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935852): SUCCESS, 설치형 M09-D UI와 STEP3 A4 출력 확인.
-- 미검증: 동의된 실제 PDF 5–10개 사용자 PC 비교, 구매자 물리 Windows PC GUI/인쇄 수용. hosted Windows 검증은 synthetic fixture만 사용.
-- main, PR #3/#4, 사용자 데이터, 배포 설정은 변경·병합하지 않음. 외부 전송·모델 다운로드·유료 서비스·OCR·배포 없음.
+- 승인 범위: STEP3 PDF 가져오기는 기존 승인 범위이며, 사용자가 STEP4 디자인 비교·적용·취소 개발도 승인했다. OCR은 별도 승인 전 제외한다. 저장형 사용자 스타일 라이브러리/스키마 변경은 승인 전 구현하지 않는다.
+- 제품 상태: STEP1·2 완료, STEP3·4·7 부분, STEP5 미구현, STEP6 승인대기. 최초 7단계 추정 약 44% (STEP1·2=2.0, STEP3=.33, STEP4=.45, STEP7=.33, 합계 3.11/7); 판매/Production NO-GO.
+- 최신 기능·테스트 SHA: `273db07ae851e8d2420da39688b5fa84641ce65d` (STEP4 같은 문서 8개 레이아웃 임시 비교, 적용/취소, 기존 디자인 컨트롤 동기화).
+- Exact-SHA Chrome+Edge [#40486509235](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40486509235): SUCCESS 2/2, Node 22 `npm test` 67/67 PASS, `npm run build` PASS. 실제 브라우저 A4 PDF의 텍스트·이미지·페이지 및 비교 미리보기/적용 PDF 레이아웃 동등성을 확인했다.
+- Exact-SHA Windows NSIS [#40486509335](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40486509335): SUCCESS. 설치 앱 STEP4 임시 비교 PDF·적용·취소, 기존 8개 A4 PDF 8/8, M09-D, 설치/제거 및 0.1.0→0.1.1 STEP2 데이터 보존을 확인했다.
+- 미검증: 동의된 실제 PDF 5–10개 사용자 PC 비교, 구매자 물리 Windows PC GUI/인쇄 수용. CI PDF는 synthetic fixture만 사용했다.
+- main, PR #3/#4, 사용자 데이터, 배포 설정은 변경·병합하지 않음. 외부 전송·OCR·모델 다운로드·유료 서비스·merge·배포 없음.
 
 ## 과거 기록 — 2026-10-27 16:51 KST
 - 저장소 `hibi89/astra_pdf_redesigner`, 검증 브랜치 `integration/astra-commercial-core`, Draft PR #9 미병합. 기능·테스트 SHA `1099b794f32da3e0bc467898e12b0ee7e7e71146`.
@@ -461,3 +462,14 @@
 - **기준 증거:** 기능/테스트 SHA cc157cba4b442f44b88c3631a72686fdfe8f8af9, [Chrome/Edge #40479935848](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935848) 및 [Windows #40479935852](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935852) SUCCESS. 최초 로드맵 약 43% 추정, 상품판매 NO-GO.
 - **승인/보존:** 원본 문서/PNG, main, PR3/PR4, 기존 데이터, 외부 전송/비용/배포 변경 금지. OCR/STEP6 웹검색/로컬 LLM 다운로드/중요 스키마 변경·PR 병합은 별도 승인. 저장·원문 필수 안전 테스트는 구현 시점 유지.
 - **전달:** [PR #9 총괄 지시](https://github.com/hibi89/astra_pdf_redesigner/pull/9#issuecomment-6438610031). 이번 기록은 코드 신규 구현이나 재테스트 완료가 아닌 실행계획 변경.
+
+## 2026-10-27 19:18 KST — STEP4 동일 문서 스타일 비교·적용·취소
+
+- **구현:** 기존 8개 레이아웃을 같은 전체 문서에서 한 번에 하나씩 비교한다. 비교 상태는 메모리 전용이라 저장 전 문서/디자인은 변하지 않는다. 선택 적용은 기존 `DesignSettings.theme`를 사용하고, 적용 직전 디자인을 한 번 취소할 수 있다. 적용/취소 뒤에도 본문, 섹션, 이미지 참조 및 IndexedDB store 구성이 동일하다. 비교 중 기존 디자인 컨트롤을 눌러도 미리보기와 저장 테마가 동기화된다.
+- **구현 방식 비교:** A) 레이아웃별 고정 CSS만 늘리면 초기 구현은 가장 빠르고 저장 호환성을 건드리지 않지만, 폰트·색상·크기 조합이 늘 때 중복·회귀·유지보수 비용이 커진다. B) 제한된 디자인 토큰(`theme/accent/font/textSize`)과 레이아웃 프리셋 ID를 유지하면 약간의 초기 설계가 필요하지만, 렌더 경로와 기존 V2 데이터에 맞춰 확장·검증하기 쉽다. 둘 다 외부/API 비용은 없다. **B를 권고**한다. 이번 구현은 이미 존재하는 V2 디자인 필드만 사용하며 저장 스키마를 바꾸지 않았다. 사용자 프리셋 저장/재사용은 데이터 이식성과 마이그레이션을 설계해 별도 승인받은 뒤 진행한다.
+- **기능·테스트 SHA:** `273db07ae851e8d2420da39688b5fa84641ce65d`.
+- **Chrome·Edge:** [Actions #40486509235](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40486509235) SUCCESS 2/2. `npm test` 67/67 PASS, `npm run build` PASS. 실제 same-document 비교 테마 PDF가 A4이고 본문 표식 3개와 래스터 이미지를 유지했다. 비교 출력과 저장된 같은 레이아웃의 제목 bbox 차이는 각 좌표 1.5pt 미만이었다. 8개 테마 실제 출력은 모두 고유 배치·A4·텍스트 순서·이미지를 보존했다.
+- **Windows 설치형:** [Actions #40486509335](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40486509335) SUCCESS. 설치된 Electron에서 ephemeral alternate PDF, 적용 후 정확한 디자인/콘텐츠 복원을 확인했고, 실제 Electron A4 레이아웃 8개를 PDF.js로 다시 읽어 8/8 성공했다. M09-D 취소→새 PDF 재선택→늦은 이전 결과 무시→V2 store 전부 불변, NSIS 설치/제거, 0.1.0→0.1.1 업그레이드 후 STEP2 문서·PNG 보존도 확인했다.
+- **중간 실패와 수정:** `a1c0885` Edge 테스트는 fixture 초기 테마를 report로 고정한 가정 때문에 실패했다. 동적 baseline으로 고쳐 `83045a6`에서 STEP4 PDF/내용 보존은 통과했지만 비교 패널 열린 동안 일반 테마 선택이 미리보기에 반영되지 않는 결함을 발견했다. 컨트롤 동기화와 회귀를 추가한 최종 SHA `273db07ae851e8d2420da39688b5fa84641ce65d`에서 Chrome·Edge·Windows 모두 성공했다. 테스트를 생략하지 않았다.
+- **미검증·제약:** 실제 고객 PDF 5–10개 및 구매자 PC 수용은 미검증. 7단계 추정은 약 44%, 판매/Production NO-GO. 사용자 스타일 저장/재사용 스키마, 무제한 디자인 조합, OCR은 미완료/승인대기.
+- **보존:** 사용자 지시에 따라 GitHub 통합 브랜치에서만 반영. main·PR #3/#4·사용자 원본/데이터·배포 설정을 변경·병합하지 않았다.

@@ -15,14 +15,14 @@
 |---|---|---|
 | STEP 1 — 회고록 꾸미기 | 완료 | 기존 글 작성·테마/색상/폰트·미리보기·PDF 저장 기능이 통합 제품의 기반으로 유지된다. 이 작업에서 해당 경로를 수정하지 않았다. |
 | STEP 2 — 개인 문서 제작기 | 완료 | 섹션/이미지/테마 편집 및 작성 데이터 보존 경로가 있다. `5d2265414f971fcc8d78b5f4cec11370a61756a1`에서 네 디자인 설정 변경·재로드에도 원문 보존, `1099b794f32da3e0bc467898e12b0ee7e7e71146`에서 JSON 내보내기/가져오기·잘못된 JSON 거부·복사본 삭제 뒤 원본 보존을 Edge 실제 브라우저로 확인했다. |
-| STEP 3 — PDF 가져오기 | 부분 | 원본 기준 기능(로컬 추출·좌표 출처·이미지·역할/순서 수동 검수·원문 대조·경고·텍스트 포함/제외·새 문서/A4 출력)이 합성 fixture로 검증됐다. 선택 제외한 헤더/푸터도 원본 검수에는 유지되고 변환 출력에서 빠지는 것을 Chrome/Edge에서 확인했다. 손상 PDF는 M08-C에서 거부되고 V2 데이터/초안이 보존된다. PDF 내부 복구는 원래 STEP3 완료 기준이 아니다. | 실제 단순 PDF 5–10건 및 구매자 물리 PC 수용 미검증. |
-| STEP 4 — 디자인 조합 엔진 | 부분 | BASIC 8개 사전 디자인의 출력·선택 경로는 Windows 회귀에서 8/8 확인됐다. 임의 레이아웃/폰트/색상/여백 조합, 여러 스타일 비교·즐겨찾기까지 완료했다는 증거는 없다. |
+| STEP 3 — PDF 가져오기 | 부분 | 원본 기준 기능(로컬 추출·좌표 출처·이미지·역할/순서 수동 검수·원문 대조·경고·텍스트 포함/제외·새 문서/A4 출력)이 합성 fixture로 검증됐다. 선택 제외한 헤더/푸터도 원본 검수에는 유지되고 변환 출력에서 빠지는 것을 Chrome/Edge에서 확인했다. 손상 PDF는 M08-C에서 거부되고 V2 데이터/초안이 보존된다. PDF 내부 복구는 원래 STEP3 완료 기준이 아니다. 실제 단순 PDF 5–10건과 구매자 물리 PC 수용은 미검증. |
+| STEP 4 — 디자인 조합 엔진 | 부분 | 기존 BASIC 8개 디자인 보존, 실제 A4 출력 8/8. `273db07`에서 동일 문서 전체를 8개 레이아웃으로 임시 비교, 선택 적용과 1회 취소/복원을 구현했다. V2 content/store 불변, Chrome·Edge PDF preview와 저장 PDF 배치 동등성, Windows Electron 8/8 PDF 재독립 감사를 확인했다. **미완료:** 폰트/색상/크기와 레이아웃을 묶은 사용자 프리셋 저장·재사용 및 export/import 호환; 저장 schema는 승인 대기. |
 | STEP 5 — 레퍼런스 따라 꾸미기 | 미구현 | 레퍼런스 이미지/PDF/URL 입력, 색상·구성 분석, 레퍼런스 기반 스타일 변환의 구현·검증 증거가 없다. 사용자 레퍼런스 파일을 받거나 URL을 연결하는 기능은 데이터 처리 범위 확정이 필요하다. |
 | STEP 6 — 레퍼런스 탐색 연동 | 승인대기 | 앱 내 인터넷 검색·썸네일 탐색·레퍼런스 저장/선택·조합의 구현 증거가 없다. 외부 검색이나 전송은 현재 허가 범위에 포함되지 않으므로 구현 전 사용자 승인과 데이터 경계가 필요하다. |
 | STEP 7 — 최종 통합 PDF 리디자인 앱 | 부분 | PDF 가져오기→검수→A4 재구성 흐름과 unsigned Windows 설치형 검증은 존재한다. OCR, 복잡한 표/다단·장문 지원, 누락/넘침 자동 검사, 부분 수정, 고객용 서명·배포 검증은 미완료다. |
-| STEP 7 OCR 및 실제 문서 수용 | 승인대기 | 현재 작업 규칙은 OCR을 기존 승인 범위 밖으로 둔다. 이번 사용자의 지시는 M09-D 취소 흐름 검증과 갭 분석을 허용하지만 OCR 구현이나 고객 문서 사용 승인으로 확대 해석하지 않는다. |
+| STEP 7 OCR 및 실제 문서 수용 | 승인대기 | OCR은 별도 승인 전까지 범위 밖이다. STEP4 개발 승인으로 OCR이나 고객 PDF 사용 범위가 확대되지 않는다. 실제 PDF 5–10건은 사용자 PC에서 별도 동의 후에만 확인하고, 구매자 물리 PC 수용은 미검증이다. |
 
-**7단계 전체 완료율 추정:** 약 **43%** (STEP 1·2 완료 2.0 + STEP 3·4·7 부분을 보수적으로 각 0.33으로 환산하여 3/7). 이는 기능 단계의 근사치이며 제품 품질이나 출시 준비율을 뜻하지 않는다. 레퍼런스·검색 단계는 완료로 계산하지 않았다.
+**7단계 전체 완료율 추정:** 약 **44%** (STEP1·2 완료 2.0 + STEP3=.33 + STEP4=.45 + STEP7=.33 = 3.11/7 ≈44%). STEP4는 실제 비교·적용/복원과 8개 A4 렌더 검증을 더했지만 사용자 스타일 저장/재사용이 빠져 부분으로 계산한다. 이는 기능 단계의 근사치이며 제품 품질이나 출시 준비율을 뜻하지 않는다. 레퍼런스·검색 단계는 완료로 계산하지 않았다.
 
 ## B. 상용 제품·72시간 내부 MVP
 
@@ -113,3 +113,13 @@
 - 최초 설계의 머리글·바닥글 제거/원문 대조 요구를 텍스트 블록 포함 체크로 구현했다. 제외한 블록의 원문은 검수 초안과 원본 PDF 뷰에서 확인 가능하고, 새 프로젝트 변환에서만 빠진다. 모든 블록 제외 시 저장은 차단한다.
 - Exact-SHA `cc157cba4b442f44b88c3631a72686fdfe8f8af9`: Chrome+Edge [#40479935848](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935848) SUCCESS 2/2, 67/67 Node 22 tests and build PASS; Windows NSIS [#40479935852](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935852) SUCCESS with M09-D and native STEP3 PDF markers.
 - 7-step estimate ~43%; M05 72-hour internal technical demo is limited GO; SKU readiness remains BASIC partial / PRO and BUSINESS unimplemented / shared offline AI approval-gated. Sale remains NO-GO until customer-local 5–10 PDF and buyer physical PC checks.
+
+## STEP4 실제 동일 문서 비교·적용·복원 — 2026-10-27 19:18 KST
+
+- **코드 기준:** `273db07ae851e8d2420da39688b5fa84641ce65d`, `integration/astra-commercial-core`, PR #9 Draft/open/unmerged. 기존 8개 layout preset을 유지한다. 한 번에 하나의 full-document renderer만 바꾸는 방식으로 중복 DOM과 세 배 이미지 디코드를 피한다. Preview는 메모리 상태에만 있고, Apply 전 저장되지 않는다. Apply/Undo는 기존 `DesignSettings`의 `theme`만 바꿔 content, asset refs, DB stores는 건드리지 않는다.
+- **비교안:** A) 고정 CSS theme별 구현은 가장 낮은 초기 작업량과 기존 데이터 호환을 제공하지만, 각 조합을 직접 늘려야 해 중복·테스트 부담이 커진다. B) 제한 디자인 토큰(`theme/accent/font/textSize`) + preset ID는 초기 계약 설계가 조금 필요하지만 구성·테스트·유지보수가 쉽다. 어느 방식도 API/서비스 비용은 없다. **B 권고**. 현재 기능은 기존 V2 디자인 타입을 재사용했다. 저장형 사용자 프리셋은 저장 schema, 사용자 데이터 호환, project export/import 계획을 별도 승인 후 결정한다.
+- **Chrome·Edge exact-SHA:** [#40486509235](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40486509235) SUCCESS 2/2; `npm test` 67/67 PASS; build PASS. same-document 임시 alternate PDF A4에서 본문 표식 3개/래스터 1개 확인. 임시 출력과 같은 테마 저장 출력의 title bbox x/y/w/h 차이 모두 1.5pt 미만. 적용/취소 뒤 본문과 IndexedDB store set 불변. 8개 themes 출력은 distinct geometry + exact source order/raster 유지.
+- **Windows exact-SHA:** [#40486509335](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40486509335) SUCCESS. Installed Electron에서 실제 임시비교 PDF 생성, Apply/Undo 뒤 기존 theme/content 복원. 설치형 Electron 8개의 A4 PDF를 출력·PDF.js로 독립 재독해; 8/8 geometry/title/source markers/raster 통과. M09-D, installed STEP3 A4, NSIS lifecycle, upgrade STEP2 data preservation PASS.
+- **실패/수정 이력:** `a1c0885` Edge: 비교 전 디자인이 `minimal`일 수 있는데 테스트가 `report`를 고정 가정하여 실패. `83045a6` Edge: STEP4 compare flow는 성공했지만 열린 compare 상태에서 기본 테마 라디오로 전환해도 ephemeral override가 이전 테마를 유지하는 UI 결함을 발견. `273db07ae851e8d2420da39688b5fa84641ce65d`에서 normal-theme control이 open comparison을 동기화하게 바꾸고 dynamic initial/current theme test를 추가; Chrome+Edge+Windows 최종 exact-SHA success.
+- **남은 승인/수용:** 저장형 사용자 프리셋 저장/재사용 스키마는 승인대기, OCR 별도 승인 전 제외. 고객 실PDF 5–10개와 구매자 물리 Windows PC는 미검증. 판매/Production NO-GO.
+

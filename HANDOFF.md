@@ -1,17 +1,17 @@
 # HANDOFF — Astra PDF Redesigner
 
-## 최신 인수인계 — 2026-10-27 18:26 KST
+## 최신 인수인계 — 2026-10-27 19:18 KST
 
-1. **목표·승인:** 로컬 PDF 재디자인 도구. STEP3 PDF 가져오기 개발은 사용자 승인 범위이며 OCR은 별도 승인 전 제외한다. 원본 기준은 `docs/ASTRA_ORIGINAL_ROADMAP.txt`, `docs/BLUEPRINT.md`, `REQUIREMENTS.md`.
-2. **이번 작업:** STEP3 텍스트 블록마다 새 문서 포함 체크를 제공한다. 제외 블록은 메모리 검수 초안/원본 비교 화면에 남고 변환 결과에서만 제외된다. 전체 블록 제외 시 저장을 차단하고, 편집 후 검수 동의를 재확인한다. 사용자 저장 스키마 및 원본 PDF를 수정하지 않았다.
-3. **기능·테스트 SHA:** `cc157cba4b442f44b88c3631a72686fdfe8f8af9`; 브랜치 `integration/astra-commercial-core`; PR #9 Draft/open/unmerged. 최신 문서/PR head는 GitHub PR #9에서 확인한다.
-4. **자동 검증:** exact-SHA Chrome+Edge [#40479935848](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935848) SUCCESS 2/2; Node 22 `npm test` 67/67 PASS, `npm run build` PASS. 합성 A4 PDF에서 원본 17개 표식, 제외 머리글/바닥글 4개, 결과 본문 13개, raster 이미지, 취소·Undo를 확인했다.
-5. **Windows/M09-D:** exact-SHA Windows NSIS [#40479935852](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935852) SUCCESS. 설치형 UI 취소→파일 교체→이전 비동기 결과 무시→V2 데이터 보존, STEP3 A4 출력, 설치/제거 및 0.1.0→0.1.1 보존을 확인했다. Hosted runner와 synthetic fixture이며 구매자 물리 PC가 아니다.
-6. **남은 STEP3 수용:** 사용자 자주 쓰는 단순 텍스트 PDF 5–10건을 소유자 PC에서 비교·수정·출력하고, 구매자 물리 Windows PC GUI/인쇄 수용을 확인해야 한다. 고객 파일을 CI/PR로 올리지 않는다. OCR 및 복잡 표/다단 완벽 복원은 범위 밖이다.
-7. **전체 완성도/상용화:** 최초 7단계 약 43% (STEP1·2 완료, STEP3·4·7 부분, STEP5 미구현, STEP6 승인대기). 72시간 내부 기술 시연은 M05의 제한 GO일 뿐 상용 판매는 NO-GO. BASIC 부분, PRO 20/BUSINESS 30 미구현, 공통 오프라인 AI 승인대기.
-8. **보존·제한:** `main`, PR #3/#4, 사용자 데이터, 배포 설정은 미변경·미병합. OCR, 외부 전송, 모델/런타임 다운로드, 비용 서비스, 배포는 실행하지 않았다.
-9. **실패 이력:** 최신 기능 코드 이전의 CI 중간 실패와 원인/수정은 STATUS 및 gap matrix 최신 기록에 남겼다. 최종 exact-SHA 체크는 모두 성공했다.
-10. **다음 순서:** 실제 단순 PDF 묶음의 로컬 수용 비교 → 구매자 물리 Windows 수용 → 결함 수정 및 exact-SHA Chrome/Edge/Windows 회귀 → 상용 게이트 재평가. 원본 설계/요구와 충돌하는 구현은 진행하지 않는다.
+1. **목표·승인:** 원본 최초 설계 `docs/ASTRA_ORIGINAL_ROADMAP.txt`, `docs/BLUEPRINT.md`, `REQUIREMENTS.md` 전체를 구현한다. STEP3 PDF 가져오기는 승인 상태이고 사용자는 STEP4 디자인 비교·적용·취소 개발도 승인했다. OCR은 별도 승인 전 제외하며, 저장형 사용자 스타일 스키마는 별도 승인 전 변경하지 않는다.
+2. **이번 구현:** 기존 8개 디자인을 보존했다. 같은 문서 전체를 한 번에 하나씩 8개 레이아웃으로 바꿔 보는 임시 비교, 선택 디자인 적용, 직전 디자인 취소/복원을 추가했다. 기존 `DesignSettings` 필드만 사용하고 저장 schema/IndexedDB store를 추가하지 않았다. 콘텐츠·이미지·원본 PDF를 변경하지 않는다.
+3. **코드·테스트 기준:** 기능/테스트 SHA `273db07ae851e8d2420da39688b5fa84641ce65d`, 브랜치 `integration/astra-commercial-core`, Draft PR #9 open/unmerged. 이 문서 커밋이 PR HEAD를 전진시키므로 실제 최신 PR HEAD는 GitHub 조회를 기준으로 한다.
+4. **Chrome·Edge:** [Actions #40486509235](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40486509235) exact-SHA SUCCESS 2/2. Node 22 `npm test` 67/67, `npm run build` 성공. 실제 비교 출력 PDF와 저장된 레이아웃 PDF가 A4/텍스트·이미지/레이아웃 기준을 통과했고, 8개 테마 A4 출력이 고유 배치를 유지했다.
+5. **Windows/M09-D:** [Actions #40486509335](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40486509335) exact-SHA SUCCESS. Installed Electron 비교·적용·취소 후 디자인/본문 복원, 8개 실제 A4 PDF 8/8, M09-D 취소·대체·stale 결과 차단·V2 store 보존, NSIS 설치/제거, 0.1.0→0.1.1 STEP2 문서/PNG 유지 확인.
+6. **설계 방식:** 고정 CSS 변형(A)은 빠르고 기존 데이터 호환에 부담이 없지만 조합 증가 시 중복과 유지보수 위험이 크다. 기존 `theme/accent/font/textSize` 토큰과 제한 프리셋(B)을 확장하는 편이 테스트·유지보수에 유리하므로 B 권고. 외부/유료 비용은 없다. 저장형 프리셋 라이브러리의 저장·내보내기/가져오기 구조는 승인 후 설계한다.
+7. **진척/상용화:** 최초 7단계 약 44% 추정 (1·2 완료, 3·4·7 부분, 5 미구현, 6 승인대기). 실PDF 사용자 수용 및 buyer physical Windows GUI/print는 NOT VERIFIED. Sale/Production NO-GO.
+8. **남은 작업 순서:** (1) 사용자 스타일 저장/재사용 요구와 스키마 옵션 승인 → (2) 승인된 토큰 프리셋 보강 및 실제 PDF 검증 → (3) STEP4 갭 매트릭스 갱신 → (4) STEP5/7 범위 내 설계 누락 보강 → (5) 보안·호환·판매 수용 검증. OCR, 외부 전송, 유료 API/모델 다운로드, merge, deployment 금지.
+9. **실패 기록·데이터 보존:** `a1c0885`의 고정 초기테마 테스트 가정을 보정했고, `83045a6`에서 비교 중 테마 컨트롤 동기화 결함을 찾아 `273db07ae851e8d2420da39688b5fa84641ce65d`에서 수정·검증했다. 실패 검사를 건너뛰지 않았다. main·PR #3/#4·V2 기존 데이터·배포 설정·원본 설계는 미변경·미병합.
+10. **환경·갱신:** Production 미배포. 합성 fixture만 사용; 고객 PDF는 CI/PR로 전송하지 않았다. 갱신 2026-10-27 19:18 KST; 현재 검사 근거는 code SHA 위의 두 Actions run이다.
 
 ## 과거 인수인계 스냅샷 — 2026-10-18
 
