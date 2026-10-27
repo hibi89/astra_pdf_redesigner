@@ -2,11 +2,11 @@
 // file, and load that file with Chrome's file input from a different profile B.
 // All content is synthetic. Node 22 / DevTools Protocol, no browser dependency.
 import assert from 'node:assert/strict';
-import {execFileSync} from 'node:child_process';
 import {launchBrowser} from './browser-process.mjs';
 import {mkdtempSync,readFileSync,readdirSync,writeFileSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
+import {getDocument,OPS} from 'pdfjs-dist/legacy/build/pdf.mjs';
 
 const chrome=process.env.CHROME_PATH||'chromium',url=process.env.SMOKE_URL||'http://127.0.0.1:4173';
 const workspace=mkdtempSync(join(tmpdir(),'astra-transfer-'));
@@ -113,6 +113,17 @@ async function addSyntheticImage(tab,mime,name,w,h,shade){
     "input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}))})()";
   await tab.evaluate(command);
 }
+async function setImageLayout(tab,index,alignment,size){
+  const command="(()=>{"+
+    "const figures=[...document.querySelectorAll('.section-editor .block-editor')].filter(block=>block.querySelector('.image-options'));"+
+    "const controls=figures["+index+"]?.querySelectorAll('.image-options select');"+
+    "if(!controls||controls.length!==2)throw Error('Missing image layout controls for image '+"+index+");"+
+    "const set=(element,value)=>{Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(element,value);element.dispatchEvent(new Event('change',{bubbles:true}))};"+
+    "set(controls[0],"+JSON.stringify(alignment)+");set(controls[1],"+JSON.stringify(size)+");"+
+    "return {alignment:controls[0].value,size:controls[1].value}})()";
+  const result=await tab.evaluate(command);
+  assert.deepEqual(result,{alignment,size},'STEP2 image layout controls did not retain selected values');
+}
 let a,b;
 try{
   a=await launch('A');
@@ -132,6 +143,11 @@ try{
   await until(()=>a.evaluate("document.querySelector('.section-editor .add-block input[type=file]')?.disabled"),v=>v===false);
   await addSyntheticImage(a,'image/webp','transfer-landscape.webp',84,36,'#1c7e99');
   await until(()=>a.evaluate("document.querySelectorAll('.project-paper figure img').length"),n=>n===2);
+  await setImageLayout(a,0,'right','small');
+  await setImageLayout(a,1,'left','large');
+  const expectedLayouts=[{alignment:'right',size:'small'},{alignment:'left',size:'large'}];
+  await until(()=>a.evaluate("[...document.querySelectorAll('.project-paper figure')].map(figure=>({alignment:[...figure.classList].find(name=>name.startsWith('align-'))?.slice(6),size:[...figure.classList].find(name=>name.startsWith('figure-'))?.slice(7)}))"),
+    layouts=>JSON.stringify(layouts)===JSON.stringify(expectedLayouts));
   await until(()=>a.evaluate("document.querySelector('.save-chip')?.textContent"),v=>v==='저장됨');
   const snapA=await until(()=>a.evaluate(snapshotJS),s=>s.assets.length===2&&activeDocument(s)?.content.sections[0].blocks.length===3);
   const docA=activeDocument(snapA);
@@ -142,6 +158,9 @@ try{
   assert.equal(docA.design.accent,'#aa593c');
   assert.equal(snapA.assets.length,2);
   assert.ok(docA.content.sections[0].blocks[0].text.includes('CROSS_PROFILE_END_4816'));
+  assert.deepEqual(docA.content.sections[0].blocks.filter(block=>block.kind==='image')
+    .map(({alignment,size})=>({alignment,size})),expectedLayouts,
+    'STEP2 image alignment/size choices were not saved');
   console.log('PASS STEP2 PROFILE A: synthetic paragraphs, metadata, design, PNG and WebP saved in isolated IndexedDB');
 
   await a.send('Page.setDownloadBehavior',{behavior:'allow',downloadPath:workspace});
@@ -205,12 +224,26 @@ try{
   const printed=await b.send('Page.printToPDF',{printBackground:false,preferCSSPageSize:true});
   const pdfPath=join(workspace,'profile-b-imported-a4.pdf');
   writeFileSync(pdfPath,Buffer.from(printed.data,'base64'));
-  assert.ok(execFileSync('pdfinfo',[pdfPath],{encoding:'utf8'}).includes('(A4)'));
-  const text=execFileSync('pdftotext',[pdfPath,'-'],{encoding:'utf8'});
-  assert.ok(text.includes('CROSS_PROFILE_BEGIN_4816')&&text.includes('CROSS_PROFILE_END_4816'));
-  const list=execFileSync('pdfimages',['-list',pdfPath],{encoding:'utf8'});
-  const embedded=list.split('\n').filter(line=>/^\s*\d+\s+\d+\s+image\s/.test(line));
-  assert.ok(embedded.length>=2,'Imported PNG/WebP missing from actual Chrome A4 PDF');
+  const task=getDocument({data:new Uint8Array(readFileSync(pdfPath)),useSystemFonts:true});
+  try{
+    const pdf=await task.promise;
+    let text='',imageDraws=0;
+    for(let pageNumber=1;pageNumber<=pdf.numPages;pageNumber++){
+      const page=await pdf.getPage(pageNumber);
+      const viewport=page.getViewport({scale:1});
+      assert.ok(Math.abs(viewport.width-595.276)<2,'Imported PDF page width is not A4');
+      assert.ok(Math.abs(viewport.height-841.89)<2,'Imported PDF page height is not A4');
+      const content=await page.getTextContent();
+      text+=content.items.filter(item=>'str' in item).map(item=>item.str).join(' ');
+      const operations=await page.getOperatorList();
+      imageDraws+=operations.fnArray.filter(code=>[
+        OPS.paintImageXObject,OPS.paintInlineImageXObject,
+        OPS.paintImageXObjectRepeat,OPS.paintInlineImageXObjectGroup,
+      ].includes(code)).length;
+    }
+    assert.ok(text.includes('CROSS_PROFILE_BEGIN_4816')&&text.includes('CROSS_PROFILE_END_4816'));
+    assert.ok(imageDraws>=2,'Imported PNG/WebP missing from actual Chrome A4 PDF');
+  }finally{await task.destroy();}
   console.log('PASS STEP2 PROFILE B: imported document/2 images persist after reload and appear in real A4 PDF');
 }finally{
   if(a)await a.close();
