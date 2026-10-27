@@ -453,3 +453,11 @@
 - **남은 검증:** 고객 동의 실제 텍스트 중심 PDF 5–10개를 사용자 PC에서만 비교하고, 구매자 물리 Windows PC에서 GUI/인쇄 수용은 아직 미검증. 이 파일들을 CI/PR에 올리지 않는다.
 - **진척 구분:** 아스트라 7단계 약 43%. 72시간 내부 기술 시연은 M05 기준 핵심 경로만 제한 GO이며 완성품/판매 허가가 아니다. BASIC은 부분, PRO 20종·BUSINESS 30종은 미구현, 전 SKU 오프라인 윤문은 승인대기. 상용 판매/Production은 NO-GO.
 - **보존/승인:** main, PR #3/#4, 사용자 저장 데이터, 배포 설정 변경·병합 없음. OCR, 모델/런타임 다운로드, 외부 문서 전송, 유료 서비스, 배포 없음. OCR은 별도 승인 전 제외.
+
+## 2026-10-27 18:40 KST — 총괄 지시 갱신: 설계 기능 구현 우선
+
+- **사용자 운영 방식 확정:** 기존 제한 GO 내부 MVP → 최초 7단계 설계/요구사항 갭 순으로 기능 완성 → 최종 보안·안정성·호환성·상용 QA. 세부 계획: [docs/commercial/MVP_TO_BLUEPRINT_COMPLETION_20261027.md](docs/commercial/MVP_TO_BLUEPRINT_COMPLETION_20261027.md).
+- **개발 다음 우선순위:** STEP4 스타일 토큰·검증된 레이아웃/비교·사용자 프리셋 저장/재사용 → 승인 범위의 STEP5 로컬 레퍼런스·STEP7 검수 보강. 이전 STEP3 합성 경계 테스트의 반복만으로 완성률을 올리지 말 것. 사용자 자료가 없어도 독립 기능 구현 진행, 실PDF/물리 PC는 미검증 유지.
+- **기준 증거:** 기능/테스트 SHA cc157cba4b442f44b88c3631a72686fdfe8f8af9, [Chrome/Edge #40479935848](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935848) 및 [Windows #40479935852](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935852) SUCCESS. 최초 로드맵 약 43% 추정, 상품판매 NO-GO.
+- **승인/보존:** 원본 문서/PNG, main, PR3/PR4, 기존 데이터, 외부 전송/비용/배포 변경 금지. OCR/STEP6 웹검색/로컬 LLM 다운로드/중요 스키마 변경·PR 병합은 별도 승인. 저장·원문 필수 안전 테스트는 구현 시점 유지.
+- **전달:** [PR #9 총괄 지시](https://github.com/hibi89/astra_pdf_redesigner/pull/9#issuecomment-6438610031). 이번 기록은 코드 신규 구현이나 재테스트 완료가 아닌 실행계획 변경.
