@@ -491,3 +491,15 @@
 10. **다음 순서/승인:** GPT-6가 최초 STEP 2 기준과 근거를 재검수한다. GitHub 기록상 PR #7/main 통합에는 별도 명시 승인 필요하며, 승인 전 merge 하지 않는다. STEP 3는 현재 승인 범위가 아니다.
 11. **완성률/로컬 상태:** STEP 2 자동·기술 검증 약 **99%**, 전체 7단계 약 **38%**는 비공식 동일 가중 추정이며 일정/판매 준비도를 뜻하지 않는다. GitHub API commit 때문에 workspace의 local Git HEAD는 `062360b50e3033654df656e84a2ce26cc3aa4061`에 남았고, unrelated untracked `ershaeinastra-step2-check`, `package-lock.json`은 보존했다.
 12. **문서:** `STATUS.md` update commit `d77e756a2ddacdf6b39c5af0e51806ed5bfc7a99`; 이 handoff 저장 뒤 final GitHub branch head를 조회해 기록한다. 갱신 시각 2026-10-27 15:17 KST.
+
+
+## 최신 STEP 2 재검증 및 다음 지시 — 2026-10-27 15:31 KST
+1. **저장소·기준 코드:** `hibi89/astra_pdf_redesigner`, STEP 2 격리 브랜치 `codex/p5-windows-reliability`. 검증 코드 SHA `574001a6e9a8a6af2b1cdee0c49ebace4b5f3ac5`; 테스트 대상 7개 소스/설정 파일은 GitHub 브랜치 파일 내용과 정규화 후 정확히 일치함을 확인했다. 당시 PR #7 문서-only tip은 `647c8f50c4b5f4560db3b5126dae4158556f8785`.
+2. **테스트 결과:** Node 24.21.0에서 `npm test` 19/19 PASS, `npm run build` PASS, `npm run desktop:verify` 11/11 PASS, `node --check tests/step2-cross-profile.mjs`, `node --check desktop/local-pdf-visual.cjs`, `git diff --check` 모두 PASS. 기존 Vite import chunk warning이 있으나 빌드 실패는 아니다.
+3. **Chrome/Edge 실제 흐름:** 합성 프로젝트를 프로필 A에서 저장·JSON 다운로드, 별도 프로필 B에 실제 파일 입력으로 가져오기, 텍스트/날짜/테마/이미지 bytes와 레이아웃 보존, reload, A4 PDF 본문·이미지 검사까지 Chrome과 Edge 각각 PASS.
+4. **실제 PDF 육안:** 합성 STEP 2 문서를 Electron에서 저장/재로드 후 A4 3페이지로 출력. A4, 본문 marker 5/5, 이미지 draw 1개 확인. Poppler 렌더 세 페이지에서 한국어 본문, 줄바꿈·페이지 분할, 이미지 비율 및 캡션 경계에 눈에 띄는 잘림이 없었다. 고객 PDF/사진 품질을 대변하지 않는다.
+5. **실패 기록/해결:** 샌드박스 Electron은 `--version`도 exit `0x80000003`; 승인된 격리 실행 경계에서 같은 합성 검사를 재실행해 성공했다. 첫 Chrome/Edge 교차 프로필 시도도 sandbox와 elevated 프로세스 간 loopback 격리 때문에 timeout. preview와 브라우저를 동일 경계에서 실행하자 둘 다 PASS. 이 실패/복구는 환경 진입 문제로 기록하며 기능 테스트 성공으로 숨기지 않는다.
+6. **데이터·정리:** 신규 합성 문서와 전용 Temp profile만 사용. 사용자 문서와 일반 브라우저/설치 앱 프로필은 열거나 수정하지 않았다. 생성 PDF/PNG 및 preview 서버를 정리했다. 변경 파일 이외 untracked 파일은 그대로 보존.
+7. **PR/배포:** PR #7 Draft/open/unmerged, main 및 Production 미변경. 코드 테스트 SHA는 `574001a6...`; STEP 2 자동·기술 검증 약99%, 전체 7단계 약38%는 비공식 추정이다. 고객 Windows, 실제 고객 PDF, 정전·서명·SmartScreen은 여전히 미검증.
+8. **GitHub 문서 반영:** `STATUS.md` 업데이트 커밋 `519239a0fb8ee78795a81135097ca6cf04d2618f`. 이 HANDOFF 업데이트의 부모는 해당 STATUS 커밋이며, 저장 뒤 PR #7 tip을 다시 조회한다.
+9. **다음 순서:** 사용자의 새 지시에 따라 현재 STEP 2 작업을 닫은 뒤 [GPT-6 PR #9 review comment](https://github.com/hibi89/astra_pdf_redesigner/pull/9#issuecomment-6435368245)를 원문 기준으로 확인한다. 우선 M09-D Windows 설치형 직접 검증과 최초 설계 대비 누락 기능 분석을 수행하고, 실제 테스트 근거 및 최신 SHA를 STATUS/HANDOFF에 기록한다. 외부 모델 다운로드·비용·브랜치 병합은 사전 승인 전 하지 않는다.
