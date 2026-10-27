@@ -247,16 +247,22 @@ try{
   const readStyleSnapshot=()=>evaluate("(async()=>{const open=await new Promise((resolve,reject)=>{const r=indexedDB.open('astra-pdf-redesigner:v2');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});try{return await new Promise((resolve,reject)=>{const tx=open.transaction('documents','readonly');const r=tx.objectStore('documents').get("+JSON.stringify(importedDocId)+
     ");r.onsuccess=()=>resolve({design:r.result.design,content:r.result.content,stores:[...open.objectStoreNames]});r.onerror=()=>reject(r.error)})}finally{open.close()}})()");
   const compareBefore=await readStyleSnapshot();
-  assert.equal(compareBefore.design.theme,'report');
+  const styleThemeIds=['report','minimal','diary','compact','editorial','ledger','brief','folio'];
+  const originalThemeIndex=await evaluate("([...document.querySelectorAll('input[name=v2theme]')]).findIndex(input=>input.checked)");
+  assert.ok(originalThemeIndex>=0&&originalThemeIndex<styleThemeIds.length);
+  assert.equal(compareBefore.design.theme,styleThemeIds[originalThemeIndex],
+    'Persisted theme and selected design control must agree before comparison');
+  const compareThemeIndex=originalThemeIndex===7?0:7;
+  const compareThemeId=styleThemeIds[compareThemeIndex];
   await evaluate("document.querySelector('[data-style-compare-toggle]').click()");
   await eventually(()=>evaluate("document.querySelectorAll('[data-style-compare-theme]').length"),n=>n===8);
-  await evaluate("document.querySelector('[data-style-compare-theme=folio]').click()");
-  await eventually(()=>evaluate("document.querySelector('.project-paper')?.classList.contains('paper-theme-folio')"),x=>x===true);
-  assert.equal(await evaluate("document.querySelectorAll('input[name=v2theme]')[0]?.checked"),true,
+  await evaluate("document.querySelector('[data-style-compare-theme="+JSON.stringify(compareThemeId)+"]').click()");
+  await eventually(()=>evaluate("document.querySelector('.project-paper')?.classList.contains('paper-theme-"+compareThemeId+"')"),x=>x===true);
+  assert.equal(await evaluate("document.querySelectorAll('input[name=v2theme]')["+originalThemeIndex+"]?.checked"),true,
     'Temporary comparison must not select or persist the design');
   assert.deepEqual(await readStyleSnapshot(),compareBefore,'Temporary preview must not mutate any saved content/design or add stores');
   const comparePdf=await send('Page.printToPDF',{preferCSSPageSize:true,printBackground:true});
-  const comparePath=join(dir,'step4-compare-folio.pdf');
+  const comparePath=join(dir,'step4-compare-alternate.pdf');
   writeFileSync(comparePath,Buffer.from(comparePdf.data,'base64'));
   const compareText=execFileSync('pdftotext',[comparePath,'-'],{encoding:'utf8'});
   assert.ok(['STEP3_TEST_BEGIN_7519','STEP3_PAGE2_BEGIN_7519','STEP3_TEST_END_7519'].every(x=>compareText.includes(x)),
@@ -264,13 +270,13 @@ try{
   assert.ok((await execFileSync('pdfinfo',[comparePath],{encoding:'utf8'})).includes('(A4)'),
     'Ephemeral design preview must print to A4');
   await evaluate("document.querySelector('[data-style-compare-apply]').click()");
-  await eventually(()=>evaluate("document.querySelectorAll('input[name=v2theme]')[7]?.checked"),x=>x===true);
+  await eventually(()=>evaluate("document.querySelectorAll('input[name=v2theme]')["+compareThemeIndex+"]?.checked"),x=>x===true);
   await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),x=>x==='저장됨');
   const comparedApplied=await readStyleSnapshot();
-  assert.equal(comparedApplied.design.theme,'folio');
+  assert.equal(comparedApplied.design.theme,compareThemeId);
   assert.deepEqual(comparedApplied.content,compareBefore.content,'Applying a style must not mutate source text/blocks');
   await evaluate("document.querySelector('[data-style-compare-undo]').click()");
-  await eventually(()=>evaluate("document.querySelectorAll('input[name=v2theme]')[0]?.checked"),x=>x===true);
+  await eventually(()=>evaluate("document.querySelectorAll('input[name=v2theme]')["+originalThemeIndex+"]?.checked"),x=>x===true);
   await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),x=>x==='저장됨');
   const comparedRestored=await readStyleSnapshot();
   assert.deepEqual(comparedRestored.design,compareBefore.design,'Apply undo must restore the exact prior design tokens');
@@ -314,10 +320,10 @@ try{
     const pdfInfo=execFileSync('pdfinfo',[theme.path],{encoding:'utf8'});
     assert.ok(pdfInfo.includes('(A4)'),theme.id+' output must be A4');
     const box=wordPosition(theme.path);
-    if(theme.id==='folio'){
+    if(theme.id===compareThemeId){
       for(const key of ['xMin','yMin','xMax','yMax'])
         assert.ok(Math.abs(box[key]-compareBox[key])<1.5,
-          'Ephemeral compare preview and saved folio PDF must have identical geometry: '+key);
+          'Ephemeral compare preview and saved PDF must have identical geometry: '+key);
     }
     assert.ok(box.xMin>=0&&box.yMin>=0&&box.xMax<=595.28&&box.yMax<=841.89,
       theme.id+' first-page title extent outside A4');

@@ -34,6 +34,8 @@ async function prepareInstalledStyleComparison(){
   const themes=[...document.querySelectorAll('input[name="v2theme"]')];
   if(themes.length!==8)throw Error('STEP4 installed compare expected eight existing themes');
   const originalIndex=themes.findIndex(input=>input.checked);
+  const targetIndex=originalIndex===7?0:7;
+  const targetTheme=['report','minimal','diary','compact','editorial','ledger','brief','folio'][targetIndex];
   const paper=document.querySelector('.project-paper');
   const originalClass=paper?.className;
   const sourceText=paper?.textContent;
@@ -45,30 +47,30 @@ async function prepareInstalledStyleComparison(){
     if(document.querySelectorAll('[data-style-compare-theme]').length===8)break;
     await new Promise(resolve=>setTimeout(resolve,100));
   }
-  const candidate=document.querySelector('[data-style-compare-theme="folio"]');
+  const candidate=document.querySelector('[data-style-compare-theme="'+targetTheme+'"]');
   if(!candidate)throw Error('STEP4 comparison candidates did not load');
   candidate.click();
   for(let i=0;i<100;i++){
-    if(document.querySelector('.project-paper')?.classList.contains('paper-theme-folio'))break;
+    if(document.querySelector('.project-paper')?.classList.contains('paper-theme-'+targetTheme))break;
     await new Promise(resolve=>setTimeout(resolve,100));
   }
-  if(!document.querySelector('.project-paper')?.classList.contains('paper-theme-folio'))
+  if(!document.querySelector('.project-paper')?.classList.contains('paper-theme-'+targetTheme))
     throw Error('STEP4 ephemeral compare theme was not rendered');
   if(!themes[originalIndex].checked||document.querySelector('.save-chip')?.textContent!==saveStatus)
     throw Error('STEP4 ephemeral comparison wrote a design change');
-  return {originalIndex,originalClass,sourceText,saveStatus};
+  return {originalIndex,targetIndex,originalClass,sourceText,saveStatus};
 }
 async function finishInstalledStyleComparison(expected){
   const apply=document.querySelector('[data-style-compare-apply]');
   if(!apply||apply.disabled)throw Error('STEP4 compare apply unavailable');
   apply.click();
   for(let i=0;i<100;i++){
-    if(document.querySelectorAll('input[name="v2theme"]')[7]?.checked&&
+    if(document.querySelectorAll('input[name="v2theme"]')[expected.targetIndex]?.checked&&
        document.querySelector('.save-chip')?.textContent==='저장됨')break;
     await new Promise(resolve=>setTimeout(resolve,100));
   }
-  if(!document.querySelectorAll('input[name="v2theme"]')[7]?.checked)
-    throw Error('STEP4 applied folio theme was not saved');
+  if(!document.querySelectorAll('input[name="v2theme"]')[expected.targetIndex]?.checked)
+    throw Error('STEP4 comparison theme was not saved');
   const undo=document.querySelector('[data-style-compare-undo]');
   if(!undo||undo.disabled)throw Error('STEP4 exact apply undo unavailable');
   undo.click();
@@ -92,7 +94,7 @@ async function exerciseInstalledStyleComparison(win,renderLocalPdf){
     throw Error('STEP4 comparison preview did not produce a valid actual PDF');
   await win.webContents.executeJavaScript(
     '('+finishInstalledStyleComparison.toString()+')('+JSON.stringify(expected)+')',true);
-  console.log('PASS STEP4 INSTALLED SAME-DOCUMENT COMPARE/APPLY/UNDO: ephemeral folio PDF valid; existing design/content restored');
+  console.log('PASS STEP4 INSTALLED SAME-DOCUMENT COMPARE/APPLY/UNDO: alternate ephemeral PDF valid; existing design/content restored');
 }
 async function runInstalledEightLayoutAcceptance(win,renderLocalPdf){
   if(process.env.GITHUB_ACTIONS!=='true'||process.platform!=='win32'||!process.env.RUNNER_TEMP)

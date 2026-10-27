@@ -217,7 +217,7 @@ test('M09-E STEP4 same-document style compare and exact undo run in browser and 
     'exerciseInstalledStyleComparison','data-style-compare-theme','data-style-compare-apply',
     'data-style-compare-undo','renderLocalPdf()'])
     assert.ok(helper.includes(marker),'STEP4 installed comparison missing '+marker);
-  for(const marker of ['readStyleSnapshot','step4-compare-folio.pdf','A4',
+  for(const marker of ['readStyleSnapshot','step4-compare-alternate.pdf','A4',
     'compareBefore.content','comparedRestored.design','eight presets'])
     assert.ok(browser.includes(marker),'STEP4 browser comparison missing '+marker);
 });
