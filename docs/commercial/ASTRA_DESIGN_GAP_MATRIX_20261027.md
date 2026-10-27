@@ -14,7 +14,7 @@
 | 원본 단계 | 판정 | 근거와 남은 범위 |
 |---|---|---|
 | STEP 1 — 회고록 꾸미기 | 완료 | 기존 글 작성·테마/색상/폰트·미리보기·PDF 저장 기능이 통합 제품의 기반으로 유지된다. 이 작업에서 해당 경로를 수정하지 않았다. |
-| STEP 2 — 개인 문서 제작기 | 완료 | 섹션/이미지/테마 편집 및 작성 데이터 보존 경로가 있다. exact-SHA 브라우저 회귀 `5d2265414f971fcc8d78b5f4cec11370a61756a1`에서 네 디자인 설정(`theme/accent/textSize/font`) 변경·재로드 후에도 저장 원문이 동일함을 검증했다. |
+| STEP 2 — 개인 문서 제작기 | 완료 | 섹션/이미지/테마 편집 및 작성 데이터 보존 경로가 있다. `5d2265414f971fcc8d78b5f4cec11370a61756a1`에서 네 디자인 설정 변경·재로드에도 원문 보존, `1099b794f32da3e0bc467898e12b0ee7e7e71146`에서 JSON 내보내기/가져오기·잘못된 JSON 거부·복사본 삭제 뒤 원본 보존을 Edge 실제 브라우저로 확인했다. |
 | STEP 3 — PDF 가져오기 | 부분 | 텍스트·이미지 추출, 사용자 검수 후 새 문서 저장, A4 출력, 손상·암호·스캔 입력 경계, 취소·재시도가 합성 fixture로 검증됐다. 깨진 구조를 복구하는 기능, 복잡한 실제 문서 품질, 고객 수용은 미검증이다. |
 | STEP 4 — 디자인 조합 엔진 | 부분 | BASIC 8개 사전 디자인의 출력·선택 경로는 Windows 회귀에서 8/8 확인됐다. 임의 레이아웃/폰트/색상/여백 조합, 여러 스타일 비교·즐겨찾기까지 완료했다는 증거는 없다. |
 | STEP 5 — 레퍼런스 따라 꾸미기 | 미구현 | 레퍼런스 이미지/PDF/URL 입력, 색상·구성 분석, 레퍼런스 기반 스타일 변환의 구현·검증 증거가 없다. 사용자 레퍼런스 파일을 받거나 URL을 연결하는 기능은 데이터 처리 범위 확정이 필요하다. |
@@ -55,6 +55,12 @@
 - 최신 STEP2 데이터·디자인 회귀 exact-SHA `5d2265414f971fcc8d78b5f4cec11370a61756a1`: [Chrome·Edge #40467219994](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40467219994) SUCCESS 2/2, [Windows NSIS #40467220067](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40467220067) SUCCESS. 두 브라우저에서 원문/네 디자인 필드 분리 및 A4 페이지 분할이 통과했고 Windows 로그에 M09-D 직접 UI 표식이 있다. 합성 회귀로 7단계 추정(~43%)과 판매 NO-GO 판정은 바뀌지 않는다.
 - 테스트는 CI의 합성 PDF만 사용했다. 고객 원문, 개인 파일, 외부 모델/런타임 다운로드를 사용하거나 전송하지 않았다.
 
+### Latest exact-SHA STEP2 project JSON check — 2026-10-27
+
+- Test-only SHA `1099b794f32da3e0bc467898e12b0ee7e7e71146`: exported project JSON must preserve exact document content and all four design values; invalid JSON must leave the active record unchanged; valid import must retain design values; deleting the imported copy must leave the original record unchanged.
+- Local unit suite 61/61 and build PASS. GitHub Edge job [#122069789553](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40468551454/job/122069789553) SUCCESS with exact JSON export/import markers. Windows NSIS run [#40468551485](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40468551485) SUCCESS, including M09-D installed UI and STEP2 upgrade data preservation.
+- Chrome job [#122069789889](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40468551454/job/122069789889): unit/build passed; CI-only Korean font installation was still running at 2026-10-27 16:51 KST, so Chrome exact-SHA smoke remains **pending/unverified**. The evidence does not change the ~43% roadmap estimate or NO-GO release assessment.
+
 ## 검토 근거
 
 - [M09-C 취소·재시도 검증](M09_C_PARSE_CANCEL_RECOVERY_20261027.md)
@@ -67,3 +73,4 @@
 ## 출시 판정
 
 **전체 SKU 판매 및 public production: NO-GO.** 기능 개발 검증과 출시 승인을 분리한다. 기존 `main`, PR #3, PR #4는 변경·병합하지 않았다. M09-D Windows CI 통과는 실제 고객 PDF·구매자 PC·AI·SKU 권한·서명/라이선스 게이트 통과를 뜻하지 않는다.
+
