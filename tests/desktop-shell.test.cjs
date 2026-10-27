@@ -59,6 +59,26 @@ test('Windows acceptance fixture is synthetic PNG and requires runner-only PDF o
   assert.ok(lifecycle.includes('Remove-Item -LiteralPath $acceptancePdf -Force'));
 });
 
+test('local PDF visual acceptance is opt-in, hidden, synthetic, and temp-path guarded',()=>{
+  const runtime=fs.readFileSync(path.resolve(__dirname,'../desktop/main.cjs'),'utf8');
+  const runner=fs.readFileSync(path.resolve(__dirname,'../desktop/local-pdf-visual.cjs'),'utf8');
+  const step2Fixture=fs.readFileSync(path.resolve(__dirname,'../desktop/step2-project-acceptance.cjs'),'utf8');
+  const verifier=fs.readFileSync(path.resolve(__dirname,'verify-desktop-pdf.mjs'),'utf8');
+  for(const required of ['--astra-local-step2-acceptance','ASTRA_LOCAL_PDF_PROFILE',
+    'ASTRA_LOCAL_PDF_OUTPUT','path.dirname(profile)!==tempRoot',
+    'path.dirname(output)!==tempRoot','profileInfo.isSymbolicLink()',
+    'fsSync.existsSync(output)',"await fs.writeFile(output,bytes,{flag:'wx'})"]){
+    assert.ok(runtime.includes(required),'Local visual acceptance guard missing '+required);
+  }
+  assert.ok(runner.includes('--astra-desktop-smoke'));
+  assert.ok(runner.includes('--astra-local-step2-acceptance'));
+  assert.ok(runner.includes('windowsHide:true'));
+  assert.ok(runner.includes('pdftoppm'));
+  assert.ok(step2Fixture.includes('Local STEP2 PDF output must be directly under the isolated OS temp folder'));
+  assert.ok(verifier.includes('--local-synthetic'));
+  assert.ok(verifier.includes("assert.equal(doc.numPages,3"));
+});
+
 test('Windows CI exercises real STEP2 UI and IndexedDB before installed PDF output',()=>{
   const fixture=fs.readFileSync(path.resolve(__dirname,'../desktop/step2-project-acceptance.cjs'),'utf8');
   const runtime=fs.readFileSync(path.resolve(__dirname,'../desktop/main.cjs'),'utf8');
