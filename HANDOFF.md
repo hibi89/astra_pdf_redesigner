@@ -464,3 +464,16 @@
 9. **남은 일/우선순위:** (1) 승인된 STEP 2 범위에서 실제 일반 사용자 Windows 10/11 설치판 또는 사용자 직접 수용 절차가 필요하면 별도 결정, (2) 대형 실제 이미지/장문·복잡한 문서를 포함한 실사용 PDF 육안 대조, 정전 복구, 코드 서명/SmartScreen은 별도 검증, (3) GPT-6 총괄이 원래 STEP 2 완료 기준 및 CI 근거를 재검수. STEP 3+는 현재 작업 규칙상 착수하지 않는다.
 10. **완성률 참고:** STEP 2 자동/기술 검증 약 **99%**, 전체 로드맵 약 **38%**라는 비공식 동일 단계 가중 추정은 일정·품질 측정값이 아니다. 38% 계산 근거는 STEP 1 완료, STEP 2 대부분 구현·검증, 별도 Draft STEP 3 일부 코드, STEP 4~7 미착수다. STEP 2 완전 수용/상용 완료 선언은 아니다.
 11. **다음 승인/기록:** 제품 데이터 모델·권한·배포 설정 변경이나 main 병합은 사용자 승인 전 수행하지 않는다. STATUS 갱신 commit: `5b47283ece9145c3a7b369d221b64ac9e310d3f0`; 이 인계 기록은 GitHub 저장 후 최신 branch SHA를 재조회한다.
+
+## 최신 인수인계 — 2026-10-27 15:05 KST (세로 이미지 PDF 출력 검증)
+1. **목표/승인 범위:** 저장소 STEP 2 안정성·데이터 보존과 시각적 출력 확인. STEP 3 PDF 가져오기/OCR와 STEP 4~7은 현재 AGENTS 범위 밖이다.
+2. **저장소/PR:** `hibi89/astra_pdf_redesigner`, `codex/p5-windows-reliability`, 검증 코드 SHA `3a8095c6b9452977b6ad81632baf4dc2d0c3b768`. Draft [PR #7](https://github.com/hibi89/astra_pdf_redesigner/pull/7) open/unmerged이며 main/Production에는 반영하지 않았다.
+3. **코드 변경:** 제품 기능 동작은 바꾸지 않았다. 로컬 전용 headless PDF harness가 Canvas로 만든 144×216 세로 패턴 PNG를 STEP 2 UI로 업로드하고 저장/새로고침 복원/PDF 출력을 확인한다. Windows 설치 CI의 원래 2×2 fixture 및 버전 업그레이드 fixture는 유지된다. profile/PDF/PNG는 새 OS Temp direct child에만 쓰며 테스트 후 삭제한다.
+4. **로컬 검증:** `npm test` **19/19 PASS**; TypeScript/Vite build PASS(기존 `src/step2/model.ts` dynamic/static import warning 1건); `npm run desktop:verify` asset check 및 desktop tests **11/11 PASS**; `npm run desktop:pdf-visual` PASS; `git diff --check` PASS. 실제 Electron PDF는 A4 **3페이지**, text marker **5/5**, image draw **1**. 120dpi 렌더 3장을 직접 열어 한국어, 세로 그림 비율, caption·A4 경계를 확인했고 잘림을 관측하지 못했다.
+5. **GitHub CI:** 동일 코드 SHA `3a8095c6b9452977b6ad81632baf4dc2d0c3b768`에서 [run #40458473476](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40458473476) build/test + Chrome + Edge **SUCCESS**; [run #40458473470](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40458473470) Windows NSIS 설치/실행/제거 + IndexedDB v1→v2 data preservation + artifact 생성 **SUCCESS**. GitHub runner는 Node.js 20 deprecation warning을 기록했지만 job 실패는 없었다.
+6. **실패/시도:** 이 검증 단위 실패 없음. GUI 자동화 대신 hidden Electron/합성 fixture를 사용했다. 실제 일반 사용자 설치 프로필·실제 고객 문서 검증을 대신하지 않는다.
+7. **개인 데이터/로컬 상태:** 사용자 문서·일반 AppData·설치 앱 프로필·원본 설계 문서는 사용하지 않았다. 이 작업은 GitHub API로 branch에 commit했으므로 workspace local Git HEAD는 `062360b50e3033654df656e84a2ce26cc3aa4061`에 남아 있다. 기존 untracked `ershaeinastra-step2-check`, `package-lock.json`은 건드리거나 업로드하지 않고 보존했다.
+8. **배포:** Production/Vercel 없음. PR #7 Draft 유지, merge 없음.
+9. **미검증/다음 순서:** 사용자 Windows 10/11 설치판에서의 별도 수동 수용, 실제 사진·고객 PDF 미관/색상, 전원 중단 복구, signing/SmartScreen은 미검증. 먼저 GPT-6 총괄이 원래 STEP 2 완료 기준과 CI/렌더 근거를 검토하고, 결함 발견 때만 수정한다. PR 병합 또는 다음 단계 착수 전 사용자 승인 필요.
+10. **완성률 참고:** STEP 2 자동/기술 기준 약 **99%**, 7단계 전체 약 **38%**라는 비공식 동등가중 추정이며, 남은 개발 시간이나 판매 가능 판정이 아니다. 38% 근거는 STEP 1 완료·STEP 2 대부분 구현/검증·Draft STEP 3 부분 구현·STEP 4~7 미착수다.
+11. **문서/시각:** `STATUS.md` commit `0d10882aaab51b2820b3c516abd16e5a2465fe6a`; 이 인계 commit 이후 GitHub head를 다시 조회한다. 작성 시각 2026-10-27 15:05 KST.
