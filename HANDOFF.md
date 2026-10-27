@@ -451,3 +451,16 @@
 9. **배포/보안:** Production 배포 없음. unsigned test installer는 7일 보관용 산출물이었다. 일반 사용자 Windows 10/11, 전원 장애, 코드 서명/SmartScreen, 실제 사용자 문서는 미검증.
 10. **남은 일 우선순위:** (1) 사용자가 원하면 원격 synthetic CI의 PDF를 실제 렌더 이미지로 검사해 시각적 QA 완료, (2) 합성 데이터만으로 개인 전용 Windows 프로필 재실행/PDF/JSON UI 흐름 완료, (3) GPT-6가 최초 설계/요구사항과 구현·CI 증거를 재검수. 사용자는 이 PC UI 흐름 중단을 지시했으므로 현재는 원격 evidence 중심으로 인계한다. PR 병합/배포는 별도 승인 전 진행하지 않는다.
 11. **상태/시각:** `STATUS.md`의 보완 기록은 commit `012affe3ce1bc5b9d257d203e64262408ef887be`에 있다. 이 인계는 2026-10-27 14:33 KST에 작성했고, 마지막 docs-only commit SHA는 GitHub 갱신 후 확인한다.
+
+## 최신 인수인계 — 2026-10-27 14:55 KST (STEP 2 headless PDF visual acceptance)
+1. **목표/범위:** Astra PDF Redesigner의 현재 승인 단계 STEP 2를 검증한다. STEP 3 PDF 가져오기/OCR·STEP 4~7은 이 단계 범위 밖이다.
+2. **저장소 상태:** `hibi89/astra_pdf_redesigner` / `codex/p5-windows-reliability`; 검증 코드 SHA `51aed78d1b85676e8ca74ce79786ea6737db495d`. [Draft PR #7](https://github.com/hibi89/astra_pdf_redesigner/pull/7)은 open/unmerged 상태이며 main/Production에는 반영하지 않았다.
+3. **이번 변경:** 제품 앱 동작은 수정하지 않고, 새 `desktop:pdf-visual` 검증 도구와 명시적 opt-in 로컬 synthetic acceptance 경로를 추가했다. 테스트는 실제 STEP 2 UI에 합성 한국어 문서와 PNG를 넣고 IndexedDB 저장→새로고침 복원→Electron PDF 생성까지 수행한다. 숨김 smoke 모드, 새 빈 Temp 프로필, 새 Temp PDF 이름과 직접 자식 경로를 검사하며 CI 전용 acceptance와 서로 배타적이다.
+4. **실제 로컬 결과:** `npm test` **19/19 PASS**; TypeScript/Vite `npm run build` PASS(기존 dynamic/static import 혼합 경고 1건); `npm run desktop:verify` bundle PASS와 **11/11 PASS**; `npm run desktop:pdf-visual` PASS. PDF 검사에서 A4 **3페이지**, 텍스트 marker **5/5**, raster draw **1**을 확인했다. Poppler 120dpi 렌더 3장을 직접 열어 한글 렌더링, 연속 텍스트와 이미지 출력을 확인했고 눈에 띄는 잘림은 발견하지 못했다. 합성 fixture PNG는 2×2 단색이므로 실제 고객 사진·실문서의 미관/색상 fidelity는 미검증이다. 생성물과 테스트 프로필은 확인 후 삭제했다.
+5. **GitHub CI:** 코드 SHA `51aed78d1b85676e8ca74ce79786ea6737db495d`에서 [Actions #40457525436](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40457525436) build/test 및 Chrome/Edge 체크 모두 **SUCCESS**; [Actions #40457525499](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40457525499) Windows x64 NSIS 설치·실행·uninstall, v1→v2 IndexedDB migration/data preservation와 Temp cleanup **SUCCESS**. Node.js 20 deprecation 경고는 GitHub Actions 환경 안내이며 작업 실패는 아니다.
+6. **실패/복구:** 이번 실행에서 테스트 실패 없음. GUI 직접 검수 대신 hidden Electron 경로로 STEP 2 UI와 실 PDF를 검증했다. 실제 사용자 UI 상호작용의 대체 증거이지 실제 사용자 설치 프로필 검수는 아니다.
+7. **기존 데이터/보안:** 개인 AppData·설치 앱 프로필·사용자 문서·원본 로드맵은 읽거나 변경하지 않았다. 합성 fixture와 독립 Temp 프로필/출력만 사용했고 cleanup을 확인했다.
+8. **배포 상태:** Vercel/Production 없음. Draft PR #7 유지; main 병합은 수행하지 않았다.
+9. **남은 일/우선순위:** (1) 승인된 STEP 2 범위에서 실제 일반 사용자 Windows 10/11 설치판 또는 사용자 직접 수용 절차가 필요하면 별도 결정, (2) 대형 실제 이미지/장문·복잡한 문서를 포함한 실사용 PDF 육안 대조, 정전 복구, 코드 서명/SmartScreen은 별도 검증, (3) GPT-6 총괄이 원래 STEP 2 완료 기준 및 CI 근거를 재검수. STEP 3+는 현재 작업 규칙상 착수하지 않는다.
+10. **완성률 참고:** STEP 2 자동/기술 검증 약 **99%**, 전체 로드맵 약 **38%**라는 비공식 동일 단계 가중 추정은 일정·품질 측정값이 아니다. 38% 계산 근거는 STEP 1 완료, STEP 2 대부분 구현·검증, 별도 Draft STEP 3 일부 코드, STEP 4~7 미착수다. STEP 2 완전 수용/상용 완료 선언은 아니다.
+11. **다음 승인/기록:** 제품 데이터 모델·권한·배포 설정 변경이나 main 병합은 사용자 승인 전 수행하지 않는다. STATUS 갱신 commit: `5b47283ece9145c3a7b369d221b64ac9e310d3f0`; 이 인계 기록은 GitHub 저장 후 최신 branch SHA를 재조회한다.
