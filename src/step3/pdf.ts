@@ -1,5 +1,5 @@
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-import { PDF_IMPORT_LIMITS, makePdfDraft, type PdfDraft, type PdfFragment, type PdfPageInput } from './structure.ts';
+import { PDF_IMPORT_LIMITS, makePdfDraft, nextPdfTextCount, type PdfDraft, type PdfFragment, type PdfPageInput } from './structure.ts';
 import { createImageRecoveryBudget, recoverPageImages, type ImageOpCodes } from './imageRecovery.ts';
 import { countVectorPaintOps, type VectorPaintOpCodes } from './vectorRisk.ts';
 import { scanGraphicsComposition, type GraphicsCompositionCodes } from './graphicsRisk.ts';
@@ -21,6 +21,7 @@ export async function extractLocalPdf(file:File):Promise<PdfDraft>{
 
     const pages:PdfPageInput[]=[];
     const imageBudget=createImageRecoveryBudget();
+    let totalExtractedChars=0;
     for(let pageNum=1;pageNum<=pdf.numPages;pageNum++){
       const page=await pdf.getPage(pageNum);
       const view=page.getViewport({scale:1});
@@ -35,6 +36,7 @@ export async function extractLocalPdf(file:File):Promise<PdfDraft>{
         // PDF.js' viewport coordinates are top-left for the rendered page.
         const x=transform[4],y=transform[5]-size;
         if(![x,y,item.width,item.height,size].every(Number.isFinite))continue;
+        totalExtractedChars=nextPdfTextCount(totalExtractedChars,item.str);
         pieces.push({text:item.str,page:pageNum,x,y,width:Math.max(0,item.width),
           height:size,fontSize:size});
       }

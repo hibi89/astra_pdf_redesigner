@@ -23,6 +23,12 @@ export interface PdfDraft {
   fileName:string; pageCount:number; pages:PdfDraftPage[]; warnings:string[]; totalChars:number;
 }
 export const PDF_IMPORT_LIMITS={bytes:30*1024*1024,pages:50,characters:500000,blocks:2500} as const;
+export function nextPdfTextCount(current:number,text:string):number{
+  if(!Number.isSafeInteger(current)||current<0)throw Error('PDF 추출 텍스트 개수 상태가 올바르지 않습니다.');
+  const next=current+text.length;
+  if(next>PDF_IMPORT_LIMITS.characters)throw Error('PDF 추출 텍스트가 50만 자 제한을 초과했습니다.');
+  return next;
+}
 const finite=(n:number)=>Number.isFinite(n)?n:0;
 const round=(n:number)=>Math.round(finite(n)*100)/100;
 const median=(a:number[])=>{
@@ -139,8 +145,7 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
         }});
         totalBlocks++;
       }
-      totalChars+=line.text.length;
-      if(totalChars>PDF_IMPORT_LIMITS.characters)throw Error('PDF 추출 텍스트가 50만 자 제한을 초과했습니다.');
+      totalChars=nextPdfTextCount(totalChars,line.text);
       if(totalBlocks>PDF_IMPORT_LIMITS.blocks)throw Error('PDF 추출 블록이 2,500개 제한을 초과했습니다.');
     }
     outPages.push({number:page.number,blocks,charCount:lines.reduce((n,x)=>n+x.text.length,0),imageDetected:detected>0,images,imageCount:detected,omittedImages:omitted,vectorPaintCount,compositionRisk});

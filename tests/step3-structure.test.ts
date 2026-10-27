@@ -1,9 +1,15 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {makePdfDraft,reconstructLines,type PdfPageInput} from '../src/step3/structure.ts';
+import {makePdfDraft,nextPdfTextCount,PDF_IMPORT_LIMITS,reconstructLines,type PdfPageInput} from '../src/step3/structure.ts';
 import {pdfDraftToProject} from '../src/step3/convert.ts';
 import {blankProject,isProjectDocument} from '../src/step2/model.ts';
 const piece=(text:string,page:number,x:number,y:number,fontSize=12,width=120)=>({text,page,x,y,width,height:fontSize,fontSize});
+test('STEP3: cumulative extracted-text limit stops before later fragments are retained',()=>{
+  const limit=PDF_IMPORT_LIMITS.characters;
+  assert.equal(nextPdfTextCount(limit-2,'ab'),limit);
+  assert.throws(()=>nextPdfTextCount(limit,'x'),/50만 자 제한/);
+  assert.throws(()=>nextPdfTextCount(-1,'x'),/개수 상태/);
+});
 test('STEP3: Korean, numbers, punctuation and source coordinates survive single-column import',()=>{
   const source:PdfPageInput={number:1,width:595,height:842,imageDetected:false,pieces:[
     piece('두 번째 줄 2/3 100%',1,45,102),
@@ -77,3 +83,4 @@ test('STEP3: merged sparse wide text items warn about possible columns without r
   assert.ok(draft.pages[0].blocks.some(b=>b.text.includes('LEFT_ALPHA_902 RIGHT_ALPHA_903')));
   assert.ok(draft.pages[0].blocks.some(b=>b.text.includes('TABLE_C_908 TABLE_D_909')));
 });
+
