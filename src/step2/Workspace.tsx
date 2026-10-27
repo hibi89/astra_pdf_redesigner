@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react';
-import { PALETTE, THEMES } from '../types.ts';
+import { PALETTE, THEMES, type DesignSettings, type ThemeId } from '../types.ts';
 import { LIMITS, documentAssetIds, moveItem, newBlock, newSection, visibleSections, type ContentBlock, type DocumentSection, type ImageAsset, type ProjectDocument } from './model.ts';
 import { downloadProject } from './projectFile.ts';
 import { useWorkspace } from './useWorkspace.ts';
@@ -16,6 +16,9 @@ const allThemes=[...THEMES,
   {id:'brief' as const,label:'이그제큐티브 브리프',description:'대형 인트로 패널과 번호별 핵심 단락'},
   {id:'folio' as const,label:'매거진 폴리오',description:'오른쪽 대형 타이틀·편집형 구획'},
 ];
+function sameDesign(a:DesignSettings,b:DesignSettings):boolean{
+  return a.theme===b.theme&&a.accent===b.accent&&a.textSize===b.textSize&&a.font===b.font;
+}
 function useAssetUrls(assets:readonly ImageAsset[]):Record<string,string>{
   const [urls,setUrls]=useState<Record<string,string>>({});
   useEffect(()=>{
@@ -23,8 +26,8 @@ function useAssetUrls(assets:readonly ImageAsset[]):Record<string,string>{
     setUrls(created);return()=>{for(const value of Object.values(created))URL.revokeObjectURL(value);};
   },[assets]);return urls;
 }
-export function ProjectPreview({doc,urls}: {doc:ProjectDocument;urls:Record<string,string>}){
-  const sections=visibleSections(doc);const design=doc.design;
+export function ProjectPreview({doc,urls,previewTheme}: {doc:ProjectDocument;urls:Record<string,string>;previewTheme?:ThemeId}){
+  const sections=visibleSections(doc);const design=previewTheme?{...doc.design,theme:previewTheme}:doc.design;
   return <article className={`document paper-theme-${design.theme} paper-font-${design.font} paper-size-${design.textSize} project-paper`} style={{'--accent':design.accent} as CSSProperties} aria-label="문서 미리보기">
     <div className="document-heading">
       {design.theme==='diary'&&<span className="document-eyebrow">LEARNING JOURNAL</span>}
@@ -66,6 +69,9 @@ export default function Workspace({onLegacy}:Props){
   const [docsOpen,setDocsOpen]=useState(true),[busy,setBusy]=useState(false),[printBusy,setPrintBusy]=useState(false);
   const [localModelStatus,setLocalModelStatus]=useState('모델 미설치 · 로컬 규칙 검수만 사용 가능');
   const [activeStage,setActiveStage]=useState<1|2|3|4>(1);
+  const [styleCompareOpen,setStyleCompareOpen]=useState(false);
+  const [previewTheme,setPreviewTheme]=useState<{documentId:string;theme:ThemeId}|null>(null);
+  const [styleUndo,setStyleUndo]=useState<{documentId:string;before:DesignSettings;applied:DesignSettings}|null>(null);
   useEffect(()=>{
     let active=true;
     const check=window.astraDesktop?.localModelStatus;
@@ -119,6 +125,9 @@ export default function Workspace({onLegacy}:Props){
   },[w.ready,w.document?.id]);
   const urls=useAssetUrls(w.assets);
   const doc=w.document;
+  const previewThemeId=doc&&previewTheme?.documentId===doc.id?previewTheme.theme:undefined;
+  const selectedCompareTheme=previewThemeId??doc?.design.theme;
+  const canUndoStyle=!!doc&&!!styleUndo&&styleUndo.documentId===doc.id&&sameDesign(doc.design,styleUndo.applied);
   const imageRefs=useMemo(()=>doc?documentAssetIds(doc):[],[doc]);
   const currentSource=!!sourceReview&&sourceReview.documentId===doc?.id;
   const originBlocks=useMemo(()=>doc?reviewableBlocks(doc):[],[doc]);
@@ -141,6 +150,26 @@ export default function Workspace({onLegacy}:Props){
   const editable=w.ready&&w.writable&&!w.operating&&!busy&&!printBusy;
   const operation=async(fn:()=>Promise<unknown>)=>{setBusy(true);try{await fn();}catch(e){w.setError(e instanceof Error?e.message:'작업 중 오류가 발생했습니다.');}finally{setBusy(false);}};
   const editDoc=(fn:(prev:ProjectDocument)=>ProjectDocument)=>w.edit(fn);
+  const openStyleCompare=()=>{
+    if(!doc)return;
+    setPreviewTheme({documentId:doc.id,theme:doc.design.theme});
+    setStyleCompareOpen(true);
+  };
+  const closeStyleCompare=()=>{setStyleCompareOpen(false);setPreviewTheme(null);};
+  const applyComparedTheme=()=>{
+    if(!doc||!styleCompareOpen||!selectedCompareTheme||selectedCompareTheme===doc.design.theme)return;
+    const before=structuredClone(doc.design);
+    const applied={...doc.design,theme:selectedCompareTheme};
+    setStyleUndo({documentId:doc.id,before,applied});
+    editDoc(d=>({...d,design:applied}));
+  };
+  const undoComparedTheme=()=>{
+    if(!doc||!styleUndo||!canUndoStyle)return;
+    const before=structuredClone(styleUndo.before);
+    editDoc(d=>({...d,design:before}));
+    setPreviewTheme({documentId:doc.id,theme:before.theme});
+    setStyleUndo(null);
+  };
   const editSection=(id:string,fn:(s:DocumentSection)=>DocumentSection)=>editDoc(d=>({...d,content:{...d.content,sections:d.content.sections.map(s=>s.id===id?fn(s):s)}}));
   const changeBlock=(sectionId:string,blockId:string,fn:(block:ContentBlock)=>ContentBlock)=>editSection(sectionId,s=>({...s,blocks:s.blocks.map(b=>b.id===blockId?fn(b):b)}));
   const print=async()=>{
@@ -255,7 +284,7 @@ export default function Workspace({onLegacy}:Props){
         </>}
       </aside>
       <div className="preview-column"><div className="preview-heading no-print"><div><h2>새 디자인 미리보기</h2><p>A4 기준 · 최종 페이지 나눔은 인쇄 창에서 확인</p></div><span className="size-tag">A4</span></div>
-        <div className="paper-surface">{doc?<ProjectPreview doc={doc} urls={urls}/>:<div className="document">{w.ready?'문서를 열 수 없습니다.':'불러오는 중…'}</div>}</div>
+        <div className="paper-surface">{doc?<ProjectPreview doc={doc} urls={urls} previewTheme={previewThemeId}/>:<div className="document">{w.ready?'문서를 열 수 없습니다.':'불러오는 중…'}</div>}</div>
         <p className="print-tip no-print">Chrome/Edge에서 PDF로 저장, A4, 머리글·바닥글 해제를 확인하세요. 인쇄는 이미지 로딩이 완료될 때까지 기다립니다.</p>
       </div>
       <aside tabIndex={-1} className="studio-style-column no-print" aria-label="디자인 스튜디오">
@@ -271,6 +300,32 @@ export default function Workspace({onLegacy}:Props){
             <div className="setting-block"><h3>포인트 색상</h3><div className="swatches">{PALETTE.map(color=><label title={color.label} className={`swatch-wrap ${doc.design.accent===color.value?'active':''}`} key={color.value}><input disabled={!editable} type="radio" name="v2accent" aria-label={color.label} checked={doc.design.accent===color.value} onChange={()=>editDoc(d=>({...d,design:{...d.design,accent:color.value}}))}/><span className="swatch" style={{backgroundColor:color.value}}/></label>)}</div></div>
             <div className="setting-block"><h3>본문 크기</h3><div className="segmented">{(['small','medium','large'] as const).map((size,i)=><label className={doc.design.textSize===size?'on':''} key={size}><input disabled={!editable} type="radio" name="v2size" checked={doc.design.textSize===size} onChange={()=>editDoc(d=>({...d,design:{...d.design,textSize:size}}))}/>{['작게','보통','크게'][i]}</label>)}</div></div>
             <div className="setting-block"><h3>폰트</h3><div className="segmented">{(['sans','serif'] as const).map((font,i)=><label className={doc.design.font===font?'on':''} key={font}><input disabled={!editable} type="radio" name="v2font" checked={doc.design.font===font} onChange={()=>editDoc(d=>({...d,design:{...d.design,font}}))}/>{['고딕','명조'][i]}</label>)}</div><p className="help-text">설치된 시스템 글꼴에 따라 표시가 달라집니다.</p></div>
+          </section>
+          <section className="panel style-compare-panel" aria-label="같은 문서 디자인 비교">
+            <div className="panel-heading project-heading-row"><h2>같은 문서 디자인 비교</h2>
+              <button type="button" className="secondary-button" data-style-compare-toggle aria-expanded={styleCompareOpen}
+                onClick={styleCompareOpen?closeStyleCompare:openStyleCompare}>{styleCompareOpen?'비교 닫기':'8개 디자인 비교'}</button>
+            </div>
+            {styleCompareOpen&&selectedCompareTheme&&<>
+              <p className="help-text">같은 문서 전체를 한 번에 하나씩 미리봅니다. 미리보기만으로는 저장되지 않습니다.</p>
+              <div className="style-compare-candidates" role="group" aria-label="미리 볼 디자인">
+                {allThemes.map(theme=><button type="button" key={theme.id} data-style-compare-theme={theme.id}
+                  aria-pressed={selectedCompareTheme===theme.id}
+                  className={selectedCompareTheme===theme.id?'selected':''}
+                  onClick={()=>doc&&setPreviewTheme({documentId:doc.id,theme:theme.id})}>{theme.label}</button>)}
+              </div>
+              <p className="style-compare-status" role="status">
+                {selectedCompareTheme===doc.design.theme?'저장된 디자인을 미리 보는 중':'임시 미리보기 · 저장 데이터는 변경되지 않았습니다'}
+              </p>
+              <div className="toolbar project-toolbar style-compare-actions">
+                <button type="button" className="secondary-button" data-style-compare-apply
+                  disabled={!editable||selectedCompareTheme===doc.design.theme} onClick={applyComparedTheme}>선택 디자인 적용</button>
+                {styleUndo?.documentId===doc.id&&<button type="button" className="text-button" data-style-compare-undo
+                  disabled={!editable||!canUndoStyle} onClick={undoComparedTheme}>
+                  {canUndoStyle?'방금 적용 취소':'다른 디자인 변경 후에는 취소할 수 없습니다'}
+                </button>}
+              </div>
+            </>}
           </section>
         </> : <p className="panel">문서를 불러오면 스타일을 선택할 수 있습니다.</p>}
       </aside>

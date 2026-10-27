@@ -207,3 +207,15 @@ button:disabled{cursor:not-allowed;opacity:.48}select{min-height:38px;padding:7p
   .paper-theme-folio{padding-left:28mm!important;padding-right:13mm!important}
   .paper-theme-brief .document-heading,.paper-theme-folio .document-heading{break-inside:avoid-page}
 }
+
+/* STEP4 same-document theme comparison. Only one full document preview is mounted. */
+.style-compare-panel .panel-heading{gap:8px;flex-wrap:wrap}
+.style-compare-panel .style-compare-candidates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.style-compare-panel .style-compare-candidates button{min-width:0;padding:8px 9px;border:1px solid #d1dce3;border-radius:7px;background:#fff;color:#294858;text-align:left;font:inherit;font-size:11px;cursor:pointer}
+.style-compare-panel .style-compare-candidates button.selected,
+.style-compare-panel .style-compare-candidates button[aria-pressed=true]{border-color:#23739e;background:#e8f4f8;box-shadow:0 0 0 1px #23739e}
+.style-compare-panel .style-compare-candidates button:focus-visible,
+.style-compare-panel button:focus-visible{outline:3px solid #23729b;outline-offset:2px}
+.style-compare-status{font-size:11px;line-height:1.45;color:#395b6d}
+.style-compare-actions{align-items:center}
+@media print{.style-compare-panel{display:none!important}}

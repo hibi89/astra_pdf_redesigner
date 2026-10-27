@@ -243,6 +243,42 @@ try{
     const attributes=Object.fromEntries([...match[1].matchAll(/(xMin|yMin|xMax|yMax)="([^"]+)"/g)].map(m=>[m[1],Number(m[2])]));
     return attributes;
   };
+  // STEP4: same-document theme comparison is ephemeral until Apply and can be undone without touching content.
+  const readStyleSnapshot=()=>evaluate("(async()=>{const open=await new Promise((resolve,reject)=>{const r=indexedDB.open('astra-pdf-redesigner:v2');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});try{return await new Promise((resolve,reject)=>{const tx=open.transaction('documents','readonly');const r=tx.objectStore('documents').get("+JSON.stringify(importedDocId)+
+    ");r.onsuccess=()=>resolve({design:r.result.design,content:r.result.content,stores:[...open.objectStoreNames]});r.onerror=()=>reject(r.error)})}finally{open.close()}})()");
+  const compareBefore=await readStyleSnapshot();
+  assert.equal(compareBefore.design.theme,'report');
+  await evaluate("document.querySelector('[data-style-compare-toggle]').click()");
+  await eventually(()=>evaluate("document.querySelectorAll('[data-style-compare-theme]').length"),n=>n===8);
+  await evaluate("document.querySelector('[data-style-compare-theme=folio]').click()");
+  await eventually(()=>evaluate("document.querySelector('.project-paper')?.classList.contains('paper-theme-folio')"),x=>x===true);
+  assert.equal(await evaluate("document.querySelectorAll('input[name=v2theme]')[0]?.checked"),true,
+    'Temporary comparison must not select or persist the design');
+  assert.deepEqual(await readStyleSnapshot(),compareBefore,'Temporary preview must not mutate any saved content/design or add stores');
+  const comparePdf=await send('Page.printToPDF',{preferCSSPageSize:true,printBackground:true});
+  const comparePath=join(dir,'step4-compare-folio.pdf');
+  writeFileSync(comparePath,Buffer.from(comparePdf.data,'base64'));
+  const compareText=execFileSync('pdftotext',[comparePath,'-'],{encoding:'utf8'});
+  assert.ok(['STEP3_TEST_BEGIN_7519','STEP3_PAGE2_BEGIN_7519','STEP3_TEST_END_7519'].every(x=>compareText.includes(x)),
+    'Ephemeral design preview PDF must preserve the imported document text');
+  assert.ok((await execFileSync('pdfinfo',[comparePath],{encoding:'utf8'})).includes('(A4)'),
+    'Ephemeral design preview must print to A4');
+  await evaluate("document.querySelector('[data-style-compare-apply]').click()");
+  await eventually(()=>evaluate("document.querySelectorAll('input[name=v2theme]')[7]?.checked"),x=>x===true);
+  await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),x=>x==='저장됨');
+  const comparedApplied=await readStyleSnapshot();
+  assert.equal(comparedApplied.design.theme,'folio');
+  assert.deepEqual(comparedApplied.content,compareBefore.content,'Applying a style must not mutate source text/blocks');
+  await evaluate("document.querySelector('[data-style-compare-undo]').click()");
+  await eventually(()=>evaluate("document.querySelectorAll('input[name=v2theme]')[0]?.checked"),x=>x===true);
+  await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),x=>x==='저장됨');
+  const comparedRestored=await readStyleSnapshot();
+  assert.deepEqual(comparedRestored.design,compareBefore.design,'Apply undo must restore the exact prior design tokens');
+  assert.deepEqual(comparedRestored.content,compareBefore.content,'Apply undo must preserve all content and image references');
+  assert.deepEqual(comparedRestored.stores,compareBefore.stores,'STEP4 comparison must not change the IndexedDB schema');
+  console.log('PASS STEP4 SAME-DOCUMENT COMPARE/APPLY/UNDO: eight presets, ephemeral PDF parity, exact content/store preservation');
+
+  const compareBox=wordPosition(comparePath);
   const reportBox=wordPosition(reportPath),minimalBox=wordPosition(minimalPath);
   assert.ok(Math.abs(reportBox.yMin-minimalBox.yMin)>8||Math.abs(reportBox.xMin-minimalBox.xMin)>8,
     'M02 requires actual PDF title positions to differ, not only color/theme ID');
@@ -278,6 +314,11 @@ try{
     const pdfInfo=execFileSync('pdfinfo',[theme.path],{encoding:'utf8'});
     assert.ok(pdfInfo.includes('(A4)'),theme.id+' output must be A4');
     const box=wordPosition(theme.path);
+    if(theme.id==='folio'){
+      for(const key of ['xMin','yMin','xMax','yMax'])
+        assert.ok(Math.abs(box[key]-compareBox[key])<1.5,
+          'Ephemeral compare preview and saved folio PDF must have identical geometry: '+key);
+    }
     assert.ok(box.xMin>=0&&box.yMin>=0&&box.xMax<=595.28&&box.yMax<=841.89,
       theme.id+' first-page title extent outside A4');
     const signature=[box.xMin,box.yMin,box.xMax-box.xMin].map(x=>Math.round(x/3));

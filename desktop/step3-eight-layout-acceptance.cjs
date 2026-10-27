@@ -30,6 +30,70 @@ async function chooseTheme(themeIndex){
   throw Error('Installed renderer never switched/committed theme '+theme);
 }
 
+async function prepareInstalledStyleComparison(){
+  const themes=[...document.querySelectorAll('input[name="v2theme"]')];
+  if(themes.length!==8)throw Error('STEP4 installed compare expected eight existing themes');
+  const originalIndex=themes.findIndex(input=>input.checked);
+  const paper=document.querySelector('.project-paper');
+  const originalClass=paper?.className;
+  const sourceText=paper?.textContent;
+  const saveStatus=document.querySelector('.save-chip')?.textContent;
+  if(originalIndex<0||!paper?.textContent.includes('ASTRA_PDF_PAGE_ONE_7401')||
+     !paper.textContent.includes('ASTRA_PDF_PAGE_TWO_7402'))throw Error('STEP4 source fixture missing');
+  document.querySelector('[data-style-compare-toggle]')?.click();
+  for(let i=0;i<100;i++){
+    if(document.querySelectorAll('[data-style-compare-theme]').length===8)break;
+    await new Promise(resolve=>setTimeout(resolve,100));
+  }
+  const candidate=document.querySelector('[data-style-compare-theme="folio"]');
+  if(!candidate)throw Error('STEP4 comparison candidates did not load');
+  candidate.click();
+  for(let i=0;i<100;i++){
+    if(document.querySelector('.project-paper')?.classList.contains('paper-theme-folio'))break;
+    await new Promise(resolve=>setTimeout(resolve,100));
+  }
+  if(!document.querySelector('.project-paper')?.classList.contains('paper-theme-folio'))
+    throw Error('STEP4 ephemeral compare theme was not rendered');
+  if(!themes[originalIndex].checked||document.querySelector('.save-chip')?.textContent!==saveStatus)
+    throw Error('STEP4 ephemeral comparison wrote a design change');
+  return {originalIndex,originalClass,sourceText,saveStatus};
+}
+async function finishInstalledStyleComparison(expected){
+  const apply=document.querySelector('[data-style-compare-apply]');
+  if(!apply||apply.disabled)throw Error('STEP4 compare apply unavailable');
+  apply.click();
+  for(let i=0;i<100;i++){
+    if(document.querySelectorAll('input[name="v2theme"]')[7]?.checked&&
+       document.querySelector('.save-chip')?.textContent==='저장됨')break;
+    await new Promise(resolve=>setTimeout(resolve,100));
+  }
+  if(!document.querySelectorAll('input[name="v2theme"]')[7]?.checked)
+    throw Error('STEP4 applied folio theme was not saved');
+  const undo=document.querySelector('[data-style-compare-undo]');
+  if(!undo||undo.disabled)throw Error('STEP4 exact apply undo unavailable');
+  undo.click();
+  for(let i=0;i<100;i++){
+    if(document.querySelectorAll('input[name="v2theme"]')[expected.originalIndex]?.checked&&
+       document.querySelector('.save-chip')?.textContent==='저장됨')break;
+    await new Promise(resolve=>setTimeout(resolve,100));
+  }
+  const paper=document.querySelector('.project-paper');
+  if(!document.querySelectorAll('input[name="v2theme"]')[expected.originalIndex]?.checked||
+     paper?.className!==expected.originalClass||paper?.textContent!==expected.sourceText)
+    throw Error('STEP4 apply undo failed to restore design or document content');
+  document.querySelector('[data-style-compare-toggle]')?.click();
+  return true;
+}
+async function exerciseInstalledStyleComparison(win,renderLocalPdf){
+  const expected=await win.webContents.executeJavaScript(
+    '('+prepareInstalledStyleComparison.toString()+')()',true);
+  const bytes=await renderLocalPdf(); // actual installed Electron PDF while the comparison theme is still ephemeral
+  if(bytes.length<3000||bytes.subarray(0,5).toString('ascii')!=='%PDF-')
+    throw Error('STEP4 comparison preview did not produce a valid actual PDF');
+  await win.webContents.executeJavaScript(
+    '('+finishInstalledStyleComparison.toString()+')('+JSON.stringify(expected)+')',true);
+  console.log('PASS STEP4 INSTALLED SAME-DOCUMENT COMPARE/APPLY/UNDO: ephemeral folio PDF valid; existing design/content restored');
+}
 async function runInstalledEightLayoutAcceptance(win,renderLocalPdf){
   if(process.env.GITHUB_ACTIONS!=='true'||process.platform!=='win32'||!process.env.RUNNER_TEMP)
     throw Error('M08-A allowed only on GitHub-hosted Windows CI');
@@ -40,6 +104,7 @@ async function runInstalledEightLayoutAcceptance(win,renderLocalPdf){
   if(path.dirname(folder)!==root||!/^astra-step3-layouts-[A-Za-z0-9-]+$/i.test(path.basename(folder)))
     throw Error('M08-A output path must be an isolated runner-only directory');
   await fs.mkdir(folder,{recursive:false}); // never overwrite or reuse a prior output
+  await exerciseInstalledStyleComparison(win,renderLocalPdf);
   let commonTitle=null;
   for(let index=0;index<BASIC_THEMES.length;index++){
     const theme=BASIC_THEMES[index];

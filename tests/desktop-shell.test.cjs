@@ -209,3 +209,15 @@ test('M09-D drives installed Windows cancel/retry UI and compares every V2 store
   assert.ok(lifecycle.includes('--astra-step3-acceptance'));
   assert.ok(ci.includes('windows-installer-lifecycle.ps1'));
 });
+
+test('M09-E STEP4 same-document style compare and exact undo run in browser and installed Windows',()=>{
+  const helper=fs.readFileSync(path.resolve(__dirname,'../desktop/step3-eight-layout-acceptance.cjs'),'utf8');
+  const browser=fs.readFileSync(path.resolve(__dirname,'step3-browser.mjs'),'utf8');
+  for(const marker of ['prepareInstalledStyleComparison','finishInstalledStyleComparison',
+    'exerciseInstalledStyleComparison','data-style-compare-theme','data-style-compare-apply',
+    'data-style-compare-undo','renderLocalPdf()'])
+    assert.ok(helper.includes(marker),'STEP4 installed comparison missing '+marker);
+  for(const marker of ['readStyleSnapshot','step4-compare-folio.pdf','A4',
+    'compareBefore.content','comparedRestored.design','eight presets'])
+    assert.ok(browser.includes(marker),'STEP4 browser comparison missing '+marker);
+});
