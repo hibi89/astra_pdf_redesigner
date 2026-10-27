@@ -21,7 +21,8 @@ async function snapshotInstalledV2(){
     request.onerror=()=>reject(request.error||Error('M09-D could not open existing V2 database'));
     request.onsuccess=()=>resolve(request.result);
   });
-  if(db.version!==2){db.close();throw Error('M09-D expected IndexedDB schema V2, got '+db.version);}
+  // IDB upgrade version is 1; schemaVersion:2 belongs to stored documents.
+  if(db.version!==1){db.close();throw Error('M09-D expected IndexedDB upgrade version 1 (document schema V2), got '+db.version);}
   const stores=Array.from(db.objectStoreNames).sort();
   if(!['assets','documents','meta'].every(name=>stores.includes(name))){
     db.close();throw Error('M09-D missing a V2 object store: '+stores.join(','));
