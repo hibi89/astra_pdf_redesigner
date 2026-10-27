@@ -364,3 +364,12 @@
 - [Chrome/Edge Actions #39244384031](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39244384031)는 두 job SUCCESS. STEP2 편집·저장·재실행, PNG/JPEG/WebP 보존, 실제 JSON 파일 export/import, A4 PDF 및 장문 캡션/페이지 경계 검증이 통과했다. Chrome 임시 프로필 정리에서 `ENOTEMPTY` 지연 경고가 있었고 Edge는 CDP 연결을 한 차례 재시도한 후 통과했다. 해당 runner는 폐기형 CI 환경이다.
 - SHA 범위: 위 Actions는 9fbf467 기준이다. 후속 제품 코드 062360b의 프로필 실행 보강분은 로컬 단위/빌드/desktop:verify로 확인했으며, 그 이후 3개 GitHub commit은 STATUS/HANDOFF 문서만 변경했다.
 - 시각적 PDF 육안 검수, 실제 일반 사용자 Windows 10/11, 사용자 문서, 전원 차단, 서명/SmartScreen, Production 배포는 **미검증**. 설계 범위의 STEP3 PDF 가져오기/OCR 및 STEP4는 시작하지 않았다.
+
+## 2026-10-27 14:55 KST — STEP 2 headless PDF visual acceptance
+- 저장소/브랜치: `hibi89/astra_pdf_redesigner`, `codex/p5-windows-reliability`. 검증 코드 SHA: `51aed78d1b85676e8ca74ce79786ea6737db495d`; Draft PR #7은 open/draft/unmerged. main 병합 및 Production 배포 없음.
+- 제품 기능은 변경하지 않았다. 합성 데이터 전용 `desktop:pdf-visual` 검증 경로를 추가했다. 숨김 Electron smoke에서 실제 STEP 2 편집 UI로 문서/PNG를 IndexedDB에 저장하고 재로드한 뒤 PDF를 생성한다. 전용 빈 Temp 프로필과 새 Temp 출력 경로를 강제하며 개인 프로필·실문서를 사용하지 않는다.
+- 실제 출력 검사: Electron PDF **A4 3페이지**, 한글/숫자 marker **5/5**, raster draw **1**. Poppler로 120dpi PNG 3장을 렌더해 직접 확인했고 눈에 띄는 텍스트 잘림 및 이미지 누락은 없었다. 테스트 PNG는 2×2 단색 합성 이미지이므로 실제 사진의 시각 품질·고객 문서는 미검증이다. 생성 PDF/PNG와 테스트 프로필은 검사 뒤 정리했다.
+- 로컬: `npm test` **19/19 PASS**; `npm run build` PASS(기존 `model.ts` dynamic/static import 혼합 경고 1건); `npm run desktop:verify` bundle 검사 PASS 및 **11/11 PASS**; `npm run desktop:pdf-visual` PASS; `git diff --check` PASS.
+- GitHub Actions, 동일 코드 SHA 기준: [#40457525436](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40457525436) build/test 및 Chrome/Edge browser checks **SUCCESS**; [#40457525499](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40457525499) Windows x64 NSIS 설치·실행·제거 및 v1→v2 IndexedDB 보존 검사 **SUCCESS**. Windows 작업의 임시 프로필 정리도 성공했다. Actions에 Node.js 20 지원 종료 공지 warning이 있었으나 작업은 통과했다.
+- 남은 경계: 사용자 Windows 10/11의 설치판 수동 확인, 실제 고객 문서·사진, 정전 복구, 서명/SmartScreen은 미검증. 대화형 PC GUI 검수는 사용자가 중단 요청한 범위를 존중해 수행하지 않았다. STEP 3 PDF 가져오기/OCR와 STEP 4~7은 현재 AGENTS 승인 범위 밖이다.
+- 비공식 추정: STEP 2의 기술 구현/자동 검증 약 **99%**; 전체 로드맵 약 **38%**(기존 STEP 1=100%, STEP 2≈99%, 별도 draft STEP 3 일부 구현, STEP 4~7 미착수의 동일 단계 가중 참고치). 일정/판매 준비도를 계량한 값이 아니며, STEP 2 사용자 설치판 수용과 원래 7단계 전체 완료를 뜻하지 않는다.
