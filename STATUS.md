@@ -373,3 +373,10 @@
 - GitHub Actions, 동일 코드 SHA 기준: [#40457525436](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40457525436) build/test 및 Chrome/Edge browser checks **SUCCESS**; [#40457525499](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40457525499) Windows x64 NSIS 설치·실행·제거 및 v1→v2 IndexedDB 보존 검사 **SUCCESS**. Windows 작업의 임시 프로필 정리도 성공했다. Actions에 Node.js 20 지원 종료 공지 warning이 있었으나 작업은 통과했다.
 - 남은 경계: 사용자 Windows 10/11의 설치판 수동 확인, 실제 고객 문서·사진, 정전 복구, 서명/SmartScreen은 미검증. 대화형 PC GUI 검수는 사용자가 중단 요청한 범위를 존중해 수행하지 않았다. STEP 3 PDF 가져오기/OCR와 STEP 4~7은 현재 AGENTS 승인 범위 밖이다.
 - 비공식 추정: STEP 2의 기술 구현/자동 검증 약 **99%**; 전체 로드맵 약 **38%**(기존 STEP 1=100%, STEP 2≈99%, 별도 draft STEP 3 일부 구현, STEP 4~7 미착수의 동일 단계 가중 참고치). 일정/판매 준비도를 계량한 값이 아니며, STEP 2 사용자 설치판 수용과 원래 7단계 전체 완료를 뜻하지 않는다.
+
+## 2026-10-27 15:05 KST — STEP 2 portrait-image PDF visual follow-up
+- 검증 코드 SHA `3a8095c6b9452977b6ad81632baf4dc2d0c3b768`, `codex/p5-windows-reliability`. 앞선 14:55 기록의 정사각형 단색 fixture를 후속 개선하여, **로컬 전용** hidden acceptance에서 Canvas로 144×216 세로 패턴 PNG를 만들고 실제 UI 업로드·IndexedDB 저장·재로드·PDF 출력까지 검증했다. Windows 설치판 CI의 기존 fixture(2×2 PNG)는 바꾸지 않았다.
+- Electron 출력 PDF는 A4 **3페이지**, 한국어/숫자 marker **5/5**, raster draw **1**. Poppler 120dpi 렌더 3장을 직접 확인해 세로 이미지의 가로세로 비율이 유지되고 캡션이 페이지 안에 들어오며 눈에 띄는 잘림이 없음을 확인했다. 합성 그림 결과이며 실제 고객 PDF/사진과 사용자 Windows 10/11 수동 수용은 미검증이다. 테스트 PDF/PNG와 격리 프로필은 정리했다.
+- 로컬 결과: `npm test` **19/19 PASS**, `npm run build` PASS(기존 dynamic/static import 경고 1건), `npm run desktop:verify` bundle PASS 및 **11/11 PASS**, `npm run desktop:pdf-visual` PASS, `git diff --check` PASS.
+- 이 SHA의 GitHub Actions: [#40458473476](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40458473476) build-and-test 및 Chrome/Edge 체크 **SUCCESS**; [#40458473470](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40458473470) Windows NSIS 설치/실행/제거, v1→v2 IndexedDB 보존, installer artifact 생성 **SUCCESS**. Actions의 Node.js 20 지원 종료 공지는 warning이며 실행은 모두 성공했다.
+- **상태:** Draft PR #7 open/unmerged, main 미변경, Production 미배포. 현재 STEP 2 자동·기술 검증 추정 약 **99%**, 전체 7단계 약 **38%**는 비공식 동등가중 참고치이며 실사용/판매 준비 척도는 아니다. STEP 3 PDF 가져오기/OCR 및 STEP 4~7은 승인 범위 밖이다.
