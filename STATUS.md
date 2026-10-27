@@ -355,3 +355,12 @@
 - 안전/범위: 격리 경로 `%TEMP%\astra-p5-personal-test-profile`은 생성되지 않았다. 설치 앱의 일반 AppData 프로필을 열거나 변경하지 않았고 사용자 문서도 사용하지 않았다. Windows Application 이벤트 로그 읽기는 현재 권한으로 거부되어 원인 진단에 포함하지 못했다.
 - **미검증:** 앱 화면 편집, 합성 이미지 삽입, 저장 후 재실행 복원, PDF 생성·열기·A4/한글/페이지/이미지 육안 검사, JSON 백업/가져오기. 개인용 1차 완료로 판정하지 않는다.
 - 다음: Electron 실행 실패 원인을 권한이 있는 Windows 진단 또는 호환 환경에서 확인한 뒤, 동일 격리 프로필에서 개인용 계획의 합성 문서 저장·재실행·PDF·백업 흐름을 완료한다. PR #7 Draft와 main 병합 금지 상태는 유지한다.
+
+## 2026-10-27 14:33 KST — PC GUI 중단 및 기존 격리 자동화 증거 확인
+- 기준: 저장소 `hibi89/astra_pdf_redesigner`, 브랜치 `codex/p5-windows-reliability`; 문서 갱신 전 HEAD `77cf4c6b989579a0bc34bf83904e09d3127e4c87`, 제품 코드 기준 `062360b50e3033654df656e84a2ce26cc3aa4061`. main 변경·병합 없음, PR #7은 Draft/open/unmerged.
+- 최신 로컬 코드 검증(062360b): `npm test` 19/19 PASS, `npm run build` PASS(Vite dynamic/static import 경고 1건), `npm run desktop:verify` bundle 검사 및 desktop tests 10/10 PASS. Electron 44.9.0 실행 및 전용 `%TEMP%\astra-p5-personal-test-profile` 경로의 시작도 성공했다.
+- PC GUI 인수시험은 사용자의 요청에 따라 즉시 중단했다. 전용 프로필에 합성 한글 문서 저장까지 확인했으며, 이미지 파일 선택은 표시된 Temp 폴더에서 파일을 찾지 못해 완료되지 않았다. 개인 문서/설치 앱 프로필은 열지 않았다. PDF 저장·육안 검사·JSON UI 내보내기/가져오기는 이번 로컬 GUI에서 **미검증**이다. 격리 프로필과 합성 초안은 보존했다.
+- 원격 자동화 근거: [Windows 설치판 Actions #39244383974](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39244383974)는 코드 SHA `9fbf467a7d7bfe1ecd84611298094595197e626f` 기준 SUCCESS. Windows Server 2025에서 NSIS 설치·업그레이드, STEP2 문서/PNG 및 IndexedDB 보존, PDF A4 3페이지·한글/수치 marker 5/5·이미지 draw 1건, 동시 versionchange/미저장 초안 보존을 확인했다.
+- [Chrome/Edge Actions #39244384031](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39244384031)는 두 job SUCCESS. STEP2 편집·저장·재실행, PNG/JPEG/WebP 보존, 실제 JSON 파일 export/import, A4 PDF 및 장문 캡션/페이지 경계 검증이 통과했다. Chrome 임시 프로필 정리에서 `ENOTEMPTY` 지연 경고가 있었고 Edge는 CDP 연결을 한 차례 재시도한 후 통과했다. 해당 runner는 폐기형 CI 환경이다.
+- SHA 범위: 위 Actions는 9fbf467 기준이다. 후속 제품 코드 062360b의 프로필 실행 보강분은 로컬 단위/빌드/desktop:verify로 확인했으며, 그 이후 3개 GitHub commit은 STATUS/HANDOFF 문서만 변경했다.
+- 시각적 PDF 육안 검수, 실제 일반 사용자 Windows 10/11, 사용자 문서, 전원 차단, 서명/SmartScreen, Production 배포는 **미검증**. 설계 범위의 STEP3 PDF 가져오기/OCR 및 STEP4는 시작하지 않았다.
