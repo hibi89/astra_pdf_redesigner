@@ -1,12 +1,14 @@
 # STATUS — Astra PDF Redesigner
 
 - 저장소: `hibi89/astra_pdf_redesigner` / `integration/astra-commercial-core` (Draft PR #9, main 미변경)
-- 단계: **STEP 1·2 회귀 확인 / STEP 3·4·7 부분 / M09-D Windows 직접 CI 검증 완료 / 상용 출시 NO-GO**
-- 최근 기능·테스트 커밋: `1099b794f32da3e0bc467898e12b0ee7e7e71146`
-- exact-SHA GitHub Actions: Chrome+Edge run `#40468551454` success 2/2, Windows NSIS run `#40468551485` success.
-- 로컬/Vercel 배포: 로컬 전용. Vercel Production 없음(미적용).
+- 승인 범위: STEP 3 PDF 가져오기 개발 진행 승인, OCR 별도 승인 전 제외.
+- 제품 상태: STEP 1·2 완료, STEP 3·4·7 부분, STEP 5 미구현, STEP 6 승인대기. 7단계 추정 약 43%; 판매/Production NO-GO.
+- 최신 기능·테스트 SHA: `cc157cba4b442f44b88c3631a72686fdfe8f8af9` (STEP3 검수 중 텍스트 블록 포함/제외).
+- Exact-SHA Chrome+Edge [#40479935848](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935848): SUCCESS 2/2, Node 22 `npm test` 67/67 PASS, build PASS. Windows NSIS [#40479935852](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40479935852): SUCCESS, 설치형 M09-D UI와 STEP3 A4 출력 확인.
+- 미검증: 동의된 실제 PDF 5–10개 사용자 PC 비교, 구매자 물리 Windows PC GUI/인쇄 수용. hosted Windows 검증은 synthetic fixture만 사용.
+- main, PR #3/#4, 사용자 데이터, 배포 설정은 변경·병합하지 않음. 외부 전송·모델 다운로드·유료 서비스·OCR·배포 없음.
 
-## 최신 상태 — 2026-10-27 16:51 KST
+## 과거 기록 — 2026-10-27 16:51 KST
 - 저장소 `hibi89/astra_pdf_redesigner`, 검증 브랜치 `integration/astra-commercial-core`, Draft PR #9 미병합. 기능·테스트 SHA `1099b794f32da3e0bc467898e12b0ee7e7e71146`.
 - 이번 테스트 보강: 프로젝트 JSON 내보내기의 원문과 네 디자인 설정 일치, 잘못된 JSON 가져오기 시 활성 문서 무변경, 올바른 가져오기의 디자인 설정 유지, 가져온 복사본 삭제 뒤 원본 보존을 확인하도록 테스트를 강화했다.
 - 로컬 exact-SHA 검증: `npm test` 61/61 PASS, `npm run build` PASS, `node --check tests/step2-browser.mjs` PASS, `git diff --check` PASS.
