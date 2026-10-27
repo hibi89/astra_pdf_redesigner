@@ -37,14 +37,27 @@ try{
   assert.deepEqual(afterTheme.content,beforeTheme.content,'Changing design settings must not mutate persisted document content');
   assert.notEqual(afterTheme.design.theme,beforeTheme.design.theme,'Theme selection must persist as a design setting');
   assert.equal(afterTheme.design.theme,'compact');
+  const changeDesignChoice=async(selector,index,field)=>{
+    const previous=(await evaluate(persistedDocumentCode)).design[field];
+    await evaluate(`document.querySelectorAll(${JSON.stringify(selector)})[${index}].click()`);
+    await eventually(()=>evaluate(persistedDocumentCode),doc=>doc?.design?.[field]!==previous);
+    await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),x=>x==='저장됨');
+  };
+  await changeDesignChoice('input[name=v2accent]',1,'accent');
+  await changeDesignChoice('input[name=v2size]',2,'textSize');
+  await changeDesignChoice('input[name=v2font]',1,'font');
+  const afterDesign=await evaluate(persistedDocumentCode);
+  assert.deepEqual(afterDesign.content,beforeTheme.content,'Changing any design setting must not mutate persisted document content');
+  for(const field of ['theme','accent','textSize','font'])assert.notEqual(afterDesign.design[field],beforeTheme.design[field],`${field} must persist as a design setting`);
   await reload();
   await eventually(()=>evaluate("document.querySelector('.project-paper .section-body')?.textContent"),x=>x==='STEP2_BEGIN 한글 원문\n\n123% STEP2_END');
   assert.equal(await evaluate("document.querySelector('.project-paper').classList.contains('paper-theme-compact')"),true);
   const afterThemeReload=await evaluate(persistedDocumentCode);
   assert.deepEqual(afterThemeReload.content,beforeTheme.content,'Theme persistence/reload must preserve the exact stored content');
   assert.equal(afterThemeReload.design.theme,'compact');
+  assert.deepEqual(afterThemeReload.design,afterDesign.design,'All design settings must persist across reload independently from content');
   assert.equal(await evaluate("document.querySelector('.doc-list-item.active strong')?.textContent"),'문서함 이름');
-  console.log('PASS STEP2: IndexedDB autosave/reload, exact content/design separation, theme, separate management name');
+  console.log('PASS STEP2: IndexedDB autosave/reload, exact content/all-design separation, theme/accent/text-size/font, separate management name');
   await evaluate("[...document.querySelectorAll('button')].find(b=>b.textContent.includes('+ 섹션 추가')).click()");
   await eventually(()=>evaluate("document.querySelectorAll('.section-editor').length"),x=>x===2);
   await evaluate("document.querySelectorAll('.section-editor')[1].querySelector('button[aria-label*=\"위로 이동\"]').click()");
