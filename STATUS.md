@@ -396,3 +396,16 @@
 9. **Next priority/procedure/completion:** M09-D candidate installed Windows UI synthetic cancellation test or owner-approved real PDF/PC user acceptance. Ensure source-review consent/DB unchanged; require Chrome/Edge and Windows green exact SHA; major model acquisition or release gated by explicit owner approval. No unsupported claims of Windows M09-C direct click.
 10. **Checked evidence:** 2026-10-27 KST. Exact final jobs #40376435854 and #40376435967 completed/success and named browser/native markers inspected; document-only later commits do not change code or independently constitute a test.
 
+
+
+## 2026-10-27 17:27 KST — STEP 3 PDF 가져오기 재개 / 검수 편집 실행 취소·다시 실행
+
+- **승인 범위:** 최신 사용자 승인은 기존 STEP 3 PDF 가져오기 개발을 계속 허용한다. OCR은 별도 승인 전까지 제외한다. 과거 STEP2-only 문구는 초기 main 안정화 기록이며, 실제 STEP3 PR #3 개발 이력 및 최신 승인은 원격 `AGENTS.md`의 2026-10-27 갱신(commit `08e68699e8f58a640ef119b832a60a92d6d87e5f`)에 정합되게 기록했다.
+- **원격 기능/테스트 SHA:** `3a704921b24b83b05701c6a48c9526d8580f9a6a`, `integration/astra-commercial-core`; PR #9는 Draft/open/unmerged.
+- **이번 보강:** PDF 확정 전 편집 초안에 최대 8단계 메모리 내 실행 취소/다시 실행 추가. 텍스트·분류·순서·이미지 포함 변경을 초안 상태에서 되돌릴 수 있고, 수정·되돌리기·다시 실행 뒤 원문 확인 동의는 다시 받아야 한다. 새 파일·취소·저장 완료 시 이력을 버린다. IndexedDB/project JSON 스키마와 원본 문서는 변경하지 않았다. 기존 Step3 추출·이미지 복원·원본 대조·취소 구현은 재작성하지 않았다.
+- **로컬 검증:** `npm test` 62/62 PASS, `npm run build` PASS, `git diff --check` PASS. 빌드는 기존 model.ts static/dynamic import chunk 경고만 출력했다.
+- **Chrome + Edge exact-SHA:** [#40472988885](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40472988885) SUCCESS 2/2. Chrome job #122084327342, Edge #122084326864에서 `PASS STEP3 DRAFT UNDO/REDO`, 실제 합성 PDF import/reprint, A4·텍스트·이미지, M09-A/B/C 회귀 로그 확인. Node 62/62 및 build도 성공.
+- **Windows NSIS exact-SHA:** [#40472988943](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40472988943) SUCCESS. Job #122084327265에 `PASS M09-D WINDOWS INSTALLED UI`, installed STEP3 import/source review/native A4 PDF(2 pages, six markers, raster draw), 설치/제거 및 0.1.0→0.1.1 STEP2 데이터 보존 로그 확인.
+- **M09-D 판정:** Windows hosted runner의 설치 앱 창에서 분석 취소→새 PDF 선택→늦은 이전 결과 무시→새 Blob URL 정리→IndexedDB V2 스냅샷 불변을 실제 UI로 확인했다. 이는 합성 CI 증거이며 고객 PC/실문서 검증은 아니다.
+- **남은 STEP3 검증:** 동의받은 고객 텍스트 중심 PDF 5~10개를 고객 로컬에서만 비교하고 구매자 Windows PC에서 GUI/실문서 수용을 확인해야 한다. 복잡한 표·다단·그래픽은 지원 완전성을 주장하지 않고 경고/수동 검수가 필요하다. 스캔 OCR, 모델/런타임 다운로드, 비용, 외부 PDF 전송은 미승인이다. 상용 판매는 NO-GO.
+- **보존/동기화:** main, PR #3/#4, 사용자 저장 데이터 및 배포 설정을 건드리거나 병합하지 않았다. 로컬 `git fetch`는 `Could not resolve host: github.com`으로 실패했으며 GitHub 연결 API로 위 exact commit을 원격에 반영했다. 현재 로컬 clone은 원격 ancestry와 다르므로 로컬 ref를 push하지 않는다.

@@ -74,3 +74,11 @@
 
 **전체 SKU 판매 및 public production: NO-GO.** 기능 개발 검증과 출시 승인을 분리한다. 기존 `main`, PR #3, PR #4는 변경·병합하지 않았다. M09-D Windows CI 통과는 실제 고객 PDF·구매자 PC·AI·SKU 권한·서명/라이선스 게이트 통과를 뜻하지 않는다.
 
+
+
+## 최신 승인·검증 추가 — 2026-10-27 17:27 KST
+
+- 사용자의 최신 승인은 STEP 3 PDF 가져오기 개발을 계속 허용한다. OCR은 별도 승인 전까지 제외한다. 과거 STEP2-only 지침은 최초 main 안정화 문맥이며, 원격 `AGENTS.md`의 승인 갱신이 실제 PR #3 이력과 현재 승인을 연결한다.
+- 통합 브랜치 기능/테스트 SHA `3a704921b24b83b05701c6a48c9526d8580f9a6a`에서 PDF 검수 초안 Undo/Redo(최대 8단계, 메모리 내, 확인 동의 재요구)를 구현·검증했다. Node 62/62, build PASS. [Chrome+Edge #40472988885](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40472988885) 및 [Windows NSIS #40472988943](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40472988943) 모두 SUCCESS. 로그에서 실제 Undo/Redo 표식, Step3 PDF 출력, Windows M09-D 설치 UI 확인.
+- 7단계 완료율 추정 ~43%는 변하지 않는다. STEP3는 합성 fixture 검증에서 부분 구현 상태를 유지하며, 동의받은 실PDF 5~10개와 구매자 PC 수동 수용은 미검증이다. OCR/복잡 표·다단 완전 재현은 승인·지원 범위 바깥이다. 판매 NO-GO.
+- main/PR #3/#4/사용자 데이터/배포 설정은 변경·병합하지 않았다.
