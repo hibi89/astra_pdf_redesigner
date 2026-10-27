@@ -389,3 +389,12 @@
 - 첫 로컬 cross-profile 시도는 sandbox 세션에서 띄운 Vite preview와 escalation된 Chrome 프로세스가 로컬 포트를 공유하지 못해 화면 준비 대기에서 timeout됐다. 원인 추정은 Windows 격리 실행 컨텍스트 간 loopback 권한 차이다. 서버와 브라우저를 같은 격리 Node 실행 안에서 시작해 재실행했고, Chrome·Edge 모두 통과했다. 실패를 숨기지 않고 기록한다.
 - 테스트는 합성 데이터와 새 임시 프로필만 사용했고 JSON/PDF/profile 및 미리보기 서버를 정리했다. 사용자 문서·일반 브라우저 프로필·설치 앱 프로필은 열지 않았다.
 - 현재 PR #7은 Draft/open/unmerged; main/Production 변경 없음. 비공식 추정 STEP 2 자동·기술 검증 약 **99%**, 전체 로드맵 약 **38%**(동일 단계 가중 참고치) 유지. 일반 사용자 Windows 설치판·실문서/사진·정전/서명 검증은 미검증이며, STEP 3 PDF 가져오기/OCR는 현재 승인 범위 밖이다.
+
+
+## 2026-10-27 15:31 KST — STEP 2 GitHub snapshot 재검증
+- 기준 저장소/브랜치: `hibi89/astra_pdf_redesigner`, `codex/p5-windows-reliability`. 검증 코드 SHA는 `574001a6e9a8a6af2b1cdee0c49ebace4b5f3ac5`; 현재 PR #7 문서 전용 후속 HEAD는 검증 코드보다 2 commits 앞서며 앱 코드는 바뀌지 않았다. 로컬에서 검사한 STEP 2 관련 7개 소스·테스트 파일을 GitHub 브랜치 내용과 대조해 모두 동일함을 확인했다.
+- 재검증: Node 24.21.0에서 `npm test` **19/19 PASS**, `npm run build` **PASS**, `npm run desktop:verify` **11/11 PASS**, `node --check` 2개 파일 및 `git diff --check` **PASS**. Vite의 기존 dynamic/static import 경고는 남았으나 build 성공.
+- Chrome·Edge 실제 브라우저에서 격리 프로필 간 합성 프로젝트 JSON 파일 이식, PNG/WebP bytes와 이미지 배치 보존, reload 및 A4 PDF 출력 **각각 PASS**. 샌드박스 경계가 loopback을 막은 첫 시도들은 실패로 기록했고, preview/browser를 같은 승인된 실행 경계에서 실행해 성공했다.
+- Electron 실제 STEP 2 저장→reload→PDF: A4 3페이지, 본문 marker 5/5, raster draw 1개. 세 렌더 페이지를 직접 확인해 한국어 가독성, 페이지 넘김, 이미지 비율과 캡션 경계에 눈에 띄는 잘림이 없었다. 샌드박스 안 Electron 시작은 `0x80000003`로 실패했으나 같은 합성·임시 프로필 검사를 승인된 실행 경계에서 다시 실행해 PASS했다.
+- 검사는 합성 콘텐츠/전용 임시 프로필만 사용. 고객 파일, 사용자 브라우저·앱 데이터는 열거나 수정하지 않았다. 임시 PDF·렌더 PNG·preview server는 정리했다.
+- PR #7 Draft/open/unmerged, main·Production 미변경. 전체 제품 판매 준비는 미완료이며 STEP 2 외 단계는 현재 승인 범위 밖. 비공식 STEP 2 99% / 전체 로드맵 38% 추정은 변경하지 않는다.
