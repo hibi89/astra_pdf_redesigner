@@ -1,22 +1,32 @@
-// Validate the *actual PDF file produced by the installed Windows Electron
-// executable*. Never validate a synthetic stand-in PDF.
+// Validate the actual PDF emitted by the app's Electron renderer. CI checks
+// the installed Windows executable; local visual review is restricted to the
+// explicit synthetic fixture and an isolated OS temp path.
 import assert from 'node:assert/strict';
 import {readFileSync} from 'node:fs';
-import {resolve} from 'node:path';
+import {basename,dirname,resolve} from 'node:path';
+import {tmpdir} from 'node:os';
 import {getDocument,OPS} from 'pdfjs-dist/legacy/build/pdf.mjs';
 
 const source=process.argv[2];
 const realStep2=process.argv.includes('--step2-project');
-if(!source||process.env.GITHUB_ACTIONS!=='true'){
-  throw Error('PDF acceptance requires a generated file path on GitHub Actions');
+const localSynthetic=process.argv.includes('--local-synthetic');
+if(!source||(!localSynthetic&&process.env.GITHUB_ACTIONS!=='true')){
+  throw Error('PDF acceptance requires a generated GitHub Actions file or explicit local synthetic mode');
 }
-const data=readFileSync(resolve(source));
+const resolvedSource=resolve(source);
+if(localSynthetic){
+  assert.equal(dirname(resolvedSource),resolve(tmpdir()),
+    'Local synthetic PDF must live directly in the OS temp folder');
+  assert.match(basename(resolvedSource),/^astra-p5-pdf-visual-[A-Za-z0-9-]+\.pdf$/i,
+    'Local synthetic PDF filename is outside the acceptance guard');
+}
+const data=readFileSync(resolvedSource);
 assert.ok(data.length>3000,'PDF must contain meaningful content');
 assert.equal(data.subarray(0,5).toString('ascii'),'%PDF-','Output is not a PDF file');
 const task=getDocument({data:new Uint8Array(data),useSystemFonts:true});
 try{
   const doc=await task.promise;
-  if(realStep2)assert.ok(doc.numPages>=1,'STEP2 document must print at least one page');
+  if(realStep2)assert.equal(doc.numPages,3,'Synthetic STEP2 document should print across exactly three A4 pages');
   else assert.equal(doc.numPages,2,'Synthetic document must print on exactly two pages');
   const text=[];
   let bitmapDraws=0;

@@ -4,6 +4,7 @@ on:
     branches:
       - 'feature/windows-electron-*'
       - 'test/windows-idb-v2-*'
+      - 'codex/p5-*'
     paths-ignore:
       - '**/*.md'
       - 'docs/**'

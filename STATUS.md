@@ -308,3 +308,93 @@
 - v2 코드는 Windows CI 작업 중 임시로 적용·빌드됨. Git 브랜치 제품 소스는 v1 유지하며 PR #5의 additive schema patch와 동일 형태. 브라우저 롤백 검증 [#39222517425](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39222517425) 별도 성공.
 - **미검증:** 일반 사용자 Windows 10/11 설치판, 실고객 문서, 코드 서명/SmartScreen, 비정상 전원종료 복구 및 장문 PDF 육안. unsigned 설치 artifact는 7일 한정 테스트용. 상세 `docs/WINDOWS_IDB_SCHEMA_V2_INSTALLED_UPGRADE_2026-10-19.md`.
 - **다음:** 해당 성공을 제품 main 병합 승인으로 간주하지 말 것. PR #4/#5/#6 모두 Draft 그대로, STEP4 금지.
+
+## 2026-10-19 — IndexedDB versionchange·실패 복구 경계
+
+- 격리 브랜치 `codex/p5-windows-reliability`, 코드 커밋 `0080272b7a1a2b306f911532c0e217f3e215df27` (기준 `test/windows-idb-v2-installed-upgrade` SHA `e2f767d87f1657f6fdecdee0457b223f285823f0`). Draft PR [#7](https://github.com/hibi89/astra_pdf_redesigner/pull/7); 병합하지 않음.
+- `versionchange` 이벤트에서 열린 연결을 닫고 편집 탭을 읽기 전용으로 전환한다. `blocked` 후 늦은 성공 연결을 즉시 닫고, 더 높은 DB 버전은 안전한 재시작 안내로 처리한다. 제품 DB 버전은 올리지 않았다.
+- 로컬: Node 테스트 19/19 PASS, TypeScript·Vite build PASS, `desktop:verify` 6/6 PASS. 새 격리 E2E Chrome 10/10, Edge 10/10 checkpoint PASS; 기존 Chrome 멀티탭, cold migration, abort·재시도 회귀 PASS. 테스트 임시 프로필 0개 잔류.
+- 로컬 교차 프로필 테스트는 `pdftotext` 실행 파일 부재로 PDF 텍스트 최종 assertion에서 중단됐다. 검증 조건은 바꾸지 않았고, GitHub Chrome job의 전체 교차 프로필 테스트는 PASS.
+- [GitHub Actions #39239803359](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39239803359) attempt 2 SUCCESS: Chrome build-and-test 및 Edge 전체 회귀 PASS. 최초 Edge attempt는 기존 `browser-smoke`의 CDP WebSocket handshake timeout으로 실패했고, 재실행은 통과했다.
+- [Windows Actions #39239803360](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39239803360) SUCCESS: Windows Server 2025 Electron smoke, NSIS 설치·제거 및 설치된 0.1.0/IDB v1 → 0.1.1/IDB v2 덮어쓰기 검증. 문서·PNG·active ID 보존 PASS. v2 후보는 임시 CI checkout에서만 생성.
+- 실제 사용자 Windows PC·데이터, 서명/SmartScreen, 전원 중단 상황은 미검증. main, PR #3~#6, STEP4 변경 없음.
+
+## 2026-10-19 20:06 KST — 설치 Electron의 동시 versionchange 복구 검증
+
+- 구현 커밋 `cc7495fb1ccaf68277f884a9533d988785c8c0d4`에서 CI 전용 실제 Electron 검증을 추가했다. 설치된 v2 앱의 첫 렌더러가 STEP2 문서·PNG를 로드한 채 두 번째 렌더러가 합성 v3 스키마 업그레이드를 요청한다. 기존 연결은 `versionchange`에서 닫히고 편집 화면은 읽기 전용 복구 안내로 전환된다.
+- Windows 검증은 v1→v2 덮어 설치 테스트가 만든 합성 `RUNNER_TEMP` 프로필만 사용한다. 업그레이드 전후 기존 전체 object store 값을 비교하고 문서, PNG 원시 bytes·메타데이터, `migrationAudit`, active document ID의 동일성을 확인한다. 합성 v3 probe store는 임시 프로필과 함께 삭제하며 사용자 설치/데이터는 사용하지 않는다.
+- 로컬: `npm test` 19/19 PASS, `npm run build` PASS, `npm run desktop:verify` 7/7 PASS, PowerShell 구문 파싱 PASS. 최초 샌드박스 빌드는 esbuild의 상위 경로 접근 거부로 막혀 허용된 실행에서 재시도해 PASS; 테스트 조건은 완화하지 않았다.
+- [Chrome/Edge Actions #39241620449](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39241620449) SUCCESS: 두 브라우저 job, 19/19 단위 테스트, versionchange abort/재시도·멱등성 및 기존 STEP2 회귀 PASS.
+- [Windows Actions #39241620515](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39241620515) SUCCESS: 실제 Windows Server 2025 설치판에서 v1→v2 덮어 설치와 새 v2→v3 동시 renderer 검증 PASS. 로그에 `blocked=0`, 기존 편집기 read-only, 문서·PNG bytes·모든 기존 store·metadata·active ID 보존, 합성 프로필 정리 PASS 확인.
+- Draft PR [#7](https://github.com/hibi89/astra_pdf_redesigner/pull/7)는 `test/windows-idb-v2-installed-upgrade` 대상 open/draft/unmerged. main 및 PR #3~#6은 변경·병합하지 않았고 STEP4 미착수. 미검증: 일반 사용자 PC/데이터, 비정상 전원 차단, 코드 서명/SmartScreen.
+- 다음 1순위: Draft PR #7에서 CI 결과와 변경 범위를 검토한다. 사용자 PC 실데이터 시험, main 병합, STEP4는 별도 승인 전 하지 않는다.
+
+## 2026-10-19 20:28 KST — 미저장 초안의 Windows Electron versionchange 보존
+
+- 코드 커밋 `9fbf467a7d7bfe1ecd84611298094595197e626f`: 설치된 Electron 두 렌더러가 동시 연결된 상태에서 초안 입력 후 v2→v3 합성 schema 업그레이드를 수행한다. 테스트는 450ms 자동 저장 콜백만 보류하고, `finally`에서 보류 타이머를 취소하고 원래 `window.setTimeout` descriptor를 복구한다.
+- React 상태 반영(편집기 값과 미리보기), 업그레이드 직전 IndexedDB에 미저장 marker가 없고 저장값이 기존 snapshot과 동일함, 업그레이드 뒤 초안 화면 유지·편집기 비활성·`저장 실패` 상태를 검사한다. 기존 store 전체·문서·PNG bytes·메타데이터·active ID 비교는 유지한다.
+- 한글 상태/경고 문자열은 `src/step2/useWorkspace.ts`와 acceptance fixture를 UTF-8로 읽어 확인했다. 문자열과 코드포인트가 일치하며 소스 손상은 없었다. 터미널 표시 문제로 보인다.
+- 로컬: `node --check desktop/step2-versionchange-acceptance.cjs`, `git diff --check` PASS; `npm test` 19/19 PASS; `npm run build` PASS; `npm run desktop:verify` 7/7 PASS.
+- 실제 설치판 Windows Actions [#39244383974](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39244383974) SUCCESS, Windows Server 2025. 로그에서 초안 보존·읽기 전용·저장 실패·기존 저장 데이터 비교·합성 프로필 정리 PASS 확인. 브라우저 Chrome/Edge Actions [#39244384031](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39244384031) 두 job SUCCESS; versionchange abort/retry/idempotence와 STEP1/2 회귀 PASS.
+- 격리 브랜치 `codex/p5-windows-reliability`; Draft PR [#7](https://github.com/hibi89/astra_pdf_redesigner/pull/7), base `test/windows-idb-v2-installed-upgrade`. main/PR #3~#6 병합 없음, STEP4 미착수.
+- 남은 미검증: 실제 사용자 Windows 10/11과 사용자 데이터, 전원 중단, 서명/SmartScreen. Windows 검증은 CI의 합성 RUNNER_TEMP 프로필로만 수행했다.
+
+
+## 2026-10-19 — 개인용 빠른 완성으로 우선순위 변경
+- 사용자 승인: 상용 배포가 아닌 본인 Windows PC의 개인 사용용으로 최단 시간 완성. 기존 STEP1/STEP2/Electron 기능 보존.
+- 실행·편집·이미지·종료 후 저장 복원·Windows PDF 실제 출력·백업을 1차 완료 조건으로 설정. STEP3 기존 PDF 가져오기/리디자인은 **미구현·별도 후속**.
+- 배포/코드 서명/자동 업데이트/고급 회귀 확대/STEP4 보류. 기존 데이터 손실·실행·PDF 치명 결함은 계속 차단.
+- 작업 지침: [개인용 완성 계획](docs/PERSONAL_WINDOWS_FINISH_PLAN_2026-10-19.md). PR #7 Draft 유지, main 및 기존 PR 변경 금지.
+- Windows Server 2025 CI 성공은 기존 증거이며 **사용자 Windows PC 실사용 검증은 아직 미완료**. 새 테스트를 실행했다고 주장하지 않음.
+
+
+## 2026-10-27 14:20:46 KST — 개인 Windows 인수시험 준비 검증 / Electron 실행 차단
+- 저장소 기준: GitHub `hibi89/astra_pdf_redesigner`, 격리 브랜치 `codex/p5-windows-reliability`, 시작 HEAD `062360b50e3033654df656e84a2ce26cc3aa4061`. main, PR #3~#7 및 STEP4는 변경·병합하지 않았다.
+- 로컬 자동 검증: `npm test` **19/19 PASS**; `npm run build` **PASS**(동적/정적 import가 함께 있어 chunk 이동이 없다는 Vite 경고 1건); `npm run desktop:verify` bundle 검사 PASS 및 데스크톱 보안·격리 테스트 **10/10 PASS**.
+- 개인 GUI 인수시험 실행: `npm run desktop:personal-test`에서 빌드는 통과했으나 Electron 프로세스가 종료 코드 **1**로 종료되고 창·진단 출력이 나타나지 않았다. `electron.cmd . --astra-personal-test --enable-logging=stderr --v=1` 재현 시에도 종료 코드 1/출력 없음. `electron.cmd --version` 역시 종료 코드 1/출력 없음. 앱 코드 결함인지 로컬 Electron 실행환경 문제인지는 **원인 미확인**이며 추가 반복 실행은 하지 않았다.
+- 안전/범위: 격리 경로 `%TEMP%\astra-p5-personal-test-profile`은 생성되지 않았다. 설치 앱의 일반 AppData 프로필을 열거나 변경하지 않았고 사용자 문서도 사용하지 않았다. Windows Application 이벤트 로그 읽기는 현재 권한으로 거부되어 원인 진단에 포함하지 못했다.
+- **미검증:** 앱 화면 편집, 합성 이미지 삽입, 저장 후 재실행 복원, PDF 생성·열기·A4/한글/페이지/이미지 육안 검사, JSON 백업/가져오기. 개인용 1차 완료로 판정하지 않는다.
+- 다음: Electron 실행 실패 원인을 권한이 있는 Windows 진단 또는 호환 환경에서 확인한 뒤, 동일 격리 프로필에서 개인용 계획의 합성 문서 저장·재실행·PDF·백업 흐름을 완료한다. PR #7 Draft와 main 병합 금지 상태는 유지한다.
+
+## 2026-10-27 14:33 KST — PC GUI 중단 및 기존 격리 자동화 증거 확인
+- 기준: 저장소 `hibi89/astra_pdf_redesigner`, 브랜치 `codex/p5-windows-reliability`; 문서 갱신 전 HEAD `77cf4c6b989579a0bc34bf83904e09d3127e4c87`, 제품 코드 기준 `062360b50e3033654df656e84a2ce26cc3aa4061`. main 변경·병합 없음, PR #7은 Draft/open/unmerged.
+- 최신 로컬 코드 검증(062360b): `npm test` 19/19 PASS, `npm run build` PASS(Vite dynamic/static import 경고 1건), `npm run desktop:verify` bundle 검사 및 desktop tests 10/10 PASS. Electron 44.9.0 실행 및 전용 `%TEMP%\astra-p5-personal-test-profile` 경로의 시작도 성공했다.
+- PC GUI 인수시험은 사용자의 요청에 따라 즉시 중단했다. 전용 프로필에 합성 한글 문서 저장까지 확인했으며, 이미지 파일 선택은 표시된 Temp 폴더에서 파일을 찾지 못해 완료되지 않았다. 개인 문서/설치 앱 프로필은 열지 않았다. PDF 저장·육안 검사·JSON UI 내보내기/가져오기는 이번 로컬 GUI에서 **미검증**이다. 격리 프로필과 합성 초안은 보존했다.
+- 원격 자동화 근거: [Windows 설치판 Actions #39244383974](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39244383974)는 코드 SHA `9fbf467a7d7bfe1ecd84611298094595197e626f` 기준 SUCCESS. Windows Server 2025에서 NSIS 설치·업그레이드, STEP2 문서/PNG 및 IndexedDB 보존, PDF A4 3페이지·한글/수치 marker 5/5·이미지 draw 1건, 동시 versionchange/미저장 초안 보존을 확인했다.
+- [Chrome/Edge Actions #39244384031](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39244384031)는 두 job SUCCESS. STEP2 편집·저장·재실행, PNG/JPEG/WebP 보존, 실제 JSON 파일 export/import, A4 PDF 및 장문 캡션/페이지 경계 검증이 통과했다. Chrome 임시 프로필 정리에서 `ENOTEMPTY` 지연 경고가 있었고 Edge는 CDP 연결을 한 차례 재시도한 후 통과했다. 해당 runner는 폐기형 CI 환경이다.
+- SHA 범위: 위 Actions는 9fbf467 기준이다. 후속 제품 코드 062360b의 프로필 실행 보강분은 로컬 단위/빌드/desktop:verify로 확인했으며, 그 이후 3개 GitHub commit은 STATUS/HANDOFF 문서만 변경했다.
+- 시각적 PDF 육안 검수, 실제 일반 사용자 Windows 10/11, 사용자 문서, 전원 차단, 서명/SmartScreen, Production 배포는 **미검증**. 설계 범위의 STEP3 PDF 가져오기/OCR 및 STEP4는 시작하지 않았다.
+
+## 2026-10-27 14:55 KST — STEP 2 headless PDF visual acceptance
+- 저장소/브랜치: `hibi89/astra_pdf_redesigner`, `codex/p5-windows-reliability`. 검증 코드 SHA: `51aed78d1b85676e8ca74ce79786ea6737db495d`; Draft PR #7은 open/draft/unmerged. main 병합 및 Production 배포 없음.
+- 제품 기능은 변경하지 않았다. 합성 데이터 전용 `desktop:pdf-visual` 검증 경로를 추가했다. 숨김 Electron smoke에서 실제 STEP 2 편집 UI로 문서/PNG를 IndexedDB에 저장하고 재로드한 뒤 PDF를 생성한다. 전용 빈 Temp 프로필과 새 Temp 출력 경로를 강제하며 개인 프로필·실문서를 사용하지 않는다.
+- 실제 출력 검사: Electron PDF **A4 3페이지**, 한글/숫자 marker **5/5**, raster draw **1**. Poppler로 120dpi PNG 3장을 렌더해 직접 확인했고 눈에 띄는 텍스트 잘림 및 이미지 누락은 없었다. 테스트 PNG는 2×2 단색 합성 이미지이므로 실제 사진의 시각 품질·고객 문서는 미검증이다. 생성 PDF/PNG와 테스트 프로필은 검사 뒤 정리했다.
+- 로컬: `npm test` **19/19 PASS**; `npm run build` PASS(기존 `model.ts` dynamic/static import 혼합 경고 1건); `npm run desktop:verify` bundle 검사 PASS 및 **11/11 PASS**; `npm run desktop:pdf-visual` PASS; `git diff --check` PASS.
+- GitHub Actions, 동일 코드 SHA 기준: [#40457525436](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40457525436) build/test 및 Chrome/Edge browser checks **SUCCESS**; [#40457525499](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40457525499) Windows x64 NSIS 설치·실행·제거 및 v1→v2 IndexedDB 보존 검사 **SUCCESS**. Windows 작업의 임시 프로필 정리도 성공했다. Actions에 Node.js 20 지원 종료 공지 warning이 있었으나 작업은 통과했다.
+- 남은 경계: 사용자 Windows 10/11의 설치판 수동 확인, 실제 고객 문서·사진, 정전 복구, 서명/SmartScreen은 미검증. 대화형 PC GUI 검수는 사용자가 중단 요청한 범위를 존중해 수행하지 않았다. STEP 3 PDF 가져오기/OCR와 STEP 4~7은 현재 AGENTS 승인 범위 밖이다.
+- 비공식 추정: STEP 2의 기술 구현/자동 검증 약 **99%**; 전체 로드맵 약 **38%**(기존 STEP 1=100%, STEP 2≈99%, 별도 draft STEP 3 일부 구현, STEP 4~7 미착수의 동일 단계 가중 참고치). 일정/판매 준비도를 계량한 값이 아니며, STEP 2 사용자 설치판 수용과 원래 7단계 전체 완료를 뜻하지 않는다.
+
+## 2026-10-27 15:05 KST — STEP 2 portrait-image PDF visual follow-up
+- 검증 코드 SHA `3a8095c6b9452977b6ad81632baf4dc2d0c3b768`, `codex/p5-windows-reliability`. 앞선 14:55 기록의 정사각형 단색 fixture를 후속 개선하여, **로컬 전용** hidden acceptance에서 Canvas로 144×216 세로 패턴 PNG를 만들고 실제 UI 업로드·IndexedDB 저장·재로드·PDF 출력까지 검증했다. Windows 설치판 CI의 기존 fixture(2×2 PNG)는 바꾸지 않았다.
+- Electron 출력 PDF는 A4 **3페이지**, 한국어/숫자 marker **5/5**, raster draw **1**. Poppler 120dpi 렌더 3장을 직접 확인해 세로 이미지의 가로세로 비율이 유지되고 캡션이 페이지 안에 들어오며 눈에 띄는 잘림이 없음을 확인했다. 합성 그림 결과이며 실제 고객 PDF/사진과 사용자 Windows 10/11 수동 수용은 미검증이다. 테스트 PDF/PNG와 격리 프로필은 정리했다.
+- 로컬 결과: `npm test` **19/19 PASS**, `npm run build` PASS(기존 dynamic/static import 경고 1건), `npm run desktop:verify` bundle PASS 및 **11/11 PASS**, `npm run desktop:pdf-visual` PASS, `git diff --check` PASS.
+- 이 SHA의 GitHub Actions: [#40458473476](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40458473476) build-and-test 및 Chrome/Edge 체크 **SUCCESS**; [#40458473470](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40458473470) Windows NSIS 설치/실행/제거, v1→v2 IndexedDB 보존, installer artifact 생성 **SUCCESS**. Actions의 Node.js 20 지원 종료 공지는 warning이며 실행은 모두 성공했다.
+- **상태:** Draft PR #7 open/unmerged, main 미변경, Production 미배포. 현재 STEP 2 자동·기술 검증 추정 약 **99%**, 전체 7단계 약 **38%**는 비공식 동등가중 참고치이며 실사용/판매 준비 척도는 아니다. STEP 3 PDF 가져오기/OCR 및 STEP 4~7은 승인 범위 밖이다.
+
+## 2026-10-27 15:17 KST — STEP 2 교차 프로필 백업/복원 및 이미지 레이아웃 검증
+- 검증 코드 SHA `574001a6e9a8a6af2b1cdee0c49ebace4b5f3ac5`, branch `codex/p5-windows-reliability`. `tests/step2-cross-profile.mjs`의 PDF 확인을 Poppler CLI 의존에서 PDF.js 기반 A4·본문·이미지 검사로 옮기고, STEP 2 이미지 정렬/크기 UI를 바꾼 값이 JSON 이식 후에도 보존되는지 검증하도록 보강했다.
+- 이 워크스테이션의 숨김 Chrome과 Edge에서 각각 실행: 격리 프로필 A의 합성 한국어 문서와 PNG/WebP 추가·테마/글꼴/색상/본문 크기·이미지 정렬(right/left)/크기(small/large) 설정 → 실제 `.localdoc.json` 파일 다운로드 → 새 빈 프로필 B의 파일 선택기로 가져오기 → 재로드 후 원문/디자인/PNG·WebP 원본 bytes/레이아웃 보존 → 실제 A4 PDF 출력까지 모두 PASS. PDF.js로 A4 크기, 본문 시작/끝 marker, PDF 이미지 draw 2개 이상을 확인했다.
+- 로컬: cross-profile Chrome **PASS**, Edge **PASS**; `node --check tests/step2-cross-profile.mjs`, `git diff --check` PASS; `npm test` **19/19 PASS**, `npm run desktop:verify` **11/11 PASS**. 앞서 같은 코드 SHA에서 `desktop:pdf-visual`로 144×216 세로 패턴 이미지의 실제 Electron PDF를 직접 확인했고, A4 3페이지/marker 5/5/image draw 1 및 비율·캡션 경계 PASS.
+- GitHub Actions, 동일 코드 SHA: [#40459695822](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40459695822) Node/build/unit/Chrome 및 Edge PDF/IndexedDB **SUCCESS**; [#40459695839](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40459695839) Windows NSIS 설치·실행·제거, STEP2 IndexedDB v1→v2 보존 **SUCCESS**. Node.js 20 deprecation annotation만 있었고 기능 실패는 없었다.
+- 첫 로컬 cross-profile 시도는 sandbox 세션에서 띄운 Vite preview와 escalation된 Chrome 프로세스가 로컬 포트를 공유하지 못해 화면 준비 대기에서 timeout됐다. 원인 추정은 Windows 격리 실행 컨텍스트 간 loopback 권한 차이다. 서버와 브라우저를 같은 격리 Node 실행 안에서 시작해 재실행했고, Chrome·Edge 모두 통과했다. 실패를 숨기지 않고 기록한다.
+- 테스트는 합성 데이터와 새 임시 프로필만 사용했고 JSON/PDF/profile 및 미리보기 서버를 정리했다. 사용자 문서·일반 브라우저 프로필·설치 앱 프로필은 열지 않았다.
+- 현재 PR #7은 Draft/open/unmerged; main/Production 변경 없음. 비공식 추정 STEP 2 자동·기술 검증 약 **99%**, 전체 로드맵 약 **38%**(동일 단계 가중 참고치) 유지. 일반 사용자 Windows 설치판·실문서/사진·정전/서명 검증은 미검증이며, STEP 3 PDF 가져오기/OCR는 현재 승인 범위 밖이다.
+
+
+## 2026-10-27 15:31 KST — STEP 2 GitHub snapshot 재검증
+- 기준 저장소/브랜치: `hibi89/astra_pdf_redesigner`, `codex/p5-windows-reliability`. 검증 코드 SHA는 `574001a6e9a8a6af2b1cdee0c49ebace4b5f3ac5`; 현재 PR #7 문서 전용 후속 HEAD는 검증 코드보다 2 commits 앞서며 앱 코드는 바뀌지 않았다. 로컬에서 검사한 STEP 2 관련 7개 소스·테스트 파일을 GitHub 브랜치 내용과 대조해 모두 동일함을 확인했다.
+- 재검증: Node 24.21.0에서 `npm test` **19/19 PASS**, `npm run build` **PASS**, `npm run desktop:verify` **11/11 PASS**, `node --check` 2개 파일 및 `git diff --check` **PASS**. Vite의 기존 dynamic/static import 경고는 남았으나 build 성공.
+- Chrome·Edge 실제 브라우저에서 격리 프로필 간 합성 프로젝트 JSON 파일 이식, PNG/WebP bytes와 이미지 배치 보존, reload 및 A4 PDF 출력 **각각 PASS**. 샌드박스 경계가 loopback을 막은 첫 시도들은 실패로 기록했고, preview/browser를 같은 승인된 실행 경계에서 실행해 성공했다.
+- Electron 실제 STEP 2 저장→reload→PDF: A4 3페이지, 본문 marker 5/5, raster draw 1개. 세 렌더 페이지를 직접 확인해 한국어 가독성, 페이지 넘김, 이미지 비율과 캡션 경계에 눈에 띄는 잘림이 없었다. 샌드박스 안 Electron 시작은 `0x80000003`로 실패했으나 같은 합성·임시 프로필 검사를 승인된 실행 경계에서 다시 실행해 PASS했다.
+- 검사는 합성 콘텐츠/전용 임시 프로필만 사용. 고객 파일, 사용자 브라우저·앱 데이터는 열거나 수정하지 않았다. 임시 PDF·렌더 PNG·preview server는 정리했다.
+- PR #7 Draft/open/unmerged, main·Production 미변경. 전체 제품 판매 준비는 미완료이며 STEP 2 외 단계는 현재 승인 범위 밖. 비공식 STEP 2 99% / 전체 로드맵 38% 추정은 변경하지 않는다.

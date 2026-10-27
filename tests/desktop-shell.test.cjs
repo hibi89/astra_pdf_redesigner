@@ -59,6 +59,28 @@ test('Windows acceptance fixture is synthetic PNG and requires runner-only PDF o
   assert.ok(lifecycle.includes('Remove-Item -LiteralPath $acceptancePdf -Force'));
 });
 
+test('local PDF visual acceptance is opt-in, hidden, synthetic, and temp-path guarded',()=>{
+  const runtime=fs.readFileSync(path.resolve(__dirname,'../desktop/main.cjs'),'utf8');
+  const runner=fs.readFileSync(path.resolve(__dirname,'../desktop/local-pdf-visual.cjs'),'utf8');
+  const step2Fixture=fs.readFileSync(path.resolve(__dirname,'../desktop/step2-project-acceptance.cjs'),'utf8');
+  const verifier=fs.readFileSync(path.resolve(__dirname,'verify-desktop-pdf.mjs'),'utf8');
+  for(const required of ['--astra-local-step2-acceptance','ASTRA_LOCAL_PDF_PROFILE',
+    'ASTRA_LOCAL_PDF_OUTPUT','path.dirname(profile)!==tempRoot',
+    'path.dirname(output)!==tempRoot','profileInfo.isSymbolicLink()',
+    'fsSync.existsSync(output)',"await fs.writeFile(output,bytes,{flag:'wx'})"]){
+    assert.ok(runtime.includes(required),'Local visual acceptance guard missing '+required);
+  }
+  assert.ok(runner.includes('--astra-desktop-smoke'));
+  assert.ok(runner.includes('--astra-local-step2-acceptance'));
+  assert.ok(runner.includes('windowsHide:true'));
+  assert.ok(runner.includes('pdftoppm'));
+  assert.ok(step2Fixture.includes('Local STEP2 PDF output must be directly under the isolated OS temp folder'));
+  assert.ok(step2Fixture.includes('local?{pattern:true,width:144,height:216}'));
+  assert.ok(step2Fixture.includes('picture.naturalHeight===expectedImage.height'));
+  assert.ok(verifier.includes('--local-synthetic'));
+  assert.ok(verifier.includes("assert.equal(doc.numPages,3"));
+});
+
 test('Windows CI exercises real STEP2 UI and IndexedDB before installed PDF output',()=>{
   const fixture=fs.readFileSync(path.resolve(__dirname,'../desktop/step2-project-acceptance.cjs'),'utf8');
   const runtime=fs.readFileSync(path.resolve(__dirname,'../desktop/main.cjs'),'utf8');
@@ -74,4 +96,22 @@ test('Windows CI exercises real STEP2 UI and IndexedDB before installed PDF outp
   assert.ok(lifecycle.includes('--step2-project'));
   assert.ok(verifier.includes('ASTRA_LIBRARY_ONLY_8310'));
   assert.ok(verifier.includes('realStep2'));
+});
+
+test('installed Electron versionchange check is synthetic, isolated, and verifies existing store data',()=>{
+  const fixture=fs.readFileSync(path.resolve(__dirname,'../desktop/step2-versionchange-acceptance.cjs'),'utf8');
+  const runtime=fs.readFileSync(path.resolve(__dirname,'../desktop/main.cjs'),'utf8');
+  const installer=fs.readFileSync(path.resolve(__dirname,'windows-installer-version-upgrade.ps1'),'utf8');
+  const workflow=fs.readFileSync(path.resolve(__dirname,'../.github/workflows/windows-desktop.yml'),'utf8');
+  for(const required of ["process.env.GITHUB_ACTIONS!=='true'","process.env.RUNNER_TEMP",
+    "--astra-step2-schema-upgrade-verify",'electronVersionchangeProbe','isDeepStrictEqual',
+    'versionchange warning','activeDocumentId','migrationAudit',"body:document.querySelector('.project-paper')?.textContent"]){
+    assert.ok(fixture.includes(required),'Electron versionchange acceptance missing '+required);
+  }
+  assert.ok(runtime.includes('--astra-step2-versionchange-verify'));
+  assert.ok(runtime.includes('runStep2VersionchangeAcceptance(mainWindow,BrowserWindow)'));
+  assert.ok(installer.includes('--astra-step2-versionchange-verify'));
+  assert.ok(installer.includes('PASS ASTRA VERSIONCHANGE PROFILE CLEANUP'));
+  assert.ok(installer.includes('Refusing to recursively remove a reparse-point CI profile'));
+  assert.match(workflow,/In-place 0\.1\.0 IDB v1 to 0\.1\.1 IDB v2 Windows upgrade preserves STEP2 IndexedDB/);
 });
