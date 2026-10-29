@@ -1,5 +1,12 @@
 # STATUS — Astra PDF Redesigner
 
+## 2026-10-29 — Windows user-data upgrade regression rerun
+
+- Latest code SHA `12213f89381ad2f90102f4db1e4fbb4e9a283edb`; added failure diagnostics around installed STEP2 renderer evaluation without changing app behavior or persistence.
+- Windows CI [#40824530246](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40824530246) exact-SHA **SUCCESS**. STEP2 baseline 0.1.0 data generation and PDF audit PASS; in-place 0.1.0→0.1.1 upgrade retained document+PNG; upgraded uninstall PASS. The prior run #40823559986 failed once at the same baseline generation with an unhelpful Electron `{}` error and did not reproduce.
+- Same run also passed installed STEP3 PDF import/manual recovery/source comparison/native A4 export, STEP4 comparison/apply/undo and 8/8 layout PDF audit, and M09-D cancel/reselect/stale-result/V2-store regression.
+- Local validation of the diagnostic-only change: Node 68/68 tests PASS, build PASS, desktop verify 14/14 PASS, script syntax/diff checks PASS. Full Windows workflow exact-SHA now green; actual customer PDFs and physical print acceptance remain unverified.
+
 ## 2026-10-29 — STEP3 Electron 원본 Blob 렌더 수정
 
 - 기능 SHA `a9404c0743470147dc7cd9228e629787f9ae347f` (`integration/astra-commercial-core`, PR #9 Draft/unmerged). 사용자 데이터·V2 schema·8개 디자인 불변.

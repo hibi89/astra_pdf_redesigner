@@ -1,5 +1,12 @@
 # HANDOFF — Astra PDF Redesigner
 
+## 2026-10-29 — Latest Windows upgrade CI completion
+
+1. Latest test code SHA `12213f89381ad2f90102f4db1e4fbb4e9a283edb`. Change only wraps STEP2 installed renderer acceptance evaluation to surface name/message/stack on rejection.
+2. Exact-SHA Windows run [#40824530246](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40824530246) **SUCCESS**. STEP2 baseline document+PNG generation, PDF verification, 0.1.0→0.1.1 in-place upgrade preservation, and upgraded uninstall all passed. Prior run #40823559986 had one non-reproducing baseline-generation failure (`ASTRA desktop startup failure: {}`).
+3. STEP3 installed import/source/manual-recovery/A4 output, STEP4 compare/apply/undo and eight-layout actual PDF audit, and M09-D installed cancel/reselect/stale-result protection also passed in #40824530246.
+4. Local Node tests 68/68, build, desktop verify 14/14, script syntax, and diff checks passed. Actual customer PDF 5–10 sample and physical print acceptance remain open. Overall roadmap estimate stays about 45%; no OCR, storage schema change, external services, main merge, or deployment.
+
 ## 최신 인수인계 — 2026-10-29 STEP3 Electron 원본 Blob 렌더 결함
 
 1. **브랜치/코드:** `integration/astra-commercial-core`, 기능 SHA `a9404c0743470147dc7cd9228e629787f9ae347f`, PR #9 Draft/unmerged. 별도 임시 clone만 사용했으며 main과 기존 로컬 프로젝트는 변경하지 않았다.
