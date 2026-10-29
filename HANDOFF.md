@@ -12,6 +12,17 @@
 8. **남은 작업:** STEP3 실제 텍스트 PDF 5–10건을 사용자 동의하에 로컬 수용시험; buyer physical Windows GUI/print acceptance; STEP4 저장형 스타일 라이브러리/프로젝트 호환은 저장 schema 승인이 필요; STEP5 로컬 레퍼런스 분석은 별도 기능 단위 설계 가능; STEP6 검색 연동은 외부 서비스/데이터 경계 승인 필요; STEP7 표/다단·넘침/부분수정 확대. 판매/배포는 여전히 NO-GO.
 9. **임시 작업:** 개발 clone은 `C:\Users\haein\Documents\Codex\astra_pdf_redesigner-work`에 있으며 원격 푸시 확인 전에는 보존한다. 기능 커밋 외 미커밋 앱 변경 없음. CI 완료를 확인한 뒤 이 생성 clone만 정리할 수 있다.
 
+# 최신 인수인계 — 2026-10-29 STEP3 기능 보강
+
+1. **저장소/상태:** `hibi89/astra_pdf_redesigner`, `integration/astra-commercial-core`, PR #9 Draft/unmerged. 최신 코드 SHA `ef4eb63df686157196a96079df0680f701bedc6c`. 원래 저장소가 아닌 별도 임시 clone에서 작업했다.
+2. **완성 기능:** 추출 블록·복원 이미지에서 PDF 원본 페이지 및 근사 위치로 이동, 선택 위치 자동 노출과 텍스트/이미지 대조 정보 표시. 누락 텍스트 직접 추가·수정·삭제·순서 조정, 8단계 편집 undo/redo와 명시적 원본 확인 동의 갱신, 빈 포함 블록 저장 거부. Electron 설치형 회귀가 수동 복구 문구를 IndexedDB 프로젝트의 A4 미리보기 및 실제 PDF에 확인하도록 확장했다.
+3. **결함 수정:** 브라우저/Windows acceptance가 React 렌더 전 수동 블록을 읽던 테스트 race를 await하도록 보정. 원본 위치를 빠르게 바꿀 때 이전 PDF.js 렌더 취소가 완료되기 전 동일 canvas에 재진입하지 않도록 렌더를 직렬화했다.
+4. **검증:** 로컬 Node 68/68 PASS, TypeScript/Vite build PASS, desktop verification 14/14 PASS, `git diff --check` (`core.whitespace=cr-at-eol`) PASS. 직접 Windows Chrome CDP 및 Electron smoke는 환경 실패로 미검증. 합성 PDF 외 실제 고객 문서/물리 인쇄 미검증.
+5. **CI 정확 상태:** `a850518` #40821833788 (Chrome/Edge)·#40821833694 (Windows), `1878a6d` #40822018994·#40822018950, 최신 `ef4eb63` #40822093641·#40822093651은 마지막 조회 시 in_progress. #40821335082 browser failure는 React 렌더 대기 부족이며 고쳤다; 동일 SHA의 Windows #40821335099 success. 이전 원본 탐색 `9ade72e` browser/Windows #40820434613/#40820434701 모두 success. 최종 보고 전 최신 두 run을 재조회한다.
+6. **보존·승인 경계:** 사용자 데이터, V2 저장 schema, 8개 layout, `main`은 변경하지 않았다. OCR, 모델 다운로드, 외부 서비스/비용, merge/deploy 금지. STEP4 저장형 사용자 프리셋은 저장 구조 변경 승인이 필요하다.
+7. **완성률 및 잔여 작업:** 보수적 7단계 추정 약 44% 유지. STEP3 복잡 표·다단/장문과 실제 PDF 5–10건 수용, STEP4 저장형 프리셋 요구·schema 승인, STEP5 레퍼런스 적용, STEP6 외부 검색 승인, STEP7 통합/출시 수용이 남는다. 인증된 고객 PDF 수용 약 2–4시간(사용자 자료·피드백 대기 별도), STEP4 preset schema+UI+호환 검증 약 1–2일, STEP5 수일~수주, STEP6 승인 후 별도 범위 산정, STEP7 안정화 1–2주 이상. 판매/Production NO-GO.
+8. **안전한 종료:** 임시 작업 폴더는 모든 변경을 remote exact SHA와 대조하고 clean 상태임을 확인한 뒤에만 제거한다. 원래 로컬 프로젝트는 건드리지 않는다.
+
 ## 최신 인수인계 — 2026-10-27 19:18 KST
 
 1. **목표·승인:** 원본 최초 설계 `docs/ASTRA_ORIGINAL_ROADMAP.txt`, `docs/BLUEPRINT.md`, `REQUIREMENTS.md` 전체를 구현한다. STEP3 PDF 가져오기는 승인 상태이고 사용자는 STEP4 디자인 비교·적용·취소 개발도 승인했다. OCR은 별도 승인 전 제외하며, 저장형 사용자 스타일 스키마는 별도 승인 전 변경하지 않는다.
