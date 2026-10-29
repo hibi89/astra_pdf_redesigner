@@ -51,7 +51,7 @@ try{
       'Document library/editor UI leaked into printed PDF');
   }else if(importedStep3){
     const tokens=['ASTRA_PDF_PAGE_ONE_7401','ASTRA_PDF_PAGE_TWO_7402',
-      '한글문서검증','마지막페이지확인','12345','67890'];
+      '한글문서검증','마지막페이지확인','12345','67890','ASTRA_MANUAL_MISSING_7403'];
     const combined=normalized.join('');
     for(const marker of tokens){
       assert.equal(combined.split(marker).length-1,1,
@@ -85,7 +85,7 @@ try{
   // actual Windows output raster, independent of the first PDF.js text pass.
   const m04Expected=importedStep3?
     ['ASTRA_PDF_PAGE_ONE_7401','한글문서검증','12345',
-      'ASTRA_PDF_PAGE_TWO_7402','마지막페이지확인','67890']:
+      'ASTRA_PDF_PAGE_TWO_7402','마지막페이지확인','67890','ASTRA_MANUAL_MISSING_7403']:
     realStep2?
     ['ASTRA_STEP2_PRINT_8307','ASTRA_STEP2_BODY_8308',
       'ASTRA_STEP2_CAPTION_8309']:
@@ -96,7 +96,7 @@ try{
   assert.equal(m04.skippedRotation,0,'Rotated text requires separate review');
   console.log('PASS M04 INSTALLED PDF AUDIT:',m04);
   console.log(importedStep3
-    ?'PASS ASTRA INSTALLED STEP3 PDF CONTENT: native A4 pages='+doc.numPages+', six source markers verified, raster draw '+bitmapDraws
+    ?'PASS ASTRA INSTALLED STEP3 PDF CONTENT: native A4 pages='+doc.numPages+', source and manual-correction markers verified, raster draw '+bitmapDraws
     :realStep2
     ?'PASS ASTRA INSTALLED STEP2 PDF CONTENT: A4 pages='+doc.numPages+', persisted Korean/numeric markers 5/5, raster draw '+bitmapDraws
     :'PASS ASTRA INSTALLED PDF CONTENT: A4 x 2, Korean/numeric markers 6/6, raster draw '+bitmapDraws);

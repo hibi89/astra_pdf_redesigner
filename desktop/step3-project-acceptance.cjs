@@ -46,12 +46,51 @@ async function uploadAndConfirm(encoded){
     throw Error('STEP3 review changed persisted document before approval');
   if(!document.querySelector('.step3-import-panel iframe[src^="blob:"]'))
     throw Error('Original PDF comparison iframe absent');
+  const pageTwo=()=>[...document.querySelectorAll('.step3-block-review details')]
+    .find(node=>node.querySelector(':scope > summary')?.textContent.includes('원본 2페이지'));
+  const sourceText=pageTwo()?.querySelector('[data-step3-show-source]');
+  if(!sourceText)throw Error('STEP3 block-to-source action absent in installed review');
+  sourceText.click();
+  await until(()=>{
+    const panel=document.querySelector('[data-step3-selected-source-block]');
+    const preview=panel?.querySelector('[data-m06-preview][data-m06-rendered-page]');
+    return preview?.getAttribute('data-m06-rendered-page')==='2'&&
+      preview.querySelector('canvas')?.width>0&&preview.querySelector('[data-m06-anchor-rect]');
+  },'installed source text location and estimated highlight');
+  document.querySelector('[data-step3-selected-source-block] button').click();
+  const sourceImage=document.querySelector('[data-step3-show-image-source]');
+  if(!sourceImage)throw Error('STEP3 recovered-image source action absent in installed review');
+  sourceImage.click();
+  await until(()=>{
+    const panel=document.querySelector('[data-step3-selected-source-image]');
+    const preview=panel?.querySelector('[data-m06-preview][data-m06-rendered-page]');
+    return preview?.getAttribute('data-m06-rendered-page')==='1'&&
+      preview.querySelector('canvas')?.width>0&&preview.querySelector('[data-m06-anchor-rect]');
+  },'installed recovered-image source placement and estimated highlight');
+  document.querySelector('[data-step3-selected-source-image] button').click();
+  const addMissing=pageTwo()?.querySelector('[data-step3-add-manual-block]');
+  if(!addMissing)throw Error('STEP3 manual missing-text recovery action absent');
+  addMissing.click();
+  const manualArea=pageTwo().querySelectorAll('textarea');
+  const correction=manualArea[manualArea.length-1];
+  if(!correction||!pageTwo().querySelector('[data-step3-remove-manual]'))
+    throw Error('STEP3 manual correction block was not created');
+  const approval=document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]');
+  const save=[...document.querySelectorAll('.step3-import-panel button')].find(button=>
+    button.textContent.includes('검수 결과를 새 문서로 저장'));
+  if(!approval||!save)throw Error('STEP3 manual review approval controls missing');
+  approval.click();
+  if(!save.disabled||!document.querySelector('[data-step3-empty-block-warning]'))
+    throw Error('STEP3 empty manual correction must warn and block save');
+  const setValue=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set;
+  setValue.call(correction,'ASTRA_MANUAL_MISSING_7403');
+  correction.dispatchEvent(new Event('input',{bubbles:true}));
+  await until(()=>!document.querySelector('[data-step3-empty-block-warning]'),
+    'manual correction completes empty-block warning');
+  approval.click();
+  if(save.disabled)throw Error('STEP3 completed manual correction remains unsavable');
   const confirm=document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]');
-  if(!confirm)throw Error('STEP3 explicit source-review checkbox absent');
-  confirm.click();
-  const save=[...document.querySelectorAll('.step3-import-panel button')].find(b=>
-    b.textContent.includes('검수 결과를 새 문서로 저장'));
-  if(!save||save.disabled)throw Error('STEP3 approval button disabled');
+  if(!confirm?.checked||!save||save.disabled)throw Error('STEP3 explicit source-review checkbox or approval state missing');
   save.click();
   await until(()=>document.querySelectorAll('.doc-list-item').length===count+1,
     'new independent IndexedDB document');
@@ -59,7 +98,8 @@ async function uploadAndConfirm(encoded){
     'active original PDF stays visible after successful installed import');
   await until(()=>{const paper=document.querySelector('.project-paper');
     return paper?.textContent?.includes('ASTRA_PDF_PAGE_ONE_7401')&&
-      paper.textContent.includes('ASTRA_PDF_PAGE_TWO_7402');},
+      paper.textContent.includes('ASTRA_PDF_PAGE_TWO_7402')&&
+      paper.textContent.includes('ASTRA_MANUAL_MISSING_7403');},
     'source tokens in new A4 preview');
   const firstClass=document.querySelector('.project-paper').className;
   const themes=[...document.querySelectorAll('input[name=v2theme]')];
@@ -70,7 +110,8 @@ async function uploadAndConfirm(encoded){
     'different selected print theme');
   await until(()=>document.querySelector('.save-chip')?.textContent==='저장됨',
     'new PDF project persisted');
-  return{count:count+1,themeClass:document.querySelector('.project-paper').className};
+  return{count:count+1,themeClass:document.querySelector('.project-paper').className,
+    manualMarker:'ASTRA_MANUAL_MISSING_7403'};
 }
 async function verifyPersisted(data){
   const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -78,6 +119,7 @@ async function verifyPersisted(data){
     const paper=document.querySelector('.project-paper');
     if(paper?.textContent?.includes('ASTRA_PDF_PAGE_ONE_7401')&&
        paper.textContent.includes('ASTRA_PDF_PAGE_TWO_7402')&&
+       (!data.manualMarker||paper.textContent.includes(data.manualMarker))&&
        document.querySelectorAll('.doc-list-item').length===data.count&&
        paper.className===data.themeClass){
       const button=document.querySelector('header .print-button');
