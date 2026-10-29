@@ -74,6 +74,9 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
   // not allocate temporary Blob URLs or update a discarded review session.
   const requestVersion=useRef(0);
   const unmounted=useRef(false);
+  const currentSourceBlock=sourceBlock&&draft
+    ?draft.pages.find(page=>page.blocks.some(block=>block.id===sourceBlock.id))?.blocks.find(block=>block.id===sourceBlock.id)??null
+    :sourceBlock;
   useEffect(()=>{
     unmounted.current=false;
     return()=>{
