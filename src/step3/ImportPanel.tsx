@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
-import {PDF_IMPORT_LIMITS,type PdfDraft,type PdfDraftBlock,type PdfRole} from './structure.ts';
+import {PDF_IMPORT_LIMITS,type PdfDraft,type PdfDraftBlock,type PdfDraftPage,type PdfRole} from './structure.ts';
 import {extractLocalPdf} from './pdf.ts';
 import SourceAnchorPreview from './SourceAnchorPreview.tsx';
 
@@ -25,6 +25,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
   const [previewUrl,setPreviewUrl]=useState('');
   const [dragging,setDragging]=useState(false);
   const [sourceBlock,setSourceBlock]=useState<PdfDraftBlock|null>(null);
+  const [sourceImage,setSourceImage]=useState<PdfDraftPage['images'][number]|null>(null);
   const [imageUrls,setImageUrls]=useState<Record<string,string>>({});
   const manualBlockSequence=useRef(0);
   const urlRef=useRef('');
@@ -49,6 +50,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
     undoStack.current=[];redoStack.current=[];
     setHistoryRevision(value=>value+1);
   };
+  const closeSourceLocation=()=>{setSourceBlock(null);setSourceImage(null);};
   const publishDraft=(next:PdfDraft|null)=>{
     draftRef.current=next;setDraft(next);
   };
@@ -81,7 +83,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
     requestVersion.current++;
     if(urlRef.current)URL.revokeObjectURL(urlRef.current);
     Object.values(imageUrlRef.current).forEach(u=>URL.revokeObjectURL(u));
-    imageUrlRef.current={};setImageUrls({});setSourceBlock(null);
+    imageUrlRef.current={};setImageUrls({});setSourceBlock(null);setSourceImage(null);
     urlRef.current='';setPreviewUrl('');publishDraft(null);setError('');setConfirmed(false);clearHistory();
   };
   const choose=async(file:File)=>{
@@ -217,10 +219,11 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
         <span className="help-text">검수 편집 최근 {DRAFT_HISTORY_LIMIT}단계까지 되돌릴 수 있습니다. 되돌리기/다시 실행 후에는 원본 확인 동의를 다시 선택해야 합니다.</span>
       </div>
       <div className="step3-source-compare">
-        {sourceBlock?.origin&&previewUrl&&<div className="panel" data-step3-selected-source-block={sourceBlock.id}>
-          <div className="panel-heading"><h3>선택한 추출 블록의 원본 위치</h3>
-            <button type="button" className="secondary-button" onClick={()=>setSourceBlock(null)}>위치 닫기</button></div>
-          <SourceAnchorPreview url={previewUrl} origin={sourceBlock.origin} blockId={sourceBlock.id}/>
+        {(sourceBlock?.origin||sourceImage)&&previewUrl&&<div className="panel"
+          data-step3-selected-source-block={sourceBlock?.id} data-step3-selected-source-image={sourceImage?.id}>
+          <div className="panel-heading"><h3>{sourceImage?'선택한 복원 이미지의 원본 위치':'선택한 추출 블록의 원본 위치'}</h3>
+            <button type="button" className="secondary-button" onClick={closeSourceLocation}>위치 닫기</button></div>
+          <SourceAnchorPreview url={previewUrl} origin={sourceBlock?.origin??sourceImage!.origin} blockId={sourceBlock?.id??sourceImage!.id}/>
           <p className="help-text">강조 영역은 PDF.js가 추정한 블록 좌표입니다. 글자별 위치와 추출 내용의 일치를 보증하지 않으므로 원본과 함께 확인하세요.</p>
         </div>}
         {previewUrl&&<details><summary>원본 PDF 열어 대조</summary>
@@ -234,6 +237,8 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
               <p className="help-text">PDF.js가 디코딩한 이미지를 PNG로 재구성했습니다. 원본 비트스트림·마스크/클리핑 효과가 그대로 보존된 것은 아닙니다. 위치는 근사치이며 저장 후 STEP2 편집기에서 크기·순서를 바꿀 수 있습니다.</p>
               {page.images.map((image,i)=><div className="section-editor" key={image.id}>
                 <strong>이미지 {i+1} · {image.width}×{image.height}px · {image.origin.x}, {image.origin.y}pt</strong>
+                <button type="button" className="secondary-button" data-step3-show-image-source={image.id}
+                  disabled={disabled||busy} onClick={()=>{setSourceBlock(null);setSourceImage(image)}}>원본 위치 보기</button>
                 {imageUrls[image.id]&&<img src={imageUrls[image.id]} className="step3-image-thumbnail" alt={page.number+'페이지 복원 이미지 '+(i+1)}/>}
                 <label className="field step3-confirm"><input type="checkbox" checked={image.include} disabled={disabled||busy}
                   onChange={e=>toggleImage(page.number,image.id,e.target.checked)}/>
@@ -247,7 +252,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
             {page.blocks.map((block,i)=><div className="section-editor" key={block.id}>
               <div className="block-header"><strong>{block.manual?'수동 추가 · 추출 원본 좌표 없음':`원본 ${block.origin?.page}p · ${block.origin?.x}, ${block.origin?.y}pt`}</strong>
                 <div className="mini-actions">
-                  {block.origin&&<button type="button" data-step3-show-source={block.id} onClick={()=>setSourceBlock(block)} disabled={disabled||busy}>원본 위치 보기</button>}
+                  {block.origin&&<button type="button" data-step3-show-source={block.id} onClick={()=>{setSourceImage(null);setSourceBlock(block)}} disabled={disabled||busy}>원본 위치 보기</button>}
                   {block.manual&&<button type="button" data-step3-remove-manual={block.id} onClick={()=>removeManualBlock(page.number,block.id)} disabled={disabled||busy}>블록 삭제</button>}
                   <button aria-label={block.id+' 위로 이동'} disabled={disabled||busy||i===0} onClick={()=>move(page.number,block.id,-1)}>↑</button>
                   <button aria-label={block.id+' 아래로 이동'} disabled={disabled||busy||i===page.blocks.length-1} onClick={()=>move(page.number,block.id,1)}>↓</button>

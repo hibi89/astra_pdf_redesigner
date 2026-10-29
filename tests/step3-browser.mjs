@@ -129,6 +129,12 @@ try{
   await evaluate("document.querySelector('[data-step3-selected-source-block] button').click()");
   assert.equal(await evaluate("Boolean(document.querySelector('[data-step3-selected-source-block]'))"),false,'Source position panel must close without changing draft');
   console.log('PASS STEP3 BLOCK-TO-SOURCE NAVIGATION: selected page-2 text maps to its rendered original page and estimated source highlight');
+  const sourceImageId=await evaluate("(()=>{const button=document.querySelector('[data-step3-show-image-source]');if(!button)throw Error('Recovered image source navigation missing');button.click();return button.getAttribute('data-step3-show-image-source')})()");
+  const imageLocation=await eventually(()=>evaluate("(()=>{const panel=document.querySelector('[data-step3-selected-source-image]');const preview=panel?.querySelector('[data-m06-preview][data-m06-rendered-page]');const canvas=preview?.querySelector('canvas');const rect=preview?.querySelector('[data-m06-anchor-rect]');return panel&&preview&&canvas?.width>0&&canvas?.height>0&&rect?{id:panel.getAttribute('data-step3-selected-source-image'),page:preview.getAttribute('data-m06-rendered-page'),highlight:rect.getBoundingClientRect().width}:null})()"),x=>x&&x.id===sourceImageId&&x.page==='2'&&x.highlight>0);
+  assert.ok(imageLocation.highlight>0,'Recovered image must highlight its estimated original placement');
+  await evaluate("document.querySelector('[data-step3-selected-source-image] button').click()");
+  assert.equal(await evaluate("Boolean(document.querySelector('[data-step3-selected-source-image]'))"),false,'Image source location panel must close');
+  console.log('PASS STEP3 IMAGE-TO-SOURCE NAVIGATION: recovered raster maps to its rendered source page and estimated placement');
   const manualBlockId=await evaluate("(()=>{const page=[...document.querySelectorAll('.step3-block-review details')].find(d=>d.querySelector(':scope > summary')?.textContent.includes('원본 2페이지'));const button=page?.querySelector('[data-step3-add-manual-block]');if(!button)throw Error('Manual recovery action missing');button.click();return page.querySelector('[data-step3-remove-manual]')?.getAttribute('data-step3-remove-manual')})()");
   assert.ok(manualBlockId,'Manual text block was not created');
   assert.equal(await evaluate("Boolean(document.querySelector('[data-step3-show-source="+JSON.stringify(manualBlockId)+"]'))"),false,'Manual block must not claim extracted source coordinates');
