@@ -36,6 +36,19 @@ export function splitPdfDraftBlock(block:PdfDraftBlock,offset:number,newId:strin
     {...common,id:newId,text:block.text.slice(offset)},
   ];
 }
+export function canMergePdfDraftBlocks(first:PdfDraftBlock,second:PdfDraftBlock):boolean{
+  return first.role===second.role&&Boolean(first.excluded)===Boolean(second.excluded)&&
+    Boolean(first.manual)===Boolean(second.manual);
+}
+/** Merge adjacent same-role review blocks without losing either text. An
+ * existing newline is retained; otherwise the former block boundary becomes
+ * one explicit line break. The first block remains the approximate source anchor.
+ */
+export function mergePdfDraftBlocks(first:PdfDraftBlock,second:PdfDraftBlock):PdfDraftBlock{
+  if(!canMergePdfDraftBlocks(first,second))throw Error('같은 분류·포함 상태의 인접 블록만 합칠 수 있습니다.');
+  const separator=first.text.endsWith('\n')||second.text.startsWith('\n')?'':'\n';
+  return {...first,text:first.text+separator+second.text,sourceText:undefined};
+}
 /** Insert a recovered source fragment near its estimated one-column reading position.
  * The transient draft retains its origin so later recovered blocks stay ordered.
  */

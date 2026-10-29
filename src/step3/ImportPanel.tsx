@@ -1,5 +1,5 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
-import {createSourceTextMatcher,insertManualPdfBlockAtSourcePosition,isSafePdfTextSplitOffset,nextSourceReviewCount,sortSourceReviewItems,splitPdfDraftBlock,PDF_IMPORT_LIMITS,PDF_SOURCE_REVIEW_BATCH,visibleSourceReviewItems,type PdfDraft,type PdfDraftBlock,type PdfDraftPage,type PdfOrigin,type PdfRole} from './structure.ts';
+import {canMergePdfDraftBlocks,createSourceTextMatcher,insertManualPdfBlockAtSourcePosition,isSafePdfTextSplitOffset,mergePdfDraftBlocks,nextSourceReviewCount,sortSourceReviewItems,splitPdfDraftBlock,PDF_IMPORT_LIMITS,PDF_SOURCE_REVIEW_BATCH,visibleSourceReviewItems,type PdfDraft,type PdfDraftBlock,type PdfDraftPage,type PdfOrigin,type PdfRole} from './structure.ts';
 import {extractLocalPdf} from './pdf.ts';
 import SourceAnchorPreview from './SourceAnchorPreview.tsx';
 
@@ -219,6 +219,15 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
       return {...p,blocks:[...p.blocks.slice(0,index),before,after,...p.blocks.slice(index+1)]};
     })}));
   };
+  const mergeWithPrevious=(page:number,id:string)=>reviseDraft(current=>({...current,pages:current.pages.map(p=>{
+    if(p.number!==page)return p;
+    const index=p.blocks.findIndex(block=>block.id===id);
+    if(index<=0)return p;
+    const first=p.blocks[index-1],second=p.blocks[index];
+    if(!canMergePdfDraftBlocks(first,second))return p;
+    delete splitOffsets.current[first.id];delete splitOffsets.current[second.id];
+    return {...p,blocks:[...p.blocks.slice(0,index-1),mergePdfDraftBlocks(first,second),...p.blocks.slice(index+1)]};
+  })}));
   const toggleImage=(page:number,id:string,include:boolean)=>{
     reviseDraft(current=>({...current,pages:current.pages.map(p=>p.number===page?
       {...p,images:p.images.map(img=>img.id===id?{...img,include}:img)}:p)}));
@@ -346,6 +355,8 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
                   {!block.manual&&block.sourceText!==undefined&&block.text!==block.sourceText&&<button type="button" data-step3-restore-extracted={block.id}
                     onClick={()=>change(page.number,block.id,b=>({...b,text:b.sourceText??b.text}))} disabled={disabled||busy}>추출 원문 복원</button>}
                   {block.manual&&<button type="button" data-step3-remove-manual={block.id} onClick={()=>removeManualBlock(page.number,block.id)} disabled={disabled||busy}>블록 삭제</button>}
+                  {i>0&&canMergePdfDraftBlocks(page.blocks[i-1],block)&&<button type="button" data-step3-merge-block={block.id}
+                    onClick={()=>mergeWithPrevious(page.number,block.id)} disabled={disabled||busy}>이전 블록과 합치기</button>}
                   <button type="button" data-step3-split-block={block.id}
                     disabled={disabled||busy||totalBlocks>=PDF_IMPORT_LIMITS.blocks||!isSafePdfTextSplitOffset(block.text,splitOffsets.current[block.id]??0)}
                     onClick={()=>splitBlockAtCursor(page.number,block.id)}>커서 위치에서 블록 나누기</button>

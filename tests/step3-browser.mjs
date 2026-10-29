@@ -194,10 +194,18 @@ try{
   await evaluate("(()=>{const button=document.querySelector('[data-step3-split-block="+JSON.stringify(splitTarget.id)+"]');const area=button.closest('.section-editor').querySelector('textarea');area.focus();area.setSelectionRange("+splitOffset+","+splitOffset+");area.dispatchEvent(new MouseEvent('click',{bubbles:true}));})()");
   await eventually(()=>evaluate("document.querySelector('[data-step3-split-block="+JSON.stringify(splitTarget.id)+"]')?.disabled"),disabled=>disabled===false);
   await evaluate("document.querySelector('[data-step3-split-block="+JSON.stringify(splitTarget.id)+"]').click()");
-  const splitParts=await evaluate("(()=>{const button=document.querySelector('[data-step3-split-block="+JSON.stringify(splitTarget.id)+"]');return {first:button.closest('.section-editor').querySelector('textarea').value,second:button.closest('.section-editor').nextElementSibling?.querySelector('textarea')?.value,count:document.querySelectorAll('.step3-block-review details:first-child .section-editor').length}})()");
+  const splitParts=await evaluate("(()=>{const button=document.querySelector('[data-step3-split-block="+JSON.stringify(splitTarget.id)+"]');const next=button.closest('.section-editor').nextElementSibling;return {first:button.closest('.section-editor').querySelector('textarea').value,second:next?.querySelector('textarea')?.value,secondId:next?.querySelector('[data-step3-split-block]')?.getAttribute('data-step3-split-block'),count:document.querySelectorAll('.step3-block-review details:first-child .section-editor').length}})()");
   assert.equal(splitParts.first+splitParts.second,splitTarget.value,'Splitting at the cursor must preserve every source character and separator');
   assert.equal(splitParts.count,splitTarget.count+1,'Splitting one source block must create one additional editable block');
-  console.log('PASS STEP3 MANUAL BLOCK SPLIT: cursor split preserves exact source text and source order through draft review');
+  assert.ok(splitParts.secondId,'The new split block must expose a merge action');
+  await evaluate("document.querySelector('[data-step3-merge-block="+JSON.stringify(splitParts.secondId)+"]').click()");
+  await eventually(()=>evaluate("document.querySelectorAll('.step3-block-review details:first-child .section-editor').length"),count=>count===splitTarget.count);
+  assert.equal(await evaluate("document.querySelector('[data-step3-split-block="+JSON.stringify(splitTarget.id)+"]')?.closest('.section-editor').querySelector('textarea').value"),splitTarget.value,
+    'Adjacent compatible blocks must merge while preserving the source text and separator');
+  await evaluate("(()=>{const button=document.querySelector('[data-step3-split-block="+JSON.stringify(splitTarget.id)+"]');const area=button.closest('.section-editor').querySelector('textarea');area.focus();area.setSelectionRange("+splitOffset+","+splitOffset+");area.dispatchEvent(new MouseEvent('click',{bubbles:true}));})()");
+  await eventually(()=>evaluate("document.querySelector('[data-step3-split-block="+JSON.stringify(splitTarget.id)+"]')?.disabled"),disabled=>disabled===false);
+  await evaluate("document.querySelector('[data-step3-split-block="+JSON.stringify(splitTarget.id)+"]').click()");
+  console.log('PASS STEP3 MANUAL BLOCK SPLIT/MERGE: text and source order survive reversible structure corrections');
   await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').click()");
   await evaluate("(()=>{const b=[...document.querySelectorAll('.step3-import-panel button')].find(b=>b.textContent.includes('검수 결과를 새 문서로 저장'));if(!b||b.disabled)throw Error('PDF confirm disabled');b.click();})()");
   await eventually(()=>evaluate("document.querySelectorAll('.doc-list-item').length"),n=>n===before+1);
