@@ -1,3 +1,12 @@
+## 2026-10-29 — STEP3 cancellation, progress and recovered-source ordering (code `9e131b2`)
+
+- Branch `integration/astra-commercial-core` remote HEAD: `9e131b296bd17a75595769a36d9ebfc954e3c0c9`; PR #9 remains Draft/open/unmerged. Original local project and user data were not touched.
+- STEP3 now reports the page being analyzed and passes an `AbortSignal` into PDF.js. Cancel, replacement selection and unmount destroy an active PDF.js task; a late file read is rejected before parsing. Missing-text recovery retains estimated coordinates only in the review draft so multiple manual recoveries remain in source order; project conversion strips those coordinates from manually recovered blocks.
+- Windows installed-app acceptance now checks loading status during cancel/reselect and ignores late responses after document switch. The STEP3 source review browser regression verifies the recovered block can navigate back to its estimated source location. Installed reload helpers wait for the STEP2/3 renderer to hydrate before executing persistence checks.
+- Local verification on code `9e131b2`: `npm test` 90/90 PASS; `npm run build` PASS; `npm run desktop:verify` 16/16 PASS; changed acceptance scripts pass `node --check`. Exact-SHA Windows and browser runs for `9e131b2` were still in progress at last check. Windows installer workflow #40856599632 on `db461dc` SUCCESS; Windows and STEP1/2 workflows on `52c18b0` SUCCESS; both workflows on `2291a85` SUCCESS. Windows was not run directly on this workstation.
+- Seven-step estimate remains approximately **52%**, below the 80% target. No percentage increase is claimed solely from tests. Current approval boundaries leave persistent user styles (schema/migration), reference URL/library persistence, internet search/services, OCR and model download unimplemented; complex table/multicolumn reconstruction also remains. Real customer PDFs and a buyer PC have not been accepted.
+- No OCR, paid API, external service, model download, storage schema change, merge, deployment or sale. The earlier isolated checkout `C:\Users\haein\Documents\Codex\astra_pdf_redesigner-work-continued` still has uncommitted changes/local-only history and must be preserved. The newer clean worktree is `C:\Users\haein\Documents\Codex\astra_pdf_redesigner-remote-current`.
+
 ## 2026-10-29 — STEP5 PDF typography proposal (verified code `c160e36`)
 
 - Branch `integration/astra-commercial-core` code SHA `c160e3667fc249995daf1b00d8338a0dacd2b7cd`; Draft PR #9 remains open and unmerged.

@@ -1,3 +1,11 @@
+## Current handoff — remote `9e131b2` (2026-10-29)
+
+1. Repository `hibi89/astra_pdf_redesigner`, branch `integration/astra-commercial-core`; remote HEAD `9e131b296bd17a75595769a36d9ebfc954e3c0c9`. Draft PR #9 remains open/unmerged; do not merge.
+2. This continuation added STEP3 page progress and actual PDF.js abort support; multi-item manual recovery now keeps source coordinates transiently for ordering and strips them from persisted project data. It also hardened installed STEP2/3 renderer readiness checks and added browser source-navigation regression.
+3. Local checks at `9e131b2`: unit tests 90/90, production build, desktop bundle check and 16 desktop static acceptance tests PASS. Windows exact-SHA #40857223514 and browser/STEP1/2 #40857223214 were still running at last check. Windows #40856599632 (`db461dc`) SUCCESS; both Windows/STEP1-2 at `52c18b0` and `2291a85` SUCCESS.
+4. Current seven-stage estimate remains about 52%, below 80. Approval-gated work: persistent custom style presets require schema/migration approval; URL reference/persistent collections and STEP6 search require external-service approval; OCR/model download are explicitly excluded. Complex table/multicolumn reconstruction and real customer PDF/physical buyer-PC acceptance remain.
+5. Preserve the old isolated clone `C:\Users\haein\Documents\Codex\astra_pdf_redesigner-work-continued`: it contains uncommitted/local-only results. The newer isolated worktree is `C:\Users\haein\Documents\Codex\astra_pdf_redesigner-remote-current`; remote code is committed and pushed. Clean only the generated new worktree when final CI/status verification is finished; never touch the original project.
+
 ## 2026-10-29 — STEP5 PDF typography proposal (verified code `c160e36`)
 
 - Branch `integration/astra-commercial-core` code SHA `c160e3667fc249995daf1b00d8338a0dacd2b7cd`; Draft PR #9 remains open and unmerged.
