@@ -27,6 +27,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
   const [sourceBlock,setSourceBlock]=useState<PdfDraftBlock|null>(null);
   const [sourceImage,setSourceImage]=useState<PdfDraftPage['images'][number]|null>(null);
   const [imageUrls,setImageUrls]=useState<Record<string,string>>({});
+  const sourceLocationPanel=useRef<HTMLDivElement|null>(null);
   const manualBlockSequence=useRef(0);
   const urlRef=useRef('');
   const imageUrlRef=useRef<Record<string,string>>({});
@@ -46,6 +47,9 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
       Object.values(imageUrlRef.current).forEach(u=>URL.revokeObjectURL(u));
     };
   },[]);
+  useEffect(()=>{
+    if(sourceBlock||sourceImage)sourceLocationPanel.current?.scrollIntoView({behavior:'smooth',block:'nearest'});
+  },[sourceBlock?.id,sourceImage?.id]);
   const clearHistory=()=>{
     undoStack.current=[];redoStack.current=[];
     setHistoryRevision(value=>value+1);
@@ -219,12 +223,14 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
         <span className="help-text">검수 편집 최근 {DRAFT_HISTORY_LIMIT}단계까지 되돌릴 수 있습니다. 되돌리기/다시 실행 후에는 원본 확인 동의를 다시 선택해야 합니다.</span>
       </div>
       <div className="step3-source-compare">
-        {(sourceBlock?.origin||sourceImage)&&previewUrl&&<div className="panel"
+        {(sourceBlock?.origin||sourceImage)&&previewUrl&&<div ref={sourceLocationPanel} className="panel"
           data-step3-selected-source-block={sourceBlock?.id} data-step3-selected-source-image={sourceImage?.id}>
           <div className="panel-heading"><h3>{sourceImage?'선택한 복원 이미지의 원본 위치':'선택한 추출 블록의 원본 위치'}</h3>
             <button type="button" className="secondary-button" onClick={closeSourceLocation}>위치 닫기</button></div>
+          {sourceBlock&&<p className="help-text" data-step3-source-excerpt>추출 내용: {sourceBlock.text}</p>}
+          {sourceImage&&imageUrls[sourceImage.id]&&<img src={imageUrls[sourceImage.id]} className="step3-image-thumbnail" alt="원본 위치 대조용 복원 이미지"/>}
           <SourceAnchorPreview url={previewUrl} origin={sourceBlock?.origin??sourceImage!.origin} blockId={sourceBlock?.id??sourceImage!.id}/>
-          <p className="help-text">강조 영역은 PDF.js가 추정한 블록 좌표입니다. 글자별 위치와 추출 내용의 일치를 보증하지 않으므로 원본과 함께 확인하세요.</p>
+          <p className="help-text">강조 영역은 추출 텍스트 블록 또는 복원 이미지의 추정 위치이며, 문자별·클리핑 정확도를 보장하지 않습니다.</p>
         </div>}
         {previewUrl&&<details><summary>원본 PDF 열어 대조</summary>
           <iframe title="원본 PDF 대조" src={previewUrl} width="100%" height="400"/>
