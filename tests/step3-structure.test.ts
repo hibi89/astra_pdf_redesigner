@@ -36,6 +36,18 @@ test('STEP3: import rejects a draft when all text blocks are explicitly excluded
   assert.throws(()=>pdfDraftToProject(draft),/가져올 본문이 없습니다/);
   assert.equal(draft.pages[0].blocks[0].text,'ONLY_HEADER_104');
 });
+test('STEP3: manually supplied missing text is imported without inventing source coordinates',()=>{
+  const draft=makePdfDraft('manual-repair.pdf',[{number:1,width:595,height:842,imageDetected:false,pieces:[piece('추출된 본문',1,40,80)]}]);
+  draft.pages[0].blocks.push({id:'manual-1',text:'원본 대조로 복구한 문장',role:'paragraph',manual:true});
+  const project=pdfDraftToProject(draft),blocks=project.content.sections[0].blocks;
+  assert.equal(blocks.length,2);
+  assert.equal(blocks[1].kind,'paragraph');
+  assert.equal(blocks[1].text,'원본 대조로 복구한 문장');
+  assert.equal(blocks[1].origin,undefined);
+  assert.ok(isProjectDocument(project));
+  draft.pages[0].blocks.push({id:'manual-2',text:'',role:'paragraph',manual:true});
+  assert.throws(()=>pdfDraftToProject(draft),/비어 있는 텍스트 블록/);
+});
 test('STEP3: Korean, numbers, punctuation and source coordinates survive single-column import',()=>{
   const source:PdfPageInput={number:1,width:595,height:842,imageDetected:false,pieces:[
     piece('두 번째 줄 2/3 100%',1,45,102),

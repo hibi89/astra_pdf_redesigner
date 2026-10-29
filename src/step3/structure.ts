@@ -16,7 +16,7 @@ export interface PdfOrigin {
   page:number; x:number; y:number; width:number; height:number;
 }
 export interface PdfDraftBlock {
-  id:string; text:string; role:PdfRole; origin:PdfOrigin; excluded?:boolean;
+  id:string; text:string; role:PdfRole; origin?:PdfOrigin; excluded?:boolean; manual?:boolean;
 }
 export interface PdfDraftPage {number:number; blocks:PdfDraftBlock[]; charCount:number; imageDetected:boolean; images:RecoveredPdfImage[];imageCount:number;omittedImages:number;vectorPaintCount:number;compositionRisk:GraphicsCompositionRisk;}
 export interface PdfDraft {
@@ -129,11 +129,11 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
       const role=lineRole(line,body);
       const prev=blocks.at(-1);
       const lastLine=lines[lines.indexOf(line)-1];
-      const isContinuation=prev&&lastLine&&role==='paragraph'&&prev.role==='paragraph'&&
+      const isContinuation=prev&&prev.origin&&lastLine&&role==='paragraph'&&prev.role==='paragraph'&&
         Math.abs(lastLine.x-line.x)<Math.max(12,body*1.8)&&
         line.y-(lastLine.y+lastLine.height)<=Math.max(12,body*1.5)&&
         line.y>=lastLine.y;
-      if(isContinuation&&prev){
+      if(isContinuation&&prev?.origin){
         // Visual line wraps are heuristic; retain explicit line breaks so no
         // content is silently merged or rewritten.
         prev.text+='\n'+line.text;

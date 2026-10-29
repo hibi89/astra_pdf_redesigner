@@ -1,5 +1,5 @@
 import {useEffect,useRef,useState} from 'react';
-import type {PdfDraft,PdfDraftBlock,PdfRole} from './structure.ts';
+import {PDF_IMPORT_LIMITS,type PdfDraft,type PdfDraftBlock,type PdfRole} from './structure.ts';
 import {extractLocalPdf} from './pdf.ts';
 import SourceAnchorPreview from './SourceAnchorPreview.tsx';
 
@@ -26,6 +26,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
   const [dragging,setDragging]=useState(false);
   const [sourceBlock,setSourceBlock]=useState<PdfDraftBlock|null>(null);
   const [imageUrls,setImageUrls]=useState<Record<string,string>>({});
+  const manualBlockSequence=useRef(0);
   const urlRef=useRef('');
   const imageUrlRef=useRef<Record<string,string>>({});
   const draftRef=useRef<PdfDraft|null>(null);
@@ -132,6 +133,14 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
       return {...p,blocks:copy};
     })}));
   };
+  const addManualBlock=(page:number)=>{
+    if(totalBlocks>=PDF_IMPORT_LIMITS.blocks){setError('검수 블록이 2,500개 제한에 도달했습니다.');return;}
+    manualBlockSequence.current++;
+    const block:PdfDraftBlock={id:'manual-'+manualBlockSequence.current,role:'paragraph',text:'',manual:true,excluded:false};
+    reviseDraft(current=>({...current,pages:current.pages.map(p=>p.number===page?{...p,blocks:[...p.blocks,block]}:p)}));
+  };
+  const removeManualBlock=(page:number,id:string)=>reviseDraft(current=>({...current,pages:current.pages.map(p=>p.number===page?
+    {...p,blocks:p.blocks.filter(b=>b.id!==id)}:p)}));
   const toggleImage=(page:number,id:string,include:boolean)=>{
     reviseDraft(current=>({...current,pages:current.pages.map(p=>p.number===page?
       {...p,images:p.images.map(img=>img.id===id?{...img,include}:img)}:p)}));
@@ -141,6 +150,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
     setBusy(true);
     try{
       if(!draft.pages.some(p=>p.blocks.some(b=>!b.excluded&&b.text.trim())))throw Error('확인된 본문이 비어 있습니다.');
+      if(draft.pages.some(p=>p.blocks.some(b=>!b.excluded&&!b.text.trim())))throw Error('빈 텍스트 블록이 있습니다. 내용을 입력하거나 새 문서에서 제외하세요.');
       const documentId=await onImport(draft);
       if(documentId){
         const url=urlRef.current;
@@ -155,6 +165,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
   };
   const totalBlocks=draft?.pages.reduce((s,p)=>s+p.blocks.length,0)??0;
   const includedTextBlocks=draft?.pages.reduce((s,p)=>s+p.blocks.filter(b=>!b.excluded&&b.text.trim()).length,0)??0;
+  const includedEmptyBlocks=draft?.pages.reduce((s,p)=>s+p.blocks.filter(b=>!b.excluded&&!b.text.trim()).length,0)??0;
   const excludedTextBlocks=draft?.pages.reduce((s,p)=>s+p.blocks.filter(b=>b.excluded).length,0)??0;
   const detected=draft?.pages.reduce((s,p)=>s+p.imageCount,0)??0;
   const recovered=draft?.pages.reduce((s,p)=>s+p.images.length,0)??0;
@@ -206,7 +217,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
         <span className="help-text">검수 편집 최근 {DRAFT_HISTORY_LIMIT}단계까지 되돌릴 수 있습니다. 되돌리기/다시 실행 후에는 원본 확인 동의를 다시 선택해야 합니다.</span>
       </div>
       <div className="step3-source-compare">
-        {sourceBlock&&previewUrl&&<div className="panel" data-step3-selected-source-block={sourceBlock.id}>
+        {sourceBlock?.origin&&previewUrl&&<div className="panel" data-step3-selected-source-block={sourceBlock.id}>
           <div className="panel-heading"><h3>선택한 추출 블록의 원본 위치</h3>
             <button type="button" className="secondary-button" onClick={()=>setSourceBlock(null)}>위치 닫기</button></div>
           <SourceAnchorPreview url={previewUrl} origin={sourceBlock.origin} blockId={sourceBlock.id}/>
@@ -231,10 +242,13 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
               </div>)}
             </div>}
             {!page.blocks.length&&<p className="warning">선택 가능한 문자가 없습니다. 스캔·이미지 콘텐츠를 확인하세요.</p>}
+            <button type="button" className="secondary-button" data-step3-add-manual-block={page.number} disabled={disabled||busy||totalBlocks>=PDF_IMPORT_LIMITS.blocks}
+              onClick={()=>addManualBlock(page.number)}>누락 텍스트 직접 추가</button>
             {page.blocks.map((block,i)=><div className="section-editor" key={block.id}>
-              <div className="block-header"><strong>원본 {block.origin.page}p · {block.origin.x}, {block.origin.y}pt</strong>
+              <div className="block-header"><strong>{block.manual?'수동 추가 · 추출 원본 좌표 없음':`원본 ${block.origin?.page}p · ${block.origin?.x}, ${block.origin?.y}pt`}</strong>
                 <div className="mini-actions">
-                  <button type="button" data-step3-show-source={block.id} onClick={()=>setSourceBlock(block)} disabled={disabled||busy}>원본 위치 보기</button>
+                  {block.origin&&<button type="button" data-step3-show-source={block.id} onClick={()=>setSourceBlock(block)} disabled={disabled||busy}>원본 위치 보기</button>}
+                  {block.manual&&<button type="button" data-step3-remove-manual={block.id} onClick={()=>removeManualBlock(page.number,block.id)} disabled={disabled||busy}>블록 삭제</button>}
                   <button aria-label={block.id+' 위로 이동'} disabled={disabled||busy||i===0} onClick={()=>move(page.number,block.id,-1)}>↑</button>
                   <button aria-label={block.id+' 아래로 이동'} disabled={disabled||busy||i===page.blocks.length-1} onClick={()=>move(page.number,block.id,1)}>↓</button>
                 </div>
@@ -250,7 +264,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
                   {ROLES.map(([role,label])=><option key={role} value={role}>{label}</option>)}
                 </select>
               </label>
-              <label className="field">원본 대조 후 내용 수정
+              <label className="field">{block.manual?'원본 대조 후 누락 내용 직접 입력':'원본 대조 후 내용 수정'}
                 <textarea rows={Math.min(7,Math.max(2,block.text.split('\n').length+1))}
                   disabled={disabled||busy} value={block.text} onChange={e=>change(page.number,block.id,b=>({...b,text:e.target.value}))}/>
               </label>
@@ -259,13 +273,14 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
         </div>
       </div>
       {totalBlocks>0&&includedTextBlocks===0&&<p className="warning" role="alert">새 문서에 포함할 텍스트가 없습니다. 최소 한 블록을 포함하세요. 원본 검수 내용은 그대로 유지됩니다.</p>}
+      {includedEmptyBlocks>0&&<p className="warning" role="alert" data-step3-empty-block-warning>비어 있는 텍스트 블록 {includedEmptyBlocks}개가 있습니다. 내용을 입력하거나 새 문서 포함을 해제한 뒤 저장하세요.</p>}
       <label className="field step3-confirm"><input type="checkbox" checked={confirmed} disabled={disabled||busy}
         onChange={e=>setConfirmed(e.target.checked)}/>
         원본과 추출 결과, 새 문서에 포함·제외할 텍스트, 이미지 복원·누락 개수를 확인했습니다. 미복원 그래픽은 새 PDF에서 누락될 수 있으며, 포함 선택 이미지는 PNG 근사 복원임을 인지하고 새 문서로 추가합니다.
       </label>
       <div className="toolbar">
         <button className="secondary-button" disabled={busy&&!parsing} onClick={cancel}>가져오기 취소</button>
-        <button className="print-button" disabled={disabled||busy||!confirmed||includedTextBlocks===0} onClick={()=>void commit()}>검수 결과를 새 문서로 저장</button>
+        <button className="print-button" disabled={disabled||busy||!confirmed||includedTextBlocks===0||includedEmptyBlocks>0} onClick={()=>void commit()}>검수 결과를 새 문서로 저장</button>
       </div>
     </>}
   </section>;

@@ -129,6 +129,21 @@ try{
   await evaluate("document.querySelector('[data-step3-selected-source-block] button').click()");
   assert.equal(await evaluate("Boolean(document.querySelector('[data-step3-selected-source-block]'))"),false,'Source position panel must close without changing draft');
   console.log('PASS STEP3 BLOCK-TO-SOURCE NAVIGATION: selected page-2 text maps to its rendered original page and estimated source highlight');
+  const manualBlockId=await evaluate("(()=>{const page=[...document.querySelectorAll('.step3-block-review details')].find(d=>d.querySelector(':scope > summary')?.textContent.includes('원본 2페이지'));const button=page?.querySelector('[data-step3-add-manual-block]');if(!button)throw Error('Manual recovery action missing');button.click();return page.querySelector('[data-step3-remove-manual]')?.getAttribute('data-step3-remove-manual')})()");
+  assert.ok(manualBlockId,'Manual text block was not created');
+  assert.equal(await evaluate("Boolean(document.querySelector('[data-step3-show-source="+JSON.stringify(manualBlockId)+"]'))"),false,'Manual block must not claim extracted source coordinates');
+  await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input').click()");
+  assert.equal(await evaluate("document.querySelector('.step3-import-panel .print-button').disabled"),true,'An empty included manual block must prevent saving');
+  assert.ok(await evaluate("Boolean(document.querySelector('[data-step3-empty-block-warning]'))"),'Empty manual block warning missing');
+  await evaluate("(()=>{const area=[...document.querySelectorAll('.step3-block-review textarea')].at(-1);const set=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set;set.call(area,'MISSING_TEXT_MANUALLY_RECOVERED_7519');area.dispatchEvent(new Event('input',{bubbles:true}));})()");
+  await eventually(()=>evaluate("!document.querySelector('[data-step3-empty-block-warning]')"));
+  await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input').click()");
+  assert.equal(await evaluate("document.querySelector('.step3-import-panel .print-button').disabled"),false,'Completed manual text with fresh consent should be savable');
+  await evaluate("document.querySelector('[data-step3-add-manual-block="+JSON.stringify('2')+"]').click()");
+  const removable=await evaluate("[...document.querySelectorAll('[data-step3-remove-manual]')].at(-1)?.getAttribute('data-step3-remove-manual')");
+  await evaluate("document.querySelector('[data-step3-remove-manual="+JSON.stringify(removable)+"]').click()");
+  assert.equal(await evaluate("document.querySelectorAll('[data-step3-remove-manual]').length"),1,'Removing a manual correction must leave the previous draft blocks intact');
+  console.log('PASS STEP3 MANUAL RECOVERY: add missing page text, prevent blank-block save, require renewed consent, delete correction');
   const edits=await evaluate("document.querySelectorAll('.step3-block-review textarea').length");
   assert.ok(edits>=2,'Expected extracted text blocks');
   const historySelector=".step3-import-panel [data-step3-undo]";
@@ -158,7 +173,7 @@ try{
   await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').click()");
   await evaluate("(()=>{const b=[...document.querySelectorAll('.step3-import-panel button')].find(b=>b.textContent.includes('검수 결과를 새 문서로 저장'));if(!b||b.disabled)throw Error('PDF confirm disabled');b.click();})()");
   await eventually(()=>evaluate("document.querySelectorAll('.doc-list-item').length"),n=>n===before+1);
-  await eventually(()=>evaluate("document.querySelector('.project-paper')?.textContent"),t=>t?.includes('STEP3_TEST_BEGIN_7519')&&t.includes('STEP3_PAGE2_BEGIN_7519')&&t.includes('STEP3_TEST_END_7519'));
+  await eventually(()=>evaluate("document.querySelector('.project-paper')?.textContent"),t=>t?.includes('STEP3_TEST_BEGIN_7519')&&t.includes('STEP3_PAGE2_BEGIN_7519')&&t.includes('STEP3_TEST_END_7519')&&t.includes('MISSING_TEXT_MANUALLY_RECOVERED_7519'));
   assert.ok(await evaluate("document.querySelectorAll('.project-paper img').length")>=1,'Recovered PNG must render in new document');
   await eventually(()=>evaluate("Promise.all([...document.querySelectorAll('.project-paper img')].map(img=>img.decode().then(()=>true,()=>false))).then(x=>x.every(Boolean))"));
 
