@@ -162,7 +162,7 @@ async function uploadAndConfirm(encoded){
   const splitButton=correction.closest('.section-editor')?.querySelector('[data-step3-split-block]');
   if(!splitButton)throw Error('STEP3 installed manual correction split action absent');
   correction.focus();correction.setSelectionRange(8,8);
-  correction.dispatchEvent(new Event('select',{bubbles:true}));
+  correction.dispatchEvent(new MouseEvent('click',{bubbles:true}));
   await until(()=>!splitButton.disabled,'manual correction split becomes available at the selected cursor');
   splitButton.click();
   await until(()=>{
