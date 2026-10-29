@@ -1,9 +1,27 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {findUnrepresentedSourcePieces,insertManualPdfBlockAtSourcePosition,makePdfDraft,nextPdfTextCount,nextSourceReviewCount,PDF_IMPORT_LIMITS,reconstructLines,sortSourceReviewItems,visibleSourceReviewItems,type PdfPageInput} from '../src/step3/structure.ts';
+import {findUnrepresentedSourcePieces,insertManualPdfBlockAtSourcePosition,isSafePdfTextSplitOffset,makePdfDraft,nextPdfTextCount,nextSourceReviewCount,PDF_IMPORT_LIMITS,reconstructLines,sortSourceReviewItems,splitPdfDraftBlock,visibleSourceReviewItems,type PdfPageInput} from '../src/step3/structure.ts';
 import {pdfDraftToProject} from '../src/step3/convert.ts';
 import {blankProject,isProjectDocument} from '../src/step2/model.ts';
 const piece=(text:string,page:number,x:number,y:number,fontSize=12,width=120)=>({text,page,x,y,width,height:fontSize,fontSize});
+test('STEP3 manual block split preserves exact text, review state and approximate source anchor',()=>{
+  const original={id:'source-1',text:'첫 문장\n둘째 문장',role:'paragraph' as const,excluded:true,
+    sourceText:'첫 문장 둘째 문장',origin:{page:2,x:40,y:80,width:200,height:30}};
+  const [first,second]=splitPdfDraftBlock(original,4,'split-2');
+  assert.equal(first.text,'첫 문장');
+  assert.equal(second.text,'\n둘째 문장');
+  assert.equal(first.text+second.text,original.text);
+  assert.deepEqual(first.origin,original.origin);
+  assert.deepEqual(second.origin,original.origin);
+  assert.equal(first.excluded,true);
+  assert.equal(second.excluded,true);
+  assert.equal(first.sourceText,undefined);
+  assert.equal(second.sourceText,undefined);
+  assert.equal(isSafePdfTextSplitOffset('A😀B',2),false,'A split cannot divide a UTF-16 surrogate pair');
+  assert.throws(()=>splitPdfDraftBlock({...original,text:'A😀B'},2,'split-emoji'));
+  assert.throws(()=>splitPdfDraftBlock(original,0,'split-3'));
+  assert.throws(()=>splitPdfDraftBlock(original,4,'source-1'));
+});
 test('STEP3 source text parity identifies missing and duplicate PDF.js text items while ignoring short layout fragments',()=>{
   const items=['ACCOUNT_123','ACCOUNT_123','1','x'];
   assert.deepEqual(findUnrepresentedSourcePieces(items,'ACCOUNT_123 1'),['ACCOUNT_123']);

@@ -18,6 +18,24 @@ export interface PdfOrigin {
 export interface PdfDraftBlock {
   id:string; text:string; role:PdfRole; origin?:PdfOrigin; excluded?:boolean; manual?:boolean; sourceText?:string;
 }
+export function isSafePdfTextSplitOffset(text:string,offset:number):boolean{
+  if(!Number.isSafeInteger(offset)||offset<=0||offset>=text.length)return false;
+  const before=text.charCodeAt(offset-1),after=text.charCodeAt(offset);
+  return !(before>=0xD800&&before<=0xDBFF&&after>=0xDC00&&after<=0xDFFF);
+}
+/** Split an edited extraction at an exact user-selected text offset. Both halves
+ * retain the source anchor as an approximate location; sourceText is cleared so
+ * neither half offers to restore the now-obsolete combined extraction.
+ */
+export function splitPdfDraftBlock(block:PdfDraftBlock,offset:number,newId:string):[PdfDraftBlock,PdfDraftBlock]{
+  if(!isSafePdfTextSplitOffset(block.text,offset)||!newId||newId===block.id)
+    throw Error('블록을 나눌 위치가 올바르지 않습니다.');
+  const common={...block,sourceText:undefined};
+  return [
+    {...common,text:block.text.slice(0,offset)},
+    {...common,id:newId,text:block.text.slice(offset)},
+  ];
+}
 /** Insert a recovered source fragment near its estimated one-column reading position.
  * The transient draft retains its origin so later recovered blocks stay ordered.
  */

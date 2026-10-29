@@ -189,6 +189,19 @@ try{
   assert.equal(await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input').checked"),false,
     'Undo/redo must still require explicit source review approval');
   console.log('PASS STEP3 DRAFT UNDO/REDO: text edit restored exactly and review approval stayed revoked');
+  const splitTarget=await evaluate("(()=>{const area=[...document.querySelector('.step3-block-review details').querySelectorAll('textarea')].sort((a,b)=>b.value.length-a.value.length)[0];if(!area||area.value.length<4)throw Error('No sufficiently long extracted block to split');return {value:area.value,id:area.closest('.section-editor').querySelector('[data-step3-split-block]').getAttribute('data-step3-split-block'),count:document.querySelectorAll('.step3-block-review details:first-child .section-editor').length}})()");
+  const splitOffset=Math.floor(splitTarget.value.length/2);
+  await evaluate("(()=>{const button=document.querySelector('[data-step3-split-block="+JSON.stringify(splitTarget.id)+"]');const area=button.closest('.section-editor').querySelector('textarea');area.focus();area.setSelectionRange("+splitOffset+","+splitOffset+");area.dispatchEvent(new Event('select',{bubbles:true}));})()");
+  await eventually(()=>evaluate("document.querySelector('[data-step3-split-block="+JSON.stringify(splitTarget.id)+"]')?.disabled"),disabled=>disabled===false);
+  await evaluate("document.querySelector('[data-step3-split-block="+JSON.stringify(splitTarget.id)+"]').click()");
+  const splitParts=await evaluate("(()=>{const button=document.querySelector('[data-step3-split-block="+JSON.stringify(splitTarget.id)+"]');return {first:button.closest('.section-editor').querySelector('textarea').value,second:button.closest('.section-editor').nextElementSibling?.querySelector('textarea')?.value,count:document.querySelectorAll('.step3-block-review details:first-child .section-editor').length}})()");
+  assert.equal(splitParts.first+splitParts.second,splitTarget.value,'Splitting at the cursor must preserve every source character and separator');
+  assert.equal(splitParts.count,splitTarget.count+1,'Splitting one source block must create one additional editable block');
+  await evaluate("document.querySelector('[data-step3-undo]').click()");
+  await eventually(()=>evaluate("document.querySelectorAll('.step3-block-review details:first-child .section-editor').length"),count=>count===splitTarget.count);
+  assert.equal(await evaluate("document.querySelector('[data-step3-split-block="+JSON.stringify(splitTarget.id)+"]')?.closest('.section-editor').querySelector('textarea').value"),splitTarget.value,
+    'Undo must restore the unsplit original block exactly');
+  console.log('PASS STEP3 MANUAL BLOCK SPLIT: cursor split preserves exact source text and undo restores the original block');
   await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').click()");
   await evaluate("(()=>{const b=[...document.querySelectorAll('.step3-import-panel button')].find(b=>b.textContent.includes('검수 결과를 새 문서로 저장'));if(!b||b.disabled)throw Error('PDF confirm disabled');b.click();})()");
   await eventually(()=>evaluate("document.querySelectorAll('.doc-list-item').length"),n=>n===before+1);

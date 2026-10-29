@@ -1,5 +1,5 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
-import {createSourceTextMatcher,insertManualPdfBlockAtSourcePosition,nextSourceReviewCount,sortSourceReviewItems,PDF_IMPORT_LIMITS,PDF_SOURCE_REVIEW_BATCH,visibleSourceReviewItems,type PdfDraft,type PdfDraftBlock,type PdfDraftPage,type PdfOrigin,type PdfRole} from './structure.ts';
+import {createSourceTextMatcher,insertManualPdfBlockAtSourcePosition,isSafePdfTextSplitOffset,nextSourceReviewCount,sortSourceReviewItems,splitPdfDraftBlock,PDF_IMPORT_LIMITS,PDF_SOURCE_REVIEW_BATCH,visibleSourceReviewItems,type PdfDraft,type PdfDraftBlock,type PdfDraftPage,type PdfOrigin,type PdfRole} from './structure.ts';
 import {extractLocalPdf} from './pdf.ts';
 import SourceAnchorPreview from './SourceAnchorPreview.tsx';
 
@@ -64,6 +64,8 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
   const [sourceImage,setSourceImage]=useState<PdfDraftPage['images'][number]|null>(null);
   const [missingSource,setMissingSource]=useState<MissingSourceItem|null>(null);
   const [imageUrls,setImageUrls]=useState<Record<string,string>>({});
+  const splitOffsets=useRef<Record<string,number>>({});
+  const [,setSplitOffsetRevision]=useState(0);
   const sourceLocationPanel=useRef<HTMLDivElement|null>(null);
   const manualBlockSequence=useRef(0);
   const urlRef=useRef('');
@@ -100,6 +102,10 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
   const closeSourceLocation=()=>{setSourceBlock(null);setSourceImage(null);setMissingSource(null);};
   const publishDraft=(next:PdfDraft|null)=>{
     draftRef.current=next;setDraft(next);
+  };
+  const rememberSplitOffset=(id:string,offset:number)=>{
+    splitOffsets.current[id]=offset;
+    setSplitOffsetRevision(value=>value+1);
   };
   const reviseDraft=(update:(current:PdfDraft)=>PdfDraft)=>{
     const current=draftRef.current;
@@ -198,6 +204,19 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
   };
   const removeManualBlock=(page:number,id:string)=>reviseDraft(current=>({...current,pages:current.pages.map(p=>p.number===page?
     {...p,blocks:p.blocks.filter(b=>b.id!==id)}:p)}));
+  const splitBlockAtCursor=(page:number,id:string)=>{
+    const offset=splitOffsets.current[id];
+    if(!Number.isSafeInteger(offset))return;
+    manualBlockSequence.current++;
+    reviseDraft(current=>({...current,pages:current.pages.map(p=>{
+      if(p.number!==page)return p;
+      const index=p.blocks.findIndex(block=>block.id===id);
+      if(index<0)return p;
+      const [before,after]=splitPdfDraftBlock(p.blocks[index],offset,`split-${manualBlockSequence.current}`);
+      delete splitOffsets.current[id];
+      return {...p,blocks:[...p.blocks.slice(0,index),before,after,...p.blocks.slice(index+1)]};
+    })}));
+  };
   const toggleImage=(page:number,id:string,include:boolean)=>{
     reviseDraft(current=>({...current,pages:current.pages.map(p=>p.number===page?
       {...p,images:p.images.map(img=>img.id===id?{...img,include}:img)}:p)}));
@@ -325,6 +344,9 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
                   {!block.manual&&block.sourceText!==undefined&&block.text!==block.sourceText&&<button type="button" data-step3-restore-extracted={block.id}
                     onClick={()=>change(page.number,block.id,b=>({...b,text:b.sourceText??b.text}))} disabled={disabled||busy}>추출 원문 복원</button>}
                   {block.manual&&<button type="button" data-step3-remove-manual={block.id} onClick={()=>removeManualBlock(page.number,block.id)} disabled={disabled||busy}>블록 삭제</button>}
+                  <button type="button" data-step3-split-block={block.id}
+                    disabled={disabled||busy||!isSafePdfTextSplitOffset(block.text,splitOffsets.current[block.id]??0)}
+                    onClick={()=>splitBlockAtCursor(page.number,block.id)}>커서 위치에서 블록 나누기</button>
                   <button aria-label={block.id+' 위로 이동'} disabled={disabled||busy||i===0} onClick={()=>move(page.number,block.id,-1)}>↑</button>
                   <button aria-label={block.id+' 아래로 이동'} disabled={disabled||busy||i===page.blocks.length-1} onClick={()=>move(page.number,block.id,1)}>↓</button>
                 </div>
@@ -342,7 +364,10 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
               </label>
               <label className="field">{block.manual?'원본 대조 후 누락 내용 직접 입력':'원본 대조 후 내용 수정'}
                 <textarea rows={Math.min(7,Math.max(2,block.text.split('\n').length+1))}
-                  disabled={disabled||busy} value={block.text} onChange={e=>change(page.number,block.id,b=>({...b,text:e.target.value}))}/>
+                  disabled={disabled||busy} value={block.text} onSelect={e=>rememberSplitOffset(block.id,e.currentTarget.selectionStart)}
+                  onKeyUp={e=>rememberSplitOffset(block.id,e.currentTarget.selectionStart)}
+                  onClick={e=>rememberSplitOffset(block.id,e.currentTarget.selectionStart)}
+                  onChange={e=>{rememberSplitOffset(block.id,e.currentTarget.selectionStart);change(page.number,block.id,b=>({...b,text:e.target.value}));}}/>
               </label>
             </div>)}
           </details>)}
