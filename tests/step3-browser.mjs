@@ -650,11 +650,16 @@ try{
   await eventually(()=>evaluate("Boolean(document.querySelector('[data-step3-selected-missing-source] [data-m06-preview][data-m06-rendered-page] [data-m06-anchor-rect]'))"),x=>x===true);
   assert.ok(await evaluate("document.querySelector('[data-step3-missing-source-excerpt]')?.textContent?.includes("+JSON.stringify(RUNNING_MARKERS[0])+")"),
     'Missing-source location preview must identify the exact omitted source text');
+  const recoveredCountBefore=await evaluate("Number(document.querySelector('[data-step3-page-char-count=\"1\"]')?.textContent?.replaceAll(',',''))");
   await evaluate("(()=>{const marker="+JSON.stringify(RUNNING_MARKERS[0])+";const item=[...document.querySelectorAll('[data-step3-missing-source-item]')].find(node=>node.textContent.includes(marker));const button=item?.querySelector('[data-step3-recover-missing-source]');if(!button)throw Error('Missing quick recovery action for omitted PDF text');button.click();})()");
+
   await eventually(()=>evaluate("[...document.querySelectorAll('[data-step3-source-text-missing]')].every(node=>!node.textContent.includes("+JSON.stringify(RUNNING_MARKERS[0])+"))"),x=>x===true);
   await eventually(()=>evaluate("[...document.querySelectorAll('[data-step3-remove-manual]')].some(button=>button.closest('.section-editor')?.querySelector('textarea')?.value==="+JSON.stringify(RUNNING_MARKERS[0])+")"),x=>x===true);
   assert.ok(await evaluate("[...document.querySelectorAll('[data-step3-remove-manual]')].some(button=>button.closest('.section-editor')?.querySelector('textarea')?.value==="+JSON.stringify(RUNNING_MARKERS[0])+")"),
     'Quick recovery must create a manual block prefilled with the exact missing source text');
+  assert.equal(await evaluate("Number(document.querySelector('[data-step3-page-char-count=\"1\"]')?.textContent?.replaceAll(',',''))"),
+    recoveredCountBefore+RUNNING_MARKERS[0].length,
+    'Page review character count must include the recovered text block');
   const recoveredOrder=await evaluate("(()=>{const marker="+JSON.stringify(RUNNING_MARKERS[0])+";const pages=[...document.querySelectorAll('.step3-block-review details')].map(d=>({summary:d.querySelector(':scope > summary')?.textContent,values:[...d.querySelectorAll('textarea')].map(area=>area.value),manuals:[...d.querySelectorAll('[data-step3-remove-manual]')].map(button=>button.closest('.section-editor')?.querySelector('textarea')?.value)}));const page=pages.find(d=>d.summary?.includes('원본 1페이지'));const values=page?.values??[];const allManuals=[...document.querySelectorAll('[data-step3-remove-manual]')].map(button=>({id:button.getAttribute('data-step3-remove-manual'),value:button.closest('.section-editor')?.querySelector('textarea')?.value,page:button.closest('details')?.querySelector(':scope > summary')?.textContent??null}));return{recovered:values.indexOf(marker),following:values.findIndex(value=>value.includes('STEP3_SOURCE_P1_BEGIN_901')),pages,allManuals};})()");
   assert.ok(recoveredOrder.recovered>=0&&recoveredOrder.following>=0&&recoveredOrder.recovered<recoveredOrder.following,
     'Quick recovery should insert missing text before later source blocks using its estimated source position: '+JSON.stringify(recoveredOrder));
