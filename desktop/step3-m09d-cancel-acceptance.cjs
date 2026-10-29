@@ -84,7 +84,10 @@ async function runInstalledM09DCancelAcceptance(win,pdfBytes,markers){
   if(!Buffer.isBuffer(pdfBytes)||pdfBytes.subarray(0,5).toString('ascii')!=='%PDF-')
     throw Error('M09-D needs the existing synthetic PDF fixture');
   await win.loadURL(APP_URL);
-  const evaluate=expression=>win.webContents.executeJavaScript(expression,true);
+  const evaluate=expression=>win.webContents.executeJavaScript(expression,true).catch(error=>{
+    throw Error('M09-D renderer evaluation failed: '+expression.slice(0,240)+' :: '+
+      (error instanceof Error?error.message:String(error)));
+  });
   await waitFor(()=>evaluate(
     "Boolean(document.querySelector('.step3-import-panel input[type=file]')&&"+
     "document.querySelector('.doc-list-item.active')&&document.querySelector('.save-chip')?.textContent==='저장됨')"),
