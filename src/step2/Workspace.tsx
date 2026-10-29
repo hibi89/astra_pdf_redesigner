@@ -405,10 +405,13 @@ export default function Workspace({onLegacy}:Props){
         </>}
       </aside>
       <div className="preview-column"><div className="preview-heading no-print"><div><h2>{styleCompareGalleryOpen&&styleCompareOpen?'두 디자인을 나란히 비교':'새 디자인 미리보기'}</h2><p>{styleCompareGalleryOpen&&styleCompareOpen?'같은 내용 · 임시 비교 · 저장된 문서는 변경되지 않았습니다':'A4 기준 · 최종 페이지 나눔은 인쇄 창에서 확인'}</p></div><span className="size-tag">A4</span></div>
-        {doc&&styleCompareOpen&&styleCompareGalleryOpen&&previewThemeId?<div className="style-compare-gallery" data-style-compare-gallery>
+        {doc&&styleCompareOpen&&styleCompareGalleryOpen&&previewThemeId?<div className="style-compare-gallery no-print" data-style-compare-gallery>
           <section className="style-compare-card" data-style-compare-original><h3>현재 디자인 · {allThemes.find(theme=>theme.id===doc.design.theme)?.label}</h3><div className="style-compare-card-viewport"><ProjectPreview doc={doc} urls={urls} previewDesign={{...doc.design,theme:doc.design.theme}}/></div></section>
           <section className="style-compare-card" data-style-compare-candidate><h3>비교 후보 · {allThemes.find(theme=>theme.id===previewThemeId)?.label}</h3><div className="style-compare-card-viewport"><ProjectPreview doc={doc} urls={urls} previewDesign={{...doc.design,theme:previewThemeId}}/></div></section>
-        </div>:<div className="paper-surface">{doc?<ProjectPreview doc={doc} urls={urls} previewTheme={previewThemeId} previewDesign={referencePreviewDesign}/>:<div className="document">{w.ready?'문서를 열 수 없습니다.':'불러오는 중…'}</div>}</div>}
+        </div>:null}
+        <div className={`paper-surface ${doc&&styleCompareOpen&&styleCompareGalleryOpen&&previewThemeId?'style-compare-print-candidate':''}`}>
+          {doc?<ProjectPreview doc={doc} urls={urls} previewTheme={previewThemeId} previewDesign={referencePreviewDesign}/>:<div className="document">{w.ready?'문서를 열 수 없습니다.':'불러오는 중…'}</div>}
+        </div>
         <p className="print-tip no-print">Chrome/Edge에서 PDF로 저장, A4, 머리글·바닥글 해제를 확인하세요. 인쇄는 이미지 로딩이 완료될 때까지 기다립니다.</p>
       </div>
       <aside tabIndex={-1} className="studio-style-column no-print" aria-label="디자인 스튜디오">

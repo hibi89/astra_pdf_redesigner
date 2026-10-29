@@ -295,6 +295,14 @@ try{
   assert.ok(sideBySide.candidate.includes('paper-theme-'+compareThemeId),'Side-by-side view must include the selected candidate');
   assert.ok(sideBySide.rects.every(rect=>rect.width>300&&rect.height>400),'Both A4 design previews must render at a readable size');
   assert.deepEqual(await readStyleSnapshot(),compareBefore,'Opening visual comparison must not mutate persisted content/design or stores');
+  const galleryPdf=await send('Page.printToPDF',{preferCSSPageSize:true,printBackground:true});
+  const galleryPath=join(dir,'step4-side-by-side-print.pdf');
+  writeFileSync(galleryPath,Buffer.from(galleryPdf.data,'base64'));
+  assert.match(await execFileSync('pdfinfo',[galleryPath],{encoding:'utf8'}),/Pages:\\s+2\\b/,
+    'Printing from side-by-side comparison must output only the selected candidate document once');
+  const galleryText=execFileSync('pdftotext',[galleryPath,'-'],{encoding:'utf8'});
+  assert.equal(galleryText.split('STEP3_TEST_BEGIN_7519').length-1,1,
+    'Side-by-side comparison cards must not duplicate content in the generated PDF');
   await evaluate("document.querySelector('[data-style-compare-side-by-side]').click()");
   assert.equal(await evaluate("document.querySelectorAll('input[name=v2theme]')["+originalThemeIndex+"]?.checked"),true,
     'Temporary comparison must not select or persist the design');
