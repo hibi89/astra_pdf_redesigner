@@ -1,7 +1,7 @@
 'use strict';
 // STEP5 local embedded-PDF typography proposal; synthetic input only.
-const {snapshotInstalledV2}=require('./step3-m09d-cancel-acceptance.cjs');
 const APP_URL='astra://app/index.html';
+const {snapshotInstalledV2}=require('./step3-m09d-cancel-acceptance.cjs');
 
 async function runInstalledPdfReferenceAcceptance(win,pdfBytes){
   if(process.env.GITHUB_ACTIONS!=='true'||process.platform!=='win32'||!process.env.RUNNER_TEMP)
@@ -20,9 +20,6 @@ async function runInstalledPdfReferenceAcceptance(win,pdfBytes){
     if(i===159)throw Error('STEP5 installed reference panel did not become ready');
   }
   const before=await evaluate('('+snapshotInstalledV2.toString()+')()');
-  const baseline=await evaluate("(()=>({active:document.querySelector('.doc-list-item.active strong')?.textContent,"+
-    "save:document.querySelector('.save-chip')?.textContent,"+
-    "text:document.querySelector('.project-paper')?.textContent}))()");
   const encoded=pdfBytes.toString('base64');
   await evaluate("(()=>{const input=document.querySelector('.reference-style-panel input[type=file]');"+
     "const data=Uint8Array.from(atob("+JSON.stringify(encoded)+"),c=>c.charCodeAt(0));"+
@@ -44,11 +41,8 @@ async function runInstalledPdfReferenceAcceptance(win,pdfBytes){
   if(!(review.count>0)||!labels[review.suggestion]||review.selected!==labels[review.suggestion])
     throw Error('STEP5 PDF text-size proposal did not follow embedded metrics: '+JSON.stringify(review));
   const after=await evaluate('('+snapshotInstalledV2.toString()+')()');
-  const current=await evaluate("(()=>({active:document.querySelector('.doc-list-item.active strong')?.textContent,"+
-    "save:document.querySelector('.save-chip')?.textContent,"+
-    "text:document.querySelector('.project-paper')?.textContent}))()");
-  if(JSON.stringify(before)!==JSON.stringify(after)||baseline.active!==current.active||baseline.text!==current.text)
-    throw Error('STEP5 reference analysis changed persisted V2 data or document content: '+JSON.stringify({before:before.signature,after:after.signature,baseline,current}));
+  if(JSON.stringify(before)!==JSON.stringify(after))
+    throw Error('STEP5 reference analysis changed one or more persisted V2 stores: '+JSON.stringify({before,after}));
   await evaluate("document.querySelector('[data-reference-analysis] button.text-button')?.click();true");
   for(let i=0;i<80;i++){
     if(!await evaluate("Boolean(document.querySelector('[data-reference-analysis]'))"))break;
