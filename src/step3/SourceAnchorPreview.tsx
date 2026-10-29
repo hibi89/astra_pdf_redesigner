@@ -3,8 +3,8 @@ import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import {anchorRectangle} from './sourceReview.ts';
 import type {PdfBlockOrigin} from '../step2/model.ts';
 
-interface Props {url:string;origin:PdfBlockOrigin;blockId:string}
-export default function SourceAnchorPreview({url,origin,blockId}:Props){
+interface Props {url:string;blob?:Blob;origin:PdfBlockOrigin;blockId:string}
+export default function SourceAnchorPreview({url,blob,origin,blockId}:Props){
   const canvas=useRef<HTMLCanvasElement|null>(null);
   const renderBarrier=useRef<Promise<void>>(Promise.resolve());
   const [view,setView]=useState<{width:number;height:number}|null>(null);
@@ -18,9 +18,13 @@ export default function SourceAnchorPreview({url,origin,blockId}:Props){
       try{
         const {getDocument,GlobalWorkerOptions}=await import('pdfjs-dist');
         GlobalWorkerOptions.workerSrc=workerUrl;
-        const response=await fetch(url);
-        if(!response.ok)throw Error('Local PDF source unavailable');
-        const bytes=new Uint8Array(await response.arrayBuffer());
+        let bytes:Uint8Array;
+        if(blob)bytes=new Uint8Array(await blob.arrayBuffer());
+        else{
+          const response=await fetch(url);
+          if(!response.ok)throw Error('Local PDF source unavailable');
+          bytes=new Uint8Array(await response.arrayBuffer());
+        }
         if(stopped)return;
         loading=getDocument({data:bytes,stopAtErrors:true});
         const pdf=await loading.promise;
@@ -49,7 +53,7 @@ export default function SourceAnchorPreview({url,origin,blockId}:Props){
     }
     void draw();
     return()=>{stopped=true;rendering?.cancel();void loading?.destroy().catch(()=>{});};
-  },[url,origin.page]);
+  },[url,blob,origin.page]);
   const rect=view?anchorRectangle(origin,view.width,view.height):null;
   return <div className="m06-origin-preview" data-m06-preview data-m06-block-id={blockId}
     data-m06-rendered-page={view?origin.page:undefined}>

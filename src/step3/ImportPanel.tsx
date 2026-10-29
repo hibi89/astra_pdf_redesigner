@@ -7,6 +7,8 @@ export interface ImportedPdfSource {
   documentId:string;
   fileName:string;
   url:string;
+  // Session-only original bytes for Electron PDF.js source rendering. Never persisted.
+  blob:Blob;
 }
 // A committed source is kept in memory only for the active document. The
 // caller takes sole ownership of the already-created Blob URL on success.
@@ -30,6 +32,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
   const sourceLocationPanel=useRef<HTMLDivElement|null>(null);
   const manualBlockSequence=useRef(0);
   const urlRef=useRef('');
+  const sourcePdfRef=useRef<Blob|null>(null);
   const imageUrlRef=useRef<Record<string,string>>({});
   const draftRef=useRef<PdfDraft|null>(null);
   const undoStack=useRef<PdfDraft[]>([]);
@@ -88,7 +91,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
     if(urlRef.current)URL.revokeObjectURL(urlRef.current);
     Object.values(imageUrlRef.current).forEach(u=>URL.revokeObjectURL(u));
     imageUrlRef.current={};setImageUrls({});setSourceBlock(null);setSourceImage(null);
-    urlRef.current='';setPreviewUrl('');publishDraft(null);setError('');setConfirmed(false);clearHistory();
+    sourcePdfRef.current=null;urlRef.current='';setPreviewUrl('');publishDraft(null);setError('');setConfirmed(false);clearHistory();
   };
   const choose=async(file:File)=>{
     forget();
@@ -101,6 +104,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
       if(!isCurrent())return; // switched/closed/superseded; never own an orphan Blob
       // The source file remains an ephemeral browser Blob URL only during review.
       const url=URL.createObjectURL(file);urlRef.current=url;setPreviewUrl(url);
+      sourcePdfRef.current=file;
       const imageMap:Record<string,string>={};
       for(const page of parsed.pages)for(const image of page.images)imageMap[image.id]=URL.createObjectURL(image.blob);
       imageUrlRef.current=imageMap;setImageUrls(imageMap);
@@ -161,7 +165,9 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
       if(documentId){
         const url=urlRef.current;
         if(!url)throw Error('원본 PDF 비교 주소가 없습니다.');
-        onSourceCommitted({documentId,fileName:draft.fileName,url});
+        const blob=sourcePdfRef.current;
+        if(!blob)throw new Error('원본 PDF가 검수 세션에서 만료되었습니다. 다시 선택해 주세요.');
+        onSourceCommitted({documentId,fileName:draft.fileName,url,blob});
         // Ownership transferred to the studio; do not revoke this one URL.
         urlRef.current='';
         forget();
@@ -229,7 +235,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
             <button type="button" className="secondary-button" onClick={closeSourceLocation}>위치 닫기</button></div>
           {sourceBlock&&<p className="help-text" data-step3-source-excerpt>추출 내용: {sourceBlock.text}</p>}
           {sourceImage&&imageUrls[sourceImage.id]&&<img src={imageUrls[sourceImage.id]} className="step3-image-thumbnail" alt="원본 위치 대조용 복원 이미지"/>}
-          <SourceAnchorPreview url={previewUrl} origin={sourceBlock?.origin??sourceImage!.origin} blockId={sourceBlock?.id??sourceImage!.id}/>
+          <SourceAnchorPreview url={previewUrl} blob={sourcePdfRef.current??undefined} origin={sourceBlock?.origin??sourceImage!.origin} blockId={sourceBlock?.id??sourceImage!.id}/>
           <p className="help-text">강조 영역은 추출 텍스트 블록 또는 복원 이미지의 추정 위치이며, 문자별·클리핑 정확도를 보장하지 않습니다.</p>
         </div>}
         {previewUrl&&<details><summary>원본 PDF 열어 대조</summary>

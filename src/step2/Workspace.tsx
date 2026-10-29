@@ -222,7 +222,7 @@ export default function Workspace({onLegacy}:Props){
               수동 대조 {completedReview}/{originBlocks.length}개 완료
               {completedReview<originBlocks.length&&<strong> · 검수 미완료 — 누락·순서·수치 확인 필요</strong>}
             </div>
-            {focusedBlock&&focusedBlock.origin&&<SourceAnchorPreview url={sourceReview.url}
+            {focusedBlock&&focusedBlock.origin&&<SourceAnchorPreview url={sourceReview.url} blob={sourceReview.blob}
               origin={focusedBlock.origin} blockId={focusedBlock.id}/>}
             <details open className="m06-original-full"><summary>원본 PDF 전체 뷰 접기/펼치기</summary>
               <iframe title="가져온 원본 PDF" src={sourceReview.url} width="100%" height="430"/>
