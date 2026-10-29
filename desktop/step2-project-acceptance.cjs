@@ -128,7 +128,15 @@ async function runStep2ProjectAcceptance(win,renderLocalPdf){
      !/^astra-step2-project-[A-Za-z0-9-]+\.pdf$/i.test(path.basename(output)))
     throw Error('STEP2 PDF output must be directly under isolated RUNNER_TEMP');
   const evaluate=async(source,label)=>{
-    try{return await win.webContents.executeJavaScript(source,true);}
+    try{
+      const wrapped=`(async()=>{try{return {ok:true,value:await (${source})}}catch(error){return {ok:false,error:{name:error?.name||'',message:error?.message||'',stack:error?.stack||'',string:String(error)}}}})()`;
+      const result=await win.webContents.executeJavaScript(wrapped,true);
+      if(result?.ok)return result.value;
+      const detail=result?.error?
+        [result.error.name,result.error.message,result.error.stack,result.error.string].filter(Boolean).join('\n'):
+        JSON.stringify(result);
+      throw Error(detail||'renderer returned no result');
+    }
     catch(error){
       const detail=error&&typeof error==='object'?
         [error.name,error.message,error.stack].filter(Boolean).join('\n'):
