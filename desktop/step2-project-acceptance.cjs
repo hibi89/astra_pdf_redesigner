@@ -117,14 +117,22 @@ async function runStep2ProjectAcceptance(win,renderLocalPdf){
      path.dirname(output)!==root||
      !/^astra-step2-project-[A-Za-z0-9-]+\.pdf$/i.test(path.basename(output)))
     throw Error('STEP2 PDF output must be directly under isolated RUNNER_TEMP');
+  const evaluate=async(source,label)=>{
+    try{return await win.webContents.executeJavaScript(source,true);}
+    catch(error){
+      const detail=error&&typeof error==='object'?
+        [error.name,error.message,error.stack].filter(Boolean).join('\n'):
+        String(error);
+      throw Error(`STEP2 ${label} renderer evaluation failed: ${detail}`);
+    }
+  };
   if(!verifyOnly){
-    const before=await win.webContents.executeJavaScript(
-      '('+editStep2InBrowser.toString()+')('+JSON.stringify(PNG64)+')',true);
+    const before=await evaluate(
+      '('+editStep2InBrowser.toString()+')('+JSON.stringify(PNG64)+')','document edit and save');
     if(!before?.editorSaved||!before?.image)throw Error('STEP2 UI edit did not complete');
   }
   await win.loadURL(APP_URL);
-  const persisted=await win.webContents.executeJavaScript(
-    '('+verifyReloadedProject.toString()+')()',true);
+  const persisted=await evaluate('('+verifyReloadedProject.toString()+')()','reload verification');
   if(!persisted?.saved||persisted.assets!==1)throw Error('STEP2 IndexedDB reload failed');
   if(verifyOnly){
     console.log('PASS ASTRA STEP2 PROFILE PRESERVED: stored document and PNG survived installed EXE restart');
