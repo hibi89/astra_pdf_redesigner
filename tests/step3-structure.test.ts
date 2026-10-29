@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {findUnrepresentedSourcePieces,insertManualPdfBlockAtSourcePosition,makePdfDraft,nextPdfTextCount,nextSourceReviewCount,PDF_IMPORT_LIMITS,reconstructLines,visibleSourceReviewItems,type PdfPageInput} from '../src/step3/structure.ts';
+import {findUnrepresentedSourcePieces,insertManualPdfBlockAtSourcePosition,makePdfDraft,nextPdfTextCount,nextSourceReviewCount,PDF_IMPORT_LIMITS,reconstructLines,sortSourceReviewItems,visibleSourceReviewItems,type PdfPageInput} from '../src/step3/structure.ts';
 import {pdfDraftToProject} from '../src/step3/convert.ts';
 import {blankProject,isProjectDocument} from '../src/step2/model.ts';
 const piece=(text:string,page:number,x:number,y:number,fontSize=12,width=120)=>({text,page,x,y,width,height:fontSize,fontSize});
@@ -63,6 +63,19 @@ test('STEP3 manual omission recovery inserts by estimated source order without p
   ],'Manual entry without an original source position remains appended for user placement');
 });
 
+test('STEP3 source omission entries sort by original vertical then horizontal coordinates',()=>{
+  const items=[
+    {id:'lower-left',origin:{page:1,x:20,y:80,width:10,height:10}},
+    {id:'top-right',origin:{page:1,x:110,y:20,width:10,height:10}},
+    {id:'middle',origin:{page:1,x:5,y:50,width:10,height:10}},
+    {id:'top-left',origin:{page:1,x:25,y:20,width:10,height:10}},
+  ];
+  assert.deepEqual(sortSourceReviewItems(items).map(item=>item.id),[
+    'top-left','top-right','middle','lower-left',
+  ]);
+  assert.deepEqual(items.map(item=>item.id),['lower-left','top-right','middle','top-left'],
+    'Sorting review entries must not mutate the source extraction order');
+});
 test('STEP3 missing source review reveals long omission lists in bounded, complete pages',()=>{
   const items=Array.from({length:29},(_,index)=>'MISSING_'+index);
   assert.equal(visibleSourceReviewItems(items,12).length,12);
