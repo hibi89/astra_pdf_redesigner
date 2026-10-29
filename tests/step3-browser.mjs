@@ -591,6 +591,14 @@ try{
     'Review must not write to the existing document list');
   assert.equal(await evaluate("Boolean(document.querySelector('.step3-source-compare iframe[src^=blob]'))"),true,
     'Original PDF preview must remain available while text is excluded');
+  const restoreMarker=RUNNING_MARKERS[0];
+  await evaluate("(()=>{const marker="+JSON.stringify(restoreMarker)+";const area=[...document.querySelectorAll('.step3-block-review textarea')].find(x=>x.value.includes(marker));if(!area)throw Error('Missing extracted block for restore regression');const set=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set;set.call(area,marker+'-edited');area.dispatchEvent(new Event('input',{bubbles:true}));})()");
+  await eventually(()=>evaluate("Boolean(document.querySelector('[data-step3-restore-extracted]'))"),x=>x===true);
+  await evaluate("document.querySelector('[data-step3-restore-extracted]').click()");
+  await eventually(()=>evaluate("[...document.querySelectorAll('.step3-block-review textarea')].some(x=>x.value==="+JSON.stringify(restoreMarker)+")"),x=>x===true);
+  assert.equal(await evaluate("Boolean(document.querySelector('[data-step3-restore-extracted]'))"),false,
+    'Restoring extracted text should remove the restore action when the block matches its source');
+  console.log('PASS STEP3 EXTRACTED TEXT RESTORE: changed source block returns to extracted text');
   for(const marker of RUNNING_MARKERS){
     const expression="(()=>{const marker="+JSON.stringify(marker)+";const area=[...document.querySelectorAll('.step3-block-review textarea')].find(x=>x.value.includes(marker));const editor=area?.closest('.section-editor');const input=editor?.querySelector('[data-step3-block-included]');if(!area||!input)throw Error('Missing editable source block '+marker);input.click();return {included:input.checked,text:area.value};})()";
     const state=await evaluate(expression);
