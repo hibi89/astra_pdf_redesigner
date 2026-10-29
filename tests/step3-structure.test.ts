@@ -26,6 +26,11 @@ test('STEP3 manual block split preserves exact text, review state and approximat
   assert.equal(merged.id,first.id);
   assert.deepEqual(merged.origin,first.origin);
   assert.equal(merged.sourceText,undefined);
+  const whitespaceBoundary=mergePdfDraftBlocks(
+    {...first,text:'첫 문장 '},{...second,text:'둘째 문장'},
+  );
+  assert.equal(whitespaceBoundary.text,'첫 문장 둘째 문장',
+    'Merging must reuse existing whitespace instead of adding an extra line break');
   assert.equal(canMergePdfDraftBlocks(first,{...second,role:'heading'}),false);
   assert.equal(canMergePdfDraftBlocks(first,{...second,excluded:false}),false);
   assert.throws(()=>mergePdfDraftBlocks(first,{...second,manual:true}));

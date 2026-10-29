@@ -46,7 +46,7 @@ export function canMergePdfDraftBlocks(first:PdfDraftBlock,second:PdfDraftBlock)
  */
 export function mergePdfDraftBlocks(first:PdfDraftBlock,second:PdfDraftBlock):PdfDraftBlock{
   if(!canMergePdfDraftBlocks(first,second))throw Error('같은 분류·포함 상태의 인접 블록만 합칠 수 있습니다.');
-  const separator=first.text.endsWith('\n')||second.text.startsWith('\n')?'':'\n';
+  const separator=/\s$/u.test(first.text)||/^\s/u.test(second.text)?'':'\n';
   return {...first,text:first.text+separator+second.text,sourceText:undefined};
 }
 /** Insert a recovered source fragment near its estimated one-column reading position.
