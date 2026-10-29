@@ -1,9 +1,14 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {makePdfDraft,nextPdfTextCount,PDF_IMPORT_LIMITS,reconstructLines,type PdfPageInput} from '../src/step3/structure.ts';
+import {findUnrepresentedSourcePieces,makePdfDraft,nextPdfTextCount,PDF_IMPORT_LIMITS,reconstructLines,type PdfPageInput} from '../src/step3/structure.ts';
 import {pdfDraftToProject} from '../src/step3/convert.ts';
 import {blankProject,isProjectDocument} from '../src/step2/model.ts';
 const piece=(text:string,page:number,x:number,y:number,fontSize=12,width=120)=>({text,page,x,y,width,height:fontSize,fontSize});
+test('STEP3 source text parity identifies missing and duplicate PDF.js text items while ignoring short layout fragments',()=>{
+  const items=[piece('ACCOUNT_123',1,0,20),piece('ACCOUNT_123',1,0,30),piece('x',1,0,40)];
+  assert.deepEqual(findUnrepresentedSourcePieces(items,'ACCOUNT_123'),['ACCOUNT_123']);
+  assert.deepEqual(findUnrepresentedSourcePieces(items,'ACCOUNT_123 ACCOUNT_123'),[]);
+});
 test('STEP3: cumulative extracted-text limit stops before later fragments are retained',()=>{
   const limit=PDF_IMPORT_LIMITS.characters;
   assert.equal(nextPdfTextCount(limit-2,'ab'),limit);

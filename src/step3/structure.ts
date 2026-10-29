@@ -87,6 +87,22 @@ export function reconstructLines(page:PdfPageInput):{lines:PdfLine[];multiColumn
   if(sparseWide.length>=2)multiColumn=true;
   return{lines,multiColumn};
 }
+export function findUnrepresentedSourcePieces(pieces:readonly PdfFragment[],reconstructedText:string):string[]{
+  const represented=reconstructedText.normalize('NFC').replace(/\s+/gu,'');
+  const required=new Map<string,number>();
+  for(const piece of pieces){
+    const marker=piece.text.normalize('NFC').replace(/\s+/gu,'');
+    if(marker.length<4)continue;
+    required.set(marker,(required.get(marker)||0)+1);
+  }
+  const missing:string[]=[];
+  for(const [marker,count] of required){
+    let found=0,at=0;
+    while(found<count&&(at=represented.indexOf(marker,at))!==-1){found++;at+=marker.length;}
+    for(let i=found;i<count;i++)missing.push(marker);
+  }
+  return missing;
+}
 function lineRole(line:PdfLine,bodyFont:number):PdfRole{
   if(line.text.trim().length<150&&line.fontSize>=bodyFont*1.22)return'heading';
   if(line.text.trim().length<180&&line.fontSize<=bodyFont*.79)return'caption';
@@ -104,6 +120,8 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
     const {lines,multiColumn}=reconstructLines(page);
     const blocks:PdfDraftBlock[]=[];
     const reviewFlags:string[]=[];
+    const unrepresented=findUnrepresentedSourcePieces(page.pieces,lines.map(line=>line.text).join(''));
+    if(unrepresented.length)reviewFlags.push('PDF.js 원본 텍스트 조각 '+unrepresented.length+'개가 재구성 블록에서 일치하지 않습니다. 대체 문자·조각 결합 또는 추출 누락 가능성이 있어 이 페이지 원본과 대조하고 필요하면 직접 추가하세요.');
     const sourceText=page.pieces.map(piece=>piece.text).join('');
     if(/[\uFFFD\uE000-\uF8FF]/u.test(sourceText))reviewFlags.push('대체 문자 또는 개인 영역 문자가 포함되어 글꼴 문자 매핑이 손상됐을 수 있습니다. 원본과 숫자·기호를 대조하세요.');
     const outOfPage=page.pieces.filter(piece=>piece.x < -2 || piece.y < -2 || piece.x+piece.width > page.width+2 || piece.y+piece.height > page.height+2).length;
