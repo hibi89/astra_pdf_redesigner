@@ -64,7 +64,7 @@ try{
   const pdf64=Buffer.from(makeMixedLayoutPdf()).toString('base64');
   await evaluate(`(()=>{const data=Uint8Array.from(atob(${JSON.stringify(pdf64)}),c=>c.charCodeAt(0));const transfer=new DataTransfer();transfer.items.add(new File([data],'reference.pdf',{type:'application/pdf'}));const input=document.querySelector('.reference-style-panel input[type=file]');input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}))})()`);
   await eventually(()=>evaluate("document.querySelector('.reference-style-panel select')?.options.length"),count=>count===2);
-  await evaluate("(()=>{const select=document.querySelector('.reference-style-panel select');Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(select,'2');select.dispatchEvent(new Event('change',{bubbles:true}))})()");
+  await evaluate("(()=>{const select=document.querySelector('.reference-style-panel select'),set=Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set;for(const page of ['2','1','2']){set.call(select,page);select.dispatchEvent(new Event('change',{bubbles:true}));}})()");
   await eventually(()=>evaluate("document.querySelector('.reference-style-panel select')?.value"),page=>page==='2');
   await eventually(()=>evaluate("document.querySelector('.reference-image-row strong')?.textContent"),name=>name?.includes('2페이지'));
   const pdfTextCount=await evaluate("Number(document.querySelector('[data-reference-pdf-text-count]')?.getAttribute('data-reference-pdf-text-count'))");

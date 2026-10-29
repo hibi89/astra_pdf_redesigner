@@ -86,6 +86,7 @@ export default function Workspace({onLegacy}:Props){
   const referenceInput=useRef<HTMLInputElement|null>(null);
   const referenceVersion=useRef(0);
   const referencePdfSession=useRef<{file:File;loading:{promise:Promise<any>;destroy:()=>Promise<void>};pdf:any}|null>(null);
+  const referenceRenderTask=useRef<{cancel:()=>void}|null>(null);
   useEffect(()=>{
     let active=true;
     const check=window.astraDesktop?.localModelStatus;
@@ -186,7 +187,9 @@ export default function Workspace({onLegacy}:Props){
     setPreviewTheme({documentId:doc.id,theme:before.theme});
     setStyleUndo(null);
   };
+  const cancelReferenceRender=()=>{const task=referenceRenderTask.current;referenceRenderTask.current=null;try{task?.cancel();}catch{}};
   const clearReference=()=>{
+    cancelReferenceRender();
     referenceVersion.current++;
     if(referencePdfSession.current){void referencePdfSession.current.loading.destroy().catch(()=>{});referencePdfSession.current=null;}
     if(referenceImage?.url)URL.revokeObjectURL(referenceImage.url);
@@ -194,7 +197,7 @@ export default function Workspace({onLegacy}:Props){
     if(referenceInput.current)referenceInput.current.value='';
   };
   useEffect(()=>()=>{if(referenceImage?.url)URL.revokeObjectURL(referenceImage.url);},[referenceImage]);
-  useEffect(()=>()=>{referenceVersion.current++;const session=referencePdfSession.current;referencePdfSession.current=null;if(session)void session.loading.destroy().catch(()=>{});},[]);
+  useEffect(()=>()=>{referenceVersion.current++;cancelReferenceRender();const session=referencePdfSession.current;referencePdfSession.current=null;if(session)void session.loading.destroy().catch(()=>{});},[]);
   useEffect(()=>{clearReference();},[doc?.id]);
   const analyzeReference=async(file:File)=>{
     clearReference();const version=referenceVersion.current;setReferenceError('');
@@ -231,6 +234,7 @@ export default function Workspace({onLegacy}:Props){
   };
   const analyzeReferencePdf=async(file:File,pageNumber:number,version:number)=>{
     let loading:{promise:Promise<any>;destroy:()=>Promise<void>}|undefined;
+    let page:any,renderTask:{promise:Promise<void>;cancel:()=>void}|undefined;
     try{
       setReferenceStatus('PDF 페이지 준비 중…');
       let pdf:any;
@@ -246,28 +250,32 @@ export default function Workspace({onLegacy}:Props){
       if(pdf.numPages<1||pdf.numPages>50)throw new Error('참고 PDF는 1~50페이지까지 지원합니다.');
       if(pageNumber<1||pageNumber>pdf.numPages)throw new Error('선택한 PDF 페이지가 없습니다.');
       setReferenceStatus('PDF 페이지 여는 중…');
-      const page=await pdf.getPage(pageNumber),base=page.getViewport({scale:1});
+      page=await pdf.getPage(pageNumber);if(referenceVersion.current!==version)return;const base=page.getViewport({scale:1});
       const textContent=await page.getTextContent();
+      if(referenceVersion.current!==version)return;
       const typography=analyzePdfTypography(textContent.items.flatMap((item:{str?:string;transform?:number[];width?:number})=>
         typeof item.str==='string'&&item.transform?[{str:item.str,transform:item.transform,width:item.width??0}]:[]),base.width);
       const viewport=page.getViewport({scale:Math.min(1,512/Math.max(base.width,base.height))});
       const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.ceil(viewport.width));canvas.height=Math.max(1,Math.ceil(viewport.height));
       const context=canvas.getContext('2d',{willReadFrequently:true});if(!context)throw new Error('PDF 페이지를 그릴 canvas가 없습니다.');
       setReferenceStatus('PDF 페이지 그리는 중…');
-      await page.render({canvasContext:context,viewport}).promise;
+      const activeRender=page.render({canvasContext:context,viewport});renderTask=activeRender;referenceRenderTask.current=activeRender;
+      await activeRender.promise;
       setReferenceStatus('PDF 디자인 분석 중…');
       const pixels=context.getImageData(0,0,canvas.width,canvas.height);
       const metrics=analyzeReferencePixels(pixels.data,canvas.width,canvas.height);
-      setReferenceStatus('');setReferenceError('');
       if(referenceVersion.current!==version)return;
+      setReferenceStatus('');setReferenceError('');
       setReferenceImage({url:null,name:`${file.name} · ${pageNumber}페이지`});
       setReferencePdf({file,pages:pdf.numPages,page:pageNumber});setReferenceMetrics(metrics);setReferencePdfTypography(typography);
       setReferencePreview({documentId:doc!.id,design:{...doc!.design,theme:metrics.suggestedTheme,accent:metrics.accent??doc!.design.accent,textSize:metrics.suggestedTextSize}});
       setReferenceError('');
-      page.cleanup();
     }catch(error){
       if(referenceVersion.current===version){const message=error instanceof Error?error.message:'PDF 페이지를 분석할 수 없습니다.';setReferenceStatus('');setReferenceError(/password/i.test(message)?'암호화된 PDF는 참고 자료로 지원하지 않습니다.':message);}
       if(loading&&referencePdfSession.current?.loading===loading){referencePdfSession.current=null;await loading.destroy();}
+    }finally{
+      if(renderTask&&referenceRenderTask.current===renderTask)referenceRenderTask.current=null;
+      try{page?.cleanup();}catch{}
     }
   };
   const updateReferenceDesign=(patch:Partial<DesignSettings>)=>{
@@ -446,7 +454,7 @@ export default function Workspace({onLegacy}:Props){
             <input ref={referenceInput} className="hidden-input" type="file" accept="image/png,image/jpeg,image/webp,application/pdf,.pdf" onChange={event=>{const file=event.target.files?.[0];event.target.value='';if(file)void analyzeReference(file);}}/>
             <button type="button" className="secondary-button" disabled={!editable} onClick={()=>referenceInput.current?.click()}>이미지 또는 PDF 선택</button>
             {referenceError&&<p className="warning" role="alert">{referenceError}</p>}{referenceStatus&&<p className="help-text" role="status">{referenceStatus}</p>}
-            {referencePdf&&<label className="field">참고 PDF 페이지<select disabled={!editable} value={referencePdf.page} onChange={event=>{const page=Number(event.target.value),file=referencePdf.file;setReferencePdf({...referencePdf,page});referenceVersion.current++;const version=referenceVersion.current;if(referenceImage?.url)URL.revokeObjectURL(referenceImage.url);setReferenceImage(null);setReferenceMetrics(null);setReferencePdfTypography(null);setReferencePreview(null);setReferenceError('');setReferenceStatus('PDF 페이지를 분석하고 있습니다…');void analyzeReferencePdf(file,page,version);}}>{Array.from({length:referencePdf.pages},(_,index)=><option key={index+1} value={index+1}>{index+1}페이지</option>)}</select></label>}
+            {referencePdf&&<label className="field">참고 PDF 페이지<select disabled={!editable} value={referencePdf.page} onChange={event=>{const page=Number(event.target.value),file=referencePdf.file;cancelReferenceRender();setReferencePdf({...referencePdf,page});referenceVersion.current++;const version=referenceVersion.current;if(referenceImage?.url)URL.revokeObjectURL(referenceImage.url);setReferenceImage(null);setReferenceMetrics(null);setReferencePdfTypography(null);setReferencePreview(null);setReferenceError('');setReferenceStatus('PDF 페이지를 분석하고 있습니다…');void analyzeReferencePdf(file,page,version);}}>{Array.from({length:referencePdf.pages},(_,index)=><option key={index+1} value={index+1}>{index+1}페이지</option>)}</select></label>}
             {referenceImage&&referenceMetrics&&referencePreviewDesign&&<div className="reference-analysis" data-reference-analysis>
               <div className="reference-image-row">{referenceImage.url?<img src={referenceImage.url} alt="분석 중인 참고 이미지"/>:<span className="reference-pdf-badge" aria-hidden="true">PDF</span>}<div><strong>{referenceImage.name}</strong><p>대략적인 제안이며 수정할 수 있습니다.</p></div></div>
               <p className="reference-metrics">여백 영역: {Math.round(referenceMetrics.whiteSpace*100)}% · 시각적 밀도: {Math.round(referenceMetrics.visualDensity*100)}%<br/>추정 여백: 위 {Math.round(referenceMetrics.margins.top*100)}%, 오른쪽 {Math.round(referenceMetrics.margins.right*100)}%, 아래 {Math.round(referenceMetrics.margins.bottom*100)}%, 왼쪽 {Math.round(referenceMetrics.margins.left*100)}%<br/>추천 테마: {allThemes.find(t=>t.id===referenceMetrics.suggestedTheme)?.label}</p>
