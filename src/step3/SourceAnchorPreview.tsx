@@ -6,6 +6,7 @@ import type {PdfBlockOrigin} from '../step2/model.ts';
 interface Props {url:string;origin:PdfBlockOrigin;blockId:string}
 export default function SourceAnchorPreview({url,origin,blockId}:Props){
   const canvas=useRef<HTMLCanvasElement|null>(null);
+  const renderBarrier=useRef<Promise<void>>(Promise.resolve());
   const [view,setView]=useState<{width:number;height:number}|null>(null);
   const [problem,setProblem]=useState('');
   useEffect(()=>{
@@ -33,8 +34,14 @@ export default function SourceAnchorPreview({url,origin,blockId}:Props){
         if(!ctx)throw Error('Canvas unavailable');
         surface.width=Math.ceil(viewport.width);
         surface.height=Math.ceil(viewport.height);
+        // PDF.js cannot render into one canvas concurrently. A new source
+        // selection may arrive before the cancelled render has settled.
+        await renderBarrier.current;
+        if(stopped)return;
         rendering=page.render({canvas:surface,canvasContext:ctx,viewport});
-        await rendering.promise;
+        const renderPromise=rendering.promise;
+        renderBarrier.current=renderPromise.catch(()=>{});
+        await renderPromise;
         if(!stopped)setView({width:viewport.width,height:viewport.height});
       }catch(error){
         if(!stopped)setProblem(error instanceof Error?error.message:'원본 페이지를 표시할 수 없습니다.');
