@@ -331,6 +331,20 @@ try{
   const comparedApplied=await readStyleSnapshot();
   assert.equal(comparedApplied.design.theme,compareThemeId);
   assert.deepEqual(comparedApplied.content,compareBefore.content,'Applying a style must not mutate source text/blocks');
+  const secondThemeIndex=(compareThemeIndex+1)%styleThemeIds.length;
+  const secondThemeId=styleThemeIds[secondThemeIndex];
+  await evaluate("document.querySelector('[data-style-compare-theme="+JSON.stringify(secondThemeId)+"]').click()");
+  await eventually(()=>evaluate("document.querySelector('.project-paper')?.classList.contains('paper-theme-"+secondThemeId+"')"),x=>x===true);
+  await evaluate("document.querySelector('[data-style-compare-apply]').click()");
+  await eventually(()=>evaluate("document.querySelectorAll('input[name=v2theme]')["+secondThemeIndex+"]?.checked"),x=>x===true);
+  await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),x=>x==='저장됨');
+  assert.equal((await readStyleSnapshot()).design.theme,secondThemeId,
+    'A second comparison choice must apply over the first without losing undo history');
+  await evaluate("document.querySelector('[data-style-compare-undo]').click()");
+  await eventually(()=>evaluate("document.querySelectorAll('input[name=v2theme]')["+compareThemeIndex+"]?.checked"),x=>x===true);
+  await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),x=>x==='저장됨');
+  assert.equal((await readStyleSnapshot()).design.theme,compareThemeId,
+    'First undo must restore the immediately preceding applied style');
   await evaluate("document.querySelector('[data-style-compare-undo]').click()");
   await eventually(()=>evaluate("document.querySelectorAll('input[name=v2theme]')["+originalThemeIndex+"]?.checked"),x=>x===true);
   await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),x=>x==='저장됨');

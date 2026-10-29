@@ -68,6 +68,7 @@ export function ProjectPreview({doc,urls,previewTheme,previewDesign}: {doc:Proje
 }
 
 interface Props {onLegacy:()=>void}
+interface StyleUndoEntry {before:DesignSettings;applied:DesignSettings}
 export default function Workspace({onLegacy}:Props){
   const w=useWorkspace();
   const [docsOpen,setDocsOpen]=useState(true),[busy,setBusy]=useState(false),[printBusy,setPrintBusy]=useState(false);
@@ -76,7 +77,7 @@ export default function Workspace({onLegacy}:Props){
   const [styleCompareOpen,setStyleCompareOpen]=useState(false);
   const [styleCompareGalleryOpen,setStyleCompareGalleryOpen]=useState(false);
   const [previewTheme,setPreviewTheme]=useState<{documentId:string;theme:ThemeId}|null>(null);
-  const [styleUndo,setStyleUndo]=useState<{documentId:string;before:DesignSettings;applied:DesignSettings}|null>(null);
+  const [styleUndo,setStyleUndo]=useState<Record<string,StyleUndoEntry[]>>({});
   const [referenceMetrics,setReferenceMetrics]=useState<ReferenceMetrics|null>(null);
   const [referencePdfTypography,setReferencePdfTypography]=useState<(PdfTypographyMetrics&{suggestedTextSize:DesignSettings['textSize']})|null>(null);
   const [referencePreview,setReferencePreview]=useState<{documentId:string;design:DesignSettings}|null>(null);
@@ -144,7 +145,10 @@ export default function Workspace({onLegacy}:Props){
   const referencePreviewDesign=doc&&referencePreview?.documentId===doc.id?referencePreview.design:undefined;
   const previewThemeId=doc&&previewTheme?.documentId===doc.id&&!referencePreviewDesign?previewTheme.theme:undefined;
   const selectedCompareTheme=previewThemeId??doc?.design.theme;
-  const canUndoStyle=!!doc&&!!styleUndo&&styleUndo.documentId===doc.id&&sameDesign(doc.design,styleUndo.applied);
+  const currentStyleUndo=doc?styleUndo[doc.id]?.at(-1):undefined;
+  const canUndoStyle=!!doc&&!!currentStyleUndo&&sameDesign(doc.design,currentStyleUndo.applied);
+  const rememberStyleUndo=(documentId:string,before:DesignSettings,applied:DesignSettings)=>
+    setStyleUndo(previous=>({...previous,[documentId]:[...(previous[documentId]??[]),{before,applied}].slice(-20)}));
   const imageRefs=useMemo(()=>doc?documentAssetIds(doc):[],[doc]);
   const currentSource=!!sourceReview&&sourceReview.documentId===doc?.id;
   const originBlocks=useMemo(()=>doc?reviewableBlocks(doc):[],[doc]);
@@ -179,16 +183,16 @@ export default function Workspace({onLegacy}:Props){
     if(!doc||!styleCompareOpen||!selectedCompareTheme||selectedCompareTheme===doc.design.theme)return;
     const before=structuredClone(doc.design);
     const applied={...doc.design,theme:selectedCompareTheme};
-    setStyleUndo({documentId:doc.id,before,applied});
+    rememberStyleUndo(doc.id,before,applied);
     editDoc(d=>({...d,design:applied}));
     setStyleCompareGalleryOpen(false);
   };
   const undoComparedTheme=()=>{
-    if(!doc||!styleUndo||!canUndoStyle)return;
-    const before=structuredClone(styleUndo.before);
+    if(!doc||!currentStyleUndo||!canUndoStyle)return;
+    const before=structuredClone(currentStyleUndo.before);
     editDoc(d=>({...d,design:before}));
     setPreviewTheme({documentId:doc.id,theme:before.theme});
-    setStyleUndo(null);
+    setStyleUndo(previous=>({...previous,[doc.id]:(previous[doc.id]??[]).slice(0,-1)}));
   };
   const cancelReferenceRender=()=>{const task=referenceRenderTask.current;referenceRenderTask.current=null;try{task?.cancel();}catch{}};
   const clearReference=()=>{
@@ -289,7 +293,7 @@ export default function Workspace({onLegacy}:Props){
   const applyReferenceDesign=()=>{
     if(!doc||!referencePreviewDesign||sameDesign(doc.design,referencePreviewDesign))return;
     const before=structuredClone(doc.design),applied=structuredClone(referencePreviewDesign);
-    setStyleUndo({documentId:doc.id,before,applied});editDoc(d=>({...d,design:applied}));
+    rememberStyleUndo(doc.id,before,applied);editDoc(d=>({...d,design:applied}));
     clearReference();setPreviewTheme(null);
   };
   const editSection=(id:string,fn:(s:DocumentSection)=>DocumentSection)=>editDoc(d=>({...d,content:{...d.content,sections:d.content.sections.map(s=>s.id===id?fn(s):s)}}));
@@ -457,7 +461,7 @@ export default function Workspace({onLegacy}:Props){
               </button>             <div className="toolbar project-toolbar style-compare-actions">
                 <button type="button" className="secondary-button" data-style-compare-apply
                   disabled={!editable||selectedCompareTheme===doc.design.theme} onClick={applyComparedTheme}>선택 디자인 적용</button>
-                {styleUndo?.documentId===doc.id&&<button type="button" className="text-button" data-style-compare-undo
+                {currentStyleUndo&&<button type="button" className="text-button" data-style-compare-undo
                   disabled={!editable||!canUndoStyle} onClick={undoComparedTheme}>
                   {canUndoStyle?'방금 적용 취소':'다른 디자인 변경 후에는 취소할 수 없습니다'}
                 </button>}
@@ -481,7 +485,7 @@ export default function Workspace({onLegacy}:Props){
               <p className="style-compare-status" role="status">임시 A4 미리보기 · 변경 사항은 저장되지 않았습니다.</p>
               <div className="toolbar project-toolbar"><button type="button" className="secondary-button" disabled={!editable||sameDesign(doc.design,referencePreviewDesign)} onClick={applyReferenceDesign}>제안 적용</button><button type="button" className="text-button" onClick={clearReference}>취소</button></div>
             </div>}
-            {styleUndo?.documentId===doc.id&&<button type="button" className="text-button" disabled={!editable||!canUndoStyle} onClick={undoComparedTheme}>직전 디자인 적용 취소</button>}
+            {currentStyleUndo&&<button type="button" className="text-button" disabled={!editable||!canUndoStyle} onClick={undoComparedTheme}>직전 디자인 적용 취소</button>}
           </section>
         </> : <p className="panel">문서를 불러오면 스타일을 선택할 수 있습니다.</p>}
       </aside>
