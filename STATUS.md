@@ -1,3 +1,12 @@
+## 2026-10-29 — STEP5 PDF typography proposal (verified code `c160e36`)
+
+- Branch `integration/astra-commercial-core` code SHA `c160e3667fc249995daf1b00d8338a0dacd2b7cd`; Draft PR #9 remains open and unmerged.
+- STEP5 now uses the selected PDF page's embedded median font size normalized by page width to suggest a small/medium/large editable body size. When the PDF has no selectable text (including scans), the existing pixel-density proposal is retained. OCR is not used. User can adjust the preview and apply or cancel it.
+- Installed Windows acceptance verifies the actual PDF analysis UI and proposal selection, full IndexedDB V2 record equality through analysis and cancel, and the rest of the installed PDF/design/upgrade regression. Exact-SHA Windows [#40847149721](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40847149721) and Chrome/Edge [#40847149615](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40847149615) SUCCESS.
+- Local `npm test` 88/88 PASS, production build PASS, `desktop:verify` 16/16 PASS, acceptance helper syntax and whitespace checks PASS. Native Electron GUI was not directly run locally; hosted Windows installed-app E2E passed.
+- Roadmap remains approximately 52%, below the requested 80%. This is a small STEP5 feature increment, not a test-count uplift. STEP3 real user PDFs (5–10) and buyer PC acceptance remain unverified; STEP4 durable custom style save/reuse needs schema approval; STEP5 URL input and STEP6 search are external service work outside current approval; STEP7 OCR is excluded.
+- No OCR, paid API, model download, schema change, merge, deployment or sale. Original local project and user data remain untouched. Isolated working clone retained pending explicit approval because automatic review rejected its deletion due divergent local history.
+
 ## 2026-10-29 — STEP3/4 continuation closeout (verified code `602c0a4`)
 
 - Branch `integration/astra-commercial-core` HEAD `602c0a410b7f2146717569b39019b152b51e2b8d`; Draft PR #9 remains open and unmerged.
