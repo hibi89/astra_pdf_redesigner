@@ -8,7 +8,7 @@ import {hasDesktopPdfExport,savePdfFromEditor} from '../desktopPdf.ts';
 import RuleReview from '../humanize/RuleReview.tsx';
 import SourceAnchorPreview from '../step3/SourceAnchorPreview.tsx';
 import {isReviewed,reviewableBlocks,reviewableOrigin,reviewSignature} from '../step3/sourceReview.ts';
-import {analyzePdfTypography,analyzeReferencePixels,type PdfTypographyMetrics,type ReferenceMetrics} from '../step5/referenceAnalysis.ts';
+import {analyzePdfTypography,analyzeReferencePixels,suggestPdfBodyTextSize,type PdfTypographyMetrics,type ReferenceMetrics} from '../step5/referenceAnalysis.ts';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import {imageDimensions,imageType} from './images.ts';
 import {pdfOutputImageCount,pdfOutputTextMarkers} from './outputMarkers.ts';
@@ -78,7 +78,7 @@ export default function Workspace({onLegacy}:Props){
   const [previewTheme,setPreviewTheme]=useState<{documentId:string;theme:ThemeId}|null>(null);
   const [styleUndo,setStyleUndo]=useState<{documentId:string;before:DesignSettings;applied:DesignSettings}|null>(null);
   const [referenceMetrics,setReferenceMetrics]=useState<ReferenceMetrics|null>(null);
-  const [referencePdfTypography,setReferencePdfTypography]=useState<PdfTypographyMetrics|null>(null);
+  const [referencePdfTypography,setReferencePdfTypography]=useState<(PdfTypographyMetrics&{suggestedTextSize:DesignSettings['textSize']})|null>(null);
   const [referencePreview,setReferencePreview]=useState<{documentId:string;design:DesignSettings}|null>(null);
   const [referenceImage,setReferenceImage]=useState<{url:string|null;name:string}|null>(null);
   const [referencePdf,setReferencePdf]=useState<{file:File;pages:number;page:number}|null>(null);
@@ -268,10 +268,11 @@ export default function Workspace({onLegacy}:Props){
       const pixels=context.getImageData(0,0,canvas.width,canvas.height);
       const metrics=analyzeReferencePixels(pixels.data,canvas.width,canvas.height);
       if(referenceVersion.current!==version)return;
+      const suggestedTextSize=suggestPdfBodyTextSize(typography,base.width,metrics.suggestedTextSize);
       setReferenceStatus('');setReferenceError('');
       setReferenceImage({url:null,name:`${file.name} · ${pageNumber}페이지`});
-      setReferencePdf({file,pages:pdf.numPages,page:pageNumber});setReferenceMetrics(metrics);setReferencePdfTypography(typography);
-      setReferencePreview({documentId:doc!.id,design:{...doc!.design,theme:metrics.suggestedTheme,accent:metrics.accent??doc!.design.accent,textSize:metrics.suggestedTextSize}});
+      setReferencePdf({file,pages:pdf.numPages,page:pageNumber});setReferenceMetrics(metrics);setReferencePdfTypography({...typography,suggestedTextSize});
+      setReferencePreview({documentId:doc!.id,design:{...doc!.design,theme:metrics.suggestedTheme,accent:metrics.accent??doc!.design.accent,textSize:suggestedTextSize}});
       setReferenceError('');
     }catch(error){
       if(referenceVersion.current===version){const message=error instanceof Error?error.message:'PDF 페이지를 분석할 수 없습니다.';setReferenceStatus('');setReferenceError(/password/i.test(message)?'암호화된 PDF는 참고 자료로 지원하지 않습니다.':message);}
@@ -473,7 +474,7 @@ export default function Workspace({onLegacy}:Props){
             {referenceImage&&referenceMetrics&&referencePreviewDesign&&<div className="reference-analysis" data-reference-analysis>
               <div className="reference-image-row">{referenceImage.url?<img src={referenceImage.url} alt="분석 중인 참고 이미지"/>:<span className="reference-pdf-badge" aria-hidden="true">PDF</span>}<div><strong>{referenceImage.name}</strong><p>대략적인 제안이며 수정할 수 있습니다.</p></div></div>
               <p className="reference-metrics">여백 영역: {Math.round(referenceMetrics.whiteSpace*100)}% · 시각적 밀도: {Math.round(referenceMetrics.visualDensity*100)}%<br/>추정 여백: 위 {Math.round(referenceMetrics.margins.top*100)}%, 오른쪽 {Math.round(referenceMetrics.margins.right*100)}%, 아래 {Math.round(referenceMetrics.margins.bottom*100)}%, 왼쪽 {Math.round(referenceMetrics.margins.left*100)}%<br/>추천 테마: {allThemes.find(t=>t.id===referenceMetrics.suggestedTheme)?.label}</p>
-              {referencePdfTypography&&<p className="reference-metrics reference-pdf-typography" data-reference-pdf-text-count={referencePdfTypography.selectableTextCount} role="note">PDF에 선택 가능한 텍스트 조각 {referencePdfTypography.selectableTextCount}개 · 중간 글자 크기 {referencePdfTypography.medianFontSize===null?'측정 불가':referencePdfTypography.medianFontSize.toFixed(1)}pt · 가장 큰 텍스트/중간 크기 비율 {referencePdfTypography.largestToMedianRatio===null?'측정 불가':referencePdfTypography.largestToMedianRatio.toFixed(1)}배 · 가장 큰 조각 정렬 {referencePdfTypography.largestFragmentAlignment==='unavailable'?'추정 불가':referencePdfTypography.largestFragmentAlignment==='left'?'왼쪽':referencePdfTypography.largestFragmentAlignment==='center'?'가운데':'오른쪽'}<br/>포함된 PDF 텍스트에서만 추정했습니다. 스캔 이미지 OCR은 수행하지 않습니다.</p>}
+              {referencePdfTypography&&<p className="reference-metrics reference-pdf-typography" data-reference-pdf-text-count={referencePdfTypography.selectableTextCount} data-reference-pdf-body-size={referencePdfTypography.suggestedTextSize} role="note">PDF에 선택 가능한 텍스트 조각 {referencePdfTypography.selectableTextCount}개 · 중간 글자 크기 {referencePdfTypography.medianFontSize===null?'측정 불가':referencePdfTypography.medianFontSize.toFixed(1)}pt · 가장 큰 텍스트/중간 크기 비율 {referencePdfTypography.largestToMedianRatio===null?'측정 불가':referencePdfTypography.largestToMedianRatio.toFixed(1)}배 · 가장 큰 조각 정렬 {referencePdfTypography.largestFragmentAlignment==='unavailable'?'추정 불가':referencePdfTypography.largestFragmentAlignment==='left'?'왼쪽':referencePdfTypography.largestFragmentAlignment==='center'?'가운데':'오른쪽'}<br/>페이지 너비 대비 글자 크기로 본문 크기를 제안하고, 선택 가능한 텍스트가 없으면 픽셀 밀도 제안을 사용합니다. 스캔 이미지 OCR은 수행하지 않습니다.</p>}
               <div className="setting-block"><h3>제안 테마</h3><div className="style-compare-candidates" role="group" aria-label="제안 테마 수정">{allThemes.map(theme=><button type="button" key={theme.id} aria-pressed={referencePreviewDesign.theme===theme.id} className={referencePreviewDesign.theme===theme.id?'selected':''} onClick={()=>updateReferenceDesign({theme:theme.id})}>{theme.label}</button>)}</div></div>
               <div className="setting-block"><h3>강조 색상</h3><div className="swatches">{PALETTE.map(color=><button type="button" key={color.value} aria-label={color.label} aria-pressed={referencePreviewDesign.accent===color.value} className={`swatch-wrap ${referencePreviewDesign.accent===color.value?'active':''}`} onClick={()=>updateReferenceDesign({accent:color.value})}><span className="swatch" style={{backgroundColor:color.value}}/></button>)}</div></div>
               <div className="setting-block"><h3>본문 크기와 글꼴</h3><div className="segmented">{(['small','medium','large'] as const).map((size,i)=><button type="button" key={size} className={referencePreviewDesign.textSize===size?'on':''} aria-pressed={referencePreviewDesign.textSize===size} onClick={()=>updateReferenceDesign({textSize:size})}>{['작게','보통','크게'][i]}</button>)}{(['sans','serif'] as const).map((font,i)=><button type="button" key={font} className={referencePreviewDesign.font===font?'on':''} aria-pressed={referencePreviewDesign.font===font} onClick={()=>updateReferenceDesign({font})}>{['고딕','명조'][i]}</button>)}</div><p className="help-text">글꼴은 이미지에서 판별하지 않습니다. 직접 선택하세요.</p></div>

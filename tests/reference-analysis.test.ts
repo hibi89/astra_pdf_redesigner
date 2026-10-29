@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {analyzePdfTypography,analyzeReferencePixels} from '../src/step5/referenceAnalysis.ts';
+import {analyzePdfTypography,analyzeReferencePixels,suggestPdfBodyTextSize} from '../src/step5/referenceAnalysis.ts';
 
 test('STEP5 local reference analysis measures whitespace, margins, density, and a supported palette color',()=>{
   const width=10,height=10,pixels=new Uint8ClampedArray(width*height*4);
@@ -43,4 +43,16 @@ test('STEP5 embedded PDF text reports when no selectable text is available',()=>
   assert.deepEqual(analyzePdfTypography([{str:'',transform:[],width:0}],600),{
     selectableTextCount:0,medianFontSize:null,largestToMedianRatio:null,largestFragmentAlignment:'unavailable',
   });
+});
+
+test('STEP5 PDF text size suggestion uses page-relative embedded font metrics and falls back for scans',()=>{
+  const metrics=(size:number)=>analyzePdfTypography([
+    {str:'BODY',transform:[1,0,0,size,40,400],width:140},
+  ],600);
+  assert.equal(suggestPdfBodyTextSize(metrics(8),600,'large'),'small');
+  assert.equal(suggestPdfBodyTextSize(metrics(10),600),'medium');
+  assert.equal(suggestPdfBodyTextSize(metrics(14),600),'large');
+  const scanned=analyzePdfTypography([{str:'',transform:[],width:0}],600);
+  assert.equal(suggestPdfBodyTextSize(scanned,600,'small'),'small');
+  assert.equal(suggestPdfBodyTextSize(metrics(14),0,'small'),'small');
 });

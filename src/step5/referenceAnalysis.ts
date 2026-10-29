@@ -18,6 +18,21 @@ export interface PdfTypographyMetrics {
   largestFragmentAlignment: 'left' | 'center' | 'right' | 'unavailable';
 }
 
+/** Use normalized embedded-text size as a conservative body-size suggestion. */
+export function suggestPdfBodyTextSize(
+  metrics: PdfTypographyMetrics,
+  pageWidth: number,
+  fallback: DesignSettings['textSize'] = 'medium',
+): DesignSettings['textSize'] {
+  if (!Number.isFinite(pageWidth) || pageWidth <= 0 ||
+      metrics.selectableTextCount === 0 || !Number.isFinite(metrics.medianFontSize) ||
+      (metrics.medianFontSize ?? 0) <= 0) return fallback;
+  const relativeSize = metrics.medianFontSize! / pageWidth;
+  if (relativeSize < .014) return 'small';
+  if (relativeSize > .022) return 'large';
+  return 'medium';
+}
+
 /** Derive rough typography/layout clues from embedded PDF text; never OCR pixels. */
 export function analyzePdfTypography(
   items: readonly { str: string; transform: readonly number[]; width: number }[],

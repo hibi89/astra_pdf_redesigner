@@ -243,3 +243,15 @@ test('M09-E STEP4 same-document style compare and exact undo run in browser and 
     assert.ok(browser.includes(marker),'STEP4 browser comparison missing '+marker);
 });
 
+
+test('STEP5 installed Windows uses PDF typography for a local editable proposal without persistence',()=>{
+  const helper=fs.readFileSync(path.resolve(__dirname,'../desktop/step5-reference-acceptance.cjs'),'utf8');
+  const entry=fs.readFileSync(path.resolve(__dirname,'../desktop/step3-project-acceptance.cjs'),'utf8');
+  const analysis=fs.readFileSync(path.resolve(__dirname,'../src/step5/referenceAnalysis.ts'),'utf8');
+  for(const marker of ['runInstalledPdfReferenceAcceptance','data-reference-pdf-text-count',
+    'data-reference-pdf-body-size','snapshotInstalledV2','scanning and cancel preserve all V2 stores'])
+    assert.ok(helper.includes(marker),'Missing installed STEP5 PDF reference assertion: '+marker);
+  assert.ok(entry.includes("require('./step5-reference-acceptance.cjs')"));
+  assert.ok(entry.includes('await runInstalledPdfReferenceAcceptance(win,bytes)'));
+  assert.ok(analysis.includes('suggestPdfBodyTextSize'));
+});

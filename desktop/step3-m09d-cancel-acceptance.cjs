@@ -239,5 +239,5 @@ async function runInstalledM09DCancelAcceptance(win,pdfBytes,markers){
   }
 }
 
-module.exports={runInstalledM09DCancelAcceptance};
+module.exports={runInstalledM09DCancelAcceptance,snapshotInstalledV2};
 
