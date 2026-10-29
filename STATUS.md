@@ -1,5 +1,13 @@
 # STATUS — Astra PDF Redesigner
 
+## 2026-10-29 — STEP3 Electron 원본 Blob 렌더 수정
+
+- 기능 SHA `a9404c0743470147dc7cd9228e629787f9ae347f` (`integration/astra-commercial-core`, PR #9 Draft/unmerged). 사용자 데이터·V2 schema·8개 디자인 불변.
+- 원인: Windows installed acceptance 진단에서 Electron `astra:` renderer의 Blob URL `fetch()`가 `Failed to fetch`로 실패해 source canvas가 비어 있었다. STEP3 원본 검수 및 STEP2 원본 대조에 세션 메모리의 원본 `Blob`을 PDF.js에 직접 전달한다. Blob을 IndexedDB/schema에 기록하지 않는다.
+- 로컬 검증: `npm test` 68/68 PASS, `npm run build` PASS, `npm run desktop:verify` 14/14 PASS, `node --check desktop/step3-project-acceptance.cjs`와 `git diff --check` PASS. `npm run desktop:smoke`는 Electron 바이너리 다운로드 `fetch failed`로 SKIP.
+- CI: exact-SHA `a9404c0` Chrome/Edge #40823560131, Windows #40823559986 실행 중. 이전 Chrome/Edge #40822208266 PASS. Windows #40822208336 및 이전 #40821833694/#40822018950/#40822093651은 Blob URL fetch 실패로 원본 위치 미표시. 진단 테스트 #40822985228에서 `Failed to fetch` 확인.
+- 실제 사용자 PDF/물리 인쇄 및 로컬 Windows GUI 미검증. 7단계 완료율 약 45%; Windows 수정 결과와 복잡 PDF 수용 검증이 남고, STEP5 미구현·STEP6 승인대기·STEP7 부분. 80% 미달, 출시/판매 NO-GO.
+
 ## 2026-10-29 — STEP3 복구·원본 대조 기능 확장
 
 - 최신 코드 SHA `ef4eb63df686157196a96079df0680f701bedc6c` (`integration/astra-commercial-core`, PR #9 Draft/unmerged). 기존 사용자 저장 데이터와 V2 스키마, 원본 roadmap, STEP4 8개 디자인은 변경하지 않았다.

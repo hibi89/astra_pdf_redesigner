@@ -1,5 +1,13 @@
 # HANDOFF — Astra PDF Redesigner
 
+## 최신 인수인계 — 2026-10-29 STEP3 Electron 원본 Blob 렌더 결함
+
+1. **브랜치/코드:** `integration/astra-commercial-core`, 기능 SHA `a9404c0743470147dc7cd9228e629787f9ae347f`, PR #9 Draft/unmerged. 별도 임시 clone만 사용했으며 main과 기존 로컬 프로젝트는 변경하지 않았다.
+2. **진단과 수정:** Windows installed E2E source text location에서 canvas가 300×150 기본값으로 남고 경고가 `Failed to fetch`였다. Electron custom `astra:` renderer가 original Blob URL을 fetch하지 못한 것이 원인. STEP3 검수와 STEP2 원본 대조에 원본 Blob을 직접 PDF.js로 전달하도록 수정했으며 저장 schema에는 반영하지 않는다.
+3. **검증:** 로컬 `npm test` 68/68 PASS, build PASS, desktop verify 14/14 PASS, acceptance node syntax와 diff check PASS. Local Electron smoke는 Electron binary 다운로드 `fetch failed`로 SKIP.
+4. **CI:** `a9404c0` browser #40823560131 / Windows #40823559986 진행 중. 수정 전 Windows #40822208336에서 `Failed to fetch`로 실패. 같은 renderer를 사용하는 STEP2/STEP3 원본 대조 양쪽에 Blob 전달을 적용했다.
+5. **남은 단계:** 최신 Windows CI로 수정 검증, actual user PDFs 5–10건과 physical print 검수. 전체 7단계 약 45%, 80% 미달. STEP5 미구현, STEP6 승인대기, STEP7 안정화 미완료. OCR, external services, schema change, merge/deploy 금지.
+
 ## 최신 개발 인수인계 — 2026-10-29
 
 1. **목표와 승인 경계:** STEP3 기존 PDF 검수와 STEP4 디자인 비교/적용/취소 보강. OCR, saved-style schema/migration, 유료 API/모델 다운로드, merge/deploy는 제외. 원본 로드맵과 사용자 데이터는 보존한다.
