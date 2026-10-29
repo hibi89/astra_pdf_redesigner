@@ -123,6 +123,12 @@ try{
   const hasSource=await evaluate("Boolean(document.querySelector('.step3-import-panel iframe[src^=blob]'))");
   assert.equal(hasSource,true,'Original PDF view missing');
   console.log('PASS STEP3 REVIEW: browser-local PDF.js extraction, preview, provenance and no premature document writes');
+  const sourceBlockId=await evaluate("(()=>{const page=[...document.querySelectorAll('.step3-block-review details')].find(d=>d.querySelector(':scope > summary')?.textContent.includes('원본 2페이지'));const button=page?.querySelector('[data-step3-show-source]');if(!button)throw Error('Page 2 block source navigation missing');button.click();return button.getAttribute('data-step3-show-source')})()");
+  const sourceLocation=await eventually(()=>evaluate("(()=>{const panel=document.querySelector('[data-step3-selected-source-block]');const preview=panel?.querySelector('[data-m06-preview][data-m06-rendered-page]');const canvas=preview?.querySelector('canvas');const rect=preview?.querySelector('[data-m06-anchor-rect]');return panel&&preview&&canvas?.width>0&&canvas?.height>0&&rect?{id:panel.getAttribute('data-step3-selected-source-block'),page:preview.getAttribute('data-m06-rendered-page'),width:canvas.width,height:canvas.height,highlight:rect.getBoundingClientRect().width}:null})()"),x=>x&&x.id===sourceBlockId&&x.page==='2'&&x.highlight>0);
+  assert.ok(sourceLocation.width>300&&sourceLocation.height>500,'Selected block must render its actual original PDF page');
+  await evaluate("document.querySelector('[data-step3-selected-source-block] button').click()");
+  assert.equal(await evaluate("Boolean(document.querySelector('[data-step3-selected-source-block]'))"),false,'Source position panel must close without changing draft');
+  console.log('PASS STEP3 BLOCK-TO-SOURCE NAVIGATION: selected page-2 text maps to its rendered original page and estimated source highlight');
   const edits=await evaluate("document.querySelectorAll('.step3-block-review textarea').length");
   assert.ok(edits>=2,'Expected extracted text blocks');
   const historySelector=".step3-import-panel [data-step3-undo]";

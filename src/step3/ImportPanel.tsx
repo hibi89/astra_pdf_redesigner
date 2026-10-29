@@ -1,6 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import type {PdfDraft,PdfDraftBlock,PdfRole} from './structure.ts';
 import {extractLocalPdf} from './pdf.ts';
+import SourceAnchorPreview from './SourceAnchorPreview.tsx';
 
 export interface ImportedPdfSource {
   documentId:string;
@@ -23,6 +24,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
   const [historyRevision,setHistoryRevision]=useState(0);
   const [previewUrl,setPreviewUrl]=useState('');
   const [dragging,setDragging]=useState(false);
+  const [sourceBlock,setSourceBlock]=useState<PdfDraftBlock|null>(null);
   const [imageUrls,setImageUrls]=useState<Record<string,string>>({});
   const urlRef=useRef('');
   const imageUrlRef=useRef<Record<string,string>>({});
@@ -78,7 +80,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
     requestVersion.current++;
     if(urlRef.current)URL.revokeObjectURL(urlRef.current);
     Object.values(imageUrlRef.current).forEach(u=>URL.revokeObjectURL(u));
-    imageUrlRef.current={};setImageUrls({});
+    imageUrlRef.current={};setImageUrls({});setSourceBlock(null);
     urlRef.current='';setPreviewUrl('');publishDraft(null);setError('');setConfirmed(false);clearHistory();
   };
   const choose=async(file:File)=>{
@@ -204,6 +206,12 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
         <span className="help-text">검수 편집 최근 {DRAFT_HISTORY_LIMIT}단계까지 되돌릴 수 있습니다. 되돌리기/다시 실행 후에는 원본 확인 동의를 다시 선택해야 합니다.</span>
       </div>
       <div className="step3-source-compare">
+        {sourceBlock&&previewUrl&&<div className="panel" data-step3-selected-source-block={sourceBlock.id}>
+          <div className="panel-heading"><h3>선택한 추출 블록의 원본 위치</h3>
+            <button type="button" className="secondary-button" onClick={()=>setSourceBlock(null)}>위치 닫기</button></div>
+          <SourceAnchorPreview url={previewUrl} origin={sourceBlock.origin} blockId={sourceBlock.id}/>
+          <p className="help-text">강조 영역은 PDF.js가 추정한 블록 좌표입니다. 글자별 위치와 추출 내용의 일치를 보증하지 않으므로 원본과 함께 확인하세요.</p>
+        </div>}
         {previewUrl&&<details><summary>원본 PDF 열어 대조</summary>
           <iframe title="원본 PDF 대조" src={previewUrl} width="100%" height="400"/>
           <p className="help-text">원본 PDF는 가져오기 검수 화면에서만 일시적으로 열립니다. 문서함에는 원본 PDF 자체를 저장하지 않습니다.</p>
@@ -226,6 +234,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
             {page.blocks.map((block,i)=><div className="section-editor" key={block.id}>
               <div className="block-header"><strong>원본 {block.origin.page}p · {block.origin.x}, {block.origin.y}pt</strong>
                 <div className="mini-actions">
+                  <button type="button" data-step3-show-source={block.id} onClick={()=>setSourceBlock(block)} disabled={disabled||busy}>원본 위치 보기</button>
                   <button aria-label={block.id+' 위로 이동'} disabled={disabled||busy||i===0} onClick={()=>move(page.number,block.id,-1)}>↑</button>
                   <button aria-label={block.id+' 아래로 이동'} disabled={disabled||busy||i===page.blocks.length-1} onClick={()=>move(page.number,block.id,1)}>↓</button>
                 </div>
