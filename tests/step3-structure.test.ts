@@ -14,15 +14,18 @@ test('STEP3 source text parity identifies missing and duplicate PDF.js text item
 });
 test('STEP3 omission review retains isolated numeric text fragments and their source positions',()=>{
   const draft=makePdfDraft('numeric-table.pdf',[{number:1,width:595,height:842,imageDetected:false,pieces:[
-    piece('본문 내용',1,55,50),piece('7',1,310,90),
+    piece('본문 내용',1,55,50),piece('7',1,310,90),piece('12',1,350,90),piece('7.5%',1,390,90),
   ]}]);
   const page=draft.pages[0];
-  assert.ok(page.sourceTextItems.includes('7'),'A single numeric cell value must stay reviewable');
+  for(const value of ['7','12','7.5%'])assert.ok(page.sourceTextItems.includes(value),
+    'A short numeric cell value must stay reviewable: '+value);
   const numberIndex=page.sourceTextItems.indexOf('7');
   assert.deepEqual(page.sourceTextOrigins[numberIndex],{page:1,x:310,y:90,width:120,height:12});
-  const included=page.blocks.filter(block=>block.text!=='7').map(block=>block.text).join('');
-  assert.ok(findUnrepresentedSourcePieces(page.sourceTextItems,included).includes('7'),
-    'Removing a standalone number from included text must raise a mismatch');
+  for(const value of ['7','12','7.5%']){
+    const included=page.sourceTextItems[0];
+    assert.ok(findUnrepresentedSourcePieces([value],included).includes(value),
+      'Removing a short number or decimal from included text must raise a mismatch: '+value);
+  }
 });
 test('STEP3 missing source review reveals long omission lists in bounded, complete pages',()=>{
   const items=Array.from({length:29},(_,index)=>'MISSING_'+index);
