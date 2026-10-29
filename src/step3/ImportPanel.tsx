@@ -319,7 +319,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
             <button type="button" className="secondary-button" data-step3-add-manual-block={page.number} disabled={disabled||busy||totalBlocks>=PDF_IMPORT_LIMITS.blocks}
               onClick={()=>addManualBlock(page.number)}>누락 텍스트 직접 추가</button>
             {page.blocks.map((block,i)=><div className="section-editor" key={block.id}>
-              <div className="block-header"><strong>{block.manual?'수동 추가 · 추출 원본 좌표 없음':`원본 ${block.origin?.page}p · ${block.origin?.x}, ${block.origin?.y}pt`}</strong>
+              <div className="block-header"><strong>{block.manual?(block.origin?`원문 복구 · ${block.origin.page}p · ${block.origin.x}, ${block.origin.y}pt`:'수동 추가 · 원문 위치 없음'):`원본 ${block.origin?.page}p · ${block.origin?.x}, ${block.origin?.y}pt`}</strong>
                 <div className="mini-actions">
                   {block.origin&&<button type="button" data-step3-show-source={block.id} onClick={()=>{setSourceImage(null);setSourceBlock(block)}} disabled={disabled||busy}>원본 위치 보기</button>}
                   {!block.manual&&block.sourceText!==undefined&&block.text!==block.sourceText&&<button type="button" data-step3-restore-extracted={block.id}

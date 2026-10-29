@@ -19,19 +19,20 @@ export interface PdfDraftBlock {
   id:string; text:string; role:PdfRole; origin?:PdfOrigin; excluded?:boolean; manual?:boolean; sourceText?:string;
 }
 /** Insert a recovered source fragment near its estimated one-column reading position.
- * The origin is used only during review; the returned manual block keeps no source coordinates.
+ * The transient draft retains its origin so later recovered blocks stay ordered.
  */
 export function insertManualPdfBlockAtSourcePosition(
   blocks:readonly PdfDraftBlock[],block:PdfDraftBlock,sourceOrigin?:PdfOrigin,
 ):PdfDraftBlock[]{
   if(!sourceOrigin)return [...blocks,block];
+  const recovered={...block,origin:{...sourceOrigin}};
   const index=blocks.findIndex(candidate=>{
     if(!candidate.origin)return false;
     const vertical=candidate.origin.y-sourceOrigin.y;
     return Math.abs(vertical)>2?vertical>0:candidate.origin.x>sourceOrigin.x;
   });
-  if(index<0)return [...blocks,block];
-  return [...blocks.slice(0,index),block,...blocks.slice(index)];
+  if(index<0)return [...blocks,recovered];
+  return [...blocks.slice(0,index),recovered,...blocks.slice(index)];
 }
 /** Keep source discrepancy entries in a stable top-to-bottom, then left-to-right order. */
 export function sortSourceReviewItems<T extends {origin:PdfOrigin}>(items:readonly T[]):T[]{

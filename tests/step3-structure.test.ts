@@ -47,7 +47,7 @@ test('STEP3 omission review retains short Korean source fragments and their posi
   assert.deepEqual(findUnrepresentedSourcePieces(page.sourceTextItems,'승인'),['계약'],
     'Missing two-character Korean source text should remain visible for manual review');
 });
-test('STEP3 manual omission recovery inserts by estimated source order without persisting coordinates',()=>{
+test('STEP3 manual omission recovery preserves source order in review and strips coordinates on import',()=>{
   const draft=makePdfDraft('manual-order.pdf',[{number:1,width:595,height:842,imageDetected:false,pieces:[
     piece('FIRST_SOURCE_BLOCK',1,40,100),piece('LAST_SOURCE_BLOCK',1,40,220),
   ]}]);
@@ -57,10 +57,23 @@ test('STEP3 manual omission recovery inserts by estimated source order without p
   assert.deepEqual(result.map(block=>block.text),[
     'FIRST_SOURCE_BLOCK','RECOVERED_SOURCE_TEXT','LAST_SOURCE_BLOCK',
   ]);
-  assert.equal(result[1].origin,undefined,'Estimated source coordinates are not attached to the manual block');
+  assert.deepEqual(result[1].origin,origin,'Review-only source coordinates keep recovered blocks ordered');
   assert.deepEqual(insertManualPdfBlockAtSourcePosition(draft.pages[0].blocks,recovered).map(block=>block.text),[
     'FIRST_SOURCE_BLOCK','LAST_SOURCE_BLOCK','RECOVERED_SOURCE_TEXT',
   ],'Manual entry without an original source position remains appended for user placement');
+  const later={...recovered,id:'manual-later',text:'RECOVERED_LATER'};
+  const earlier={...recovered,id:'manual-earlier',text:'RECOVERED_EARLIER'};
+  const twoRecoveries=insertManualPdfBlockAtSourcePosition(
+    insertManualPdfBlockAtSourcePosition(draft.pages[0].blocks,later,{...origin,y:200}),
+    earlier,{...origin,y:160},
+  );
+  assert.deepEqual(twoRecoveries.map(block=>block.text),[
+    'FIRST_SOURCE_BLOCK','RECOVERED_EARLIER','RECOVERED_LATER','LAST_SOURCE_BLOCK',
+  ],'Sequential recovery must retain the prior recovered fragment source position');
+  const project=pdfDraftToProject({...draft,pages:[{...draft.pages[0],blocks:twoRecoveries}]});
+  const saved=project.content.sections[0].blocks.find(block=>block.kind!=='image'&&block.text==='RECOVERED_EARLIER');
+  assert.equal(saved?.kind==='image'?undefined:saved?.origin,undefined,
+    'Review-only coordinates for manual blocks must not enter the persisted project');
 });
 
 test('STEP3 source omission entries sort by original vertical then horizontal coordinates',()=>{

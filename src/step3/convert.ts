@@ -13,7 +13,7 @@ export function pdfDraftToProject(draft:PdfDraft):ProjectDocument {
   const sections=draft.pages.map(page=>{
     const blocks:ContentBlock[]=page.blocks.filter(block=>!block.excluded).map(block=>({
       id:newIdentifier(),kind:block.role,text:block.text,
-      ...(block.origin?{origin:{...block.origin}}:{}),
+      ...(!block.manual&&block.origin?{origin:{...block.origin}}:{}),
     }));
     // Place decoded images near their source y position without rewriting
     // text blocks or undoing the user's explicit text block reordering.
