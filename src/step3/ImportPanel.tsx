@@ -265,14 +265,17 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
         <span className="help-text">검수 편집 최근 {DRAFT_HISTORY_LIMIT}단계까지 되돌릴 수 있습니다. 되돌리기/다시 실행 후에는 원본 확인 동의를 다시 선택해야 합니다.</span>
       </div>
       <div className="step3-source-compare">
-        {(sourceBlock?.origin||sourceImage||missingSource)&&previewUrl&&<div ref={sourceLocationPanel} className="panel"
-          data-step3-selected-source-block={sourceBlock?.id} data-step3-selected-source-image={sourceImage?.id} data-step3-selected-missing-source={missingSource?.id}>
+        {(currentSourceBlock?.origin||sourceImage||missingSource)&&previewUrl&&<div ref={sourceLocationPanel} className="panel"
+          data-step3-selected-source-block={currentSourceBlock?.id} data-step3-selected-source-image={sourceImage?.id} data-step3-selected-missing-source={missingSource?.id}>
           <div className="panel-heading"><h3>{sourceImage?'선택한 복원 이미지의 원본 위치':missingSource?'누락된 원문 조각의 위치':'선택한 추출 블록의 원본 위치'}</h3>
             <button type="button" className="secondary-button" onClick={closeSourceLocation}>위치 닫기</button></div>
-          {sourceBlock&&<p className="help-text" data-step3-source-excerpt>추출 내용: {sourceBlock.text}</p>}
+          {currentSourceBlock&&currentSourceBlock.sourceText!==undefined&&currentSourceBlock.text!==currentSourceBlock.sourceText?<>
+            <p className="help-text" data-step3-source-excerpt>PDF.js 추출 원문: {currentSourceBlock.sourceText}</p>
+            <p className="help-text" data-step3-edited-excerpt>현재 수정 내용: {currentSourceBlock.text}</p>
+          </>:currentSourceBlock&&<p className="help-text" data-step3-source-excerpt>추출 내용: {currentSourceBlock.text}</p>}
           {missingSource&&<p className="help-text" data-step3-missing-source-excerpt>추출 누락 원문: {missingSource.text}</p>}
           {sourceImage&&imageUrls[sourceImage.id]&&<img src={imageUrls[sourceImage.id]} className="step3-image-thumbnail" alt="원본 위치 대조용 복원 이미지"/>}
-          <SourceAnchorPreview url={previewUrl} blob={sourcePdfRef.current??undefined} origin={sourceBlock?.origin??sourceImage?.origin??missingSource!.origin} blockId={sourceBlock?.id??sourceImage?.id??missingSource!.id}/>
+          <SourceAnchorPreview url={previewUrl} blob={sourcePdfRef.current??undefined} origin={currentSourceBlock?.origin??sourceImage?.origin??missingSource!.origin} blockId={currentSourceBlock?.id??sourceImage?.id??missingSource!.id}/>
           <p className="help-text">강조 영역은 추출 텍스트 블록 또는 복원 이미지의 추정 위치이며, 문자별·클리핑 정확도를 보장하지 않습니다.</p>
         </div>}
         {previewUrl&&<details><summary>원본 PDF 열어 대조</summary>

@@ -127,6 +127,16 @@ try{
   const sourceBlockId=await evaluate("(()=>{const page=[...document.querySelectorAll('.step3-block-review details')].find(d=>d.querySelector(':scope > summary')?.textContent.includes('원본 2페이지'));const button=page?.querySelector('[data-step3-show-source]');if(!button)throw Error('Page 2 block source navigation missing');button.click();return button.getAttribute('data-step3-show-source')})()");
   const sourceLocation=await eventually(()=>evaluate("(()=>{const panel=document.querySelector('[data-step3-selected-source-block]');const preview=panel?.querySelector('[data-m06-preview][data-m06-rendered-page]');const canvas=preview?.querySelector('canvas');const rect=preview?.querySelector('[data-m06-anchor-rect]');return panel&&preview&&canvas?.width>0&&canvas?.height>0&&rect?{id:panel.getAttribute('data-step3-selected-source-block'),page:preview.getAttribute('data-m06-rendered-page'),width:canvas.width,height:canvas.height,highlight:rect.getBoundingClientRect().width}:null})()"),x=>x&&x.id===sourceBlockId&&x.page==='2'&&x.highlight>0);
   assert.ok(sourceLocation.width>300&&sourceLocation.height>500,'Selected block must render its actual original PDF page');
+  const originalSourceText=await evaluate("(()=>{const id="+JSON.stringify(sourceBlockId)+";return [...document.querySelectorAll('[data-step3-show-source]')].find(button=>button.getAttribute('data-step3-show-source')===id)?.closest('.section-editor')?.querySelector('textarea')?.value})()");
+  const editedSourceText=originalSourceText+' REVIEW_EDIT_418';
+  await evaluate("(()=>{const id="+JSON.stringify(sourceBlockId)+";const button=[...document.querySelectorAll('[data-step3-show-source]')].find(x=>x.getAttribute('data-step3-show-source')===id);const area=button?.closest('.section-editor')?.querySelector('textarea');if(!area)throw Error('Selected source block editor missing');const set=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set;set.call(area,"+JSON.stringify(editedSourceText)+");area.dispatchEvent(new Event('input',{bubbles:true}));})()");
+  await eventually(()=>evaluate("document.querySelector('[data-step3-edited-excerpt]')?.textContent?.includes('REVIEW_EDIT_418')"),x=>x===true);
+  assert.equal(await evaluate("document.querySelector('[data-step3-source-excerpt]')?.textContent?.replace(/^PDF.js 추출 원문: /,'')"),originalSourceText,
+    'Source comparison must retain the original PDF.js text beside a live manual edit');
+  assert.equal(await evaluate("document.querySelector('[data-step3-edited-excerpt]')?.textContent?.replace(/^현재 수정 내용: /,'')"),editedSourceText,
+    'Source comparison must refresh the current edited text instead of a stale block snapshot');
+  await evaluate("document.querySelector('[data-step3-undo]').click()");
+  await eventually(()=>evaluate("!document.querySelector('[data-step3-edited-excerpt]')"),x=>x===true);
   await evaluate("document.querySelector('[data-step3-selected-source-block] button').click()");
   assert.equal(await evaluate("Boolean(document.querySelector('[data-step3-selected-source-block]'))"),false,'Source position panel must close without changing draft');
   console.log('PASS STEP3 BLOCK-TO-SOURCE NAVIGATION: selected page-2 text maps to its rendered original page and estimated source highlight');
