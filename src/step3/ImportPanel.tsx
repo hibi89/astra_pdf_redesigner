@@ -42,6 +42,7 @@ function SourceTextMissingWarning({page,onShow,onRecover}:{page:PdfDraftPage;onS
     <p>원문에서 읽은 텍스트 조각 {missing.length}개가 현재 포함 내용에 없습니다. 일부러 제외했는지 확인하고 원본과 대조하세요.</p>
     <ul>{visibleSourceReviewItems(entries,visibleCount).map(item=><li key={item.id} data-step3-missing-source-item={item.id}>
       <span>{item.text.slice(0,120)}{item.text.length>120?'…':''}</span>
+      <small className="help-text" data-step3-missing-source-origin={item.id}>원본 위치: {item.origin.page}페이지 · x {item.origin.x.toLocaleString('ko-KR')}pt · y {item.origin.y.toLocaleString('ko-KR')}pt</small>
       <div className="mini-actions">
         <button type="button" data-step3-show-missing-source={item.id} onClick={()=>onShow(item)}>원본 위치 보기</button>
         <button type="button" data-step3-recover-missing-source={item.id} onClick={()=>onRecover(item)}>이 원문을 수동 블록으로 추가</button>
