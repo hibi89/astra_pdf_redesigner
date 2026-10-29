@@ -665,6 +665,14 @@ try{
   const recoveredOrder=await evaluate("(()=>{const marker="+JSON.stringify(RUNNING_MARKERS[0])+";const pages=[...document.querySelectorAll('.step3-block-review details')].map(d=>({summary:d.querySelector(':scope > summary')?.textContent,values:[...d.querySelectorAll('textarea')].map(area=>area.value),manuals:[...d.querySelectorAll('[data-step3-remove-manual]')].map(button=>button.closest('.section-editor')?.querySelector('textarea')?.value)}));const page=pages.find(d=>d.summary?.includes('원본 1페이지'));const values=page?.values??[];const allManuals=[...document.querySelectorAll('[data-step3-remove-manual]')].map(button=>({id:button.getAttribute('data-step3-remove-manual'),value:button.closest('.section-editor')?.querySelector('textarea')?.value,page:button.closest('details')?.querySelector(':scope > summary')?.textContent??null}));return{recovered:values.indexOf(marker),following:values.findIndex(value=>value.includes('STEP3_SOURCE_P1_BEGIN_901')),pages,allManuals};})()");
   assert.ok(recoveredOrder.recovered>=0&&recoveredOrder.following>=0&&recoveredOrder.recovered<recoveredOrder.following,
     'Quick recovery should insert missing text before later source blocks using its estimated source position: '+JSON.stringify(recoveredOrder));
+  const recoveredSource=await evaluate("(()=>{const marker="+JSON.stringify(RUNNING_MARKERS[0])+";const area=[...document.querySelectorAll('.section-editor textarea')].find(x=>x.value===marker);const editor=area?.closest('.section-editor');const button=editor?.querySelector('[data-step3-show-source]');return{button:button?.getAttribute('data-step3-show-source')??null,label:editor?.querySelector('.block-header strong')?.textContent??''};})()");
+  assert.ok(recoveredSource.button&&recoveredSource.label.includes('원문 복구'),
+    'A quick-recovered manual block must retain its source location during review');
+  await evaluate("[...document.querySelectorAll('[data-step3-show-source]')].find(x=>x.getAttribute('data-step3-show-source')==="+JSON.stringify(recoveredSource.button)+")?.click()");
+  await eventually(()=>evaluate("document.querySelector('[data-step3-selected-source-block] [data-m06-preview][data-m06-rendered-page]')?.getAttribute('data-m06-rendered-page')"),x=>x==='1');
+  await evaluate("document.querySelector('[data-step3-selected-source-block] button')?.click()");
+  assert.equal(await evaluate("Boolean(document.querySelector('[data-step3-selected-source-block]'))"),false,
+    'Quick-recovered source location must close without changing the editable draft');
   assert.equal(await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').checked"),false,
     'Quick recovery must revoke earlier source-review consent');
   await evaluate("document.querySelector('[data-step3-undo]').click()");
