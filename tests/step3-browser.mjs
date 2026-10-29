@@ -298,7 +298,7 @@ try{
   const galleryPdf=await send('Page.printToPDF',{preferCSSPageSize:true,printBackground:true});
   const galleryPath=join(dir,'step4-side-by-side-print.pdf');
   writeFileSync(galleryPath,Buffer.from(galleryPdf.data,'base64'));
-  assert.match(await execFileSync('pdfinfo',[galleryPath],{encoding:'utf8'}),/Pages:\\s+2\\b/,
+  assert.match(await execFileSync('pdfinfo',[galleryPath],{encoding:'utf8'}),/Pages:\s+2\b/,
     'Printing from side-by-side comparison must output only the selected candidate document once');
   const galleryText=execFileSync('pdftotext',[galleryPath,'-'],{encoding:'utf8'});
   assert.equal(galleryText.split('STEP3_TEST_BEGIN_7519').length-1,1,
