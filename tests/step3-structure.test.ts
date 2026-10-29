@@ -122,3 +122,13 @@ test('STEP3: merged sparse wide text items warn about possible columns without r
   assert.ok(draft.pages[0].blocks.some(b=>b.text.includes('TABLE_C_908 TABLE_D_909')));
 });
 
+test('STEP3: extraction quality flags identify damaged glyph mappings and text outside the source page',()=>{
+  const draft=makePdfDraft('damaged-text.pdf',[{number:1,width:595,height:842,imageDetected:false,pieces:[
+    piece('본문 � 숫자 ',1,40,80,12,120),piece('경계 밖 텍스트',1,580,840,12,80),
+  ]}]);
+  assert.equal(draft.pages[0].reviewFlags.length,2);
+  assert.ok(draft.warnings.some(w=>w.includes('대체 문자 또는 개인 영역')));
+  assert.ok(draft.warnings.some(w=>w.includes('페이지 경계 밖')));
+  assert.ok(draft.pages[0].blocks.some(b=>b.text.includes('�')),'Suspicious source text must remain available for manual correction');
+});
+

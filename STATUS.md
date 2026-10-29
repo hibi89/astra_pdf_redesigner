@@ -1,13 +1,14 @@
 # STATUS — Astra PDF Redesigner
 
-## 2026-10-29 — STEP5 local reference image/PDF page analysis
+## 2026-10-29 — STEP3 extraction quality signals and STEP5 local reference analysis
 
 - Implemented an in-memory, local-only raster analysis flow: PNG/JPEG/WebP up to 10 MiB and 20 MP, or PDF up to 30 MiB / 50 pages with selectable page. Measures approximate whitespace, visual density and margins; maps salient colors to the existing palette and suggests an existing theme/text size. Font remains a user choice. This is heuristic pixel analysis, not OCR or semantic/text/font recognition.
 - The user can edit supported existing `DesignSettings`, preview on the current A4 document, apply, cancel or undo. Source image/PDF bytes and analysis are not persisted; existing content and V2 schema remain unchanged. No network/API/model usage.
 - For PDF pages with embedded selectable text, also estimate median font size, largest-fragment/median size ratio and the largest fragment's alignment. This reads PDF text operators only; scanned pixels remain unrecognized and the UI states that OCR is not performed.
 - Added synthetic pixel tests and Chrome UI regression for local image analysis, PDF page 2 selection, preview/cancel/apply/undo and exact content preservation.
 - Local evidence at the first feature SHA: `npm test` 71/71 PASS; build PASS; desktop verify 14/14 PASS. At the typography extension: `npm test` 73/73 PASS, build PASS, browser-script syntax/diff check PASS; dedicated `tests/step5-reference-browser.mjs` **Chrome PASS and Edge PASS** (local raster, two-page PDF selectable-text metrics and OCR disclosure, A4 PDF generation, preview/cancel/apply/undo and content preservation). Broader pre-existing `step2-browser.mjs` was not rerun to completion locally because Poppler's `pdftotext` executable is unavailable. Exact-SHA CI for first feature `dab6d9ae0c4401e8e19284a3811f6d6e1a688ba6` is running; Windows exact-SHA not yet confirmed.
-- Functional commits: `dab6d9ae0c4401e8e19284a3811f6d6e1a688ba6` (image/PDF page analysis), with embedded-PDF typography extension in current working tree pending its own commit/push. Main and original local project untouched. Roadmap estimate ~48% (STEP5 remains partial); 80% not achieved. Continue with next independent gaps; do not wait idle on CI.
+- STEP3 follow-up: each page flags replacement/private-use glyphs and text fragments outside page bounds, with a page-local warning and character count; source text remains editable for correction. No persisted schema change. Local evidence: `npm test` 74/74 PASS, build PASS, desktop verify 14/14 PASS.
+- Functional commits: `dab6d9ae0c4401e8e19284a3811f6d6e1a688ba6` (image/PDF analysis), `b0222e92e6f192a06c1236402529804482d35e1f` (embedded PDF typography), and the STEP3 quality-signal follow-up is being committed separately. Main and original local project untouched. Roadmap estimate ~48% (STEP5 remains partial); 80% not achieved. Exact-SHA CI continues asynchronously; continue with next independent gaps without idle waiting.
 
 ## 2026-10-29 — Windows user-data upgrade regression rerun
 

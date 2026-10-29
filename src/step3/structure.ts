@@ -18,7 +18,7 @@ export interface PdfOrigin {
 export interface PdfDraftBlock {
   id:string; text:string; role:PdfRole; origin?:PdfOrigin; excluded?:boolean; manual?:boolean;
 }
-export interface PdfDraftPage {number:number; blocks:PdfDraftBlock[]; charCount:number; imageDetected:boolean; images:RecoveredPdfImage[];imageCount:number;omittedImages:number;vectorPaintCount:number;compositionRisk:GraphicsCompositionRisk;}
+export interface PdfDraftPage {number:number; blocks:PdfDraftBlock[]; charCount:number; imageDetected:boolean; images:RecoveredPdfImage[];imageCount:number;omittedImages:number;vectorPaintCount:number;compositionRisk:GraphicsCompositionRisk;reviewFlags:string[];}
 export interface PdfDraft {
   fileName:string; pageCount:number; pages:PdfDraftPage[]; warnings:string[]; totalChars:number;
 }
@@ -103,7 +103,13 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
   for(const page of sorted){
     const {lines,multiColumn}=reconstructLines(page);
     const blocks:PdfDraftBlock[]=[];
+    const reviewFlags:string[]=[];
+    const sourceText=page.pieces.map(piece=>piece.text).join('');
+    if(/[\uFFFD\uE000-\uF8FF]/u.test(sourceText))reviewFlags.push('대체 문자 또는 개인 영역 문자가 포함되어 글꼴 문자 매핑이 손상됐을 수 있습니다. 원본과 숫자·기호를 대조하세요.');
+    const outOfPage=page.pieces.filter(piece=>piece.x < -2 || piece.y < -2 || piece.x+piece.width > page.width+2 || piece.y+piece.height > page.height+2).length;
+    if(outOfPage)reviewFlags.push('텍스트 조각 '+outOfPage+'개가 페이지 경계 밖에 있습니다. 잘림·클리핑 또는 좌표 추출 오류 여부를 원본에서 확인하세요.');
     if(!lines.length)warnings.push(page.number+'페이지에서 선택 가능한 문자를 찾지 못했습니다. 스캔/이미지 또는 문자 매핑 실패 가능성이 있어 원본 검수가 필요합니다.');
+    if(reviewFlags.length)for(const flag of reviewFlags)warnings.push(page.number+'페이지 추출 품질 확인: '+flag);
     const images=page.imageRecovery?.images??[];
     const detected=page.imageRecovery?.detected??(page.imageDetected?1:0);
     const omitted=Math.max(0,detected-images.length);
@@ -148,7 +154,7 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
       totalChars=nextPdfTextCount(totalChars,line.text);
       if(totalBlocks>PDF_IMPORT_LIMITS.blocks)throw Error('PDF 추출 블록이 2,500개 제한을 초과했습니다.');
     }
-    outPages.push({number:page.number,blocks,charCount:lines.reduce((n,x)=>n+x.text.length,0),imageDetected:detected>0,images,imageCount:detected,omittedImages:omitted,vectorPaintCount,compositionRisk});
+    outPages.push({number:page.number,blocks,charCount:lines.reduce((n,x)=>n+x.text.length,0),imageDetected:detected>0,images,imageCount:detected,omittedImages:omitted,vectorPaintCount,compositionRisk,reviewFlags});
   }
   if(!totalChars)throw Error('선택 가능한 텍스트가 없습니다. 스캔 PDF는 OCR 지원 전까지 가져올 수 없습니다.');
   warnings.unshift('PDF의 읽기 순서·줄바꿈·공백·제목/캡션 분류는 추정입니다. 원본과 대조해 검수한 뒤 문서함에 추가하세요.');

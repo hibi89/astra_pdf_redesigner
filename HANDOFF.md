@@ -1,11 +1,11 @@
 # HANDOFF — Astra PDF Redesigner
 
-## 2026-10-29 — STEP5 local reference analysis (current work)
+## 2026-10-29 — STEP3 extraction quality and STEP5 local reference analysis (current work)
 
-1. Base `e6046988cc4b4ac8ecee98dbe83716d529554d32`, branch `integration/astra-commercial-core`, isolated clone `C:\Users\haein\Documents\Codex\astra_pdf_redesigner-work-step5`.
+1. Branch `integration/astra-commercial-core`, isolated clone `C:\Users\haein\Documents\Codex\astra_pdf_redesigner-work-step5`; first STEP5 commit `dab6d9ae0c4401e8e19284a3811f6d6e1a688ba6`, PDF typography extension `b0222e92e6f192a06c1236402529804482d35e1f` (pushed).
 2. Added local PNG/JPEG/WebP + selected PDF page analysis, image/analysis cleanup, supported `DesignSettings` editing, A4 transient preview, apply/cancel/exact undo. Current heuristic reads pixels only. No OCR, external request, source persistence, schema change or document content edits.
-3. Follow-up extends PDF input: use its embedded selectable text (no OCR) to estimate median font size, largest-fragment ratio and largest fragment alignment. Synthetic unit test and UI disclosure cover scan-only limitation. Feature SHA is still `dab6d9ae...`; this follow-up is uncommitted at this point.
-4. `npm test` now 73/73 PASS; build PASS; first feature `desktop:verify` 14/14 PASS. Dedicated `tests/step5-reference-browser.mjs` passed Chrome and Edge for image/PDF page analysis, selectable text metrics/OCR disclosure, preview/cancel, apply/undo, content invariance and browser PDF output. Broad `step2-browser.mjs` not locally completed because Poppler `pdftotext` is unavailable.
+3. PDF references use embedded selectable text (no OCR) to estimate median font size, largest-fragment ratio and largest-fragment alignment. A further STEP3 quality-signal change detects replacement/private-use glyphs and out-of-page text and surfaces page-local warnings while preserving editable text; it is in the current uncommitted follow-up.
+4. Latest local checks: `npm test` 74/74 PASS, build PASS, `desktop:verify` 14/14 PASS. Dedicated `tests/step5-reference-browser.mjs` passed Chrome and Edge for image/PDF page analysis, selectable text metrics/OCR disclosure, preview/cancel, apply/undo, content invariance and browser PDF output. Broad `step2-browser.mjs` not locally completed because Poppler `pdftotext` is unavailable.
 5. Exact-SHA workflows for `dab6d9ae0c4401e8e19284a3811f6d6e1a688ba6` are running (Chrome/Edge and Windows); continue work without idle CI waiting. STEP5 remains partial (no URL input, persistent reference/style library, broad quality validation). Overall ~48%, 80% unmet. Real customer PDFs and buyer physical PC acceptance remain open.
 
 ## 2026-10-29 — Latest Windows upgrade CI completion
