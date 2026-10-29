@@ -78,6 +78,31 @@ async function uploadAndConfirm(encoded){
       preview.querySelector('canvas')?.width>0&&preview.querySelector('[data-m06-anchor-rect]');
   },'installed recovered-image source placement and estimated highlight');
   document.querySelector('[data-step3-selected-source-image] button').click();
+  const restoreMarker='ASTRA_PDF_PAGE_ONE_7401';
+  const restoreArea=()=>[...document.querySelectorAll('.step3-block-review textarea')]
+    .find(area=>area.value.includes(restoreMarker));
+  const extractedText=restoreArea()?.value;
+  if(!extractedText)throw Error('STEP3 extracted text baseline unavailable in installed review');
+  const editedText=extractedText+' ASTRA_RESTORE_EDIT_7404';
+  const setTextareaValue=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set;
+  setTextareaValue.call(restoreArea(),editedText);
+  restoreArea().dispatchEvent(new Event('input',{bubbles:true}));
+  await until(()=>document.querySelector('[data-step3-restore-extracted]'),
+    'extracted-text restore action appears after edit');
+  document.querySelector('[data-step3-restore-extracted]').click();
+  await until(()=>restoreArea()?.value===extractedText,'restore exact extracted PDF text');
+  if(document.querySelector('[data-step3-restore-extracted]'))
+    throw Error('STEP3 restore control remained after restoring extracted text');
+  document.querySelector('[data-step3-undo]').click();
+  await until(()=>restoreArea()?.value===editedText,'undo restores edited source text');
+  if(!document.querySelector('[data-step3-restore-extracted]'))
+    throw Error('STEP3 undo did not restore the extracted-text action');
+  if(document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').checked)
+    throw Error('STEP3 restore/undo retained stale source-review consent');
+  document.querySelector('[data-step3-redo]').click();
+  await until(()=>restoreArea()?.value===extractedText,'redo restores exact extracted PDF text');
+  if(document.querySelector('[data-step3-restore-extracted]'))
+    throw Error('STEP3 redo did not restore the extracted-text baseline');
   const addMissing=pageTwo()?.querySelector('[data-step3-add-manual-block]');
   if(!addMissing)throw Error('STEP3 manual missing-text recovery action absent');
   addMissing.click();
@@ -123,7 +148,7 @@ async function uploadAndConfirm(encoded){
   await until(()=>document.querySelector('.save-chip')?.textContent==='저장됨',
     'new PDF project persisted');
   return{count:count+1,themeClass:document.querySelector('.project-paper').className,
-    manualMarker:'ASTRA_MANUAL_MISSING_7403'};
+    manualMarker:'ASTRA_MANUAL_MISSING_7403',sourceTextRestored:true};
 }
 async function verifyPersisted(data){
   const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
