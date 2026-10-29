@@ -597,6 +597,19 @@ try{
     assert.equal(state.included,false,'Header/footer should toggle out of the new document: '+marker);
     assert.ok(state.text.includes(marker),'Excluded source text must remain reviewable: '+marker);
   }
+  const missingSourceItems=await evaluate("[...document.querySelectorAll('[data-step3-source-text-missing]')].map(node=>node.textContent)");
+  assert.equal(missingSourceItems.length,2,'Each source page with excluded text should show its own live omission warning');
+  for(const marker of RUNNING_MARKERS)assert.ok(missingSourceItems.some(text=>text?.includes(marker)),
+    'Source parity warning should identify excluded marker for manual recovery: '+marker);
+  await evaluate("document.querySelector('[data-step3-add-manual-block]').click()");
+  await evaluate("(()=>{const area=document.querySelector('[data-step3-remove-manual]')?.closest('.section-editor')?.querySelector('textarea');if(!area)throw Error('Manual source recovery textarea missing');const set=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set;set.call(area,"+JSON.stringify(RUNNING_MARKERS[0])+");area.dispatchEvent(new Event('input',{bubbles:true}));})()");
+  assert.ok(await evaluate("[...document.querySelectorAll('[data-step3-source-text-missing]')].every(node=>!node.textContent.includes("+JSON.stringify(RUNNING_MARKERS[0])+"))"),
+    'Typing a missing source excerpt into an included manual block should clear the live warning');
+  await evaluate("document.querySelector('[data-step3-remove-manual]')?.click()");
+  await evaluate("(()=>{const area=[...document.querySelectorAll('.step3-block-review textarea')].find(x=>x.value.includes('RUNNING_MARKERS[0]'));area.closest('.section-editor').querySelector('[data-step3-block-included]').click();})()".replace('RUNNING_MARKERS[0]',JSON.stringify(RUNNING_MARKERS[0])));
+  assert.ok(await evaluate("[...document.querySelectorAll('[data-step3-source-text-missing]')].every(node=>!node.textContent.includes("+JSON.stringify(RUNNING_MARKERS[0])+"))"),
+    'Reincluding the recovered source marker should clear it from the live omission warning');
+  await evaluate("(()=>{const area=[...document.querySelectorAll('.step3-block-review textarea')].find(x=>x.value.includes('RUNNING_MARKERS[0]'));area.closest('.section-editor').querySelector('[data-step3-block-included]').click();})()".replace('RUNNING_MARKERS[0]',JSON.stringify(RUNNING_MARKERS[0])));
   assert.equal(await evaluate("document.querySelectorAll('[data-step3-block-included]:not(:checked)').length"),4);
   await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').click()");
   assert.equal(await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').checked"),true);

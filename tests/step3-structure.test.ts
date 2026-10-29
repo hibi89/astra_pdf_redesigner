@@ -5,7 +5,7 @@ import {pdfDraftToProject} from '../src/step3/convert.ts';
 import {blankProject,isProjectDocument} from '../src/step2/model.ts';
 const piece=(text:string,page:number,x:number,y:number,fontSize=12,width=120)=>({text,page,x,y,width,height:fontSize,fontSize});
 test('STEP3 source text parity identifies missing and duplicate PDF.js text items while ignoring short layout fragments',()=>{
-  const items=[piece('ACCOUNT_123',1,0,20),piece('ACCOUNT_123',1,0,30),piece('x',1,0,40)];
+  const items=['ACCOUNT_123','ACCOUNT_123','x'];
   assert.deepEqual(findUnrepresentedSourcePieces(items,'ACCOUNT_123'),['ACCOUNT_123']);
   assert.deepEqual(findUnrepresentedSourcePieces(items,'ACCOUNT_123 ACCOUNT_123'),[]);
 });

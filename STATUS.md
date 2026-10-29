@@ -1,4 +1,12 @@
 # STATUS — Astra PDF Redesigner
+## 2026-10-29 — STEP3 live source parity + STEP7 exported PDF audit (latest `21d985e`)
+
+- STEP3 retains transient PDF.js text items for each import review page. The live warning compares them with currently included editable blocks, identifies missing text excerpts, and updates as the user edits, excludes/re-includes, or adds manual blocks. Undo/redo remains covered by the same page review flow. This is embedded-text comparison only; no OCR or persistence change.
+- Electron STEP2/4 PDF save now compares actual PDF text markers and raster image draw count with the editor's text markers and image block count before Save As. Warnings allow cancel or continue. It does not claim visual or per-image identity.
+- Feature commits: `cab4461` image omission warning, `6f6b960` compare raster draw count to all image blocks, `fcd9158` reconstruction source text parity helper, `21d985e` live editable-block omission warnings and browser regression.
+- Latest local verification: Node **83/83 PASS**, TypeScript/Vite build PASS, `desktop:verify` **15/15 PASS**, browser script syntax PASS. Browser and Windows Electron run for exact SHA `21d985e` is running: Chrome/Edge workflow #40830774089 and Windows installer #40830774088. No local Windows desktop GUI run.
+- Scope estimate remains approximately **49%** of the seven-step plan; 80% not achieved. STEP5 is still partial/local, STEP6 and OCR remain approval-gated, and customer PDFs/physical buyer PC acceptance are not available in this task. No merge, release, or deployment.
+
 ## 2026-10-29 — STEP7 Electron PDF output preflight
 
 - Electron export reopens generated PDF with bundled PDF.js before showing Save As. It checks A4 page boxes, text bounds, rotated text that could not be checked, and pages with neither selectable text nor raster content. Findings open a continue-save/cancel warning; no file is written until the user continues and chooses a path. Browser print flow is unchanged.

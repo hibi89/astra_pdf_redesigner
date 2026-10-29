@@ -18,7 +18,7 @@ export interface PdfOrigin {
 export interface PdfDraftBlock {
   id:string; text:string; role:PdfRole; origin?:PdfOrigin; excluded?:boolean; manual?:boolean;
 }
-export interface PdfDraftPage {number:number; blocks:PdfDraftBlock[]; charCount:number; imageDetected:boolean; images:RecoveredPdfImage[];imageCount:number;omittedImages:number;vectorPaintCount:number;compositionRisk:GraphicsCompositionRisk;reviewFlags:string[];}
+export interface PdfDraftPage {number:number; blocks:PdfDraftBlock[]; charCount:number; imageDetected:boolean; images:RecoveredPdfImage[];imageCount:number;omittedImages:number;vectorPaintCount:number;compositionRisk:GraphicsCompositionRisk;reviewFlags:string[];sourceTextItems:string[];}
 export interface PdfDraft {
   fileName:string; pageCount:number; pages:PdfDraftPage[]; warnings:string[]; totalChars:number;
 }
@@ -87,11 +87,11 @@ export function reconstructLines(page:PdfPageInput):{lines:PdfLine[];multiColumn
   if(sparseWide.length>=2)multiColumn=true;
   return{lines,multiColumn};
 }
-export function findUnrepresentedSourcePieces(pieces:readonly PdfFragment[],reconstructedText:string):string[]{
+export function findUnrepresentedSourcePieces(sourceItems:readonly string[],reconstructedText:string):string[]{
   const represented=reconstructedText.normalize('NFC').replace(/\s+/gu,'');
   const required=new Map<string,number>();
-  for(const piece of pieces){
-    const marker=piece.text.normalize('NFC').replace(/\s+/gu,'');
+  for(const sourceText of sourceItems){
+    const marker=sourceText.normalize('NFC').replace(/\s+/gu,'');
     if(marker.length<4)continue;
     required.set(marker,(required.get(marker)||0)+1);
   }
@@ -120,7 +120,8 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
     const {lines,multiColumn}=reconstructLines(page);
     const blocks:PdfDraftBlock[]=[];
     const reviewFlags:string[]=[];
-    const unrepresented=findUnrepresentedSourcePieces(page.pieces,lines.map(line=>line.text).join(''));
+    const sourceTextItems=page.pieces.map(piece=>piece.text).filter(text=>text.normalize('NFC').replace(/\s+/gu,'').length>=4);
+    const unrepresented=findUnrepresentedSourcePieces(sourceTextItems,lines.map(line=>line.text).join(''));
     if(unrepresented.length)reviewFlags.push('PDF.js 원본 텍스트 조각 '+unrepresented.length+'개가 재구성 블록에서 일치하지 않습니다. 대체 문자·조각 결합 또는 추출 누락 가능성이 있어 이 페이지 원본과 대조하고 필요하면 직접 추가하세요.');
     const sourceText=page.pieces.map(piece=>piece.text).join('');
     if(/[\uFFFD\uE000-\uF8FF]/u.test(sourceText))reviewFlags.push('대체 문자 또는 개인 영역 문자가 포함되어 글꼴 문자 매핑이 손상됐을 수 있습니다. 원본과 숫자·기호를 대조하세요.');
@@ -172,7 +173,7 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
       totalChars=nextPdfTextCount(totalChars,line.text);
       if(totalBlocks>PDF_IMPORT_LIMITS.blocks)throw Error('PDF 추출 블록이 2,500개 제한을 초과했습니다.');
     }
-    outPages.push({number:page.number,blocks,charCount:lines.reduce((n,x)=>n+x.text.length,0),imageDetected:detected>0,images,imageCount:detected,omittedImages:omitted,vectorPaintCount,compositionRisk,reviewFlags});
+    outPages.push({number:page.number,blocks,charCount:lines.reduce((n,x)=>n+x.text.length,0),imageDetected:detected>0,images,imageCount:detected,omittedImages:omitted,vectorPaintCount,compositionRisk,reviewFlags,sourceTextItems});
   }
   if(!totalChars)throw Error('선택 가능한 텍스트가 없습니다. 스캔 PDF는 OCR 지원 전까지 가져올 수 없습니다.');
   warnings.unshift('PDF의 읽기 순서·줄바꿈·공백·제목/캡션 분류는 추정입니다. 원본과 대조해 검수한 뒤 문서함에 추가하세요.');
