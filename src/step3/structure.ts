@@ -161,7 +161,10 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
     const {lines,multiColumn}=reconstructLines(page);
     const blocks:PdfDraftBlock[]=[];
     const reviewFlags:string[]=[];
-    const sourceItems=page.pieces.filter(piece=>piece.text.normalize('NFC').replace(/\s+/gu,'').length>=4);
+    const sourceItems=page.pieces.filter(piece=>{
+      const marker=piece.text.normalize('NFC').replace(/\s+/gu,'');
+      return marker.length>=4||/^\p{N}$/u.test(marker);
+    });
     const sourceTextItems=sourceItems.map(piece=>piece.text);
     const sourceTextOrigins=sourceItems.map(piece=>({page:piece.page,x:round(piece.x),y:round(piece.y),width:round(piece.width),height:round(piece.height)}));
     const unrepresented=findUnrepresentedSourcePieces(sourceTextItems,lines.map(line=>line.text).join(''));
