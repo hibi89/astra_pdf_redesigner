@@ -1,5 +1,5 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
-import {createSourceTextMatcher,PDF_IMPORT_LIMITS,type PdfDraft,type PdfDraftBlock,type PdfDraftPage,type PdfOrigin,type PdfRole} from './structure.ts';
+import {createSourceTextMatcher,nextSourceReviewCount,PDF_IMPORT_LIMITS,PDF_SOURCE_REVIEW_BATCH,visibleSourceReviewItems,type PdfDraft,type PdfDraftBlock,type PdfDraftPage,type PdfOrigin,type PdfRole} from './structure.ts';
 import {extractLocalPdf} from './pdf.ts';
 import SourceAnchorPreview from './SourceAnchorPreview.tsx';
 
@@ -21,6 +21,7 @@ const ROLES:[PdfRole,string][]=[['paragraph','본문'],['heading','소제목'],[
 const DRAFT_HISTORY_LIMIT=8;
 interface MissingSourceItem {id:string;text:string;origin:PdfOrigin}
 function SourceTextMissingWarning({page,onShow,onRecover}:{page:PdfDraftPage;onShow:(item:MissingSourceItem)=>void;onRecover:(item:MissingSourceItem)=>void}){
+  const [visibleCount,setVisibleCount]=useState(12);
   const matcher=useMemo(()=>createSourceTextMatcher(page.sourceTextItems),[page.sourceTextItems]);
   const missing=matcher(page.blocks.filter(block=>!block.excluded).map(block=>block.text).join(''));
   const entries=useMemo(()=>{
@@ -39,14 +40,15 @@ function SourceTextMissingWarning({page,onShow,onRecover}:{page:PdfDraftPage;onS
   if(!missing.length)return null;
   return <div className="warning" role="status" data-step3-source-text-missing={page.number}>
     <p>원문에서 읽은 텍스트 조각 {missing.length}개가 현재 포함 내용에 없습니다. 일부러 제외했는지 확인하고 원본과 대조하세요.</p>
-    <ul>{entries.slice(0,12).map(item=><li key={item.id} data-step3-missing-source-item={item.id}>
+    <ul>{visibleSourceReviewItems(entries,visibleCount).map(item=><li key={item.id} data-step3-missing-source-item={item.id}>
       <span>{item.text.slice(0,120)}{item.text.length>120?'…':''}</span>
       <div className="mini-actions">
         <button type="button" data-step3-show-missing-source={item.id} onClick={()=>onShow(item)}>원본 위치 보기</button>
         <button type="button" data-step3-recover-missing-source={item.id} onClick={()=>onRecover(item)}>이 원문을 수동 블록으로 추가</button>
       </div>
     </li>)}</ul>
-    {entries.length>12&&<p>나머지 {entries.length-12}개 조각도 직접 검수할 수 있도록 아래 블록 편집을 이용하세요.</p>}
+    {entries.length>visibleCount&&<button type="button" className="secondary-button" data-step3-show-more-missing
+      onClick={()=>setVisibleCount(current=>nextSourceReviewCount(current,entries.length))}>다음 누락 조각 {Math.min(PDF_SOURCE_REVIEW_BATCH,entries.length-visibleCount)}개 보기</button>}
   </div>;
 }
 export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Props){

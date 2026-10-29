@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {findUnrepresentedSourcePieces,makePdfDraft,nextPdfTextCount,PDF_IMPORT_LIMITS,reconstructLines,type PdfPageInput} from '../src/step3/structure.ts';
+import {findUnrepresentedSourcePieces,makePdfDraft,nextPdfTextCount,nextSourceReviewCount,PDF_IMPORT_LIMITS,reconstructLines,visibleSourceReviewItems,type PdfPageInput} from '../src/step3/structure.ts';
 import {pdfDraftToProject} from '../src/step3/convert.ts';
 import {blankProject,isProjectDocument} from '../src/step2/model.ts';
 const piece=(text:string,page:number,x:number,y:number,fontSize=12,width=120)=>({text,page,x,y,width,height:fontSize,fontSize});
@@ -11,6 +11,15 @@ test('STEP3 source text parity identifies missing and duplicate PDF.js text item
   assert.deepEqual(findUnrepresentedSourcePieces(['1'],'2'),['1'],'Single-digit source values must remain reviewable');
   assert.equal(findUnrepresentedSourcePieces(['A'.repeat(150)],'')[0].length,97,
     'Long missing source excerpts are truncated before display');
+});
+test('STEP3 missing source review reveals long omission lists in bounded, complete pages',()=>{
+  const items=Array.from({length:29},(_,index)=>'MISSING_'+index);
+  assert.equal(visibleSourceReviewItems(items,12).length,12);
+  assert.equal(nextSourceReviewCount(12,items.length),24);
+  assert.equal(visibleSourceReviewItems(items,nextSourceReviewCount(12,items.length)).length,24);
+  assert.equal(nextSourceReviewCount(24,items.length),29);
+  assert.equal(nextSourceReviewCount(29,items.length),29);
+  assert.deepEqual(visibleSourceReviewItems(items,-1),[]);
 });
 test('STEP3: cumulative extracted-text limit stops before later fragments are retained',()=>{
   const limit=PDF_IMPORT_LIMITS.characters;

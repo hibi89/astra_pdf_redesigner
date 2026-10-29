@@ -23,6 +23,16 @@ export interface PdfDraft {
   fileName:string; pageCount:number; pages:PdfDraftPage[]; warnings:string[]; totalChars:number;
 }
 export const PDF_IMPORT_LIMITS={bytes:30*1024*1024,pages:50,characters:500000,blocks:2500} as const;
+export const PDF_SOURCE_REVIEW_BATCH=12;
+export function visibleSourceReviewItems<T>(items:readonly T[],visibleCount:number):T[]{
+  const limit=Number.isSafeInteger(visibleCount)?Math.max(0,Math.min(items.length,visibleCount)):0;
+  return items.slice(0,limit);
+}
+export function nextSourceReviewCount(current:number,total:number):number{
+  const safeTotal=Number.isSafeInteger(total)?Math.max(0,total):0;
+  const safeCurrent=Number.isSafeInteger(current)?Math.max(0,current):0;
+  return Math.min(safeTotal,safeCurrent+PDF_SOURCE_REVIEW_BATCH);
+}
 export function nextPdfTextCount(current:number,text:string):number{
   if(!Number.isSafeInteger(current)||current<0)throw Error('PDF 추출 텍스트 개수 상태가 올바르지 않습니다.');
   const next=current+text.length;
