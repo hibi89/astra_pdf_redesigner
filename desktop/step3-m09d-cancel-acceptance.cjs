@@ -105,7 +105,7 @@ async function runInstalledM09DCancelAcceptance(win,pdfBytes,markers){
   }
   try{
     hooksInstalled=true;
-    await evaluate("(()=>{const state={held:false,released:false,oldBytesDelivered:false,created:[],revoked:[],"+
+    await evaluate("(()=>{const state={held:false,released:false,oldBytesDelivered:false,switchHeld:false,switchReleased:false,switchBytesDelivered:false,created:[],revoked:[],"+
       "originalArrayBuffer:File.prototype.arrayBuffer,originalCreate:URL.createObjectURL,originalRevoke:URL.revokeObjectURL};"+
       "window.__astraM09D=state;File.prototype.arrayBuffer=function(...args){if(this.name!=='m09d-old.pdf')return state.originalArrayBuffer.apply(this,args);"+
       "if(state.held)throw Error('M09-D old PDF was read more than once');state.held=true;const file=this;"+
@@ -169,10 +169,48 @@ async function runInstalledM09DCancelAcceptance(win,pdfBytes,markers){
       "revoked:s.revoked,hasDraft:Boolean(document.querySelector('.step3-import-panel .step3-block-review'))};})()",true);
     if(final.hasDraft||!final.newUrls.length||!final.newUrls.every(url=>final.revoked.includes(url)))
       throw Error('M09-D cancel must revoke the new source URL and clear its review');
+    const activeAndOther=await evaluate("(()=>{const rows=[...document.querySelectorAll('.doc-list-item')];"+
+      "return{active:document.querySelector('.doc-list-item.active strong')?.textContent,"+
+      "other:rows.find(row=>!row.classList.contains('active'))?.querySelector('strong')?.textContent};})()",true);
+    if(!activeAndOther.active||!activeAndOther.other)
+      throw Error('M09-D document-switch race needs two existing synthetic V2 documents');
+    await evaluate("(()=>{const s=window.__astraM09D;const original=File.prototype.arrayBuffer;"+
+      "File.prototype.arrayBuffer=function(...args){if(this.name!=='m09d-switch.pdf')return original.apply(this,args);"+
+      "s.switchHeld=true;const file=this;return new Promise((resolve,reject)=>{s.releaseSwitch=()=>{if(s.switchReleased)return;"+
+      "s.switchReleased=true;s.originalArrayBuffer.apply(file,args).then(bytes=>{s.switchBytesDelivered=true;resolve(bytes);},reject);};});};return true;})()",true);
+    await upload('m09d-switch.pdf');
+    await waitFor(()=>evaluate('window.__astraM09D?.switchHeld===true'),
+      'third synthetic PDF extraction is held before cancellation');
+    await evaluate("[...document.querySelectorAll('.step3-import-panel button')].find(x=>x.textContent.includes('가져오기 취소')).click();true");
+    await waitFor(()=>evaluate("!document.querySelector('.step3-import-panel input[type=file]').disabled"),
+      'switch-race parse cancellation re-enables document controls');
+    await evaluate("[...document.querySelectorAll('.doc-list-item')].find(row=>row.querySelector('strong')?.textContent==="+
+      JSON.stringify(activeAndOther.other)+")?.click();true",true);
+    await waitFor(()=>evaluate("document.querySelector('.doc-list-item.active strong')?.textContent==="+
+      JSON.stringify(activeAndOther.other)), 'switch to a different saved V2 document while canceled parse remains pending');
+    const switchedBeforeLate=await evaluate('('+snapshotInstalledV2.toString()+')()');
+    await evaluate("if(!window.__astraM09D?.releaseSwitch)throw Error('M09-D switch-race parse cannot be released');"+
+      "window.__astraM09D.releaseSwitch();true",true);
+    await waitFor(()=>evaluate('window.__astraM09D?.switchBytesDelivered===true'),
+      'switch-race PDF bytes arrive after active document changes');
+    await wait(4500);
+    const switchedLate=await evaluate("(()=>({active:document.querySelector('.doc-list-item.active strong')?.textContent,"+
+      "draft:Boolean(document.querySelector('.step3-import-panel .step3-block-review)),"+
+      "sourceUrl:Boolean(document.querySelector('.step3-import-panel iframe[src^=blob]')),"+
+      "created:window.__astraM09D.created.filter(x=>x.name==='m09d-switch.pdf')}))()",true);
+    if(switchedLate.active!==activeAndOther.other||switchedLate.draft||switchedLate.sourceUrl||switchedLate.created.length)
+      throw Error('M09-D late response after document switch changed review or allocated a source URL: '+JSON.stringify(switchedLate));
+    const afterSwitchLate=await evaluate('('+snapshotInstalledV2.toString()+')()');
+    if(JSON.stringify(switchedBeforeLate)!==JSON.stringify(afterSwitchLate))
+      throw Error('M09-D late response after document switch changed persisted V2 stores');
+    await evaluate("[...document.querySelectorAll('.doc-list-item')].find(row=>row.querySelector('strong')?.textContent==="+
+      JSON.stringify(activeAndOther.active)+")?.click();true",true);
+    await waitFor(()=>evaluate("document.querySelector('.doc-list-item.active strong')?.textContent==="+
+      JSON.stringify(activeAndOther.active)), 'restore original active document after switch-race acceptance');
     const afterCancel=await evaluate('('+snapshotInstalledV2.toString()+')()');
     if(JSON.stringify(before)!==JSON.stringify(afterCancel))
       throw Error('M09-D cancel/retry/stale completion changed V2 stores before reload');
-    const result={before,afterCancel,oldUrlCreated:late.oldUrls.length,
+    const result={before,afterCancel,oldUrlCreated:late.oldUrls.length,switchResponseIgnored:true,
       newUrlCreated:final.newUrls.length,newUrlRevoked:true,lateOldBytesDelivered:late.bytesDelivered};
     await evaluate("(()=>{const s=window.__astraM09D;if(!s)return;File.prototype.arrayBuffer=s.originalArrayBuffer;"+
       "URL.createObjectURL=s.originalCreate;URL.revokeObjectURL=s.originalRevoke;delete window.__astraM09D;return true;})()",true);
@@ -185,12 +223,13 @@ async function runInstalledM09DCancelAcceptance(win,pdfBytes,markers){
     const afterReload=await evaluate('('+snapshotInstalledV2.toString()+')()');
     if(JSON.stringify(before)!==JSON.stringify(afterReload))
       throw Error('M09-D V2 stores differ after installed-app reload');
-    console.log('PASS M09-D WINDOWS INSTALLED UI: visible cancel during analysis, replacement selection, released stale parse ignored, new URL revoked, full V2 stores unchanged before/after reload');
+    console.log('PASS M09-D WINDOWS INSTALLED UI: visible cancel during analysis, replacement selection, stale parse ignored before/after document switch, new URLs revoked/omitted, full V2 stores unchanged before/after reload');
     return result;
   }finally{
     if(hooksInstalled){
       try{await evaluate("(()=>{const s=window.__astraM09D;if(!s)return;"+
-        "if(s.held&&!s.released)s.releaseOld?.();File.prototype.arrayBuffer=s.originalArrayBuffer;"+
+        "if(s.held&&!s.released)s.releaseOld?.();if(s.switchHeld&&!s.switchReleased)s.releaseSwitch?.();"+
+        "File.prototype.arrayBuffer=s.originalArrayBuffer;"+
         "URL.createObjectURL=s.originalCreate;URL.revokeObjectURL=s.originalRevoke;delete window.__astraM09D;return true;})()");}
       catch{}
     }
@@ -198,3 +237,4 @@ async function runInstalledM09DCancelAcceptance(win,pdfBytes,markers){
 }
 
 module.exports={runInstalledM09DCancelAcceptance};
+

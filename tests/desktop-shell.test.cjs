@@ -217,9 +217,10 @@ test('M09-D drives installed Windows cancel/retry UI and compares every V2 store
   const lifecycle=fs.readFileSync(path.resolve(__dirname,'windows-installer-lifecycle.ps1'),'utf8');
   const ci=fs.readFileSync(path.resolve(__dirname,'../.github/workflows/windows-desktop.yml'),'utf8');
   for(const marker of ['process.platform!==\'win32\'','GITHUB_ACTIONS','snapshotInstalledV2',
-    'File.prototype.arrayBuffer','m09d-old.pdf','m09d-new.pdf','oldBytesDelivered',
+    'File.prototype.arrayBuffer','m09d-old.pdf','m09d-new.pdf','m09d-switch.pdf','switchBytesDelivered',
     "getClientRects().length>0","textContent.includes('가져오기 취소')).click()",'원본과 추출 결과',
     'URL.revokeObjectURL','SHA-256',
+    'stale completion changed V2 stores before reload','late response after document switch',
     'V2 stores differ after installed-app reload','PASS M09-D WINDOWS INSTALLED UI'])
     assert.ok(helper.includes(marker),'Missing M09-D installed UI assertion: '+marker);
   assert.ok(entry.includes("require('./step3-m09d-cancel-acceptance.cjs')"));
@@ -240,3 +241,4 @@ test('M09-E STEP4 same-document style compare and exact undo run in browser and 
     'compareBefore.content','comparedRestored.design','eight presets'])
     assert.ok(browser.includes(marker),'STEP4 browser comparison missing '+marker);
 });
+
