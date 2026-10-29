@@ -207,6 +207,8 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
   const splitBlockAtCursor=(page:number,id:string)=>{
     const offset=splitOffsets.current[id];
     if(!Number.isSafeInteger(offset))return;
+    const blockCount=draftRef.current?.pages.reduce((count,current)=>count+current.blocks.length,0)??0;
+    if(blockCount>=PDF_IMPORT_LIMITS.blocks){setError('검수 블록이 2,500개 제한에 도달했습니다.');return;}
     manualBlockSequence.current++;
     reviseDraft(current=>({...current,pages:current.pages.map(p=>{
       if(p.number!==page)return p;
@@ -345,7 +347,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
                     onClick={()=>change(page.number,block.id,b=>({...b,text:b.sourceText??b.text}))} disabled={disabled||busy}>추출 원문 복원</button>}
                   {block.manual&&<button type="button" data-step3-remove-manual={block.id} onClick={()=>removeManualBlock(page.number,block.id)} disabled={disabled||busy}>블록 삭제</button>}
                   <button type="button" data-step3-split-block={block.id}
-                    disabled={disabled||busy||!isSafePdfTextSplitOffset(block.text,splitOffsets.current[block.id]??0)}
+                    disabled={disabled||busy||totalBlocks>=PDF_IMPORT_LIMITS.blocks||!isSafePdfTextSplitOffset(block.text,splitOffsets.current[block.id]??0)}
                     onClick={()=>splitBlockAtCursor(page.number,block.id)}>커서 위치에서 블록 나누기</button>
                   <button aria-label={block.id+' 위로 이동'} disabled={disabled||busy||i===0} onClick={()=>move(page.number,block.id,-1)}>↑</button>
                   <button aria-label={block.id+' 아래로 이동'} disabled={disabled||busy||i===page.blocks.length-1} onClick={()=>move(page.number,block.id,1)}>↓</button>
