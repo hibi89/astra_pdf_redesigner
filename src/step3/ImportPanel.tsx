@@ -1,5 +1,5 @@
-import {useEffect,useRef,useState} from 'react';
-import {findUnrepresentedSourcePieces,PDF_IMPORT_LIMITS,type PdfDraft,type PdfDraftBlock,type PdfDraftPage,type PdfRole} from './structure.ts';
+import {useEffect,useMemo,useRef,useState} from 'react';
+import {createSourceTextMatcher,PDF_IMPORT_LIMITS,type PdfDraft,type PdfDraftBlock,type PdfDraftPage,type PdfRole} from './structure.ts';
 import {extractLocalPdf} from './pdf.ts';
 import SourceAnchorPreview from './SourceAnchorPreview.tsx';
 
@@ -19,6 +19,12 @@ interface Props {
 }
 const ROLES:[PdfRole,string][]=[['paragraph','본문'],['heading','소제목'],['caption','캡션']];
 const DRAFT_HISTORY_LIMIT=8;
+function SourceTextMissingWarning({page}:{page:PdfDraftPage}){
+  const matcher=useMemo(()=>createSourceTextMatcher(page.sourceTextItems),[page.sourceTextItems]);
+  const missing=matcher(page.blocks.filter(block=>!block.excluded).map(block=>block.text).join(''));
+  if(!missing.length)return null;
+  return <p className="warning" role="status" data-step3-source-text-missing={page.number}>원문에서 읽은 텍스트 조각 {missing.length}개가 현재 포함 내용에 없습니다. 일부러 제외했는지 확인하고, 빠진 내용은 수동 블록에 추가하세요. (예: {missing.slice(0,3).join(' · ')})</p>;
+}
 export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Props){
   const [draft,setDraft]=useState<PdfDraft|null>(null);
   const [busy,setBusy]=useState(false),[parsing,setParsing]=useState(false);
@@ -246,7 +252,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
           {draft.pages.map(page=><details key={page.number} open={page.number===1}>
             <summary>원본 {page.number}페이지 — {page.blocks.length}개 텍스트 · {page.charCount.toLocaleString('ko-KR')}자 · 새 문서 제외 {page.blocks.filter(b=>b.excluded).length}개 · 이미지 {page.images.length}/{page.imageCount}복원{page.omittedImages?' · 미복원 '+page.omittedImages+'건':''}{page.vectorPaintCount?' · 벡터 경로 '+page.vectorPaintCount+'회':''}{page.reviewFlags.length?' · 추출 품질 확인 '+page.reviewFlags.length+'건':''}</summary>
             {page.reviewFlags.map((flag,i)=><p className="warning" role="status" data-step3-page-review-flag={page.number} key={i}>{flag}</p>)}
-            {(()=>{const missing=findUnrepresentedSourcePieces(page.sourceTextItems,page.blocks.filter(block=>!block.excluded).map(block=>block.text).join(''));return missing.length>0&&<p className="warning" role="status" data-step3-source-text-missing={page.number}>원문에서 읽은 텍스트 조각 {missing.length}개가 현재 포함 내용에 없습니다. 일부러 제외했는지 확인하고, 빠진 내용은 수동 블록에 추가하세요. (예: {missing.slice(0,3).join(' · ')})</p>;})()}
+            <SourceTextMissingWarning page={page}/>
             {page.images.length>0&&<div className="step3-image-review">
               <p className="help-text">PDF.js가 디코딩한 이미지를 PNG로 재구성했습니다. 원본 비트스트림·마스크/클리핑 효과가 그대로 보존된 것은 아닙니다. 위치는 근사치이며 저장 후 STEP2 편집기에서 크기·순서를 바꿀 수 있습니다.</p>
               {page.images.map((image,i)=><div className="section-editor" key={image.id}>

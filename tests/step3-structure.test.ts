@@ -8,6 +8,8 @@ test('STEP3 source text parity identifies missing and duplicate PDF.js text item
   const items=['ACCOUNT_123','ACCOUNT_123','x'];
   assert.deepEqual(findUnrepresentedSourcePieces(items,'ACCOUNT_123'),['ACCOUNT_123']);
   assert.deepEqual(findUnrepresentedSourcePieces(items,'ACCOUNT_123 ACCOUNT_123'),[]);
+  assert.equal(findUnrepresentedSourcePieces(['A'.repeat(150)],'')[0].length,97,
+    'Long missing source excerpts are truncated before display');
 });
 test('STEP3: cumulative extracted-text limit stops before later fragments are retained',()=>{
   const limit=PDF_IMPORT_LIMITS.characters;

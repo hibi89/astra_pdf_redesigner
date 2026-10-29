@@ -87,21 +87,52 @@ export function reconstructLines(page:PdfPageInput):{lines:PdfLine[];multiColumn
   if(sparseWide.length>=2)multiColumn=true;
   return{lines,multiColumn};
 }
-export function findUnrepresentedSourcePieces(sourceItems:readonly string[],reconstructedText:string):string[]{
-  const represented=reconstructedText.normalize('NFC').replace(/\s+/gu,'');
+export type SourceTextMatcher=(reconstructedText:string)=>string[];
+export function createSourceTextMatcher(sourceItems:readonly string[]):SourceTextMatcher{
   const required=new Map<string,number>();
   for(const sourceText of sourceItems){
     const marker=sourceText.normalize('NFC').replace(/\s+/gu,'');
     if(marker.length<4)continue;
     required.set(marker,(required.get(marker)||0)+1);
   }
-  const missing:string[]=[];
-  for(const [marker,count] of required){
-    let found=0,at=0;
-    while(found<count&&(at=represented.indexOf(marker,at))!==-1){found++;at+=marker.length;}
-    for(let i=found;i<count;i++)missing.push(marker);
+  const entries=[...required],nodes=[{next:new Map<string,number>(),fail:0,terminal:number[],outputLink:0}];
+  for(let id=0;id<entries.length;id++){
+    let state=0;
+    for(const char of entries[id][0]){
+      let next=nodes[state].next.get(char);
+      if(next===undefined){next=nodes.length;nodes[state].next.set(char,next);nodes.push({next:new Map(),fail:0,terminal:[],outputLink:0});}
+      state=next;
+    }
+    nodes[state].terminal.push(id);
   }
-  return missing;
+  const queue:number[]=[];
+  for(const child of nodes[0].next.values())queue.push(child);
+  for(let cursor=0;cursor<queue.length;cursor++){
+    const state=queue[cursor];
+    for(const [char,child] of nodes[state].next){
+      let fallback=nodes[state].fail;
+      while(fallback&&!nodes[fallback].next.has(char))fallback=nodes[fallback].fail;
+      nodes[child].fail=nodes[fallback].next.get(char)??0;
+      const fail=nodes[child].fail;
+      nodes[child].outputLink=nodes[fail].terminal.length?fail:nodes[fail].outputLink;
+      queue.push(child);
+    }
+  }
+  return reconstructedText=>{
+    const found=entries.map(()=>0),text=reconstructedText.normalize('NFC').replace(/\s+/gu,'');
+    let state=0;
+    for(const char of text){
+      while(state&&!nodes[state].next.has(char))state=nodes[state].fail;
+      state=nodes[state].next.get(char)??0;
+      for(let output=nodes[state].terminal.length?state:nodes[state].outputLink;output;output=nodes[output].outputLink){
+        for(const id of nodes[output].terminal)if(found[id]<entries[id][1])found[id]++;
+      }
+    }
+    return entries.flatMap(([marker,count],id)=>Array.from({length:Math.max(0,count-found[id])},()=>marker.length>96?marker.slice(0,96)+'…':marker));
+  };
+}
+export function findUnrepresentedSourcePieces(sourceItems:readonly string[],reconstructedText:string):string[]{
+  return createSourceTextMatcher(sourceItems)(reconstructedText);
 }
 function lineRole(line:PdfLine,bodyFont:number):PdfRole{
   if(line.text.trim().length<150&&line.fontSize>=bodyFont*1.22)return'heading';
