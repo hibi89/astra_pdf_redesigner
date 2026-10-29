@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {findUnrepresentedSourcePieces,makePdfDraft,nextPdfTextCount,nextSourceReviewCount,PDF_IMPORT_LIMITS,reconstructLines,visibleSourceReviewItems,type PdfPageInput} from '../src/step3/structure.ts';
+import {findUnrepresentedSourcePieces,insertManualPdfBlockAtSourcePosition,makePdfDraft,nextPdfTextCount,nextSourceReviewCount,PDF_IMPORT_LIMITS,reconstructLines,visibleSourceReviewItems,type PdfPageInput} from '../src/step3/structure.ts';
 import {pdfDraftToProject} from '../src/step3/convert.ts';
 import {blankProject,isProjectDocument} from '../src/step2/model.ts';
 const piece=(text:string,page:number,x:number,y:number,fontSize=12,width=120)=>({text,page,x,y,width,height:fontSize,fontSize});
@@ -47,6 +47,22 @@ test('STEP3 omission review retains short Korean source fragments and their posi
   assert.deepEqual(findUnrepresentedSourcePieces(page.sourceTextItems,'승인'),['계약'],
     'Missing two-character Korean source text should remain visible for manual review');
 });
+test('STEP3 manual omission recovery inserts by estimated source order without persisting coordinates',()=>{
+  const draft=makePdfDraft('manual-order.pdf',[{number:1,width:595,height:842,imageDetected:false,pieces:[
+    piece('FIRST_SOURCE_BLOCK',1,40,100),piece('LAST_SOURCE_BLOCK',1,40,220),
+  ]}]);
+  const recovered={id:'manual-1',role:'paragraph' as const,text:'RECOVERED_SOURCE_TEXT',manual:true,excluded:false};
+  const origin={page:1,x:40,y:160,width:90,height:12};
+  const result=insertManualPdfBlockAtSourcePosition(draft.pages[0].blocks,recovered,origin);
+  assert.deepEqual(result.map(block=>block.text),[
+    'FIRST_SOURCE_BLOCK','RECOVERED_SOURCE_TEXT','LAST_SOURCE_BLOCK',
+  ]);
+  assert.equal(result[1].origin,undefined,'Estimated source coordinates are not attached to the manual block');
+  assert.deepEqual(insertManualPdfBlockAtSourcePosition(draft.pages[0].blocks,recovered).map(block=>block.text),[
+    'FIRST_SOURCE_BLOCK','LAST_SOURCE_BLOCK','RECOVERED_SOURCE_TEXT',
+  ],'Manual entry without an original source position remains appended for user placement');
+});
+
 test('STEP3 missing source review reveals long omission lists in bounded, complete pages',()=>{
   const items=Array.from({length:29},(_,index)=>'MISSING_'+index);
   assert.equal(visibleSourceReviewItems(items,12).length,12);

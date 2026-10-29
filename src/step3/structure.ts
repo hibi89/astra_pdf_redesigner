@@ -18,6 +18,21 @@ export interface PdfOrigin {
 export interface PdfDraftBlock {
   id:string; text:string; role:PdfRole; origin?:PdfOrigin; excluded?:boolean; manual?:boolean; sourceText?:string;
 }
+/** Insert a recovered source fragment near its estimated one-column reading position.
+ * The origin is used only during review; the returned manual block keeps no source coordinates.
+ */
+export function insertManualPdfBlockAtSourcePosition(
+  blocks:readonly PdfDraftBlock[],block:PdfDraftBlock,sourceOrigin?:PdfOrigin,
+):PdfDraftBlock[]{
+  if(!sourceOrigin)return [...blocks,block];
+  const index=blocks.findIndex(candidate=>{
+    if(!candidate.origin)return false;
+    const vertical=candidate.origin.y-sourceOrigin.y;
+    return Math.abs(vertical)>2?vertical>0:candidate.origin.x>sourceOrigin.x;
+  });
+  if(index<0)return [...blocks,block];
+  return [...blocks.slice(0,index),block,...blocks.slice(index)];
+}
 export interface PdfDraftPage {number:number; blocks:PdfDraftBlock[]; charCount:number; imageDetected:boolean; images:RecoveredPdfImage[];imageCount:number;omittedImages:number;vectorPaintCount:number;compositionRisk:GraphicsCompositionRisk;reviewFlags:string[];sourceTextItems:string[];sourceTextOrigins:PdfOrigin[];}
 export interface PdfDraft {
   fileName:string; pageCount:number; pages:PdfDraftPage[]; warnings:string[]; totalChars:number;

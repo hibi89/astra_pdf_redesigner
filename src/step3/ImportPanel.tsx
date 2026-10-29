@@ -1,5 +1,5 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
-import {createSourceTextMatcher,nextSourceReviewCount,PDF_IMPORT_LIMITS,PDF_SOURCE_REVIEW_BATCH,visibleSourceReviewItems,type PdfDraft,type PdfDraftBlock,type PdfDraftPage,type PdfOrigin,type PdfRole} from './structure.ts';
+import {createSourceTextMatcher,insertManualPdfBlockAtSourcePosition,nextSourceReviewCount,PDF_IMPORT_LIMITS,PDF_SOURCE_REVIEW_BATCH,visibleSourceReviewItems,type PdfDraft,type PdfDraftBlock,type PdfDraftPage,type PdfOrigin,type PdfRole} from './structure.ts';
 import {extractLocalPdf} from './pdf.ts';
 import SourceAnchorPreview from './SourceAnchorPreview.tsx';
 
@@ -176,11 +176,13 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
       return {...p,blocks:copy};
     })}));
   };
-  const addManualBlock=(page:number,text='')=>{
+  const addManualBlock=(page:number,text='',sourceOrigin?:PdfOrigin)=>{
     if(totalBlocks>=PDF_IMPORT_LIMITS.blocks){setError('검수 블록이 2,500개 제한에 도달했습니다.');return;}
     manualBlockSequence.current++;
     const block:PdfDraftBlock={id:'manual-'+manualBlockSequence.current,role:'paragraph',text,manual:true,excluded:false};
-    reviseDraft(current=>({...current,pages:current.pages.map(p=>p.number===page?{...p,blocks:[...p.blocks,block]}:p)}));
+    reviseDraft(current=>({...current,pages:current.pages.map(p=>p.number===page?{
+      ...p,blocks:insertManualPdfBlockAtSourcePosition(p.blocks,block,sourceOrigin),
+    }:p)}));
     setMissingSource(null);
   };
   const removeManualBlock=(page:number,id:string)=>reviseDraft(current=>({...current,pages:current.pages.map(p=>p.number===page?
@@ -282,7 +284,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
             <summary>원본 {page.number}페이지 — {page.blocks.length}개 텍스트 · {page.charCount.toLocaleString('ko-KR')}자 · 새 문서 제외 {page.blocks.filter(b=>b.excluded).length}개 · 이미지 {page.images.length}/{page.imageCount}복원{page.omittedImages?' · 미복원 '+page.omittedImages+'건':''}{page.vectorPaintCount?' · 벡터 경로 '+page.vectorPaintCount+'회':''}{page.reviewFlags.length?' · 추출 품질 확인 '+page.reviewFlags.length+'건':''}</summary>
             {page.reviewFlags.map((flag,i)=><p className="warning" role="status" data-step3-page-review-flag={page.number} key={i}>{flag}</p>)}
             <SourceTextMissingWarning page={page} onShow={item=>{setSourceBlock(null);setSourceImage(null);setMissingSource(item);}}
-              onRecover={item=>{addManualBlock(page.number,item.text);setSourceBlock(null);setSourceImage(null);}}/>
+              onRecover={item=>{addManualBlock(page.number,item.text,item.origin);setSourceBlock(null);setSourceImage(null);}}/>
             {page.images.length>0&&<div className="step3-image-review">
               <p className="help-text">PDF.js가 디코딩한 이미지를 PNG로 재구성했습니다. 원본 비트스트림·마스크/클리핑 효과가 그대로 보존된 것은 아닙니다. 위치는 근사치이며 저장 후 STEP2 편집기에서 크기·순서를 바꿀 수 있습니다.</p>
               {page.images.map((image,i)=><div className="section-editor" key={image.id}>
