@@ -135,7 +135,8 @@ try{
   await evaluate("document.querySelector('[data-step3-selected-source-image] button').click()");
   assert.equal(await evaluate("Boolean(document.querySelector('[data-step3-selected-source-image]'))"),false,'Image source location panel must close');
   console.log('PASS STEP3 IMAGE-TO-SOURCE NAVIGATION: recovered raster maps to its rendered source page and estimated placement');
-  const manualBlockId=await evaluate("(()=>{const page=[...document.querySelectorAll('.step3-block-review details')].find(d=>d.querySelector(':scope > summary')?.textContent.includes('원본 2페이지'));const button=page?.querySelector('[data-step3-add-manual-block]');if(!button)throw Error('Manual recovery action missing');button.click();return page.querySelector('[data-step3-remove-manual]')?.getAttribute('data-step3-remove-manual')})()");
+  await evaluate("(()=>{const page=[...document.querySelectorAll('.step3-block-review details')].find(d=>d.querySelector(':scope > summary')?.textContent.includes('원본 2페이지'));const button=page?.querySelector('[data-step3-add-manual-block]');if(!button)throw Error('Manual recovery action missing');button.click();return true})()");
+  const manualBlockId=await eventually(()=>evaluate("document.querySelector('[data-step3-remove-manual]')?.getAttribute('data-step3-remove-manual')"),x=>typeof x==='string'&&x.length>0);
   assert.ok(manualBlockId,'Manual text block was not created');
   assert.equal(await evaluate("Boolean(document.querySelector('[data-step3-show-source="+JSON.stringify(manualBlockId)+"]'))"),false,'Manual block must not claim extracted source coordinates');
   await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input').click()");
@@ -146,6 +147,7 @@ try{
   await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input').click()");
   assert.equal(await evaluate("document.querySelector('.step3-import-panel .print-button').disabled"),false,'Completed manual text with fresh consent should be savable');
   await evaluate("document.querySelector('[data-step3-add-manual-block="+JSON.stringify('2')+"]').click()");
+  await eventually(()=>evaluate("document.querySelectorAll('[data-step3-remove-manual]').length"),n=>n===2);
   const removable=await evaluate("[...document.querySelectorAll('[data-step3-remove-manual]')].at(-1)?.getAttribute('data-step3-remove-manual')");
   await evaluate("document.querySelector('[data-step3-remove-manual="+JSON.stringify(removable)+"]').click()");
   assert.equal(await evaluate("document.querySelectorAll('[data-step3-remove-manual]').length"),1,'Removing a manual correction must leave the previous draft blocks intact');

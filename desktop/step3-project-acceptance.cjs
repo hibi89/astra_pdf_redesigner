@@ -71,6 +71,8 @@ async function uploadAndConfirm(encoded){
   const addMissing=pageTwo()?.querySelector('[data-step3-add-manual-block]');
   if(!addMissing)throw Error('STEP3 manual missing-text recovery action absent');
   addMissing.click();
+  await until(()=>pageTwo()?.querySelector('[data-step3-remove-manual]'),
+    'manual correction block added to installed review');
   const manualArea=pageTwo().querySelectorAll('textarea');
   const correction=manualArea[manualArea.length-1];
   if(!correction||!pageTwo().querySelector('[data-step3-remove-manual]'))
