@@ -74,6 +74,7 @@ export default function Workspace({onLegacy}:Props){
   const [localModelStatus,setLocalModelStatus]=useState('모델 미설치 · 로컬 규칙 검수만 사용 가능');
   const [activeStage,setActiveStage]=useState<1|2|3|4>(1);
   const [styleCompareOpen,setStyleCompareOpen]=useState(false);
+  const [styleCompareGalleryOpen,setStyleCompareGalleryOpen]=useState(false);
   const [previewTheme,setPreviewTheme]=useState<{documentId:string;theme:ThemeId}|null>(null);
   const [styleUndo,setStyleUndo]=useState<{documentId:string;before:DesignSettings;applied:DesignSettings}|null>(null);
   const [referenceMetrics,setReferenceMetrics]=useState<ReferenceMetrics|null>(null);
@@ -170,15 +171,17 @@ export default function Workspace({onLegacy}:Props){
     if(!doc)return;
     clearReference();
     setPreviewTheme({documentId:doc.id,theme:doc.design.theme});
+    setStyleCompareGalleryOpen(false);
     setStyleCompareOpen(true);
   };
-  const closeStyleCompare=()=>{setStyleCompareOpen(false);setPreviewTheme(null);};
+  const closeStyleCompare=()=>{setStyleCompareOpen(false);setStyleCompareGalleryOpen(false);setPreviewTheme(null);};
   const applyComparedTheme=()=>{
     if(!doc||!styleCompareOpen||!selectedCompareTheme||selectedCompareTheme===doc.design.theme)return;
     const before=structuredClone(doc.design);
     const applied={...doc.design,theme:selectedCompareTheme};
     setStyleUndo({documentId:doc.id,before,applied});
     editDoc(d=>({...d,design:applied}));
+    setStyleCompareGalleryOpen(false);
   };
   const undoComparedTheme=()=>{
     if(!doc||!styleUndo||!canUndoStyle)return;
@@ -401,8 +404,11 @@ export default function Workspace({onLegacy}:Props){
           <p className="privacy-note">문서는 현재 브라우저 프로필·주소의 IndexedDB에 저장됩니다. 사이트 데이터 삭제 시 유실될 수 있습니다. 여러 탭 동시 편집은 지원하지 않습니다. 이미지 원본에는 메타데이터가 포함될 수 있습니다. 외부 서버로 전송하지 않습니다.</p>
         </>}
       </aside>
-      <div className="preview-column"><div className="preview-heading no-print"><div><h2>새 디자인 미리보기</h2><p>A4 기준 · 최종 페이지 나눔은 인쇄 창에서 확인</p></div><span className="size-tag">A4</span></div>
-        <div className="paper-surface">{doc?<ProjectPreview doc={doc} urls={urls} previewTheme={previewThemeId} previewDesign={referencePreviewDesign}/>:<div className="document">{w.ready?'문서를 열 수 없습니다.':'불러오는 중…'}</div>}</div>
+      <div className="preview-column"><div className="preview-heading no-print"><div><h2>{styleCompareGalleryOpen&&styleCompareOpen?'두 디자인을 나란히 비교':'새 디자인 미리보기'}</h2><p>{styleCompareGalleryOpen&&styleCompareOpen?'같은 내용 · 임시 비교 · 저장된 문서는 변경되지 않았습니다':'A4 기준 · 최종 페이지 나눔은 인쇄 창에서 확인'}</p></div><span className="size-tag">A4</span></div>
+        {doc&&styleCompareOpen&&styleCompareGalleryOpen&&previewThemeId?<div className="style-compare-gallery" data-style-compare-gallery>
+          <section className="style-compare-card" data-style-compare-original><h3>현재 디자인 · {allThemes.find(theme=>theme.id===doc.design.theme)?.label}</h3><div className="style-compare-card-viewport"><ProjectPreview doc={doc} urls={urls} previewDesign={{...doc.design,theme:doc.design.theme}}/></div></section>
+          <section className="style-compare-card" data-style-compare-candidate><h3>비교 후보 · {allThemes.find(theme=>theme.id===previewThemeId)?.label}</h3><div className="style-compare-card-viewport"><ProjectPreview doc={doc} urls={urls} previewDesign={{...doc.design,theme:previewThemeId}}/></div></section>
+        </div>:<div className="paper-surface">{doc?<ProjectPreview doc={doc} urls={urls} previewTheme={previewThemeId} previewDesign={referencePreviewDesign}/>:<div className="document">{w.ready?'문서를 열 수 없습니다.':'불러오는 중…'}</div>}</div>}
         <p className="print-tip no-print">Chrome/Edge에서 PDF로 저장, A4, 머리글·바닥글 해제를 확인하세요. 인쇄는 이미지 로딩이 완료될 때까지 기다립니다.</p>
       </div>
       <aside tabIndex={-1} className="studio-style-column no-print" aria-label="디자인 스튜디오">
@@ -438,7 +444,13 @@ export default function Workspace({onLegacy}:Props){
               <p className="style-compare-status" role="status">
                 {selectedCompareTheme===doc.design.theme?'저장된 디자인을 미리 보는 중':'임시 미리보기 · 저장 데이터는 변경되지 않았습니다'}
               </p>
-              <div className="toolbar project-toolbar style-compare-actions">
+ 
+              <button type="button" className="secondary-button" data-style-compare-side-by-side
+                disabled={selectedCompareTheme===doc.design.theme}
+                aria-expanded={styleCompareGalleryOpen}
+                onClick={()=>setStyleCompareGalleryOpen(value=>!value)}>
+                {styleCompareGalleryOpen?'나란히 비교 닫기':'현재와 후보 나란히 비교'}
+              </button>             <div className="toolbar project-toolbar style-compare-actions">
                 <button type="button" className="secondary-button" data-style-compare-apply
                   disabled={!editable||selectedCompareTheme===doc.design.theme} onClick={applyComparedTheme}>선택 디자인 적용</button>
                 {styleUndo?.documentId===doc.id&&<button type="button" className="text-button" data-style-compare-undo

@@ -288,6 +288,14 @@ try{
   await eventually(()=>evaluate("document.querySelectorAll('[data-style-compare-theme]').length"),n=>n===8);
   await evaluate("document.querySelector('[data-style-compare-theme="+JSON.stringify(compareThemeId)+"]').click()");
   await eventually(()=>evaluate("document.querySelector('.project-paper')?.classList.contains('paper-theme-"+compareThemeId+"')"),x=>x===true);
+  await evaluate("document.querySelector('[data-style-compare-side-by-side]').click()");
+  await eventually(()=>evaluate("document.querySelectorAll('[data-style-compare-gallery] .style-compare-card .project-paper').length"),n=>n===2);
+  const sideBySide=await evaluate("(()=>({original:document.querySelector('[data-style-compare-original] .project-paper')?.className,candidate:document.querySelector('[data-style-compare-candidate] .project-paper')?.className,rects:[...document.querySelectorAll('[data-style-compare-gallery] .style-compare-card-viewport .project-paper')].map(x=>{const r=x.getBoundingClientRect();return {width:r.width,height:r.height}})}))()");
+  assert.ok(sideBySide.original.includes('paper-theme-'+compareBefore.design.theme),'Side-by-side view must include the saved design');
+  assert.ok(sideBySide.candidate.includes('paper-theme-'+compareThemeId),'Side-by-side view must include the selected candidate');
+  assert.ok(sideBySide.rects.every(rect=>rect.width>300&&rect.height>400),'Both A4 design previews must render at a readable size');
+  assert.deepEqual(await readStyleSnapshot(),compareBefore,'Opening visual comparison must not mutate persisted content/design or stores');
+  await evaluate("document.querySelector('[data-style-compare-side-by-side]').click()");
   assert.equal(await evaluate("document.querySelectorAll('input[name=v2theme]')["+originalThemeIndex+"]?.checked"),true,
     'Temporary comparison must not select or persist the design');
   assert.deepEqual(await readStyleSnapshot(),compareBefore,'Temporary preview must not mutate any saved content/design or add stores');
