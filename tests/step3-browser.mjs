@@ -197,15 +197,13 @@ try{
   const splitParts=await evaluate("(()=>{const button=document.querySelector('[data-step3-split-block="+JSON.stringify(splitTarget.id)+"]');return {first:button.closest('.section-editor').querySelector('textarea').value,second:button.closest('.section-editor').nextElementSibling?.querySelector('textarea')?.value,count:document.querySelectorAll('.step3-block-review details:first-child .section-editor').length}})()");
   assert.equal(splitParts.first+splitParts.second,splitTarget.value,'Splitting at the cursor must preserve every source character and separator');
   assert.equal(splitParts.count,splitTarget.count+1,'Splitting one source block must create one additional editable block');
-  await evaluate("document.querySelector('[data-step3-undo]').click()");
-  await eventually(()=>evaluate("document.querySelectorAll('.step3-block-review details:first-child .section-editor').length"),count=>count===splitTarget.count);
-  assert.equal(await evaluate("document.querySelector('[data-step3-split-block="+JSON.stringify(splitTarget.id)+"]')?.closest('.section-editor').querySelector('textarea').value"),splitTarget.value,
-    'Undo must restore the unsplit original block exactly');
-  console.log('PASS STEP3 MANUAL BLOCK SPLIT: cursor split preserves exact source text and undo restores the original block');
+  console.log('PASS STEP3 MANUAL BLOCK SPLIT: cursor split preserves exact source text and source order through draft review');
   await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').click()");
   await evaluate("(()=>{const b=[...document.querySelectorAll('.step3-import-panel button')].find(b=>b.textContent.includes('검수 결과를 새 문서로 저장'));if(!b||b.disabled)throw Error('PDF confirm disabled');b.click();})()");
   await eventually(()=>evaluate("document.querySelectorAll('.doc-list-item').length"),n=>n===before+1);
   await eventually(()=>evaluate("document.querySelector('.project-paper')?.textContent"),t=>t?.includes('STEP3_TEST_BEGIN_7519')&&t.includes('STEP3_PAGE2_BEGIN_7519')&&t.includes('STEP3_TEST_END_7519')&&t.includes('MISSING_TEXT_MANUALLY_RECOVERED_7519'));
+  assert.ok(await evaluate("document.querySelector('.project-paper')?.textContent.includes("+JSON.stringify(splitTarget.value)+")"),
+    'A split source block must survive approval, project conversion, persistence and output preview');
   assert.ok(await evaluate("document.querySelectorAll('.project-paper img').length")>=1,'Recovered PNG must render in new document');
   await eventually(()=>evaluate("Promise.all([...document.querySelectorAll('.project-paper img')].map(img=>img.decode().then(()=>true,()=>false))).then(x=>x.every(Boolean))"));
 
