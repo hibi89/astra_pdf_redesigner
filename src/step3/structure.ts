@@ -105,8 +105,11 @@ export function createSourceTextMatcher(sourceItems:readonly string[]):SourceTex
     if(marker.length<2&&!/^\p{N}$/u.test(marker))continue;
     required.set(marker,(required.get(marker)||0)+1);
   }
-  const entries=[...required],nodes=[{next:new Map<string,number>(),fail:0,terminal:[] as number[],outputLink:0}];
+  const entries=[...required];
+  const numeric=entries.map(([marker])=>/^[+\-−]?\p{N}+(?:[.,]\p{N}+)*%?$/u.test(marker));
+  const nodes=[{next:new Map<string,number>(),fail:0,terminal:[] as number[],outputLink:0}];
   for(let id=0;id<entries.length;id++){
+    if(numeric[id])continue;
     let state=0;
     for(const char of entries[id][0]){
       let next=nodes[state].next.get(char);
@@ -138,7 +141,16 @@ export function createSourceTextMatcher(sourceItems:readonly string[]):SourceTex
         for(const id of nodes[output].terminal)if(found[id]<entries[id][1])found[id]++;
       }
     }
-    return entries.flatMap(([marker,count],id)=>Array.from({length:Math.max(0,count-found[id])},()=>marker.length>96?marker.slice(0,96)+'…':marker));
+    const numericFound=new Map<string,number>();
+    const tokenPattern=/(?:^|[^\p{L}\p{N}])([+\-−]?\p{N}+(?:[.,]\p{N}+)*%?)(?=$|[^\p{L}\p{N}])/gu;
+    for(const match of reconstructedText.normalize('NFC').matchAll(tokenPattern)){
+      const token=match[1].replace(/\s+/gu,'');
+      numericFound.set(token,(numericFound.get(token)??0)+1);
+    }
+    return entries.flatMap(([marker,count],id)=>{
+      const available=numeric[id]?(numericFound.get(marker)??0):found[id];
+      return Array.from({length:Math.max(0,count-available)},()=>marker.length>96?marker.slice(0,96)+'…':marker);
+    });
   };
 }
 export function findUnrepresentedSourcePieces(sourceItems:readonly string[],reconstructedText:string):string[]{
@@ -167,7 +179,7 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
     });
     const sourceTextItems=sourceItems.map(piece=>piece.text);
     const sourceTextOrigins=sourceItems.map(piece=>({page:piece.page,x:round(piece.x),y:round(piece.y),width:round(piece.width),height:round(piece.height)}));
-    const unrepresented=findUnrepresentedSourcePieces(sourceTextItems,lines.map(line=>line.text).join(''));
+    const unrepresented=findUnrepresentedSourcePieces(sourceTextItems,lines.map(line=>line.text).join('\n'));
     if(unrepresented.length)reviewFlags.push('PDF.js 원본 텍스트 조각 '+unrepresented.length+'개가 재구성 블록에서 일치하지 않습니다. 대체 문자·조각 결합 또는 추출 누락 가능성이 있어 이 페이지 원본과 대조하고 필요하면 직접 추가하세요.');
     const sourceText=page.pieces.map(piece=>piece.text).join('');
     if(/[\uFFFD\uE000-\uF8FF]/u.test(sourceText))reviewFlags.push('대체 문자 또는 개인 영역 문자가 포함되어 글꼴 문자 매핑이 손상됐을 수 있습니다. 원본과 숫자·기호를 대조하세요.');

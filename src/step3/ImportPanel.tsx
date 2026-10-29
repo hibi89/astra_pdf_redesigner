@@ -23,7 +23,7 @@ interface MissingSourceItem {id:string;text:string;origin:PdfOrigin}
 function SourceTextMissingWarning({page,onShow,onRecover}:{page:PdfDraftPage;onShow:(item:MissingSourceItem)=>void;onRecover:(item:MissingSourceItem)=>void}){
   const [visibleCount,setVisibleCount]=useState(12);
   const matcher=useMemo(()=>createSourceTextMatcher(page.sourceTextItems),[page.sourceTextItems]);
-  const missing=matcher(page.blocks.filter(block=>!block.excluded).map(block=>block.text).join(''));
+  const missing=matcher(page.blocks.filter(block=>!block.excluded).map(block=>block.text).join('\n'));
   const entries=useMemo(()=>{
     const remaining=new Map<string,number>();
     for(const text of missing)remaining.set(text,(remaining.get(text)??0)+1);

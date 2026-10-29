@@ -9,6 +9,13 @@ test('STEP3 source text parity identifies missing and duplicate PDF.js text item
   assert.deepEqual(findUnrepresentedSourcePieces(items,'ACCOUNT_123 1'),['ACCOUNT_123']);
   assert.deepEqual(findUnrepresentedSourcePieces(items,'ACCOUNT_123 ACCOUNT_123 1'),[]);
   assert.deepEqual(findUnrepresentedSourcePieces(['1'],'2'),['1'],'Single-digit source values must remain reviewable');
+  assert.deepEqual(findUnrepresentedSourcePieces(['7'],'7.5%'),['7'],
+    'A decimal that contains the same digit must not satisfy a missing integer source item');
+  assert.deepEqual(findUnrepresentedSourcePieces(['12'],'112'),['12'],
+    'A larger number must not satisfy a missing shorter numeric item');
+  assert.deepEqual(findUnrepresentedSourcePieces(['7','7'],'7'),['7'],
+    'Repeated numeric source cells require the same number of output occurrences');
+  assert.deepEqual(findUnrepresentedSourcePieces(['7.5%'],'7.5%'),[]);
   assert.equal(findUnrepresentedSourcePieces(['A'.repeat(150)],'')[0].length,97,
     'Long missing source excerpts are truncated before display');
 });
