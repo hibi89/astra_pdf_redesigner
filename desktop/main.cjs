@@ -103,10 +103,11 @@ async function renderLocalPdf(){
   return pdf;
 }
 function registerPdfSaving(){
-  ipcMain.handle('astra:save-pdf',async(event,rawExpectedTextMarkers)=>{
+  ipcMain.handle('astra:save-pdf',async(event,rawExpectedTextMarkers,expectRasterImage=false)=>{
     if(!mainWindow||event.sender!==mainWindow.webContents||
        !isAppUrl(event.sender.getURL()))throw Error('Blocked untrusted PDF export request');
     const expectedTextMarkers=validOutputMarkers(rawExpectedTextMarkers);
+    if(typeof expectRasterImage!=='boolean')throw Error('Invalid PDF image review flag');
     // Smoke mode uses an isolated test-only directory. It never opens the
     // native picker or writes into the user's Documents directory.
     if(SMOKE){
@@ -125,7 +126,7 @@ function registerPdfSaving(){
     }
     try{
       const data=await renderLocalPdf();
-      const audit=await auditOutputPdf(data,expectedTextMarkers);
+      const audit=await auditOutputPdf(data,expectedTextMarkers,expectRasterImage);
       if(audit.issues.length){
         const choice=await dialog.showMessageBox(mainWindow,{
           type:'warning',title:'PDF 출력 검수',
@@ -245,7 +246,7 @@ async function runPdfContentAcceptance(win){
      !fixture?.text?.includes(MARKERS.second)||!fixture?.text?.includes(MARKERS.korean))
     throw Error('Synthetic printable preview was not ready');
   const bytes=await renderLocalPdf();
-  const audit=await auditOutputPdf(bytes,Object.values(MARKERS));
+  const audit=await auditOutputPdf(bytes,Object.values(MARKERS),true);
   if(audit.pages!==2||audit.issues.length)
     throw Error('Installed Electron output preflight rejected synthetic A4 fixture: '+JSON.stringify(audit));
   await fs.writeFile(output,bytes,{flag:'wx'});

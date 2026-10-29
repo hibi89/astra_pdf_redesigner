@@ -5,7 +5,7 @@ const assert=require('node:assert/strict');
 test('Electron export preflight independently reads actual PDF pages and identifies A4 text/image content',async()=>{
   const {auditOutputPdf}=require('../desktop/pdf-output-audit.cjs');
   const {makeMixedLayoutPdf,MIXED_LAYOUT_MARKERS}=await import('./fixtures/step3-mixed-layout-pdf.mjs');
-  const audit=await auditOutputPdf(makeMixedLayoutPdf(),MIXED_LAYOUT_MARKERS);
+  const audit=await auditOutputPdf(makeMixedLayoutPdf(),MIXED_LAYOUT_MARKERS,true);
   assert.equal(audit.pages,2);
   assert.equal(audit.checkedPages,2);
   assert.ok(audit.textItems>=13);
@@ -25,6 +25,17 @@ test('Electron export preflight flags source text markers missing from actual PD
   assert.equal(audit.found,1);
   assert.deepEqual(audit.missing,['EXPECTED_SOURCE_TEXT_MISSING_992']);
   assert.ok(audit.issues.some(issue=>issue.includes('텍스트 표식 1/2개')));
+});
+
+test('Electron export preflight flags a missing raster when the edited document contains an image',async()=>{
+  const {auditOutputPdf}=require('../desktop/pdf-output-audit.cjs');
+  const {makeMixedLayoutPdf}=await import('./fixtures/step3-mixed-layout-pdf.mjs');
+  const source=makeMixedLayoutPdf().toString('binary');
+  const withoutImage=source.replace('/Im1 Do','       ');
+  assert.notEqual(withoutImage,source,'Fixture must omit its one image paint operator');
+  const audit=await auditOutputPdf(Buffer.from(withoutImage,'binary'),[],true);
+  assert.equal(audit.rasterDraws,0);
+  assert.ok(audit.issues.some(issue=>issue.includes('문서인데 출력 PDF에서 래스터 이미지를 찾지 못했습니다')));
 });
 
 test('Electron export preflight warns about non-A4 pages and text extending outside page bounds',async()=>{

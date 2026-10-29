@@ -14,3 +14,7 @@ export function pdfOutputTextMarkers(doc:ProjectDocument):string[]{
     return compact.length<=96?[compact]:[compact.slice(0,48),compact.slice(-48)];
   });
 }
+
+export function pdfOutputHasImages(doc:ProjectDocument):boolean{
+  return visibleSections(doc).some(section=>section.blocks.some(block=>block.kind==='image'));
+}
