@@ -18,7 +18,7 @@ export interface PdfOrigin {
 export interface PdfDraftBlock {
   id:string; text:string; role:PdfRole; origin?:PdfOrigin; excluded?:boolean; manual?:boolean; sourceText?:string;
 }
-export interface PdfDraftPage {number:number; blocks:PdfDraftBlock[]; charCount:number; imageDetected:boolean; images:RecoveredPdfImage[];imageCount:number;omittedImages:number;vectorPaintCount:number;compositionRisk:GraphicsCompositionRisk;reviewFlags:string[];sourceTextItems:string[];}
+export interface PdfDraftPage {number:number; blocks:PdfDraftBlock[]; charCount:number; imageDetected:boolean; images:RecoveredPdfImage[];imageCount:number;omittedImages:number;vectorPaintCount:number;compositionRisk:GraphicsCompositionRisk;reviewFlags:string[];sourceTextItems:string[];sourceTextOrigins:PdfOrigin[];}
 export interface PdfDraft {
   fileName:string; pageCount:number; pages:PdfDraftPage[]; warnings:string[]; totalChars:number;
 }
@@ -151,7 +151,9 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
     const {lines,multiColumn}=reconstructLines(page);
     const blocks:PdfDraftBlock[]=[];
     const reviewFlags:string[]=[];
-    const sourceTextItems=page.pieces.map(piece=>piece.text).filter(text=>text.normalize('NFC').replace(/\s+/gu,'').length>=4);
+    const sourceItems=page.pieces.filter(piece=>piece.text.normalize('NFC').replace(/\s+/gu,'').length>=4);
+    const sourceTextItems=sourceItems.map(piece=>piece.text);
+    const sourceTextOrigins=sourceItems.map(piece=>({page:piece.page,x:round(piece.x),y:round(piece.y),width:round(piece.width),height:round(piece.height)}));
     const unrepresented=findUnrepresentedSourcePieces(sourceTextItems,lines.map(line=>line.text).join(''));
     if(unrepresented.length)reviewFlags.push('PDF.js 원본 텍스트 조각 '+unrepresented.length+'개가 재구성 블록에서 일치하지 않습니다. 대체 문자·조각 결합 또는 추출 누락 가능성이 있어 이 페이지 원본과 대조하고 필요하면 직접 추가하세요.');
     const sourceText=page.pieces.map(piece=>piece.text).join('');
@@ -205,7 +207,7 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
       totalChars=nextPdfTextCount(totalChars,line.text);
       if(totalBlocks>PDF_IMPORT_LIMITS.blocks)throw Error('PDF 추출 블록이 2,500개 제한을 초과했습니다.');
     }
-    outPages.push({number:page.number,blocks,charCount:lines.reduce((n,x)=>n+x.text.length,0),imageDetected:detected>0,images,imageCount:detected,omittedImages:omitted,vectorPaintCount,compositionRisk,reviewFlags,sourceTextItems});
+    outPages.push({number:page.number,blocks,charCount:lines.reduce((n,x)=>n+x.text.length,0),imageDetected:detected>0,images,imageCount:detected,omittedImages:omitted,vectorPaintCount,compositionRisk,reviewFlags,sourceTextItems,sourceTextOrigins});
   }
   if(!totalChars)throw Error('선택 가능한 텍스트가 없습니다. 스캔 PDF는 OCR 지원 전까지 가져올 수 없습니다.');
   warnings.unshift('PDF의 읽기 순서·줄바꿈·공백·제목/캡션 분류는 추정입니다. 원본과 대조해 검수한 뒤 문서함에 추가하세요.');

@@ -24,7 +24,7 @@ async function uploadAndConfirm(encoded){
       if(await check())return;
       await pause(200);
     }
-    const panel=document.querySelector('[data-step3-selected-source-block],[data-step3-selected-source-image]');
+    const panel=document.querySelector('[data-step3-selected-source-block],[data-step3-selected-source-image],[data-step3-selected-missing-source]');
     const preview=panel?.querySelector('[data-m06-preview]');
     const canvas=preview?.querySelector('canvas');
     throw Error('STEP3 renderer timed out: '+label+' '+JSON.stringify({
@@ -103,6 +103,32 @@ async function uploadAndConfirm(encoded){
   await until(()=>restoreArea()?.value===extractedText,'redo restores exact extracted PDF text');
   if(document.querySelector('[data-step3-restore-extracted]'))
     throw Error('STEP3 redo did not restore the extracted-text baseline');
+  const omissionArea=restoreArea();
+  setTextareaValue.call(omissionArea,'');
+  omissionArea.dispatchEvent(new Event('input',{bubbles:true}));
+  await until(()=>document.querySelector('[data-step3-source-text-missing] [data-step3-missing-source-item]'),
+    'omitted extracted text gets a live source mismatch entry');
+  const missingItem=document.querySelector('[data-step3-source-text-missing] [data-step3-missing-source-item]');
+  const missingSnippet=missingItem?.querySelector('span')?.textContent;
+  if(!missingSnippet)throw Error('STEP3 missing PDF source excerpt unavailable in installed review');
+  missingItem.querySelector('[data-step3-show-missing-source]')?.click();
+  await until(()=>document.querySelector('[data-step3-selected-missing-source] [data-m06-preview][data-m06-rendered-page] [data-m06-anchor-rect]'),
+    'omitted text source location renders with estimated highlight');
+  const recoveryItem=[...document.querySelectorAll('[data-step3-source-text-missing] [data-step3-missing-source-item]')]
+    .find(node=>node.querySelector('span')?.textContent===missingSnippet);
+  if(!recoveryItem?.querySelector('[data-step3-recover-missing-source]'))
+    throw Error('STEP3 missing source quick-recovery action absent');
+  recoveryItem.querySelector('[data-step3-recover-missing-source]').click();
+  await until(()=>[...document.querySelectorAll('[data-step3-remove-manual]')]
+    .some(button=>button.closest('.section-editor')?.querySelector('textarea')?.value===missingSnippet),
+    'quick recovery creates an exact manual source-text block');
+  if(document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').checked)
+    throw Error('STEP3 missing source recovery retained earlier review consent');
+  document.querySelector('[data-step3-undo]').click();
+  await until(()=>document.querySelectorAll('[data-step3-remove-manual]').length===0,
+    'undo removes the quick-recovered source block');
+  document.querySelector('[data-step3-undo]').click();
+  await until(()=>restoreArea()?.value===extractedText,'undo restores source text after omission recovery review');
   const addMissing=pageTwo()?.querySelector('[data-step3-add-manual-block]');
   if(!addMissing)throw Error('STEP3 manual missing-text recovery action absent');
   addMissing.click();
@@ -148,7 +174,8 @@ async function uploadAndConfirm(encoded){
   await until(()=>document.querySelector('.save-chip')?.textContent==='저장됨',
     'new PDF project persisted');
   return{count:count+1,themeClass:document.querySelector('.project-paper').className,
-    manualMarker:'ASTRA_MANUAL_MISSING_7403',sourceTextRestored:true};
+    manualMarker:'ASTRA_MANUAL_MISSING_7403',sourceTextRestored:true,
+    missingTextSourceLocated:true,missingTextRecovered:true};
 }
 async function verifyPersisted(data){
   const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -271,7 +298,7 @@ async function runStep3ProjectAcceptance(win,renderLocalPdf,armNativeCapture,out
   const encoded=JSON.stringify(bytes.toString('base64'));
   const imported=await win.webContents.executeJavaScript(
     '('+uploadAndConfirm.toString()+')('+encoded+')',true);
-  if(!imported?.count||!imported?.themeClass)
+  if(!imported?.count||!imported?.themeClass||!imported?.missingTextSourceLocated||!imported?.missingTextRecovered)
     throw Error('STEP3 UI commit and layout selection failed');
   await win.loadURL(APP_URL);
   const stale=await win.webContents.executeJavaScript(

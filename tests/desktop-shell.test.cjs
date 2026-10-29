@@ -99,6 +99,7 @@ test('Windows CI exercises installed STEP3 PDF.js approval, reload and native ex
   for(const required of ['uploadAndConfirm','verifyPersisted',
     'ASTRA_PDF_PAGE_ONE_7401','ASTRA_PDF_PAGE_TWO_7402',
     'ASTRA_RESTORE_EDIT_7404','data-step3-restore-extracted','data-step3-undo','data-step3-redo','sourceTextRestored',
+    'data-step3-show-missing-source','data-step3-recover-missing-source','missingTextSourceLocated','missingTextRecovered',
     'armNativeCapture','new DataTransfer()']){
     assert.ok(fixture.includes(required),'STEP3 installed acceptance missing '+required);
   }

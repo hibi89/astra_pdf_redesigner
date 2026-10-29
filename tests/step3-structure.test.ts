@@ -84,11 +84,16 @@ test('STEP3: heading/caption heuristic is reversible and stores optional geometr
     piece('원문 자료 캡션',1,55,160,8),
     piece('다른 본문',1,55,210,12),
   ]}]);
+  assert.equal(draft.pages[0].sourceTextItems.length,draft.pages[0].sourceTextOrigins.length,
+    'Transient source snippets must retain a parallel source location for direct omission review');
+  assert.deepEqual(draft.pages[0].sourceTextOrigins[0],{page:1,x:55,y:90,width:120,height:12});
   assert.equal(draft.pages[0].blocks[0].role,'heading');
   assert.ok(draft.pages[0].blocks.some(b=>b.role==='caption'));
   const project=pdfDraftToProject(draft);
   assert.ok(project.content.sections[0].blocks.some(b=>b.kind==='caption'));
   assert.ok(isProjectDocument(project));
+  assert.equal('sourceTextOrigins' in (project as unknown as Record<string,unknown>),false,
+    'Transient source text locations must not enter the persisted project schema');
 });
 test('STEP3: text-absent document rejected, mixed empty pages and omitted images warned',()=>{
   const empty:PdfPageInput={number:1,width:595,height:842,imageDetected:true,pieces:[]};

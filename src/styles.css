@@ -230,3 +230,8 @@ button:disabled{cursor:not-allowed;opacity:.48}select{min-height:38px;padding:7p
 .reference-style-panel .segmented button { border: 1px solid #ccd1d6; border-radius: 5px; background: white; padding: 7px 10px; cursor: pointer; }
 .reference-style-panel .segmented button.on { border-color: var(--accent); color: var(--accent); font-weight: 700; }
 .reference-style-panel .swatch-wrap { cursor: pointer; }
+[data-step3-source-text-missing] > p:first-child{margin:0 0 8px}
+[data-step3-source-text-missing] ul{display:grid;gap:8px;margin:0;padding-left:20px}
+[data-step3-source-text-missing] li{padding-left:2px;overflow-wrap:anywhere}
+[data-step3-source-text-missing] li .mini-actions{flex-wrap:wrap;margin-top:4px}
+[data-step3-source-text-missing] li .mini-actions button{cursor:pointer}

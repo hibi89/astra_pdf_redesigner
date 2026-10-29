@@ -1,5 +1,5 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
-import {createSourceTextMatcher,PDF_IMPORT_LIMITS,type PdfDraft,type PdfDraftBlock,type PdfDraftPage,type PdfRole} from './structure.ts';
+import {createSourceTextMatcher,PDF_IMPORT_LIMITS,type PdfDraft,type PdfDraftBlock,type PdfDraftPage,type PdfOrigin,type PdfRole} from './structure.ts';
 import {extractLocalPdf} from './pdf.ts';
 import SourceAnchorPreview from './SourceAnchorPreview.tsx';
 
@@ -19,11 +19,35 @@ interface Props {
 }
 const ROLES:[PdfRole,string][]=[['paragraph','본문'],['heading','소제목'],['caption','캡션']];
 const DRAFT_HISTORY_LIMIT=8;
-function SourceTextMissingWarning({page}:{page:PdfDraftPage}){
+interface MissingSourceItem {id:string;text:string;origin:PdfOrigin}
+function SourceTextMissingWarning({page,onShow,onRecover}:{page:PdfDraftPage;onShow:(item:MissingSourceItem)=>void;onRecover:(item:MissingSourceItem)=>void}){
   const matcher=useMemo(()=>createSourceTextMatcher(page.sourceTextItems),[page.sourceTextItems]);
   const missing=matcher(page.blocks.filter(block=>!block.excluded).map(block=>block.text).join(''));
+  const entries=useMemo(()=>{
+    const remaining=new Map<string,number>();
+    for(const text of missing)remaining.set(text,(remaining.get(text)??0)+1);
+    return page.sourceTextItems.flatMap((text,index)=>{
+      const normalized=text.normalize('NFC').replace(/\s+/gu,'');
+      const key=normalized.length>96?normalized.slice(0,96)+'…':normalized;
+      const count=remaining.get(key)??0;
+      if(!count)return[];
+      remaining.set(key,count-1);
+      const origin=page.sourceTextOrigins[index];
+      return origin?[{id:`${page.number}-${index}`,text,origin}]:[];
+    });
+  },[missing,page.number,page.sourceTextItems,page.sourceTextOrigins]);
   if(!missing.length)return null;
-  return <p className="warning" role="status" data-step3-source-text-missing={page.number}>원문에서 읽은 텍스트 조각 {missing.length}개가 현재 포함 내용에 없습니다. 일부러 제외했는지 확인하고, 빠진 내용은 수동 블록에 추가하세요. (예: {missing.slice(0,3).join(' · ')})</p>;
+  return <div className="warning" role="status" data-step3-source-text-missing={page.number}>
+    <p>원문에서 읽은 텍스트 조각 {missing.length}개가 현재 포함 내용에 없습니다. 일부러 제외했는지 확인하고 원본과 대조하세요.</p>
+    <ul>{entries.slice(0,12).map(item=><li key={item.id} data-step3-missing-source-item={item.id}>
+      <span>{item.text.slice(0,120)}{item.text.length>120?'…':''}</span>
+      <div className="mini-actions">
+        <button type="button" data-step3-show-missing-source={item.id} onClick={()=>onShow(item)}>원본 위치 보기</button>
+        <button type="button" data-step3-recover-missing-source={item.id} onClick={()=>onRecover(item)}>이 원문을 수동 블록으로 추가</button>
+      </div>
+    </li>)}</ul>
+    {entries.length>12&&<p>나머지 {entries.length-12}개 조각도 직접 검수할 수 있도록 아래 블록 편집을 이용하세요.</p>}
+  </div>;
 }
 export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Props){
   const [draft,setDraft]=useState<PdfDraft|null>(null);
@@ -34,6 +58,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
   const [dragging,setDragging]=useState(false);
   const [sourceBlock,setSourceBlock]=useState<PdfDraftBlock|null>(null);
   const [sourceImage,setSourceImage]=useState<PdfDraftPage['images'][number]|null>(null);
+  const [missingSource,setMissingSource]=useState<MissingSourceItem|null>(null);
   const [imageUrls,setImageUrls]=useState<Record<string,string>>({});
   const sourceLocationPanel=useRef<HTMLDivElement|null>(null);
   const manualBlockSequence=useRef(0);
@@ -63,7 +88,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
     undoStack.current=[];redoStack.current=[];
     setHistoryRevision(value=>value+1);
   };
-  const closeSourceLocation=()=>{setSourceBlock(null);setSourceImage(null);};
+  const closeSourceLocation=()=>{setSourceBlock(null);setSourceImage(null);setMissingSource(null);};
   const publishDraft=(next:PdfDraft|null)=>{
     draftRef.current=next;setDraft(next);
   };
@@ -96,7 +121,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
     requestVersion.current++;
     if(urlRef.current)URL.revokeObjectURL(urlRef.current);
     Object.values(imageUrlRef.current).forEach(u=>URL.revokeObjectURL(u));
-    imageUrlRef.current={};setImageUrls({});setSourceBlock(null);setSourceImage(null);
+    imageUrlRef.current={};setImageUrls({});setSourceBlock(null);setSourceImage(null);setMissingSource(null);
     sourcePdfRef.current=null;urlRef.current='';setPreviewUrl('');publishDraft(null);setError('');setConfirmed(false);clearHistory();
   };
   const choose=async(file:File)=>{
@@ -149,11 +174,12 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
       return {...p,blocks:copy};
     })}));
   };
-  const addManualBlock=(page:number)=>{
+  const addManualBlock=(page:number,text='')=>{
     if(totalBlocks>=PDF_IMPORT_LIMITS.blocks){setError('검수 블록이 2,500개 제한에 도달했습니다.');return;}
     manualBlockSequence.current++;
-    const block:PdfDraftBlock={id:'manual-'+manualBlockSequence.current,role:'paragraph',text:'',manual:true,excluded:false};
+    const block:PdfDraftBlock={id:'manual-'+manualBlockSequence.current,role:'paragraph',text,manual:true,excluded:false};
     reviseDraft(current=>({...current,pages:current.pages.map(p=>p.number===page?{...p,blocks:[...p.blocks,block]}:p)}));
+    setMissingSource(null);
   };
   const removeManualBlock=(page:number,id:string)=>reviseDraft(current=>({...current,pages:current.pages.map(p=>p.number===page?
     {...p,blocks:p.blocks.filter(b=>b.id!==id)}:p)}));
@@ -235,13 +261,14 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
         <span className="help-text">검수 편집 최근 {DRAFT_HISTORY_LIMIT}단계까지 되돌릴 수 있습니다. 되돌리기/다시 실행 후에는 원본 확인 동의를 다시 선택해야 합니다.</span>
       </div>
       <div className="step3-source-compare">
-        {(sourceBlock?.origin||sourceImage)&&previewUrl&&<div ref={sourceLocationPanel} className="panel"
-          data-step3-selected-source-block={sourceBlock?.id} data-step3-selected-source-image={sourceImage?.id}>
-          <div className="panel-heading"><h3>{sourceImage?'선택한 복원 이미지의 원본 위치':'선택한 추출 블록의 원본 위치'}</h3>
+        {(sourceBlock?.origin||sourceImage||missingSource)&&previewUrl&&<div ref={sourceLocationPanel} className="panel"
+          data-step3-selected-source-block={sourceBlock?.id} data-step3-selected-source-image={sourceImage?.id} data-step3-selected-missing-source={missingSource?.id}>
+          <div className="panel-heading"><h3>{sourceImage?'선택한 복원 이미지의 원본 위치':missingSource?'누락된 원문 조각의 위치':'선택한 추출 블록의 원본 위치'}</h3>
             <button type="button" className="secondary-button" onClick={closeSourceLocation}>위치 닫기</button></div>
           {sourceBlock&&<p className="help-text" data-step3-source-excerpt>추출 내용: {sourceBlock.text}</p>}
+          {missingSource&&<p className="help-text" data-step3-missing-source-excerpt>추출 누락 원문: {missingSource.text}</p>}
           {sourceImage&&imageUrls[sourceImage.id]&&<img src={imageUrls[sourceImage.id]} className="step3-image-thumbnail" alt="원본 위치 대조용 복원 이미지"/>}
-          <SourceAnchorPreview url={previewUrl} blob={sourcePdfRef.current??undefined} origin={sourceBlock?.origin??sourceImage!.origin} blockId={sourceBlock?.id??sourceImage!.id}/>
+          <SourceAnchorPreview url={previewUrl} blob={sourcePdfRef.current??undefined} origin={sourceBlock?.origin??sourceImage?.origin??missingSource!.origin} blockId={sourceBlock?.id??sourceImage?.id??missingSource!.id}/>
           <p className="help-text">강조 영역은 추출 텍스트 블록 또는 복원 이미지의 추정 위치이며, 문자별·클리핑 정확도를 보장하지 않습니다.</p>
         </div>}
         {previewUrl&&<details><summary>원본 PDF 열어 대조</summary>
@@ -252,7 +279,8 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
           {draft.pages.map(page=><details key={page.number} open={page.number===1}>
             <summary>원본 {page.number}페이지 — {page.blocks.length}개 텍스트 · {page.charCount.toLocaleString('ko-KR')}자 · 새 문서 제외 {page.blocks.filter(b=>b.excluded).length}개 · 이미지 {page.images.length}/{page.imageCount}복원{page.omittedImages?' · 미복원 '+page.omittedImages+'건':''}{page.vectorPaintCount?' · 벡터 경로 '+page.vectorPaintCount+'회':''}{page.reviewFlags.length?' · 추출 품질 확인 '+page.reviewFlags.length+'건':''}</summary>
             {page.reviewFlags.map((flag,i)=><p className="warning" role="status" data-step3-page-review-flag={page.number} key={i}>{flag}</p>)}
-            <SourceTextMissingWarning page={page}/>
+            <SourceTextMissingWarning page={page} onShow={item=>{setSourceBlock(null);setSourceImage(null);setMissingSource(item);}}
+              onRecover={item=>{addManualBlock(page.number,item.text);setSourceBlock(null);setSourceImage(null);}}/>
             {page.images.length>0&&<div className="step3-image-review">
               <p className="help-text">PDF.js가 디코딩한 이미지를 PNG로 재구성했습니다. 원본 비트스트림·마스크/클리핑 효과가 그대로 보존된 것은 아닙니다. 위치는 근사치이며 저장 후 STEP2 편집기에서 크기·순서를 바꿀 수 있습니다.</p>
               {page.images.map((image,i)=><div className="section-editor" key={image.id}>
