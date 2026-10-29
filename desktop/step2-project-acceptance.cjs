@@ -11,6 +11,16 @@ const TOKENS=Object.freeze({
   library:'ASTRA_LIBRARY_ONLY_8310',
 });
 const APP_URL='astra://app/index.html';
+async function waitForProjectPreview(win){
+  for(let i=0;i<140;i++){
+    try{
+      if(await win.webContents.executeJavaScript(
+        "document.readyState==='complete'&&Boolean(document.querySelector('.project-paper'))",true))return;
+    }catch{}
+    await new Promise(resolve=>setTimeout(resolve,150));
+  }
+  throw Error('STEP2 project preview renderer did not become ready after reload');
+}
 
 async function editStep2InBrowser(encoded) {
   const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
@@ -132,6 +142,7 @@ async function runStep2ProjectAcceptance(win,renderLocalPdf){
     if(!before?.editorSaved||!before?.image)throw Error('STEP2 UI edit did not complete');
   }
   await win.loadURL(APP_URL);
+  await waitForProjectPreview(win);
   const persisted=await evaluate('('+verifyReloadedProject.toString()+')()','reload verification');
   if(!persisted?.saved||persisted.assets!==1)throw Error('STEP2 IndexedDB reload failed');
   if(verifyOnly){

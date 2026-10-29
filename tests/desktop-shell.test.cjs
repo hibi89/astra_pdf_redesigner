@@ -120,11 +120,13 @@ test('Windows CI exercises real STEP2 UI and IndexedDB before installed PDF outp
   const runtime=fs.readFileSync(path.resolve(__dirname,'../desktop/main.cjs'),'utf8');
   const lifecycle=fs.readFileSync(path.resolve(__dirname,'windows-installer-lifecycle.ps1'),'utf8');
   const verifier=fs.readFileSync(path.resolve(__dirname,'verify-desktop-pdf.mjs'),'utf8');
-  for(const required of ['editStep2InBrowser','verifyReloadedProject',
+  for(const required of ['editStep2InBrowser','verifyReloadedProject','waitForProjectPreview',
     "indexedDB.open('astra-pdf-redesigner:v2')",'ASTRA_STEP2_BODY_8308',
     "path.dirname(output)!==root","{flag:'wx'}"]){
     assert.ok(fixture.includes(required),'STEP2 acceptance missing '+required);
   }
+  assert.match(fixture,/await win\.loadURL\(APP_URL\);\s*await waitForProjectPreview\(win\);\s*const persisted=/,
+    'Installed STEP2 reload verification must wait for the React preview before executing the persistence audit');
   assert.ok(runtime.includes('--astra-step2-acceptance'));
   assert.ok(lifecycle.includes('--astra-step2-acceptance'));
   assert.ok(lifecycle.includes('--step2-project'));
