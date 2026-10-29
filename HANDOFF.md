@@ -20,7 +20,7 @@
 4. **검증:** 로컬 Node 68/68 PASS, TypeScript/Vite build PASS, desktop verification 14/14 PASS, `git diff --check` (`core.whitespace=cr-at-eol`) PASS. 직접 Windows Chrome CDP 및 Electron smoke는 환경 실패로 미검증. 합성 PDF 외 실제 고객 문서/물리 인쇄 미검증.
 5. **CI 정확 상태:** `a850518` #40821833788 (Chrome/Edge)·#40821833694 (Windows), `1878a6d` #40822018994·#40822018950, 최신 `ef4eb63` #40822093641·#40822093651은 마지막 조회 시 in_progress. #40821335082 browser failure는 React 렌더 대기 부족이며 고쳤다; 동일 SHA의 Windows #40821335099 success. 이전 원본 탐색 `9ade72e` browser/Windows #40820434613/#40820434701 모두 success. 최종 보고 전 최신 두 run을 재조회한다.
 6. **보존·승인 경계:** 사용자 데이터, V2 저장 schema, 8개 layout, `main`은 변경하지 않았다. OCR, 모델 다운로드, 외부 서비스/비용, merge/deploy 금지. STEP4 저장형 사용자 프리셋은 저장 구조 변경 승인이 필요하다.
-7. **완성률 및 잔여 작업:** 보수적 7단계 추정 약 44% 유지. STEP3 복잡 표·다단/장문과 실제 PDF 5–10건 수용, STEP4 저장형 프리셋 요구·schema 승인, STEP5 레퍼런스 적용, STEP6 외부 검색 승인, STEP7 통합/출시 수용이 남는다. 인증된 고객 PDF 수용 약 2–4시간(사용자 자료·피드백 대기 별도), STEP4 preset schema+UI+호환 검증 약 1–2일, STEP5 수일~수주, STEP6 승인 후 별도 범위 산정, STEP7 안정화 1–2주 이상. 판매/Production NO-GO.
+7. **완성률 및 잔여 작업:** 보수적 7단계 추정 약 45% (STEP3 수동 복구와 원본 위치 검수를 실제 브라우저 통합 기준으로 약 1%p 반영; Windows installed source-location timeout과 고객 PDF 미검증 때문에 80% 미달). STEP3 복잡 표·다단/장문과 실제 PDF 5–10건 수용, STEP4 저장형 프리셋 요구·schema 승인, STEP5 레퍼런스 적용, STEP6 외부 검색 승인, STEP7 통합/출시 수용이 남는다. 인증된 고객 PDF 수용 약 2–4시간(사용자 자료·피드백 대기 별도), STEP4 preset schema+UI+호환 검증 약 1–2일, STEP5 수일~수주, STEP6 승인 후 별도 범위 산정, STEP7 안정화 1–2주 이상. 판매/Production NO-GO.
 8. **안전한 종료:** 임시 작업 폴더는 모든 변경을 remote exact SHA와 대조하고 clean 상태임을 확인한 뒤에만 제거한다. 원래 로컬 프로젝트는 건드리지 않는다.
 
 ## 최신 인수인계 — 2026-10-27 19:18 KST
