@@ -199,7 +199,7 @@ async function runInstalledM09DCancelAcceptance(win,pdfBytes,markers){
     await wait(4500);
     const switchedLate=await evaluate("(()=>({active:document.querySelector('.doc-list-item.active strong')?.textContent,"+
       "draft:Boolean(document.querySelector('.step3-import-panel .step3-block-review)),"+
-      "sourceUrl:Boolean(document.querySelector('.step3-import-panel iframe[src^=blob]')),"+
+      "sourceUrl:[...document.querySelectorAll('.step3-import-panel iframe')].some(frame=>frame.src.startsWith('blob:')),"+
       "created:window.__astraM09D.created.filter(x=>x.name==='m09d-switch.pdf')}))()",true);
     if(switchedLate.active!==activeAndOther.other||switchedLate.draft||switchedLate.sourceUrl||switchedLate.created.length)
       throw Error('M09-D late response after document switch changed review or allocated a source URL: '+JSON.stringify(switchedLate));
