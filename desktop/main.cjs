@@ -5,6 +5,7 @@ const os=require('node:os');
 const path=require('node:path');
 const {pathToFileURL}=require('node:url');
 const {resolveBundleAsset}=require('./bundle-path.cjs');
+const {auditOutputPdf}=require('./pdf-output-audit.cjs');
 const {acceptanceDomSource,MARKERS}=require('./pdf-acceptance-fixture.cjs');
 const {runStep2ProjectAcceptance}=require('./step2-project-acceptance.cjs');
 const {runStep3ProjectAcceptance}=require('./step3-project-acceptance.cjs');
@@ -114,17 +115,28 @@ function registerPdfSaving(){
         return{status:'saved'};
       }finally{if(!persistentTestOutput)await fs.rm(output,{force:true});}
     }
-    const selection=await dialog.showSaveDialog(mainWindow,{
-      title:'PDF로 저장',
-      buttonLabel:'PDF 저장',
-      defaultPath:path.join(app.getPath('documents'),'ASTRA-문서.pdf'),
-      filters:[{name:'PDF 문서',extensions:['pdf']}],
-    });
-    if(selection.canceled||!selection.filePath)return{status:'cancelled'};
-    const output=/\.pdf$/i.test(selection.filePath)?selection.filePath:selection.filePath+'.pdf';
     try{
       const data=await renderLocalPdf();
+      const audit=await auditOutputPdf(data);
+      if(audit.issues.length){
+        const choice=await dialog.showMessageBox(mainWindow,{
+          type:'warning',title:'PDF 출력 검수',
+          message:'자동 검수에서 확인이 필요한 항목을 찾았습니다.',
+          detail:audit.issues.map(issue=>'• '+issue).join('\n')+'\n\n텍스트 외관, 표·도형, 원본과의 의미상 일치 여부는 자동 검수만으로 보증되지 않습니다. 출력 파일을 확인하세요.',
+          buttons:['계속 저장','취소'],defaultId:0,cancelId:1,noLink:true,
+        });
+        if(choice.response!==0)return{status:'cancelled'};
+      }
+      const selection=await dialog.showSaveDialog(mainWindow,{
+        title:'PDF로 저장',
+        buttonLabel:'PDF 저장',
+        defaultPath:path.join(app.getPath('documents'),'ASTRA-문서.pdf'),
+        filters:[{name:'PDF 문서',extensions:['pdf']}],
+      });
+      if(selection.canceled||!selection.filePath)return{status:'cancelled'};
+      const output=/\.pdf$/i.test(selection.filePath)?selection.filePath:selection.filePath+'.pdf';
       await fs.writeFile(output,data);
+      console.log('PASS ASTRA PDF OUTPUT PREFLIGHT: pages='+audit.pages+', textItems='+audit.textItems+', warnings='+audit.issues.length);
       return{status:'saved'};
     }catch(error){
       console.error('ASTRA desktop PDF export failed:',error instanceof Error?error.name:'unknown');
@@ -225,11 +237,14 @@ async function runPdfContentAcceptance(win){
      !fixture?.text?.includes(MARKERS.second)||!fixture?.text?.includes(MARKERS.korean))
     throw Error('Synthetic printable preview was not ready');
   const bytes=await renderLocalPdf();
+  const audit=await auditOutputPdf(bytes);
+  if(audit.pages!==2||audit.issues.length)
+    throw Error('Installed Electron output preflight rejected synthetic A4 fixture: '+JSON.stringify(audit));
   await fs.writeFile(output,bytes,{flag:'wx'});
   const written=await fs.readFile(output);
   if(written.length!==bytes.length||written.subarray(0,5).toString('ascii')!=='%PDF-')
     throw Error('Installed Electron did not persist the PDF acceptance output');
-  console.log('PASS ASTRA PDF CONTENT FIXTURE: installed renderer printed a two-page Korean/image synthetic preview');
+  console.log('PASS ASTRA PDF CONTENT FIXTURE: installed renderer printed a two-page Korean/image synthetic preview; independent output audit passed');
 }
 
 if(lock){

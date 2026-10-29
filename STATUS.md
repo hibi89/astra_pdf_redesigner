@@ -1,4 +1,10 @@
 # STATUS — Astra PDF Redesigner
+## 2026-10-29 — STEP7 Electron PDF output preflight
+
+- Electron export reopens generated PDF with bundled PDF.js before showing Save As. It checks A4 page boxes, text bounds, rotated text that could not be checked, and pages with neither selectable text nor raster content. Findings open a continue-save/cancel warning; no file is written until the user continues and chooses a path. Browser print flow is unchanged.
+- The Windows installed synthetic PDF acceptance calls the same audit and requires actual two-page A4 text/raster output to pass. Local regression mutates actual synthetic PDF bytes to prove non-A4 and out-of-bounds warnings.
+- Verification: `npm test` 76/76 PASS, `npm run build` PASS, `npm run desktop:verify` 15/15 PASS, CJS syntax and diff checks PASS. Previous SHA `1b178a6` Windows / Chrome+Edge CI remains in progress; this follow-up's Windows Electron execution awaits its exact-SHA workflow.
+- No OCR, external service, model or persistence change. Roadmap estimate remains ~48%; 80% not achieved.
 
 ## 2026-10-29 — STEP3 extraction quality signals and STEP5 local reference analysis
 
