@@ -273,6 +273,8 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
               <div className="block-header"><strong>{block.manual?'수동 추가 · 추출 원본 좌표 없음':`원본 ${block.origin?.page}p · ${block.origin?.x}, ${block.origin?.y}pt`}</strong>
                 <div className="mini-actions">
                   {block.origin&&<button type="button" data-step3-show-source={block.id} onClick={()=>{setSourceImage(null);setSourceBlock(block)}} disabled={disabled||busy}>원본 위치 보기</button>}
+                  {!block.manual&&block.sourceText!==undefined&&block.text!==block.sourceText&&<button type="button" data-step3-restore-extracted={block.id}
+                    onClick={()=>change(page.number,block.id,b=>({...b,text:b.sourceText??b.text}))} disabled={disabled||busy}>추출 원문 복원</button>}
                   {block.manual&&<button type="button" data-step3-remove-manual={block.id} onClick={()=>removeManualBlock(page.number,block.id)} disabled={disabled||busy}>블록 삭제</button>}
                   <button aria-label={block.id+' 위로 이동'} disabled={disabled||busy||i===0} onClick={()=>move(page.number,block.id,-1)}>↑</button>
                   <button aria-label={block.id+' 아래로 이동'} disabled={disabled||busy||i===page.blocks.length-1} onClick={()=>move(page.number,block.id,1)}>↓</button>
