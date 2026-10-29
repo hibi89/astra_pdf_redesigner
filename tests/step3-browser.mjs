@@ -655,6 +655,7 @@ try{
     'Missing-source location preview must identify the exact omitted source text');
   await evaluate("(()=>{const marker="+JSON.stringify(RUNNING_MARKERS[0])+";const item=[...document.querySelectorAll('[data-step3-missing-source-item]')].find(node=>node.textContent.includes(marker));const button=item?.querySelector('[data-step3-recover-missing-source]');if(!button)throw Error('Missing quick recovery action for omitted PDF text');button.click();})()");
   await eventually(()=>evaluate("[...document.querySelectorAll('[data-step3-source-text-missing]')].every(node=>!node.textContent.includes("+JSON.stringify(RUNNING_MARKERS[0])+"))"),x=>x===true);
+  await eventually(()=>evaluate("[...document.querySelectorAll('[data-step3-remove-manual]')].some(button=>button.closest('.section-editor')?.querySelector('textarea')?.value==="+JSON.stringify(RUNNING_MARKERS[0])+")"),x=>x===true);
   assert.ok(await evaluate("[...document.querySelectorAll('[data-step3-remove-manual]')].some(button=>button.closest('.section-editor')?.querySelector('textarea')?.value==="+JSON.stringify(RUNNING_MARKERS[0])+")"),
     'Quick recovery must create a manual block prefilled with the exact missing source text');
   assert.equal(await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').checked"),false,
