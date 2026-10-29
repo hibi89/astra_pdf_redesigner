@@ -159,6 +159,17 @@ async function uploadAndConfirm(encoded){
   correction.dispatchEvent(new Event('input',{bubbles:true}));
   await until(()=>!document.querySelector('[data-step3-empty-block-warning]'),
     'manual correction completes empty-block warning');
+  const splitButton=correction.closest('.section-editor')?.querySelector('[data-step3-split-block]');
+  if(!splitButton)throw Error('STEP3 installed manual correction split action absent');
+  correction.focus();correction.setSelectionRange(8,8);
+  correction.dispatchEvent(new Event('select',{bubbles:true}));
+  await until(()=>!splitButton.disabled,'manual correction split becomes available at the selected cursor');
+  splitButton.click();
+  await until(()=>{
+    const first=splitButton.closest('.section-editor')?.querySelector('textarea')?.value;
+    const second=splitButton.closest('.section-editor')?.nextElementSibling?.querySelector('textarea')?.value;
+    return first+second==='ASTRA_MANUAL_MISSING_7403';
+  },'manual source correction splits without losing characters');
   approval.click();
   if(save.disabled)throw Error('STEP3 completed manual correction remains unsavable');
   const confirm=document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]');
