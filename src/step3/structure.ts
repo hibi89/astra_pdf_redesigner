@@ -33,6 +33,10 @@ export function insertManualPdfBlockAtSourcePosition(
   if(index<0)return [...blocks,block];
   return [...blocks.slice(0,index),block,...blocks.slice(index)];
 }
+/** Keep source discrepancy entries in a stable top-to-bottom, then left-to-right order. */
+export function sortSourceReviewItems<T extends {origin:PdfOrigin}>(items:readonly T[]):T[]{
+  return [...items].sort((a,b)=>a.origin.y-b.origin.y||a.origin.x-b.origin.x);
+}
 export interface PdfDraftPage {number:number; blocks:PdfDraftBlock[]; charCount:number; imageDetected:boolean; images:RecoveredPdfImage[];imageCount:number;omittedImages:number;vectorPaintCount:number;compositionRisk:GraphicsCompositionRisk;reviewFlags:string[];sourceTextItems:string[];sourceTextOrigins:PdfOrigin[];}
 export interface PdfDraft {
   fileName:string; pageCount:number; pages:PdfDraftPage[]; warnings:string[]; totalChars:number;
