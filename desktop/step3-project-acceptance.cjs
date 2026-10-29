@@ -18,6 +18,14 @@ async function waitFor(check,label){
   }
   throw Error('STEP3 installed acceptance timed out: '+label);
 }
+async function loadAppAndWait(win,label){
+  await win.loadURL(APP_URL);
+  await waitFor(async()=>{
+    try{return await win.webContents.executeJavaScript(
+      "Boolean(document.querySelector('.paper-surface')&&document.querySelector('.step3-import-panel input[type=file]')&&document.querySelector('.doc-list-item.active'))",true);
+    }catch{return false;}
+  },label);
+}
 async function uploadAndConfirm(encoded){
   const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
   async function until(check,label){
@@ -295,13 +303,13 @@ async function runStep3ProjectAcceptance(win,renderLocalPdf,armNativeCapture,out
   const bytes=await renderLocalPdf();
   if(bytes.length<3000||bytes.subarray(0,5).toString('ascii')!=='%PDF-')
     throw Error('STEP3 source PDF generation failed');
-  await win.loadURL(APP_URL);
+  await loadAppAndWait(win,'STEP3 editor ready after import navigation');
   const encoded=JSON.stringify(bytes.toString('base64'));
   const imported=await win.webContents.executeJavaScript(
     '('+uploadAndConfirm.toString()+')('+encoded+')',true);
   if(!imported?.count||!imported?.themeClass||!imported?.missingTextSourceLocated||!imported?.missingTextRecovered)
     throw Error('STEP3 UI commit and layout selection failed');
-  await win.loadURL(APP_URL);
+  await loadAppAndWait(win,'STEP3 editor ready after persistence reload');
   const stale=await win.webContents.executeJavaScript(
     "Boolean(document.querySelector('.studio-source-panel'))",true);
   if(stale)throw Error('Original Blob URL unexpectedly persisted after installed app reload');
@@ -324,7 +332,7 @@ async function runStep3ProjectAcceptance(win,renderLocalPdf,armNativeCapture,out
   // M08-B: separate installed renderer navigation after the successful native
   // export; synth scanned image-only PDF must refuse import, partial scan warns
   // and cancel must preserve the formerly imported V2 project.
-  await win.loadURL(APP_URL);
+  await loadAppAndWait(win,'STEP3 editor ready after output audit navigation');
   const scanResult=await win.webContents.executeJavaScript(
     '('+verifyInstalledScanBoundary.toString()+')('+[
       JSON.stringify(makeScannedPagesPdf().toString('base64')),
@@ -345,7 +353,7 @@ async function runStep3ProjectAcceptance(win,renderLocalPdf,armNativeCapture,out
   const finalTheme=await win.webContents.executeJavaScript(
     "document.querySelector('.project-paper')?.className",true);
   if(!finalTheme)throw Error('M08-C missing final theme before reload');
-  await win.loadURL(APP_URL);
+  await loadAppAndWait(win,'STEP3 editor ready after final theme persistence reload');
   await win.webContents.executeJavaScript(
     '('+verifyPersisted.toString()+')('+JSON.stringify({...imported,themeClass:finalTheme})+')',true);
   console.log('PASS M08-C WINDOWS INSTALLED CORRUPT CATALOG: parser rejects, stale draft/Blob cleared, valid retry canceled, V2 persisted across reload');

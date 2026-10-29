@@ -96,13 +96,17 @@ test('Windows CI exercises installed STEP3 PDF.js approval, reload and native ex
   const main=fs.readFileSync(path.resolve(__dirname,'../desktop/main.cjs'),'utf8');
   const lifecycle=fs.readFileSync(path.resolve(__dirname,'windows-installer-lifecycle.ps1'),'utf8');
   const verifier=fs.readFileSync(path.resolve(__dirname,'verify-desktop-pdf.mjs'),'utf8');
-  for(const required of ['uploadAndConfirm','verifyPersisted',
+  for(const required of ['uploadAndConfirm','verifyPersisted','loadAppAndWait',
+    'STEP3 editor ready after import navigation','STEP3 editor ready after persistence reload',
+    'STEP3 editor ready after output audit navigation','STEP3 editor ready after final theme persistence reload',
     'ASTRA_PDF_PAGE_ONE_7401','ASTRA_PDF_PAGE_TWO_7402',
     'ASTRA_RESTORE_EDIT_7404','data-step3-restore-extracted','data-step3-undo','data-step3-redo','sourceTextRestored',
     'data-step3-show-missing-source','data-step3-recover-missing-source','missingTextSourceLocated','missingTextRecovered',
     'armNativeCapture','new DataTransfer()']){
     assert.ok(fixture.includes(required),'STEP3 installed acceptance missing '+required);
   }
+  assert.equal((fixture.match(/await loadAppAndWait\(win,/g)||[]).length,4,
+    'Every STEP3 installed-app navigation must wait until the renderer and document library are ready');
   assert.ok(main.includes('--astra-step3-acceptance'));
   assert.ok(main.includes('step3NativeCaptureArmed'));
   assert.ok(main.includes('path.dirname(output)!==root'));
