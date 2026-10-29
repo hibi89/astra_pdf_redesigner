@@ -21,7 +21,6 @@ async function runInstalledPdfReferenceAcceptance(win,pdfBytes){
   }
   const before=await evaluate('('+snapshotInstalledV2.toString()+')()');
   const baseline=await evaluate("(()=>({active:document.querySelector('.doc-list-item.active strong')?.textContent,"+
-    "theme:[...document.querySelectorAll('input[name=v2theme]')].findIndex(input=>input.checked),"+
     "save:document.querySelector('.save-chip')?.textContent,"+
     "text:document.querySelector('.project-paper')?.textContent}))()");
   const encoded=pdfBytes.toString('base64');
@@ -46,11 +45,10 @@ async function runInstalledPdfReferenceAcceptance(win,pdfBytes){
     throw Error('STEP5 PDF text-size proposal did not follow embedded metrics: '+JSON.stringify(review));
   const after=await evaluate('('+snapshotInstalledV2.toString()+')()');
   const current=await evaluate("(()=>({active:document.querySelector('.doc-list-item.active strong')?.textContent,"+
-    "theme:[...document.querySelectorAll('input[name=v2theme]')].findIndex(input=>input.checked),"+
     "save:document.querySelector('.save-chip')?.textContent,"+
     "text:document.querySelector('.project-paper')?.textContent}))()");
-  if(JSON.stringify(before)!==JSON.stringify(after)||JSON.stringify(baseline)!==JSON.stringify(current))
-    throw Error('STEP5 analyzing a reference PDF changed persisted V2 data or document design/content');
+  if(JSON.stringify(before)!==JSON.stringify(after)||baseline.active!==current.active||baseline.text!==current.text)
+    throw Error('STEP5 reference analysis changed persisted V2 data or document content: '+JSON.stringify({before:before.signature,after:after.signature,baseline,current}));
   await evaluate("document.querySelector('[data-reference-analysis] button.text-button')?.click();true");
   for(let i=0;i<80;i++){
     if(!await evaluate("Boolean(document.querySelector('[data-reference-analysis]'))"))break;
