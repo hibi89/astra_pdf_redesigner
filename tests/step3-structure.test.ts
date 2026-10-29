@@ -34,6 +34,19 @@ test('STEP3 omission review retains isolated numeric text fragments and their so
       'Removing a short number or decimal from included text must raise a mismatch: '+value);
   }
 });
+test('STEP3 omission review retains short Korean source fragments and their positions',()=>{
+  const draft=makePdfDraft('short-korean.pdf',[{number:1,width:595,height:842,imageDetected:false,pieces:[
+    piece('계약',1,120,210),piece('승인',1,165,210),piece('x',1,190,210),
+  ]}]);
+  const page=draft.pages[0];
+  assert.deepEqual(page.sourceTextItems,['계약','승인']);
+  assert.deepEqual(page.sourceTextOrigins,[
+    {page:1,x:120,y:210,width:120,height:12},
+    {page:1,x:165,y:210,width:120,height:12},
+  ]);
+  assert.deepEqual(findUnrepresentedSourcePieces(page.sourceTextItems,'승인'),['계약'],
+    'Missing two-character Korean source text should remain visible for manual review');
+});
 test('STEP3 missing source review reveals long omission lists in bounded, complete pages',()=>{
   const items=Array.from({length:29},(_,index)=>'MISSING_'+index);
   assert.equal(visibleSourceReviewItems(items,12).length,12);
@@ -117,7 +130,9 @@ test('STEP3: heading/caption heuristic is reversible and stores optional geometr
   ]}]);
   assert.equal(draft.pages[0].sourceTextItems.length,draft.pages[0].sourceTextOrigins.length,
     'Transient source snippets must retain a parallel source location for direct omission review');
-  assert.deepEqual(draft.pages[0].sourceTextOrigins[0],{page:1,x:55,y:90,width:120,height:12});
+  const bodyMarkerIndex=draft.pages[0].sourceTextItems.indexOf('본문 첫 줄');
+  assert.ok(bodyMarkerIndex>=0);
+  assert.deepEqual(draft.pages[0].sourceTextOrigins[bodyMarkerIndex],{page:1,x:55,y:90,width:120,height:12});
   assert.equal(draft.pages[0].blocks[0].role,'heading');
   assert.ok(draft.pages[0].blocks.some(b=>b.role==='caption'));
   const project=pdfDraftToProject(draft);

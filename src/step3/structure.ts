@@ -175,7 +175,10 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
     const reviewFlags:string[]=[];
     const sourceItems=page.pieces.filter(piece=>{
       const marker=piece.text.normalize('NFC').replace(/\s+/gu,'');
-      return marker.length>=4||/\p{N}/u.test(marker);
+      // Two-character CJK words are common complete PDF text items in Korean
+      // documents (for example, 계약). Preserve them alongside longer snippets
+      // and numeric cells so omission review can point back to the source.
+      return marker.length>=4||/\p{N}/u.test(marker)||/[\p{Script=Hangul}\p{Script=Han}\p{Script=Hiragana}\p{Script=Katakana}]{2,}/u.test(marker);
     });
     const sourceTextItems=sourceItems.map(piece=>piece.text);
     const sourceTextOrigins=sourceItems.map(piece=>({page:piece.page,x:round(piece.x),y:round(piece.y),width:round(piece.width),height:round(piece.height)}));
