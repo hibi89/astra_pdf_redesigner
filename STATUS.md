@@ -1,5 +1,13 @@
 # STATUS — Astra PDF Redesigner
 
+## 2026-10-29 — STEP3 원본 위치 연결 보강
+
+- 최신 브랜치 코드 SHA `9ade72efb957d4399a2d184f1aafc39472b576dd` (`integration/astra-commercial-core`, PR #9 Draft, 미병합). 기존 원본 PDF·V2 저장 구조·8개 디자인은 변경하지 않았다.
+- 기능: STEP3 검수의 각 텍스트 블록에서 `원본 위치 보기`를 누르면 실제 PDF.js 원본 페이지를 렌더하고 추정 출처 좌표를 강조한다. 기존 원본 파일 Blob URL 수명과 취소/확정 흐름을 재사용한다.
+- 로컬 Windows 검증: `npm test` 67/67 PASS, `npm run build` PASS, `npm run desktop:verify` 14/14 PASS, `git diff --check` PASS (`core.whitespace=cr-at-eol`).
+- 미검증/실패: Chrome STEP3 E2E는 Windows Chrome의 DevTools WebSocket 시작 실패로 테스트 페이지 진입 전 종료. `npm run desktop:smoke`는 Electron 바이너리 설치 후 종료 코드 1(추가 로그 없음). 따라서 Windows 앱 상호작용은 이번 SHA에서 미검증. GitHub exact-SHA CI #40820434613 (Chrome/Edge) 및 #40820434701 (Windows installer)은 실행 중이며 아직 결과로 기록하지 않는다.
+- 전체 7단계 완성률은 **약 44% 유지**. STEP3/4는 여전히 부분이며 이 보강 하나만으로 단계 완성률을 올리지 않는다. STEP5 미구현, STEP6 승인대기, STEP7 부분. 고객 PDF 5–10건과 구매자 PC 인수검수는 미검증.
+
 - 저장소: `hibi89/astra_pdf_redesigner` / `integration/astra-commercial-core` (Draft PR #9, main 미변경)
 - 승인 범위: STEP3 PDF 가져오기는 기존 승인 범위이며, 사용자가 STEP4 디자인 비교·적용·취소 개발도 승인했다. OCR은 별도 승인 전 제외한다. 저장형 사용자 스타일 라이브러리/스키마 변경은 승인 전 구현하지 않는다.
 - 제품 상태: STEP1·2 완료, STEP3·4·7 부분, STEP5 미구현, STEP6 승인대기. 최초 7단계 추정 약 44% (STEP1·2=2.0, STEP3=.33, STEP4=.45, STEP7=.33, 합계 3.11/7); 판매/Production NO-GO.

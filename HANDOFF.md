@@ -1,5 +1,17 @@
 # HANDOFF — Astra PDF Redesigner
 
+## 최신 개발 인수인계 — 2026-10-29
+
+1. **목표와 승인 경계:** STEP3 기존 PDF 검수와 STEP4 디자인 비교/적용/취소 보강. OCR, saved-style schema/migration, 유료 API/모델 다운로드, merge/deploy는 제외. 원본 로드맵과 사용자 데이터는 보존한다.
+2. **완료 기능:** STEP3 각 추출 텍스트 블록에 `원본 위치 보기`를 추가했다. 해당 블록의 PDF.js 원본 페이지를 그려 추정 좌표를 강조하고 닫기 동작을 제공한다. 검수 초안의 메모리 상태만 사용하며 DB 구조/내용·원본 PDF 바이트는 변경하지 않는다.
+3. **저장소와 SHA:** `hibi89/astra_pdf_redesigner`, `integration/astra-commercial-core`, PR #9 Draft/unmerged. 기능 커밋 `9ade72efb957d4399a2d184f1aafc39472b576dd`, 원격 푸시 완료. 이번에 main, PR #3/#4, 배포는 건드리지 않았다.
+4. **로컬 검증:** Windows Node 24 `npm test` 67/67 PASS, `npm run build` PASS, `npm run desktop:verify` 14/14 PASS, whitespace diff check PASS. CI에는 page-2 source anchor E2E가 추가됐다.
+5. **Windows 직접 실행 결과:** 실제 Chrome E2E가 CDP WebSocket 연결 시간 초과로 앱 URL을 열기 전에 종료되어 해당 E2E는 실패/미검증이다. Electron 바이너리 다운로드는 성공했으나 `npm run desktop:smoke`가 종료 코드 1과 로그 없이 종료; 직접 Windows Electron UI 검증도 미검증이다. 코드 결함으로 분류하지 않는다.
+6. **원격 CI:** exact-SHA Chrome/Edge run [#40820434613](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40820434613), Windows installer run [#40820434701](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40820434701)은 마지막 확인 당시 in progress였다. 완료 결과는 해당 run 상태를 재조회해야 하며 PASS로 선기록하지 않는다.
+7. **완성률 재평가:** 원본 7단계 대비 약 44% 유지(STEP1/2 완료, STEP3/4/7 부분, STEP5 미구현, STEP6 승인대기). 이 한 가지 사용성 보강을 단계 전체 완료율 상승으로 계산하지 않는다. STEP4 저장형 스타일 재사용은 schema 승인이 필요하다.
+8. **남은 작업:** STEP3 실제 텍스트 PDF 5–10건을 사용자 동의하에 로컬 수용시험; buyer physical Windows GUI/print acceptance; STEP4 저장형 스타일 라이브러리/프로젝트 호환은 저장 schema 승인이 필요; STEP5 로컬 레퍼런스 분석은 별도 기능 단위 설계 가능; STEP6 검색 연동은 외부 서비스/데이터 경계 승인 필요; STEP7 표/다단·넘침/부분수정 확대. 판매/배포는 여전히 NO-GO.
+9. **임시 작업:** 개발 clone은 `C:\Users\haein\Documents\Codex\astra_pdf_redesigner-work`에 있으며 원격 푸시 확인 전에는 보존한다. 기능 커밋 외 미커밋 앱 변경 없음. CI 완료를 확인한 뒤 이 생성 clone만 정리할 수 있다.
+
 ## 최신 인수인계 — 2026-10-27 19:18 KST
 
 1. **목표·승인:** 원본 최초 설계 `docs/ASTRA_ORIGINAL_ROADMAP.txt`, `docs/BLUEPRINT.md`, `REQUIREMENTS.md` 전체를 구현한다. STEP3 PDF 가져오기는 승인 상태이고 사용자는 STEP4 디자인 비교·적용·취소 개발도 승인했다. OCR은 별도 승인 전 제외하며, 저장형 사용자 스타일 스키마는 별도 승인 전 변경하지 않는다.
