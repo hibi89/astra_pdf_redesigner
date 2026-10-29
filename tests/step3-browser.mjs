@@ -598,7 +598,17 @@ try{
   await eventually(()=>evaluate("[...document.querySelectorAll('.step3-block-review textarea')].some(x=>x.value==="+JSON.stringify(restoreMarker)+")"),x=>x===true);
   assert.equal(await evaluate("Boolean(document.querySelector('[data-step3-restore-extracted]'))"),false,
     'Restoring extracted text should remove the restore action when the block matches its source');
-  console.log('PASS STEP3 EXTRACTED TEXT RESTORE: changed source block returns to extracted text');
+  await evaluate("document.querySelector('[data-step3-undo]').click()");
+  await eventually(()=>evaluate("[...document.querySelectorAll('.step3-block-review textarea')].some(x=>x.value==="+JSON.stringify(restoreMarker+'-edited')+")"),x=>x===true);
+  assert.equal(await evaluate("Boolean(document.querySelector('[data-step3-restore-extracted]'))"),true,
+    'Undo must restore the edited text and its source-restore action');
+  assert.equal(await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').checked"),false,
+    'Undo after source restore must require renewed source-review consent');
+  await evaluate("document.querySelector('[data-step3-redo]').click()");
+  await eventually(()=>evaluate("[...document.querySelectorAll('.step3-block-review textarea')].some(x=>x.value==="+JSON.stringify(restoreMarker)+")"),x=>x===true);
+  assert.equal(await evaluate("Boolean(document.querySelector('[data-step3-restore-extracted]'))"),false,
+    'Redo must restore the extracted baseline and remove the source-restore action');
+  console.log('PASS STEP3 EXTRACTED TEXT RESTORE: edit, restore, undo, redo and consent invalidation');
   for(const marker of RUNNING_MARKERS){
     const expression="(()=>{const marker="+JSON.stringify(marker)+";const area=[...document.querySelectorAll('.step3-block-review textarea')].find(x=>x.value.includes(marker));const editor=area?.closest('.section-editor');const input=editor?.querySelector('[data-step3-block-included]');if(!area||!input)throw Error('Missing editable source block '+marker);input.click();return {included:input.checked,text:area.value};})()";
     const state=await evaluate(expression);
