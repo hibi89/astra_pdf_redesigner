@@ -92,7 +92,7 @@ export function createSourceTextMatcher(sourceItems:readonly string[]):SourceTex
   const required=new Map<string,number>();
   for(const sourceText of sourceItems){
     const marker=sourceText.normalize('NFC').replace(/\s+/gu,'');
-    if(marker.length<4)continue;
+    if(marker.length<2&&!/^\p{N}$/u.test(marker))continue;
     required.set(marker,(required.get(marker)||0)+1);
   }
   const entries=[...required],nodes=[{next:new Map<string,number>(),fail:0,terminal:number[],outputLink:0}];
