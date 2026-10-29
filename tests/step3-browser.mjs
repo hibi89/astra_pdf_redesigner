@@ -606,10 +606,11 @@ try{
   assert.ok(await evaluate("[...document.querySelectorAll('[data-step3-source-text-missing]')].every(node=>!node.textContent.includes("+JSON.stringify(RUNNING_MARKERS[0])+"))"),
     'Typing a missing source excerpt into an included manual block should clear the live warning');
   await evaluate("document.querySelector('[data-step3-remove-manual]')?.click()");
-  await evaluate("(()=>{const area=[...document.querySelectorAll('.step3-block-review textarea')].find(x=>x.value.includes('RUNNING_MARKERS[0]'));area.closest('.section-editor').querySelector('[data-step3-block-included]').click();})()".replace('RUNNING_MARKERS[0]',JSON.stringify(RUNNING_MARKERS[0])));
+  const toggleSourceText=(marker)=>`(()=>{const marker=${JSON.stringify(marker)};const area=[...document.querySelectorAll('.step3-block-review textarea')].find(x=>x.value.includes(marker));const input=area?.closest('.section-editor')?.querySelector('[data-step3-block-included]');if(!input)throw Error('Missing source block inclusion checkbox '+marker);input.click();return input.checked;})()`;
+  await evaluate(toggleSourceText(RUNNING_MARKERS[0]));
   assert.ok(await evaluate("[...document.querySelectorAll('[data-step3-source-text-missing]')].every(node=>!node.textContent.includes("+JSON.stringify(RUNNING_MARKERS[0])+"))"),
     'Reincluding the recovered source marker should clear it from the live omission warning');
-  await evaluate("(()=>{const area=[...document.querySelectorAll('.step3-block-review textarea')].find(x=>x.value.includes('RUNNING_MARKERS[0]'));area.closest('.section-editor').querySelector('[data-step3-block-included]').click();})()".replace('RUNNING_MARKERS[0]',JSON.stringify(RUNNING_MARKERS[0])));
+  await evaluate(toggleSourceText(RUNNING_MARKERS[0]));
   assert.equal(await evaluate("document.querySelectorAll('[data-step3-block-included]:not(:checked)').length"),4);
   await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').click()");
   assert.equal(await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').checked"),true);
