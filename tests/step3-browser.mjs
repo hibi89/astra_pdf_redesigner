@@ -629,9 +629,9 @@ try{
   await eventually(()=>evaluate("[...document.querySelectorAll('.step3-block-review textarea')].some(x=>x.value==="+JSON.stringify(restoreMarker+'-edited')+")"),x=>x===true);
   assert.equal(await evaluate("Boolean(document.querySelector('[data-step3-restore-extracted]'))"),true,
     'Undo must restore the edited text and its source-restore action');
-  const recoveredOrder=await evaluate("(()=>{const marker="+JSON.stringify(RUNNING_MARKERS[0])+";const page=[...document.querySelectorAll('.step3-block-review details')].find(d=>d.querySelector(':scope > summary')?.textContent.includes('원본 1페이지'));const values=[...page.querySelectorAll('textarea')].map(area=>area.value);return{recovered:values.indexOf(marker),following:values.indexOf('STEP3_SOURCE_P1_BEGIN_901')};})()");
+  const recoveredOrder=await evaluate("(()=>{const marker="+JSON.stringify(RUNNING_MARKERS[0])+";const page=[...document.querySelectorAll('.step3-block-review details')].find(d=>d.querySelector(':scope > summary')?.textContent.includes('원본 1페이지'));const values=[...page.querySelectorAll('textarea')].map(area=>area.value);return{recovered:values.indexOf(marker),following:values.findIndex(value=>value.includes('STEP3_SOURCE_P1_BEGIN_901')),values};})()");
   assert.ok(recoveredOrder.recovered>=0&&recoveredOrder.following>=0&&recoveredOrder.recovered<recoveredOrder.following,
-    'Quick recovery should insert missing text before later source blocks using its estimated source position');
+    'Quick recovery should insert missing text before later source blocks using its estimated source position: '+JSON.stringify(recoveredOrder));
   assert.equal(await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').checked"),false,
     'Undo after source restore must require renewed source-review consent');
   await evaluate("document.querySelector('[data-step3-redo]').click()");
