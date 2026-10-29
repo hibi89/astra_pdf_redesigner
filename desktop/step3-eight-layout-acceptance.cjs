@@ -71,7 +71,8 @@ async function prepareInstalledStyleComparison(){
     throw Error('STEP4 side-by-side gallery did not show the saved design beside its candidate');
   if(!themes[originalIndex].checked||document.querySelector('.save-chip')?.textContent!==saveStatus)
     throw Error('STEP4 side-by-side gallery changed the saved design');
-  return {originalIndex,targetIndex,originalClass,sourceText,saveStatus,sideBySide:true};
+  return {originalIndex,targetIndex,originalClass,sourceText,saveStatus,sideBySide:true,
+    expectedRasterImages:originalPreview.querySelectorAll('img').length};
 }
 async function finishInstalledStyleComparison(expected){
   const apply=document.querySelector('[data-style-compare-apply]');
@@ -105,7 +106,7 @@ async function exerciseInstalledStyleComparison(win,renderLocalPdf){
   const bytes=await renderLocalPdf(); // actual installed Electron PDF while the comparison theme is still ephemeral
   if(bytes.length<3000||bytes.subarray(0,5).toString('ascii')!=='%PDF-')
     throw Error('STEP4 comparison preview did not produce a valid actual PDF');
-  const audit=await auditOutputPdf(bytes,['ASTRA_PDF_PAGE_ONE_7401','ASTRA_PDF_PAGE_TWO_7402']);
+  const audit=await auditOutputPdf(bytes,['ASTRA_PDF_PAGE_ONE_7401','ASTRA_PDF_PAGE_TWO_7402'],expected.expectedRasterImages);
   if(audit.pages!==2||audit.missing.length||audit.issues.length)
     throw Error('STEP4 side-by-side print must emit the candidate A4 document once: '+JSON.stringify(audit));
   await win.webContents.executeJavaScript(
