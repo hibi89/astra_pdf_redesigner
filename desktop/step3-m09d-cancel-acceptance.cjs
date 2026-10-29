@@ -198,7 +198,7 @@ async function runInstalledM09DCancelAcceptance(win,pdfBytes,markers){
       'switch-race PDF bytes arrive after active document changes');
     await wait(4500);
     const switchedLate=await evaluate("(()=>({active:document.querySelector('.doc-list-item.active strong')?.textContent,"+
-      "draft:Boolean(document.querySelector('.step3-import-panel .step3-block-review)),"+
+      "draft:Boolean(document.querySelector('.step3-import-panel .step3-block-review')),"+
       "sourceUrl:[...document.querySelectorAll('.step3-import-panel iframe')].some(frame=>frame.src.startsWith('blob:')),"+
       "created:window.__astraM09D.created.filter(x=>x.name==='m09d-switch.pdf')}))()",true);
     if(switchedLate.active!==activeAndOther.other||switchedLate.draft||switchedLate.sourceUrl||switchedLate.created.length)
