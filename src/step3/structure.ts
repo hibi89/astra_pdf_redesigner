@@ -95,7 +95,7 @@ export function createSourceTextMatcher(sourceItems:readonly string[]):SourceTex
     if(marker.length<2&&!/^\p{N}$/u.test(marker))continue;
     required.set(marker,(required.get(marker)||0)+1);
   }
-  const entries=[...required],nodes=[{next:new Map<string,number>(),fail:0,terminal:number[],outputLink:0}];
+  const entries=[...required],nodes=[{next:new Map<string,number>(),fail:0,terminal:[] as number[],outputLink:0}];
   for(let id=0;id<entries.length;id++){
     let state=0;
     for(const char of entries[id][0]){
