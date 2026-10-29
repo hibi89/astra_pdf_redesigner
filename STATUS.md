@@ -1,5 +1,13 @@
 # STATUS — Astra PDF Redesigner
 
+## 2026-10-29 — STEP5 local reference image/PDF page analysis
+
+- Implemented an in-memory, local-only raster analysis flow: PNG/JPEG/WebP up to 10 MiB and 20 MP, or PDF up to 30 MiB / 50 pages with selectable page. Measures approximate whitespace, visual density and margins; maps salient colors to the existing palette and suggests an existing theme/text size. Font remains a user choice. This is heuristic pixel analysis, not OCR or semantic/text/font recognition.
+- The user can edit supported existing `DesignSettings`, preview on the current A4 document, apply, cancel or undo. Source image/PDF bytes and analysis are not persisted; existing content and V2 schema remain unchanged. No network/API/model usage.
+- Added synthetic pixel tests and Chrome UI regression for local image analysis, PDF page 2 selection, preview/cancel/apply/undo and exact content preservation.
+- Local evidence: `npm test` 71/71 PASS; `npm run build` PASS; `npm run desktop:verify` 14/14 PASS; `node --check tests/step5-reference-browser.mjs` and `git diff --check` PASS. Dedicated real-browser E2E `tests/step5-reference-browser.mjs` **Chrome PASS and Edge PASS** (local raster, two-page PDF selection, A4 PDF generation, preview/cancel/apply/undo and content preservation). Broader pre-existing `step2-browser.mjs` was not rerun to completion locally because Poppler's `pdftotext` executable is unavailable. Windows hosted exact-SHA still pending.
+- Current base SHA `e6046988cc4b4ac8ecee98dbe83716d529554d32`; feature not yet committed/pushed at time of this entry. Main and original local project untouched. Roadmap estimate ~47% (STEP5 now partial); 80% not achieved. Next: commit/push, check exact-SHA CI without waiting idle, continue local STEP5 failure/unsupported feedback and STEP3/4 remaining independently.
+
 ## 2026-10-29 — Windows user-data upgrade regression rerun
 
 - Latest code SHA `12213f89381ad2f90102f4db1e4fbb4e9a283edb`; added failure diagnostics around installed STEP2 renderer evaluation without changing app behavior or persistence.

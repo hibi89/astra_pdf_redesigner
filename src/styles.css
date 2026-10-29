@@ -219,3 +219,14 @@ button:disabled{cursor:not-allowed;opacity:.48}select{min-height:38px;padding:7p
 .style-compare-status{font-size:11px;line-height:1.45;color:#395b6d}
 .style-compare-actions{align-items:center}
 @media print{.style-compare-panel{display:none!important}}
+.reference-analysis { display: grid; gap: 12px; margin-top: 16px; }
+.reference-image-row { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.reference-image-row img { width: 88px; height: 112px; object-fit: contain; background: #f3f4f5; border: 1px solid #d9dce0; border-radius: 6px; }
+.reference-pdf-badge { display: grid; place-items: center; flex: 0 0 88px; height: 112px; border: 1px solid #d9dce0; border-radius: 6px; background: #f3f4f5; color: #7b3131; font-weight: 800; }
+.reference-image-row strong { overflow-wrap: anywhere; }
+.reference-metrics { font-size: .85rem; line-height: 1.55; }
+.reference-style-panel .style-compare-candidates { display: flex; flex-wrap: wrap; gap: 6px; }
+.reference-style-panel .segmented { display: flex; flex-wrap: wrap; gap: 6px; }
+.reference-style-panel .segmented button { border: 1px solid #ccd1d6; border-radius: 5px; background: white; padding: 7px 10px; cursor: pointer; }
+.reference-style-panel .segmented button.on { border-color: var(--accent); color: var(--accent); font-weight: 700; }
+.reference-style-panel .swatch-wrap { cursor: pointer; }

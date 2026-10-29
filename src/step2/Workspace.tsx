@@ -8,6 +8,9 @@ import {hasDesktopPdfExport,savePdfFromEditor} from '../desktopPdf.ts';
 import RuleReview from '../humanize/RuleReview.tsx';
 import SourceAnchorPreview from '../step3/SourceAnchorPreview.tsx';
 import {isReviewed,reviewableBlocks,reviewableOrigin,reviewSignature} from '../step3/sourceReview.ts';
+import {analyzeReferencePixels,type ReferenceMetrics} from '../step5/referenceAnalysis.ts';
+import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+import {imageDimensions,imageType} from './images.ts';
 
 const allThemes=[...THEMES,
   {id:'compact' as const,label:'컴팩트 리포트',description:'짧은 제목과 밀도 높은 문서'},
@@ -26,8 +29,8 @@ function useAssetUrls(assets:readonly ImageAsset[]):Record<string,string>{
     setUrls(created);return()=>{for(const value of Object.values(created))URL.revokeObjectURL(value);};
   },[assets]);return urls;
 }
-export function ProjectPreview({doc,urls,previewTheme}: {doc:ProjectDocument;urls:Record<string,string>;previewTheme?:ThemeId}){
-  const sections=visibleSections(doc);const design=previewTheme?{...doc.design,theme:previewTheme}:doc.design;
+export function ProjectPreview({doc,urls,previewTheme,previewDesign}: {doc:ProjectDocument;urls:Record<string,string>;previewTheme?:ThemeId;previewDesign?:DesignSettings}){
+  const sections=visibleSections(doc);const design=previewDesign??(previewTheme?{...doc.design,theme:previewTheme}:doc.design);
   return <article className={`document paper-theme-${design.theme} paper-font-${design.font} paper-size-${design.textSize} project-paper`} style={{'--accent':design.accent} as CSSProperties} aria-label="문서 미리보기">
     <div className="document-heading">
       {design.theme==='diary'&&<span className="document-eyebrow">LEARNING JOURNAL</span>}
@@ -72,6 +75,15 @@ export default function Workspace({onLegacy}:Props){
   const [styleCompareOpen,setStyleCompareOpen]=useState(false);
   const [previewTheme,setPreviewTheme]=useState<{documentId:string;theme:ThemeId}|null>(null);
   const [styleUndo,setStyleUndo]=useState<{documentId:string;before:DesignSettings;applied:DesignSettings}|null>(null);
+  const [referenceMetrics,setReferenceMetrics]=useState<ReferenceMetrics|null>(null);
+  const [referencePreview,setReferencePreview]=useState<{documentId:string;design:DesignSettings}|null>(null);
+  const [referenceImage,setReferenceImage]=useState<{url:string|null;name:string}|null>(null);
+  const [referencePdf,setReferencePdf]=useState<{file:File;pages:number;page:number}|null>(null);
+  const [referenceError,setReferenceError]=useState('');
+  const [referenceStatus,setReferenceStatus]=useState('');
+  const referenceInput=useRef<HTMLInputElement|null>(null);
+  const referenceVersion=useRef(0);
+  const referencePdfSession=useRef<{file:File;loading:{promise:Promise<any>;destroy:()=>Promise<void>};pdf:any}|null>(null);
   useEffect(()=>{
     let active=true;
     const check=window.astraDesktop?.localModelStatus;
@@ -125,7 +137,8 @@ export default function Workspace({onLegacy}:Props){
   },[w.ready,w.document?.id]);
   const urls=useAssetUrls(w.assets);
   const doc=w.document;
-  const previewThemeId=doc&&previewTheme?.documentId===doc.id?previewTheme.theme:undefined;
+  const referencePreviewDesign=doc&&referencePreview?.documentId===doc.id?referencePreview.design:undefined;
+  const previewThemeId=doc&&previewTheme?.documentId===doc.id&&!referencePreviewDesign?previewTheme.theme:undefined;
   const selectedCompareTheme=previewThemeId??doc?.design.theme;
   const canUndoStyle=!!doc&&!!styleUndo&&styleUndo.documentId===doc.id&&sameDesign(doc.design,styleUndo.applied);
   const imageRefs=useMemo(()=>doc?documentAssetIds(doc):[],[doc]);
@@ -152,6 +165,7 @@ export default function Workspace({onLegacy}:Props){
   const editDoc=(fn:(prev:ProjectDocument)=>ProjectDocument)=>w.edit(fn);
   const openStyleCompare=()=>{
     if(!doc)return;
+    clearReference();
     setPreviewTheme({documentId:doc.id,theme:doc.design.theme});
     setStyleCompareOpen(true);
   };
@@ -169,6 +183,97 @@ export default function Workspace({onLegacy}:Props){
     editDoc(d=>({...d,design:before}));
     setPreviewTheme({documentId:doc.id,theme:before.theme});
     setStyleUndo(null);
+  };
+  const clearReference=()=>{
+    referenceVersion.current++;
+    if(referencePdfSession.current){void referencePdfSession.current.loading.destroy().catch(()=>{});referencePdfSession.current=null;}
+    if(referenceImage?.url)URL.revokeObjectURL(referenceImage.url);
+    setReferenceImage(null);setReferencePdf(null);setReferenceMetrics(null);setReferencePreview(null);setReferenceError('');setReferenceStatus('');
+    if(referenceInput.current)referenceInput.current.value='';
+  };
+  useEffect(()=>()=>{if(referenceImage?.url)URL.revokeObjectURL(referenceImage.url);},[referenceImage]);
+  useEffect(()=>()=>{referenceVersion.current++;const session=referencePdfSession.current;referencePdfSession.current=null;if(session)void session.loading.destroy().catch(()=>{});},[]);
+  useEffect(()=>{clearReference();},[doc?.id]);
+  const analyzeReference=async(file:File)=>{
+    clearReference();const version=referenceVersion.current;setReferenceError('');
+    if(file.type==='application/pdf'||/\.pdf$/i.test(file.name)){
+      if(file.size>30*1024*1024){setReferenceError('참고 PDF 파일은 30 MiB 이하여야 합니다.');return;}
+      const signature=new Uint8Array(await file.slice(0,5).arrayBuffer());
+      if(referenceVersion.current!==version)return;
+      if(String.fromCharCode(...signature)!=='%PDF-'){setReferenceError('PDF 파일 시그니처가 올바르지 않습니다.');return;}
+      await analyzeReferencePdf(file,1,version);return;
+    }
+    if(!['image/png','image/jpeg','image/webp'].includes(file.type)){setReferenceError('PNG, JPEG, WebP 이미지 또는 PDF를 선택하세요.');return;}
+    if(file.size===0||file.size>10*1024*1024){setReferenceError('참고 이미지 파일은 1바이트 이상 10 MiB 이하여야 합니다.');return;}
+    try{
+      const header=new Uint8Array(await file.slice(0,Math.min(file.size,65536)).arrayBuffer());
+      if(referenceVersion.current!==version)return;
+      const mime=imageType(header);
+      if(!mime||mime!==file.type)throw new Error('이미지 MIME 유형과 실제 파일 형식이 일치하지 않습니다.');
+      const dimensions=imageDimensions(header,mime);
+      if(dimensions&&(!dimensions.width||!dimensions.height||dimensions.width*dimensions.height>20_000_000))throw new Error('이미지 크기는 20메가픽셀 이하여야 합니다.');
+      const bitmap=await createImageBitmap(file);
+      try{
+        if(bitmap.width*bitmap.height>20_000_000)throw new Error('이미지 크기는 20메가픽셀 이하여야 합니다.');
+        const scale=Math.min(1,512/Math.max(bitmap.width,bitmap.height));
+        const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.round(bitmap.width*scale));canvas.height=Math.max(1,Math.round(bitmap.height*scale));
+        const context=canvas.getContext('2d',{willReadFrequently:true});if(!context)throw new Error('이미지 분석용 canvas를 사용할 수 없습니다.');
+        context.drawImage(bitmap,0,0,canvas.width,canvas.height);
+        const metrics=analyzeReferencePixels(context.getImageData(0,0,canvas.width,canvas.height).data,canvas.width,canvas.height);
+        if(referenceVersion.current!==version)return;
+        const url=URL.createObjectURL(file);
+        setReferenceImage({url,name:file.name});setReferenceMetrics(metrics);
+        setReferencePreview({documentId:doc!.id,design:{...doc!.design,theme:metrics.suggestedTheme,accent:metrics.accent??doc!.design.accent,textSize:metrics.suggestedTextSize}});
+      }finally{bitmap.close();}
+    }catch(error){if(referenceVersion.current===version)setReferenceError(error instanceof Error?error.message:'이미지를 분석할 수 없습니다.');}
+  };
+  const analyzeReferencePdf=async(file:File,pageNumber:number,version:number)=>{
+    let loading:{promise:Promise<any>;destroy:()=>Promise<void>}|undefined;
+    try{
+      setReferenceStatus('PDF 페이지 준비 중…');
+      let pdf:any;
+      if(referencePdfSession.current?.file===file)pdf=referencePdfSession.current.pdf;
+      else{
+        const pdfjs=await import('pdfjs-dist');pdfjs.GlobalWorkerOptions.workerSrc=pdfWorkerUrl;
+        const bytes=new Uint8Array(await file.arrayBuffer());loading=pdfjs.getDocument({data:bytes,stopAtErrors:true});
+        const record={file,loading,pdf:null};referencePdfSession.current=record;
+        setReferenceStatus('PDF 문서 읽는 중…');
+        pdf=await loading.promise;record.pdf=pdf;
+        if(referenceVersion.current!==version){await loading.destroy();if(referencePdfSession.current===record)referencePdfSession.current=null;return;}
+      }
+      if(pdf.numPages<1||pdf.numPages>50)throw new Error('참고 PDF는 1~50페이지까지 지원합니다.');
+      if(pageNumber<1||pageNumber>pdf.numPages)throw new Error('선택한 PDF 페이지가 없습니다.');
+      setReferenceStatus('PDF 페이지 여는 중…');
+      const page=await pdf.getPage(pageNumber),base=page.getViewport({scale:1});
+      const viewport=page.getViewport({scale:Math.min(1,512/Math.max(base.width,base.height))});
+      const canvas=document.createElement('canvas');canvas.width=Math.max(1,Math.ceil(viewport.width));canvas.height=Math.max(1,Math.ceil(viewport.height));
+      const context=canvas.getContext('2d',{willReadFrequently:true});if(!context)throw new Error('PDF 페이지를 그릴 canvas가 없습니다.');
+      setReferenceStatus('PDF 페이지 그리는 중…');
+      await page.render({canvasContext:context,viewport}).promise;
+      setReferenceStatus('PDF 디자인 분석 중…');
+      const pixels=context.getImageData(0,0,canvas.width,canvas.height);
+      const metrics=analyzeReferencePixels(pixels.data,canvas.width,canvas.height);
+      setReferenceStatus('');setReferenceError('');
+      if(referenceVersion.current!==version)return;
+      setReferenceImage({url:null,name:`${file.name} · ${pageNumber}페이지`});
+      setReferencePdf({file,pages:pdf.numPages,page:pageNumber});setReferenceMetrics(metrics);
+      setReferencePreview({documentId:doc!.id,design:{...doc!.design,theme:metrics.suggestedTheme,accent:metrics.accent??doc!.design.accent,textSize:metrics.suggestedTextSize}});
+      setReferenceError('');
+      page.cleanup();
+    }catch(error){
+      if(referenceVersion.current===version){const message=error instanceof Error?error.message:'PDF 페이지를 분석할 수 없습니다.';setReferenceStatus('');setReferenceError(/password/i.test(message)?'암호화된 PDF는 참고 자료로 지원하지 않습니다.':message);}
+      if(loading&&referencePdfSession.current?.loading===loading){referencePdfSession.current=null;await loading.destroy();}
+    }
+  };
+  const updateReferenceDesign=(patch:Partial<DesignSettings>)=>{
+    if(!doc||!referencePreviewDesign)return;
+    setReferencePreview({documentId:doc.id,design:{...referencePreviewDesign,...patch}});
+  };
+  const applyReferenceDesign=()=>{
+    if(!doc||!referencePreviewDesign||sameDesign(doc.design,referencePreviewDesign))return;
+    const before=structuredClone(doc.design),applied=structuredClone(referencePreviewDesign);
+    setStyleUndo({documentId:doc.id,before,applied});editDoc(d=>({...d,design:applied}));
+    clearReference();setPreviewTheme(null);
   };
   const editSection=(id:string,fn:(s:DocumentSection)=>DocumentSection)=>editDoc(d=>({...d,content:{...d.content,sections:d.content.sections.map(s=>s.id===id?fn(s):s)}}));
   const changeBlock=(sectionId:string,blockId:string,fn:(block:ContentBlock)=>ContentBlock)=>editSection(sectionId,s=>({...s,blocks:s.blocks.map(b=>b.id===blockId?fn(b):b)}));
@@ -284,7 +389,7 @@ export default function Workspace({onLegacy}:Props){
         </>}
       </aside>
       <div className="preview-column"><div className="preview-heading no-print"><div><h2>새 디자인 미리보기</h2><p>A4 기준 · 최종 페이지 나눔은 인쇄 창에서 확인</p></div><span className="size-tag">A4</span></div>
-        <div className="paper-surface">{doc?<ProjectPreview doc={doc} urls={urls} previewTheme={previewThemeId}/>:<div className="document">{w.ready?'문서를 열 수 없습니다.':'불러오는 중…'}</div>}</div>
+        <div className="paper-surface">{doc?<ProjectPreview doc={doc} urls={urls} previewTheme={previewThemeId} previewDesign={referencePreviewDesign}/>:<div className="document">{w.ready?'문서를 열 수 없습니다.':'불러오는 중…'}</div>}</div>
         <p className="print-tip no-print">Chrome/Edge에서 PDF로 저장, A4, 머리글·바닥글 해제를 확인하세요. 인쇄는 이미지 로딩이 완료될 때까지 기다립니다.</p>
       </div>
       <aside tabIndex={-1} className="studio-style-column no-print" aria-label="디자인 스튜디오">
@@ -297,12 +402,12 @@ export default function Workspace({onLegacy}:Props){
         {doc ? <>
           <section className="panel settings-panel"><div className="panel-heading"><h2>디자인 설정</h2><span className="panel-caption">원문은 변경하지 않습니다</span></div>
             <div className="setting-block"><h3>테마</h3><div className="theme-options">{allThemes.map(theme=><label className={`theme-option ${doc.design.theme===theme.id?'selected':''}`} key={theme.id}><input disabled={!editable} type="radio" name="v2theme" checked={doc.design.theme===theme.id} onChange={()=>{
-              editDoc(d=>({...d,design:{...d.design,theme:theme.id}}));
+              clearReference();editDoc(d=>({...d,design:{...d.design,theme:theme.id}}));
               if(styleCompareOpen&&doc)setPreviewTheme({documentId:doc.id,theme:theme.id});
             }}/><span><strong>{theme.label}</strong><small>{theme.description}</small></span></label>)}</div></div>
-            <div className="setting-block"><h3>포인트 색상</h3><div className="swatches">{PALETTE.map(color=><label title={color.label} className={`swatch-wrap ${doc.design.accent===color.value?'active':''}`} key={color.value}><input disabled={!editable} type="radio" name="v2accent" aria-label={color.label} checked={doc.design.accent===color.value} onChange={()=>editDoc(d=>({...d,design:{...d.design,accent:color.value}}))}/><span className="swatch" style={{backgroundColor:color.value}}/></label>)}</div></div>
-            <div className="setting-block"><h3>본문 크기</h3><div className="segmented">{(['small','medium','large'] as const).map((size,i)=><label className={doc.design.textSize===size?'on':''} key={size}><input disabled={!editable} type="radio" name="v2size" checked={doc.design.textSize===size} onChange={()=>editDoc(d=>({...d,design:{...d.design,textSize:size}}))}/>{['작게','보통','크게'][i]}</label>)}</div></div>
-            <div className="setting-block"><h3>폰트</h3><div className="segmented">{(['sans','serif'] as const).map((font,i)=><label className={doc.design.font===font?'on':''} key={font}><input disabled={!editable} type="radio" name="v2font" checked={doc.design.font===font} onChange={()=>editDoc(d=>({...d,design:{...d.design,font}}))}/>{['고딕','명조'][i]}</label>)}</div><p className="help-text">설치된 시스템 글꼴에 따라 표시가 달라집니다.</p></div>
+            <div className="setting-block"><h3>포인트 색상</h3><div className="swatches">{PALETTE.map(color=><label title={color.label} className={`swatch-wrap ${doc.design.accent===color.value?'active':''}`} key={color.value}><input disabled={!editable} type="radio" name="v2accent" aria-label={color.label} checked={doc.design.accent===color.value} onChange={()=>{clearReference();editDoc(d=>({...d,design:{...d.design,accent:color.value}}));}}/><span className="swatch" style={{backgroundColor:color.value}}/></label>)}</div></div>
+            <div className="setting-block"><h3>본문 크기</h3><div className="segmented">{(['small','medium','large'] as const).map((size,i)=><label className={doc.design.textSize===size?'on':''} key={size}><input disabled={!editable} type="radio" name="v2size" checked={doc.design.textSize===size} onChange={()=>{clearReference();editDoc(d=>({...d,design:{...d.design,textSize:size}}));}}/>{['작게','보통','크게'][i]}</label>)}</div></div>
+            <div className="setting-block"><h3>폰트</h3><div className="segmented">{(['sans','serif'] as const).map((font,i)=><label className={doc.design.font===font?'on':''} key={font}><input disabled={!editable} type="radio" name="v2font" checked={doc.design.font===font} onChange={()=>{clearReference();editDoc(d=>({...d,design:{...d.design,font}}));}}/>{['고딕','명조'][i]}</label>)}</div><p className="help-text">설치된 시스템 글꼴에 따라 표시가 달라집니다.</p></div>
           </section>
           <section className="panel style-compare-panel" aria-label="같은 문서 디자인 비교">
             <div className="panel-heading project-heading-row"><h2>같은 문서 디자인 비교</h2>
@@ -329,6 +434,24 @@ export default function Workspace({onLegacy}:Props){
                 </button>}
               </div>
             </>}
+          </section>
+          <section className="panel reference-style-panel" aria-label="이미지 기반 디자인 제안">
+            <div className="panel-heading"><h2>참고 이미지에서 디자인 제안</h2></div>
+            <p className="help-text">이 기기 안에서 분석합니다. 색상, 여백, 시각적 밀도만 추정하며 텍스트와 글꼴은 인식하지 않습니다. 이미지는 문서에 저장하지 않습니다.</p>
+            <input ref={referenceInput} className="hidden-input" type="file" accept="image/png,image/jpeg,image/webp,application/pdf,.pdf" onChange={event=>{const file=event.target.files?.[0];event.target.value='';if(file)void analyzeReference(file);}}/>
+            <button type="button" className="secondary-button" disabled={!editable} onClick={()=>referenceInput.current?.click()}>이미지 또는 PDF 선택</button>
+            {referenceError&&<p className="warning" role="alert">{referenceError}</p>}{referenceStatus&&<p className="help-text" role="status">{referenceStatus}</p>}
+            {referencePdf&&<label className="field">참고 PDF 페이지<select disabled={!editable} value={referencePdf.page} onChange={event=>{const page=Number(event.target.value),file=referencePdf.file;setReferencePdf({...referencePdf,page});referenceVersion.current++;const version=referenceVersion.current;if(referenceImage?.url)URL.revokeObjectURL(referenceImage.url);setReferenceImage(null);setReferenceMetrics(null);setReferencePreview(null);setReferenceError('');setReferenceStatus('PDF 페이지를 분석하고 있습니다…');void analyzeReferencePdf(file,page,version);}}>{Array.from({length:referencePdf.pages},(_,index)=><option key={index+1} value={index+1}>{index+1}페이지</option>)}</select></label>}
+            {referenceImage&&referenceMetrics&&referencePreviewDesign&&<div className="reference-analysis" data-reference-analysis>
+              <div className="reference-image-row">{referenceImage.url?<img src={referenceImage.url} alt="분석 중인 참고 이미지"/>:<span className="reference-pdf-badge" aria-hidden="true">PDF</span>}<div><strong>{referenceImage.name}</strong><p>대략적인 제안이며 수정할 수 있습니다.</p></div></div>
+              <p className="reference-metrics">여백 영역: {Math.round(referenceMetrics.whiteSpace*100)}% · 시각적 밀도: {Math.round(referenceMetrics.visualDensity*100)}%<br/>추정 여백: 위 {Math.round(referenceMetrics.margins.top*100)}%, 오른쪽 {Math.round(referenceMetrics.margins.right*100)}%, 아래 {Math.round(referenceMetrics.margins.bottom*100)}%, 왼쪽 {Math.round(referenceMetrics.margins.left*100)}%<br/>추천 테마: {allThemes.find(t=>t.id===referenceMetrics.suggestedTheme)?.label}</p>
+              <div className="setting-block"><h3>제안 테마</h3><div className="style-compare-candidates" role="group" aria-label="제안 테마 수정">{allThemes.map(theme=><button type="button" key={theme.id} aria-pressed={referencePreviewDesign.theme===theme.id} className={referencePreviewDesign.theme===theme.id?'selected':''} onClick={()=>updateReferenceDesign({theme:theme.id})}>{theme.label}</button>)}</div></div>
+              <div className="setting-block"><h3>강조 색상</h3><div className="swatches">{PALETTE.map(color=><button type="button" key={color.value} aria-label={color.label} aria-pressed={referencePreviewDesign.accent===color.value} className={`swatch-wrap ${referencePreviewDesign.accent===color.value?'active':''}`} onClick={()=>updateReferenceDesign({accent:color.value})}><span className="swatch" style={{backgroundColor:color.value}}/></button>)}</div></div>
+              <div className="setting-block"><h3>본문 크기와 글꼴</h3><div className="segmented">{(['small','medium','large'] as const).map((size,i)=><button type="button" key={size} className={referencePreviewDesign.textSize===size?'on':''} aria-pressed={referencePreviewDesign.textSize===size} onClick={()=>updateReferenceDesign({textSize:size})}>{['작게','보통','크게'][i]}</button>)}{(['sans','serif'] as const).map((font,i)=><button type="button" key={font} className={referencePreviewDesign.font===font?'on':''} aria-pressed={referencePreviewDesign.font===font} onClick={()=>updateReferenceDesign({font})}>{['고딕','명조'][i]}</button>)}</div><p className="help-text">글꼴은 이미지에서 판별하지 않습니다. 직접 선택하세요.</p></div>
+              <p className="style-compare-status" role="status">임시 A4 미리보기 · 변경 사항은 저장되지 않았습니다.</p>
+              <div className="toolbar project-toolbar"><button type="button" className="secondary-button" disabled={!editable||sameDesign(doc.design,referencePreviewDesign)} onClick={applyReferenceDesign}>제안 적용</button><button type="button" className="text-button" onClick={clearReference}>취소</button></div>
+            </div>}
+            {styleUndo?.documentId===doc.id&&<button type="button" className="text-button" disabled={!editable||!canUndoStyle} onClick={undoComparedTheme}>직전 디자인 적용 취소</button>}
           </section>
         </> : <p className="panel">문서를 불러오면 스타일을 선택할 수 있습니다.</p>}
       </aside>

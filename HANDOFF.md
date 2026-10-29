@@ -1,5 +1,13 @@
 # HANDOFF — Astra PDF Redesigner
 
+## 2026-10-29 — STEP5 local reference analysis (current work)
+
+1. Base `e6046988cc4b4ac8ecee98dbe83716d529554d32`, branch `integration/astra-commercial-core`, isolated clone `C:\Users\haein\Documents\Codex\astra_pdf_redesigner-work-step5`.
+2. Added local PNG/JPEG/WebP + selected PDF page analysis, image/analysis cleanup, supported `DesignSettings` editing, A4 transient preview, apply/cancel/exact undo. Current heuristic reads pixels only. No OCR, external request, source persistence, schema change or document content edits.
+3. `npm test` 71/71 PASS; build PASS; desktop verify 14/14 PASS; syntax/diff check PASS. Dedicated `tests/step5-reference-browser.mjs` passed in both Chrome and Edge: image/PDF page analysis, preview/cancel, apply/undo, content invariance and browser A4 PDF output. The broader pre-existing `step2-browser.mjs` was not rerun to completion locally because Poppler `pdftotext` is unavailable. Windows hosted exact-SHA is pending.
+4. Approximate original 7-step progress is ~47%; STEP5 remains partial because no URL input, reference/style library persistence or broad reference quality validation. Saving presets would change persisted schema and is still approval-gated. STEP6, real customer PDFs and physical Windows acceptance remain open. 80% unmet.
+5. Continue with independent core functions after confirming exact-SHA CI status; do not idle for CI. Preserve source blob only during active session and use same local-only/no-schema boundary unless owner approval changes it.
+
 ## 2026-10-29 — Latest Windows upgrade CI completion
 
 1. Latest test code SHA `12213f89381ad2f90102f4db1e4fbb4e9a283edb`. Change only wraps STEP2 installed renderer acceptance evaluation to surface name/message/stack on rejection.
