@@ -16,7 +16,7 @@ export interface PdfOrigin {
   page:number; x:number; y:number; width:number; height:number;
 }
 export interface PdfDraftBlock {
-  id:string; text:string; role:PdfRole; origin?:PdfOrigin; excluded?:boolean; manual?:boolean;
+  id:string; text:string; role:PdfRole; origin?:PdfOrigin; excluded?:boolean; manual?:boolean; sourceText?:string;
 }
 export interface PdfDraftPage {number:number; blocks:PdfDraftBlock[]; charCount:number; imageDetected:boolean; images:RecoveredPdfImage[];imageCount:number;omittedImages:number;vectorPaintCount:number;compositionRisk:GraphicsCompositionRisk;reviewFlags:string[];sourceTextItems:string[];}
 export interface PdfDraft {
@@ -193,10 +193,11 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
         // Visual line wraps are heuristic; retain explicit line breaks so no
         // content is silently merged or rewritten.
         prev.text+='\n'+line.text;
+        prev.sourceText=(prev.sourceText??'')+'\n'+line.text;
         prev.origin.width=round(Math.max(prev.origin.x+prev.origin.width,line.x+line.width)-prev.origin.x);
         prev.origin.height=round(Math.max(prev.origin.y+prev.origin.height,line.y+line.height)-prev.origin.y);
       }else{
-        blocks.push({id:'p'+page.number+'-'+blocks.length,text:line.text,role,excluded:false,origin:{
+        blocks.push({id:'p'+page.number+'-'+blocks.length,text:line.text,sourceText:line.text,role,excluded:false,origin:{
           page:page.number,x:round(line.x),y:round(line.y),width:round(line.width),height:round(line.height),
         }});
         totalBlocks++;
