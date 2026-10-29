@@ -20,7 +20,8 @@ export const MIXED_LAYOUT_MARKERS = Object.freeze([
   'RUNNING_FOOTER_P2_917',
 ]);
 
-export function makeMixedLayoutPdf() {
+export function makeMixedLayoutPdf(imageDrawCount=1) {
+  if(!Number.isInteger(imageDrawCount)||imageDrawCount<0||imageDrawCount>10)throw new Error('Invalid synthetic image draw count');
   const dim = 32;
   const rgb = Buffer.alloc(dim * dim * 3);
   for (let y = 0; y < dim; y++) for (let x = 0; x < dim; x++) {
@@ -42,7 +43,7 @@ export function makeMixedLayoutPdf() {
     'BT /F1 11 Tf 305 563 Td (TABLE_B_907) Tj ET',
     'BT /F1 11 Tf 50 509 Td (TABLE_C_908) Tj ET',
     'BT /F1 11 Tf 305 509 Td (TABLE_D_909) Tj ET',
-    'q 170 0 0 110 70 319 cm /Im1 Do Q',
+    'q 170 0 0 110 70 319 cm '+Array(imageDrawCount).fill('/Im1 Do').join(' ')+' Q',
     'BT /F1 12 Tf 40 241 Td (STEP3_SOURCE_P1_END_910) Tj ET',
     'BT /F1 8 Tf 40 20 Td (RUNNING_FOOTER_P1_915) Tj ET',
     '',

@@ -41,7 +41,12 @@ async function auditOutputPdf(bytes,expectedTextMarkers=[],expectedRasterImages=
       if(overflowItems)issues.push(`페이지 밖으로 벗어난 텍스트 영역 ${overflowItems}개를 찾았습니다.`);
       if(rotatedItems)issues.push(`회전된 텍스트 영역 ${rotatedItems}개는 자동 위치 검사를 완료하지 못했습니다.`);
       if(blankPages)issues.push(`텍스트와 래스터 이미지가 없는 페이지 ${blankPages}개를 찾았습니다. 빈 페이지 또는 벡터 전용 페이지인지 직접 확인하세요.`);
-      if(expectedRasterImages>rasterDraws)issues.push(`문서 이미지 ${expectedRasterImages}개 중 출력 PDF에서 래스터 이미지 ${rasterDraws}개만 확인했습니다. 이미지 누락 여부를 직접 확인하세요.`);
+      if(expectedRasterImages!==rasterDraws){
+        const difference=expectedRasterImages>rasterDraws
+          ?`문서 이미지 ${expectedRasterImages}개 중 출력 PDF에서 래스터 이미지 ${rasterDraws}개만 확인했습니다. 이미지 누락 여부를 직접 확인하세요.`
+          :`문서 이미지 블록 ${expectedRasterImages}개보다 출력 PDF의 래스터 이미지 연산 ${rasterDraws}개가 많습니다. 이미지 중복 또는 추가 출력을 직접 확인하세요.`;
+        issues.push(difference);
+      }
       const markerComparison=compareExpectedTextMarkers(outputText.join(''),expectedTextMarkers);
       if(markerComparison.missing.length)issues.push(`원문에서 선택한 텍스트 표식 ${markerComparison.missing.length}/${markerComparison.expected}개가 PDF에 없습니다. 편집 내용이 출력에서 빠졌는지 확인하세요.`);
       return{pages:pdf.numPages,checkedPages,textItems,rasterDraws,...markerComparison,issues};

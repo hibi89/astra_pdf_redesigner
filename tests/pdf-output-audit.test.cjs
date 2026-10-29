@@ -46,6 +46,14 @@ test('Electron export preflight compares all expected image blocks instead of on
   assert.ok(audit.issues.some(issue=>issue.includes('문서 이미지 2개 중 출력 PDF에서 래스터 이미지 1개')));
 });
 
+test('Electron export preflight also warns when raster output exceeds image block count',async()=>{
+  const {auditOutputPdf}=require('../desktop/pdf-output-audit.cjs');
+  const {makeMixedLayoutPdf}=await import('./fixtures/step3-mixed-layout-pdf.mjs');
+  const audit=await auditOutputPdf(makeMixedLayoutPdf(2),[],1);
+  assert.equal(audit.rasterDraws,2);
+  assert.ok(audit.issues.some(issue=>issue.includes('문서 이미지 블록 1개보다 출력 PDF의 래스터 이미지 연산 2개가 많습니다')));
+});
+
 test('Electron export preflight warns about non-A4 pages and text extending outside page bounds',async()=>{
   const {auditOutputPdf}=require('../desktop/pdf-output-audit.cjs');
   const {makeMixedLayoutPdf}=await import('./fixtures/step3-mixed-layout-pdf.mjs');
