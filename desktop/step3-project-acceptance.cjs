@@ -24,7 +24,17 @@ async function uploadAndConfirm(encoded){
       if(await check())return;
       await pause(200);
     }
-    throw Error('STEP3 renderer timed out: '+label);
+    const panel=document.querySelector('[data-step3-selected-source-block],[data-step3-selected-source-image]');
+    const preview=panel?.querySelector('[data-m06-preview]');
+    const canvas=preview?.querySelector('canvas');
+    throw Error('STEP3 renderer timed out: '+label+' '+JSON.stringify({
+      selectedBlock:panel?.getAttribute('data-step3-selected-source-block'),
+      selectedImage:panel?.getAttribute('data-step3-selected-source-image'),
+      renderedPage:preview?.getAttribute('data-m06-rendered-page'),
+      canvas:canvas?{width:canvas.width,height:canvas.height}:null,
+      warning:panel?.querySelector('[role=alert]')?.textContent,
+      previewText:preview?.innerText?.slice(0,800),
+    }));
   }
   await until(()=>{const input=document.querySelector('.step3-import-panel input[type=file]');
     return input&&!input.disabled&&document.querySelector('.doc-list-item.active');},'ready editor');
