@@ -646,6 +646,8 @@ try{
   assert.equal(missingSourceItems.length,2,'Each source page with excluded text should show its own live omission warning');
   for(const marker of RUNNING_MARKERS)assert.ok(missingSourceItems.some(text=>text?.includes(marker)),
     'Source parity warning should identify excluded marker for manual recovery: '+marker);
+  assert.equal(await evaluate("(()=>{const marker="+JSON.stringify(RUNNING_MARKERS[0])+";const item=[...document.querySelectorAll('[data-step3-missing-source-item]')].find(node=>node.textContent.includes(marker));const origin=item?.querySelector('[data-step3-missing-source-origin]');return origin?.getAttribute('data-step3-missing-source-origin')===item?.getAttribute('data-step3-missing-source-item')&&/^원본 위치: \\d+페이지 · x .+pt · y .+pt$/u.test(origin?.textContent??'')})()"),true,
+    'Each missing source excerpt must expose its original PDF page and estimated coordinates beside the warning');
   await evaluate("(()=>{const marker="+JSON.stringify(RUNNING_MARKERS[0])+";const item=[...document.querySelectorAll('[data-step3-missing-source-item]')].find(node=>node.textContent.includes(marker));const button=item?.querySelector('[data-step3-show-missing-source]');if(!button)throw Error('Missing source-location action for omitted PDF text');button.click();})()");
   await eventually(()=>evaluate("Boolean(document.querySelector('[data-step3-selected-missing-source] [data-m06-preview][data-m06-rendered-page] [data-m06-anchor-rect]'))"),x=>x===true);
   assert.ok(await evaluate("document.querySelector('[data-step3-missing-source-excerpt]')?.textContent?.includes("+JSON.stringify(RUNNING_MARKERS[0])+")"),
