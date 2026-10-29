@@ -5,27 +5,46 @@ import { countVectorPaintOps, type VectorPaintOpCodes } from './vectorRisk.ts';
 import { scanGraphicsComposition, type GraphicsCompositionCodes } from './graphicsRisk.ts';
 
 // Browser-only PDF.js adapter. Never send PDF bytes to a server.
-export async function extractLocalPdf(file:File):Promise<PdfDraft>{
+export interface PdfImportProgress {page:number;totalPages:number}
+export interface PdfImportOptions {signal?:AbortSignal;onProgress?:(progress:PdfImportProgress)=>void}
+function throwIfImportAborted(signal?:AbortSignal):void{
+  if(signal?.aborted){const error=Error('PDF 가져오기가 취소되었습니다.');error.name='AbortError';throw error;}
+}
+export async function extractLocalPdf(file:File,options:PdfImportOptions={}):Promise<PdfDraft>{
+  const {signal,onProgress}=options;
+  throwIfImportAborted(signal);
   if(file.size<10||file.size>PDF_IMPORT_LIMITS.bytes)throw Error('PDF는 30MiB 이하의 유효한 파일이어야 합니다.');
   if(!/\.pdf$/i.test(file.name))throw Error('확장자가 .pdf인 파일만 가져올 수 있습니다.');
   const header=new Uint8Array(await file.slice(0,5).arrayBuffer());
+  throwIfImportAborted(signal);
   if(String.fromCharCode(...header)!=='%PDF-')throw Error('PDF 파일 시그니처가 올바르지 않습니다.');
   const {getDocument,GlobalWorkerOptions,OPS,Util}=await import('pdfjs-dist');
+  throwIfImportAborted(signal);
   GlobalWorkerOptions.workerSrc=workerUrl;
   const bytes=new Uint8Array(await file.arrayBuffer());
+  throwIfImportAborted(signal);
   // A separate local copy avoids transferring the user's File's original ArrayBuffer.
   const loading=getDocument({data:bytes,stopAtErrors:true});
+  let destroyPromise:Promise<void>|null=null;
+  const destroy=()=>destroyPromise??(destroyPromise=loading.destroy());
+  const destroyOnAbort=()=>{void destroy().catch(()=>{});};
+  signal?.addEventListener('abort',destroyOnAbort,{once:true});
   try{
     const pdf=await loading.promise;
+    throwIfImportAborted(signal);
     if(pdf.numPages<1||pdf.numPages>PDF_IMPORT_LIMITS.pages)throw Error('지원하는 PDF는 1~50페이지입니다.');
 
     const pages:PdfPageInput[]=[];
     const imageBudget=createImageRecoveryBudget();
     let totalExtractedChars=0;
     for(let pageNum=1;pageNum<=pdf.numPages;pageNum++){
+      throwIfImportAborted(signal);
+      onProgress?.({page:pageNum,totalPages:pdf.numPages});
       const page=await pdf.getPage(pageNum);
+      throwIfImportAborted(signal);
       const view=page.getViewport({scale:1});
       const text=await page.getTextContent();
+      throwIfImportAborted(signal);
       const pieces:PdfFragment[]=[];
       for(const raw of text.items){
         if(!('str' in raw))continue;
@@ -46,6 +65,7 @@ export async function extractLocalPdf(file:File):Promise<PdfDraft>{
       let imageRecovery:PdfPageInput['imageRecovery'];
       try{
         const opList=await page.getOperatorList();
+        throwIfImportAborted(signal);
         vectorPaintCount=countVectorPaintOps(opList,OPS as unknown as VectorPaintOpCodes);
         compositionRisk=scanGraphicsComposition(opList,OPS as unknown as GraphicsCompositionCodes);
         const obj=page as unknown as {
@@ -56,8 +76,12 @@ export async function extractLocalPdf(file:File):Promise<PdfDraft>{
           pageNum,opList,view.transform,view.width,view.height,
           OPS as unknown as ImageOpCodes,{objs:obj.objs,commonObjs:obj.commonObjs},imageBudget,
         );
+        throwIfImportAborted(signal);
         imageDetected=imageRecovery.detected>0;
-      }catch(error){operatorWarning=error instanceof Error?error.name:'그래픽 명령 분석 실패';}
+      }catch(error){
+        if(signal?.aborted)throw error;
+        operatorWarning=error instanceof Error?error.name:'그래픽 명령 분석 실패';
+      }
       pages.push({number:pageNum,width:view.width,height:view.height,pieces,imageDetected,operatorWarning,imageRecovery,vectorPaintCount,compositionRisk});
       page.cleanup();
     }
@@ -67,7 +91,8 @@ export async function extractLocalPdf(file:File):Promise<PdfDraft>{
       throw Error('암호화된 PDF는 이번 버전에서 지원하지 않습니다. 원본에서 암호를 해제하고 다시 선택하세요.');
     throw error;
   }finally{
-    await loading.destroy();
+    signal?.removeEventListener('abort',destroyOnAbort);
+    await destroy();
   }
 }
 

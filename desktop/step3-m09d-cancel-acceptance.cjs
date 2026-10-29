@@ -125,9 +125,12 @@ async function runInstalledM09DCancelAcceptance(win,pdfBytes,markers){
       "const button=[...panel.querySelectorAll('button')].find(x=>x.textContent.includes('가져오기 취소'));"+
       "const style=button&&getComputedStyle(button);return{exists:!!button,disabled:button?.disabled??true,"+
       "visible:!!button&&button.getClientRects().length>0&&style.display!=='none'&&style.visibility!=='hidden',"+
-      "inputDisabled:panel.querySelector('input[type=file]')?.disabled};})()",true);
-    if(!pending.exists||pending.disabled||!pending.visible||!pending.inputDisabled)
-      throw Error('M09-D real installed UI must expose an enabled, visible cancel while file analysis is pending');
+      "inputDisabled:panel.querySelector('input[type=file]')?.disabled,"+
+      "progress:panel.querySelector('[data-step3-import-progress]')?.getAttribute('data-step3-import-progress'),"+
+      "progressText:panel.querySelector('[data-step3-import-progress]')?.textContent};})()",true);
+    if(!pending.exists||pending.disabled||!pending.visible||!pending.inputDisabled||
+       pending.progress!=='0'||!pending.progressText?.includes('분석을 준비'))
+      throw Error('M09-D installed UI must expose live import status and enabled cancel while file analysis is pending');
     await evaluate("[...document.querySelectorAll('.step3-import-panel button')].find(x=>x.textContent.includes('가져오기 취소')).click();true");
     await waitFor(()=>evaluate("(()=>{const p=document.querySelector('.step3-import-panel');return p&&"+
       "!p.querySelector('.step3-block-review')&&!p.querySelector('p[role=status]')&&"+

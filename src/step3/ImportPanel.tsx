@@ -55,6 +55,7 @@ function SourceTextMissingWarning({page,onShow,onRecover}:{page:PdfDraftPage;onS
 export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Props){
   const [draft,setDraft]=useState<PdfDraft|null>(null);
   const [busy,setBusy]=useState(false),[parsing,setParsing]=useState(false);
+  const [importProgress,setImportProgress]=useState<{page:number;totalPages:number}|null>(null);
   const [error,setError]=useState(''),[confirmed,setConfirmed]=useState(false);
   const [historyRevision,setHistoryRevision]=useState(0);
   const [previewUrl,setPreviewUrl]=useState('');
@@ -74,6 +75,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
   // A PDF.js parse can finish after a workspace mode switch. Its result must
   // not allocate temporary Blob URLs or update a discarded review session.
   const requestVersion=useRef(0);
+  const parseController=useRef<AbortController|null>(null);
   const unmounted=useRef(false);
   const currentSourceBlock=sourceBlock&&draft
     ?draft.pages.find(page=>page.blocks.some(block=>block.id===sourceBlock.id))?.blocks.find(block=>block.id===sourceBlock.id)??null
@@ -83,6 +85,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
     return()=>{
       unmounted.current=true;
       requestVersion.current++;
+      parseController.current?.abort();parseController.current=null;
       if(urlRef.current)URL.revokeObjectURL(urlRef.current);
       Object.values(imageUrlRef.current).forEach(u=>URL.revokeObjectURL(u));
     };
@@ -125,6 +128,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
   const forget=()=>{
     // Also invalidates any in-flight PDF extraction before it can publish.
     requestVersion.current++;
+    parseController.current?.abort();parseController.current=null;setImportProgress(null);
     if(urlRef.current)URL.revokeObjectURL(urlRef.current);
     Object.values(imageUrlRef.current).forEach(u=>URL.revokeObjectURL(u));
     imageUrlRef.current={};setImageUrls({});setSourceBlock(null);setSourceImage(null);setMissingSource(null);
@@ -134,10 +138,13 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
     forget();
     const version=requestVersion.current;
     const isCurrent=()=>!unmounted.current&&requestVersion.current===version;
+    const controller=new AbortController();parseController.current=controller;
     setBusy(true);
     setParsing(true);
     try{
-      const parsed=await extractLocalPdf(file);
+      const parsed=await extractLocalPdf(file,{signal:controller.signal,onProgress:progress=>{
+        if(isCurrent())setImportProgress(progress);
+      }});
       if(!isCurrent())return; // switched/closed/superseded; never own an orphan Blob
       // The source file remains an ephemeral browser Blob URL only during review.
       const url=URL.createObjectURL(file);urlRef.current=url;setPreviewUrl(url);
@@ -149,7 +156,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
     }catch(e){
       if(isCurrent())setError(e instanceof Error?e.message:'PDF에서 내용을 추출할 수 없습니다.');
     }finally{
-      if(isCurrent()){setBusy(false);setParsing(false);}
+      if(isCurrent()){parseController.current=null;setBusy(false);setParsing(false);setImportProgress(null);}
     }
   };
   const cancel=()=>{
@@ -239,7 +246,10 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
           onChange={e=>{const f=e.target.files?.[0];e.target.value='';if(f)void choose(f);}}/>
       </label>
     </div>
-    {busy&&<p role="status">PDF를 분석하거나 새 문서를 저장하는 중입니다…</p>}
+    {busy&&parsing&&<p role="status" data-step3-import-progress={importProgress?.page??0} data-step3-import-total={importProgress?.totalPages??0}>
+      {importProgress?`PDF ${importProgress.page}/${importProgress.totalPages}페이지 분석 중…`:'PDF 파일을 열고 분석을 준비하는 중입니다…'}
+    </p>}
+    {busy&&!parsing&&<p role="status">새 문서를 저장하는 중입니다…</p>}
     {busy&&parsing&&<div className="toolbar"><button className="secondary-button" onClick={cancel}>가져오기 취소</button></div>}
     {!!error&&<p className="warning" role="alert">{error}</p>}
     {draft&&<>

@@ -219,6 +219,8 @@ test('M08-D AES-256 fixture is encrypted, immutable and wired into browser/Windo
 
 test('M09-D drives installed Windows cancel/retry UI and compares every V2 store',()=>{
   const helper=fs.readFileSync(path.resolve(__dirname,'../desktop/step3-m09d-cancel-acceptance.cjs'),'utf8');
+  const importer=fs.readFileSync(path.resolve(__dirname,'../src/step3/ImportPanel.tsx'),'utf8');
+  const extractor=fs.readFileSync(path.resolve(__dirname,'../src/step3/pdf.ts'),'utf8');
   const entry=fs.readFileSync(path.resolve(__dirname,'../desktop/step3-project-acceptance.cjs'),'utf8');
   const lifecycle=fs.readFileSync(path.resolve(__dirname,'windows-installer-lifecycle.ps1'),'utf8');
   const ci=fs.readFileSync(path.resolve(__dirname,'../.github/workflows/windows-desktop.yml'),'utf8');
@@ -227,8 +229,16 @@ test('M09-D drives installed Windows cancel/retry UI and compares every V2 store
     "getClientRects().length>0","textContent.includes('가져오기 취소')).click()",'원본과 추출 결과',
     'URL.revokeObjectURL','SHA-256',
     'stale completion changed V2 stores before reload','late response after document switch',
-    'V2 stores differ after installed-app reload','PASS M09-D WINDOWS INSTALLED UI'])
+    'V2 stores differ after installed-app reload','data-step3-import-progress',
+    'PASS M09-D WINDOWS INSTALLED UI'])
     assert.ok(helper.includes(marker),'Missing M09-D installed UI assertion: '+marker);
+  assert.ok(importer.includes('signal:controller.signal')&&importer.includes('onProgress:progress=>'),
+    'STEP3 must pass cancellation and page progress to the PDF extraction task');
+  assert.ok(importer.includes('PDF 파일을 열고 분석을 준비하는 중입니다'),
+    'STEP3 must distinguish PDF loading from page-by-page analysis');
+  assert.ok(extractor.includes('signal?.addEventListener(\'abort\',destroyOnAbort')&&
+    extractor.includes('onProgress?.({page:pageNum,totalPages:pdf.numPages})'),
+    'PDF.js loading must be aborted and report page progress during extraction');
   assert.ok(entry.includes("require('./step3-m09d-cancel-acceptance.cjs')"));
   assert.ok(entry.includes('await runInstalledM09DCancelAcceptance(win,bytes,MARKERS)'));
   assert.ok(lifecycle.includes('--astra-step3-acceptance'));
