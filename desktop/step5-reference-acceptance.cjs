@@ -1,5 +1,6 @@
 'use strict';
 // STEP5 local embedded-PDF typography proposal; synthetic input only.
+const {snapshotInstalledV2}=require('./step3-m09d-cancel-acceptance.cjs');
 const APP_URL='astra://app/index.html';
 
 async function runInstalledPdfReferenceAcceptance(win,pdfBytes){
