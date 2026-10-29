@@ -1,5 +1,14 @@
-# 최신 인수인계 — 원격 CI 복구 커밋 `b640c3f`\n\n- `29b2c7d` hosted Windows CI exposed a corrupted API-uploaded browser test file. The source was re-created from the locally syntax-checked bytes and pushed as `b640c3fc1e654edccd5c4234fa31810e0105e993`. Exact SHA CI: Chrome+Edge #40838475198, Windows #40838475306; latest state must be rechecked. Local tests on the source were 86/86 PASS, and focused numeric omission UI E2E was Chrome/Edge PASS.\n- Do not treat the `29b2c7d` CI failure as a product behavior failure; it was invalid test-file encoding.\n\n# HANDOFF — Astra PDF Redesigner
-## 2026-10-29 — Continuation checkpoint (latest `b640c3f`)
+# 최신 인수인계 — STEP3/4 continuation (`602c0a4`)
+
+- 원격 브랜치 `integration/astra-commercial-core` HEAD `602c0a410b7f2146717569b39019b152b51e2b8d`, Draft PR #9 미병합.
+- Chrome+Edge [#40843605820](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40843605820), Windows installer [#40843605882](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40843605882) exact-SHA SUCCESS. Windows M09-D checks cancel/reselect, late completion after document switch, no stale URL/review, and full V2-store equality. STEP4 actual side-by-side candidate-only PDF output, apply/undo and 8 A4 presets all passed.
+- Local `npm test` 87/87, build, `desktop:verify` 15/15 and whitespace/syntax checks PASS. Direct local Electron launch SKIP because Electron's binary download failed in the restricted environment; installed Windows hosted acceptance passed.
+- Seven-step completion re-estimated at about 52%, below 80%. Continue from actual feature gaps; do not count tests as product completeness.
+- Remaining: broader real-PDF diversity and reading-order/table handling, custom saved styles (schema change needs separate approval), URL/reference search integration (external access needs approval), and customer/physical buyer-PC acceptance. No OCR, external service, schema change, merge or deployment authorized.
+- The isolated checkout `C:/Users/haein/Documents/Codex/astra_pdf_redesigner-work-continued` has local commits/worktree changes and was preserved after automatic approval review rejected its deletion because local HEAD differs from remote; do not delete until explicitly approved.
+
+# HANDOFF — Astra PDF Redesigner
+## Historical checkpoint — continuation at `b640c3f`
 
 1. Branch `integration/astra-commercial-core`, current remote code SHA `b640c3fc1e654edccd5c4234fa31810e0105e993`; PR #9 remains Draft/open/unmerged. Original local project untouched. Current isolated clone: `C:\Users\haein\Documents\Codex\astra_pdf_redesigner-work-continued`.
 2. Current STEP3 implementation links omitted text snippets to estimated source coordinates, allows exact manual recovery, paginates long warning lists, and preserves short numeric fragments with numeric-token boundary/count checks. These fields remain transient; no project schema change. The prior `추출 원문 복원` flow remains undoable with renewed review consent. Feature commits: `df4e473`, `d3a7d17`, `4d4349e`, `484d43f`, `d4f2ecd`.

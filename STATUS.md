@@ -1,5 +1,15 @@
-## 2026-10-29 — Remote closeout at `b640c3f`\n\n- GitHub branch HEAD: `b640c3fc1e654edccd5c4234fa31810e0105e993`; previous numeric UI regression commit `29b2c7d` had a Windows syntax failure because a GitHub API blob was truncated. Corrected source was committed as `b640c3f`; rerun exact-SHA CI is pending.\n- Local `npm test` 86/86 PASS; numeric source-recovery UI E2E passed in Chrome and Edge with the verified pre-commit source. Do not count the new commit hosted acceptance as PASS until runs complete.\n\n# STATUS — Astra PDF Redesigner
-## 2026-10-29 — STEP3 source omission recovery (latest `b640c3f`)
+## 2026-10-29 — STEP3/4 continuation closeout (verified code `602c0a4`)
+
+- Branch `integration/astra-commercial-core` HEAD `602c0a410b7f2146717569b39019b152b51e2b8d`; Draft PR #9 remains open and unmerged.
+- STEP3 retains short Korean source fragments for omission matching. Windows acceptance covers cancel, reselect, a late PDF response after switching documents, no stale URL/draft, and identical V2 stores before/after reload.
+- STEP4 compares saved and candidate A4 previews side by side. Print output contains only the candidate once; actual Windows Electron audit found 2 A4 pages, both fixture markers, and the expected raster image. Apply/undo restored the exact prior design and content.
+- Exact-SHA Chrome+Edge workflow [#40843605820](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40843605820) SUCCESS; Windows installer workflow [#40843605882](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/40843605882) SUCCESS, including 8/8 A4 layouts, M09-D, install/uninstall, and 0.1.0→0.1.1 document/image preservation.
+- Local Node tests 87/87 PASS; TypeScript/Vite build PASS; `desktop:verify` 15/15 PASS; helper syntax/whitespace checks PASS. Local Electron binary launch was SKIP: Electron's binary fetch failed in this network-restricted environment. Hosted Windows acceptance passed.
+- Reassessment: approximately 52% across the original seven steps; the 80% goal is not met. No increase is attributed to test quantity. User PDF variety, custom saved design library, URL/search references, customer machine acceptance and production hardening remain.
+- No OCR, paid/external API, model download, schema migration, merge, deployment, or sale. Original local project remains untouched.
+
+# STATUS — Astra PDF Redesigner
+## Historical record — STEP3 source omission recovery (`b640c3f`)
 
 - Current branch: `integration/astra-commercial-core`; code/test SHA `b640c3fc1e654edccd5c4234fa31810e0105e993`; PR #9 remains Draft/open/unmerged. Source restore began at `4a7094c`; current source omission features are `df4e473`, `d3a7d17`, `4d4349e`, `484d43f`, and `d4f2ecd`.
 - STEP3 missing-text warnings link each missing PDF.js text item to its estimated source-page location and let the user add that exact source text as an editable manual block. Adding it revokes prior review consent and participates in undo/redo. Transient source coordinates and the extracted-text baseline are excluded from project conversion.
