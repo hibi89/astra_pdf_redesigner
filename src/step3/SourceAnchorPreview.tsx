@@ -32,12 +32,12 @@ export default function SourceAnchorPreview({url,origin,blockId}:Props){
         if(!surface||stopped)return;
         const ctx=surface.getContext('2d');
         if(!ctx)throw Error('Canvas unavailable');
-        surface.width=Math.ceil(viewport.width);
-        surface.height=Math.ceil(viewport.height);
         // PDF.js cannot render into one canvas concurrently. A new source
         // selection may arrive before the cancelled render has settled.
         await renderBarrier.current;
         if(stopped)return;
+        surface.width=Math.ceil(viewport.width);
+        surface.height=Math.ceil(viewport.height);
         rendering=page.render({canvas:surface,canvasContext:ctx,viewport});
         const renderPromise=rendering.promise;
         renderBarrier.current=renderPromise.catch(()=>{});
