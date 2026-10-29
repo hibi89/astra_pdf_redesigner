@@ -573,3 +573,10 @@
 - **중간 실패와 수정:** `a1c0885` Edge 테스트는 fixture 초기 테마를 report로 고정한 가정 때문에 실패했다. 동적 baseline으로 고쳐 `83045a6`에서 STEP4 PDF/내용 보존은 통과했지만 비교 패널 열린 동안 일반 테마 선택이 미리보기에 반영되지 않는 결함을 발견했다. 컨트롤 동기화와 회귀를 추가한 최종 SHA `273db07ae851e8d2420da39688b5fa84641ce65d`에서 Chrome·Edge·Windows 모두 성공했다. 테스트를 생략하지 않았다.
 - **미검증·제약:** 실제 고객 PDF 5–10개 및 구매자 PC 수용은 미검증. 7단계 추정은 약 44%, 판매/Production NO-GO. 사용자 스타일 저장/재사용 스키마, 무제한 디자인 조합, OCR은 미완료/승인대기.
 - **보존:** 사용자 지시에 따라 GitHub 통합 브랜치에서만 반영. main·PR #3/#4·사용자 원본/데이터·배포 설정을 변경·병합하지 않았다.
+
+## 2026-10-29 — STEP3 block split/merge and STEP4 multi-undo
+
+- Functional SHA `97a5720d9b130d8137e9cfc068ba7b192954d3e1` adds cursor-based extraction block split, guarded same-role adjacent merge that preserves boundary whitespace, and per-document STEP4 apply undo history (up to 20 entries); existing V2 schema unchanged.
+- Local verification: `npm test` 91/91 PASS, `npm run build` PASS, `npm run desktop:verify` 16/16 PASS. Exact-SHA Chrome/Edge run #40860736343 SUCCESS; Windows installer/upgrade run #40860736332 SUCCESS, including IndexedDB preservation.
+- Seven-stage completion reassessed at ~52%, below 80%. Customer PDFs and physical buyer PC remain unverified; durable design presets need schema approval; OCR remains excluded. No merge, deployment or sale.
+- Local temporary worktree contains preserved line-ending-only edits and patch backups; it was not deleted. No original project/user data was modified.
