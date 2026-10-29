@@ -233,7 +233,8 @@ test('M09-E STEP4 same-document style compare and exact undo run in browser and 
   const browser=fs.readFileSync(path.resolve(__dirname,'step3-browser.mjs'),'utf8');
   for(const marker of ['prepareInstalledStyleComparison','finishInstalledStyleComparison',
     'exerciseInstalledStyleComparison','data-style-compare-theme','data-style-compare-apply',
-    'data-style-compare-undo','renderLocalPdf()'])
+    'data-style-compare-undo','data-style-compare-side-by-side','style-compare-gallery',
+    'auditOutputPdf','audit.pages!==2','renderLocalPdf()'])
     assert.ok(helper.includes(marker),'STEP4 installed comparison missing '+marker);
   for(const marker of ['readStyleSnapshot','step4-compare-alternate.pdf','A4',
     'compareBefore.content','comparedRestored.design','eight presets'])

@@ -3,6 +3,7 @@
 // All files are temporary synthetic PDFs on GitHub-hosted Windows CI only.
 const fs=require('node:fs/promises');
 const path=require('node:path');
+const {auditOutputPdf}=require('./pdf-output-audit.cjs');
 
 const BASIC_THEMES=Object.freeze(['report','minimal','diary','compact','editorial','ledger','brief','folio']);
 async function chooseTheme(themeIndex){
@@ -58,7 +59,19 @@ async function prepareInstalledStyleComparison(){
     throw Error('STEP4 ephemeral compare theme was not rendered');
   if(!themes[originalIndex].checked||document.querySelector('.save-chip')?.textContent!==saveStatus)
     throw Error('STEP4 ephemeral comparison wrote a design change');
-  return {originalIndex,targetIndex,originalClass,sourceText,saveStatus};
+  document.querySelector('[data-style-compare-side-by-side]')?.click();
+  for(let i=0;i<100;i++){
+    if(document.querySelectorAll('[data-style-compare-gallery] .style-compare-card .project-paper').length===2)break;
+    await new Promise(resolve=>setTimeout(resolve,100));
+  }
+  const originalPreview=document.querySelector('[data-style-compare-original] .project-paper');
+  const candidatePreview=document.querySelector('[data-style-compare-candidate] .project-paper');
+  if(!originalPreview?.classList.contains('paper-theme-'+['report','minimal','diary','compact','editorial','ledger','brief','folio'][originalIndex])||
+     !candidatePreview?.classList.contains('paper-theme-'+targetTheme))
+    throw Error('STEP4 side-by-side gallery did not show the saved design beside its candidate');
+  if(!themes[originalIndex].checked||document.querySelector('.save-chip')?.textContent!==saveStatus)
+    throw Error('STEP4 side-by-side gallery changed the saved design');
+  return {originalIndex,targetIndex,originalClass,sourceText,saveStatus,sideBySide:true};
 }
 async function finishInstalledStyleComparison(expected){
   const apply=document.querySelector('[data-style-compare-apply]');
@@ -92,9 +105,12 @@ async function exerciseInstalledStyleComparison(win,renderLocalPdf){
   const bytes=await renderLocalPdf(); // actual installed Electron PDF while the comparison theme is still ephemeral
   if(bytes.length<3000||bytes.subarray(0,5).toString('ascii')!=='%PDF-')
     throw Error('STEP4 comparison preview did not produce a valid actual PDF');
+  const audit=await auditOutputPdf(bytes,['ASTRA_PDF_PAGE_ONE_7401','ASTRA_PDF_PAGE_TWO_7402']);
+  if(audit.pages!==2||audit.missing.length||audit.issues.length)
+    throw Error('STEP4 side-by-side print must emit the candidate A4 document once: '+JSON.stringify(audit));
   await win.webContents.executeJavaScript(
     '('+finishInstalledStyleComparison.toString()+')('+JSON.stringify(expected)+')',true);
-  console.log('PASS STEP4 INSTALLED SAME-DOCUMENT COMPARE/APPLY/UNDO: alternate ephemeral PDF valid; existing design/content restored');
+  console.log('PASS STEP4 INSTALLED SAME-DOCUMENT COMPARE/APPLY/UNDO: side-by-side previews match actual current/candidate layouts, one 2-page A4 candidate printed, existing design/content restored');
 }
 async function runInstalledEightLayoutAcceptance(win,renderLocalPdf){
   if(process.env.GITHUB_ACTIONS!=='true'||process.platform!=='win32'||!process.env.RUNNER_TEMP)
