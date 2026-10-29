@@ -287,7 +287,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
         </details>}
         <div className="step3-block-review">
           {draft.pages.map(page=><details key={page.number} open={page.number===1}>
-            <summary>원본 {page.number}페이지 — {page.blocks.length}개 텍스트 · {page.charCount.toLocaleString('ko-KR')}자 · 새 문서 제외 {page.blocks.filter(b=>b.excluded).length}개 · 이미지 {page.images.length}/{page.imageCount}복원{page.omittedImages?' · 미복원 '+page.omittedImages+'건':''}{page.vectorPaintCount?' · 벡터 경로 '+page.vectorPaintCount+'회':''}{page.reviewFlags.length?' · 추출 품질 확인 '+page.reviewFlags.length+'건':''}</summary>
+            <summary>원본 {page.number}페이지 — <span data-step3-page-block-count={page.number}>{page.blocks.length}</span>개 텍스트 · <span data-step3-page-char-count={page.number}>{page.blocks.reduce((count,block)=>count+block.text.length,0).toLocaleString('ko-KR')}</span>자 · 새 문서 제외 {page.blocks.filter(b=>b.excluded).length}개 · 이미지 {page.images.length}/{page.imageCount}복원{page.omittedImages?' · 미복원 '+page.omittedImages+'건':''}{page.vectorPaintCount?' · 벡터 경로 '+page.vectorPaintCount+'회':''}{page.reviewFlags.length?' · 추출 품질 확인 '+page.reviewFlags.length+'건':''}</summary>
             {page.reviewFlags.map((flag,i)=><p className="warning" role="status" data-step3-page-review-flag={page.number} key={i}>{flag}</p>)}
             <SourceTextMissingWarning page={page} onShow={item=>{setSourceBlock(null);setSourceImage(null);setMissingSource(item);}}
               onRecover={item=>{addManualBlock(page.number,item.text,item.origin);setSourceBlock(null);setSourceImage(null);}}/>
