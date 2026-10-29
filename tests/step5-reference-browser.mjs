@@ -78,5 +78,9 @@ try{
 }finally{
   try{ws?.close();}catch{}
   await browser.close().catch(()=>{});
-  rmSync(profile,{recursive:true,force:true});
+  try{rmSync(profile,{recursive:true,force:true,maxRetries:12,retryDelay:250});}
+  catch(error){
+    if(!['ENOTEMPTY','EBUSY','EPERM'].includes(error?.code))throw error;
+    console.warn('WARN STEP5: Chromium temporary profile cleanup deferred ('+error.code+')');
+  }
 }

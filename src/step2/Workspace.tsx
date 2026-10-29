@@ -11,6 +11,7 @@ import {isReviewed,reviewableBlocks,reviewableOrigin,reviewSignature} from '../s
 import {analyzePdfTypography,analyzeReferencePixels,type PdfTypographyMetrics,type ReferenceMetrics} from '../step5/referenceAnalysis.ts';
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import {imageDimensions,imageType} from './images.ts';
+import {pdfOutputTextMarkers} from './outputMarkers.ts';
 
 const allThemes=[...THEMES,
   {id:'compact' as const,label:'컴팩트 리포트',description:'짧은 제목과 밀도 높은 문서'},
@@ -288,7 +289,7 @@ export default function Workspace({onLegacy}:Props){
       const missing=imageRefs.filter(id=>!w.assets.some(a=>a.id===id)||!urls[id]);if(missing.length)throw new Error('일부 이미지 파일이 누락되었습니다. 인쇄 전 문서를 확인해 주세요.');
       await Promise.all([...document.querySelectorAll<HTMLImageElement>('.project-paper img')].map(image=>image.decode()));
       await document.fonts.ready;
-      await savePdfFromEditor();
+      await savePdfFromEditor(pdfOutputTextMarkers(doc));
     }catch(e){w.setError(e instanceof Error?`인쇄 준비 실패: ${e.message}`:'인쇄를 준비할 수 없습니다.');}finally{setPrintBusy(false);}
   };
   return <>

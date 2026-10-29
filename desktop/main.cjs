@@ -88,6 +88,13 @@ function configureSession(){
 
 
 const PDF_OPTIONS=Object.freeze({pageSize:'A4',preferCSSPageSize:true,printBackground:true,displayHeaderFooter:false});
+function validOutputMarkers(value){
+  if(value===undefined)return[];
+  if(!Array.isArray(value)||value.length>7000||value.some(marker=>typeof marker!=='string'||marker.length>96)||
+     value.reduce((total,marker)=>total+marker.length,0)>600000)
+    throw Error('Invalid PDF output review markers');
+  return value;
+}
 async function renderLocalPdf(){
   if(!mainWindow||mainWindow.isDestroyed())throw Error('No active document window');
   const pdf=await mainWindow.webContents.printToPDF(PDF_OPTIONS);
@@ -96,9 +103,10 @@ async function renderLocalPdf(){
   return pdf;
 }
 function registerPdfSaving(){
-  ipcMain.handle('astra:save-pdf',async(event)=>{
+  ipcMain.handle('astra:save-pdf',async(event,rawExpectedTextMarkers)=>{
     if(!mainWindow||event.sender!==mainWindow.webContents||
        !isAppUrl(event.sender.getURL()))throw Error('Blocked untrusted PDF export request');
+    const expectedTextMarkers=validOutputMarkers(rawExpectedTextMarkers);
     // Smoke mode uses an isolated test-only directory. It never opens the
     // native picker or writes into the user's Documents directory.
     if(SMOKE){
@@ -117,7 +125,7 @@ function registerPdfSaving(){
     }
     try{
       const data=await renderLocalPdf();
-      const audit=await auditOutputPdf(data);
+      const audit=await auditOutputPdf(data,expectedTextMarkers);
       if(audit.issues.length){
         const choice=await dialog.showMessageBox(mainWindow,{
           type:'warning',title:'PDF 출력 검수',
@@ -237,7 +245,7 @@ async function runPdfContentAcceptance(win){
      !fixture?.text?.includes(MARKERS.second)||!fixture?.text?.includes(MARKERS.korean))
     throw Error('Synthetic printable preview was not ready');
   const bytes=await renderLocalPdf();
-  const audit=await auditOutputPdf(bytes);
+  const audit=await auditOutputPdf(bytes,Object.values(MARKERS));
   if(audit.pages!==2||audit.issues.length)
     throw Error('Installed Electron output preflight rejected synthetic A4 fixture: '+JSON.stringify(audit));
   await fs.writeFile(output,bytes,{flag:'wx'});
