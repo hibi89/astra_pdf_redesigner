@@ -31,6 +31,9 @@ test('STEP3: excluded running text remains reviewable but is omitted from the im
   const output=project.content.sections.flatMap(section=>section.blocks)
     .filter(block=>block.kind!=='image').map(block=>block.text).join('\n');
   assert.ok(output.includes('BODY_MARKER_102'));
+  assert.equal(header.sourceText,header.text,'Extracted baseline should be retained for reversible review edits');
+  assert.equal(project.content.sections[0].blocks.some(block=>'sourceText' in block),false,
+    'Transient extraction baseline must not enter the persisted document model');
   assert.ok(!output.includes('RUNNING_HEADER_101'));
   assert.ok(!output.includes('RUNNING_FOOTER_103'));
   assert.equal(header.text,'RUNNING_HEADER_101');
