@@ -1,5 +1,5 @@
 import {useEffect,useMemo,useRef,useState} from 'react';
-import {createSourceTextMatcher,insertManualPdfBlockAtSourcePosition,nextSourceReviewCount,PDF_IMPORT_LIMITS,PDF_SOURCE_REVIEW_BATCH,visibleSourceReviewItems,type PdfDraft,type PdfDraftBlock,type PdfDraftPage,type PdfOrigin,type PdfRole} from './structure.ts';
+import {createSourceTextMatcher,insertManualPdfBlockAtSourcePosition,nextSourceReviewCount,sortSourceReviewItems,PDF_IMPORT_LIMITS,PDF_SOURCE_REVIEW_BATCH,visibleSourceReviewItems,type PdfDraft,type PdfDraftBlock,type PdfDraftPage,type PdfOrigin,type PdfRole} from './structure.ts';
 import {extractLocalPdf} from './pdf.ts';
 import SourceAnchorPreview from './SourceAnchorPreview.tsx';
 
@@ -27,7 +27,7 @@ function SourceTextMissingWarning({page,onShow,onRecover}:{page:PdfDraftPage;onS
   const entries=useMemo(()=>{
     const remaining=new Map<string,number>();
     for(const text of missing)remaining.set(text,(remaining.get(text)??0)+1);
-    return page.sourceTextItems.flatMap((text,index)=>{
+    return sortSourceReviewItems(page.sourceTextItems.flatMap((text,index)=>{
       const normalized=text.normalize('NFC').replace(/\s+/gu,'');
       const key=normalized.length>96?normalized.slice(0,96)+'…':normalized;
       const count=remaining.get(key)??0;
@@ -35,7 +35,7 @@ function SourceTextMissingWarning({page,onShow,onRecover}:{page:PdfDraftPage;onS
       remaining.set(key,count-1);
       const origin=page.sourceTextOrigins[index];
       return origin?[{id:`${page.number}-${index}`,text,origin}]:[];
-    });
+    }));
   },[missing,page.number,page.sourceTextItems,page.sourceTextOrigins]);
   if(!missing.length)return null;
   return <div className="warning" role="status" data-step3-source-text-missing={page.number}>
