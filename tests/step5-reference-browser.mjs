@@ -67,6 +67,9 @@ try{
   await evaluate("(()=>{const select=document.querySelector('.reference-style-panel select');Object.getOwnPropertyDescriptor(HTMLSelectElement.prototype,'value').set.call(select,'2');select.dispatchEvent(new Event('change',{bubbles:true}))})()");
   await eventually(()=>evaluate("document.querySelector('.reference-style-panel select')?.value"),page=>page==='2');
   await eventually(()=>evaluate("document.querySelector('.reference-image-row strong')?.textContent"),name=>name?.includes('2페이지'));
+  const pdfTextCount=await evaluate("Number(document.querySelector('[data-reference-pdf-text-count]')?.getAttribute('data-reference-pdf-text-count'))");
+  assert.ok(pdfTextCount>0,'Embedded PDF text analysis should be available when the selected page contains selectable text');
+  assert.ok(await evaluate("document.querySelector('.reference-pdf-typography')?.textContent.includes('OCR은 수행하지 않습니다')"),'PDF analysis must disclose that it does not OCR scanned pixels');
   const afterPdfAnalysis=await evaluate(stored);
   assert.deepEqual(afterPdfAnalysis.content,before.content,'PDF reference analysis must preserve source content');
   await evaluate("document.querySelector('.reference-style-panel .text-button').click()");

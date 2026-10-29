@@ -11,6 +11,41 @@ export interface ReferenceMetrics {
   suggestedTextSize: DesignSettings['textSize'];
 }
 
+export interface PdfTypographyMetrics {
+  selectableTextCount: number;
+  medianFontSize: number | null;
+  largestToMedianRatio: number | null;
+  largestFragmentAlignment: 'left' | 'center' | 'right' | 'unavailable';
+}
+
+/** Derive rough typography/layout clues from embedded PDF text; never OCR pixels. */
+export function analyzePdfTypography(
+  items: readonly { str: string; transform: readonly number[]; width: number }[],
+  pageWidth: number,
+): PdfTypographyMetrics {
+  const fragments = items.flatMap(item => {
+    const size = Math.hypot(item.transform[2] ?? NaN, item.transform[3] ?? NaN);
+    const x = item.transform[4] ?? NaN;
+    if (!item.str.trim() || !Number.isFinite(size) || size <= 0 || !Number.isFinite(x) || !Number.isFinite(item.width)) return [];
+    return [{ size, center: x + item.width / 2 }];
+  });
+  if (!fragments.length || !Number.isFinite(pageWidth) || pageWidth <= 0) {
+    return { selectableTextCount: fragments.length, medianFontSize: null, largestToMedianRatio: null, largestFragmentAlignment: 'unavailable' };
+  }
+  const sizes = fragments.map(fragment => fragment.size).sort((a, b) => a - b);
+  const middle = Math.floor(sizes.length / 2);
+  const medianFontSize = sizes.length % 2 ? sizes[middle] : (sizes[middle - 1] + sizes[middle]) / 2;
+  const largest = fragments.reduce((best, fragment) => fragment.size > best.size ? fragment : best);
+  const centerRatio = largest.center / pageWidth;
+  const largestFragmentAlignment = centerRatio < .38 ? 'left' : centerRatio > .62 ? 'right' : 'center';
+  return {
+    selectableTextCount: fragments.length,
+    medianFontSize,
+    largestToMedianRatio: medianFontSize > 0 ? largest.size / medianFontSize : null,
+    largestFragmentAlignment,
+  };
+}
+
 /** Analyze only raster pixels. This intentionally does not infer text, fonts, or semantic layout. */
 export function analyzeReferencePixels(data: Uint8ClampedArray, width: number, height: number): ReferenceMetrics {
   if (!Number.isInteger(width) || !Number.isInteger(height) || width < 1 || height < 1 ||
