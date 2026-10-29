@@ -675,3 +675,10 @@
 8. **원본/백업/비밀:** docs/ASTRA_ORIGINAL_ROADMAP.txt, docs/BLUEPRINT.md, 원본 2 PNG, STEP1 v1/STEP2 V2 및 Codex 로컬 미커밋 원본 유지. 고객 파일 CI 업로드·외부 전송 금지. Git 이력으로 복원 가능.
 9. **다음 작업/완료/승인:** 실제 STEP4 코드/저장 구조 확인 → 2개 설계안 비용/안전/유지보수 비교 → 안전한 최소 사용자 동선 한 단위 구현·실PDF 출력 테스트. 주요 설계/스키마 변경 전 승인, 테스트 exact SHA 기록, 현재 43%는 품질/판매율이 아님. 사용자 실PDF 5~10개/물리 PC는 자료 동의 후 검증하되 독립 개발 계속.
 10. **기록 시각/범위:** 2026-10-27 18:40 KST, Codex [보고 댓글](https://github.com/hibi89/astra_pdf_redesigner/pull/9#issuecomment-6438491093)·기능 SHA/CI 직접 확인. [GPT-6 지시](https://github.com/hibi89/astra_pdf_redesigner/pull/9#issuecomment-6438610031). 본 작업은 문서/운영 체계 갱신, 신규 기능 검증은 아직 수행하지 않음.
+
+## 2026-10-29 — STEP3/4 continuation handoff (verified code `97a5720`)
+
+- Functional/test SHA `97a5720d9b130d8137e9cfc068ba7b192954d3e1` is on `integration/astra-commercial-core`; Draft PR #9 remains open/unmerged. Documentation commit `6054c0e7aafe6ecf04566d882f0658818c93ca79` records this update.
+- Added STEP3 cursor split and safe adjacent merge with whitespace preservation; STEP4 per-document multi-apply undo. Local unit tests 91/91, build, desktop verify 16/16 PASS. Chrome/Edge #40860736343 and Windows installer/upgrade #40860736332 SUCCESS. Windows checks include IndexedDB preservation; no local physical Windows GUI test was claimed.
+- 7-step estimate ~52%, under 80%. Real customer PDF acceptance, physical buyer PC, durable custom style persistence/schema approval, and remaining STEP5/6/7 scope are outstanding. No OCR/external service/model download/schema change/merge/deploy/sale.
+- Preserve the isolated workspace: local line-ending deltas and patch backups remain; do not delete them or the older isolated checkout.
