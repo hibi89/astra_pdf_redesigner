@@ -15,6 +15,6 @@ export function pdfOutputTextMarkers(doc:ProjectDocument):string[]{
   });
 }
 
-export function pdfOutputHasImages(doc:ProjectDocument):boolean{
-  return visibleSections(doc).some(section=>section.blocks.some(block=>block.kind==='image'));
+export function pdfOutputImageCount(doc:ProjectDocument):number{
+  return visibleSections(doc).reduce((count,section)=>count+section.blocks.filter(block=>block.kind==='image').length,0);
 }

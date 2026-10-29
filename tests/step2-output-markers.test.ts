@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import {blankProject} from '../src/step2/model.ts';
-import {pdfOutputHasImages,pdfOutputTextMarkers} from '../src/step2/outputMarkers.ts';
+import {pdfOutputImageCount,pdfOutputTextMarkers} from '../src/step2/outputMarkers.ts';
 
 test('STEP4 PDF export markers cover visible document text and image captions without changing stored content',()=>{
   const doc=blankProject('2026-01-01T00:00:00.000Z');
@@ -23,7 +23,7 @@ test('STEP4 PDF export markers cover visible document text and image captions wi
   assert.ok(markers.includes('Subheadingmarker67890'));
   assert.ok(markers.includes('Figurecaption24680'));
   assert.ok(!markers.some(marker=>marker.includes('Emptysection')));
-  assert.equal(pdfOutputHasImages(doc),true);
+  assert.equal(pdfOutputImageCount(doc),1);
   assert.deepEqual(doc,before,'Creating transient output markers must not mutate project content');
 });
 
@@ -38,9 +38,11 @@ test('STEP4 long output blocks are sampled at both ends within bounded marker si
   assert.ok(markers.every(marker=>marker.length<=96));
 });
 
-test('STEP4 image preflight only expects a raster when a visible image block exists',()=>{
+test('STEP4 image preflight counts only visible image blocks',()=>{
   const doc=blankProject('2026-01-01T00:00:00.000Z');
-  assert.equal(pdfOutputHasImages(doc),false);
+  assert.equal(pdfOutputImageCount(doc),0);
   doc.content.sections[0].blocks=[{id:'img',kind:'image',assetId:'asset',caption:'',alignment:'center',size:'medium'}];
-  assert.equal(pdfOutputHasImages(doc),true);
+  assert.equal(pdfOutputImageCount(doc),1);
+  doc.content.sections[0].blocks.push({id:'img2',kind:'image',assetId:'asset',caption:'',alignment:'center',size:'medium'});
+  assert.equal(pdfOutputImageCount(doc),2);
 });
