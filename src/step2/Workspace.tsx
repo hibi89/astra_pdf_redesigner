@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState, type CSSProperties } from 'react'
 import { PALETTE, THEMES } from '../types.ts';
 import { LIMITS, documentAssetIds, moveItem, newBlock, newSection, visibleSections, type ContentBlock, type DocumentSection, type ImageAsset, type ProjectDocument } from './model.ts';
 import { downloadProject } from './projectFile.ts';
+import {hasDesktopPdfExport,savePdfFromEditor} from '../desktopPdf.ts';
 import { useWorkspace } from './useWorkspace.ts';
 
 const allThemes=[...THEMES,{id:'compact' as const,label:'컴팩트 리포트',description:'짧은 제목과 밀도 높은 문서'}];
@@ -64,13 +65,13 @@ export default function Workspace({onLegacy}:Props){
       const missing=imageRefs.filter(id=>!w.assets.some(a=>a.id===id)||!urls[id]);if(missing.length)throw new Error('일부 이미지 파일이 누락되었습니다. 인쇄 전 문서를 확인해 주세요.');
       await Promise.all([...document.querySelectorAll<HTMLImageElement>('.project-paper img')].map(image=>image.decode()));
       await document.fonts.ready;
-      window.print();
+      await savePdfFromEditor();
     }catch(e){w.setError(e instanceof Error?`인쇄 준비 실패: ${e.message}`:'인쇄를 준비할 수 없습니다.');}finally{setPrintBusy(false);}
   };
   return <>
     <header className="app-header no-print"><div className="brand"><span className="brand-icon">A</span><div><h1>아스트라 PDF 리디자이너</h1><p>STEP 2 · 개인 문서 제작기</p></div></div>
       <div className="print-actions"><button className="secondary-button" disabled={!editable} onClick={()=>void operation(async()=>{await w.flush();onLegacy();})}>기존 회고록 편집</button>
-      <button className="print-button" disabled={!editable} onClick={()=>void print()}>{printBusy?'준비 중…':'PDF 저장 / 인쇄'}</button><span>인쇄 창에서 ‘PDF로 저장’을 선택하세요.</span></div>
+      <button className="print-button" disabled={!editable} onClick={()=>void print()}>{printBusy?'준비 중…':hasDesktopPdfExport()?'PDF 파일 저장':'PDF 저장 / 인쇄'}</button><span>{hasDesktopPdfExport()?'저장할 PDF 파일의 위치를 선택하세요.':'인쇄 창에서 ‘PDF로 저장’을 선택하세요.'}</span></div>
     </header>
     <main className="app-layout project-layout">
       <aside className="editor-column no-print">

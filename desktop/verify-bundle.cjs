@@ -1,0 +1,14 @@
+'use strict';
+const fs=require('node:fs');
+const path=require('node:path');
+const assert=require('node:assert/strict');
+const dist=path.resolve(__dirname,'../dist'),entry=path.join(dist,'index.html');
+assert.ok(fs.existsSync(entry),'Build first: dist/index.html missing');
+const html=fs.readFileSync(entry,'utf8');
+assert.match(html,/id="root"/);
+assert.doesNotMatch(html,/src="\/assets\//);
+assert.doesNotMatch(html,/href="\/assets\//);
+const refs=[...html.matchAll(/(?:src|href)="(\.\/assets\/[^"]+)"/g)].map(m=>m[1]);
+assert.ok(refs.some(ref=>ref.endsWith('.js')),'Built JS asset missing');
+for(const ref of refs)assert.ok(fs.existsSync(path.join(dist,ref.slice(2))),'Missing asset: '+ref);
+console.log('PASS DESKTOP BUNDLE: local relative JS/CSS and HTML assets exist');

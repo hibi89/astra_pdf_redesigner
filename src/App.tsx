@@ -4,6 +4,7 @@ import {
   type DesignSettings, type PersistedState, type Retrospective,
 } from './types';
 import { clearState, initialState, saveState } from './storage';
+import {hasDesktopPdfExport,savePdfFromEditor} from './desktopPdf.ts';
 
 interface FormProps { value: Retrospective; onChange: (patch: Partial<Retrospective>) => void }
 function InputForm({ value, onChange }: FormProps) {
@@ -103,6 +104,7 @@ export function DocumentView({ document, design }: DocumentProps) {
 export default function App() {
   const [state, setState] = useState<PersistedState>(initialState);
   const [saveWarning, setSaveWarning] = useState(false);
+  const [pdfError,setPdfError]=useState('');
   const [resetWarning, setResetWarning] = useState(false);
   const skipNextSave = useRef(false);
 
@@ -136,16 +138,22 @@ export default function App() {
     setState({ schemaVersion: 1, document: defaultDocument(), design: defaultDesign() });
   };
 
+  const printPdf=async()=>{
+    setPdfError('');
+    try{await savePdfFromEditor();}
+    catch(error){setPdfError(error instanceof Error?error.message:'PDF를 저장하지 못했습니다.');}
+  };
   return (
     <>
       <header className="app-header no-print"><div className="brand">
         <span className="brand-icon" aria-hidden="true">A</span>
         <div><h1>아스트라 PDF 리디자이너</h1><p>나만의 회고록을 단정한 문서로</p></div>
-      </div><div className="print-actions"><button className="print-button" onClick={() => window.print()}>PDF 저장 / 인쇄</button>
-        <span>인쇄 창에서 ‘PDF로 저장’을 선택하세요.</span>
+      </div><div className="print-actions"><button className="print-button" onClick={() => void printPdf()}>{hasDesktopPdfExport()?"PDF 파일 저장":"PDF 저장 / 인쇄"}</button>
+        <span>{hasDesktopPdfExport()?'저장할 PDF 파일의 위치를 선택하세요.':'인쇄 창에서 ‘PDF로 저장’을 선택하세요.'}</span>
       </div></header>
       <main className="app-layout">
         <aside className="editor-column no-print">
+          {pdfError && <p className="warning" role="alert">{pdfError}</p>}
           {saveWarning && <p className="warning" role="alert">로컬 저장에 실패했습니다. 편집은 가능하지만 새로고침 시 내용이 사라질 수 있습니다.</p>}
           {resetWarning && <p className="warning" role="alert">저장 데이터 삭제에 실패했습니다. 브라우저의 사이트 데이터를 확인해 주세요.</p>}
           <div className="toolbar"><button className="secondary-button" onClick={loadExample}>예시 불러오기</button><button className="text-button" onClick={reset}>초기화</button></div>

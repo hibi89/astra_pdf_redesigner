@@ -81,3 +81,25 @@ STEP 2 병합·완료 전 필요한 **원본 지침 §16의 21개 수동 검사*
 ## STEP 2 병합 후 CI 상태 (2026-10-19)
 
 PR #2는 `main`에 병합되었으며 merge SHA는 `f1ad26320b12b07019b115f77f8cf55e62f1e7e6`입니다. 초기 `main` CI에서 Edge CDP 연결 실패가 발생했으나, 브라우저 WebSocket 직접 연결과 독립 Edge runner로 복구한 코드 SHA `a54c10a89e486cf4ab0f922f9ee6aa83fffe013a`의 [Actions #39157047624](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39157047624)는 **Chrome·Edge 포함 전체 SUCCESS**입니다. [상세 복구 보고서](docs/STEP2_POSTMERGE_MAIN_CI_RECOVERY_2026-10-19.md) 및 [Windows 수동 검수표](docs/STEP2_WINDOWS_ACCEPTANCE_AND_MERGE_GATE_2026-10-19.md)를 참고하세요. **Windows Edge 실제 PDF와 Windows 장문/이미지 PDF 육안 수용 검수는 미완료**이며, STEP 3은 아직 미착수입니다.
+
+## Windows 설치형 GUI 시험판 (2026-10-19, STEP1·STEP2)
+
+- 안정된 main의 STEP1·STEP2를 Electron 설치형으로 포장해 CLI/Node.js/VS Code 없이 프로그램 아이콘으로 실행할 수 있게 설계했습니다.
+- PDF 파일 저장 버튼에 Windows 기본 저장 위치 선택창을 연결했습니다. 웹 브라우저에서는 기존 인쇄 창을 사용합니다.
+- Windows 자동 검증: https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39206761720 (Node 19/19, desktop 3/3, 개발용 Electron 및 패키징된 EXE의 실제 PDF 디스크 저장 PASS).
+- 최신 unsigned 개발용 설치 파일: https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39206761720/artifacts/12165323804 (7일 보존).
+- 상세 검증/미완료: docs/WINDOWS_DESKTOP_NATIVE_PDF_EXPORT_2026-10-19.md.
+- 기존 브라우저의 문서는 앱으로 자동 이동하지 않습니다. STEP2의 .localdoc.json 내보내기/가져오기를 사용해야 합니다.
+- Windows 실사용 설치/삭제, PDF 대화상자 수동 검증, 한글/장문·이미지 실제 품질은 미완료입니다. STEP3 PDF 업로드/리디자인 기능은 이 설치형 시험판에 아직 포함되지 않습니다.
+
+### Windows 설치형 실제 설치·제거 회귀 — 2026-10-19
+
+- [Windows Actions #39208406254](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39208406254): NSIS **실제 무인 설치/제거**, 두 바로가기 생성/정리, 설치된 Electron GUI+PDF 생성, 합성 앱 데이터 보존 **PASS**. Node19/19·desktop4/4.
+- 최신 개발용 unsigned [설치 파일 다운로드(7일 보존)](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39208406254/artifacts/12165714586).
+- [NSIS 실제 설치·제거 수용 기록](docs/WINDOWS_NSIS_INSTALL_UNINSTALL_ACCEPTANCE_2026-10-19.md). GUI 마법사·PDF 저장 대화상자 수동 조작 및 실제 A4/한글/장문 육안은 미검증. STEP3 PDF 가져오기는 미포함.
+
+### Windows 설치형 PDF 실제 내용 검증 — 2026-10-19
+
+- [Windows Actions #39210319075](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39210319075) **SUCCESS**: 설치된 Windows EXE에서 합성 한글 2페이지/이미지 PDF 생성 후 PDF.js 재검증. A4 2쪽·한글/숫자/라틴 마커 **6/6**, 래스터 이미지 그리기 1건. 기존 테스트 Node19/19·desktop5/5, 설치/제거 자동검증 PASS.
+- [최신 unsigned Windows 설치 파일 Artifact](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39210319075/artifacts/12167606844) — 7일 보존. 이전 설치 링크/해시는 이전 시험판 기록입니다.
+- [PDF 실제 내용 검증 기록](docs/WINDOWS_PDF_CONTENT_ACCEPTANCE_2026-10-19.md). 합성 미리보기 테스트이며 고객 실제 문서/STEP3 가져오기·한글 폰트와 표의 육안/수동 저장창은 여전히 미검증.
