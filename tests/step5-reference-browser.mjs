@@ -47,6 +47,14 @@ try{
   await uploadImage();
   await eventually(()=>evaluate("Boolean(document.querySelector('[data-reference-analysis]'))"));
   await eventually(()=>evaluate("document.querySelector('.project-paper')?.classList.contains('paper-theme-minimal')"));
+  // A local STEP5 reference can be exported as a bounded STEP4 preset without raw reference pixels/PDF text.
+  const exportedReference=await evaluate("(async()=>{const original=URL.createObjectURL.bind(URL);URL.createObjectURL=blob=>{if(blob.type==='application/json')window.__astraReferencePreset=blob;return original(blob);};const click=HTMLAnchorElement.prototype.click;HTMLAnchorElement.prototype.click=function(){if(this.download==='astra-style-preset.json')return;return click.call(this);};document.querySelector('[data-step5-reference-preset-export]').click();return await window.__astraReferencePreset.text()})()");
+  const portable=JSON.parse(exportedReference);
+  assert.equal(portable.format,'astra-style-preset');
+  assert.equal(portable.design.theme,'minimal');
+  assert.equal(portable.design.accent,'#3f644d');
+  assert.deepEqual(Object.keys(portable.design).sort(),['accent','font','textSize','theme']);
+  assert.doesNotMatch(exportedReference,/reference.png|reference.pdf|private|imageData|sourceTextItems/);
   const previewState=await evaluate(stored);
   assert.deepEqual(previewState.content,before.content);assert.deepEqual(previewState.design,before.design);
   await evaluate("document.querySelector('.reference-style-panel .text-button').click()");
