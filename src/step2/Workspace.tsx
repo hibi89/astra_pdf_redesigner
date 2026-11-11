@@ -69,9 +69,9 @@ export function ProjectPreview({doc,urls,previewTheme,previewDesign}: {doc:Proje
   </article>;
 }
 
-interface Props {onLegacy:()=>void}
+interface Props {onLegacy:()=>void;onOwnerReview?:()=>void}
 interface StyleUndoEntry {before:DesignSettings;applied:DesignSettings}
-export default function Workspace({onLegacy}:Props){
+export default function Workspace({onLegacy,onOwnerReview}:Props){
   const w=useWorkspace();
   const [docsOpen,setDocsOpen]=useState(true),[busy,setBusy]=useState(false),[printBusy,setPrintBusy]=useState(false);
   const [localModelStatus,setLocalModelStatus]=useState('모델 미설치 · 로컬 규칙 검수만 사용 가능');
@@ -334,7 +334,7 @@ export default function Workspace({onLegacy}:Props){
   };
   return <>
     <header className="app-header no-print"><div className="brand"><span className="brand-icon">A</span><div><h1>아스트라 PDF 리디자이너</h1><p>STEP 2·3 · 로컬 문서 및 PDF 가져오기</p></div></div>
-      <div className="print-actions"><button className="secondary-button" disabled={!editable} onClick={()=>void operation(async()=>{await w.flush();onLegacy();})}>기존 회고록 편집</button>
+      <div className="print-actions">{onOwnerReview&&<button type="button" className="secondary-button" data-step7-open-pdf-review onClick={onOwnerReview}>최종 PDF 원본 대조</button>}<button className="secondary-button" disabled={!editable} onClick={()=>void operation(async()=>{await w.flush();onLegacy();})}>기존 회고록 편집</button>
       <button className="print-button" disabled={!editable} onClick={()=>void print()}>{printBusy?'준비 중…':hasDesktopPdfExport()?'PDF 파일 저장':'PDF 저장 / 인쇄'}</button><span>{hasDesktopPdfExport()?'저장할 PDF 파일의 위치를 선택하세요.':'인쇄 창에서 ‘PDF로 저장’을 선택하세요.'}</span></div>
     </header>
     <main className="app-layout project-layout studio-layout">
