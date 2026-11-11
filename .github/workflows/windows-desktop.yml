@@ -4,6 +4,7 @@ on:
     branches:
       - 'feature/windows-electron-*'
       - 'integration/astra-commercial-core'
+      - 'feature/astra-p52-to-p70-20261111'
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
