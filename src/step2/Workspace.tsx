@@ -13,6 +13,7 @@ import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import {imageDimensions,imageType} from './images.ts';
 import {pdfOutputImageCount,pdfOutputTextMarkers} from './outputMarkers.ts';
 import {downloadStylePreset,importStylePreset} from '../step4/stylePreset.ts';
+import {makeSourceReviewReceipt,downloadSourceReviewReceipt} from '../step3/reviewReceipt.ts';
 
 const allThemes=[...THEMES,
   {id:'compact' as const,label:'컴팩트 리포트',description:'짧은 제목과 밀도 높은 문서'},
@@ -367,6 +368,20 @@ export default function Workspace({onLegacy}:Props){
               <button className="text-button" type="button" onClick={closeSourceReview}>원본 비교 닫기</button>
             </div>
             <p className="help-text">원본: {sourceReview.fileName} · 현재 문서 전용 임시 미리보기입니다. 오른쪽 A4 결과와 비교하세요.</p>
+            <div className="toolbar project-toolbar">
+              <button type="button" className="secondary-button" data-source-review-receipt
+                disabled={!editable} onClick={()=>{if(!doc)return;void operation(async()=>{
+                  const source=sourceReviewRef.current;
+                  if(!source||source.documentId!==doc.id)throw new Error('현재 원본 문서가 없습니다.');
+                  const snapshot=JSON.stringify(doc.content);
+                  const receipt=await makeSourceReviewReceipt(doc,reviewMarks,source.blob);
+                  if(sourceReviewRef.current!==source||w.document?.id!==doc.id||
+                     JSON.stringify(w.document.content)!==snapshot)
+                    throw new Error('원본 검토 도중 문서가 변경되었습니다. 다시 시도하세요.');
+                  downloadSourceReviewReceipt(receipt);
+                });}}>검토 근거 JSON 저장</button>
+            </div>
+            <p className="help-text">영수증은 원본·문서 내용의 SHA-256, 출처 연결 블록 수와 수동 확인 상태만 기록합니다. 원문 내용은 포함하지 않으며 자동 원문 보존 인증서나 사용자 승인이 아닙니다.</p>
             <div className="m06-source-progress" role="status" data-m06-progress>
               수동 대조 {completedReview}/{originBlocks.length}개 완료
               {completedReview<originBlocks.length&&<strong> · 검수 미완료 — 누락·순서·수치 확인 필요</strong>}
