@@ -12,6 +12,7 @@ import {analyzePdfTypography,analyzeReferencePixels,suggestPdfBodyTextSize,type 
 import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import {imageDimensions,imageType} from './images.ts';
 import {pdfOutputImageCount,pdfOutputTextMarkers} from './outputMarkers.ts';
+import {downloadStylePreset,importStylePreset} from '../step4/stylePreset.ts';
 
 const allThemes=[...THEMES,
   {id:'compact' as const,label:'컴팩트 리포트',description:'짧은 제목과 밀도 높은 문서'},
@@ -78,6 +79,10 @@ export default function Workspace({onLegacy}:Props){
   const [styleCompareGalleryOpen,setStyleCompareGalleryOpen]=useState(false);
   const [previewTheme,setPreviewTheme]=useState<{documentId:string;theme:ThemeId}|null>(null);
   const [styleUndo,setStyleUndo]=useState<Record<string,StyleUndoEntry[]>>({});
+  const [portableStyle,setPortableStyle]=useState<{documentId:string;name:string;design:DesignSettings}|null>(null);
+  const [portableStyleName,setPortableStyleName]=useState('내 스타일');
+  const [portableStyleError,setPortableStyleError]=useState('');
+  const portableStyleInput=useRef<HTMLInputElement|null>(null);
   const [referenceMetrics,setReferenceMetrics]=useState<ReferenceMetrics|null>(null);
   const [referencePdfTypography,setReferencePdfTypography]=useState<(PdfTypographyMetrics&{suggestedTextSize:DesignSettings['textSize']})|null>(null);
   const [referencePreview,setReferencePreview]=useState<{documentId:string;design:DesignSettings}|null>(null);
@@ -143,7 +148,9 @@ export default function Workspace({onLegacy}:Props){
   const urls=useAssetUrls(w.assets);
   const doc=w.document;
   const referencePreviewDesign=doc&&referencePreview?.documentId===doc.id?referencePreview.design:undefined;
-  const previewThemeId=doc&&previewTheme?.documentId===doc.id&&!referencePreviewDesign?previewTheme.theme:undefined;
+  const portablePreviewDesign=doc&&portableStyle?.documentId===doc.id?portableStyle.design:undefined;
+  const activePreviewDesign=referencePreviewDesign??portablePreviewDesign;
+  const previewThemeId=doc&&previewTheme?.documentId===doc.id&&!activePreviewDesign?previewTheme.theme:undefined;
   const selectedCompareTheme=previewThemeId??doc?.design.theme;
   const currentStyleUndo=doc?styleUndo[doc.id]?.at(-1):undefined;
   const canUndoStyle=!!doc&&!!currentStyleUndo&&sameDesign(doc.design,currentStyleUndo.applied);
@@ -194,6 +201,22 @@ export default function Workspace({onLegacy}:Props){
     setPreviewTheme({documentId:doc.id,theme:before.theme});
     setStyleUndo(previous=>({...previous,[doc.id]:(previous[doc.id]??[]).slice(0,-1)}));
   };
+  const applyPortableStyle=()=>{
+    if(!doc||!portablePreviewDesign||!editable||sameDesign(doc.design,portablePreviewDesign))return;
+    const before=structuredClone(doc.design),applied=structuredClone(portablePreviewDesign);
+    rememberStyleUndo(doc.id,before,applied);
+    editDoc(d=>({...d,design:applied}));
+    setPortableStyle(null);setPortableStyleError('');
+  };
+  const loadPortableStyle=async(file:File)=>{
+    try{
+      const preset=await importStylePreset(file);
+      if(!doc||!editable)return;
+      clearReference();closeStyleCompare();
+      setPortableStyle({documentId:doc.id,name:preset.name,design:preset.design});
+      setPortableStyleError('');
+    }catch(error){setPortableStyle(null);setPortableStyleError(error instanceof Error?error.message:'프리셋을 열 수 없습니다.');}
+  };
   const cancelReferenceRender=()=>{const task=referenceRenderTask.current;referenceRenderTask.current=null;try{task?.cancel();}catch{}};
   const clearReference=()=>{
     cancelReferenceRender();
@@ -205,7 +228,7 @@ export default function Workspace({onLegacy}:Props){
   };
   useEffect(()=>()=>{if(referenceImage?.url)URL.revokeObjectURL(referenceImage.url);},[referenceImage]);
   useEffect(()=>()=>{referenceVersion.current++;cancelReferenceRender();const session=referencePdfSession.current;referencePdfSession.current=null;if(session)void session.loading.destroy().catch(()=>{});},[]);
-  useEffect(()=>{clearReference();},[doc?.id]);
+  useEffect(()=>{clearReference();setPortableStyle(null);setPortableStyleError('');},[doc?.id]);
   const analyzeReference=async(file:File)=>{
     clearReference();const version=referenceVersion.current;setReferenceError('');
     if(file.type==='application/pdf'||/\.pdf$/i.test(file.name)){
@@ -415,7 +438,7 @@ export default function Workspace({onLegacy}:Props){
           <section className="style-compare-card" data-style-compare-candidate><h3>비교 후보 · {allThemes.find(theme=>theme.id===previewThemeId)?.label}</h3><div className="style-compare-card-viewport"><ProjectPreview doc={doc} urls={urls} previewDesign={{...doc.design,theme:previewThemeId}}/></div></section>
         </div>:null}
         <div className={`paper-surface ${doc&&styleCompareOpen&&styleCompareGalleryOpen&&previewThemeId?'style-compare-print-candidate':''}`}>
-          {doc?<ProjectPreview doc={doc} urls={urls} previewTheme={previewThemeId} previewDesign={referencePreviewDesign}/>:<div className="document">{w.ready?'문서를 열 수 없습니다.':'불러오는 중…'}</div>}
+          {doc?<ProjectPreview doc={doc} urls={urls} previewTheme={previewThemeId} previewDesign={activePreviewDesign}/>:<div className="document">{w.ready?'문서를 열 수 없습니다.':'불러오는 중…'}</div>}
         </div>
         <p className="print-tip no-print">Chrome/Edge에서 PDF로 저장, A4, 머리글·바닥글 해제를 확인하세요. 인쇄는 이미지 로딩이 완료될 때까지 기다립니다.</p>
       </div>
@@ -467,6 +490,32 @@ export default function Workspace({onLegacy}:Props){
                 </button>}
               </div>
             </>}
+          </section>
+          <section className="panel portable-style-panel" aria-label="디자인 프리셋 가져오기 및 내보내기" data-step4-portable-preset>
+            <div className="panel-heading"><h2>디자인 프리셋 파일</h2><span className="panel-caption">문서 내용은 포함하지 않습니다</span></div>
+            <p className="help-text">테마·색상·본문 크기·글꼴만 JSON으로 저장하거나 다른 기기에서 가져옵니다. 원본 PDF와 저장된 문서는 가져오기로 변경되지 않습니다.</p>
+            <label className="field">프리셋 이름
+              <input aria-label="디자인 프리셋 이름" value={portableStyleName} maxLength={60} disabled={!editable}
+                onChange={event=>setPortableStyleName(event.target.value)}/>
+            </label>
+            <div className="toolbar project-toolbar">
+              <button type="button" className="secondary-button" data-style-preset-export disabled={!editable}
+                onClick={()=>{try{downloadStylePreset(portableStyleName,doc.design);setPortableStyleError('');}catch(error){setPortableStyleError(error instanceof Error?error.message:'프리셋을 저장할 수 없습니다.');}}}>현재 디자인 파일로 저장</button>
+              <button type="button" className="secondary-button" data-style-preset-import disabled={!editable}
+                onClick={()=>portableStyleInput.current?.click()}>프리셋 파일 가져오기</button>
+            </div>
+            <input ref={portableStyleInput} className="hidden-input" type="file" accept=".json,application/json" aria-label="프리셋 JSON 선택"
+              onChange={event=>{const file=event.target.files?.[0];event.target.value='';if(file)void loadPortableStyle(file);}}/>
+            {portableStyleError&&<p role="alert" className="warning" data-style-preset-error>{portableStyleError}</p>}
+            {portablePreviewDesign&&portableStyle?.documentId===doc.id&&<div data-style-preset-preview>
+              <p role="status">"{portableStyle.name}" 임시 미리보기 · 실제 문서 저장 전 확인하세요.</p>
+              <div className="toolbar project-toolbar">
+                <button type="button" className="secondary-button" data-style-preset-apply
+                  disabled={!editable||sameDesign(doc.design,portablePreviewDesign)} onClick={applyPortableStyle}>미리보기 디자인 적용</button>
+                <button type="button" className="text-button" data-style-preset-cancel
+                  onClick={()=>{setPortableStyle(null);setPortableStyleError('');}}>가져오기 취소</button>
+              </div>
+            </div>}
           </section>
           <section className="panel reference-style-panel" aria-label="이미지 기반 디자인 제안">
             <div className="panel-heading"><h2>참고 이미지에서 디자인 제안</h2></div>
