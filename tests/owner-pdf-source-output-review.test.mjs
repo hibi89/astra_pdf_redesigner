@@ -75,6 +75,14 @@ test('P71 non-A4 output only flags risk without corrupting source',async()=>{
  assert.ok(r.issues.includes('OUTPUT_NON_A4_PAGES'));
  assert.equal(sha(f.source),old);
 });
+test('P71 duplicated extra raster draw is flagged even when all text tokens match',async()=>{
+ const f=fixture();
+ const r=await reviewPdfPair(f.source,f.output,f.receipt,f.project,sha(f.output));
+ assert.equal(r.missing_source_tokens,0);
+ assert.equal(r.missing_numeric_tokens,0);
+ assert.ok(r.issues.includes('RASTER_DRAW_COUNT_CHANGED'));
+ assert.equal(r.status,'POTENTIAL_CONTENT_DIFFERENCES_REVIEW_REQUIRED');
+});
 test('P71 wrong independent output SHA is refused',async()=>{
  const f=fixture();
  await assert.rejects(reviewPdfPair(f.source,f.output,f.receipt,f.project,'0'.repeat(64)),/BLOCKED/);

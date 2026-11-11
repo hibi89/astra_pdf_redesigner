@@ -121,7 +121,7 @@ export async function reviewPdfPair(sourceBytes,outputBytes,receiptBytes,project
  if(compared.missing_source_tokens)issues.push('SOURCE_TOKENS_NOT_FOUND_IN_OUTPUT');
  if(compared.missing_numeric_tokens)issues.push('SOURCE_NUMERIC_TOKENS_NOT_FOUND');
  if(compared.extra_output_tokens)issues.push('OUTPUT_HAS_ADDITIONAL_TOKENS');
- if(source.rasterDraws>output.rasterDraws)issues.push('RASTER_DRAW_COUNT_DECREASED');
+ if(source.rasterDraws!==output.rasterDraws)issues.push('RASTER_DRAW_COUNT_CHANGED');
  if(output.nonA4)issues.push('OUTPUT_NON_A4_PAGES');
  return Object.freeze({
   format:REVIEW_FORMAT,

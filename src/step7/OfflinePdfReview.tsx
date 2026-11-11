@@ -142,6 +142,8 @@ export default function OfflinePdfReview(){
      '자동 텍스트 대조상 차이가 없지만 실제 충실도는 확인되지 않았습니다.'}</p>
     <dl>
      <dt>PDF 페이지</dt><dd>원본 {report.sourcePages} / 결과 {report.outputPages}</dd>
+     <dt>원본 PDF SHA256</dt><dd><code>{report.sourceSha256}</code></dd>
+     <dt>결과 PDF SHA256</dt><dd><code>{report.outputSha256}</code></dd>
      <dt>선택텍스트</dt><dd>원본 {report.sourceTokens}토큰 / 결과 {report.outputTokens}토큰</dd>
      <dt>누락된 원본 토큰</dt><dd>{report.missingTokens}</dd>
      <dt>숫자 포함 누락 토큰</dt><dd>{report.missingNumericTokens}</dd>
