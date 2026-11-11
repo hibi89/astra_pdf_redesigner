@@ -1,0 +1,86 @@
+// STEP4 portable preset: actual browser export/import, ephemeral preview, undo, A4, V2 integrity.
+import assert from 'node:assert/strict';
+import {mkdtempSync,rmSync,writeFileSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+import {execFileSync} from 'node:child_process';
+import {launchBrowser} from './browser-process.mjs';
+const binary=process.env.CHROME_PATH||'chromium';
+const url=process.env.SMOKE_URL||'http://127.0.0.1:4173';
+const profile=mkdtempSync(join(tmpdir(),'astra-style-preset-'));
+const browser=launchBrowser(binary,profile,'STEP4 portable preset');
+let ws,seq=0;
+const pending=new Map();
+const pause=ms=>new Promise(resolve=>setTimeout(resolve,ms));
+async function eventually(fn,predicate=x=>Boolean(x),timeout=25000){
+ const end=Date.now()+timeout;let last;
+ while(Date.now()<end){last=await fn();if(predicate(last))return last;await pause(120);}
+ throw Error('STEP4 preset browser timeout: '+JSON.stringify(last));
+}
+try{
+ ws=await browser.connect();
+ ws.addEventListener('message',event=>{
+  const message=JSON.parse(event.data);
+  if(message.id&&pending.has(message.id)){const item=pending.get(message.id);pending.delete(message.id);
+   if(message.error)item.reject(Error(message.error.message));else item.resolve(message.result);}
+ });
+ const request=(method,params={},sessionId)=>new Promise((resolve,reject)=>{
+  const id=++seq;pending.set(id,{resolve,reject});
+  ws.send(JSON.stringify({id,method,params,...(sessionId?{sessionId}:{})}));
+ });
+ const {targetId}=await request('Target.createTarget',{url});
+ const {sessionId}=await request('Target.attachToTarget',{targetId,flatten:true});
+ const send=(method,params={})=>request(method,params,sessionId);
+ await send('Page.enable');await send('Runtime.enable');
+ const evaluate=async expression=>{
+  const result=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});
+  if(result.exceptionDetails)throw Error(JSON.stringify(result.exceptionDetails));
+  return result.result.value;
+ };
+ await eventually(()=>evaluate("Boolean(document.querySelector('.doc-list-item.active')&&document.querySelector('[data-step4-portable-preset]'))"));
+ const stored="(async()=>{const db=await new Promise((resolve,reject)=>{const r=indexedDB.open('astra-pdf-redesigner:v2');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});try{const id=await new Promise((resolve,reject)=>{const r=db.transaction('meta','readonly').objectStore('meta').get('activeDocumentId');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});return await new Promise((resolve,reject)=>{const r=db.transaction('documents','readonly').objectStore('documents').get(id);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}finally{db.close()}})()";
+ const before=await eventually(()=>evaluate(stored),x=>Boolean(x?.id&&x?.design&&x?.content));
+ await evaluate("(()=>{window.__astraPresetBlob=null;const original=URL.createObjectURL.bind(URL);URL.createObjectURL=blob=>{if(blob.type==='application/json')window.__astraPresetBlob=blob;return original(blob)};HTMLAnchorElement.prototype.click=function(){window.__astraPresetDownload=this.download;};document.querySelector('[data-style-preset-export]').click();})()");
+ const exported=await evaluate("(async()=>({filename:window.__astraPresetDownload,json:await window.__astraPresetBlob?.text()}))()");
+ assert.equal(exported.filename,'astra-style-preset.json');
+ const preset=JSON.parse(exported.json);
+ assert.deepEqual(preset.design,before.design);
+ assert.deepEqual(Object.keys(preset).sort(),['design','format','name','version']);
+ assert.doesNotMatch(exported.json,/sections|PRIVATE|assetId|sourcePdf/);
+ const newTheme=before.design.theme==='report'?'folio':'report';
+ preset.design.theme=newTheme;
+ const selected=JSON.stringify(preset);
+ const load=async json=>evaluate("(()=>{const f=new File(["+JSON.stringify(json)+"],'portable.json',{type:'application/json'});const transfer=new DataTransfer();transfer.items.add(f);const input=document.querySelector('[data-step4-portable-preset] input[type=file]');input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));return true;})()");
+ await load(selected);
+ await eventually(()=>evaluate("document.querySelector('[data-style-preset-preview]')?.textContent.includes('미리보기')"));
+ assert.equal(await evaluate("document.querySelector('.project-paper')?.classList.contains("+JSON.stringify('paper-theme-'+newTheme)+")"),true);
+ assert.deepEqual(await evaluate(stored),before,'Import/preview must not persist design or document');
+ await evaluate("document.querySelector('[data-style-preset-cancel]').click()");
+ await eventually(()=>evaluate("!document.querySelector('[data-style-preset-preview]')"));
+ assert.equal(await evaluate("document.querySelector('.project-paper')?.classList.contains("+JSON.stringify('paper-theme-'+before.design.theme)+")"),true);
+ assert.deepEqual(await evaluate(stored),before,'Cancel must keep saved source intact');
+ await load(selected);
+ await eventually(()=>evaluate("Boolean(document.querySelector('[data-style-preset-apply]:not(:disabled)'))"));
+ await evaluate("document.querySelector('[data-style-preset-apply]').click()");
+ const applied=await eventually(()=>evaluate(stored),d=>d?.design?.theme===newTheme);
+ assert.deepEqual(applied.content,before.content,'Apply must only change design, never PDF-derived content');
+ const pdf=await send('Page.printToPDF',{printBackground:true,preferCSSPageSize:true});
+ const bytes=Buffer.from(pdf.data,'base64');
+ assert.equal(bytes.subarray(0,5).toString(),'%PDF-');
+ const output=join(profile,'style-preset-a4.pdf');writeFileSync(output,bytes);
+ const pdfinfo=execFileSync('pdfinfo',[output],{encoding:'utf8'});
+ assert.match(pdfinfo,/Page size:\s+595(?:\.\d+)? x 842(?:\.\d+)? pts|Page size:\s+595\.2\d* x 841\.8\d* pts/);
+ await evaluate("[...document.querySelectorAll('.reference-style-panel button')].find(b=>b.textContent==='직전 디자인 적용 취소').click()");
+ const restored=await eventually(()=>evaluate(stored),d=>JSON.stringify(d?.design)===JSON.stringify(before.design));
+ assert.deepEqual(restored.content,before.content);
+ await load(JSON.stringify({...preset,ownerApproval:'GRANTED'}));
+ await eventually(()=>evaluate("Boolean(document.querySelector('[data-style-preset-error]'))"));
+ assert.equal(await evaluate("Boolean(document.querySelector('[data-style-preset-preview]'))"),false);
+ assert.deepEqual(await evaluate(stored),before,'Tampered preset must not modify stored document');
+ console.log('PASS STEP4 PORTABLE STYLE: file export/import, transient preview/cancel, apply/undo, A4 PDF, tamper and original V2 preservation');
+}finally{
+ try{ws?.close();}catch{}
+ await browser.close().catch(()=>{});
+ try{rmSync(profile,{recursive:true,force:true,maxRetries:12,retryDelay:250});}
+ catch(error){if(!['ENOTEMPTY','EBUSY','EPERM'].includes(error?.code))throw error;}
+}
