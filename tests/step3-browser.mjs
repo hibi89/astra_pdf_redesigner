@@ -277,6 +277,21 @@ try{
   assert.equal(sourceHash,createHash('sha256').update(Buffer.from(pdf.data,'base64')).digest('hex'),
     'Retained in-memory original differs byte-for-byte from uploaded PDF');
   console.log('PASS M02 SOURCE AFTER COMMIT: same document id, active iframe, byte-identical local PDF; no source DB storage');
+  // The owner explicitly downloads only hashes and manual-review counts, never the PDF content.
+  await evaluate("(()=>{const original=URL.createObjectURL.bind(URL);URL.createObjectURL=blob=>{if(blob.type==='application/json')window.__astraSourceReviewReceipt=blob;return original(blob);};const click=HTMLAnchorElement.prototype.click;HTMLAnchorElement.prototype.click=function(){if(this.download==='astra-source-review.json'){window.__astraSourceReceiptFilename=this.download;return;}return click.call(this);};document.querySelector('[data-source-review-receipt]').click()})()");
+  const receiptRaw=await eventually(()=>evaluate("window.__astraSourceReviewReceipt?.text()"));
+  const receipt=JSON.parse(receiptRaw);
+  assert.equal(receipt.format,'astra-local-source-review-receipt');
+  assert.equal(receipt.source_sha256,sourceHash);
+  assert.equal(receipt.source_size_bytes,Buffer.from(pdf.data,'base64').length);
+  assert.equal(receipt.acknowledged_block_count,1);
+  assert.equal(receipt.status,'REVIEW_INCOMPLETE');
+  assert.equal(receipt.source_fidelity_certified,false);
+  assert.equal(receipt.owner_approval,'NOT_GRANTED');
+  assert.equal(receipt.external_transfer,false);
+  assert.equal(await evaluate("window.__astraSourceReceiptFilename"),'astra-source-review.json');
+  assert.ok(!receiptRaw.includes('STEP3_TEST_BEGIN_7519'),'Downloaded receipt must not contain source PDF text');
+  console.log('PASS STEP7 REVIEW RECEIPT: real source SHA256, explicit review count, no content or false certification');
   // M02: Capture actual REPORT print before switching to MINIMAL, not CSS-only assertions.
   const reportPdf=await send('Page.printToPDF',{preferCSSPageSize:true,printBackground:true});
   const reportPath=join(dir,'m02-report.pdf');
