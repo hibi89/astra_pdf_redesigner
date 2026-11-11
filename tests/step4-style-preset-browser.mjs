@@ -78,7 +78,7 @@ try{
  await load(JSON.stringify({...preset,ownerApproval:'GRANTED'}));
  await eventually(()=>evaluate("Boolean(document.querySelector('[data-style-preset-error]'))"));
  assert.equal(await evaluate("Boolean(document.querySelector('[data-style-preset-preview]'))"),false);
- assert.deepEqual(await evaluate(stored),before,'Tampered preset must not modify stored document');
+ assert.deepEqual(await evaluate(stored),restored,'Tampered preset must not modify the document after completed apply/undo');
  console.log('PASS STEP4 PORTABLE STYLE: file export/import, transient preview/cancel, apply/undo, A4 PDF, tamper and original V2 preservation');
 }finally{
  try{ws?.close();}catch{}
