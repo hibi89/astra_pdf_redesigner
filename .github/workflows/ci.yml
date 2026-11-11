@@ -1,7 +1,7 @@
 name: Astra STEP 1 + STEP 2 validation
 on:
   push:
-    branches: [main, 'feature/step2-*', 'feature/step3-*', 'integration/astra-commercial-core', 'feature/astra-p52-to-p70-20261111']
+    branches: [main, 'feature/step2-*', 'feature/step3-*', 'integration/astra-commercial-core', 'feature/astra-p52-to-p70-20261111', 'feature/astra-p71-pdf-source-parity-20261112']
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
