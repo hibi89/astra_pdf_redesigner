@@ -181,7 +181,7 @@ export default function Workspace({onLegacy}:Props){
   const editDoc=(fn:(prev:ProjectDocument)=>ProjectDocument)=>w.edit(fn);
   const openStyleCompare=()=>{
     if(!doc)return;
-    clearReference();
+    setPortableStyle(null);clearReference();
     setPreviewTheme({documentId:doc.id,theme:doc.design.theme});
     setStyleCompareGalleryOpen(false);
     setStyleCompareOpen(true);
@@ -231,7 +231,7 @@ export default function Workspace({onLegacy}:Props){
   useEffect(()=>()=>{referenceVersion.current++;cancelReferenceRender();const session=referencePdfSession.current;referencePdfSession.current=null;if(session)void session.loading.destroy().catch(()=>{});},[]);
   useEffect(()=>{clearReference();setPortableStyle(null);setPortableStyleError('');},[doc?.id]);
   const analyzeReference=async(file:File)=>{
-    clearReference();const version=referenceVersion.current;setReferenceError('');
+    setPortableStyle(null);clearReference();const version=referenceVersion.current;setReferenceError('');
     if(file.type==='application/pdf'||/\.pdf$/i.test(file.name)){
       if(file.size>30*1024*1024){setReferenceError('참고 PDF 파일은 30 MiB 이하여야 합니다.');return;}
       const signature=new Uint8Array(await file.slice(0,5).arrayBuffer());
@@ -467,12 +467,12 @@ export default function Workspace({onLegacy}:Props){
         {doc ? <>
           <section className="panel settings-panel"><div className="panel-heading"><h2>디자인 설정</h2><span className="panel-caption">원문은 변경하지 않습니다</span></div>
             <div className="setting-block"><h3>테마</h3><div className="theme-options">{allThemes.map(theme=><label className={`theme-option ${doc.design.theme===theme.id?'selected':''}`} key={theme.id}><input disabled={!editable} type="radio" name="v2theme" checked={doc.design.theme===theme.id} onChange={()=>{
-              clearReference();editDoc(d=>({...d,design:{...d.design,theme:theme.id}}));
+              setPortableStyle(null);clearReference();editDoc(d=>({...d,design:{...d.design,theme:theme.id}}));
               if(styleCompareOpen&&doc)setPreviewTheme({documentId:doc.id,theme:theme.id});
             }}/><span><strong>{theme.label}</strong><small>{theme.description}</small></span></label>)}</div></div>
-            <div className="setting-block"><h3>포인트 색상</h3><div className="swatches">{PALETTE.map(color=><label title={color.label} className={`swatch-wrap ${doc.design.accent===color.value?'active':''}`} key={color.value}><input disabled={!editable} type="radio" name="v2accent" aria-label={color.label} checked={doc.design.accent===color.value} onChange={()=>{clearReference();editDoc(d=>({...d,design:{...d.design,accent:color.value}}));}}/><span className="swatch" style={{backgroundColor:color.value}}/></label>)}</div></div>
-            <div className="setting-block"><h3>본문 크기</h3><div className="segmented">{(['small','medium','large'] as const).map((size,i)=><label className={doc.design.textSize===size?'on':''} key={size}><input disabled={!editable} type="radio" name="v2size" checked={doc.design.textSize===size} onChange={()=>{clearReference();editDoc(d=>({...d,design:{...d.design,textSize:size}}));}}/>{['작게','보통','크게'][i]}</label>)}</div></div>
-            <div className="setting-block"><h3>폰트</h3><div className="segmented">{(['sans','serif'] as const).map((font,i)=><label className={doc.design.font===font?'on':''} key={font}><input disabled={!editable} type="radio" name="v2font" checked={doc.design.font===font} onChange={()=>{clearReference();editDoc(d=>({...d,design:{...d.design,font}}));}}/>{['고딕','명조'][i]}</label>)}</div><p className="help-text">설치된 시스템 글꼴에 따라 표시가 달라집니다.</p></div>
+            <div className="setting-block"><h3>포인트 색상</h3><div className="swatches">{PALETTE.map(color=><label title={color.label} className={`swatch-wrap ${doc.design.accent===color.value?'active':''}`} key={color.value}><input disabled={!editable} type="radio" name="v2accent" aria-label={color.label} checked={doc.design.accent===color.value} onChange={()=>{setPortableStyle(null);clearReference();editDoc(d=>({...d,design:{...d.design,accent:color.value}}));}}/><span className="swatch" style={{backgroundColor:color.value}}/></label>)}</div></div>
+            <div className="setting-block"><h3>본문 크기</h3><div className="segmented">{(['small','medium','large'] as const).map((size,i)=><label className={doc.design.textSize===size?'on':''} key={size}><input disabled={!editable} type="radio" name="v2size" checked={doc.design.textSize===size} onChange={()=>{setPortableStyle(null);clearReference();editDoc(d=>({...d,design:{...d.design,textSize:size}}));}}/>{['작게','보통','크게'][i]}</label>)}</div></div>
+            <div className="setting-block"><h3>폰트</h3><div className="segmented">{(['sans','serif'] as const).map((font,i)=><label className={doc.design.font===font?'on':''} key={font}><input disabled={!editable} type="radio" name="v2font" checked={doc.design.font===font} onChange={()=>{setPortableStyle(null);clearReference();editDoc(d=>({...d,design:{...d.design,font}}));}}/>{['고딕','명조'][i]}</label>)}</div><p className="help-text">설치된 시스템 글꼴에 따라 표시가 달라집니다.</p></div>
           </section>
           <section className="panel style-compare-panel" aria-label="같은 문서 디자인 비교">
             <div className="panel-heading project-heading-row"><h2>같은 문서 디자인 비교</h2>
@@ -547,7 +547,7 @@ export default function Workspace({onLegacy}:Props){
               <div className="setting-block"><h3>강조 색상</h3><div className="swatches">{PALETTE.map(color=><button type="button" key={color.value} aria-label={color.label} aria-pressed={referencePreviewDesign.accent===color.value} className={`swatch-wrap ${referencePreviewDesign.accent===color.value?'active':''}`} onClick={()=>updateReferenceDesign({accent:color.value})}><span className="swatch" style={{backgroundColor:color.value}}/></button>)}</div></div>
               <div className="setting-block"><h3>본문 크기와 글꼴</h3><div className="segmented">{(['small','medium','large'] as const).map((size,i)=><button type="button" key={size} className={referencePreviewDesign.textSize===size?'on':''} aria-pressed={referencePreviewDesign.textSize===size} onClick={()=>updateReferenceDesign({textSize:size})}>{['작게','보통','크게'][i]}</button>)}{(['sans','serif'] as const).map((font,i)=><button type="button" key={font} className={referencePreviewDesign.font===font?'on':''} aria-pressed={referencePreviewDesign.font===font} onClick={()=>updateReferenceDesign({font})}>{['고딕','명조'][i]}</button>)}</div><p className="help-text">글꼴은 이미지에서 판별하지 않습니다. 직접 선택하세요.</p></div>
               <p className="style-compare-status" role="status">임시 A4 미리보기 · 변경 사항은 저장되지 않았습니다.</p>
-              <div className="toolbar project-toolbar"><button type="button" className="secondary-button" disabled={!editable||sameDesign(doc.design,referencePreviewDesign)} onClick={applyReferenceDesign}>제안 적용</button><button type="button" className="text-button" onClick={clearReference}>취소</button></div>
+              <div className="toolbar project-toolbar"><button type="button" className="secondary-button" disabled={!editable||sameDesign(doc.design,referencePreviewDesign)} onClick={applyReferenceDesign}>제안 적용</button><button type="button" className="secondary-button" data-step5-reference-preset-export disabled={!editable} onClick={()=>{try{downloadStylePreset('참고 스타일',referencePreviewDesign);setReferenceError('');}catch(error){setReferenceError(error instanceof Error?error.message:'프리셋 파일로 저장할 수 없습니다.');}}}>참고 스타일 파일로 저장</button><button type="button" className="text-button" onClick={clearReference}>취소</button></div>
             </div>}
             {currentStyleUndo&&<button type="button" className="text-button" disabled={!editable||!canUndoStyle} onClick={undoComparedTheme}>직전 디자인 적용 취소</button>}
           </section>
