@@ -4,8 +4,9 @@ import {createHash} from 'node:crypto';
 import {spawnSync} from 'node:child_process';
 import {mkdtempSync,rmSync,writeFileSync,readFileSync,symlinkSync} from 'node:fs';
 import {tmpdir} from 'node:os';
-import {join,resolve} from 'node:path';
-const root=resolve(new URL('../',import.meta.url).pathname);
+import {join} from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=fileURLToPath(new URL('../',import.meta.url));
 const script=join(root,'scripts','verify-source-review.mjs');
 const hash=(value:Buffer|string)=>createHash('sha256').update(value).digest('hex');
 const source=Buffer.from('%PDF-1.4\nSYNTHETIC_SOURCE_PRIVATE_112\n%%EOF','utf8');
@@ -57,12 +58,12 @@ test('STEP7 modified project body fails content hash without exposing contents',
 });
 test('STEP7 forged certificate, approval and impossible review counts are blocked',t=>{
  const mutants=[
-  x=>{x.receipt.owner_approval='GRANTED';},
-  x=>{x.receipt.source_fidelity_certified=true;},
+  x=>{(x.receipt as any).owner_approval='GRANTED';},
+  x=>{(x.receipt as any).source_fidelity_certified=true;},
   x=>{x.receipt.anchored_block_count=0;},
   x=>{x.receipt.stale_acknowledgement_count=99;},
-  x=>{x.receipt.extra='injected';},
-  x=>{x.receipt.status='ALL_ANCHORED_BLOCKS_ACKNOWLEDGED';}
+  x=>{(x.receipt as any).extra='injected';},
+  x=>{(x.receipt as any).status='ALL_ANCHORED_BLOCKS_ACKNOWLEDGED';}
  ];
  for(const [i,change] of mutants.entries()){
   const {result,report}=run(t,x=>change(x));
