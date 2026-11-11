@@ -276,3 +276,10 @@
 - **즉시 다음 개발:** STEP4 검증된 스타일 토큰/프리셋·복수 스타일 비교·저장/재사용·PDF 원문 보존. 설계 대안 2개 비교 후 기존 데이터 모델 변경/주요 설계 변경은 승인. 이후 승인 범위 내 STEP5 로컬 레퍼런스, STEP7 지원성 점검. 필수 안전 회귀는 기능과 동시에 진행.
 - **차단·미검증:** OCR, STEP6 외부 검색, 로컬 모델/런타임 다운로드, 유료 서비스, 실제 사용자 PDF/구매자 Windows 실기기, 서명/라이선스, PR 병합/배포. 사용자가 승인·자료 제공하기 전 외부 전송/변경 금지. Codex 로컬 Electron 시각 테스트 종료코드 2147483651은 CI 성공으로 덮지 말 것.
 - **지시 전달:** [PR #9 GPT-6 운영 재설계 댓글](https://github.com/hibi89/astra_pdf_redesigner/pull/9#issuecomment-6438610031). 진행 중인 Codex 세션 자동 수신 보장은 없으므로 다음 작업 시 직접 참조.
+
+## 2026-11-11 KST — ASTRA PDF 52%→70% 잠정 기능개발 목표 달성 (상용 RELEASE HOLD)
+- 별도 `feature/astra-p52-to-p70-20261111`만 수정, 기반 `integration/astra-commercial-core@b80830ab3219dbcf88556d60ce2c47c2dcec7764`. `main`/통합 브랜치/기존 Draft PR #3/#4/#9/원본 PDF·기존 IndexedDB/Production 변경 없음.
+- **기능범위 가중치:** STEP4 휴대용 스타일 프리셋 내보내기·가져오기·임시 미리보기·명시적 적용/되돌리기 (+5%p); STEP5 로컬 참고 이미지/PDF 분석 제안을 동일 프리셋으로 재사용(+4); STEP7 원본 PDF SHA-256·문서 내용 SHA-256·수동 출처 대조 현황 검토 영수증(+5); 로컬 원본 PDF·프로젝트 백업과 영수증 독립 무수정 검증(+4). **52→70% 잠정 엔지니어링 추정**, 기존 8개 기본 디자인·M09는 재가산하지 않음. 원본 7단계 설계 완성도 및 판매 준비율과 별개.
+- **GitHub 실제 exact-SHA `dab6e365f5c9d57e285eaf71cb840ecc41513c6e`:** [Chrome/Edge #42957762014](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/42957762014) SUCCESS 2/2, `npm test` **107 PASS/0 FAIL/0 SKIP**, `npm run build` PASS, 브라우저 실제 프리셋→A4→UNDO/원본 IndexedDB, STEP5 분석 프리셋, STEP7 원본 PDF 해시/검토 영수증 및 기존 STEP1~3 PDF 테스트 PASS. [Windows NSIS #42957762000](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/42957762000) SUCCESS, Node **107/107**, Desktop **16/16**, 패키지 EXE/설치·제거·업그레이드·M09-D 보존 PASS.
+- 최초 CI 타입 좁히기, A4 좌표 허용오차, `updatedAt` 테스트 baseline, Windows 경로 파싱 문제를 수정해 최종 정확 SHA에서 재검증함. 이전 실패를 최종 성공으로 대체하되 이력 보존. 독립 `verify-source-review.mjs`는 **원본·백업 바이트 해시 일치 검증**일 뿐 PDF 픽셀/내용 동일성·법적 사용자 인증이 아님. 검토 결과는 `source_fidelity_certified:false`, `owner_approval:NOT_GRANTED`.
+- OCR/STEP6 인터넷 탐색/실 GGUF 한국어 윤문과 사용권·CPU 성능, PRO20/BUSINESS30, 실제 고객 PDF 5~10건, 구매자 물리 Windows/서명·라이선스·지원 **미구현/미검증**. **전 SKU 출시 NO-GO, Vercel Production 미적용**. 상세 `docs/commercial/ASTRA_P70_PORTABLE_STYLE_RECEIPT_20261111.md`.
