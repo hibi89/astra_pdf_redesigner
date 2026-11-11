@@ -185,7 +185,7 @@ export function createReviewHtml(report){
 }
 export async function generateOwnerPdfReview({receipt,source,project,output,outputSha256,jsonPath,htmlPath}){
  if(![receipt,source,project,output,jsonPath,htmlPath].every(x=>typeof x==='string'&&path.isAbsolute(x)))deny();
- const inputs=[receipt,source,project,output].map(path.resolve);
+ const inputs=[receipt,source,project,output].map(value=>path.resolve(value));
  if(new Set(inputs).size!==4||!validHash(outputSha256))deny();
  const json=requireNewOutput(jsonPath,'.json',inputs),html=requireNewOutput(htmlPath,'.html',[...inputs,json]);
  if(json===html)deny();
