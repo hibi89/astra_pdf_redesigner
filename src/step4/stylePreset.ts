@@ -12,8 +12,10 @@ const exact=(value:unknown,keys:readonly string[]):value is Record<string,unknow
   Object.keys(value).length===keys.length&&keys.every(key=>Object.hasOwn(value,key));
 const deny=():never=>{throw new Error('지원하지 않는 디자인 프리셋이거나 파일이 손상되었습니다.');};
 function validated(name:unknown,design:unknown):{name:string;design:DesignSettings}{
-  if(typeof name!=='string'||name!==name.trim()||!SAFE_NAME.test(name)||
-     !exact(design,['theme','accent','textSize','font'])||!isDesign(design))deny();
+  if(typeof name!=='string')return deny();
+  if(name!==name.trim()||!SAFE_NAME.test(name))return deny();
+  if(!exact(design,['theme','accent','textSize','font']))return deny();
+  if(!isDesign(design))return deny();
   return {name,design:{theme:design.theme,accent:design.accent,textSize:design.textSize,font:design.font}};
 }
 export function exportStylePreset(name:string,design:DesignSettings):string{
@@ -26,8 +28,8 @@ export function parseStylePreset(source:string):Shape{
   if(typeof source!=='string'||new TextEncoder().encode(source).length>MAX_JSON_BYTES)deny();
   let parsed:unknown;
   try{parsed=JSON.parse(source);}catch{deny();}
-  if(!exact(parsed,['format','version','name','design'])||
-     parsed.format!==STYLE_PRESET_FORMAT||parsed.version!==STYLE_PRESET_VERSION)deny();
+  if(!exact(parsed,['format','version','name','design']))return deny();
+  if(parsed.format!==STYLE_PRESET_FORMAT||parsed.version!==STYLE_PRESET_VERSION)return deny();
   const {name,design}=validated(parsed.name,parsed.design);
   return {format:STYLE_PRESET_FORMAT,version:STYLE_PRESET_VERSION,name,design};
 }
