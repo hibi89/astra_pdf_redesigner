@@ -22,8 +22,8 @@ export interface SourceReviewReceipt {
   external_transfer:false;
   original_modified:false;
 }
-const DENY=()=>{throw new Error('원본 검토 영수증을 생성할 수 없습니다. 문서와 원본을 다시 확인하세요.');};
-const HEX=bytes=>[...new Uint8Array(bytes)].map(n=>n.toString(16).padStart(2,'0')).join('');
+const DENY=():never=>{throw new Error('원본 검토 영수증을 생성할 수 없습니다. 문서와 원본을 다시 확인하세요.');};
+const HEX=(bytes:ArrayBuffer):string=>[...new Uint8Array(bytes)].map(n=>n.toString(16).padStart(2,'0')).join('');
 async function sha256(bytes:ArrayBuffer):Promise<string>{
   if(!globalThis.crypto?.subtle)DENY();
   return HEX(await crypto.subtle.digest('SHA-256',bytes));
