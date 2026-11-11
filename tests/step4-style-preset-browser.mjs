@@ -69,7 +69,9 @@ try{
  assert.equal(bytes.subarray(0,5).toString(),'%PDF-');
  const output=join(profile,'style-preset-a4.pdf');writeFileSync(output,bytes);
  const pdfinfo=execFileSync('pdfinfo',[output],{encoding:'utf8'});
- assert.match(pdfinfo,/Page size:\s+595(?:\.\d+)? x 842(?:\.\d+)? pts|Page size:\s+595\.2\d* x 841\.8\d* pts/);
+ const page=/Page size:\s+([0-9.]+) x ([0-9.]+) pts \(A4\)/.exec(pdfinfo);
+ assert.ok(page,'Browser-printed PDF must be identified as A4');
+ assert.ok(Math.abs(Number(page[1])-595.28)<1&&Math.abs(Number(page[2])-841.89)<1,'A4 page dimensions must be within renderer point rounding tolerance');
  await evaluate("[...document.querySelectorAll('.reference-style-panel button')].find(b=>b.textContent==='직전 디자인 적용 취소').click()");
  const restored=await eventually(()=>evaluate(stored),d=>JSON.stringify(d?.design)===JSON.stringify(before.design));
  assert.deepEqual(restored.content,before.content);
