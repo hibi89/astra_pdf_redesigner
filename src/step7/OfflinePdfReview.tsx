@@ -21,33 +21,50 @@ const validPdf=(file:File)=>file.size>=10&&file.size<=MAX_FILE&&/\.pdf$/i.test(f
 function hex(bytes:ArrayBuffer):string{
  return [...new Uint8Array(bytes)].map(n=>n.toString(16).padStart(2,'0')).join('');
 }
-async function inspectPdf(file:File):Promise<PdfSignal>{
+async function inspectPdf(file:File,signal:AbortSignal):Promise<PdfSignal>{
+ const ensureActive=()=>{if(signal.aborted)throw Error('변경된 PDF 검수는 취소되었습니다.');};
+ ensureActive();
  if(!validPdf(file)||!globalThis.crypto?.subtle)throw Error('지원하는 로컬 PDF만 검사할 수 있습니다.');
  const bytes=await file.arrayBuffer();
+ ensureActive();
  if(String.fromCharCode(...new Uint8Array(bytes.slice(0,5)))!=='%PDF-')
   throw Error('유효하지 않은 PDF 파일입니다.');
  const digest=hex(await crypto.subtle.digest('SHA-256',bytes));
+ ensureActive();
  const {getDocument,GlobalWorkerOptions,OPS}=await import('pdfjs-dist');
+ ensureActive();
  GlobalWorkerOptions.workerSrc=workerUrl;
  const loader=getDocument({data:new Uint8Array(bytes.slice(0)),stopAtErrors:true,useSystemFonts:true});
+ // Cancel the active PDF.js worker when owner changes either selected file.
+ // One shared destroy Promise makes abort/finally cleanup idempotent.
+ let destroyPromise:Promise<void>|null=null;
+ const destroy=()=>destroyPromise??(destroyPromise=loader.destroy());
+ const abort=()=>{void destroy().catch(()=>{});};
+ signal.addEventListener('abort',abort,{once:true});
  try{
+  ensureActive();
   const document=await loader.promise;
+  ensureActive();
   if(document.numPages<1||document.numPages>MAX_PAGES)
    throw Error('50페이지 이하 PDF만 검수할 수 있습니다.');
   let items=0,chars=0,raster=0,nonA4=0;
   const tokens:string[]=[],perPageTokens:string[][]=[];
   for(let pageNo=1;pageNo<=document.numPages;pageNo++){
+   ensureActive();
    const page=await document.getPage(pageNo);
+   ensureActive();
    const view=page.getViewport({scale:1});
    if(Math.abs(view.width-595.276)>2||Math.abs(view.height-841.89)>2)nonA4++;
    const text=(await page.getTextContent()).items.flatMap(item=>
     'str' in item && typeof item.str==='string'?[item.str]:[]);
+   ensureActive();
    items+=text.length;chars+=text.reduce((sum,value)=>sum+value.length,0);
    if(items>MAX_ITEMS||chars>MAX_CHARS)throw Error('PDF 분석 크기 제한을 초과했습니다.');
    const pageTokens=tokenizePdfText(text);
    tokens.push(...pageTokens);perPageTokens.push(pageTokens);
    if(tokens.length>MAX_ITEMS)throw Error('PDF 토큰 제한을 초과했습니다.');
    const ops=(await page.getOperatorList()).fnArray;
+   ensureActive();
    raster+=ops.filter(op=>[
     OPS.paintImageXObject,OPS.paintInlineImageXObject,
     OPS.paintImageXObjectRepeat,OPS.paintInlineImageXObjectGroup,
@@ -57,7 +74,10 @@ async function inspectPdf(file:File):Promise<PdfSignal>{
   }
   return{sha256:digest,pages:document.numPages,textItems:items,
    tokens,perPageTokens,rasterDraws:raster,nonA4};
- }finally{await loader.destroy();}
+ }finally{
+  signal.removeEventListener('abort',abort);
+  await destroy();
+ }
 }
 export function downloadPdfReview(report:PdfReviewReport):void{
  if(report.ownerApproval!=='NOT_GRANTED'||report.contentFidelityCertified!==false||
@@ -75,18 +95,26 @@ export default function OfflinePdfReview(){
  const [error,setError]=useState('');
  const [busy,setBusy]=useState(false);
  const epoch=useRef(0);
- useEffect(()=>()=>{epoch.current++;},[]);
+ const activeController=useRef<AbortController|null>(null);
+ useEffect(()=>()=>{epoch.current++;activeController.current?.abort();},[]);
  const choose=(role:'source'|'output',file:File|null)=>{
-  epoch.current++;setReport(null);setError('');
+  epoch.current++;
+  activeController.current?.abort();
+  activeController.current=null;
+  setBusy(false);setReport(null);setError('');
   if(role==='source')setSource(file);else setOutput(file);
  };
  const review=async()=>{
-  const now=++epoch.current;setReport(null);setError('');setBusy(true);
+  const now=++epoch.current;
+  activeController.current?.abort();
+  const controller=new AbortController();
+  activeController.current=controller;
+  setReport(null);setError('');setBusy(true);
   try{
    if(!source||!output)throw Error('원본과 저장한 PDF를 각각 지정하세요.');
-   const s=await inspectPdf(source);
+   const s=await inspectPdf(source,controller.signal);
    if(epoch.current!==now)return;
-   const o=await inspectPdf(output);
+   const o=await inspectPdf(output,controller.signal);
    if(epoch.current!==now)return;
    const comparison=comparePdfTokenLists(s.tokens,o.tokens);
    const perPageTextRiskPages=countPdfPerPageTokenDifferences(s.perPageTokens,o.perPageTokens);
@@ -118,7 +146,12 @@ export default function OfflinePdfReview(){
    });
   }catch{
    if(epoch.current===now)setError('PDF를 자동 대조하지 못했습니다. 파일 형식·30MiB·50페이지 제한과 원본을 확인하세요.');
-  }finally{if(epoch.current===now)setBusy(false);}
+  }finally{
+   if(epoch.current===now){
+    activeController.current=null;
+    setBusy(false);
+   }
+  }
  };
  return <main className="app-layout" data-step7-pdf-review>
   <section className="panel" aria-label="PDF 원본과 결과 검수">

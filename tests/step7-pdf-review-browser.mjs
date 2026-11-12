@@ -56,6 +56,10 @@ try{
  assert.notDeepEqual(out,src,'Redesigned fixture differs at image-neutral layout position');
  await upload('[data-pdf-review-source]',src,'original.pdf');
  await upload('[data-pdf-review-output]',out,'redesigned.pdf');
+ // P79: change selection synchronously after starting an asynchronous review.
+ // A stale run must be cancelled and cannot leave the primary action disabled.
+ await evaluate("(()=>{document.querySelector('[data-pdf-review-start]').click();const input=document.querySelector('[data-pdf-review-output]');const f=input.files[0];const dt=new DataTransfer();dt.items.add(new File([f],'reselected-redesign.pdf',{type:'application/pdf'}));input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}));return true})()");
+ await eventually(()=>evaluate("(()=>{const b=document.querySelector('[data-pdf-review-start]');return !b.disabled && b.textContent.includes('두 PDF 대조하기') && !document.querySelector('[data-pdf-review-result]')})()"));
  await evaluate("document.querySelector('[data-pdf-review-start]').click()");
  await eventually(()=>evaluate("document.querySelector('[data-pdf-review-result]')?.textContent"),s=>s?.includes('원본 2 / 결과 2')&&s?.includes('누락된 원본 토큰'));
  assert.equal(await evaluate("Boolean(document.querySelector('[data-pdf-review-error]'))"),false);
