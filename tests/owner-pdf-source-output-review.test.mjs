@@ -185,6 +185,8 @@ test('P76 PDF reversed pages: globally equal text must still flag page position'
  const r=await reviewPdfPair(f.source,f.output,f.receipt,f.project,sha(f.output));
  assert.equal(r.missing_source_tokens,0);assert.equal(r.extra_output_tokens,0);
  assert.equal(r.per_page_text_risk_pages,2);
+ assert.equal(r.document_text_order_risk,true);
+ assert.ok(r.issues.includes('DOCUMENT_TEXT_ORDER_DIFFERENCES_REVIEW_REQUIRED'));
  assert.equal(r.source_vector_strokes,r.output_vector_strokes);
  assert.equal(r.per_page_vector_stroke_risk_pages,2);
  assert.equal(r.source_raster_draws,r.output_raster_draws);

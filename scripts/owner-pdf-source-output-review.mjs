@@ -127,6 +127,10 @@ export async function reviewPdfPair(sourceBytes,outputBytes,receiptBytes,project
   textOnlyPdfEvidence(sourceBytes),textOnlyPdfEvidence(outputBytes)
  ]);
  const compared=summarizeTokens(source.tokens,output.tokens);
+ const documentOrderRisk=compared.source_tokens>0&&
+  compared.source_tokens===compared.output_tokens&&
+  !source.tokens.every((value,i)=>value===output.tokens[i])&&
+  compared.missing_source_tokens===0&&compared.extra_output_tokens===0;
  // A matching global multiset can conceal page swaps or relocated content.
  const perPageRiskPages=source.pages===output.pages
   ?source.perPageTokens.reduce((n,page,i)=>{
@@ -150,6 +154,7 @@ export async function reviewPdfPair(sourceBytes,outputBytes,receiptBytes,project
  if(compared.missing_source_tokens)issues.push('SOURCE_TOKENS_NOT_FOUND_IN_OUTPUT');
  if(compared.missing_numeric_tokens)issues.push('SOURCE_NUMERIC_TOKENS_NOT_FOUND');
  if(compared.extra_output_tokens)issues.push('OUTPUT_HAS_ADDITIONAL_TOKENS');
+ if(documentOrderRisk)issues.push('DOCUMENT_TEXT_ORDER_DIFFERENCES_REVIEW_REQUIRED');
  if(source.pages!==output.pages)issues.push('PDF_PAGE_COUNT_CHANGED');
  else if(perPageRiskPages>0)issues.push('PER_PAGE_TEXT_DIFFERENCES_REVIEW_REQUIRED');
  if(perPageOrderRiskPages>0)issues.push('PER_PAGE_TEXT_ORDER_DIFFERENCES_REVIEW_REQUIRED');
@@ -170,6 +175,7 @@ export async function reviewPdfPair(sourceBytes,outputBytes,receiptBytes,project
   source_vector_strokes:source.vectorStrokes,output_vector_strokes:output.vectorStrokes,
   per_page_vector_stroke_risk_pages:perPageVectorRiskPages,
   output_non_a4_pages:output.nonA4,
+  document_text_order_risk:documentOrderRisk,
   per_page_text_risk_pages:perPageRiskPages,
   per_page_order_risk_pages:perPageOrderRiskPages,
   ...compared,issues,
@@ -201,6 +207,7 @@ function htmlReport(data){
   ['페이지별 벡터 선 위험',data.per_page_vector_stroke_risk_pages===null?'페이지 수 달라 비교 불가':data.per_page_vector_stroke_risk_pages],
   ['페이지별 이미지 위험',data.per_page_raster_draw_risk_pages===null?'페이지 수 달라 비교 불가':data.per_page_raster_draw_risk_pages],
   ['출력 비A4 페이지',data.output_non_a4_pages],
+  ['문서 전체 텍스트 순서 위험',data.document_text_order_risk?'검토 필요':'신호 없음'],
   ['페이지별 선택텍스트 위험',data.per_page_text_risk_pages===null?'페이지 수 달라 비교 불가':data.per_page_text_risk_pages],
   ['페이지 안 읽기 순서 위험',data.per_page_order_risk_pages===null?'페이지 수 달라 비교 불가':data.per_page_order_risk_pages],
  ];

@@ -66,3 +66,18 @@ export function countPdfPerPageOrderRisks(
   return count+Number(diff.missingTokens===0&&diff.addedTokens===0);
  },0);
 }
+
+
+// When a redesigned document reflows to a different page count, compare the
+// entire selected-text sequence. Equality of token bags alone hides reordering.
+// Advisory only: PDF.js extraction order may differ for legitimate reflow.
+export function hasPdfDocumentTextOrderRisk(
+ source:readonly string[],output:readonly string[],
+):boolean{
+ if(source.length>300_000||output.length>300_000)
+  throw Error('PDF 선택 텍스트 검수 제한을 초과했습니다.');
+ if(source.length!==output.length||source.length===0)return false;
+ if(source.every((token,i)=>token===output[i]))return false;
+ const diff=comparePdfTokenLists(source,output);
+ return diff.missingTokens===0&&diff.addedTokens===0;
+}

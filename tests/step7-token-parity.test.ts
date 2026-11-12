@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {comparePdfTokenLists,countPdfPerPageTokenDifferences,countPdfPerPageOrderRisks,tokenizePdfText} from '../src/step7/tokenParity.ts';
+import {comparePdfTokenLists,countPdfPerPageTokenDifferences,countPdfPerPageOrderRisks,hasPdfDocumentTextOrderRisk,tokenizePdfText} from '../src/step7/tokenParity.ts';
 
 test('STEP7 lexical comparison keeps source and output order-independent counts',()=>{
  const source=tokenizePdfText(['원문 001, 매출 3,500.', '결론 A-01']);
@@ -101,4 +101,15 @@ test('STEP7 negative, positive and unicode-minus signs are significant numeric s
 test('STEP7 huge local PDF lexical input fails at explicit limit, not JS stack overflow',()=>{
  const huge=Array(300_001).fill('x').join(' ');
  assert.throws(()=>tokenizePdfText([huge]),/PDF 선택 텍스트 검수 제한/);
+});
+
+test('STEP7 global order risk catches reordered sections even when page counts and token bags differ in shape',()=>{
+ const first=tokenizePdfText(['section A 100']),second=tokenizePdfText(['section B 200']);
+ const source=[...first,...second],out=[...second,...first];
+ assert.equal(comparePdfTokenLists(source,out).missingTokens,0);
+ assert.equal(hasPdfDocumentTextOrderRisk(source,out),true);
+ assert.equal(hasPdfDocumentTextOrderRisk(source,source),false);
+ assert.equal(hasPdfDocumentTextOrderRisk(source,tokenizePdfText(['different'])),false);
+ assert.equal(hasPdfDocumentTextOrderRisk([],[]),false);
+ assert.throws(()=>hasPdfDocumentTextOrderRisk(Array(300001).fill('x'),[]),/제한/);
 });

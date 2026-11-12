@@ -85,6 +85,9 @@ try{
  await eventually(()=>evaluate("document.querySelector('[data-pdf-review-result]')?.textContent"),s=>s?.includes('같은 번호 페이지의 내용이 다릅니다'));
  const drift=await evaluate("(()=>{const dl=document.querySelector('[data-pdf-review-result] dl');const d=[...dl.querySelectorAll('dt')].find(x=>x.textContent==='페이지별 텍스트 위험');return Number(d?.nextElementSibling?.textContent)})()");
  assert.equal(drift,2,'Page swap must be visible even when global text counts match');
+ const globalOrder=await evaluate("(()=>{const d=[...document.querySelectorAll('[data-pdf-review-result] dt')].find(x=>x.textContent==='문서 전체 읽기 순서');return d?.nextElementSibling?.textContent})()");
+ assert.equal(globalOrder,'검토 필요','All tokens equal but global reading order moved');
+
  const movedVector=await evaluate("(()=>{const d=[...document.querySelectorAll('[data-pdf-review-result] dt')].find(x=>x.textContent==='페이지별 벡터 위험');return Number(d?.nextElementSibling?.textContent)})()");
  assert.equal(movedVector,2,'A page swap must reveal per-page vector stroke displacement');
  const movedRaster=await evaluate("(()=>{const d=[...document.querySelectorAll('[data-pdf-review-result] dt')].find(x=>x.textContent==='페이지별 이미지 위험');return Number(d?.nextElementSibling?.textContent)})()");

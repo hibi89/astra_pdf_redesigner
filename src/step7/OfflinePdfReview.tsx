@@ -1,6 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-import {comparePdfTokenLists,countPdfPerPageTokenDifferences,countPdfPerPageOrderRisks,tokenizePdfText,type TokenParity} from './tokenParity.ts';
+import {comparePdfTokenLists,countPdfPerPageTokenDifferences,countPdfPerPageOrderRisks,hasPdfDocumentTextOrderRisk,tokenizePdfText,type TokenParity} from './tokenParity.ts';
 import {countPdfVectorStrokes,countPdfPageStrokeDrift,countPdfPageRasterDrift} from './pdfPaintSignals.ts';
 
 // Independent owner-chosen PDF A and output PDF B. No file name/bytes/text is
@@ -12,7 +12,7 @@ interface PdfReviewReport extends TokenParity {
  sourcePages:number;outputPages:number;
  sourceRasterDraws:number;outputRasterDraws:number;
  sourceVectorStrokes:number;outputVectorStrokes:number;vectorPageRiskPages:number|null;rasterPageRiskPages:number|null;
- outputNonA4Pages:number;perPageTextRiskPages:number|null;perPageOrderRiskPages:number|null;
+ outputNonA4Pages:number;perPageTextRiskPages:number|null;perPageOrderRiskPages:number|null;documentTextOrderRisk:boolean;
  status:'RISK_SIGNALS_REVIEW_REQUIRED'|'LEXICAL_PARITY_NOT_FIDELITY_CERTIFIED';
  issues:string[];
  contentFidelityCertified:false;visualFidelityCertified:false;
@@ -124,6 +124,7 @@ export default function OfflinePdfReview(){
    const o=await inspectPdf(output,controller.signal);
    if(epoch.current!==now)return;
    const comparison=comparePdfTokenLists(s.tokens,o.tokens);
+   const documentTextOrderRisk=hasPdfDocumentTextOrderRisk(s.tokens,o.tokens);
    const perPageTextRiskPages=countPdfPerPageTokenDifferences(s.perPageTokens,o.perPageTokens);
    const perPageOrderRiskPages=countPdfPerPageOrderRisks(s.perPageTokens,o.perPageTokens);
    const vectorPageRiskPages=countPdfPageStrokeDrift(s.vectorPerPage,o.vectorPerPage);
@@ -135,6 +136,7 @@ export default function OfflinePdfReview(){
    if(comparison.missingTokens)issues.push('결과 PDF에 없는 원본 토큰이 있습니다.');
    if(comparison.missingNumericTokens)issues.push('결과 PDF에 없는 숫자 포함 토큰이 있습니다.');
    if(comparison.addedTokens)issues.push('원본에 없는 출력 토큰이 있습니다. 추가·중복 여부를 확인하세요.');
+   if(documentTextOrderRisk)issues.push('문서 전체의 추출 텍스트 순서가 변경되었습니다. 섹션·표·다단 읽기 순서를 검수하세요.');
    if(s.pages!==o.pages)issues.push('원본과 결과의 페이지 수가 다릅니다. 페이지 배치와 누락을 확인하세요.');
    else if(perPageTextRiskPages!==null&&perPageTextRiskPages>0)
     issues.push('전체 텍스트 수는 같아도 같은 번호 페이지의 내용이 다릅니다. 재배치·누락을 확인하세요.');
@@ -154,7 +156,7 @@ export default function OfflinePdfReview(){
     sourcePages:s.pages,outputPages:o.pages,
     sourceRasterDraws:s.rasterDraws,outputRasterDraws:o.rasterDraws,
     sourceVectorStrokes:s.vectorStrokes,outputVectorStrokes:o.vectorStrokes,vectorPageRiskPages,rasterPageRiskPages,
-    outputNonA4Pages:o.nonA4,perPageTextRiskPages,perPageOrderRiskPages,
+    outputNonA4Pages:o.nonA4,perPageTextRiskPages,perPageOrderRiskPages,documentTextOrderRisk,
     ...comparison,issues,
     status:issues.length?'RISK_SIGNALS_REVIEW_REQUIRED':'LEXICAL_PARITY_NOT_FIDELITY_CERTIFIED',
     contentFidelityCertified:false,visualFidelityCertified:false,
@@ -212,6 +214,7 @@ export default function OfflinePdfReview(){
      <dt>출력 비A4 페이지</dt><dd>{report.outputNonA4Pages}</dd>
      <dt>페이지별 텍스트 위험</dt><dd>{report.perPageTextRiskPages===null?'페이지 수 달라 비교 불가':report.perPageTextRiskPages}</dd>
      <dt>페이지 내 텍스트 순서 위험</dt><dd>{report.perPageOrderRiskPages===null?'페이지 수 달라 비교 불가':report.perPageOrderRiskPages}</dd>
+     <dt>문서 전체 읽기 순서</dt><dd>{report.documentTextOrderRisk?'검토 필요':'신호 없음'}</dd>
     </dl>
     {report.issues.length>0&&<ul>{report.issues.map((issue,i)=><li key={i}>{issue}</li>)}</ul>}
     <p className="warning">원문 충실도 미인증 · 법적 권리/라이선스 미검증 · 실제 고객 Windows 검증 미실행 · 판매 승인 NOT_GRANTED</p>
