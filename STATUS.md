@@ -1,3 +1,12 @@
+## 2026-11-12 KST — ASTRA P76/P77, P95 objective remains pending
+- Feature source `047d48372f4e5c997bf6f24683a90cd05c506873` (parent `dc69f7e7ddbb4a3816ab9068373e8feefd659799`) on `feature/astra-p71-pdf-source-parity-20261112`; main and prior IndexedDB V2 preserved.
+- P76 CLI PDF.js and GUI compare same-index page selected-text token counts. Globally identical tokens on reversed PDF pages are detected; unequal page counts are REVIEW REQUIRED, not fidelity proof. Export still contains counts/flags only.
+- P77 removed post-error pathname cleanup of private JSON/HTML review output, preserving replaced owner files on concurrent writes as HOLD. O_EXCL still refuses overwrites.
+- Source code/test commits `702032f0f24a6ebfbc682eab5915fe6766a22a2c`, `047d48372f4e5c997bf6f24683a90cd05c506873`, GitHub diff 2+4 expected paths only. Exact blob `src/step7/tokenParity.ts` 6a9ebc5c3f08ebca0e567cf0d920803141d0eb46 reconstructed and Linux Node22.16 6 assertions PASS.
+- Full npm, Chrome/Edge browser, Windows NSIS at final SHA NOT VERIFIED: connector returned no PR workflow runs and empty commit statuses. Earlier P75 exact SHA 3b3c6f73 CI Chrome+Edge 2/2 SUCCESS and Windows installer SUCCESS, but cannot transfer that status to P76/P77.
+- Final-product internal engineering remains **85% provisional**, **95 NOT ACHIEVED**, BASIC/PRO/BUSINESS RELEASE HOLD. PRO20/BUSINESS30 unique designs, licensed local Korean LLM, real owner customer PDF acceptance, physical Windows10/11, STEP6 search, rights/signature/support are pending or approval-gated.
+- See `docs/commercial/ASTRA_P95_ATTEMPT_P76_P77_20261112.md`; no model/API, permission, release, deployment or source file transfer.
+
 ## 2026-11-12 KST — P71–P75 PDF source/output parity (85% provisional engineering; RELEASE HOLD)
 - Independent new feature `feature/astra-p71-pdf-source-parity-20261112` code **`3b3c6f73a11d1791076eb5a860f14f87691844b5`**, original parent `feature/astra-p52-to-p70-20261111@8f987462dc7c2edd02303ec32c9813340170860a`, main and original STEP1–5 intact.
 - Owner-selected local source/output PDFs: actual PDF.js selected-text tokens, numeric changes, raster draw parity, A4 and PDF pages. CLI additionally binds original manual receipt + project .localdoc JSON + original/changed PDF to SHA256 and emits private new-only offline JSON/HTML with script/network disabled; GUI integrates **최종 PDF 원본 대조** with local file pickers, diff metadata/sha display/export and return to unchanged IndexedDB V2. No OCR, model, original file edits, data transfer, license approval.
