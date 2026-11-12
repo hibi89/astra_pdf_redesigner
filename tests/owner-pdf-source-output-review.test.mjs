@@ -265,3 +265,28 @@ test('P82 removed vector table border must be flagged even when selectable text 
  assert.equal(r.status,'POTENTIAL_CONTENT_DIFFERENCES_REVIEW_REQUIRED');
  assert.equal(r.owner_sale_approval,'NOT_GRANTED');
 });
+
+
+test('P84 diagnostic: real PDF.js drawing operators on synthetic border and page swap',async()=>{
+ const {getDocument,OPS}=await import('pdfjs-dist/legacy/build/pdf.mjs');
+ const raw=makeMixedLayoutPdf(1);
+ const changed=Buffer.from(raw.toString('binary').replace('1 w 40 490 510 108 re S','1 w 40 490 510 108 re n'),'binary');
+ const pageSwapped=Buffer.from(raw.toString('binary').replace('/Kids [3 0 R 7 0 R]','/Kids [7 0 R 3 0 R]'),'binary');
+ const names=Object.fromEntries(Object.entries(OPS).map(([key,value])=>[value,key]));
+ const describe=async(bytes)=>{
+  const task=getDocument({data:new Uint8Array(bytes),stopAtErrors:true,useSystemFonts:true});
+  try{
+   const pdf=await task.promise, pages=[];
+   for(let p=1;p<=pdf.numPages;p++){
+    const page=await pdf.getPage(p);
+    const op=await page.getOperatorList();
+    const types={};for(const id of op.fnArray)types[names[id]??id]=(types[names[id]??id]||0)+1;
+    pages.push({page:p,types});
+   }
+   return pages;
+  }finally{await task.destroy()}
+ };
+ console.log('ASTRA_P84_PDFJS_SYNTHETIC_OPERATORS '+JSON.stringify({
+  source:await describe(raw),borderRemoved:await describe(changed),pageSwapped:await describe(pageSwapped)
+ }));
+});
