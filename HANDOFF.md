@@ -1,3 +1,15 @@
+## 2026-11-12 KST — ASTRA P82/P83 vector stroke handoff (10 required)
+1. Goal/tech: Raise local PDF redesign product to verified 95%, React19/TS5/Vite7/Electron44/PDF.js, unchanged user-approved offline scope.
+2. Features/design: compared pixel raster verification (high cost and misleading for redesign) vs count-only vector stroke painting (chosen). P82 flags missing table border strokes despite equal text; P83 flags cross-page displacement despite equal global strokes.
+3. Testing: exact Git blob source 0399a2c8 and test adf5c769 verified locally, Node22.16 scoped 3PASS/0FAIL, standalone tsc PASS. Synthetic text-identical PDF 4 vs 3 vector strokes checked by PyMuPDF. Original npm test/build/Chrome/Edge/Windows full PDF.js NOT VERIFIED.
+4. Status: P82/P83 committed, current 85% provisional, P95 not achieved, RELEASE HOLD, product [작업중] preserved.
+5. Errors/blocker: no full private repository mount/checkout available, GitHub fetch_commit_workflow_runs reports 0 PR runs and combined status empty; historical successful P75 CI not latest source evidence. No assertions about real renderer or device acceptance.
+6. GitHub: hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112 latest code 36bc458da322ebb77b9b48190857112b637ea7bf, source parent 31304eae, Draft PR10 unmerged. Hub hibi89/hackathon-command-center-2026@kmong-productization; scoreboard must be checked at latest HEAD before edit.
+7. Runtime/deploy: Node22 npm test/build/desktop:verify, Chrome/Edge smoke, Windows NSIS install/upgrade; Production Vercel N/A, no deployed/paid service or release.
+8. Source/backup/security: base 6eacf9f7 and P82/P83 Git history recoverable; customer PDF/IndexedDB V2 and original feature owner data untouched. No secrets, external document upload, fonts/models, permission changes.
+9. Next: full exact-SHA CI, buyer-owned PDF consent and visual/table acceptance; only with explicit authorization licensed model/PRO20/BUSINESS30 commercial gate. Do not release or remove [작업중] before verified 95%.
+10. Updated 2026-11-12 KST; limited verified scope exact helper/test blobs, synthetic PyMuPDF, GitHub source diffs and docs. GitHub doc HEAD readback pending.
+
 ## 2026-11-12 KST — ASTRA P79–P81 handoff (10 required fields)
 1. Goal/technology: ASTRA locally processed PDF redesign to 95%; React19/TypeScript5/Vite7/Electron44/PDF.js; authorized current feature-only code and tests, no paid/external features.
 2. Features/decisions: P79 selected cancellation via AbortController/PDF.js over mere busy reset; P80 preserved numeric sign over mere digit count; P81 prechecked token bounds and loops instead of catching stack overflow. Original V2 and docs preserved.
