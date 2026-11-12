@@ -87,6 +87,8 @@ try{
  assert.equal(drift,2,'Page swap must be visible even when global text counts match');
  const movedVector=await evaluate("(()=>{const d=[...document.querySelectorAll('[data-pdf-review-result] dt')].find(x=>x.textContent==='페이지별 벡터 위험');return Number(d?.nextElementSibling?.textContent)})()");
  assert.equal(movedVector,2,'A page swap must reveal per-page vector stroke displacement');
+ const movedRaster=await evaluate("(()=>{const d=[...document.querySelectorAll('[data-pdf-review-result] dt')].find(x=>x.textContent==='페이지별 이미지 위험');return Number(d?.nextElementSibling?.textContent)})()");
+ assert.equal(movedRaster,2,'A page swap must reveal moved raster image draw even with same image total');
  const shifted=Buffer.from(src.toString('binary').replace('(TABLE_A_906)','(TABLE_Z_906)')
   .replace('(TABLE_B_907)','(TABLE_A_906)').replace('(TABLE_Z_906)','(TABLE_B_907)'),'binary');
  await upload('[data-pdf-review-output]',shifted,'within-page-table-swapped.pdf');

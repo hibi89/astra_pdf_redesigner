@@ -187,6 +187,9 @@ test('P76 PDF reversed pages: globally equal text must still flag page position'
  assert.equal(r.per_page_text_risk_pages,2);
  assert.equal(r.source_vector_strokes,r.output_vector_strokes);
  assert.equal(r.per_page_vector_stroke_risk_pages,2);
+ assert.equal(r.source_raster_draws,r.output_raster_draws);
+ assert.equal(r.per_page_raster_draw_risk_pages,2);
+ assert.ok(r.issues.includes('PAGE_RASTER_DRAW_DIFFERENCES_REVIEW_REQUIRED'));
  assert.ok(r.issues.includes('PAGE_VECTOR_STROKE_DIFFERENCES_REVIEW_REQUIRED'));
  assert.ok(r.issues.includes('PER_PAGE_TEXT_DIFFERENCES_REVIEW_REQUIRED'));
  assert.equal(r.status,'POTENTIAL_CONTENT_DIFFERENCES_REVIEW_REQUIRED');

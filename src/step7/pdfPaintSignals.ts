@@ -38,3 +38,11 @@ export function countPdfPageStrokeDrift(
  }
  return count;
 }
+
+// Page-local image-paint count drift is advisory only: equal totals can
+// conceal page relocation, not actual image/pixel content equivalence.
+export function countPdfPageRasterDrift(
+ source:readonly number[],output:readonly number[],
+):number|null{
+ return countPdfPageStrokeDrift(source,output);
+}
