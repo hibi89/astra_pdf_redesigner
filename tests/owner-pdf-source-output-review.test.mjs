@@ -176,3 +176,36 @@ test('P73 CLI returns hashes/status not customer content; no overwrite on repeat
  assert.doesNotMatch(written.join(''),/RUNNING_HEADER|STEP3_SOURCE|project\.localdoc\.json/);
  assert.equal(written.join('').includes(tmp.dir),false);
 });
+
+
+test('P76 PDF reversed pages: globally equal text must still flag page position',async()=>{
+ const f=fixture(),raw=f.source.toString('binary');
+ assert.ok(raw.includes('/Kids [3 0 R 7 0 R]'));
+ f.output=Buffer.from(raw.replace('/Kids [3 0 R 7 0 R]','/Kids [7 0 R 3 0 R]'),'binary');
+ const r=await reviewPdfPair(f.source,f.output,f.receipt,f.project,sha(f.output));
+ assert.equal(r.missing_source_tokens,0);assert.equal(r.extra_output_tokens,0);
+ assert.equal(r.per_page_text_risk_pages,2);
+ assert.ok(r.issues.includes('PER_PAGE_TEXT_DIFFERENCES_REVIEW_REQUIRED'));
+ assert.equal(r.status,'POTENTIAL_CONTENT_DIFFERENCES_REVIEW_REQUIRED');
+ assert.equal(r.owner_sale_approval,'NOT_GRANTED');
+});
+
+test('P77 output path replaced by concurrent owner after first write survives second write failure',async t=>{
+ const tmp=mk();t.after(tmp.close);const opts=files(tmp.dir);
+ const oldOpen=fs.openSync;let intercepted=false;
+ fs.openSync=function(file,...args){
+  if(file===opts.htmlPath&&!intercepted){
+   intercepted=true;
+   fs.writeFileSync(opts.jsonPath,'CONCURRENT_OWNER_REPLACEMENT');
+   throw Error('synthetic second report creation failure');
+  }
+  return oldOpen.call(fs,file,...args);
+ };
+ try{await assert.rejects(generateOwnerPdfReview(opts),/synthetic second report/);}
+ finally{fs.openSync=oldOpen;}
+ assert.equal(intercepted,true);
+ assert.equal(fs.readFileSync(opts.jsonPath,'utf8'),'CONCURRENT_OWNER_REPLACEMENT');
+ assert.equal(fs.existsSync(opts.htmlPath),false);
+ await assert.rejects(generateOwnerPdfReview(opts),/BLOCKED/);
+ assert.equal(fs.readFileSync(opts.jsonPath,'utf8'),'CONCURRENT_OWNER_REPLACEMENT');
+});

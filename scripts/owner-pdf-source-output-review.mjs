@@ -78,7 +78,7 @@ async function textOnlyPdfEvidence(data){
   const pdf=await task.promise;
   if(pdf.numPages<1||pdf.numPages>MAX_PAGES)deny();
   let tokenCount=0,charCount=0,textItems=0,rasterDraws=0,nonA4=0;
-  const result=[];
+  const result=[],perPageTokens=[];
   for(let i=1;i<=pdf.numPages;i++){
    const page=await pdf.getPage(i);
    const view=page.getViewport({scale:1});
@@ -91,6 +91,7 @@ async function textOnlyPdfEvidence(data){
    tokenCount+=pageTokens.length;
    if(tokenCount>MAX_TOKENS)deny();
    result.push(...pageTokens);
+   perPageTokens.push(pageTokens);
    if(Math.abs(view.width-595.276)>2||Math.abs(view.height-841.89)>2)nonA4++;
    const {fnArray}=await page.getOperatorList();
    rasterDraws+=fnArray.filter(op=>[
@@ -100,7 +101,7 @@ async function textOnlyPdfEvidence(data){
    ].includes(op)).length;
    page.cleanup();
   }
-  return{pages:pdf.numPages,tokens:result,textItems,rasterDraws,nonA4};
+  return{pages:pdf.numPages,tokens:result,perPageTokens,textItems,rasterDraws,nonA4};
  }finally{await task.destroy();}
 }
 export async function reviewPdfPair(sourceBytes,outputBytes,receiptBytes,projectBytes,expectedOutputSha){
@@ -115,12 +116,20 @@ export async function reviewPdfPair(sourceBytes,outputBytes,receiptBytes,project
   textOnlyPdfEvidence(sourceBytes),textOnlyPdfEvidence(outputBytes)
  ]);
  const compared=summarizeTokens(source.tokens,output.tokens);
+ // A matching global multiset can conceal page swaps or relocated content.
+ const perPageRiskPages=source.pages===output.pages
+  ?source.perPageTokens.reduce((n,page,i)=>{
+    const diff=summarizeTokens(page,output.perPageTokens[i]);
+    return n+Number(diff.missing_source_tokens>0||diff.extra_output_tokens>0);
+   },0):null;
  const issues=[];
  if(!compared.source_tokens)issues.push('SOURCE_HAS_NO_SELECTABLE_TEXT');
  if(!compared.output_tokens)issues.push('OUTPUT_HAS_NO_SELECTABLE_TEXT');
  if(compared.missing_source_tokens)issues.push('SOURCE_TOKENS_NOT_FOUND_IN_OUTPUT');
  if(compared.missing_numeric_tokens)issues.push('SOURCE_NUMERIC_TOKENS_NOT_FOUND');
  if(compared.extra_output_tokens)issues.push('OUTPUT_HAS_ADDITIONAL_TOKENS');
+ if(source.pages!==output.pages)issues.push('PDF_PAGE_COUNT_CHANGED');
+ else if(perPageRiskPages>0)issues.push('PER_PAGE_TEXT_DIFFERENCES_REVIEW_REQUIRED');
  if(source.rasterDraws!==output.rasterDraws)issues.push('RASTER_DRAW_COUNT_CHANGED');
  if(output.nonA4)issues.push('OUTPUT_NON_A4_PAGES');
  return Object.freeze({
@@ -132,6 +141,7 @@ export async function reviewPdfPair(sourceBytes,outputBytes,receiptBytes,project
   source_text_items:source.textItems,output_text_items:output.textItems,
   source_raster_draws:source.rasterDraws,output_raster_draws:output.rasterDraws,
   output_non_a4_pages:output.nonA4,
+  per_page_text_risk_pages:perPageRiskPages,
   ...compared,issues,
   original_receipt_and_project_hashes_matched:true,
   reviewed_source_blocks:sourceReview.acknowledged_blocks,
@@ -157,6 +167,7 @@ function htmlReport(data){
   ['원본 래스터 그리기 수',data.source_raster_draws],
   ['출력 래스터 그리기 수',data.output_raster_draws],
   ['출력 비A4 페이지',data.output_non_a4_pages],
+  ['페이지별 선택텍스트 위험',data.per_page_text_risk_pages===null?'페이지 수 달라 비교 불가':data.per_page_text_risk_pages],
  ];
  return `<!doctype html><html lang="ko"><head><meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; connect-src 'none'; img-src 'none'; style-src 'unsafe-inline'; object-src 'none'; base-uri 'none'; form-action 'none'">
@@ -198,18 +209,14 @@ export async function generateOwnerPdfReview({receipt,source,project,output,outp
   [project,p,MAX_PROJECT,'.json'],[output,o,MAX_SOURCE,'.pdf']]){
   if(sha(readLocal(name,ext,size))!==sha(snapshot))deny();
  }
- const artifacts=[];
- try{
-  for(const [name,content] of [[json,JSON.stringify(report,null,2)+'\n'],[html,createReviewHtml(report)]]){
-   const fd=fs.openSync(name,fs.constants.O_WRONLY|fs.constants.O_CREAT|fs.constants.O_EXCL,0o600);
-   artifacts.push(name);
-   try{fs.writeFileSync(fd,content,{encoding:'utf8'});}finally{fs.closeSync(fd);}
-  }
-  return report;
- }catch(error){
-  for(const name of artifacts.reverse())fs.rmSync(name,{force:true});
-  throw error;
+ // On failure, do not unlink by pathname: another owner writer could replace
+ // a created report. Preserve partial outputs as HOLD for manual inspection.
+ // O_EXCL ensures retries never overwrite owner data.
+ for(const [name,content] of [[json,JSON.stringify(report,null,2)+'\n'],[html,createReviewHtml(report)]]){
+  const fd=fs.openSync(name,fs.constants.O_WRONLY|fs.constants.O_CREAT|fs.constants.O_EXCL,0o600);
+  try{fs.writeFileSync(fd,content,{encoding:'utf8'});}finally{fs.closeSync(fd);}
  }
+ return report;
 }
 export async function main(argv=process.argv.slice(2)){
  try{
