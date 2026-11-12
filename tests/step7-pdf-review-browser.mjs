@@ -75,6 +75,12 @@ try{
  await eventually(()=>evaluate("document.querySelector('[data-pdf-review-result]')?.textContent"),s=>s?.includes('차이 또는 미확인 위험')&&s?.includes('숫자 포함'));
  const missingNum=await evaluate("(()=>{const dl=document.querySelector('[data-pdf-review-result] dl');const d=[...dl.querySelectorAll('dt')].find(x=>x.textContent==='숫자 포함 누락 토큰');return Number(d?.nextElementSibling?.textContent)})()");
  assert.ok(missingNum>=1,'Changed numeric source token must be shown as risk');
+ const reversed=Buffer.from(src.toString('binary').replace('/Kids [3 0 R 7 0 R]','/Kids [7 0 R 3 0 R]'),'binary');
+ await upload('[data-pdf-review-output]',reversed,'page-order-changed.pdf');
+ await evaluate("document.querySelector('[data-pdf-review-start]').click()");
+ await eventually(()=>evaluate("document.querySelector('[data-pdf-review-result]')?.textContent"),s=>s?.includes('같은 번호 페이지의 내용이 다릅니다'));
+ const drift=await evaluate("(()=>{const dl=document.querySelector('[data-pdf-review-result] dl');const d=[...dl.querySelectorAll('dt')].find(x=>x.textContent==='페이지별 텍스트 위험');return Number(d?.nextElementSibling?.textContent)})()");
+ assert.equal(drift,2,'Page swap must be visible even when global text counts match');
  await evaluate("document.querySelector('.mode-bar button').click()");
  await eventually(()=>evaluate("Boolean(document.querySelector('.doc-list-item.active'))"));
  const after=await evaluate(snapshot);

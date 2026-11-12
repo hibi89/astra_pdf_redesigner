@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {comparePdfTokenLists,tokenizePdfText} from '../src/step7/tokenParity.ts';
+import {comparePdfTokenLists,countPdfPerPageTokenDifferences,tokenizePdfText} from '../src/step7/tokenParity.ts';
 
 test('STEP7 lexical comparison keeps source and output order-independent counts',()=>{
  const source=tokenizePdfText(['원문 001, 매출 3,500.', '결론 A-01']);
@@ -51,4 +51,17 @@ test('STEP7 report helper returns only counts, not sensitive source tokens',()=>
 });
 test('STEP7 300001-token untrusted input is rejected before work',()=>{
  assert.throws(()=>comparePdfTokenLists(Array(300001).fill('x'),[]),/제한/);
+});
+
+
+test('STEP7 page count mismatch never implies positional parity',()=>{
+ const a=tokenizePdfText(['page1 01']),b=tokenizePdfText(['page2 02']);
+ assert.equal(countPdfPerPageTokenDifferences([a,b],[a,b,[]]),null);
+});
+test('STEP7 swapped page text is found despite exact global token counts',()=>{
+ const a=tokenizePdfText(['alpha 123']),b=tokenizePdfText(['beta 456']);
+ const global=comparePdfTokenLists([...a,...b],[...b,...a]);
+ assert.equal(global.missingTokens,0);assert.equal(global.addedTokens,0);
+ assert.equal(countPdfPerPageTokenDifferences([a,b],[b,a]),2);
+ assert.equal(countPdfPerPageTokenDifferences([a,b],[a,b]),0);
 });

@@ -32,3 +32,15 @@ export function comparePdfTokenLists(source:readonly string[],output:readonly st
  return{sourceTokens:source.length,outputTokens:output.length,
   missingTokens:missing,missingNumericTokens:numeric,addedTokens:added};
 }
+
+// Positional risks are counts only. No sensitive PDF content is exported.
+export function countPdfPerPageTokenDifferences(
+ sourcePages:readonly (readonly string[])[],outputPages:readonly (readonly string[])[],
+):number|null{
+ if(sourcePages.length>50||outputPages.length>50)throw Error('PDF 페이지 검수 제한을 초과했습니다.');
+ if(sourcePages.length!==outputPages.length)return null;
+ return sourcePages.reduce((count,source,index)=>{
+  const diff=comparePdfTokenLists(source,outputPages[index]);
+  return count+Number(diff.missingTokens>0||diff.addedTokens>0);
+ },0);
+}

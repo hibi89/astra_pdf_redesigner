@@ -1,16 +1,16 @@
 import {useEffect,useRef,useState} from 'react';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-import {comparePdfTokenLists,tokenizePdfText,type TokenParity} from './tokenParity.ts';
+import {comparePdfTokenLists,countPdfPerPageTokenDifferences,tokenizePdfText,type TokenParity} from './tokenParity.ts';
 
 // Independent owner-chosen PDF A and output PDF B. No file name/bytes/text is
 // logged, stored, transmitted, or embedded in exported metadata. No OCR or model.
-interface PdfSignal {sha256:string;pages:number;textItems:number;tokens:string[];rasterDraws:number;nonA4:number}
+interface PdfSignal {sha256:string;pages:number;textItems:number;tokens:string[];perPageTokens:string[][];rasterDraws:number;nonA4:number}
 interface PdfReviewReport extends TokenParity {
  format:'astra-step7-local-pdf-parity-v1';
  sourceSha256:string;outputSha256:string;
  sourcePages:number;outputPages:number;
  sourceRasterDraws:number;outputRasterDraws:number;
- outputNonA4Pages:number;
+ outputNonA4Pages:number;perPageTextRiskPages:number|null;
  status:'RISK_SIGNALS_REVIEW_REQUIRED'|'LEXICAL_PARITY_NOT_FIDELITY_CERTIFIED';
  issues:string[];
  contentFidelityCertified:false;visualFidelityCertified:false;
@@ -35,7 +35,7 @@ async function inspectPdf(file:File):Promise<PdfSignal>{
   if(document.numPages<1||document.numPages>MAX_PAGES)
    throw Error('50페이지 이하 PDF만 검수할 수 있습니다.');
   let items=0,chars=0,raster=0,nonA4=0;
-  const tokens:string[]=[];
+  const tokens:string[]=[],perPageTokens:string[][]=[];
   for(let pageNo=1;pageNo<=document.numPages;pageNo++){
    const page=await document.getPage(pageNo);
    const view=page.getViewport({scale:1});
@@ -44,7 +44,8 @@ async function inspectPdf(file:File):Promise<PdfSignal>{
     'str' in item && typeof item.str==='string'?[item.str]:[]);
    items+=text.length;chars+=text.reduce((sum,value)=>sum+value.length,0);
    if(items>MAX_ITEMS||chars>MAX_CHARS)throw Error('PDF 분석 크기 제한을 초과했습니다.');
-   tokens.push(...tokenizePdfText(text));
+   const pageTokens=tokenizePdfText(text);
+   tokens.push(...pageTokens);perPageTokens.push(pageTokens);
    if(tokens.length>MAX_ITEMS)throw Error('PDF 토큰 제한을 초과했습니다.');
    const ops=(await page.getOperatorList()).fnArray;
    raster+=ops.filter(op=>[
@@ -55,7 +56,7 @@ async function inspectPdf(file:File):Promise<PdfSignal>{
    page.cleanup();
   }
   return{sha256:digest,pages:document.numPages,textItems:items,
-   tokens,rasterDraws:raster,nonA4};
+   tokens,perPageTokens,rasterDraws:raster,nonA4};
  }finally{await loader.destroy();}
 }
 export function downloadPdfReview(report:PdfReviewReport):void{
@@ -88,6 +89,7 @@ export default function OfflinePdfReview(){
    const o=await inspectPdf(output);
    if(epoch.current!==now)return;
    const comparison=comparePdfTokenLists(s.tokens,o.tokens);
+   const perPageTextRiskPages=countPdfPerPageTokenDifferences(s.perPageTokens,o.perPageTokens);
    const issues:string[]=[];
    if(s.sha256===o.sha256)issues.push('원본과 결과 파일 해시가 같습니다. 실제 재디자인 PDF인지 확인하세요.');
    if(!s.tokens.length)issues.push('원본에 선택 가능한 텍스트가 없습니다. OCR이나 원문 보존을 검증하지 못했습니다.');
@@ -95,6 +97,9 @@ export default function OfflinePdfReview(){
    if(comparison.missingTokens)issues.push('결과 PDF에 없는 원본 토큰이 있습니다.');
    if(comparison.missingNumericTokens)issues.push('결과 PDF에 없는 숫자 포함 토큰이 있습니다.');
    if(comparison.addedTokens)issues.push('원본에 없는 출력 토큰이 있습니다. 추가·중복 여부를 확인하세요.');
+   if(s.pages!==o.pages)issues.push('원본과 결과의 페이지 수가 다릅니다. 페이지 배치와 누락을 확인하세요.');
+   else if(perPageTextRiskPages!==null&&perPageTextRiskPages>0)
+    issues.push('전체 텍스트 수는 같아도 같은 번호 페이지의 내용이 다릅니다. 재배치·누락을 확인하세요.');
    if(s.rasterDraws!==o.rasterDraws)issues.push('원본과 결과의 이미지 그리기 수가 다릅니다.');
    if(o.nonA4)issues.push('출력 중 A4가 아닌 페이지가 있습니다.');
    setReport({
@@ -102,7 +107,7 @@ export default function OfflinePdfReview(){
     sourceSha256:s.sha256,outputSha256:o.sha256,
     sourcePages:s.pages,outputPages:o.pages,
     sourceRasterDraws:s.rasterDraws,outputRasterDraws:o.rasterDraws,
-    outputNonA4Pages:o.nonA4,
+    outputNonA4Pages:o.nonA4,perPageTextRiskPages,
     ...comparison,issues,
     status:issues.length?'RISK_SIGNALS_REVIEW_REQUIRED':'LEXICAL_PARITY_NOT_FIDELITY_CERTIFIED',
     contentFidelityCertified:false,visualFidelityCertified:false,
@@ -150,6 +155,7 @@ export default function OfflinePdfReview(){
      <dt>출력에만 있는 토큰</dt><dd>{report.addedTokens}</dd>
      <dt>이미지 그리기</dt><dd>원본 {report.sourceRasterDraws} / 결과 {report.outputRasterDraws}</dd>
      <dt>출력 비A4 페이지</dt><dd>{report.outputNonA4Pages}</dd>
+     <dt>페이지별 텍스트 위험</dt><dd>{report.perPageTextRiskPages===null?'페이지 수 달라 비교 불가':report.perPageTextRiskPages}</dd>
     </dl>
     {report.issues.length>0&&<ul>{report.issues.map((issue,i)=><li key={i}>{issue}</li>)}</ul>}
     <p className="warning">원문 충실도 미인증 · 법적 권리/라이선스 미검증 · 실제 고객 Windows 검증 미실행 · 판매 승인 NOT_GRANTED</p>
