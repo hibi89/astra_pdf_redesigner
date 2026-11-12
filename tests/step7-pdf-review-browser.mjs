@@ -81,6 +81,13 @@ try{
  await eventually(()=>evaluate("document.querySelector('[data-pdf-review-result]')?.textContent"),s=>s?.includes('같은 번호 페이지의 내용이 다릅니다'));
  const drift=await evaluate("(()=>{const dl=document.querySelector('[data-pdf-review-result] dl');const d=[...dl.querySelectorAll('dt')].find(x=>x.textContent==='페이지별 텍스트 위험');return Number(d?.nextElementSibling?.textContent)})()");
  assert.equal(drift,2,'Page swap must be visible even when global text counts match');
+ const shifted=Buffer.from(src.toString('binary').replace('(TABLE_A_906)','(TABLE_Z_906)')
+  .replace('(TABLE_B_907)','(TABLE_A_906)').replace('(TABLE_Z_906)','(TABLE_B_907)'),'binary');
+ await upload('[data-pdf-review-output]',shifted,'within-page-table-swapped.pdf');
+ await evaluate("document.querySelector('[data-pdf-review-start]').click()");
+ await eventually(()=>evaluate("document.querySelector('[data-pdf-review-result]')?.textContent"),s=>s?.includes('같은 페이지에서 추출된 텍스트 순서가 바뀌었습니다'));
+ const orderDrift=await evaluate("(()=>{const d=[...document.querySelectorAll('[data-pdf-review-result] dt')].find(x=>x.textContent==='페이지 내 텍스트 순서 위험');return Number(d?.nextElementSibling?.textContent)})()");
+ assert.equal(orderDrift,1,'Within-page content order warning must be visible to owner');
  await evaluate("document.querySelector('.mode-bar button').click()");
  await eventually(()=>evaluate("Boolean(document.querySelector('.doc-list-item.active'))"));
  const after=await evaluate(snapshot);

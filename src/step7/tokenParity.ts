@@ -44,3 +44,21 @@ export function countPdfPerPageTokenDifferences(
   return count+Number(diff.missingTokens>0||diff.addedTokens>0);
  },0);
 }
+
+
+// Detect reshuffled extracted text only when the page has the same token multiset.
+// Reading order is advisory, not an assertion of content or visual fidelity.
+export function countPdfPerPageOrderRisks(
+ sourcePages:readonly (readonly string[])[],outputPages:readonly (readonly string[])[],
+):number|null{
+ if(sourcePages.length>50||outputPages.length>50)throw Error('PDF 페이지 검수 제한을 초과했습니다.');
+ if(sourcePages.length!==outputPages.length)return null;
+ return sourcePages.reduce((count,source,index)=>{
+  const output=outputPages[index];
+  if(source.length!==output.length)return count;
+  if(source.length>300_000)throw Error('PDF 선택 텍스트 검수 제한을 초과했습니다.');
+  if(source.every((token,i)=>token===output[i]))return count;
+  const diff=comparePdfTokenLists(source,output);
+  return count+Number(diff.missingTokens===0&&diff.addedTokens===0);
+ },0);
+}

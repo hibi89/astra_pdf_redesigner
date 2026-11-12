@@ -209,3 +209,21 @@ test('P77 output path replaced by concurrent owner after first write survives se
  await assert.rejects(generateOwnerPdfReview(opts),/BLOCKED/);
  assert.equal(fs.readFileSync(opts.jsonPath,'utf8'),'CONCURRENT_OWNER_REPLACEMENT');
 });
+
+
+test('P78 actual PDF same-page table labels swapped flags reading-order risk with global parity',async()=>{
+ const f=fixture();
+ const orig=f.source.toString('binary');
+ assert.ok(orig.includes('(TABLE_A_906)')&&orig.includes('(TABLE_B_907)'));
+ f.output=Buffer.from(orig.replace('(TABLE_A_906)','(TABLE_Z_906)')
+  .replace('(TABLE_B_907)','(TABLE_A_906)')
+  .replace('(TABLE_Z_906)','(TABLE_B_907)'),'binary');
+ const report=await reviewPdfPair(f.source,f.output,f.receipt,f.project,sha(f.output));
+ assert.equal(report.missing_source_tokens,0);
+ assert.equal(report.extra_output_tokens,0);
+ assert.equal(report.per_page_text_risk_pages,0);
+ assert.equal(report.per_page_order_risk_pages,1);
+ assert.ok(report.issues.includes('PER_PAGE_TEXT_ORDER_DIFFERENCES_REVIEW_REQUIRED'));
+ assert.equal(report.status,'POTENTIAL_CONTENT_DIFFERENCES_REVIEW_REQUIRED');
+ assert.equal(report.owner_sale_approval,'NOT_GRANTED');
+});

@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {comparePdfTokenLists,countPdfPerPageTokenDifferences,tokenizePdfText} from '../src/step7/tokenParity.ts';
+import {comparePdfTokenLists,countPdfPerPageTokenDifferences,countPdfPerPageOrderRisks,tokenizePdfText} from '../src/step7/tokenParity.ts';
 
 test('STEP7 lexical comparison keeps source and output order-independent counts',()=>{
  const source=tokenizePdfText(['원문 001, 매출 3,500.', '결론 A-01']);
@@ -64,4 +64,20 @@ test('STEP7 swapped page text is found despite exact global token counts',()=>{
  assert.equal(global.missingTokens,0);assert.equal(global.addedTokens,0);
  assert.equal(countPdfPerPageTokenDifferences([a,b],[b,a]),2);
  assert.equal(countPdfPerPageTokenDifferences([a,b],[a,b]),0);
+});
+
+
+test('STEP7 within-page table item swap is detected despite identical global/page token multisets',()=>{
+ const a=tokenizePdfText(['TABLE_A_906 TABLE_B_907 TABLE_C_908']);
+ const b=tokenizePdfText(['TABLE_B_907 TABLE_A_906 TABLE_C_908']);
+ assert.equal(comparePdfTokenLists(a,b).missingTokens,0);
+ assert.equal(countPdfPerPageTokenDifferences([a],[b]),0);
+ assert.equal(countPdfPerPageOrderRisks([a],[b]),1);
+ assert.equal(countPdfPerPageOrderRisks([a],[a]),0);
+});
+test('STEP7 order-only check is unknown when page counts differ and does not mislabel content changes',()=>{
+ const a=tokenizePdfText(['one 010 two']),b=tokenizePdfText(['one 999 two']);
+ assert.equal(countPdfPerPageOrderRisks([a],[]),null);
+ assert.equal(countPdfPerPageOrderRisks([a],[b]),0);
+ assert.throws(()=>countPdfPerPageOrderRisks(Array(51).fill([]),Array(51).fill([])),/제한/);
 });

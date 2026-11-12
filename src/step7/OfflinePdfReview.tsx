@@ -1,6 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
-import {comparePdfTokenLists,countPdfPerPageTokenDifferences,tokenizePdfText,type TokenParity} from './tokenParity.ts';
+import {comparePdfTokenLists,countPdfPerPageTokenDifferences,countPdfPerPageOrderRisks,tokenizePdfText,type TokenParity} from './tokenParity.ts';
 
 // Independent owner-chosen PDF A and output PDF B. No file name/bytes/text is
 // logged, stored, transmitted, or embedded in exported metadata. No OCR or model.
@@ -10,7 +10,7 @@ interface PdfReviewReport extends TokenParity {
  sourceSha256:string;outputSha256:string;
  sourcePages:number;outputPages:number;
  sourceRasterDraws:number;outputRasterDraws:number;
- outputNonA4Pages:number;perPageTextRiskPages:number|null;
+ outputNonA4Pages:number;perPageTextRiskPages:number|null;perPageOrderRiskPages:number|null;
  status:'RISK_SIGNALS_REVIEW_REQUIRED'|'LEXICAL_PARITY_NOT_FIDELITY_CERTIFIED';
  issues:string[];
  contentFidelityCertified:false;visualFidelityCertified:false;
@@ -90,6 +90,7 @@ export default function OfflinePdfReview(){
    if(epoch.current!==now)return;
    const comparison=comparePdfTokenLists(s.tokens,o.tokens);
    const perPageTextRiskPages=countPdfPerPageTokenDifferences(s.perPageTokens,o.perPageTokens);
+   const perPageOrderRiskPages=countPdfPerPageOrderRisks(s.perPageTokens,o.perPageTokens);
    const issues:string[]=[];
    if(s.sha256===o.sha256)issues.push('원본과 결과 파일 해시가 같습니다. 실제 재디자인 PDF인지 확인하세요.');
    if(!s.tokens.length)issues.push('원본에 선택 가능한 텍스트가 없습니다. OCR이나 원문 보존을 검증하지 못했습니다.');
@@ -100,6 +101,8 @@ export default function OfflinePdfReview(){
    if(s.pages!==o.pages)issues.push('원본과 결과의 페이지 수가 다릅니다. 페이지 배치와 누락을 확인하세요.');
    else if(perPageTextRiskPages!==null&&perPageTextRiskPages>0)
     issues.push('전체 텍스트 수는 같아도 같은 번호 페이지의 내용이 다릅니다. 재배치·누락을 확인하세요.');
+   if(perPageOrderRiskPages!==null&&perPageOrderRiskPages>0)
+    issues.push('같은 페이지에서 추출된 텍스트 순서가 바뀌었습니다. 표·숫자 연결과 읽기 순서를 확인하세요.');
    if(s.rasterDraws!==o.rasterDraws)issues.push('원본과 결과의 이미지 그리기 수가 다릅니다.');
    if(o.nonA4)issues.push('출력 중 A4가 아닌 페이지가 있습니다.');
    setReport({
@@ -107,7 +110,7 @@ export default function OfflinePdfReview(){
     sourceSha256:s.sha256,outputSha256:o.sha256,
     sourcePages:s.pages,outputPages:o.pages,
     sourceRasterDraws:s.rasterDraws,outputRasterDraws:o.rasterDraws,
-    outputNonA4Pages:o.nonA4,perPageTextRiskPages,
+    outputNonA4Pages:o.nonA4,perPageTextRiskPages,perPageOrderRiskPages,
     ...comparison,issues,
     status:issues.length?'RISK_SIGNALS_REVIEW_REQUIRED':'LEXICAL_PARITY_NOT_FIDELITY_CERTIFIED',
     contentFidelityCertified:false,visualFidelityCertified:false,
@@ -156,6 +159,7 @@ export default function OfflinePdfReview(){
      <dt>이미지 그리기</dt><dd>원본 {report.sourceRasterDraws} / 결과 {report.outputRasterDraws}</dd>
      <dt>출력 비A4 페이지</dt><dd>{report.outputNonA4Pages}</dd>
      <dt>페이지별 텍스트 위험</dt><dd>{report.perPageTextRiskPages===null?'페이지 수 달라 비교 불가':report.perPageTextRiskPages}</dd>
+     <dt>페이지 내 텍스트 순서 위험</dt><dd>{report.perPageOrderRiskPages===null?'페이지 수 달라 비교 불가':report.perPageOrderRiskPages}</dd>
     </dl>
     {report.issues.length>0&&<ul>{report.issues.map((issue,i)=><li key={i}>{issue}</li>)}</ul>}
     <p className="warning">원문 충실도 미인증 · 법적 권리/라이선스 미검증 · 실제 고객 Windows 검증 미실행 · 판매 승인 NOT_GRANTED</p>

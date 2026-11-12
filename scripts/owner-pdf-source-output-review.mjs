@@ -122,6 +122,13 @@ export async function reviewPdfPair(sourceBytes,outputBytes,receiptBytes,project
     const diff=summarizeTokens(page,output.perPageTokens[i]);
     return n+Number(diff.missing_source_tokens>0||diff.extra_output_tokens>0);
    },0):null;
+ const perPageOrderRiskPages=source.pages===output.pages
+  ?source.perPageTokens.reduce((n,page,i)=>{
+    const other=output.perPageTokens[i];
+    if(page.length!==other.length||page.every((token,j)=>token===other[j]))return n;
+    const diff=summarizeTokens(page,other);
+    return n+Number(diff.missing_source_tokens===0&&diff.extra_output_tokens===0);
+   },0):null;
  const issues=[];
  if(!compared.source_tokens)issues.push('SOURCE_HAS_NO_SELECTABLE_TEXT');
  if(!compared.output_tokens)issues.push('OUTPUT_HAS_NO_SELECTABLE_TEXT');
@@ -130,6 +137,7 @@ export async function reviewPdfPair(sourceBytes,outputBytes,receiptBytes,project
  if(compared.extra_output_tokens)issues.push('OUTPUT_HAS_ADDITIONAL_TOKENS');
  if(source.pages!==output.pages)issues.push('PDF_PAGE_COUNT_CHANGED');
  else if(perPageRiskPages>0)issues.push('PER_PAGE_TEXT_DIFFERENCES_REVIEW_REQUIRED');
+ if(perPageOrderRiskPages>0)issues.push('PER_PAGE_TEXT_ORDER_DIFFERENCES_REVIEW_REQUIRED');
  if(source.rasterDraws!==output.rasterDraws)issues.push('RASTER_DRAW_COUNT_CHANGED');
  if(output.nonA4)issues.push('OUTPUT_NON_A4_PAGES');
  return Object.freeze({
@@ -142,6 +150,7 @@ export async function reviewPdfPair(sourceBytes,outputBytes,receiptBytes,project
   source_raster_draws:source.rasterDraws,output_raster_draws:output.rasterDraws,
   output_non_a4_pages:output.nonA4,
   per_page_text_risk_pages:perPageRiskPages,
+  per_page_order_risk_pages:perPageOrderRiskPages,
   ...compared,issues,
   original_receipt_and_project_hashes_matched:true,
   reviewed_source_blocks:sourceReview.acknowledged_blocks,
@@ -168,6 +177,7 @@ function htmlReport(data){
   ['출력 래스터 그리기 수',data.output_raster_draws],
   ['출력 비A4 페이지',data.output_non_a4_pages],
   ['페이지별 선택텍스트 위험',data.per_page_text_risk_pages===null?'페이지 수 달라 비교 불가':data.per_page_text_risk_pages],
+  ['페이지 안 읽기 순서 위험',data.per_page_order_risk_pages===null?'페이지 수 달라 비교 불가':data.per_page_order_risk_pages],
  ];
  return `<!doctype html><html lang="ko"><head><meta charset="utf-8">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'none'; connect-src 'none'; img-src 'none'; style-src 'unsafe-inline'; object-src 'none'; base-uri 'none'; form-action 'none'">
