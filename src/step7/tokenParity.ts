@@ -11,8 +11,10 @@ export function tokenizePdfText(chunks:readonly string[]):string[]{
   // Losing a sign must never be mistaken for a faithful financial value.
   const matches=chunk.normalize('NFC').toLocaleLowerCase('und')
     .match(/(?:[+\-\u2212](?=\p{N}))?[\p{L}\p{N}]+(?:[.,:_-][\p{L}\p{N}]+)*/gu)||[];
-  tokens.push(...matches.map(value=>value.startsWith('\u2212')?'-'+value.slice(1):value));
-  if(tokens.length>300_000)throw Error('PDF 선택 텍스트 검수 제한을 초과했습니다.');
+  // Check before appending: a large spread itself can overflow the JS call stack.
+  if(tokens.length+matches.length>300_000)throw Error('PDF 선택 텍스트 검수 제한을 초과했습니다.');
+  for(const value of matches)
+   tokens.push(value.startsWith('\u2212')?'-'+value.slice(1):value);
  }
  return tokens;
 }

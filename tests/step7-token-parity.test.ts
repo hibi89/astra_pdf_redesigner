@@ -96,3 +96,9 @@ test('STEP7 negative, positive and unicode-minus signs are significant numeric s
  assert.equal(same.missingTokens,0);
  assert.equal(same.addedTokens,0);
 });
+
+
+test('STEP7 huge local PDF lexical input fails at explicit limit, not JS stack overflow',()=>{
+ const huge=Array(300_001).fill('x').join(' ');
+ assert.throws(()=>tokenizePdfText([huge]),/PDF 선택 텍스트 검수 제한/);
+});

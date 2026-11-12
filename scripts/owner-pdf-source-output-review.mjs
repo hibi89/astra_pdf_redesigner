@@ -91,7 +91,7 @@ async function textOnlyPdfEvidence(data){
    const pageTokens=tokens(text.join(' '));
    tokenCount+=pageTokens.length;
    if(tokenCount>MAX_TOKENS)deny();
-   result.push(...pageTokens);
+   for(const value of pageTokens)result.push(value);
    perPageTokens.push(pageTokens);
    if(Math.abs(view.width-595.276)>2||Math.abs(view.height-841.89)>2)nonA4++;
    const {fnArray}=await page.getOperatorList();

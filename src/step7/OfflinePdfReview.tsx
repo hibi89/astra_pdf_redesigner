@@ -61,8 +61,9 @@ async function inspectPdf(file:File,signal:AbortSignal):Promise<PdfSignal>{
    items+=text.length;chars+=text.reduce((sum,value)=>sum+value.length,0);
    if(items>MAX_ITEMS||chars>MAX_CHARS)throw Error('PDF 분석 크기 제한을 초과했습니다.');
    const pageTokens=tokenizePdfText(text);
-   tokens.push(...pageTokens);perPageTokens.push(pageTokens);
-   if(tokens.length>MAX_ITEMS)throw Error('PDF 토큰 제한을 초과했습니다.');
+   if(tokens.length+pageTokens.length>MAX_ITEMS)throw Error('PDF 토큰 제한을 초과했습니다.');
+   for(const value of pageTokens)tokens.push(value);
+   perPageTokens.push(pageTokens);
    const ops=(await page.getOperatorList()).fnArray;
    ensureActive();
    raster+=ops.filter(op=>[
