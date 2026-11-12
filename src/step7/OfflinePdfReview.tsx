@@ -18,6 +18,24 @@ interface PdfReviewReport extends TokenParity {
  contentFidelityCertified:false;visualFidelityCertified:false;
  originalSourceModified:false;externalTransfer:false;ownerApproval:'NOT_GRANTED';
 }
+
+// Owner-only visual checklist; intentionally transient and not a sale approval.
+const MANUAL_REVIEW_ITEMS=[
+ {id:'text',label:'원문 문장·제목·순서를 육안으로 대조'},
+ {id:'numbers',label:'금액·날짜·숫자·부호를 확인'},
+ {id:'tables',label:'표 셀·테두리·다단 배치를 확인'},
+ {id:'images',label:'사진·로고·캡션의 존재 여부를 확인'},
+ {id:'pagination',label:'페이지 분할·머리말·꼬리말을 확인'},
+ {id:'typography',label:'한글·글꼴·기호 표시를 확인'},
+ {id:'clipping',label:'잘림·겹침·누락 여부를 확인'},
+] as const;
+type ReviewItemId=(typeof MANUAL_REVIEW_ITEMS)[number]['id'];
+type VisualReviewState=Partial<Record<ReviewItemId,boolean>>;
+function visualReviewEvidence(checked:VisualReviewState){
+ const items=MANUAL_REVIEW_ITEMS.map(item=>({id:item.id,checked:checked[item.id]===true}));
+ return {scope:'LOCAL_VISUAL_CHECK_ONLY_NOT_SALE_APPROVAL' as const,
+  completed:items.every(item=>item.checked),items};
+}
 const MAX_FILE=30*1024*1024,MAX_PAGES=50,MAX_CHARS=1_500_000,MAX_ITEMS=300_000;
 const validPdf=(file:File)=>file.size>=10&&file.size<=MAX_FILE&&/\.pdf$/i.test(file.name);
 function hex(bytes:ArrayBuffer):string{
@@ -86,10 +104,11 @@ async function inspectPdf(file:File,signal:AbortSignal):Promise<PdfSignal>{
   await destroy();
  }
 }
-export function downloadPdfReview(report:PdfReviewReport):void{
+export function downloadPdfReview(report:PdfReviewReport,checked:VisualReviewState={}):void{
  if(report.ownerApproval!=='NOT_GRANTED'||report.contentFidelityCertified!==false||
     report.externalTransfer!==false)throw Error('승인되지 않은 검수 영수증입니다.');
- const url=URL.createObjectURL(new Blob([JSON.stringify(report,null,2)+'\n'],{type:'application/json'}));
+ const safeReport={...report,manualVisualReview:visualReviewEvidence(checked)};
+ const url=URL.createObjectURL(new Blob([JSON.stringify(safeReport,null,2)+'\n'],{type:'application/json'}));
  try{
   const a=document.createElement('a');a.href=url;a.download='astra-pdf-parity-review.json';
   document.body.appendChild(a);a.click();a.remove();
@@ -101,6 +120,8 @@ export default function OfflinePdfReview(){
  const [report,setReport]=useState<PdfReviewReport|null>(null);
  const [error,setError]=useState('');
  const [busy,setBusy]=useState(false);
+ const [manualChecked,setManualChecked]=useState<VisualReviewState>({});
+ const manualCount=MANUAL_REVIEW_ITEMS.filter(item=>manualChecked[item.id]===true).length;
  const epoch=useRef(0);
  const activeController=useRef<AbortController|null>(null);
  useEffect(()=>()=>{epoch.current++;activeController.current?.abort();},[]);
@@ -108,7 +129,7 @@ export default function OfflinePdfReview(){
   epoch.current++;
   activeController.current?.abort();
   activeController.current=null;
-  setBusy(false);setReport(null);setError('');
+  setBusy(false);setReport(null);setError('');setManualChecked({});
   if(role==='source')setSource(file);else setOutput(file);
  };
  const review=async()=>{
@@ -116,7 +137,7 @@ export default function OfflinePdfReview(){
   activeController.current?.abort();
   const controller=new AbortController();
   activeController.current=controller;
-  setReport(null);setError('');setBusy(true);
+  setReport(null);setError('');setBusy(true);setManualChecked({});
   try{
    if(!source||!output)throw Error('원본과 저장한 PDF를 각각 지정하세요.');
    const s=await inspectPdf(source,controller.signal);
@@ -191,7 +212,7 @@ export default function OfflinePdfReview(){
      disabled={busy||!source||!output} onClick={()=>void review()}>
       {busy?'로컬 분석 중…':'두 PDF 대조하기'}</button>
     {report&&<button type="button" className="secondary-button" data-pdf-review-download
-     onClick={()=>downloadPdfReview(report)}>검수 결과 JSON 저장</button>}
+     onClick={()=>downloadPdfReview(report,manualChecked)}>검수 결과 JSON 저장</button>}
    </div>
    {error&&<p role="alert" className="warning" data-pdf-review-error>{error}</p>}
    {report&&<section className="panel" aria-label="자동 원본 대조 결과" data-pdf-review-result>
@@ -217,6 +238,19 @@ export default function OfflinePdfReview(){
      <dt>문서 전체 읽기 순서</dt><dd>{report.documentTextOrderRisk?'검토 필요':'신호 없음'}</dd>
     </dl>
     {report.issues.length>0&&<ul>{report.issues.map((issue,i)=><li key={i}>{issue}</li>)}</ul>}
+    <fieldset className="panel" data-pdf-review-manual aria-label="소유자 수동 PDF 품질 점검">
+     <legend><strong>수동 원본 대조 — {manualCount}/7 확인</strong></legend>
+     <p className="help-text">실제 원본과 결과 PDF를 옆에 놓고 확인한 항목만 표시하세요. 이 기록은 현재 파일 쌍에만 적용되며 파일 변경 시 초기화됩니다. 판매 승인이 아닙니다.</p>
+     {MANUAL_REVIEW_ITEMS.map(item=><label className="field" key={item.id}>
+      <input type="checkbox" data-pdf-review-manual-check={item.id}
+       checked={manualChecked[item.id]===true}
+       onChange={event=>setManualChecked(before=>({...before,[item.id]:event.target.checked}))}/>
+      {item.label}
+     </label>)}
+     <p role="status" data-pdf-review-manual-status>{manualCount===MANUAL_REVIEW_ITEMS.length?
+      '수동 점검 7/7 기록됨 · 원문 충실도 및 판매 승인 아님':
+      '수동 점검 미완료 · 출시 승인 아님'}</p>
+    </fieldset>
     <p className="warning">원문 충실도 미인증 · 법적 권리/라이선스 미검증 · 실제 고객 Windows 검증 미실행 · 판매 승인 NOT_GRANTED</p>
    </section>}
   </section>

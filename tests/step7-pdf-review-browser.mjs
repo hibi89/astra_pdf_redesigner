@@ -116,6 +116,23 @@ try{
   s=>s?.includes('벡터 선 그리기 수가 다릅니다'));
  const strokes=await evaluate("(()=>{const d=[...document.querySelectorAll('[data-pdf-review-result] dt')].find(x=>x.textContent==='벡터 선 그리기');return d?.nextElementSibling?.textContent})()");
  assert.match(strokes,/원본 [0-9]+ \/ 결과 [0-9]+/);
+ const manualStart=await evaluate("document.querySelector('[data-pdf-review-manual]')?.textContent");
+ assert.match(manualStart,/0\/7/);
+ await evaluate("document.querySelector('[data-pdf-review-manual-check=\"numbers\"]').click()");
+ assert.match(await evaluate("document.querySelector('[data-pdf-review-manual]')?.textContent"),/1\/7/);
+ await evaluate("document.querySelector('[data-pdf-review-download]').click()");
+ const updated=JSON.parse(await evaluate("(async()=>await window.__ownerReviewBlob?.text())()"));
+ assert.equal(updated.manualVisualReview.items.length,7);
+ assert.equal(updated.manualVisualReview.items.find(x=>x.id==='numbers').checked,true);
+ assert.equal(updated.manualVisualReview.completed,false);
+ assert.equal(updated.manualVisualReview.scope,'LOCAL_VISUAL_CHECK_ONLY_NOT_SALE_APPROVAL');
+ assert.equal(updated.ownerApproval,'NOT_GRANTED');
+ assert.equal(updated.externalTransfer,false);
+ await upload('[data-pdf-review-output]',out,'manual-review-reset.pdf');
+ assert.equal(await evaluate("Boolean(document.querySelector('[data-pdf-review-result]'))"),false);
+ await evaluate("document.querySelector('[data-pdf-review-start]').click()");
+ await eventually(()=>evaluate("document.querySelector('[data-pdf-review-manual]')?.textContent"),s=>s?.includes('0/7'));
+
 
  await evaluate("document.querySelector('.mode-bar button').click()");
  await eventually(()=>evaluate("Boolean(document.querySelector('.doc-list-item.active'))"));
