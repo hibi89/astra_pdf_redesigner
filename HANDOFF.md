@@ -1,3 +1,15 @@
+## 2026-11-12 KST — ASTRA P78 within-page order safety continuation (10 points)
+1. Goal / scope: 95% Astra Kmong product using existing local React19/Vite7/TS5/Electron44/PDF.js, no external PDF upload, OCR, commercial rights bypass.
+2. Chosen design: A full semantic/PDF layout equivalence would overclaim visual/OCR truth; B linear advisory token order count with multiset guard chosen. Reports only risk count; keeps original contents unchanged. Previously P76 detected page swaps and P77 prevented error cleanup deletion.
+3. Tests: exact Git blob `f249d24dcaad06d9050e3ab470c39c96707074d1` local SHA match; Node22.16 5/5 deterministic unit PASS, 300 fuzz cases + 300k token stress PASS, TypeScript tsc standalone PASS. Three integration tests added but exact new-SHA full npm/PDF.js/browser/Windows not yet executed; no claim of CI pass.
+4. Status: P78 code committed; current engineering score 85% provisional, 95 NOT achieved, SALE HOLD, work marker maintained.
+5. Failure/blocker: full private/public checkout unavailable from local container due github.com DNS; existing connector provides per-file source but no comprehensive repo runtime. New SHA commit statuses empty/PR workflow list empty, not proof either way. Don't repeat destructive or meaningless CI retries.
+6. GitHub: `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, new code SHA `071978729197c671f2a41b0e1ce6ad838ce24f8b`; exact six paths checked. Draft PR #10 unmerged; pre-change SHA `1151a0d6` reversible; hub `hibi89/hackathon-command-center-2026@kmong-productization`.
+7. Deployment/run: Node22 npm test/build/desktop:verify + Chrome/Edge/Windows workflows; no Vercel Production, no release, no billing or permission changes.
+8. Backup/auth/data: all customer PDFs and local V2 unmodified; only synthetic test fixtures, no API keys, no new data uploads; Git history is rollback source.
+9. Next steps: exact commit full npm/build/Chrome/Edge/Windows tests; real owner-consented 5–10 PDF visual acceptance and PRO20/BUSINESS30 design/approved local Korean model/rights support where required. Keep [작업중] until actual target verified.
+10. Timestamp: 2026-11-12 KST; scope GitHub source diff/blob, isolated local TypeScript & stress regression, CI status queries; documents based on functional SHA; documentation-only HEAD should be read back after commit.
+
 ## 2026-11-12 KST — ASTRA P76/P77 partial development, P95 not certified (10 points)
 1. Goal/tech: achieve Astra Kmong 95%; existing local React19/Vite7/TS5/Electron44/PDF.js offline PDF redesign. No owner approval for external services, OCR, LLM, schema changes or sale.
 2. Work/design: A inode-check-before-output-delete still TOCTOU; B no pathname removal after write failure, HOLD outputs, selected. P76 now flags page-local text movement with matching global tokens in CLI/GUI; P77 keeps replaced owner files after second output write fails.
