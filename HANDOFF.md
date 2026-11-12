@@ -1,3 +1,15 @@
+## 2026-11-13 KST — ASTRA 사용자 개입 필요 · 명시적 작업 종료 인수인계 (필수 10항)
+1. **목표·기술**: 원본 PDF→로컬 구조화→검수→새 A4 출력의 Astra PDF Redesigner(React/TS/Vite/Electron/PDF.js). 최종 목표 95% 유지.
+2. **완료 기능·결정 근거**: P85 이미지 페이지별 이동 위험, P86 전체 텍스트 읽기 순서 위험, P87 소유자 7항목 수동 검수·JSON. 최신 사용자 직접 지시로 개발 `[작업중]` 해제, `[사용자 개입 필요]`로 전환. **95% 달성 아님**.
+3. **실제 테스트**: 기능 SHA `0db2acb5185445d342f97062a6962ec52a08a1fe` Linux/Chrome/Edge #43243819225 150/150 PASS 2/2 SUCCESS; Windows #43243819123 149 PASS/1 SKIP, desktop 16 PASS, 8/8 A4, NSIS 설치/제거/업그레이드 1/1 SUCCESS. 이번 상태 변경에서는 코드를 수정하거나 CI를 실행하지 않음. 실구매자 PC·실고객 PDF **미검증**.
+4. **상태·중단 지점**: 엔지니어링 **85% 잠정**, 목표 **95% 미달**. **RELEASE HOLD**, 외부 판매 불가. 중앙 상태 **[사용자 개입 필요]**, 사용자 재개 지시 전 Astra 개발 대기.
+5. **오류·시도·전환**: P82/P83 PDF.js constructPath 오분류 P84 수정 검증; P86 중간 Edge CDP 시간초과 후 P87 최신 성공. 재작업 반복 금지. 병목은 고객 PDF/물리 Windows/라이선스 승인 및 미구현 PRO/BUSINESS.
+6. **저장소·브랜치·SHA·경로**: `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, 최신 기능 SHA `0db2acb51854`, 기존 문서 `deb87550fa48`; Draft PR #10 미병합. 해총 `hibi89/hackathon-command-center-2026@kmong-productization` 중앙 감사표 `docs/audits/KMONG_16_CURRENT_20261111.md`.
+7. **배포·환경**: `npm test`, `npm run build`, GitHub Chrome/Edge 및 Windows Electron/NSIS 자동 검증. Production/Vercel 해당 없음; 상용 출시/배포 없음.
+8. **원본·백업·인증 관리**: Git 커밋으로 기능·문서 이전 상태 복구 가능, 원본 PDF/IndexedDB V2 유지, 토큰·개인정보·유료 모델 다운로드/외부 데이터 전송/권한 변경 없음. 원본·main 및 타제품 변경 금지.
+9. **다음 작업·승인·완료 기준**: 사용자가 원본 사용 허용 PDF 5–10개 제공·검수하고 실제 Windows 사용, 모델/폰트 재배포 권리 및 SKU/판매 승인. PRO20/BUSINESS30 고유 디자인 구현·실제 품질/서명 보강 후 최신 기능 SHA CI/실사용 검증, 그때 95% 판정. 그 전에는 Astra `[작업중]` 표식 재설정 금지.
+10. **갱신 기준**: 2026-11-13 KST. 기능 검증은 2026-11-12 수행한 정확 SHA CI 근거; 현 상태 변경은 문서만. 문서 SHA는 기록된 GitHub 새 HEAD를 확인. 운영 원칙은 Astra 한정 사용자 최신 지시 우선.
+
 ## 2026-11-12 KST — ASTRA P85–P87 owner-acceptance handoff (10 required fields)
 1. Goal/tech: Astra existing offline React19/TS5/Vite7/Electron44/PDF.js program, final 95% target, source/output PDF preservation first; existing 7-step blueprint controls scope.
 2. Completed/choices: P85 same-index raster image draw count differences, P86 document-wide reading-order risk with identical token multiset, P87 transient 7-item visual checklist and safe offline JSON. Chose schema-preserving low-cost verification over unapproved new persistent theme/migration and falsely certifying PDF visual fidelity.
