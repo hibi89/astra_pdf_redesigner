@@ -66,9 +66,10 @@ async function inspectPdf(file:File,signal:AbortSignal):Promise<PdfSignal>{
    if(tokens.length+pageTokens.length>MAX_ITEMS)throw Error('PDF 토큰 제한을 초과했습니다.');
    for(const value of pageTokens)tokens.push(value);
    perPageTokens.push(pageTokens);
-   const ops=(await page.getOperatorList()).fnArray;
+   const operatorList=await page.getOperatorList();
    ensureActive();
-   const strokeCount=countPdfVectorStrokes(ops,OPS);
+   const {fnArray:ops,argsArray}=operatorList;
+   const strokeCount=countPdfVectorStrokes(ops,argsArray,OPS);
    vector+=strokeCount;vectorPerPage.push(strokeCount);
    raster+=ops.filter(op=>[
     OPS.paintImageXObject,OPS.paintInlineImageXObject,

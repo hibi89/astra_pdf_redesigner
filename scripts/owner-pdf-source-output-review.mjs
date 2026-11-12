@@ -94,11 +94,15 @@ async function textOnlyPdfEvidence(data){
    for(const value of pageTokens)result.push(value);
    perPageTokens.push(pageTokens);
    if(Math.abs(view.width-595.276)>2||Math.abs(view.height-841.89)>2)nonA4++;
-   const {fnArray}=await page.getOperatorList();
-   const strokeCount=fnArray.filter(op=>[
+   const {fnArray,argsArray}=await page.getOperatorList();
+   // PDF.js exposes paint commands as constructPath([paintOp,...]), not
+   // top-level stroke operators. Read the embedded operation in both paths.
+   const strokeKinds=new Set([
     OPS.stroke,OPS.closeStroke,OPS.fillStroke,OPS.eoFillStroke,
     OPS.closeFillStroke,OPS.closeEOFillStroke,
-   ].includes(op)).length;
+   ]);
+   const strokeCount=fnArray.reduce((n,op,i)=>
+    n+Number(strokeKinds.has(op===OPS.constructPath?argsArray[i]?.[0]:op)),0);
    vectorStrokes+=strokeCount;vectorPerPage.push(strokeCount);
    rasterDraws+=fnArray.filter(op=>[
     OPS.paintImageXObject,OPS.paintInlineImageXObject,
