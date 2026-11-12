@@ -227,3 +227,22 @@ test('P78 actual PDF same-page table labels swapped flags reading-order risk wit
  assert.equal(report.status,'POTENTIAL_CONTENT_DIFFERENCES_REVIEW_REQUIRED');
  assert.equal(report.owner_sale_approval,'NOT_GRANTED');
 });
+
+
+test('P80 real selectable PDF sign-only numeric change cannot pass text parity',async()=>{
+ const f=fixture(),raw=f.source.toString('binary');
+ const old='(TABLE_A_906)',positive='(100        )',negative='(-100       )';
+ assert.equal(old.length,positive.length);assert.equal(positive.length,negative.length);
+ assert.ok(raw.includes(old));
+ f.source=Buffer.from(raw.replace(old,positive),'binary');
+ const r=JSON.parse(f.receipt.toString());
+ r.source_sha256=sha(f.source);
+ f.receipt=Buffer.from(JSON.stringify(r));
+ f.output=Buffer.from(f.source.toString('binary').replace(positive,negative),'binary');
+ const report=await reviewPdfPair(f.source,f.output,f.receipt,f.project,sha(f.output));
+ assert.equal(report.missing_source_tokens,1);
+ assert.equal(report.missing_numeric_tokens,1);
+ assert.equal(report.extra_output_tokens,1);
+ assert.ok(report.issues.includes('SOURCE_NUMERIC_TOKENS_NOT_FOUND'));
+ assert.equal(report.owner_sale_approval,'NOT_GRANTED');
+});

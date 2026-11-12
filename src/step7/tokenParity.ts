@@ -7,9 +7,11 @@ export interface TokenParity {
 export function tokenizePdfText(chunks:readonly string[]):string[]{
  const tokens:string[]=[];
  for(const chunk of chunks){
+  // Preserve +, hyphen-minus and Unicode minus when directly before a number.
+  // Losing a sign must never be mistaken for a faithful financial value.
   const matches=chunk.normalize('NFC').toLocaleLowerCase('und')
-    .match(/[\p{L}\p{N}]+(?:[.,:_-][\p{L}\p{N}]+)*/gu)||[];
-  tokens.push(...matches);
+    .match(/(?:[+\-\u2212](?=\p{N}))?[\p{L}\p{N}]+(?:[.,:_-][\p{L}\p{N}]+)*/gu)||[];
+  tokens.push(...matches.map(value=>value.startsWith('\u2212')?'-'+value.slice(1):value));
   if(tokens.length>300_000)throw Error('PDF 선택 텍스트 검수 제한을 초과했습니다.');
  }
  return tokens;
@@ -27,7 +29,7 @@ export function comparePdfTokenLists(source:readonly string[],output:readonly st
  let missing=0,numeric=0;
  for(const [value,count] of counts){
   missing+=count;
-  if(/[0-9]/u.test(value))numeric+=count;
+  if(/\p{N}/u.test(value))numeric+=count;
  }
  return{sourceTokens:source.length,outputTokens:output.length,
   missingTokens:missing,missingNumericTokens:numeric,addedTokens:added};

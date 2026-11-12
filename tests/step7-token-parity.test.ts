@@ -81,3 +81,18 @@ test('STEP7 order-only check is unknown when page counts differ and does not mis
  assert.equal(countPdfPerPageOrderRisks([a],[b]),0);
  assert.throws(()=>countPdfPerPageOrderRisks(Array(51).fill([]),Array(51).fill([])),/제한/);
 });
+
+
+test('STEP7 negative, positive and unicode-minus signs are significant numeric source data',()=>{
+ const a=tokenizePdfText(['매출 -100 +20 100 −100 2026년']);
+ assert.deepEqual(a,['매출','-100','+20','100','-100','2026년']);
+ for(const [before,after] of [['-100','100'],['+100','100'],['100','-100']]){
+  const result=comparePdfTokenLists(tokenizePdfText([before]),tokenizePdfText([after]));
+  assert.equal(result.missingTokens,1);
+  assert.equal(result.missingNumericTokens,1);
+  assert.equal(result.addedTokens,1);
+ }
+ const same=comparePdfTokenLists(tokenizePdfText(['−100']),tokenizePdfText(['-100']));
+ assert.equal(same.missingTokens,0);
+ assert.equal(same.addedTokens,0);
+});

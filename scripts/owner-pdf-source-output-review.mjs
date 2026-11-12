@@ -52,8 +52,9 @@ function requireNewOutput(file,extension,inputs){
  if(!fs.lstatSync(parent).isDirectory())deny();
  return resolved;
 }
-const tokens=text=>text.normalize('NFC').toLocaleLowerCase('und')
- .match(/[\p{L}\p{N}]+(?:[.,:_-][\p{L}\p{N}]+)*/gu)||[];
+const tokens=text=>(text.normalize('NFC').toLocaleLowerCase('und')
+ .match(/(?:[+\-\u2212](?=\p{N}))?[\p{L}\p{N}]+(?:[.,:_-][\p{L}\p{N}]+)*/gu)||[])
+ .map(value=>value.startsWith('\u2212')?'-'+value.slice(1):value);
 function summarizeTokens(src,dst){
  const counts=new Map();
  for(const token of src)counts.set(token,(counts.get(token)||0)+1);
@@ -65,7 +66,7 @@ function summarizeTokens(src,dst){
  }
  let missing=0,numericMissing=0,missingDistinct=0;
  for(const [token,count] of counts){
-  if(count){missing+=count;missingDistinct++;if(/[0-9]/u.test(token))numericMissing+=count;}
+  if(count){missing+=count;missingDistinct++;if(/\p{N}/u.test(token))numericMissing+=count;}
  }
  return{source_tokens:src.length,output_tokens:dst.length,
   missing_source_tokens:missing,missing_numeric_tokens:numericMissing,

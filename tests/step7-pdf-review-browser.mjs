@@ -92,6 +92,14 @@ try{
  await eventually(()=>evaluate("document.querySelector('[data-pdf-review-result]')?.textContent"),s=>s?.includes('같은 페이지에서 추출된 텍스트 순서가 바뀌었습니다'));
  const orderDrift=await evaluate("(()=>{const d=[...document.querySelectorAll('[data-pdf-review-result] dt')].find(x=>x.textContent==='페이지 내 텍스트 순서 위험');return Number(d?.nextElementSibling?.textContent)})()");
  assert.equal(orderDrift,1,'Within-page content order warning must be visible to owner');
+ const unsigned=Buffer.from(src.toString('binary').replace('(TABLE_A_906)','(100        )'),'binary');
+ const negative=Buffer.from(unsigned.toString('binary').replace('(100        )','(-100       )'),'binary');
+ await upload('[data-pdf-review-source]',unsigned,'positive-source.pdf');
+ await upload('[data-pdf-review-output]',negative,'negative-result.pdf');
+ await evaluate("document.querySelector('[data-pdf-review-start]').click()");
+ await eventually(()=>evaluate("document.querySelector('[data-pdf-review-result]')?.textContent"),s=>s?.includes('결과 PDF에 없는 숫자 포함 토큰이 있습니다'));
+ const missingSign=await evaluate("(()=>{const d=[...document.querySelectorAll('[data-pdf-review-result] dt')].find(x=>x.textContent==='숫자 포함 누락 토큰');return Number(d?.nextElementSibling?.textContent)})()");
+ assert.equal(missingSign,1,'A lost number sign must be flagged as missing numeric content');
  await evaluate("document.querySelector('.mode-bar button').click()");
  await eventually(()=>evaluate("Boolean(document.querySelector('.doc-list-item.active'))"));
  const after=await evaluate(snapshot);
