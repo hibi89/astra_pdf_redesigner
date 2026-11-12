@@ -100,6 +100,16 @@ try{
  await eventually(()=>evaluate("document.querySelector('[data-pdf-review-result]')?.textContent"),s=>s?.includes('결과 PDF에 없는 숫자 포함 토큰이 있습니다'));
  const missingSign=await evaluate("(()=>{const d=[...document.querySelectorAll('[data-pdf-review-result] dt')].find(x=>x.textContent==='숫자 포함 누락 토큰');return Number(d?.nextElementSibling?.textContent)})()");
  assert.equal(missingSign,1,'A lost number sign must be flagged as missing numeric content');
+ const removedBorder=Buffer.from(src.toString('binary').replace(
+  '1 w 40 490 510 108 re S','1 w 40 490 510 108 re n'),'binary');
+ await upload('[data-pdf-review-source]',src,'vector-original.pdf');
+ await upload('[data-pdf-review-output]',removedBorder,'table-border-removed.pdf');
+ await evaluate("document.querySelector('[data-pdf-review-start]').click()");
+ await eventually(()=>evaluate("document.querySelector('[data-pdf-review-result]')?.textContent"),
+  s=>s?.includes('벡터 선 그리기 수가 다릅니다'));
+ const strokes=await evaluate("(()=>{const d=[...document.querySelectorAll('[data-pdf-review-result] dt')].find(x=>x.textContent==='벡터 선 그리기');return d?.nextElementSibling?.textContent})()");
+ assert.match(strokes,/원본 [0-9]+ \/ 결과 [0-9]+/);
+
  await evaluate("document.querySelector('.mode-bar button').click()");
  await eventually(()=>evaluate("Boolean(document.querySelector('.doc-list-item.active'))"));
  const after=await evaluate(snapshot);

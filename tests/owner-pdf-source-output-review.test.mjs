@@ -246,3 +246,19 @@ test('P80 real selectable PDF sign-only numeric change cannot pass text parity',
  assert.ok(report.issues.includes('SOURCE_NUMERIC_TOKENS_NOT_FOUND'));
  assert.equal(report.owner_sale_approval,'NOT_GRANTED');
 });
+
+
+test('P82 removed vector table border must be flagged even when selectable text is identical',async()=>{
+ const f=fixture(),raw=f.source.toString('binary');
+ const original='1 w 40 490 510 108 re S',removed='1 w 40 490 510 108 re n';
+ assert.equal(original.length,removed.length);
+ assert.ok(raw.includes(original));
+ f.output=Buffer.from(raw.replace(original,removed),'binary');
+ const r=await reviewPdfPair(f.source,f.output,f.receipt,f.project,sha(f.output));
+ assert.equal(r.missing_source_tokens,0);
+ assert.equal(r.extra_output_tokens,0);
+ assert.ok(r.source_vector_strokes>r.output_vector_strokes);
+ assert.ok(r.issues.includes('VECTOR_STROKE_COUNT_CHANGED'));
+ assert.equal(r.status,'POTENTIAL_CONTENT_DIFFERENCES_REVIEW_REQUIRED');
+ assert.equal(r.owner_sale_approval,'NOT_GRANTED');
+});
