@@ -15,3 +15,18 @@ export function countPdfVectorStrokes(
  for(const op of fnArray)if(strokeOps.has(op))count++;
  return count;
 }
+
+export function countPdfPageStrokeDrift(
+ source:readonly number[],output:readonly number[],
+):number|null{
+ if(source.length>50||output.length>50)throw Error('PDF 페이지 검수 제한을 초과했습니다.');
+ if(source.length!==output.length)return null;
+ let count=0;
+ for(let i=0;i<source.length;i++){
+  if(!Number.isSafeInteger(source[i])||source[i]<0||
+     !Number.isSafeInteger(output[i])||output[i]<0)
+   throw Error('유효하지 않은 PDF 선 그리기 정보입니다.');
+  if(source[i]!==output[i])count++;
+ }
+ return count;
+}

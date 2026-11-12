@@ -79,7 +79,7 @@ async function textOnlyPdfEvidence(data){
   const pdf=await task.promise;
   if(pdf.numPages<1||pdf.numPages>MAX_PAGES)deny();
   let tokenCount=0,charCount=0,textItems=0,rasterDraws=0,vectorStrokes=0,nonA4=0;
-  const result=[],perPageTokens=[];
+  const result=[],perPageTokens=[],vectorPerPage=[];
   for(let i=1;i<=pdf.numPages;i++){
    const page=await pdf.getPage(i);
    const view=page.getViewport({scale:1});
@@ -95,10 +95,11 @@ async function textOnlyPdfEvidence(data){
    perPageTokens.push(pageTokens);
    if(Math.abs(view.width-595.276)>2||Math.abs(view.height-841.89)>2)nonA4++;
    const {fnArray}=await page.getOperatorList();
-   vectorStrokes+=fnArray.filter(op=>[
+   const strokeCount=fnArray.filter(op=>[
     OPS.stroke,OPS.closeStroke,OPS.fillStroke,OPS.eoFillStroke,
     OPS.closeFillStroke,OPS.closeEOFillStroke,
    ].includes(op)).length;
+   vectorStrokes+=strokeCount;vectorPerPage.push(strokeCount);
    rasterDraws+=fnArray.filter(op=>[
     OPS.paintImageXObject,OPS.paintInlineImageXObject,
     OPS.paintImageXObjectRepeat,OPS.paintInlineImageXObjectGroup,
@@ -106,7 +107,7 @@ async function textOnlyPdfEvidence(data){
    ].includes(op)).length;
    page.cleanup();
   }
-  return{pages:pdf.numPages,tokens:result,perPageTokens,textItems,rasterDraws,vectorStrokes,nonA4};
+  return{pages:pdf.numPages,tokens:result,perPageTokens,textItems,rasterDraws,vectorStrokes,vectorPerPage,nonA4};
  }finally{await task.destroy();}
 }
 export async function reviewPdfPair(sourceBytes,outputBytes,receiptBytes,projectBytes,expectedOutputSha){
@@ -134,6 +135,8 @@ export async function reviewPdfPair(sourceBytes,outputBytes,receiptBytes,project
     const diff=summarizeTokens(page,other);
     return n+Number(diff.missing_source_tokens===0&&diff.extra_output_tokens===0);
    },0):null;
+ const perPageVectorRiskPages=source.pages===output.pages
+  ?source.vectorPerPage.reduce((n,count,i)=>n+Number(count!==output.vectorPerPage[i]),0):null;
  const issues=[];
  if(!compared.source_tokens)issues.push('SOURCE_HAS_NO_SELECTABLE_TEXT');
  if(!compared.output_tokens)issues.push('OUTPUT_HAS_NO_SELECTABLE_TEXT');
@@ -145,6 +148,7 @@ export async function reviewPdfPair(sourceBytes,outputBytes,receiptBytes,project
  if(perPageOrderRiskPages>0)issues.push('PER_PAGE_TEXT_ORDER_DIFFERENCES_REVIEW_REQUIRED');
  if(source.rasterDraws!==output.rasterDraws)issues.push('RASTER_DRAW_COUNT_CHANGED');
  if(source.vectorStrokes!==output.vectorStrokes)issues.push('VECTOR_STROKE_COUNT_CHANGED');
+ if(perPageVectorRiskPages>0)issues.push('PAGE_VECTOR_STROKE_DIFFERENCES_REVIEW_REQUIRED');
  if(output.nonA4)issues.push('OUTPUT_NON_A4_PAGES');
  return Object.freeze({
   format:REVIEW_FORMAT,
@@ -155,6 +159,7 @@ export async function reviewPdfPair(sourceBytes,outputBytes,receiptBytes,project
   source_text_items:source.textItems,output_text_items:output.textItems,
   source_raster_draws:source.rasterDraws,output_raster_draws:output.rasterDraws,
   source_vector_strokes:source.vectorStrokes,output_vector_strokes:output.vectorStrokes,
+  per_page_vector_stroke_risk_pages:perPageVectorRiskPages,
   output_non_a4_pages:output.nonA4,
   per_page_text_risk_pages:perPageRiskPages,
   per_page_order_risk_pages:perPageOrderRiskPages,
@@ -184,6 +189,7 @@ function htmlReport(data){
   ['출력 래스터 그리기 수',data.output_raster_draws],
   ['원본 벡터 선 그리기 수',data.source_vector_strokes],
   ['출력 벡터 선 그리기 수',data.output_vector_strokes],
+  ['페이지별 벡터 선 위험',data.per_page_vector_stroke_risk_pages===null?'페이지 수 달라 비교 불가':data.per_page_vector_stroke_risk_pages],
   ['출력 비A4 페이지',data.output_non_a4_pages],
   ['페이지별 선택텍스트 위험',data.per_page_text_risk_pages===null?'페이지 수 달라 비교 불가':data.per_page_text_risk_pages],
   ['페이지 안 읽기 순서 위험',data.per_page_order_risk_pages===null?'페이지 수 달라 비교 불가':data.per_page_order_risk_pages],

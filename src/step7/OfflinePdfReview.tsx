@@ -1,17 +1,17 @@
 import {useEffect,useRef,useState} from 'react';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import {comparePdfTokenLists,countPdfPerPageTokenDifferences,countPdfPerPageOrderRisks,tokenizePdfText,type TokenParity} from './tokenParity.ts';
-import {countPdfVectorStrokes} from './pdfPaintSignals.ts';
+import {countPdfVectorStrokes,countPdfPageStrokeDrift} from './pdfPaintSignals.ts';
 
 // Independent owner-chosen PDF A and output PDF B. No file name/bytes/text is
 // logged, stored, transmitted, or embedded in exported metadata. No OCR or model.
-interface PdfSignal {sha256:string;pages:number;textItems:number;tokens:string[];perPageTokens:string[][];rasterDraws:number;vectorStrokes:number;nonA4:number}
+interface PdfSignal {sha256:string;pages:number;textItems:number;tokens:string[];perPageTokens:string[][];rasterDraws:number;vectorStrokes:number;vectorPerPage:number[];nonA4:number}
 interface PdfReviewReport extends TokenParity {
  format:'astra-step7-local-pdf-parity-v1';
  sourceSha256:string;outputSha256:string;
  sourcePages:number;outputPages:number;
  sourceRasterDraws:number;outputRasterDraws:number;
- sourceVectorStrokes:number;outputVectorStrokes:number;
+ sourceVectorStrokes:number;outputVectorStrokes:number;vectorPageRiskPages:number|null;
  outputNonA4Pages:number;perPageTextRiskPages:number|null;perPageOrderRiskPages:number|null;
  status:'RISK_SIGNALS_REVIEW_REQUIRED'|'LEXICAL_PARITY_NOT_FIDELITY_CERTIFIED';
  issues:string[];
@@ -50,7 +50,7 @@ async function inspectPdf(file:File,signal:AbortSignal):Promise<PdfSignal>{
   if(document.numPages<1||document.numPages>MAX_PAGES)
    throw Error('50페이지 이하 PDF만 검수할 수 있습니다.');
   let items=0,chars=0,raster=0,vector=0,nonA4=0;
-  const tokens:string[]=[],perPageTokens:string[][]=[];
+  const tokens:string[]=[],perPageTokens:string[][]=[],vectorPerPage:number[]=[];
   for(let pageNo=1;pageNo<=document.numPages;pageNo++){
    ensureActive();
    const page=await document.getPage(pageNo);
@@ -68,7 +68,8 @@ async function inspectPdf(file:File,signal:AbortSignal):Promise<PdfSignal>{
    perPageTokens.push(pageTokens);
    const ops=(await page.getOperatorList()).fnArray;
    ensureActive();
-   vector+=countPdfVectorStrokes(ops,OPS);
+   const strokeCount=countPdfVectorStrokes(ops,OPS);
+   vector+=strokeCount;vectorPerPage.push(strokeCount);
    raster+=ops.filter(op=>[
     OPS.paintImageXObject,OPS.paintInlineImageXObject,
     OPS.paintImageXObjectRepeat,OPS.paintInlineImageXObjectGroup,
@@ -77,7 +78,7 @@ async function inspectPdf(file:File,signal:AbortSignal):Promise<PdfSignal>{
    page.cleanup();
   }
   return{sha256:digest,pages:document.numPages,textItems:items,
-   tokens,perPageTokens,rasterDraws:raster,vectorStrokes:vector,nonA4};
+   tokens,perPageTokens,rasterDraws:raster,vectorStrokes:vector,vectorPerPage,nonA4};
  }finally{
   signal.removeEventListener('abort',abort);
   await destroy();
@@ -123,6 +124,7 @@ export default function OfflinePdfReview(){
    const comparison=comparePdfTokenLists(s.tokens,o.tokens);
    const perPageTextRiskPages=countPdfPerPageTokenDifferences(s.perPageTokens,o.perPageTokens);
    const perPageOrderRiskPages=countPdfPerPageOrderRisks(s.perPageTokens,o.perPageTokens);
+   const vectorPageRiskPages=countPdfPageStrokeDrift(s.vectorPerPage,o.vectorPerPage);
    const issues:string[]=[];
    if(s.sha256===o.sha256)issues.push('원본과 결과 파일 해시가 같습니다. 실제 재디자인 PDF인지 확인하세요.');
    if(!s.tokens.length)issues.push('원본에 선택 가능한 텍스트가 없습니다. OCR이나 원문 보존을 검증하지 못했습니다.');
@@ -138,13 +140,15 @@ export default function OfflinePdfReview(){
    if(s.rasterDraws!==o.rasterDraws)issues.push('원본과 결과의 이미지 그리기 수가 다릅니다.');
    if(s.vectorStrokes!==o.vectorStrokes)
     issues.push('원본과 결과의 벡터 선 그리기 수가 다릅니다. 표 테두리·구분선 누락 여부를 확인하세요.');
+   if(vectorPageRiskPages!==null&&vectorPageRiskPages>0)
+    issues.push('같은 번호 페이지에서 벡터 선 그리기 수가 다릅니다. 표·도형 위치 변경을 확인하세요.');
    if(o.nonA4)issues.push('출력 중 A4가 아닌 페이지가 있습니다.');
    setReport({
     format:'astra-step7-local-pdf-parity-v1',
     sourceSha256:s.sha256,outputSha256:o.sha256,
     sourcePages:s.pages,outputPages:o.pages,
     sourceRasterDraws:s.rasterDraws,outputRasterDraws:o.rasterDraws,
-    sourceVectorStrokes:s.vectorStrokes,outputVectorStrokes:o.vectorStrokes,
+    sourceVectorStrokes:s.vectorStrokes,outputVectorStrokes:o.vectorStrokes,vectorPageRiskPages,
     outputNonA4Pages:o.nonA4,perPageTextRiskPages,perPageOrderRiskPages,
     ...comparison,issues,
     status:issues.length?'RISK_SIGNALS_REVIEW_REQUIRED':'LEXICAL_PARITY_NOT_FIDELITY_CERTIFIED',
@@ -198,6 +202,7 @@ export default function OfflinePdfReview(){
      <dt>출력에만 있는 토큰</dt><dd>{report.addedTokens}</dd>
      <dt>이미지 그리기</dt><dd>원본 {report.sourceRasterDraws} / 결과 {report.outputRasterDraws}</dd>
      <dt>벡터 선 그리기</dt><dd>원본 {report.sourceVectorStrokes} / 결과 {report.outputVectorStrokes}</dd>
+     <dt>페이지별 벡터 위험</dt><dd>{report.vectorPageRiskPages===null?'페이지 수 달라 비교 불가':report.vectorPageRiskPages}</dd>
      <dt>출력 비A4 페이지</dt><dd>{report.outputNonA4Pages}</dd>
      <dt>페이지별 텍스트 위험</dt><dd>{report.perPageTextRiskPages===null?'페이지 수 달라 비교 불가':report.perPageTextRiskPages}</dd>
      <dt>페이지 내 텍스트 순서 위험</dt><dd>{report.perPageOrderRiskPages===null?'페이지 수 달라 비교 불가':report.perPageOrderRiskPages}</dd>
