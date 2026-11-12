@@ -1,3 +1,15 @@
+## 2026-11-12 KST — ASTRA P79–P81 handoff (10 required fields)
+1. Goal/technology: ASTRA locally processed PDF redesign to 95%; React19/TypeScript5/Vite7/Electron44/PDF.js; authorized current feature-only code and tests, no paid/external features.
+2. Features/decisions: P79 selected cancellation via AbortController/PDF.js over mere busy reset; P80 preserved numeric sign over mere digit count; P81 prechecked token bounds and loops instead of catching stack overflow. Original V2 and docs preserved.
+3. Tests: exact Git helper blob `4513d760` SHA match, Node22 isolated tests 11PASS/0FAIL, 1000 sign fuzz, 300001 token controlled limit, TypeScript `tsc` standalone PASS. Full app npm/build/browser/Windows/CI latest SHA NOT VERIFIED.
+4. Status: new functional code completed, engineering 85% provisional, P95 not met, release HOLD, ASTRA [작업중] marker kept.
+5. Error/attempt/pivot: old token spread failed with actual RangeError; changed to bounded loops then 11/11 PASS. Browser changed-file stale busy bug fixed in source and synthetic browser regression added but not run. GitHub workflow query reports no PR-triggered runs and empty status (not CI result); previous container git DNS unavailable, no unproductive repeat.
+6. GitHub: `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`; P79 `3739ede47ce9361073ac1939e44599fa7d734a52`, P80 `c2003ced478a379360e4ed9ec38982c9a650d49c`, latest code `d417eb91e31f5781fded65120bcfc363a4ea97c2`; Draft PR10 unmerged, main unchanged. Hub `hibi89/hackathon-command-center-2026@kmong-productization`.
+7. Deployment: Node22 npm test, npm run build, npm run desktop:verify plus Chrome/Edge GitHub Actions & Windows NSIS workflows; actual Vercel Production N/A, no release or owner Windows run.
+8. Originals/security: original feature parent `736c2930` recoverable, no customer source PDFs or IndexedDB V2 edited; no secrets, models, real consumer uploads or permission changes; GitHub history preserves rollback.
+9. Next priority/completion: run exact latest SHA full CI including actual browser and Windows, add owner-consented 5–10 PDF acceptance and physical buyer device check, obtain necessary rights/design/model decisions; leave [작업중] until 95 proven, no auto-unmark at switch/end.
+10. Updated 2026-11-12 KST; source/test diff + exact core blob and isolated local tests verified, full browser/Windows/external acceptance NOT VERIFIED. This handoff documentation commit SHA should be read back.
+
 ## 2026-11-12 KST — ASTRA P78 within-page order safety continuation (10 points)
 1. Goal / scope: 95% Astra Kmong product using existing local React19/Vite7/TS5/Electron44/PDF.js, no external PDF upload, OCR, commercial rights bypass.
 2. Chosen design: A full semantic/PDF layout equivalence would overclaim visual/OCR truth; B linear advisory token order count with multiset guard chosen. Reports only risk count; keeps original contents unchanged. Previously P76 detected page swaps and P77 prevented error cleanup deletion.
