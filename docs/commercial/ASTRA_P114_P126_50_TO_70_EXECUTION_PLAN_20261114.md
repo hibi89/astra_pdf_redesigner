@@ -222,4 +222,4 @@
 
 70~100 상세 잔여 30점과 사용자가 개입해야 할 최종 승인 장벽은 docs/commercial/ASTRA_INSTANT_70_TO_100_HANDOFF_20261114.md에 따로 기록한다. 모든 항목의 사용자가 확정한 배점과 원본 설계는 동일하다.
 
-**최종 확인:** P114–P118 VERIFIED, G55 PASS; P119–P121 BLOCKED +0; P122 VERIFIED +2; P123/P124 BLOCKED +0; current evidence score 59/100. Latest fully verified task SHA remains `d2a84d03ac8c791e74470e756cb6417a356776c3`; P125 code SHA `440cae43022314684bb5d291107521853c10b3be` GitHub CI in progress, no score yet. G60/G65 not passed. Official acceptance UNASSESSED, RELEASE HOLD.
+**최종 확인:** P114–P118 VERIFIED, G55 PASS; P119–P121 BLOCKED +0; P122 VERIFIED +2; P123/P124 BLOCKED +0; P125 VERIFIED +2; P126 BLOCKED +0; current provisional task sum 61/100. Latest verified feature SHA `88c56e4188754f960ae94281b6d68e37b5081b62`, exact-SHA Linux #43641402429, Windows #43641402454, and blueprint #43641402742 all SUCCESS. G60 NOT PASSED because actual Windows Tesseract/OCR evidence is missing; G65/G70 not passed. Official acceptance UNASSESSED, RELEASE HOLD.
