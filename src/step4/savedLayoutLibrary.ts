@@ -20,7 +20,7 @@ export function validateSavedLayouts(raw:unknown):SavedLayout[]{
      typeof item.name!=='string'||item.name.trim().length<1||item.name.trim().length>60||
      /[\u0000-\u001f\u007f-\u009f\u202a-\u202e]/u.test(item.name)||
      typeof item.layoutId!=='string'||!skuLayoutCandidate(item.layoutId)||
-     !Number.isSafeInteger(item.savedAt)||item.savedAt<1577836800000||ids.has(item.id))return fail();
+     typeof item.savedAt!=='number'||!Number.isSafeInteger(item.savedAt)||item.savedAt<1577836800000||ids.has(item.id))return fail();
    ids.add(item.id);
    return {id:item.id,name:item.name.trim(),layoutId:item.layoutId,savedAt:item.savedAt};
  });
