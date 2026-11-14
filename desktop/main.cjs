@@ -1,16 +1,22 @@
 'use strict';
-const {app,BrowserWindow,dialog,ipcMain,net,protocol,session}=require('electron');
+const {app,BrowserWindow,dialog,ipcMain,net,protocol,session,shell}=require('electron');
 const fs=require('node:fs/promises');
 const os=require('node:os');
 const path=require('node:path');
 const {pathToFileURL}=require('node:url');
 const {resolveBundleAsset}=require('./bundle-path.cjs');
+const {approvedSearchTarget}=require('./approved-search-link.cjs');
 const {auditOutputPdf}=require('./pdf-output-audit.cjs');
+const {assertTrustedPdfSaveRequest}=require('./pdf-export-ipc-guard.cjs');
 const {acceptanceDomSource,MARKERS}=require('./pdf-acceptance-fixture.cjs');
 const {runStep2ProjectAcceptance}=require('./step2-project-acceptance.cjs');
 const {runStep3ProjectAcceptance}=require('./step3-project-acceptance.cjs');
 const {createLocalModelController}=require('./local-model-controller.cjs');
+const {createOwnerOllamaController}=require('./owner-ollama-controller.cjs');
+const {createLocalOcrController}=require('./local-ocr-controller.cjs');
 const localModel=createLocalModelController({resourcesDir:process.resourcesPath});
+const ownerOllama=createOwnerOllamaController();
+const localOcr=createLocalOcrController({resourcesDir:process.resourcesPath});
 
 const APP_URL='astra://app/index.html';
 const SMOKE=process.argv.includes('--astra-desktop-smoke');
@@ -104,8 +110,7 @@ async function renderLocalPdf(){
 }
 function registerPdfSaving(){
   ipcMain.handle('astra:save-pdf',async(event,rawExpectedTextMarkers,expectedRasterImages=0)=>{
-    if(!mainWindow||event.sender!==mainWindow.webContents||
-       !isAppUrl(event.sender.getURL()))throw Error('Blocked untrusted PDF export request');
+    assertTrustedPdfSaveRequest(event,mainWindow);
     const expectedTextMarkers=validOutputMarkers(rawExpectedTextMarkers);
     if(!Number.isInteger(expectedRasterImages)||expectedRasterImages<0||expectedRasterImages>5000)throw Error('Invalid PDF image review count');
     // Smoke mode uses an isolated test-only directory. It never opens the
@@ -159,15 +164,38 @@ function registerLocalModel(){
     event.sender===mainWindow.webContents&&isAppUrl(event.sender.getURL());
   ipcMain.handle('astra:local-model-status',async event=>{
     if(!trusted(event))throw Error('Untrusted model status request');
-    return localModel.status();
+    const packaged=await localModel.status();
+    return packaged.status==='available'?packaged:ownerOllama.status();
   });
-  ipcMain.handle('astra:local-model-propose',async(event,text)=>{
+  ipcMain.handle('astra:local-model-propose',async(event,text,explicitConsent)=>{
     if(!trusted(event))throw Error('Untrusted model proposal request');
-    return localModel.propose(text);
+    if(explicitConsent!==true)return{status:'error',reason:'local-model-consent-required'};
+    const packaged=await localModel.status();
+    return packaged.status==='available'?localModel.propose(text):
+      ownerOllama.propose(text,{explicitConsent:true});
   });
   ipcMain.handle('astra:local-model-cancel',async event=>{
     if(!trusted(event))throw Error('Untrusted model cancellation request');
-    return localModel.cancel();
+    const owner=ownerOllama.cancel();
+    const packaged=localModel.cancel();
+    return owner.status==='cancel-requested'?owner:packaged;
+  });
+}
+
+function registerLocalOcr(){
+  const trusted=event=>mainWindow&&!mainWindow.isDestroyed()&&
+    event.sender===mainWindow.webContents&&isAppUrl(event.sender.getURL());
+  ipcMain.handle('astra:local-ocr-status',async event=>{
+    if(!trusted(event))throw Error('Untrusted OCR status request');
+    return localOcr.status();
+  });
+  ipcMain.handle('astra:local-ocr-recognize',async(event,pngBytes,layoutMode)=>{
+    if(!trusted(event))throw Error('Untrusted OCR request');
+    return localOcr.recognizePng(pngBytes,layoutMode);
+  });
+  ipcMain.handle('astra:local-ocr-cancel',async event=>{
+    if(!trusted(event))throw Error('Untrusted OCR cancellation request');
+    return localOcr.cancel();
   });
 }
 
@@ -182,7 +210,19 @@ function createWindow(){
       webviewTag:false,devTools:!app.isPackaged,webSecurity:true,
     },
   });
-  mainWindow.webContents.setWindowOpenHandler(()=>({action:'deny'}));
+  mainWindow.webContents.setWindowOpenHandler(details=>{
+    const safeUrl=approvedSearchTarget(details.url);
+    if(safeUrl&&!SMOKE){
+      // A separate native confirmation is mandatory; browser never silently sends a keyword.
+      void dialog.showMessageBox(mainWindow,{
+        type:'question',title:'외부 디자인 이미지 검색',
+        message:'입력한 검색 키워드를 시스템 웹브라우저로 전달하시겠습니까?',
+        detail:'원본 PDF·문서 내용·파일명은 전송하지 않습니다. 외부 사이트는 별도 개인정보/저작권 정책을 적용합니다.',
+        buttons:['외부 브라우저에서 열기','취소'],defaultId:1,cancelId:1,noLink:true,
+      }).then(({response})=>{if(response===0)return shell.openExternal(safeUrl);}).catch(()=>{});
+    }
+    return{action:'deny'};
+  });
   mainWindow.webContents.on('will-navigate',(event,url)=>{
     if(!isAppUrl(url))event.preventDefault();
   });
@@ -224,7 +264,13 @@ async function runSmoke(win){
   const modelStatus=await evaluate('window.astraDesktop.localModelStatus()');
   if(modelStatus.status!=='unavailable')throw Error('Model must fail closed without shipped weights');
   const unavailableProposal=await evaluate("window.astraDesktop.localModelPropose('synthetic CI text')");
-  if(unavailableProposal.status!=='unavailable')throw Error('Unshipped model unexpectedly executed');
+  if(unavailableProposal.status!=='error'||unavailableProposal.reason!=='local-model-consent-required')throw Error('Unconsented local model call was not blocked');
+  const ocrBridge=await evaluate("typeof window.astraDesktop.localOcrRecognizePng==='function'");
+  if(!ocrBridge)throw Error('Secure local OCR bridge unavailable');
+  const ocrStatus=await evaluate('window.astraDesktop.localOcrStatus()');
+  if(ocrStatus.status!=='unavailable')throw Error('Unshipped OCR assets unexpectedly enabled');
+  const badOcr=await evaluate('window.astraDesktop.localOcrRecognizePng(new Uint8Array(33))');
+  if(badOcr.status!=='error'||badOcr.reason!=='invalid-image')throw Error('OCR image validation failed');
   const saved=await evaluate("window.astraDesktop.savePdf()");
   if(saved?.status!=='saved')throw Error('Desktop PDF export failed: '+JSON.stringify(saved));
   await evaluate("localStorage.removeItem('__astra_desktop_ci__')");
@@ -265,6 +311,7 @@ if(lock){
       configureSession();
       registerPdfSaving();
       registerLocalModel();
+      registerLocalOcr();
       await createWindow();
       if(SMOKE){
         await runSmoke(mainWindow);

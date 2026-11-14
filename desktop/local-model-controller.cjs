@@ -35,12 +35,20 @@ async function verifiedAsset(root,folder,entry){
   if(digest.toLowerCase()!==entry.sha256.toLowerCase())throw Error('Model bundle file hash mismatch');
   return real;
 }
+// Conservative, local-only protection of literal high-impact facts. This is a
+// syntactic fail-closed filter, never a guarantee of semantic preservation.
 function stableTokens(value){
-  return JSON.stringify([
-    ...(value.match(/https?:\/\/[^\s]+/g)||[]),
-    ...(value.match(/\d+(?:[.,:/%-]\d+)*/g)||[]),
-    ...(value.match(/"[^"\n]*"|'[^'\n]*'/g)||[]),
-  ]);
+  const v=value.normalize('NFC').replaceAll('\u2212','-');
+  const urls=v.match(/https?:\/\/[^\s]+/g)||[];
+  const numbers=v.match(/(?:[$₩€£]|[+\-])?\d+(?:[.,:/%\-]\d+)*(?:%|원|달러|만원|억원)?/g)||[];
+  const quoted=v.match(/"[^"\n]*"|'[^'\n]*'|“[^”\n]*”|‘[^’\n]*’/g)||[];
+  // Reject removal/addition of negation and operational prohibitions, including
+  // unmarked Korean negatives, even when numbers and quotes happen to match.
+  const protectedRoots=['않','못','없','아니','불가','금지','거부','취소','미승인','불허','제외','비승인'];
+  const protectedCounts=protectedRoots.map(root=>[root,v.split(root).length-1])
+    .filter(([,count])=>count>0);
+  const spacedAnCount=(v.match(/(?:^|[\s(])안(?=\s)/g)||[]).length;
+  return JSON.stringify([urls,numbers,quoted,protectedCounts,spacedAnCount]);
 }
 function validateSuggestion(before,after){
   if(typeof after!=='string'||after.trim().length===0||after.length>5000||after.trim()===before.trim())

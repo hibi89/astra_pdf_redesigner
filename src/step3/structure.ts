@@ -4,7 +4,7 @@ import type { ImageRecoveryResult, RecoveredPdfImage } from './imageRecovery.ts'
 import type { GraphicsCompositionRisk } from './graphicsRisk.ts';
 export type PdfRole='heading'|'paragraph'|'caption';
 export interface PdfFragment {
-  text:string; page:number; x:number; y:number; width:number; height:number; fontSize:number;
+  text:string; page:number; x:number; y:number; width:number; height:number; fontSize:number; rotationDegrees?:number;
 }
 export interface PdfPageInput {
   number:number; width:number; height:number; pieces:PdfFragment[];
@@ -69,7 +69,7 @@ export function insertManualPdfBlockAtSourcePosition(
 export function sortSourceReviewItems<T extends {origin:PdfOrigin}>(items:readonly T[]):T[]{
   return [...items].sort((a,b)=>a.origin.y-b.origin.y||a.origin.x-b.origin.x);
 }
-export interface PdfDraftPage {number:number; blocks:PdfDraftBlock[]; charCount:number; imageDetected:boolean; images:RecoveredPdfImage[];imageCount:number;omittedImages:number;vectorPaintCount:number;compositionRisk:GraphicsCompositionRisk;reviewFlags:string[];sourceTextItems:string[];sourceTextOrigins:PdfOrigin[];}
+export interface PdfDraftPage {number:number; blocks:PdfDraftBlock[]; charCount:number; imageDetected:boolean; images:RecoveredPdfImage[];imageCount:number;omittedImages:number;vectorPaintCount:number;compositionRisk:GraphicsCompositionRisk;reviewFlags:string[];layoutReviewRequired:boolean;layoutReviewReasons:string[];sourceTextItems:string[];sourceTextOrigins:PdfOrigin[];}
 export interface PdfDraft {
   fileName:string; pageCount:number; pages:PdfDraftPage[]; warnings:string[]; totalChars:number;
 }
@@ -97,14 +97,19 @@ const median=(a:number[])=>{
   return arr.length?arr[Math.floor(arr.length/2)]:12;
 };
 interface PdfLine {text:string;x:number;y:number;width:number;height:number;fontSize:number}
-function normalizePieces(page:PdfPageInput):PdfFragment[]{
-  return page.pieces.filter(p=>p.text.length>0).map(p=>({
-    ...p, x:finite(p.x),y:finite(p.y),width:Math.max(0,finite(p.width)),
-    height:Math.max(1,finite(p.height)),fontSize:Math.max(1,finite(p.fontSize)),
-  })).sort((a,b)=>Math.abs(a.y-b.y)>2? a.y-b.y : a.x-b.x);
+function normalizePiece(piece:PdfFragment):PdfFragment{
+  return {...piece,x:finite(piece.x),y:finite(piece.y),width:Math.max(0,finite(piece.width)),
+    height:Math.max(1,finite(piece.height)),fontSize:Math.max(1,finite(piece.fontSize)),
+    rotationDegrees:finite(piece.rotationDegrees??0)};
 }
-export function reconstructLines(page:PdfPageInput):{lines:PdfLine[];multiColumn:boolean}{
-  const pieces=normalizePieces(page);
+export function reconstructLines(page:PdfPageInput):{
+  lines:PdfLine[];multiColumn:boolean;rotatedTextCount:number;vectorLayoutSuspected:boolean;
+  operatorAnalysisIncomplete:boolean;geometryOutsidePage:boolean;sourceOrderPreserved:boolean;
+}{
+  // Preserve PDF.js order independently from geometric order. Geometry is a
+  // useful reading-order hint only when the page is a clear horizontal column.
+  const sourcePieces=page.pieces.filter(p=>p.text.length>0).map(normalizePiece);
+  const pieces=[...sourcePieces].sort((a,b)=>Math.abs(a.y-b.y)>2?a.y-b.y:a.x-b.x);
   const groups:PdfFragment[][]=[];
   for(const piece of pieces){
     const tail=groups.at(-1);
@@ -112,14 +117,13 @@ export function reconstructLines(page:PdfPageInput):{lines:PdfLine[];multiColumn
     else groups.push([piece]);
   }
   let multiColumn=false;
-  const lines=groups.map(group=>{
+  const geometricLines=groups.map(group=>{
     const sorted=[...group].sort((a,b)=>a.x-b.x);
     const x=Math.min(...sorted.map(p=>p.x));
     const y=Math.min(...sorted.map(p=>p.y));
     let right=x,output='';
     for(let i=0;i<sorted.length;i++){
-      const token=sorted[i];
-      const gap=token.x-right;
+      const token=sorted[i],gap=token.x-right;
       if(i&&gap>Math.max(2,token.fontSize*.28)&&!/\s$/.test(output)&&!/^\s/.test(token.text))output+=' ';
       if(i&&gap>page.width*.28&&token.text.trim().length>=2&&sorted[i-1].text.trim().length>=2)multiColumn=true;
       output+=token.text;
@@ -127,26 +131,52 @@ export function reconstructLines(page:PdfPageInput):{lines:PdfLine[];multiColumn
     }
     return{text:output,x,y,width:Math.max(0,right-x),height:Math.max(...sorted.map(p=>p.height)),fontSize:median(sorted.map(p=>p.fontSize))};
   }).filter(line=>line.text.trim().length>0).sort((a,b)=>Math.abs(a.y-b.y)>2?a.y-b.y:a.x-b.x);
-  // Distinct non-overlapping left/right text runs often indicate columns;
-  // only warn, never silently rearrange multiple columns as one.
-  const left=lines.filter(l=>l.x<page.width*.42&&l.width<page.width*.45);
-  const right=lines.filter(l=>l.x>page.width*.52&&l.width<page.width*.45);
+  const left=geometricLines.filter(l=>l.x<page.width*.42&&l.width<page.width*.45);
+  const right=geometricLines.filter(l=>l.x>page.width*.52&&l.width<page.width*.45);
   if(left.length>=2&&right.length>=2){
     const overlap=Math.min(Math.max(...left.map(l=>l.y)),Math.max(...right.map(l=>l.y)))-
       Math.max(Math.min(...left.map(l=>l.y)),Math.min(...right.map(l=>l.y)));
     if(overlap>20)multiColumn=true;
   }
-  // PDF.js can combine left and right runs into a single TextItem. That
-  // erases their individual x coordinates even if its bbox still covers a
-  // large gap. Warn conservatively on repeated short-but-sparse wide lines;
-  // never reorder their text or claim that columns were reconstructed.
-  const sparseWide=lines.filter(line=>{
+  // PDF.js may combine separate columns into one item. Repeated sparse,
+  // wide boxes provide an additional conservative signal.
+  const sparseWide=geometricLines.filter(line=>{
     const characters=line.text.replace(/\s/g,'').length;
     return characters>=6&&characters<=75&&line.width>=page.width*.42&&
       line.width>characters*line.fontSize*.9;
   });
   if(sparseWide.length>=2)multiColumn=true;
-  return{lines,multiColumn};
+  const rotatedTextCount=sourcePieces.filter(piece=>{
+    const angle=((piece.rotationDegrees??0)%180+180)%180;
+    return Math.min(angle,180-angle)>=3;
+  }).length;
+  const vectorLayoutSuspected=Number.isSafeInteger(page.vectorPaintCount)&&page.vectorPaintCount!>=4;
+  const operatorAnalysisIncomplete=Boolean(page.operatorWarning);
+  const geometryOutsidePage=sourcePieces.some(piece=>piece.x < -2||piece.y < -2||
+    piece.x+piece.width > page.width+2||piece.y+piece.height > page.height+2);
+  const sourceOrderPreserved=multiColumn||rotatedTextCount>0||vectorLayoutSuspected||
+    operatorAnalysisIncomplete||geometryOutsidePage;
+  // PDF.js can expose spacing as standalone whitespace items. Keep every source
+  // character in order, but fold such items into a neighboring text fragment so
+  // they cannot become blank editable blocks that block a reviewed save.
+  const sourceOrderPieces:PdfFragment[]=[];
+  let leadingWhitespace='';
+  for(const piece of sourcePieces){
+    if(!piece.text.trim()){
+      if(sourceOrderPieces.length){
+        const last=sourceOrderPieces.length-1;
+        sourceOrderPieces[last]={...sourceOrderPieces[last],text:sourceOrderPieces[last].text+piece.text};
+      }else leadingWhitespace+=piece.text;
+      continue;
+    }
+    sourceOrderPieces.push(leadingWhitespace?{...piece,text:leadingWhitespace+piece.text}:piece);
+    leadingWhitespace='';
+  }
+  const lines=sourceOrderPreserved?sourceOrderPieces.map(piece=>({
+    text:piece.text,x:piece.x,y:piece.y,width:piece.width,height:piece.height,fontSize:piece.fontSize,
+  })):geometricLines;
+  return{lines,multiColumn,rotatedTextCount,vectorLayoutSuspected,operatorAnalysisIncomplete,
+    geometryOutsidePage,sourceOrderPreserved};
 }
 export type SourceTextMatcher=(reconstructedText:string)=>string[];
 export function createSourceTextMatcher(sourceItems:readonly string[]):SourceTextMatcher{
@@ -221,7 +251,8 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
   const body=median(allFonts),outPages:PdfDraftPage[]=[];
   let totalChars=0,totalBlocks=0;
   for(const page of sorted){
-    const {lines,multiColumn}=reconstructLines(page);
+    const reconstruction=reconstructLines(page);
+    const {lines,multiColumn}=reconstruction;
     const blocks:PdfDraftBlock[]=[];
     const reviewFlags:string[]=[];
     const sourceItems=page.pieces.filter(piece=>{
@@ -233,6 +264,13 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
     });
     const sourceTextItems=sourceItems.map(piece=>piece.text);
     const sourceTextOrigins=sourceItems.map(piece=>({page:piece.page,x:round(piece.x),y:round(piece.y),width:round(piece.width),height:round(piece.height)}));
+    const layoutReviewReasons:string[]=[];
+    if(multiColumn)layoutReviewReasons.push('다단 또는 넓은 텍스트 간격이 감지됐습니다. PDF.js 원본 추출 순서를 유지하며 자동 정렬하지 않았습니다.');
+    if(reconstruction.vectorLayoutSuspected)layoutReviewReasons.push('여러 벡터 페인트 명령이 감지됐습니다. 표·선·도형 순서를 원본과 대조하세요.');
+    if(reconstruction.rotatedTextCount)layoutReviewReasons.push('기울거나 회전된 텍스트 '+reconstruction.rotatedTextCount+'개가 감지됐습니다. 원본 위치와 읽기 순서를 대조하세요.');
+    if(reconstruction.operatorAnalysisIncomplete)layoutReviewReasons.push('그래픽 구조 분석이 완료되지 않았습니다. 페이지 텍스트와 읽기 순서를 원본과 대조하세요.');
+    if(reconstruction.geometryOutsidePage)layoutReviewReasons.push('페이지 경계 밖 텍스트가 감지됐습니다. 누락·잘림 여부를 원본과 대조하세요.');
+    for(const reason of layoutReviewReasons)reviewFlags.push('레이아웃 수동 검수 필요: '+reason);
     const unrepresented=findUnrepresentedSourcePieces(sourceTextItems,lines.map(line=>line.text).join('\n'));
     if(unrepresented.length)reviewFlags.push('PDF.js 원본 텍스트 조각 '+unrepresented.length+'개가 재구성 블록에서 일치하지 않습니다. 대체 문자·조각 결합 또는 추출 누락 가능성이 있어 이 페이지 원본과 대조하고 필요하면 직접 추가하세요.');
     const sourceText=page.pieces.map(piece=>piece.text).join('');
@@ -266,7 +304,7 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
       const role=lineRole(line,body);
       const prev=blocks.at(-1);
       const lastLine=lines[lines.indexOf(line)-1];
-      const isContinuation=prev&&prev.origin&&lastLine&&role==='paragraph'&&prev.role==='paragraph'&&
+      const isContinuation=!reconstruction.sourceOrderPreserved&&prev&&prev.origin&&lastLine&&role==='paragraph'&&prev.role==='paragraph'&&
         Math.abs(lastLine.x-line.x)<Math.max(12,body*1.8)&&
         line.y-(lastLine.y+lastLine.height)<=Math.max(12,body*1.5)&&
         line.y>=lastLine.y;
@@ -286,7 +324,7 @@ export function makePdfDraft(fileName:string,pages:PdfPageInput[]):PdfDraft{
       totalChars=nextPdfTextCount(totalChars,line.text);
       if(totalBlocks>PDF_IMPORT_LIMITS.blocks)throw Error('PDF 추출 블록이 2,500개 제한을 초과했습니다.');
     }
-    outPages.push({number:page.number,blocks,charCount:lines.reduce((n,x)=>n+x.text.length,0),imageDetected:detected>0,images,imageCount:detected,omittedImages:omitted,vectorPaintCount,compositionRisk,reviewFlags,sourceTextItems,sourceTextOrigins});
+    outPages.push({number:page.number,blocks,charCount:lines.reduce((n,x)=>n+x.text.length,0),imageDetected:detected>0,images,imageCount:detected,omittedImages:omitted,vectorPaintCount,compositionRisk,reviewFlags,layoutReviewRequired:layoutReviewReasons.length>0,layoutReviewReasons,sourceTextItems,sourceTextOrigins});
   }
   if(!totalChars)throw Error('선택 가능한 텍스트가 없습니다. 스캔 PDF는 OCR 지원 전까지 가져올 수 없습니다.');
   warnings.unshift('PDF의 읽기 순서·줄바꿈·공백·제목/캡션 분류는 추정입니다. 원본과 대조해 검수한 뒤 문서함에 추가하세요.');

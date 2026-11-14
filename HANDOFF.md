@@ -1,3 +1,580 @@
+## 2026-11-15 KST — P117 VERIFIED · 잠정 56/100 GitHub-only 인수인계 (10항)
+
+1. **목표·범위:** P114–P117 검증을 마쳤다. 사용자 확정 A01~A12, STEP1 V1·STEP2 V2, BASIC8/PRO20/BUSINESS30, 서명·출시 차단 정책을 보존한다. GPT-6 High의 독립 검수는 사용자가 70점 달성 뒤 요청할 때 수행한다.
+2. **완료 작업·변경:** P117(A04 +1). 이전 배치 대상을 누적 병합하던 BUSINESS plan 갱신을 새 선택으로 교체한다. Chrome/Edge 실제 UI 회귀와 위조 license guard 회귀를 추가했다. 상세 [P117 검증서](docs/evidence/astra/P117/VERIFICATION.md).
+3. **최종 기능 SHA:** `c4d96dc02fb616e44773871952343161079e293b`; 기능 코드 변경은 부모 커밋 `e57396a47c2fdb46214601795df91fca6e44f16f` 및 테스트 선택자 수정 커밋 `c4d96dc02fb616e44773871952343161079e293b`에 반영됐다. 변경 파일: `src/step2/Workspace.tsx`, `tests/brand-batch-plan.test.ts`, `tests/sku-action-gate.test.ts`, `tests/step4-brand-batch-browser.mjs`, `.github/workflows/ci.yml`.
+4. **정확 SHA Actions:** Linux #43622221289 (Node 271/271, build, Chrome+Edge PASS), Windows #43622221235 (Node 270 PASS/1 OS SKIP, desktop 73/73, NSIS PASS), 정책 #43622221573; 모두 head SHA `c4d96dc02fb616e44773871952343161079e293b`.
+5. **기능 수용 증거:** Chrome·Edge 각각 21개 합성 V2 문서에서 2/5/20개 계획을 전환하고 총 27개 개별 A4 PDF를 검사했다. 비대상 미오염, 취소 뒤 21/21 원래 테마 복원과 V2 문서·assets 불변 PASS. Windows 0.1.0→0.1.1 NSIS 업그레이드 후 기존 STEP2 문서+PNG 보존 PASS.
+6. **점수:** P117 +1, A04 13→14/15, 잠정 총점 55→56/100. A01~A12 최대 배점 변경 없음. G55는 이미 별도 PASS이고 G60/G65/G70은 미도달.
+7. **시도 판정:** 초기 SHA `e57396a47c2fdb46214601795df91fca6e44f16f`의 Linux #43621810438은 브라우저 test의 꼬리말 선택자 충돌로 실패해 0점. 선택자를 좁힌 최종 SHA에서 세 필수 workflow를 재실행해 모두 PASS했다.
+8. **미검증·차단:** 다중 배치 로고, 실제 고객 issuer pin/서명 발급·상용 사용권, 고객 문서·구매자 육안 수용, 물리 Win10/11은 미검증. 공식 수용 UNASSESSED, RELEASE HOLD 유지.
+9. **저장소·진행률:** 기존 branch `feature/astra-p71-pdf-source-parity-20261112`만 사용했다. 코드·증거·진행률·핸드오프는 GitHub에 기록 중이며 사용자의 로컬 PC/외부 CI/Vercel/유료서비스/외부 추론 API를 사용하지 않았다.
+10. **다음:** P118 로컬 레퍼런스 분석→비파괴 적용·재현성 강화. 목표 70점 달성 전까지 P114–P126 순서와 별도 G60/G65/G70 증거 게이트를 유지한다.
+
+## 2026-11-15 KST — P116 VERIFIED · G55 PASS / 잠정 55/100 GitHub-only 인수인계 (10항)
+
+1. **목표·범위:** 사용자 확정 A01~A12, STEP1 V1·STEP2 V2, BASIC8/PRO20/BUSINESS30, 출시 차단 정책을 유지하며 P114~P116을 검증했다. GPT-6 High는 70점 후 사용자 요청 시 독립 검수한다.
+2. **완료 작업·변경 파일:** P116(A04)에서 기존 30개 레이아웃의 실제 A4 PDF 구조·텍스트·이미지 회귀를 추가했다. 제품 레이아웃 코드는 그대로이며 변경 파일은 `tests/step4-style-preset-browser.mjs` 하나다. 상세: `docs/evidence/astra/P116/VERIFICATION.md`.
+3. **검증 기능 SHA:** `b03583f12c5eb212dd0207fb539593ec7c2b8df3`. Linux #43618379958: npm test 269/269, build PASS, Chrome 및 Edge 각각 30/30 A4 PDF·문자 순서·40개 표식·PNG/V2·경계/겹침 PASS. Windows #43618379926: 268 PASS, 1 OS 전용 SKIP, 0 FAIL; desktop 73/73, 설치/업그레이드 PASS. 정책 #43618380099 PASS.
+4. **점수·별도 게이트:** P116 +1, A04 12→13/15, 잠정 54→55/100. G55를 별도 PASS로 적용했다. P114+P115+P116 증거는 `docs/evidence/astra/G55/VERIFICATION.md`. 공식 구매자 수용은 UNASSESSED.
+5. **실패 후보·시험 판정:** SHA `254e8c2b39488c0e2caad733b88fb2abfe04f31f`의 Linux #43618017819은 PDF 추출 공백 정규화 차이로 실패했고 0점 처리했다. 최종 SHA에서 문자 순서 비교와 개별 표식 검사를 수정해 통과시켰다. 다른 실험 실패 후보도 점수 미인정.
+6. **저장소·커밋:** `hibi89/astra_pdf_redesigner`, `feature/astra-p71-pdf-source-parity-20261112`; 검증 코드는 위 정확 SHA. 증거/상태 문서는 별도 문서 커밋으로 기록한다.
+7. **런너·자료:** GitHub-hosted Linux/Windows만 사용. 합성 ASCII 원문·2×2 PNG 사용, Actions에서 60개 브라우저 PDF를 임시 생성·검사·폐기. 고객 원본·유료 API/CI·외부 AI 추론·Vercel 사용 없음.
+8. **정확 SHA CI:** [Linux #43618379958](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43618379958), [Windows #43618379926](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43618379926), [정책 #43618380099](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43618380099) 모두 SUCCESS, 각각 head SHA `b03583f12c5eb212dd0207fb539593ec7c2b8df3`.
+9. **미검증·차단:** Poppler CJK 텍스트 계층/한국어 추출 정합, 고객 PDF와 실제 구매자 시각 품질, 종이 출력, 물리 Win10/11은 미검증. STEP1 V1, STEP2 V2, SKU·서명키·OCR/고객 출시 차단은 유지. 공식 수용 UNASSESSED, RELEASE HOLD.
+10. **다음:** P117 BUSINESS 다중 문서 브랜드 재사용·저장·취소·SKU 우회 회귀. G60/G65/G70은 각각 별도 증거 후 적용.
+## 2026-11-15 KST — P115 VERIFIED / 잠정 54/100 GitHub-only 인수인계 (10항)
+
+1. **목표·범위:** Astra STEP1~7, 확정 A01~A12 가중치, P114~P126 50→70 실행 순서, BASIC8/PRO20/BUSINESS30 보존. GPT-6 High는 사용자 호출 시 별도 독립 검수.
+2. **완료·변경:** P115는 원본/출력 PDF의 숫자 포함 토큰, 기호, 부정 표현, 링크 및 추가/중복 토큰 차이를 페이지 위치와 함께 분리한다. 수동 검토·취소/오류 복구를 유지하고 원본 SHA, V1/V2 및 자동승인 금지를 검증했다. 변경: `src/step7/OfflinePdfReview.tsx`, `src/step7/tokenParity.ts`, `tests/fixtures/step7-pdf-parity-corpus.mjs`, `tests/step7-pdf-review-browser.mjs`, `tests/step7-token-parity.test.ts`.
+3. **테스트·정확 SHA:** 기능 SHA `a89c7a7dfbb2e18ef1c5f328e248d2e60ec69a0d`. [Linux #43612143269](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43612143269) SUCCESS: Node 269PASS/0FAIL/0SKIP, build PASS, Chrome·Edge 각 15/15 실제 A4 합성 쌍 대조, 오류/취소·원본 SHA/V1/V2 불변 PASS. [Windows #43612143223](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43612143223) SUCCESS: Node 268PASS/0FAIL/1 Windows 전용 SKIP, desktop 73PASS/0FAIL, NSIS 설치·실행·제거·0.1.0→0.1.1 V2 문서/PNG 보존 PASS. [정본 정책 #43612143523](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43612143523) SUCCESS.
+4. **당시 P115 결과:** P115 +2, A03 10→12/14, 누적 52→54/100. 이후 P116/G55 최신 결과는 이 파일 최상단 인수인계에 기록했다. 공식 구매자 최종 수용 UNASSESSED, RELEASE HOLD.
+5. **오류·시도:** #43611032904 V1 합성 기준 데이터 누락, #43611361119 SHA helper import 누락, #43611776507 마이그레이션 기준 스냅샷 순서 오류. 테스트를 각각 보정했고 실패 후보 가점은 0. 최종 SHA에서 세 Actions 전체 PASS.
+6. **저장소·버전:** `hibi89/astra_pdf_redesigner`, `feature/astra-p71-pdf-source-parity-20261112`. 검증 기능 SHA `a89c7a7dfbb2e18ef1c5f328e248d2e60ec69a0d`. 증거 `docs/evidence/astra/P115/VERIFICATION.md`, 등록 `docs/commercial/ASTRA_P114_P126_TASK_REGISTER_20261114.json`; 문서 동기화 SHA는 기능 검증 SHA와 구분한다.
+7. **실행 환경:** GitHub-hosted Ubuntu Node22 Chrome/Edge 및 Windows Electron/NSIS만 사용. 입력 15쌍과 데이터는 합성. 사용자 로컬 PC, 외부 CI, Vercel, 유료 서비스, 외부 AI API, 고객 원본 전송 없음.
+8. **CI 링크:** [Linux Chrome/Edge #43612143269](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43612143269), [Windows Electron/NSIS #43612143223](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43612143223), [Final blueprint policy #43612143523](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43612143523). 세 실행은 모두 정확 SHA `a89c7a7dfbb2e18ef1c5f328e248d2e60ec69a0d`.
+9. **수용 범위/미검증:** 합성 PDF에서 숫자·날짜·기호·부정·링크 차이 대조와 V1/V2/원본 무손상만 입증. 실제 표·다단 의미 정확성, 이미지 픽셀 재구성, 고객 PDF·물리 Win10/11·Windows OCR·Qwen3 CPU·구매자 수용은 미검증. 점수는 잠정, 공식 수용 UNASSESSED, RELEASE HOLD.
+10. **당시 다음:** P116 30개 A4 검수 및 G55 별도 게이트. 완료 결과와 현재 다음 작업 P117은 최상단 인수인계에 기록했다.
+
+## 2026-11-14 21:55 KST — P114~P126 50→70 High 설계 공시 / Instant 인수인계 10항
+
+1. **목표·용도·확정요구·기술:** 사용자 최종설계 A01~A12 배점 총100, Astra 로컬 PDF STEP1~7와 BASIC8/PRO20/BUSINESS30, React/TS/Vite, Electron/NSIS, local Tesseract/Ollama는 별도 설치·검증. 현재 잠정 50/100, 공식 UNASSESSED. 사용자 최신 지시: High는 **설계만**, Instant가 개발을 실행하며 70점 이후 100점까지 추진, 이후 사용자 요청 시 High 재검수.
+2. **완료 변경·선택 근거:** [P114~P126 50→70 작업별 실행 설계](docs/commercial/ASTRA_P114_P126_50_TO_70_EXECUTION_PLAN_20261114.md), [JSON 점수·의존·증거 작업 원장](docs/commercial/ASTRA_P114_P126_TASK_REGISTER_20261114.json), [P127~P138 70→100 후속·High 감사 체크리스트](docs/commercial/ASTRA_INSTANT_70_TO_100_HANDOFF_20261114.md) 생성. 13개 단계 P114~P126 총 +20점: A03 +4, A04 +2, A05 +1, A07 +3, A08 +7, A09 +2, A10 +1. 기존 12영역 최대 가중치 변경 0. 모델은 사용자 설치 Ollama Qwen3 우선(모델 동봉/배포 대비 유지비·보안 부담 최소), OCR은 출처/권리 감사→격리 Windows 실검증 우선(무허가 패키징 반대), 문서/브랜드는 비파괴 세션 경로 유지.
+3. **테스트 명령·실제 결과·미검증:** 이번 회차는 문서/JSON 생성·합계/13개 PENDING 불변 검증만 수행; **코드 테스트·새 CI 미실행**, 점수 +0. 기준 정확 기능 SHA `26aff40d6de524c2430f8a6b325d906cea67f7e1`: 이전 Linux Node 263 PASS/0 FAIL, Chrome/Edge SUCCESS [#43595956953](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43595956953); Windows Node262 PASS/1 SKIP, desktop73 PASS, NSIS SUCCESS [#43595956932](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43595956932); 정책 SUCCESS [#43595957159](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43595957159). Instant 재현: npm test, npm run build, npm run desktop:test, npm run ocr:release-gate 및 Chrome/Edge/Windows NSIS 실제 CI. 코드 변경 후 새 SHA 재검증 필수.
+4. **상태/차단:** P114~P126 **전체 PENDING**, 코드 미착수, 완료 선언 금지. 50→70은 '검증 후 인정될 경우' 상한 목표. 실제 Qwen3 4B CPU/Astra 윤문, Windows OCR 공급자·kor/eng·DLL 라이선스, 실고객 Win10/11·허가 PDF 5~10건, 상용 판매 키/환불/법적 승인 차단. 잠정 50, 공식 UNASSESSED, RELEASE HOLD, 등록 미완.
+5. **오류 근거·시도·대안/중단:** 과거 P111 Windows 스모크 실패는 preload/동의 오류 예상값 변경 뒤 최종 SHA 3/3 정상화됨. 구 실패 방식을 반복하지 않는다. 앞으로 기능 구현 중 2회 무진전 실패하면 중단·전환해 차단 원인(코드/CI/자산/라이선스/고객)과 1~3개 대안을 보고하고 독립 작업을 진행한다. mock/model 미설치/CI Ready를 실모델/실고객 수용으로 오인 금지.
+6. **저장소·브랜치·SHA·경로:** `hibi89/astra_pdf_redesigner` / `feature/astra-p71-pdf-source-parity-20261112`; 기준 실제 기능 SHA `26aff40d6de524c2430f8a6b325d906cea67f7e1`; 설계 이전 문서 HEAD `7ed25d4f04ba10bad18e96c6986bb9a5e97a0b08`. 이번 설계 문서 파일 3개는 위 링크, 최신 문서 HEAD는 GitHub ref readback으로 확인. 이 뒤 소스 변경 없음.
+7. **Production URL/Vercel/실행:** Product 판매 Production/Vercel **미적용**. 테스트 환경은 GitHub-hosted Linux Chrome/Edge, Windows Electron/unsigned NSIS. 로컬 npm test/build/desktop:test 등은 사용자 PC 개입 없이 runner에서 가능한 범위만. 실제 사용자 Windows PC·고객 PDF는 최종 수동 단계에 모음.
+8. **원본·백업·인증/수정금지:** P113 기능 SHA와 이번 설계 전 문서 HEAD를 참조 복구. main/PR#10, 고객 PDF/이미지/문서, STEP1 V1, STEP2 V2, 기존 레이아웃, 사용자 저장 데이터 보존. OCR_MANIFEST=null, customer build flag=false, seller public JWK/pin=null 유지. 고객 원본/민감문장/비밀키/.env·대용량 모델·OCR 실행파일 GitHub 업로드 금지. 크몽 타상품 및 등록완료 이력 변경 금지.
+9. **Instant 다음 우선순위/완료 기준/승인:** 첫 `ㄱ`에 P114 시작. P115~P126 의존 순서 및 각 수용검사(부정/합성/실제 인식/CPU·Windows 설치·데이터 무결성)를 계획대로 수행. 점수·STATUS/HANDOFF·중앙 Astra 행 갱신은 정확 새 SHA CI 통과 후. 70 달성 뒤 P127~P138 후보를 최신 근거로 재평가하여 100까지 추진. 유료/보안·권한/서명키/판매·배포/고객 데이터 외부 전송은 별도 승인.
+10. **갱신 KST·근거 범위:** 2026-11-14 21:55 KST 사용자 최신 역할 전환·50→70 공시 요구 기준. **검증된 것은 계획 파일 존재·작업13/증분20/분야합계70 계산**, 코드 개발/새 CI/고객 검수는 이 회차에 미수행. 공식 UNASSESSED, RELEASE HOLD. High 최종 독립 검수는 사용자 명시 재호출이 필요.
+
+## 2026-11-14 KST — P111~P113 최종설계 잠정50% 달성 인수인계 (10항)
+
+1. **목표·확정 요구·기술:** Astra PDF Redesigner, 12개 확정 영역 A01~A12 100점, STEP1~7와 BASIC8/PRO20/BUSINESS30. P111 로컬 Ollama Qwen3 adapter / P112 BUSINESS batch & STEP6 source link / P113 OCR 수동 대조. 로컬 React/TS/Node/Electron/NSIS. 사용자 요구는 우선 50% 도달 후 100%까지 연속 개발.
+2. **완료·설계 비교:** A08 로컬 Ollama 고정 127.0.0.1:11434 및 `qwen3:4b-instruct` 별도 사용자 PC 설치 모델, 사용자 명시 동의·검사/수정 전후/되돌림. 대안 A 별도 런타임·모델 번들(품질/용량·재배포권 검증 필요) 대비 B 기존 설치 모델 로컬 API(추가 API 비용0·배포물 중량 증가0, 채택). A04는 기존 영구 V2 스키마 변경 대신 세션 메모리 브랜드 계획(2~20문서, 각각 독립 PDF 저장, V2 보존) 채택. A06 출처 기록 수동 파일 선택만(온라인 자동 크롤 금지), A07 페이지 시각/수동 대조 UI. 내장 모델이나 OCR 비밀·자산 새로 동봉하지 않음.
+3. **테스트·정확 SHA:** `npm test`, `npm run build`, `npm run desktop:test`, `npm run ocr:release-gate`. 기능 SHA **`26aff40d6de524c2430f8a6b325d906cea67f7e1`**. [Linux Chrome+Edge #43595956953](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43595956953) 2/2 SUCCESS, Node **263PASS/0FAIL/0SKIP**, 실제 브라우저 합성 PDF·IndexedDB 회귀 PASS; [Windows Electron+NSIS #43595956932](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43595956932) SUCCESS, Node **262PASS/0FAIL/1 OS SKIP**, desktop **73PASS/0FAIL**, 설치·제거/업그레이드 0.1.0→0.1.1 V2/PNG 보존 PASS; [정본 정책 #43595957159](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43595957159) SUCCESS. 정확 SHA 3/3 및 raw job logs 확인. P111 Ollama mock HTTP8/8, P112 batch plan4/4, P111~113 UI wiring4/4 신규. 별도 이 컨테이너에서 정식 Tesseract 5.5.0 kor/eng/Pillow/NanumGothic 합성 이미지 3건 **2 정확/1 실패**(실측이지만 앱 IPC 실행 아님).
+4. **완료/진행/대기/차단:** 총괄 잠정 전체 설계 점수 **50/100(+8)** A04 12/15, A06 4/5, A07 5/12, A08 2/14. 사용자 승인 부분점수 아님 → **공식 UNASSESSED**, 출시 RELEASE HOLD. A08 실 윈도우 Astra 모델 윤문과 품질 수용, OCR Windows 공급업체 DLL·실 스캔, 고객 PDF5~10/Win10·11, 상품·법적 승인 미완.
+5. **오류 근거·시도·재시도 금지·대안:** 중간 P111 Windows 실패1: 기존 `tests/desktop-shell.test.cjs`가 preload `localModelPropose:text=>` 문자열 고정 검사; 정확 원인과 새 `(text,explicitConsent)=>` 비교로 수정. Windows 실패2: 기존 installed Electron smoke가 미동의 모델 호출을 `unavailable`로 기대했으나 새 계약은 `local-model-consent-required` error, smoke 기대값 수정. 구 중간 커밋 CI SUCCESS/FAIL을 최종 검증 증거로 쓰지 않음. 정확 기능 SHA `26aff40d6de524c2430f8a6b325d906cea67f7e1` 3/3 SUCCESS로 회귀 종료. 합성 Ollama 테스트를 실제 한국어 모델 추론 성공으로 전용 금지. 실제 Tesseract 샘플3의 실패를 품질 개선 대상으로 유지.
+6. **저장소·브랜치·SHA·경로:** 제품 `hibi89/astra_pdf_redesigner` / `feature/astra-p71-pdf-source-parity-20261112`; 기능 `26aff40d6de524c2430f8a6b325d906cea67f7e1`. `desktop/owner-ollama-controller.cjs`, `desktop/main.cjs`, `desktop/preload.cjs`, `src/humanize/LocalModelReview.tsx`, `src/step2/Workspace.tsx`, `src/step4/brandBatchPlan.ts`, `src/step6/SourceRecordsPanel.tsx`, `src/step7/LocalOcrPanel.tsx`, `tools/verify-real-korean-ocr.py`, 관련 `tests/*`. 문서 `docs/commercial/ASTRA_FINAL_EVIDENCE_SCORE_20261114.md`, `STATUS.md`, `HANDOFF.md`.
+7. **배포/실행·환경:** Production URL·Vercel 미적용. React Vite 빌드, GitHub-hosted Windows2025 unsigned NSIS, Linux Chrome/Edge 검증. 로컬 Ollama 사용자 설치 모델 연동 코드는 동작 준비되었으나 실제 Astra owner PC 시험 미완. OCR 앱 번들 RELEASE HOLD. GitHub Actions SUCCESS는 고객 PC 정상의 대체 증거가 아님.
+8. **원본·백업·인증·수정 금지:** 시작 제품 문서 HEAD `f1837253d488ddc9f51c1910a57bc012b2666467` 안전복구 기준, 이후 정확 기능 SHA 위에서 문서 갱신. 고객 원본 PDF·STEP1 V1/STEP2 V2·8+22 후보·`main`/Draft PR#10 변경 금지. 개인키, 고객 텍스트, .env, 토큰 저장/외부 전송 금지. `PRODUCTION_ISSUER_JWK=null`, pinned SHA=null, `ASTRA_CUSTOMER_BUILD_ENABLED=false`, OCR_MANIFEST=null. 중앙 타상품·등록이력 보존.
+9. **다음 작업·완료 기준·승인:** P114 실제 허가/합성 문단의 Windows Ollama Qwen3 추론(최소 고정 8케이스 + 날짜/금액/부정/고유명사), 거부/승인/Undo 실제 UI/중간 취소, BUSINESS 대상 문서 2~20개 화면·출력, Tesseract 실제 Windows 공급자 해시/Authenticode/언어팩 및 로고·다단 검증. 차후 사용자 보유 허가 PDF5~10 육안 수용, 실제 설치기 서명/법무·라이선스·판매자 키 승인은 분리. 실행 불가 PC 작업은 마지막에 모아 요청.
+10. **갱신·검증범위:** 2026-11-14 KST, 기능 SHA `26aff40d6de524c2430f8a6b325d906cea67f7e1`, Linux Node/Chrome/Edge + Windows Node/Electron/NSIS + 정본 정책 **3/3 SUCCESS** raw logs 직접 확인. 총괄 잠정 50/100(공식 UNASSESSED), [작업중], RELEASE HOLD, 크몽 미등록. 소스 SHA와 문서·중앙 원장 HEAD 별도 재조회.
+
+## 2026-11-14 KST — P110 Electron PDF IPC 신뢰경계 + 최종설계 잠정42% 인수인계 10항
+
+1. **목표·용도·확정 요구·기술:** Astra 로컬 PDF STEP1~7/3SKU, 사용자 최종 12영역 배점100. P109 GUI SKU 검증 뒤 P110 Electron main process PDF IPC 외부 창·하위 프레임·출처 위조 차단. Node22/TypeScript/React/Electron/NSIS; 외부 서비스·과금0.
+2. **완료 기능·결정:** 대안 A native IPC에서 정확 top-frame/source/window 검증(채택; 적은 변경·비용0·기존 프리뷰 유지), B React UI 버튼 검사만 수행(동일 렌더러의 우회 가능, 제외). 새 `desktop/pdf-export-ipc-guard.cjs`에서 요청 Sender, senderFrame===mainFrame, 정확 `astra://app/index.html`, 생존 창 검사. `desktop/main.cjs` PDF 실제 printToPDF 전 검사. 새 `tests/pdf-export-ipc-guard.test.cjs` 6개; `package.json` Node+desktop 테스트 포함. 고객용 라이선스/DRM 활성화는 미완.
+3. **테스트 명령/실수:** 기능 `5ed3525947f0225888963806f95d8f821ca03394`. `npm test`, `npm run build`, `npm run desktop:test`, `npm run ocr:release-gate`. [Linux Chrome·Edge #43593105358](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43593105358) **2/2 SUCCESS**, **247PASS/0FAIL/0SKIP**. [Windows Electron·NSIS #43593105373](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43593105373) **SUCCESS**, Node **246PASS/0FAIL/1 OS symlink SKIP**, desktop **65PASS/0FAIL**, NSIS 설치·제거/업그레이드 0.1.0→0.1.1/V2/PNG PASS. [정본 정책 #43593105644](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43593105644) SUCCESS. P110 신규6/6 두 테스트 경로 PASS; 원시 logs+정확 SHA 3/3 확인.
+4. **완료·진행·대기·차단:** IPC 출처/프레임과 CI 검증 완료. 사용자 설계 총괄 **잠정 42/100**(+1 A09)이며 정식 부분점수 승인 전이라 공식 UNASSESSED. customer build 실제 signer public JWK/pin, same-frame IPC abuse, 강력 DRM, 환불/철회·실 기기, 실 OCR/한국어 AI/물리 Win10/11/PDF5~10 미완. [작업중], RELEASE HOLD.
+5. **오류 근거·시도·실패/전환:** P110 최초 코드 SHA `c2c3951474fa6af2e1562a24e18b4f002db733d4`는 보안 테스트 파일을 npm script 목록에 넣지 않아 새 테스트가 CI에서 실행되지 않았음. Node/Windows 기존 테스트 SUCCESS를 P110 신규6 PASS로 오인하지 않고 `package.json` 양 경로에 추가 → 새 SHA `5ed3525947...`로 6/6 실행+전체3/3 CI 재검증. 실행 중 로그 404는 미완결 job blob 조회였으며 기능 실패가 아님. 임의 구 동작 성공을 새 보안테스트 성공으로 전용 금지.
+6. **저장소·브랜치·SHA·경로:** `hibi89/astra_pdf_redesigner`, `feature/astra-p71-pdf-source-parity-20261112`, P110 기능 SHA `5ed3525947f0225888963806f95d8f821ca03394`, 수정 `desktop/pdf-export-ipc-guard.cjs`, `desktop/main.cjs`, `tests/pdf-export-ipc-guard.test.cjs`, `package.json`, `docs/commercial/ASTRA_FINAL_EVIDENCE_SCORE_20261114.md`, `STATUS.md`, `HANDOFF.md`.
+7. **Production·Vercel/환경:** GitHub-hosted Windows NSIS unsigned test·Linux Chrome/Edge, 정식 Production/Vercel 미적용, 실제 판매자용 signed 설치기·물리 Windows 및 구매자 설치 미검증.
+8. **원본·백업·비밀·수정 금지:** P110 이전 P109 제품 문서 HEAD `d24e73f82fe28e8f94b0ef15cc27d4460d0c40ff` 복구 기준. main/Draft PR10, 고객 원본 PDF, STEP1 V1·STEP2 V2, 기존 디자인 8+22, OCR_MANIFEST null, 모든 실제 비밀키/토큰/.env, 중앙 타상품 및 등록이력 불변. 고객 모델/OCR 외부 전송0.
+9. **다음 우선순위·절차·완료기준/승인:** P111 Electron main에서 신뢰성 있는 실제 서명 영수증 검증을 요구하는 구매자용 별도 경로(내부 테스트 preview 분리), direct IPC 및 영수증 위조/만료/revoke/보안 정책 회귀 → A08 합법 GGUF 한국어 CPU 추론·A07 정식 Tesseract 실제 공급처/Windows 한글 인식/법무 검증 → 실 고객 승인 PDF5~10/물리 Win10/11. 사용자 요청 전 판매/권한/실제 키/상용 출시 금지.
+10. **갱신/확인/문서 기준:** 2026-11-14 KST, 정확 기능 SHA `5ed352...` 전체3/3 workflow+raw job PASS 확인. **총괄 잠정 최종설계 완성률 42/100**, 공식 UNASSESSED, RELEASE HOLD. 문서 최신 HEAD와 중앙 kmong HEAD는 별도 readback 확인.
+
+## 2026-11-14 KST — P109 3SKU GUI·PDF 실행 경로 정확 SHA 3/3 CI 검증 인수인계 10항
+
+1. **목표·용도·요구·기술:** STEP1~7 Astra PDF, BASIC8/PRO20/BUSINESS30과 12영역100점 확정 사용자 설계 중 A09 SKU 실행 경로. P96 ECDSA P-256 offline receipt/P107 pinned issuer, React/Node22/Electron/Windows NSIS, 무료·로컬·기존 시연 기능 보존.
+2. **완료 기능·비교·결정:** A 내부 developer preview 보존 + 고객 상용 실행 경로마다 서명 검증(채택, 비용0/기존 시연 회귀 최소화). B UI tier/localStorage 문자열만 체크(빠르나 위조 취약, 배제). 신규 skuActionGate.ts·CommercialLicensePanel.tsx·5 합성 테스트와 Workspace/PDF 출력·배치 검수/PRO/BUSINESS 보관함 action 연결. receipt는 상태 메모리만, 공개키 pin null이면 상용 액션 거부. 내부 프리뷰 통과를 고객용 판매 승인으로 혼동 금지.
+3. **테스트 명령·PASS/FAIL/SKIP:** 기능 SHA **`ee7ed4eaacf44a08800b56639d2178f5df76e7d3`**, `npm test`/ `npm run build`/ `npm run desktop:test`/ `npm run ocr:release-gate`. Linux Chrome·Edge [#43591625251](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43591625251) **2/2 SUCCESS**, Node **241PASS/0FAIL/0SKIP**, Chrome·Edge 실제 합성 PDF/IndexedDB PASS. Windows [#43591625273](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43591625273) **SUCCESS**, Node **240PASS/0FAIL/1 symlink SKIP**, desktop **59PASS/0FAIL**, NSIS 설치·제거/0.1.0→0.1.1 V2·PNG 보존 PASS. 최종설계 [#43591625548](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43591625548) SUCCESS. P109 신규 **5/5 PASS**, 정확 기능 SHA CI **3/3 SUCCESS** 및 원시 logs readback.
+4. **완료/진행/대기/차단:** GUI 상용 영수증 검사, 3SKU 저장·출력 직전 검증 및 내부 프리뷰 회귀 구현·CI 검증 완료. 고객 build sign-off, 실제 seller key/pin, Electron main IPC 직접 호출 보안, 브라우저 인쇄 우회, 취소·환불/좌석·기기 정책, OCR·한국어 GGUF 실 공급자·실물 Win10/11·허가 PDF5~10은 미검증·미구현. 공식 UNASSESSED, RELEASE HOLD.
+5. **오류·시도·재시도 금지·대안:** 통합 원격 소스 패치의 공백/중복 문자열 앵커 불일치와 별도 JS 문법 오류 발생 → 커밋 전 중단, 보존 확인 후 단일 파일·작은 범위 sequential 안전 수정으로 전환. 최신 정확 SHA Linux/Windows/정책 성공. 상용 flag=false 조건의 내부 시험 실행을 DRM 성공/무단 판매로 판단 금지. 실패한 대규모 문자열 패치 반복 금지.
+6. **저장소·브랜치·SHA·주요 경로:** `hibi89/astra_pdf_redesigner` / `feature/astra-p71-pdf-source-parity-20261112` / 기능 `ee7ed4eaacf44a08800b56639d2178f5df76e7d3`. 경로 `src/commercial/skuActionGate.ts`, `CommercialLicensePanel.tsx`, `src/step2/Workspace.tsx`, `src/step3/BatchImportPanel.tsx`, `src/step4/{ProLayoutLibrary,BusinessBrandLibrary}.tsx`, `tests/sku-action-gate.test.ts`, `docs/commercial/ASTRA_P109_GUI_SKU_GATES_20261114.md`. 문서 HEAD 별도 readback.
+7. **Production/URL·환경:** Chrome·Edge GitHub Linux runner/Windows Electron·unsigned NSIS Github runner. 물리 고객 PC·배포 서명·상용 등록/Vercel Production 미적용. 고객별 독립 설치/실제 라이선스 검수 없음.
+8. **원본·백업·권한·수정 금지:** P109 시작 제품 HEAD `42594efcb675ba86d6700e33d5c8b0b316290a5c` 복구 기준. `main`, Draft PR10, 고객 원본PDF, STEP1 localStorage V1/STEP2 IndexedDB V2, 기존 8+22 시안, 중앙 타제품, 실제 개인키·토큰/.env/기존 등록 이력 불변. `ASTRA_CUSTOMER_BUILD_ENABLED=false`, 실제 판매자 공개키 pin null, `OCR_MANIFEST=null` 유지.
+9. **다음 우선순위/절차·완료/승인:** P110 Electron main process PDF IPC에서 구매자용 신뢰 경계·직접 호출 차단/개발 preview 분리(기본 릴리스 HOLD 유지), 실제 라이선스·만료·위조 테스트, 출력·저장 우회 회귀 → 실 공급자 OCR/로컬 한국어 AI Windows CPU·법무/실 PC/허가 PDF 수동 QA → A01~12 정확 수용 증거 산정. 키 생성·운영·판매·배포·보안/권한 변경은 별도 승인.
+10. **갱신일시 KST·검증범위·기준:** 2026-11-14 KST, 기능 `ee7ed4eaacf44a08800b56639d2178f5df76e7d3` 정확 SHA CI Linux/Win/정책 최종 3/3 상태+raw logs 확인. 테스트의 합성 PDF와 실제 고객 원본 품질/물리 Win10/11/상용 법적 수용은 엄격 분리. 공식 UNASSESSED/100 미달, RELEASE HOLD, 크몽 미등록.
+
+## 2026-11-14 KST — P108 오프라인 라이선스 발급·연장 정확 SHA 3/3 CI 최종 성공 인수인계 10항
+
+1. **목표·용도·요구·기술:** Astra 최종 7단계, BASIC/PRO/BUSINESS 3SKU, 전체12영역100점 중 A09 오프라인 라이선스. P96 ECDSA P-256 canonical receipt + P107 publisher public JWK thumbprint, Node22/React/Electron/Windows NSIS. 무료/오프라인.
+2. **완료 기능·대안 비교:** A 기존 서명 형식으로 소유자 비추출 CryptoKey 발급·서명 읽기검증·동일 ID/SKU/seats 연장(채택; 외부 서버/키 유출 없음). B 상시 온라인 인증·취소 서버(비용/네트워크·프라이버시 단점, 보류). 신규 발급/연장 API는 테스트 전용 기술이며 정식 판매자키/고객발급 기능이 아니다.
+3. **테스트 명령·PASS/FAIL/SKIP:** 정확 기능 **0bf9c7bb125b25b3441117a6e54ba53ac05cba67**. [Linux Chrome/Edge #43586747520](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43586747520) **2/2 SUCCESS**, Node **236PASS/0FAIL/0SKIP**, 신규 P108 합성 **8/8 PASS**(로그 #71–#78), React 빌드/Chrome/Edge 합성 PDF.js·V2 보존 PASS. [Windows Electron/NSIS #43586747579](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43586747579) **SUCCESS**, Node **235PASS/0FAIL/1 Windows symlink SKIP**, desktop **59PASS/0FAIL**, P106 Authenticode synthetic PASS, NSIS 설치·제거/0.1.0→0.1.1 IndexedDB V2·PNG 보존 PASS. [정본정책 #43586747799](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43586747799) SUCCESS. **전체 3/3 workflow SUCCESS**. npm test/npm run build/npm run desktop:test/npm run ocr:release-gate.
+4. **완료·진행·대기·차단:** 사전검증 발급/연장 정책 소스/합성 PASS. 정식 seller key·공개 pin, 소유자 안전 발급 도구, 고객 GUI SKU 잠금/내보내기 강제, 오프라인 철회/환불·재발급·장치수·정식 2석 계약 미구현. 실제 Tesseract/한글AI 모델·물리 Win10/11·허가 PDF5~10 미검증. 12영역 공식 UNASSESSED·100 미달, RELEASE HOLD.
+5. **오류 근거·시도/재시도 금지·대안:** 첫 GitHub batch 저장 RemoteProtocolError; 원격 HEAD 불변 확인 후 blob2개 분리 업로드·일반 fast-forward 성공. P108 정확 SHA CI 3/3 성공/신규8/8 테스트 성공, 기존 P108 초기 전체 CI 진행중 기록은 새 증거로 정정(이력은 유지). 서명만으로 환불 취소/기존 영수증 즉시 철회·라이선스 복제 방지 보장 금지.
+6. **저장소·브랜치·SHA·경로:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112; 기능 0bf9c7bb125b25b3441117a6e54ba53ac05cba67. src/commercial/offlineLicenseIssuer.ts, tests/offline-license-issuer.test.ts, docs/commercial/ASTRA_P108_OFFLINE_LICENSE_ISSUANCE_20261114.md, ASTRA_P100_SCOREBOARD_20261114.md, STATUS.md/HANDOFF.md. 문서 HEAD 최종 readback 필수.
+7. **Production/Vercel·환경:** Windows hosted runner unsigned NSIS 시험/Node22/Chrome·Edge, 실제 Windows10/11 PC 고객설치·판매·크몽등록/Vercel Production 미적용. 키는 synthetic tests에서만 메모리 생성, 외부 네트워크/서버/고객 PDF 접근 없음.
+8. **원본·백업·비밀·수정 금지:** 직전 제품 HEAD fbff14090caf5cead6973e6a47d503e76248696b 복구 기준. main/PR10, 원본 PDF, STEP1 V1·STEP2 V2·8+22 시안, 서명키·토큰/권한·등록이력 변경0. production signer key/pin null, OCR_MANIFEST=null, 오프라인 모델 공급처 미승인.
+9. **다음 우선순위·절차·승인:** 무료 코드 범위의 판매용 GUI·export SKU enforcement 설계/시험(기존 개발 시안·원본 보존) → 소유자 명시 승인 후만 실제 개인키·발급 운영/철회 목록 및 rollback 방지 프로세스 → 실 공급자 OCR/AI CPU 품질·법무/Windows/동의 고객PDF5~10 → 정본12영역 점수 증빙·출시 수용. 판매/개인키/외부자료 전송/환경·권한변경 미승인 유지.
+10. **KST 갱신·검증 범위:** 2026-11-14 KST, 기능 정확 SHA Linux/Win/정책 3/3 최종 GitHub status+raw logs 확인; 실제 판매자·사용자 설치·법무·물리 Windows/문서품질은 미검증. 중앙 원장 별도 최신화·readback 확인.
+
+## 2026-11-14 KST — P108 오프라인 서명 라이선스 발급·연장 개발 인수인계 10항 (정확 CI 전체 확인 중)
+
+1. **목표·요구·기술:** Astra PDF 사용자 최종 STEP1~7 및 BASIC/PRO/BUSINESS A09 11/100 영역. P96 ECDSA P256 오프라인 receipt 검증 + P107 발급자 공개키 pin 체계 위에 서명 발급·안전 연장을 구현. TypeScript/WebCrypto/Node22, 외부 API·과금·고객 자료 전송 없음.
+2. **완료 기능·설계 비교:** 대안 A 기존 서명형 v1 영수증을 소유자 비추출 CryptoKey로 발급하고 기존 서명 영수증을 확인한 뒤 동일 ID/SKU/seat 조건으로 만료일만 단조 증가 연장(채택, 비용0/형식 호환). 대안 B 온라인 활성화·복제/취소 서버(운영비·고객기기 추적·오프라인 약속 불일치, 보류). 새 src/commercial/offlineLicenseIssuer.ts + tests/offline-license-issuer.test.ts 합성8개. BASIC/PRO 1석 기술안, BUSINESS 1/2석 기술 초안(법적·상용 확정 아님), 서명 실패·미래/기한초과·tier/seat 조작/기간축소 거부.
+3. **명령·테스트·숫자:** 정확 기능 SHA 0bf9c7bb125b25b3441117a6e54ba53ac05cba67. 신규 WebCrypto 합성8검증, 기존 npm test의 tests/*.test.ts 자동 포함. [Linux Chrome/Edge #43586747520](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43586747520), [Windows NSIS #43586747579](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43586747579), [정본 정책 #43586747799](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43586747799). 정책 SUCCESS, Linux npm test/build PASS 및 Windows npm test/P106 step PASS, 전체 Linux/Windows run은 아직 IN_PROGRESS·결론 미확인. 이전 P107 3/3 PASS는 별도 코드 SHA.
+4. **완료/진행/대기/차단:** 서명된 발급·연장 라이브러리와 합성 테스트 반영. 진짜 판매자 개인키와 신원·키 pin·오프라인 운영 발급 CLI/GUI·영수증 전달/재발급·refund 철회 목록·최신버전 강제·좌석/장치 인증·고객 상품 실행/법무 조건 미구현. P108 함수는 구매자 앱 화면에 연결되지 않았고 테스트키만 메모리에 생성. A07 실 OCR/A08 로컬 한글 AI/허가 PDF5~10 미검증. 공식 전체 UNASSESSED/100 미달, RELEASE HOLD.
+5. **오류·근거·재시도·대안:** GitHub 코드 업로드 첫 다중요청이 RemoteProtocolError로 중단되어 실제 브랜치 변경0을 HEAD readback으로 확인, 동일 코드를 blob 단위 분리 저장하여 정상 일반 fast-forward commit. 기능/CI 에러 아직 확인되지 않음. 이전 영수증 재사용 차단은 서명만으로 불가능하므로 사후 취소/철회나 환불 효력을 주장하지 않음. 임의 판매자키 배포 금지.
+6. **저장소·브랜치·SHA·경로:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112. 신규 code 0bf9c7bb125b25b3441117a6e54ba53ac05cba67; src/commercial/offlineLicenseIssuer.ts, tests/offline-license-issuer.test.ts, docs/commercial/ASTRA_P108_OFFLINE_LICENSE_ISSUANCE_20261114.md. 기존 P96/107 소스 불변. docs HEAD commit 이후 정확 조회.
+7. **Production·Vercel·실행환경:** 고객 실제 판매·배포 없음, Vercel 미적용. Node22 test/npm run build/npm run desktop:test/npm run ocr:release-gate. 발급 모듈은 소유자 테스트용 API로만 존재, 실제 고객 발급 프로그램 아님.
+8. **원본·백업·비밀·금지:** 수정 전 HEAD fbff14090caf5cead6973e6a47d503e76248696b. main/PR10/원본 PDF, STEP1 localStorage V1, STEP2 IndexedDB V2, 8+22 레이아웃, 등록이력, 앱 권한/서명키·토큰·환경변수 무변경. 테스트 키 ephemeral memory only; production issuer key/pin null. OCR_MANIFEST=null, RELEASE HOLD.
+9. **다음 작업·절차·완료기준·승인:** 정확 코드 SHA 3/3 최종 CI/원시 로그 확인 → 사용자 승인된 서명키 생성·안전 소유자 발급 인터페이스·출력 atomic write/비밀 비유출 설계 및 운영 QA → 유효 서명 갱신·키교체·취소목록 로컬 전달/rollback 탐지(오프라인 철회 한계 명시) → 실제 GUI 액션·PDF export entitlement 진입점 통합 및 물리 Win10/11/구매자 인수. A07/08 실제 공급처·모델 및 12영역 재산정 별도. 무료 코드 개발 기승인, 실제 비밀/배포/권한 변경/실고객 자료 전송 별도 승인.
+10. **갱신시점(KST)/검증범위:** 2026-11-14 KST. 기능 SHA code GitHub readback + 일부 Actions steps/정본정책 확인, Linux/Windows 최종 PASS/FAIL/SKIP 대기. 공식 점수 UNASSESSED, 개발 진행 [작업중], 판매/배포 HOLD. 중앙 원장 별도 commit 검증 예정.
+
+## 2026-11-14 KST — P107 exact-source 3/3 CI 검증 성공 최종 인수인계 10항
+
+1. 목표·용도·요구·기술: Astra 최종 7단계 3SKU 사용자12영역100점. A09 오프라인 SKU 사용권 기능별 검증 로직, P96 ECDSA P256 signed receipt+RFC7638 JWK thumbprint. Vite/React/Node22/Windows NSIS, 외부 전송·비용0.
+2. 완료 기능·대안/근거: A verified signer receipt + pinned issuer public key + tier capability matrix(채택, 서명 위조 불가/유지비0), B UI tier/localStorage raw 값 수용(위조 가능, 불채택). BASIC 기본8, PRO20+템플릿/다중PDF, BUSINESS30+브랜드, 총6 action. 생산 키/pin null이라 실제 상품 사용권 DENY; 기존 개발 프로토타입 GUI 무변경. 단독 권한 검증은 판매 가능 판단이 아니다.
+3. 테스트 명령·성공/실패/SKIP: 정확 기능 SHA 0d3501d0cf51f3b5e87370f6a973fbb01d72e697. [Linux Chrome/Edge #43583817449](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43583817449) 2/2 SUCCESS Node 228 PASS/0 FAIL/0 SKIP, Chrome·Edge 합성 PDF/IndexedDB·OCR GUI PASS. [Windows NSIS #43583817441](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43583817441) SUCCESS Node 227 PASS/0 FAIL/1 symlink SKIP, desktop 59 PASS/0 FAIL, Windows PowerShell synthetic P106 PASS, NSIS 0.1.0→0.1.1 V2·PNG 보존 PASS. [정본정책 #43583817679](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43583817679) SUCCESS. 총 workflow 3/3 SUCCESS. 명령 npm test, npm run build, npm run desktop:test, npm run ocr:release-gate.
+4. 완료/진행/대기/차단: Policy+WebCrypto 합성7 tests 기능 검증 완료. A09 아직 생산판매자 공개키pin·라이선스 생성/재발급·취소/장치 수·GUI/내보내기 강제락과 소비자 Win10/11·상용품질 미완. A07 실제 OCR, A08 GGUF local AI, 실 허가 PDF5~10 및 최종12영역100점 미검증. UNASSESSED/RELEASE HOLD.
+5. 오류/원인/시도/대안: 신규 P107 CI 실패0. 이전 P107 초안의 Linux/Windows 진행 중 기록은 정확 SHA raw logs로 성공 정정, 과거 기록 삭제하지 않음. preview에 무단 락 적용하면 기존 정상 기능 훼손 위험이므로 상용 기능 연결 전 key/회귀/UX 승인 필요. 허위 공개키/실 인증서/판매 승인 생성 금지.
+6. 저장소·브랜치·SHA/경로: hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112 / code 0d3501d0cf51f3b5e87370f6a973fbb01d72e697. src/commercial/skuAccess.ts, tests/sku-access.test.ts, docs/commercial/ASTRA_P107_SIGNED_SKU_ACCESS_20261114.md. docs HEAD는 커밋 후 재조회.
+7. Production/Vercel·실행환경: 제품 Windows local/Electron + GitHub hosted CI synthetic, Vercel 미적용, 판매/정식 고객 설치·크몽 등록0, private key/라이선스 서버 없음. CI는 고객 상용 acceptance 증거 아님.
+8. 원본·백업·인증/수정금지: 이전 Git 기능 부모 0b432f2598f121ae1a7f527bf4289ab92aed6a52를 복구 참조. main/Draft PR10, STEP1 localStorage V1/STEP2 IndexedDB V2, 디자인8종+22개 시안, 고객 원본 PDF, 기존 등록 이력, GitHub 연결/토큰/비밀/서명키 불변. 테스트 key 메모리 생성 및 폐기.
+9. 다음 우선순위/절차·완료기준·승인: P108은 정식 issuer key 신원·pin 배포 및 라이선스 발급/회수·장치수 정책 설계, 시험 GUI/상용 GUI 분리 후 구매자 진입점과 PDF 생성 액션 실제 권한 검증; 무료 코드 가능. 이후 Tesseract 실제 Win 서명/재배포권·로컬 한국어 AI CPU·실 구매자 Win10/11·허가 PDF 검증 및12영역 재산정. 판매·고객 자료 전송·권한/보안 변경/실제품 활성화는 별도 승인.
+10. 갱신 시점·검증범위: 2026-11-14 KST, GitHub Actions 정확 source SHA 3/3 SUCCESS + Linux/Win raw logs PASS/FAIL/SKIP 확인. CI와 실제 법적/고객/물리 검증 구분, 공식 UNASSESSED·100% 미달·RELEASE HOLD. 중앙 원장과 제품 docs HEAD 최종 readback 별도 실시.
+
+## 2026-11-14 KST — P107 사용자 12영역 A09 오프라인 SKU 기능 권한 판정 10항 (CI 전체 진행중)
+
+1. 목표·요구·기술: Astra PDF STEP1~7, BASIC/PRO/BUSINESS 3SKU 8/20/30 조판·템플릿·다중 PDF·브랜드 사용권; A09는 100점 중 11점 영역. P96 ECDSA P-256 receipt verifier 위에 vendor-pinned JWK SHA-256 thumbprint(RFC7638)와 서명 기반 기능 허용 매트릭스를 구축한다. React/TypeScript/WebCrypto, 외부 API 0.
+2. 완료 기능 및 선택 근거: A. 서명 검증 + 공개키 thumbprint를 trusted build에 pin하고 기능 요청마다 검증하는 방식(채택, 별도 비용0); B. UI tier 문자열이나 localStorage 값으로 잠금 해제(빠르지만 조작 가능해 배제). src/commercial/skuAccess.ts 추가; BASIC base-layout만, PRO base/pro + template-save/batch-pdf, BUSINESS 전체 6개 capability. 서명·expiry 검증 전 기능 허용 금지. 실제 판매자 issuer key/pin은 null, 정식 상용 접근 전부 DENY. 기존 개발용 preview는 변경하지 않고 별도 완제품 SKU UI 통합이 필요.
+3. 테스트 명령·PASS/FAIL/SKIP: 기능 정확 SHA 0d3501d0cf51f3b5e87370f6a973fbb01d72e697. 신규 tests/sku-access.test.ts 7개 합성 WebCrypto 서명 receipt 회귀를 기존 npm test (tests/*.test.ts)에 자동 포함. GitHub Linux Chrome/Edge #43583817449, Windows NSIS #43583817441, 정책 #43583817679. 확인 시점 정책 SUCCESS, Linux npm test/build 및 Windows npm test + P106 step PASS. 전체 Actions 최종 결론 및 정확 수치는 진행 중/미확인. 실행 npm test, npm run build, npm run desktop:test, npm run ocr:release-gate.
+4. 완료·진행·차단: capability 검증 정책 코드 및 회귀 GitHub 반영. 정식 판매자 공개키/핀·라이선스 발급·장치수/재발급·GUI entitlement enforcement·실 구매자 Windows/판매약관/사용권·모델/OCR 품질 미구현·미검증. 공식 UNASSESSED, 100% 미달, RELEASE HOLD.
+5. 오류·원인·실패 대안: 기존 UI는 PRO/BUSINESS를 별도 명시한 개발 시험 시안으로 노출하므로, 실제 구매자 기능을 임의로 잠가 정상 기능을 훼손하지 않도록 읽기·저장·디자인 프로토타입 수정 금지. issuer key를 테스트 생성값으로 실제 제품에 pin하면 판매자 신뢰 위조 위험, 미설정 null 유지. 현 작업 검증 실패 발견 시 최소 수정 후 정확 SHA 재검증.
+6. 저장소·브랜치·SHA·주요 경로: hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112 / 기능 0d3501d0cf51f3b5e87370f6a973fbb01d72e697. src/commercial/skuAccess.ts, tests/sku-access.test.ts, 기존 src/commercial/offlineLicense.ts는 수정0. 상세 docs/commercial/ASTRA_P107_SIGNED_SKU_ACCESS_20261114.md.
+7. Production URL·Vercel·실행 환경: 로컬 전용 Windows/Electron/Node22 + GitHub Actions 합성. Vercel 미적용, 실제 크몽 판매 미등록, 발급 서버/클라우드 없음. 테스트 검증은 설치/배포 승인 아님.
+8. 원본·복구·보안: 직전 제품 HEAD 0b432f2598f121ae1a7f527bf4289ab92aed6a52 정상 Git revert 기반. main/Draft PR10, 원본 고객 PDF·STEP1 localStorage V1·STEP2 IndexedDB V2·고급 시안·기존 라이선스/판매 이력, GitHub secrets/키/환경 미수정. 새 라이선스 test key는 CI 메모리에서만 생성, 저장·배포하지 않음.
+9. 다음 단계·완료 기준·승인: (1) P107 정확 코드 SHA 전체 CI 및 로그 확인 (2) trusted publisher JWK thumbprint·라이선스 발급/기기 정책 및 철회 모델을 설계·증거 기반 승인 (3) 사용자 검수 후 실제 GUI/액션 진입점에 entitlement enforcement 통합하되 현재 개발용 프로토타입 보존 (4) P106 실제 Windows OCR 공급처 검증과 A08 한국어 로컬 LLM, 실 고객 PDF5~10, 최종 12영역 재산정. 무료 개발 승인 기확정, 출시/서명키/외부자료 전송/판매는 별도.
+10. 갱신 KST·검증 범위: 2026-11-14 KST. GitHub branch/기능 commit 및 Linux/Windows 중간 unit/build, 정책 PASS 일부 실증. 전체 Linux/Windows 최종은 미확인; 문서 SHA와 중앙 원장 최종 HEAD는 별도 readback. 기능권한 테스트 합격을 제품 판매 가능이나 A09 11/11점으로 간주 금지.
+
+## 2026-11-14 KST — P106 기능 정확 SHA 3/3 CI 최종 성공 인수인계 10항
+
+1. **목표·최종 요구·기술:** Astra PDF 원래 7단계/3SKU/12영역100점, Windows 오프라인 Tesseract EXE/DLL/installer Authenticode·SHA 증거 검수. PowerShell Get-AuthenticodeSignature/Get-FileHash + Node/PDF.js/Electron; 배포·원본 변경 없음.
+2. **완료 기능/대안:** A) Windows 기본 무료 API(구현) vs B) 외부 SignTool·실 바이너리 동적 로더(보류/실 공급자 확보 후). 실제 설치파일 SHA, PE files pre/post SHA, 누락/변조/미등록 DLL/unsafe path fail-closed. 실 서명·권리 승인 자동 전환 안 함; P104/P105 독립 검증 필요.
+3. **테스트 명령/숫자/근거:** 정확 기능 SHA **7ec1de61a750d324df7e7ae25ff30f109fc766e5**. [Linux Chrome·Edge #43580696635](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43580696635) **2/2 SUCCESS**, Node **221PASS/0FAIL/0SKIP**, 실제 Chrome·Edge 합성 PDF.js/OCR 검수 UI PASS. [Windows Electron/NSIS #43580696709](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43580696709) **SUCCESS**, Node **220PASS/0FAIL/1 symlink 권한 SKIP**, desktop **59PASS/0FAIL**, P106 Windows Authenticode **11/11 합성 확인**, Electron smoke·NSIS 설치/삭제·0.1.0→0.1.1 V2/PNG 보존 PASS. [정본 정책 #43580696839](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43580696839) SUCCESS. **전체3/3 workflow SUCCESS.** 실행: npm test, npm run build, npm run desktop:test, npm run ocr:release-gate, CI pwsh tests/ocr-windows-authenticode-evidence.test.ps1.
+4. **완료/진행/대기/차단:** 보안 도구·검사·CI 완료; 실제 공급자 installer/서명/라이선스/실 PE 동적 DLL closure/실한글 OCR/물리 Win10·11/고객 PDF5~10/3SKU/로컬 모델 미검증. 공식 최종점수 UNASSESSED, 100% 미달, RELEASE HOLD.
+5. **오류/원인·재시도 금지:** 최초 문서 작성 문자열 구문 오류(원격 변경0), 간소화 재시도로 문서 HEAD 정상 반영. 실제 P106 보안 단계와 CI 모두 실패0. 합성 unsigned 서명으로 실 제조자 인증·상용 적법성 주장 금지. 독립 공급자 신뢰/서명시각/폐기/권리 자료 필요.
+6. **저장소/브랜치/SHA/경로:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112 / 기능 7ec1de61a750d324df7e7ae25ff30f109fc766e5. scripts/ocr-windows-authenticode-evidence.ps1, tests/ocr-windows-authenticode-evidence.test.ps1, .github/workflows/windows-desktop.yml, docs/commercial/ASTRA_P106_WINDOWS_AUTHENTICODE_EVIDENCE_20261114.md. 최종 문서 HEAD는 remote 확인.
+7. **Production/환경:** Windows hosted unsigned NSIS 합성 시험; 실제 구매자 설치 배포·판매·Vercel은 N/A. 미래 공급처 오프라인 감사 pwsh -NoProfile -File scripts/ocr-windows-authenticode-evidence.ps1 -InstallerPath <installer> -AssetsRoot <assets> -ManifestPath <external-manifest>. 네트워크 고객자료전송0.
+8. **원본/백업·인증·금지:** 직전 P105 HEAD 9bcbd93e82f477e47970795854ba9b3cf9ec95f8 복구 참조. main·Draft PR10·STEP1 localStorage V1·STEP2 IndexedDB V2·디자인8종·고객 PDF·GitHub 권한·Secrets/서명키·크몽등록 이력 변경0. OCR_MANIFEST=null.
+9. **다음 작업/완료기준·승인:** (1) 실제 공급자 Windows Tesseract installer/EXE/DLL/kor+eng 사용권·SHA·서명·SBOM·NOTICE (2) 윈도우 동적 DLL/runtime·한글/금액/표/다단 실 OCR (3) 물리 Win10/11, 허가 PDF5~10, 모델/3SKU 정식 인수 (4) 사용자 최종설계12영역/100점 증거 재산정. 무료 개발 기승인/모바일 PC개입 보류, 판매·권한변경·외부 전송 별도 승인.
+10. **갱신(KST)/검증 범위:** 2026-11-14 KST, GitHub 정확 SHA 3/3 workflow 및 Linux/Windows raw job logs·Windows P106 신규 테스트 11개 PASS 확인. 실제 공급자/구매자 PC/법무·판매 GO는 미검증. 중앙 kmong-productization 원장 따로 동기화.
+
+## 2026-11-14 KST — P106 Authenticode Evidence 10항 인수인계 (CI 전체 검증 중)
+
+1. **목표·용도·기술:** Astra STEP1~7, BASIC/PRO/BUSINESS 사용자 최종설계 12영역100점 기준, 로컬 Windows OCR 공급자 설치/EXE/DLL의 서명 및 SHA 증거 수집. Node22/React/PDF.js/Electron/PowerShell.
+2. **완료·대안:** A Windows 기본 Get-AuthenticodeSignature+Get-FileHash(무료/새 의존성0·구현), B 외부 SignTool/별도 WinTrust(실물 확보·추가 도구 필요, 후속). 명시적 installer hash pin, 바이너리 SHA 전후 재검증, manifest와 native 파일 목록 비교, reparse/경로변조 차단. 모든 상용·법적 승인 false.
+3. **테스트:** 기능 SHA 7ec1de61a750d324df7e7ae25ff30f109fc766e5. Windows synthetic Authenticode CI STEP SUCCESS 및 정책 CI [#43580696839](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43580696839) SUCCESS. 전체 Windows NSIS [#43580696709](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43580696709), Linux/Chrome/Edge [#43580696635](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43580696635) 최종 결론 IN_PROGRESS(상세 숫자 미확정). npm test, npm run desktop:test, npm run build, npm run ocr:release-gate.
+4. **완료/진행/차단:** CI 신설 기능 보안 단계 통과, 전체 CI 결과 및 실제 제3자 Windows installer/DLL/kor+eng, 인증서 신뢰·법적 재배포, 실제 Windows10/11·고객 PDF5~10·로컬 모델·PRO20/BUSINESS30 수용 미확인. 공식 UNASSESSED, RELEASE HOLD.
+5. **오류·원인·재시도 금지·대안:** 코드 CI P106 단계 실패 기록 없음. 문서 원자적 커밋 첫 시도 문자열 구문 오류로 원격변경0, 간소화해 재시도. 해시가 확인돼도 manifest 자체 공급자 신뢰·AuthentiCode 적법성/동적 DLL 폐쇄성 보증 아님; 허위 서명·법적 증거 생성 금지.
+6. **저장소·브랜치·SHA:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112. 기능 7ec1de61a750d324df7e7ae25ff30f109fc766e5, scripts/ocr-windows-authenticode-evidence.ps1, tests/ocr-windows-authenticode-evidence.test.ps1, .github/workflows/windows-desktop.yml, docs/commercial/ASTRA_P106_WINDOWS_AUTHENTICODE_EVIDENCE_20261114.md.
+7. **Production·환경:** 실제 상용 설치/배포 없음, Vercel 미적용. Windows PowerShell 오프라인 비실행 감사(외부 PDF 전송0). 미래 검증 시 pwsh -NoProfile -File scripts/ocr-windows-authenticode-evidence.ps1 -InstallerPath <installer> -AssetsRoot <assets> -ManifestPath <external-json>. P104/P105 별도 검증 필수.
+8. **원본·복구·비밀·수정금지:** 직전 HEAD 9bcbd93e82f477e47970795854ba9b3cf9ec95f8 백업 SHA, main/PR10 및 STEP1 localStorage V1, STEP2 IndexedDB V2, 고객 원본 PDF, 디자인8종, 암호·키·GitHub 권한/판매 이력 불변. OCR_MANIFEST=null.
+9. **다음 우선순위·승인:** 정확 SHA 전체 Linux/Win CI 완료/실패 로그 → 실제 공급자 exe/DLL/언어팩/라이선스 실측·서명·법무→실 로더·한국어·금액·표·다단·물리 Win10/11/허가 PDF 검수→3SKU·로컬 모델 12영역 공식100점 재산정. 무료 개발 승인 재요청 불필요, 실 다운로드/배포/판매/고객 원본 외부 전송 별도 승인.
+10. **갱신 KST/검증 범위:** 2026-11-14 KST, 실제 GitHub SHA/Windows 신규 synthetic step/정본 gate 확인, 전체 CI 종결·실 OCR 공급원/실 Windows/상업권리 미검증. docs 및 중앙 kmong HEAD 최종 조회 필요.
+
+## 2026-11-14 17:38 KST — P105 정확 CI 검증 완료 최종 인수인계 10항
+
+1. **목표·요구·기술:** Astra PDF STEP1~7, BASIC/PRO/BUSINESS 최종설계 12영역 100점. 오프라인 Tesseract 공급망 정적 PE32+ x64 import 검증. React/PDF.js/Electron/Node22/NSIS. 원본 무손상/외부 API·과금 없음.
+2. **완료 변경·설계 근거:** 옵션 A 기존 P104 SHA-256 동일 바이트 스트림에서 정적 import/delay-load 검사(0원·오프라인/채택). 옵션 B Windows Authenticode/실제 DLL Loader만으로 검사(서명·동적검증에는 필요하지만 import inventory 대체 불가, 공급원 미확보로 보류). P105 새 parser, 기존 preflight 연결, 안전 실패 처리, 합성11회귀; P104 안전검사/릴리스 HOLD 보존.
+3. **테스트/정확 SHA PASS/FAIL/SKIP:** 기능 **d8e765ef538e6f41fa3fc870a9257238a7c4af98**. [Linux Chrome+Edge #43576345594](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43576345594) 2/2 SUCCESS, Node **221 PASS/0 FAIL/0 SKIP**, Chrome+Edge PDF.js 합성 OCR UI/저장 데이터 보존 PASS. [Windows #43576345628](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43576345628) 1/1 SUCCESS, Node **220 PASS/0 FAIL/1 symlink OS SKIP**, desktop **59 PASS/0 FAIL**, Electron NSIS 설치/제거·0.1.0→0.1.1 V2/PNG 보존 PASS. [정본 #43576345809](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43576345809) SUCCESS. 전체 3/3 SUCCESS. Linux/Windows raw job logs 확인.
+4. **완료/진행/대기·차단:** 정적 PE와 Linux/Windows 합성 E2E 통과. 실제 제3자 설치파일/EXE/DLL/kor+eng 정본 SHA·Authenticode/재배포권·NOTICE/SBOM·동적 로딩·물리 Win10/11·고객 PDF5~10·오프라인 한국어 AI·3SKU 인수 미검증. 전체 공식률 UNASSESSED/100 미달. RELEASE HOLD.
+5. **오류·원인·시도·대안:** 원자적 코드 커밋 최초 JS 문자열 구문오류(실제 원격 변경0), 수정 후 일반 nonforce fast-forward 성공. CI P105 전체 PASS 확인으로 초기 '진행중' 기록 정정. 정적 import 무결성=실 DLL 로딩 또는 재배포 적법성이라는 오인 금지. 공급원 미확보 상태에서 임의 서명해시/권리증거 생성 금지.
+6. **저장소/브랜치/SHA·경로:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112. 기능 d8e765ef538e6f41fa3fc870a9257238a7c4af98; desktop/ocr-pe-import-audit.cjs, desktop/ocr-supply-chain-preflight.cjs, tests/ocr-pe-import-audit.test.cjs, tests/ocr-supply-chain-preflight.test.cjs, package.json, docs/commercial/ASTRA_P105_PE_STATIC_IMPORT_REVIEW_20261114.md. 본 docs HEAD는 GitHub 최종 readback 필수.
+7. **Production·Vercel·실행:** 판매/배포 Vercel 미적용. Windows hosted unsigned NSIS와 설치 회귀 검증은 실 사용자 설치 테스트가 아님. npm test/npm run build/npm run desktop:test/npm run ocr:release-gate, 외부 실 자산 있을 때만 npm run ocr:preflight -- <assets-folder> <external-manifest>.
+8. **원본·백업·비밀·금지:** 기능 이전 부모 074b240244aad23631466894fd633efc86558f12로 정상 Git revert 가능. main/Draft PR10, 사용자 원본PDF·V1 localStorage·V2 IndexedDB·8디자인/기존 등록이력·비밀·서명키/권한 그대로. OCR_MANIFEST=null, 외부 전송/자동 다운로드/원본 변경/force push/무단 배포 없음.
+9. **다음 작업 우선순위·완료기준·승인:** (1) 적법한 Windows Tesseract 설치파일·DLL·kor+eng 공급자 해시/정확 버전/서명 인증서/법무 LICENSE·NOTICE·SBOM 확보 (2) 실제 DLL 로더·동적 의존성 및 Windows 한글/금액/표/다단 OCR (3) 독립 물리 Windows10/11·허가 PDF5~10·원문 보존 검수 (4) 3SKU/실 GGUF CPU/12영역100점·판매 승인. 무료 코드 승인 기확정, 모바일 사용자에게 PC 요구는 최종 단계로 일괄.
+10. **갱신 시각(KST)·확인 범위:** 2026-11-14 17:38 KST, GitHub Actions 정확 기능 SHA의 3/3 result + job raw logs 확인. 실 공급원/물리PC/고객·판매 검증 미진행, 공식 제품100% 증명 아님. 중앙 kmong-productization 원장 최신화는 별도 커밋 확인.
+
+## 2026-11-14 KST — P105 다음 채팅 인수인계 10항 (CI 진행 중 잠정)
+
+1. **목표·용도·확정 요구·기술:** ASTRA PDF 원래 7단계, BASIC/PRO/BUSINESS, 사용자 최종설계 12영역 100점, 오프라인 OCR 공급망 신뢰 강화. Node22/PE32+ x64/React+PDF.js/Electron; 실제 고객 자료·판매·유료결제 없음.
+2. **완료 기능·결정 근거:** 대안 A 기존 P104 스트리밍 SHA-256로 확인한 동일 파일 바이트에서 PE 정적 import/지연 DLL 검사(채택; 부수 비용 0, 즉시 CI 검증), 대안 B 외부 Windows 설치 공급자·서명 검수 단독(실제 자산 없어 보류). P105 경로 누락/공급망 DLL 탈락/OS DLL 이름 오염/변조된 RVA 차단; 기존 P104 정확 SHA·패키징 차단 유지.
+3. **테스트 명령/진행·성공/실패·미검증:** P105 기능 SHA d8e765ef538e6f41fa3fc870a9257238a7c4af98; 추가 parser 합성 11건. npm test / npm run desktop:test / npm run build / npm run ocr:release-gate. GitHub Actions Linux+Chrome/Edge #43576345594, Windows+NSIS #43576345628, 최종설계 #43576345809. 코드 push 직후 Node Linux/Windows·build/desktop smoke/RELEASE HOLD CI step 성공, 정책 workflow 성공; 전체 2개 workflow **IN_PROGRESS / 최종 PASS 아직 미검증**. P104 이전 3/3 성공과 혼동 금지.
+4. **완료/진행/대기/차단:** P105 코드 커밋 반영/일부 CI 단계 PASS. 전체 browser/NSIS 결과·원시 로그 확인 진행, 공급자 EXE/DLL/installer 실물 서명·실측 SHA·전체 runtime 종속성·NOTICE/SBOM/법적 재배포·실 OS/고객 PDF/LLM/3SKU 수용 대기. 전체 최종률 UNASSESSED, 100% 미달, RELEASE HOLD.
+5. **오류·근거·시도·재시도 금지·대안:** 최초 원자적 커밋 스크립트 문자열 구문오류(원격 코드 변경 0), 단순화 후 GitHub fast-forward 성공. PE import table만으로 LoadLibrary를 검증했다는 오인 금지; 파일 검증 한계를 우회하기 위한 false PASS 금지. 서명과 재배포 적법성은 공급자 원본 필요.
+6. **저장소·브랜치·SHA·핵심 경로:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112 / 기능 d8e765ef538e6f41fa3fc870a9257238a7c4af98. 변경 desktop/ocr-pe-import-audit.cjs, desktop/ocr-supply-chain-preflight.cjs, tests/ocr-pe-import-audit.test.cjs, tests/ocr-supply-chain-preflight.test.cjs, package.json, P105 상세 문서. 본 문서 SHA는 최종 커밋 후 확인.
+7. **Production·배포·환경:** Windows NSIS 합성 설치기 CI는 배포/실 제품 승인 아님. Vercel 미적용. Node22 npm test/build/desktop:test/ocr:release-gate, 외부 manifest 검수는 npm run ocr:preflight -- <assets> <manifest>. 현재 실제 자산 0/OCR_MANIFEST=null.
+8. **원본·백업·비밀·수정 금지:** 이전 Git HEAD 074b240244aad23631466894fd633efc86558f12로 정상 Git revert 가능한 기준. main·Draft PR10·STEP1 localStorage V1·STEP2 IndexedDB V2·고객 PDF·디자인8종·등록이력·인증 비밀 모두 유지. force push·외부 업로드·서명키·승인 없는 OCR 자산 다운로드·번들 금지.
+9. **다음 작업·완료 기준·승인:** ①정확 기능 SHA의 Linux+Windows 전체 job/raw log 완료 확인 ②실제 신뢰할 Windows Tesseract installer+개별 DLL/kor+eng 및 라이선스/Authenticode 증거 확보(무단 설치/재배포 금지) ③Windows static+dynamic loader 회귀와 실 한글/금액/표 PDF ④3SKU/AI/실 고객 PDF 5~10·물리 PC·12영역100점 검수. 사용자 모바일; PC 요청 최후 합산, 무료 코드 범위 이미 승인.
+10. **갱신 시점(KST)·검증 범위:** 2026-11-14 KST, GitHub commit/branch + Actions step 단위 실증; 전체 Actions 최종 결과 및 공급자/구매자 Windows는 아직 미확인. 중앙 kmong-productization 동기화는 별도 exact-SHA 검증 후.
+
+## 2026-11-14 KST — P104 정확 SHA 3/3 CI 검증 최종 인수인계 10항
+
+1. **목표·확정 요구·기술:** Astra STEP1~7/3SKU/최종12항100점, 로컬 Windows x64 OCR 바이너리 안전 감사·가드. React/TS/PDF.js/Electron/NSIS + Node22 SHA-256/PE32+ 사전검사, 유료/외부 전송0.
+2. **완료 기능/변경/선택 근거:** 휴먼 서명·법무 검토 선행 오프라인 번들(A) 우선, 별도 사용자설치(B) 대비 사용편의 우위. 출처·SHA/크기·모든 exe/DLL·kor+eng·LICENSE/NOTICE manifest 교차 검사와 우회(glob, symlink, hardlink, extraResources) 차단, OCR_RELEASE_HOLD 기본 유지. 성공 report도 review-required/legalRedistributionApproved:false. OCR 실행 자산은 실제 포함하지 않음.
+3. **정확 테스트/명령·PASS/FAIL/SKIP:** 기능 sha **e2fd0797990ce94e7f7a68720ece3617f9d114db**. [Linux Chrome+Edge #43574432110](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43574432110) 2/2 SUCCESS Node **210PASS/0FAIL/0SKIP**, npm run build PASS, 두 브라우저 STEP7 synthetic OCR review E2E PASS. [Windows #43574432095](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43574432095) SUCCESS Node **209PASS/0FAIL/1 Windows symlink 권한SKIP**, desktop **48PASS/0FAIL**, NSIS EXE/설치·제거/업그레이드 V2·PNG 보존 PASS, OCR release hold (기본 0.1.0·업그레이드0.1.1) 2회 PASS. [정본 정책 #43574432327](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43574432327) SUCCESS.
+4. **완료/진행/대기/차단:** GitHub 코드/합성 공급망 회귀 15+6, 안전 패키징 차단/CI 검증까지 완료. 사용자 실제 Win10/11·한글 OCR 엔진 실행·독립 공급처 EXE/DLL/kor+eng·SHA/Authenticode/법적 재배포/NOTICE·실고객 PDF5~10·한국어 AI/정식3SKU/판매 GO 미완. 최종100% 미달/UNASSESSED/RELEASE HOLD.
+5. **오류 근거/원인/시도/재시도 금지·대안:** 초기 디렉터리 hardlink 검사 false-positive 가능성 제거(파일 hardlink만 거부); Electron 파일 포함 목록 변경 우회 발견→정확 files 3개 allowlist+악성 추가 glob 회귀 적용. CI 실제 로그를 확인하여 이전 '미검증' 표현 정정. 이력상 이전 일부 커밋 실패를 최신 전체 성공으로 대체하되 실패 로그를 삭제하거나 force push하지 않음.
+6. **저장소/브랜치/SHA/경로:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112, 실행 코드 e2fd0797990ce94e7f7a68720ece3617f9d114db. desktop/ocr-supply-chain-preflight.cjs, desktop/ocr-release-hold-gate.cjs, tests/ocr-supply-chain-preflight.test.cjs, tests/ocr-release-hold-gate.test.cjs, package.json, .github/workflows/windows-desktop.yml, docs/commercial/ASTRA_P104_WINDOWS_OCR_PREFLIGHT_20261114.md. 문서 SHA는 본 update 후 확인.
+7. **배포/Production URL/실행 환경:** Windows NSIS 개발 설치기 CI에서만 합성 확인. Vercel N/A, 크몽 등록0. npm test; npm run build (prebuild OCR hold), npm run desktop:test; npm run ocr:release-gate; 실제 자산 확보 시 npm run ocr:preflight -- <folder> <json> (결과 review-required이고 출시허가 불가).
+8. **원본/백업/보안·수정금지:** main·Draft PR10·STEP1 localStorage V1·STEP2 IndexedDB V2·원본 PDF 및 고객 자료, 서명/환경·토큰/모델 자산 변경0. Git 이전 SHA로 원복 가능. 고객 실파일·바이너리 GitHub 저장0. OCR_MANIFEST=null.
+9. **다음 작업/절차/완료 조건·승인:** (1) 외부 공급처 Windows 설치파일/Authenticode와 EXE/DLL/kor+eng 실제 bytes 및 라이선스·NOTICE/SBOM 검수 (2) 전체 의존 DLL closure 및 런타임 서명/해시 재검증 후 사용자 사용 PC 조건 (3) Windows 실제 한글/숫자/표 OCR와 원본 PDF 대조·합성/실사용자 시나리오 (4) 3SKU/LLM/최종사용자 수용. 기존 무료 OCR 코딩 승인 재요청 금지, 외부 전송/유료 구매/권한·보안 변경/판매 GO 별도 승인.
+10. **갱신일시(KST)·확인시점·검증범위·문서기준:** 2026-11-14 KST, GitHub raw workflow job logs에서 정확 SHA 3/3 SUCCESS, Node Linux210 Windows209+1SKIP desktop48, Chrome/Edge OCR UI 및 NSIS2회 HOLD PASS. 기능 CI 성공≠재배포 라이선스·실 Win10/11·제품 공식100% 합격. HEAD는 문서 업데이트 직후 실제 비교.
+
+## 2026-11-14 KST — P104 Windows OCR 공급망 사전 검증 10항 (최신)
+
+1. **목표·용도·확정 요구·기술:** Astra PDF STEP1~7, BASIC/PRO/BUSINESS 사용자 원본 12영역/100점·원본 무손상·무료 로컬 OCR 사전 안전 감사. Node22 CJS, Win64 PE 헤더, SHA-256, Electron Builder NSIS. 무료 OCR 코드/배점은 승인됨. 판매·유료결제·외부 고객 자료 전송 미승인.
+2. **완료 기능/변경/근거:** 공급망 옵션 A(검증 후 허가된 오프라인 Windows DLL/EXE/lang 번들) 선택, B(별도 사용자 설치/지원비 증가) 대안. 실제 파일 반입 전 offline manifest 검사, per-file SHA/bytes/PE x64, 라이선스·NOTICE 인벤토리, symlink/hardlink/추가DLL/경로/extraResources/extraFiles 차단. 성공해도 `review-required`로 귀결, legalRedistributionApproved=false. 현재 패키지 자체 release HOLD.
+3. **테스트/명령·성공/실패수:** tests/ocr-supply-chain-preflight.test.cjs 15개 + tests/ocr-release-hold-gate.test.cjs 6개, npm test/desktop:test 연결; prebuild+Windows 0.1.0/0.1.1 직전 `npm run ocr:release-gate` 필수. 실제 CI 정확 코드 e2fd0797990ce94e7f7a68720ece3617f9d114db 설계 게이트 #43574432327 SUCCESS, Linux/Chrome/Edge #43574432110·Windows NSIS #43574432095 전체 최종 로그 **확인 중**, 통과 주장 금지. 이전 P103 SHA f9672f12 CI는 3/3 SUCCESS(이력 분리).
+4. **완료/진행/대기/차단:** 안전검사·패키징 차단 코드 GitHub 반영, 정책 성공. 실제 서명된 Windows exe와 모든 DLL·kor/eng/실물 해시·AuthentiCode·DLL import closure/업스트림 재배포권 및 LICENSE/NOTICE 육안 법무확인 미완, Release HOLD. 실제 고객 Win10/11·PDF5~10·모델/3SKU/판매수용 미검증.
+5. **오류/실패 근거·원인·시도·재시도 금지·대안:** 초기 검사에서 정상 Unix directory nlink>1도 불법 하드링크로 잘못 분류할 가능성 파악 → 일반 디렉터리 허용·파일 하드링크만 거부. Electron files glob에 새 폴더만 더하면 OCR 네이티브 파일이 우회될 위험 확인 → 정확 3개 files allowlist 검증+회귀 추가. unsigned DLL/가짜 법적 증빙은 사전 검사 성공으로 판매 가능 판정 불가; 별도 법무/서명·실 실행 필요.
+6. **저장소/브랜치/SHA/경로:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112. 최신 **기능·테스트 SHA e2fd0797990ce94e7f7a68720ece3617f9d114db**, 문서 docs/commercial/ASTRA_P104_WINDOWS_OCR_PREFLIGHT_20261114.md. 대상 desktop/ocr-supply-chain-preflight.cjs, desktop/ocr-release-hold-gate.cjs, tests/ocr-*.test.cjs, .github/workflows/windows-desktop.yml, package.json.
+7. **Production URL·Vercel·명령·환경:** Vercel 미적용(Windows Electron/NSIS), npm test/build, npm run desktop:test, npm run ocr:release-gate; 미래 자산 검증시 `npm run ocr:preflight -- <assets-folder> <manifest.json>`(현재 실제 바이너리 없음). CI Windows hosted 테스트는 물리 구매자 PC의 정상보증 아님.
+8. **원본/백업·인증·수정 금지:** 개발 브랜치 과거 SHA에서 복구 가능. main/PR10, 사용자 PDF·STEP1 localStorage V1·STEP2 IndexedDB V2·등록 이력·서명키/비밀·구매자 데이터 미수정, 실제 OCR 바이너리/모델/폰트 ZIP 미다운로드·미번들. OCR_MANIFEST=null.
+9. **다음 작업 우선순위/완료기준·승인:** e2fd0797 exact SHA Linux Chrome/Edge + Windows NSIS Actions 완료 결론/원시 로그 확인→필요시 테스트/경로 최소 수정→Windows 설치파일/EXE/DLL/thumbprint/SBOM·LICENSE/NOTICE·실 Win OCR 독립 실행→원문 검수/실 고객 PDF5~10·3SKU/모델·최종 판매 승인. 무료 코드 승인 재요청 금지. 구매·전송/상품 등록·범위변경/외부 인증은 사전 승인.
+10. **최신화 KST·확인시점·검증 범위·문서 기준커밋:** 2026-11-14 KST, 코드 SHA e2fd0797; GitHub 실제 파일·CI 정책 확인, Linux/Windows full CI 결론 확인 전 미검증. 문서/중앙 원장은 마지막 커밋 SHA를 별도로 재확인. 본 문서는 P104 코드 개발 기록이며 최종 제품100% 완료 주장 아님.
+
+## 2026-11-14 KST — P103 정확 SHA CI 3/3 성공 인수인계 (최신 10항)
+
+1. **목표·요구·기술:** 사용자 원본 7단계+3SKU 12영역 100점 전체, React/TypeScript/PDF.js/Electron/Tesseract. 원본/사용자 저장 데이터 보존, OCR 미승인 검수, 출시 RELEASE HOLD.
+2. **구현·근거:** P102 보안 OCR 기반 유지, P103 신규 골든 러너 PSM3/6 선택·STEP7 페이지/모드 변경 시 과거 초안 폐기·OCR 초안 페이지/모드 출처와 수동 수정 여부 표시. 스캔 PDF 실제 브라우저 렌더에 모의 OCR 백엔드 사용한 E2E 추가. 단문20+복합6 합성 실 Tesseract 품질 비교, PSM6 기본 및 PSM3 수동 대안.
+3. **테스트 명령·성공/실패/범위:** 정확 기능 SHA **f9672f12b2d40106bdcc244e2675c903b3c98888**. [Chrome+Edge #43571908499](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43571908499) 2/2 SUCCESS, Node189PASS/0FAIL, npm run build PASS, Chrome와 Edge 각각 **PASS STEP7 OCR UI**. [Windows #43571908498](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43571908498) 1/1 SUCCESS, Node188PASS/0FAIL/1 OS-only symlink SKIP, desktop27/27PASS, NSIS install/uninstall·0.1.0→0.1.1 V2 PNG 보존 PASS. [정본 정책 #43571908709](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43571908709) SUCCESS(100% 합격 아님). 실 고객 OCR/Win10·11 미검증.
+4. **완료/진행/대기·차단:** P103 코드·UI·Chrome/Edge/Windows hosted 합성 테스트 통과. OCR_MANIFEST=null, Windows 정식 native Tesseract+DLL/kor+eng 미번들/미사용. 표·다단 오인식 가능, 실제 PDF 원문 복원·고객 PC/LLM/3SKU 정식 상용·판매 승인 미충족. 공식 최종점수 UNASSESSED, 100% 미달/[작업중]/RELEASE HOLD/크몽 미등록.
+5. **오류/원인·시도·전환:** P102 CI 접근 이슈는 GitHub REST workflow runs/jobs/logs 정확 SHA 조회로 해소. PSM3 단문20 중 5 exact/CER51.28%로 누락 다수 → PSM6 기본 유지(15 exact/CER2.2%). 복합6 경우 PSM3가 표/박스 표식을 더 찾기도 하여 사용자가 직접 모드 선택·대조, 자동 인증 금지. P103 새 스캔 UI E2E는 Chrome/Edge 모두 녹색. 동일 실패 방식을 반복하지 않음.
+6. **저장소/브랜치/SHA·경로:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112, 기능 f9672f12b2d40106bdcc244e2675c903b3c98888. docs/commercial/ASTRA_P103_OCR_PSM_REVIEW_20261114.md, src/step7/LocalOcrPanel.tsx, scripts/run-ocr-golden.cjs, tests/step7-local-ocr-browser.mjs, .github/workflows/ci.yml. 제품 STATUS 문서 업데이트 e1c0682d6cfdd7e25b4bfbd3d1a6768f69e3bceb, 본 HANDOFF 갱신 SHA는 이후 HEAD 확인.
+7. **Production/실행 명령·환경:** Node22 npm test/npm run build, 실제 Chrome/Edge 브라우저 E2E 및 Windows hosted NSIS/Electron, Vercel 미적용. OS별 상품 구매자 물리 테스트·실 Tesseract Windows 실행은 미검증. PSM3/6 실 비교는 Linux5.5·Pillow/NanumGothic 합성 샘플.
+8. **원본 위치/백업·인증 관리·수정 금지:** Git 직전 SHA 롤백 가능. 사용자 V1 localStorage·V2 IndexedDB, 원본 docs/ASTRA_ORIGINAL_ROADMAP.txt, main/Draft PR10, 비밀키·고객 PDF/실 라이선스 자산 변경0. OCR 데이터는 별도 미승인 메모리 초안, 클라우드 원문 전송0/고객파일 GitHub 업로드0. OCR 배포 manifest null.
+9. **다음 작업/우선순위/승인:** ①Windows Tesseract 공급처·DLL/kor/eng 정확 버전 SHA·라이선스/NOTICE/SBOM 사전 검증(승인 전 번들 금지) ②전용 OCR 실제 Windows Native+페이지별 혼합/스캔·표 정확도·CPU/취소 회귀 ③고객 허가 PDF5~10 원문/출력 수동 검수와 물리 Win10/11 설치·인쇄 ④3SKU/실 GGUF/소유자 최종 판매 승인. 무료 OCR 코드 개발/100점 배점은 기존 승인 완료, 반복 승인 요청 금지. 유료구매·외부원문 전송·등록/배포는 별도.
+10. **KST 갱신/정확 검증 범위·문서 기준:** 2026-11-14 KST, GitHub Actions 3/3 raw logs 직접 조회, 합성 UI E2E Chrome/Edge 각 PASS·Windows hosted Node/desktop/NSIS PASS. Linux 실 Tesseract 20/6 합성 비교는 윈도우 사용성·판매성 증거 아님. 최종 HEAD 확인 필요, 코드 f9672f12/문서 커밋 구분.
+
+## 2026-11-14 KST — P103 실 OCR 모드 비교·프론트엔드 초안 귀속 인수인계 10항
+
+1. **목표/기술/정본:** 사용자 확정 STEP1~7 및 BASIC8/PRO20/BUSINESS30, 12영역 총 100점. React/TS/PDF.js/Electron/무료 로컬 Tesseract. 고객 내용·원본 무손상, 전체 공식 최종률 UNASSESSED/100% 미달.
+2. **완료/변경/근거:** P102 Unicode/임시PNG/허용 PSM 보강 CI 정확 SHA 성공. P103 단문 합성20 OCR 모드 PSM6/3 성능 비교 및 복합 구조6 탐색 후 기본6 유지/PSM3 선택형. STEP7 페이지·모드 전환 시 미승인 이전 OCR 초안과 provenance 삭제, 성공 시 페이지·모드 표시/사용자 편집표시. 합성 스캔 PDF 브라우저 E2E 추가.
+3. **실제 테스트/미검증:** P102 exact 기능 SHA 5d87df4ef2f9: Linux Chrome+Edge #43568805209 2/2 SUCCESS Node189PASS/0FAIL/0SKIP·build PASS, Windows #43568805220 SUCCESS Node188PASS/0FAIL/1 symlink OS SKIP+desktop27PASS·NSIS 설치/업그레이드 성공, 정책 #43568805420 SUCCESS. P103 신규 기능 SHA f9672f12b2d40106bdcc244e2675c903b3c98888 GitHub Chrome/Edge·Windows CI는 현재 실행중/미확인. Linux 실 Tesseract 5.5 PSM6 합성20 중15 exact/CER2.2%, PSM3 5 exact/CER51.28%. 합성 표식6장은 예비 탐색으로만 평가. 실고객·실 WinOCR 불인정.
+4. **완료/진행/대기/차단:** UI와 합성 E2E 코드 반영 완료, P102 exact CI green. P103 신규 CI 판단 대기. 실제 Windows 실행파일+kor/eng/DLL 정식 LICENSE·NOTICE/해시·실 Win10/11·허가 PDF5~10·한국어 GGUF CPU·3SKU 정식 권리·판매 승인 미충족; RELEASE HOLD.
+5. **오류/원인/시도/대안:** PDF 페이지 또는 PSM 변경 후 이전 초안이 남으면 다른 출처 텍스트 오인 가능 → 입력 변경 때 초안/출처 폐기, 성공 시 생성한 페이지/모드 명시. 골든 비교에서 PSM3 단문 누락 다수(5/20 정확) 확인 → 기본 PSM6 유지. 두 모드 모두 표 숫자/의미 자동 인증 불가, 수동 검수 보존. E2E 실패 시 실제 job log를 읽고 안전한 테스트·UI 최소 수정(테스트 생략 금지).
+6. **repo/branch/SHA/경로:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112. P102 기능5d87df4e / P103 기능 f9672f12b2d40106bdcc244e2675c903b3c98888. P103 문서 HEAD 1d951f39182b7a313ba5cd49b1d695a8ab4d6d78, STATUS 갱신 1be2518211c948ba9bfa5b8fd015aefeb3e4400a; 본 HANDOFF 이후 HEAD 재조회. 주요 src/step7/LocalOcrPanel.tsx, scripts/run-ocr-golden.cjs, tests/step7-local-ocr-browser.mjs, .github/workflows/ci.yml, docs/commercial/ASTRA_P103_OCR_PSM_REVIEW_20261114.md.
+7. **실행/Production/환경:** Node22 npm test/build, GitHub hosted Chrome/Edge actual browser, Windows NSIS/Electron. Vercel N/A, 크몽 미등록. Linux 실 OCR 비교는 Tesseract 5.5 kor+eng/Pillow/NanumGothic 합성20, 자료 외부업로드0.
+8. **원본/백업/인증/수정 금지:** 기존 main/PR10·STEP1 localStorage V1/STEP2 IndexedDB V2·원본 PDF/고객 파일·구매자 개인정보/비밀키 불변. Git parent SHA 회복 가능. OCR_MANIFEST=null, 정식 Windows 바이너리/모델/폰트 번들0; 유료 사용·외부 원문 전송·판매 없음.
+9. **다음 작업/완료 기준:** 먼저 P103 head SHA GitHub Actions Chrome·Edge E2E+Windows NSIS Node/React 실제 로그 성공/실패를 확인하고 최소 수정. 다음 PSM3/6 복합 6종 재현 생성기 고정/검증, Windows Tesseract DLL·언어팩·LICENSE/NOTICE·SBOM exact pin, 실제 무전송 한글 OCR/A4/취소·원문 보존·수동 검수. 최종100%는 사용자 실 PDF/물리 Windows/상용 권리·판매 별도 수용 필요. 사용자 무료 OCR 개발 승인 반복 요청 금지.
+10. **갱신일시/증거/기준커밋:** 2026-11-14 KST, GitHub API Actions raw job logs로 P102 exact SHA 3/3 확인, Python 로컬 synthetic 20+6 실OCR 비교, P103 코드 f9672f12 신규 CI 아직 최종 미확인. 본 문서 SHA는 새 HEAD로 확인하고 기능 SHA와 구분.
+
+## 2026-11-14 KST — P102 Windows OCR 인수인계 10항 (최신)
+
+1. **목표/기술:** Astra PDF STEP1~7·BASIC/PRO/BUSINESS 사용자 100점 설계 기준, 로컬 Tesseract/Electron/PDF.js/React·기존 사용자 데이터 안전/0원 운영.
+2. **결정·구현:** Windows Tesseract 5 최신 공식 설치파일 부재·UB Mannheim 제3자 확인. 기본 무배포(OFF) 유지. P102 UTF8 native stdout 보존, PSM3/6 allowlist·UI, Windows temp PNG 재시도/실패 비성공, 페이지 캔버스 4096px/8MP 가드 추가.
+3. **테스트:** tests/local-ocr-controller.test.cjs 신규 한글 바이트 split·PSM 주입·cleanup failure 회귀 3종 추가; npm test/desktop:test 기존 OCR 포함 확인. GitHub 코드 연결 11개 정적 확인. **P102 exact-source Node/TS/Chrome/Edge/Windows CI 모두 실행 결과 미확인**, 신규 PASS 수치 주장 불가. P101 Linux 과거 7/7+실 Tesseract synthetic20 중 15 exact 별도 근거.
+4. **완료/진행/차단:** 코드·테스트·문서 GitHub 원격 반영. 실제 Windows OCR 바이너리·DLL·traineddata 사용권/디지털 서명/해시·실 Win10/11·OCR 품질·고객 PDF5~10·LLM/상용 3SKU 모두 미검증. 최종100 미달·RELEASE HOLD.
+5. **시도/결함/전환:** native stdout chunk-by-chunk UTF8 디코딩의 다중바이트 한글 깨짐 위험을 Buffer.concat으로 수정, 모드 문자열 CLI 주입 허용 금지, 임시파일 rm 실패를 성공으로 숨기지 않도록 수정. 공개 Actions URL 읽기 불가/커넥터 실행목록 제한이라 CI 성공 간주 금지. 다음엔 GitHub Actions 정확 SHA 확인 또는 독립 재현 환경으로 대체.
+6. **저장소·브랜치·SHA·주요 경로:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112; **최종 P102 기능 소스 SHA 5d87df4ef2f9f6b6cefd6f51f52d7f66de0d2d71**, 정책/공급망 문서 커밋 d062320a2e7ce5725d77ef036b9a0b2806010459. desktop/local-ocr-controller.cjs, desktop/main.cjs, preload.cjs, src/desktopPdf.ts, src/step7/LocalOcrPanel.tsx, tests/local-ocr-controller.test.cjs. 이 문서 커밋으로 HEAD 갱신 가능.
+7. **Production/실행:** Node22 npm test/build, npm run desktop:verify/smoke, Windows NSIS CI; Production/Vercel 미적용, 크몽 판매·배포 없음.
+8. **원본/백업/인증:** Git 이전 SHA 복원 가능, main/PR10/STEP1 localStorage V1·STEP2 IndexedDB V2·원본 PDF/고객자료·개인키·모델바이너리/NOTICE 변경 없음. OCR_MANIFEST=null.
+9. **다음 작업/기준·승인:** P102 정확 SHA CI Linux/Chrome/Edge/Windows 전 검증, DLL/재배포권/sha256/NOTICE/SBOM 포함 재배포 승인 전 공급망 프리플라이트, PSM3/6 합성표/한글 숫자 골든, 실 PDF 5~10·실 Win10/11 수용·사용자 판매 별도 승인. 무료 OCR 개발 승인 완료, 같은 승인 재요청 금지.
+10. **KST 확인·증거:** 2026-11-14 KST GitHub 커넥터로 실제 소스/테스트 연결 11개 확인. 공식 12영역 가중치 합계100 승인·증거점수 UNASSESSED, 과거 내부 기술85% 구분. P102 자료 docs/commercial/ASTRA_P102_WINDOWS_OCR_SUPPLY_CHAIN_20261114.md. 문서 기준 커밋은 작성 후 HEAD 별도 대조.
+
+## 2026-11-14 KST — P101 실 Tesseract 골든20 / 재현 자동화 인수인계 10항 (최신)
+
+1. **목표·스택·요구:** 사용자 최종설계 STEP1~7+3SKU 100점 기준, 무료 로컬 OCR/Tesseract + React/PDF.js/Electron. 원본 데이터 보존·오프라인 검수 초안·유료서비스0. 공식 완성률 UNASSESSED/100% 미달.
+2. **완료 기능·결정:** 스캔-only 판별과 PNG CRC/청크 검사 보강. 테스트를 고의로 어려운 한영·숫자·명암·기울임·흐림 20개 합성 이미지로 재생성/실 Tesseract 실행. 소스 스크립트 scripts/generate-ocr-golden.py 및 scripts/run-ocr-golden.cjs 원격 커밋. 상용 바이너리/언어팩 번들은 활성화하지 않음.
+3. **테스트 명령·실측:** Node22 로컬 동일 Blob 단위 7 PASS/0 FAIL/0 SKIP; strict TS PASS. 실제 Linux Tesseract 5.5.0 kor+eng 20/20 review 반환/정확한 문자열 15/20/오인식5/20/평균 사례별 CER 2.2%/약 4.1~4.3초. 신규 생성기와 실행기를 이용해 20 PNG 해시와 결과를 재현. **전체 npm build/Chrome/Edge/Windows NSIS exact SHA CI는 조회 불가·미검증**.
+4. **완료·진행·대기·차단:** P101 OCR 컨트롤러·GUI 비파괴 소스 구현, Linux OCR CLI 실추론 단위 확인. 원본 보존 실PDF5~10/고객 물리 Win10·11/실 GUI 연동/정식 DLL·언어팩 LICENSE/NOTICE/원본 A07 수동 검수/3SKU/LLM 미완, RELEASE HOLD.
+5. **오류 근거·원인·대안:** 실제 합성 사례 2 불가→물가, 8 2,300,000→22300,000, 13 AI→시, 16 숫자 구분자 오류, 17 A-101→4-101. OCR은 의미·숫자 무손실 보증 불가하여 manual reviewOnly/approved:false 유지. test runner의 regex 이중 escaping 초기 코드 오류를 발견해 소스 e81afaaf에서 수정, 최신 직접 재실행 PASS. GUI/Win 성공으로 과장 금지.
+6. **저장소/브랜치/SHA·경로:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112; 최신 소스+하네스 commit **e81afaafcb93a55f0d9ca6eb3ad827edebb72231**; STATUS 갱신 **622632a50d87584a0b7aceb54b49661b928d1e5d**. 실제 실행 코어 blob ebfce5b8, mock test f7b448e0, eligibility 11bdc938/a26b1e0e, Python generator 3a156177, Node runner 9b0405d1. 주요 desktop/local-ocr-controller.cjs, src/step7/*, tests/*, scripts/generate-ocr-golden.py, scripts/run-ocr-golden.cjs.
+7. **Production/실행 명령/환경:** npm test/build, npm run desktop:verify/smoke, Windows NSIS, Vercel N/A. Linux 골든: python scripts/generate-ocr-golden.py --out <빈폴더> --font <로컬 한글폰트>; node scripts/run-ocr-golden.cjs <샘플폴더> <tesseract바이너리> <kor.traineddata> <eng.traineddata>. 이 명령은 OS/폰트/패키지 설치에 의존하며 대고객 품질 확정 아님.
+8. **원본·백업·보안·권리:** 기존 main/Draft PR10/V1 localStorage/V2 IndexedDB/원본 PDF·사용자 기밀·한글 폰트·실 binaries 무변경, 외부 PDF 업로드0. Linux 시험 바이너리 파일·kor/eng 언어팩은 임시 공간 테스트 후 삭제, 상용 Windows 패키지 포함0. Git history SHA 롤백 가능.
+9. **다음 우선순위·기준/승인:** exact SHA GitHub Actions 검증 → 무료 정식 Windows Tesseract 배포 경로·DLL/NOTICE·언어팩 해시 및 권리 확인 → 20 실 PDF/로컬 CPU/취소·실 UI·원문/수동 승인 회귀 → 실고객5~10/Win10·11·3SKU/LLM·최종 상용 판매 승인. 사용자 이미 무료 OCR 코드와 100점 배점 승인했으므로 재요청 금지. 유료결제/외부전송/출시는 별도.
+10. **갱신 일시·범위·문서 SHA:** 2026-11-14 KST, 독립 컨테이너 Linux Node22·Python Pillow·Tesseract5.5 실 20건과 정확 소스 blob 확인, GitHub 원격 문서 반영. 본 HANDOFF 자체 commit은 다음 조회로 확인. GitHub Actions/Windows/고객 실제 PDF 검증하지 않음.
+
+## 2026-11-14 KST — P101 OCR 보완 검증 인수인계 (10항 최신)
+
+1. **목표·요구·기술:** Astra 원본 7단계 및 3SKU 최종 100점 가중 범위. OCR은 승인된 무료 오프라인 Tesseract/PDF.js/React/Electron, 원본·고객 자료 무전송, 결과 검수 전 미승인 초안.
+2. **구현·결정:** 기존 P101 로컬 OCR 컨트롤러/프론트엔드에 PNG 전체 CRC/청크 검증을 추가하고 PDF.js 원본 선택 텍스트가 있는 페이지의 OCR 실행을 차단. 헤더만 믿는 안보다 CRC+IEND 검사(8MiB·8MP bounded)가 품질/안전상 우위, 외부 API 비용0. 개인정보·원본 V1/V2 DB 불변.
+3. **명령·실검증:** Node22.16 격리 원격 동일 Blob 4개로 node --experimental-strip-types --test tests/local-ocr-controller.test.cjs tests/step7-ocr-eligibility.test.ts **7 PASS /0 FAIL /0 SKIP**, eligibility TypeScript strict PASS. 전체 npm test/build/Chrome·Edge/Windows NSIS 신규 소스는 **CI 미확인**. 단위 테스트의 mock spawn은 실제 Tesseract 인식 성공이 아님.
+4. **완료/진행/대기:** 저장소 소스 반영/단위 검증 완료, 실행 manifest null 및 Tesseract 바이너리·kor/eng 언어팩 미번들, 실제 OCR/실 고객 PDF/물리 Win10·11 검사 미완. 공식 UNASSESSED, 판매 RELEASE HOLD.
+5. **오류/원인·대안:** 기존 검사는 PNG 서명/IHDR만 신뢰하여 CRC 오류를 인식 전 거부하지 못함 → 1024청크 제한·CRC·IEND 검증 보완. test mock은 유효 4×4 PNG로 교체하고 손상 CRC 부정검사 추가. GitHub Actions API/웹 실행 목록 조회 불가, 확인되지 않은 CI 성공 추정 금지.
+6. **repo/branch/SHA:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112. 정확 최신 실행 소스 SHA **d6dcf80bc024c2a36ab40738cbed1d7b28e4711f**; STATUS 문서 SHA **e4538b969b53ab4e7359c875ee4705ac9a837958**. 주요 src/step7/LocalOcrPanel.tsx·ocrEligibility.ts, desktop/local-ocr-controller.cjs, tests/local-ocr-controller.test.cjs·step7-ocr-eligibility.test.ts.
+7. **Production/환경:** 로컬 Electron Windows NSIS, React Vite 브라우저, Node22. 실 서비스 배포 Vercel 미적용, 크몽 미등록, 포장/설치 사용자 검수 미적용. 빌드 및 Win CI는 차회 실제 로그 확인.
+8. **원본/백업·보안:** Git 부모 SHA 롤백 가능, main/Draft PR10/원본 설계 PNG·기존 저장 데이터·고객 실PDF·서명키/모델 파일 불변. OCR 임시PNG 자동 삭제, 로그로 사용자 텍스트 출력 금지. 라이선스/바이너리 해시 및 고객 원본의 클라우드 업로드는 별도 조건.
+9. **다음 우선순위:** (1) GitHub 정확 SHA Actions 실행 확인/최소 수정 (2) 정식 Tesseract Windows 바이너리+언어팩+DLL/NOTICE 검토 및 SHA 고정 (3) 한글·숫자·표·다단 스캔 20종 실 오프라인 결과/실 Win10·11 측정 (4) 원문-초안 대조·승인 동작 수용 (5) 마지막 별도 SKU/LLM/판매 요건 재검증. 추가 유료결제/실고객 원본 외부전송/PR 병합 금지.
+10. **갱신 시점/근거:** 2026-11-14 KST. GitHub 현재 코드 ref 원격 일치 및 컨테이너 Node22 단위7/7, TS strict 검증. 마지막 기능 SHA와 문서 SHA 구분. 이 문서 커밋은 코드 성공 증빙 아님.
+
+## 2026-11-14 KST — P101 신규 로컬 OCR 개발 인수인계 (10항)
+
+1. **목표/기술:** 사용자 최종설계 STEP1~7 + 3SKU 100%, 무료 오프라인 Tesseract/PDF.js/React/TypeScript/Electron. 승인된 A01~A12 배점 100점, 증거점수 공식 UNASSESSED, 출시 HOLD.
+2. **구현/근거:** desktop/local-ocr-controller.cjs에 실행파일+kor/eng 해시 고정 필수, PNG 8MiB/8MP, 안전한 전용 임시파일·stdin 미사용·shell:false·timeout/취소/동시실행 제한. main/preload/desktopPdf 좁은 IPC, step7/LocalOcrPanel.tsx UI, Root STEP7 PDF 검수 하단 연결. 별도 검토 초안만 제공, 원문/DB 자동 변경 없음.
+3. **테스트/범위:** tests/local-ocr-controller.test.cjs 합성 무실행 가드/asset pin/취소/임시파일 제거, tests/step7-pdf-review-browser.mjs 브라우저 실패 폐쇄, Windows smoke IPC 검사, npm test와 desktop:test 명령에 추가. **신규 exact SHA의 실제 전체 npm/Chrome/Edge/Windows 결과는 미검증**. 이전 P100 Node179/178+desktop19 PASS 증거만 별도 보존, P101 통과로 전용 금지.
+4. **완료/진행/차단:** 소스·테스트 구현/원격 반영 완료. 배포 패키지에 OCR_MANIFEST=null·실바이너리/kor/eng 언어팩 미포함으로 실제 한국어 OCR 실행 불가; Golden20, 실 고객 PDF5~10, 물리PC/라이선스/권리·상용 심사 미완.
+5. **오류/근거/전환:** 인수 문서 최초 작성에서 JS 템플릿의 markdown backtick 구문 오류로 도구 요청 전 중단, backtick 없는 문서로 수정하여 GitHub 커밋 완료. 제품 실행 테스트 실패는 아직 확인되지 않음. 설치 자산 미검증 상태에서 임의 오픈/외부 다운로드 금지.
+6. **저장소·브랜치·SHA:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112. 마지막 소스 SHA **deeb1ed94a00cb25cfc1efafcf8e33fab1f9847b**; 이후 docs-only STATUS **e06ec9c665b52bee31b5d02765d9bbe1f03223ff**, 본 HANDOFF 갱신 시 HEAD 재확인. main/Draft PR10 불변.
+7. **배포/환경:** Node22 npm test/build, Chrome/Edge, Windows Electron NSIS hosted; Vercel Production 해당 없음. 설치형 합성 테스트가 실 Win10/11 구매자 수용을 대체하지 않음.
+8. **자산·백업/보안:** 원본 docs/ASTRA_ORIGINAL_ROADMAP.txt·설계PNG, V1 localStorage/V2 IndexedDB, 고객 PDF·모델 비밀·개인키 그대로. 신규 OCR은 임시 페이지 래스터 1장 메모리→격리 파일→정리, 외부 network/API/요금0. 기존 Git 부모 SHA로 코드 복원 가능.
+9. **다음 작업:** (1) 신규 exact-SHA GitHub Actions Linux/Chrome/Edge/Windows 로그 확인 및 오류 최소수정 (2) Tesseract Windows 공급원·DLL/LICENSE/NOTICE 및 kor/eng SHA 검증+승인 코드 manifest pin (3) 실 오프라인 한국어 스캔 골든 20종/취소/성능 회귀 (4) OCR 미승인 초안 수동 대조·확정, 이후 실고객/상품화 분리. 100%/판매GO 주장 금지.
+10. **시점/검증:** 2026-11-14 KST 원격 코드·문서 API 업데이트 결과 확인, 최신 CI 실행 결과 아직 별도 증거 없음. P101은 개발 회차 번호이며 공식 완성률이 아님. 상세 docs/commercial/ASTRA_P101_LOCAL_OCR_DEVELOPMENT_20261114.md.
+
+## 2026-11-14 KST — 사용자 승인 최신 인수인계 (10항)
+
+1. 목표: 원본 STEP1~7+3SKU 전체 100%, 최종 12영역 가중치 승인.
+2. 결정: 무료 로컬 OCR Tesseract 우선, 무료 llama.cpp+Qwen GGUF 후보 우선, 배점 A01–A12 확정.
+3. 검증: 공식 라이선스 원문 Tesseract/tessdata_fast Apache-2.0, llama.cpp MIT, Qwen3-0.6B GGUF Apache-2.0 확인. 기능 실바이너리/CPU/OCR 품질·재배포 해시 미검증; 이전 P95~P100 exact SHA CI 기록 유지.
+4. 상태: 사용자 승인 3건 완료, 구현/실증 대기, 최종 증거 점수 산정 대기/100% 미달, RELEASE HOLD.
+5. 실패/대안: 별도 OCR 실행파일 vs WASM(전자는 기존 구조 최소수정), 로컬 llama.cpp vs 유료 클라우드(전자는 0원·개인정보 유출 차단). 무검증 번들 금지.
+6. repo/branch: hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112, 최신 기능 SHA 2213e8e5, 본 승인 문서 SHA 이후 재조회.
+7. 배포: Vercel 미적용, 크몽 미등록, Windows NSIS CI 기술 PASS/실 사용자 Win10·11 미검증.
+8. 원본·보안: main/PR10·V1/V2/고객 PDF·개인키·모델파일 불변, 다운로드/외부 원본 업로드/유료결제0.
+9. 다음: 정확한 무료 바이너리/모델 버전·해시·권리 확보→STEP7 OCR/로컬 모델 안전 통합→CPU/한글 품질 회귀→실 PDF5~10·Windows 설치 수용→정식 SKU 및 판매 별도 GO. 동일 승인 재요청 금지.
+10. 확인: 2026-11-14 KST, 사용자 채팅의 명시 승인 및 upstream 공식 라이선스 근거. 상세 `docs/commercial/ASTRA_OWNER_1300_CHECKLIST_20261114.md`.
+
+## 2026-11-14 KST — P100 STEP6 출처 보관 검증 성공 / 전체 제품 100% 미달 (10항)
+
+1. **목표·정본·기술:** 원본 STEP1~7+크몽 3SKU 100% 기준 React/TS/Electron/PDF.js, 공식률 UNASSESSED, 과거85% 내부 별도.
+2. **완료·근거:** P95 PRO 로컬 PDF 수동 순차 승인, P96 ECDSA 서명 검증 모듈, P97 PRO 저장 시안, P98 BUSINESS 브랜드 텍스트 보관, P99 안전 외부 Google/Bing 네이티브 확인, P100 참고 URL/권리 `UNVERIFIED` 별도 로컬 출처 목록. 사용자 원문·파일 원본 자동수집/전송 없음.
+3. **테스트:** 신규 정확 기능SHA `2213e8e50759836b8c24bfbe7b037536a8fd995a`, [Linux Chrome/Edge #43553461990](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43553461990) **2/2 SUCCESS, Node179/179 PASS**, [Win #43553462026](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43553462026) **SUCCESS, Node178 PASS/1OS SKIP, desktop19PASS, NSIS upgrade V2·PNG 보존**. P95~P99 정확 SHA/CI 이전 HANDOFF 기록 참조. 실 고객PC/실PDF·모델/OCR 검증 없음.
+4. **완료·진행·차단:** P100 로컬 출처 메타데이터 구현·회귀 3/3 성공, 원래 STEP6 검색결과 API/카드/STEP5 직접 연결 미완. 진짜 오프라인 LLM·OCR/스캔, 표·다단, 상용 GUI 사용권/브랜드 일괄·사용자 PC/실 PDF5~10·폰트/모델 rights·크몽/고객 수용 미완. 전체100 미달, RELEASE HOLD·미등록.
+5. **오류·근거·피벗:** P100 최초 브라우저 test 교체 위치 찾기 실패 GitHub 쓰기 전 중단→독립 파일·실존 브라우저 로그 앵커 사용해서 재설계/테스트 통과, 원본 프로젝트 V2 불변. P97 첫 TS 타입 오류는 수정 SHA `ed363a4f` 후 CI GREEN. 반복 무의미 재시도 금지.
+6. **저장소/브랜치/SHA:** `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, P100 기능 `2213e8e5`, 제품 직전 docs `83c65f23`, 크몽 listing-only docs `1d79bbca`. 이번 docs HEAD 커밋 후 조회. 주요 `src/step6/sourceRecords.ts`, `src/step6/SourceRecordsPanel.tsx`, `tests/step5-reference-browser.mjs`.
+7. **Production/환경:** GitHub Node22 Linux Chrome/Edge Windows Electron NSIS, Vercel/Production 미적용, 고객 설치·크몽 등록 없음.
+8. **원본·백업/비밀:** git parent SHA reversible, main/PR10/V1/V2/원본 PDF/모델/폰트/실 라이선스 발급키 불변. 고객 내용 자동 외부 네트워크0, 유료 결제0.
+9. **다음 우선순위/사용자 승인:** 2026-11-14 13:00 KST 기존 통합 알림에서 폰으로 12영역 배점 확정·모델/Tesseract 0원 권리/해시·오프라인 라이선스 발급 정책 승인, 외출 후 PC Win10/11+5~10 허가PDF 원문/출력7항 실검수/국문 글꼴·실 모델 CPU/판매 GO 별도 요청. 100%·등록완료·판매GO 증거 없이 확정 금지.
+10. **갱신/검증범위:** 2026-11-14 KST 실제 GitHub exact SHA Actions raw job log 3/3, 총 Node179/178+desktop19, P100은 내부 기능 번호이며 공식 완성률 아님. 문서 자체 커밋은 별도 코드 증명 불가.
+
+## 2026-11-14 KST — P100 수동 출처 수집·오프라인 라이브러리 후속 인수 (10항)
+
+1. **목표·기술:** 원본STEP1~7+3SKU 전체100%, React/TS/Electron 로컬 우선, 제품 공식완성률 `UNASSESSED`/100% 미달.
+2. **변경·선택:** STEP6 검색 URL 결과 직접 API/자동수집 대신 추가 0원·무전송 수동 북마크. 사용자가 직접 URL·이름·권리 메모 입력, 별도 localStorage 20건, 항상 권리 `UNVERIFIED`, V2 문서 불변.
+3. **테스트:** 정확 코드 `2213e8e50759836b8c24bfbe7b037536a8fd995a` Node unit+Chrome/Edge browser sourceRecord V2 불변 회귀 작성, [Linux #43553461990](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43553461990), [Win #43553462026](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43553462026) **실행 중/결과 미확인**. policy #43553462320 SUCCESS. 앞 P99 source `0a0dec3e` Chrome/Edge+Win CI 3/3 GREEN Node177/176 desktop19. 실 URL 사용권·고객PDF QA 미검증.
+4. **상태:** 이번 P100 기능 소스/회귀 커밋됨, CI 검증 대기. 원래 STEP6 앱 내 결과 카드/API/권리 자동검증·STEP7 OCR/진짜 로컬 LLM·정식 상품 SKU/실 고객 PC/5–10 PDF·판매 승인 HOLD. 전체100 미달.
+5. **실패/피벗:** 최초 P100 브라우저 테스트 정확 앵커 불일치 GitHub 쓰기 전 중단, 이번 작업은 독립 sourceRecords/SourceRecordsPanel 분리·브라우저 끝의 실제 존재 앵커 위치를 사용해 소스 반영. 문제가 발견되면 exact CI 로그 확인 후 최소 1회 수정; 반복 강제 패치 금지.
+6. **repo/branch/SHA/path:** `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, 코드 `2213e8e5`, `src/step6/sourceRecords.ts`, `src/step6/SourceRecordsPanel.tsx`, `tests/source-records.test.ts`, `tests/step5-reference-browser.mjs`; 문서 HEAD 이번 커밋 후 확인.
+7. **Production/환경:** GitHub Node22 Linux Chrome/Edge, Win Electron NSIS. Vercel/Production 미적용, 출시/크몽 등록0.
+8. **원본·백업·보안:** parent `ded69d01` 및 이후 HEAD revert 가능. 원본 STEP1 V1/STEP2 IDB V2/고객 PDFs·모델키/실 브랜드 assets·main/PR10 불변, 외부 전송·유료 사용료0.
+9. **다음 작업/승인:** 정확 P100 Linux/Win CI 종료 결과 확인→오류시 재현/최소수정. 실제 Tesseract OCR/한국어 GGUF 승인·다운로드 권리/인수 및 원래 STEP6 제공처 API·검색결과 카드·실품질/상용 SKU 구현은 후속. 기존 13:00 사용자 통합에서 휴대전화 배점/권리·소프트웨어 승인과 PC 실PDF5~10/Win10·11 검증 일괄 안내; 당장 외출 중 수동 PC 작업 요구 금지.
+10. **확인 일시/범위:** 2026-11-14 KST GitHub source readback 및 Actions 현재 상태, 최종 SUCCEEDED 아직 미확정. 공식 `UNASSESSED`/목표100 미달·이전 내부85% 별도.
+
+## 2026-11-14 KST — P99 CI 완료 readback 및 인수인계 10항 (최신)
+
+1. **목표/기술:** 원본 7단계·3SKU 전체100%, 오프라인 우선 React/TS/Electron/PDF.js·0원, 최종률 UNASSESSED.
+2. **완료 기능/설계:** P95 파일별 수동 검수 PRO 배치; P96 ECDSA-256 진짜 서명 검증 모듈(판매키 미발급), P97 PRO 레이아웃 로컬 보관, P98 BUSINESS 브랜드 텍스트 보관, P99 안전 URL만 시스템 외부 브라우저로 띄우기 전 별도 native 확인창 (실 GUI 사람 클릭 시험 대기). V2 문서/원본 PDF 미변경.
+3. **테스트:** 최신 정확 source `0a0dec3edb998cc8ea94bcffc3fa781c7d1c9377`: Linux [#43552456521](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43552456521) **2/2 SUCCESS Node177/177 PASS**, Windows [#43552456514](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43552456514) **SUCCESS Node176 PASS/1 OS SKIP desktop19/19**, 설치·제거·업그레이드 V2/PDF 보존. 정책 [#43552456710](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43552456710) SUCCESS. 실제 물리 Win10/11·PDF5~10/OCR/모델·클릭 웹브라우저 미검증.
+4. **진척/대기:** P95–P99 기능 또는 경계선 보안 CI SUCCESS. 원래 STEP6 완전 검색결과 카드·STEP7 OCR 실제 실행·한국어 GGUF 모델/CPU·SKU GUI entitlement·BUSINESS 일괄·인수/권리/판매 GO 미완. 공식 P100 UNASSESSED, [작업중]/HOLD/미등록.
+5. **오류·근거/대안:** P97 최초 unknown savedAt 타입 오류 CI FAIL을 좁힘 수정으로 재CI 성공. P100 참고 출처 북마크 테스트 앵커 불일치로 커밋 전 중단, 기존 기능 유지; 후속 컴포넌트 분리나 실제 승인 기반 검색 제공 API가 마련될 때 재평가.
+6. **저장소/브랜치/SHA:** `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, code SHA `0a0dec3e`, 전 문서 HEAD `cf3813d3`, 새 docs HEAD는 커밋 후 확인. 핵심 파일은 STATUS 상단 및 P95–P99 인수 항목 참조.
+7. **배포/실행:** `npm test && npm run build`, Chrome/Edge GitHub Linux runners, Windows Node22 Electron NSIS. Production/Vercel **미적용**, 설치형 미출시/실고객 Windows 검증 전 보류.
+8. **백업·비밀:** git parent SHA 역변환 가능, force push 없음; main/PR10/V1 localStorage/V2 IndexedDB/고객 PDF·모델·실 라이선스 키 불변, 외부 원문 전송0.
+9. **다음 작업/승인:** 오후 1시(2026-11-14 KST) 기존 통합 1회 알림에서 폰 12영역 배점/권리·실 모델·OCR·정식 발급키 승인, PC 5~10 허가 PDF/Win10·11 설치 인수/실제 검색 페이지·국문 폰트 검증을 묶음. 미승인 유료결제·소유자 원본 업로드·상용키 생성·크몽 등록 실행 금지.
+10. **갱신일/검증 범위:** 2026-11-14 KST raw GitHub Actions exact SHA 전체 verdict, Node/desktop counters, 보류 항목·정본 요구를 구분. 문서 커밋 자체는 기능 CI가 아님.
+
+## 2026-11-14 KST — P95~P99 개발·회귀 및 100% 목표 인수인계 (필수 10항)
+
+1. **목표·기술·확정:** 사용자 7단계+크몽 3SKU(BASIC8/PRO20/BUSINESS30), 0원 로컬 React/TypeScript/Electron/PDF.js. 최종 100%, 공식률 UNASSESSED/미달. 미승인 12항 100점 배점안은 `docs/commercial/ASTRA_P100_SCOREBOARD_20261114.md`.
+2. **완료·설계근거:** P95 독립 BatchImportPanel 로컬 PDF2–10개 수동 개별 인수 (기존 PDF 업로드 로직 재사용), P96 서버 없는 ECDSA 오프라인 서명 검증 모듈, P97 고급 레이아웃 별도 로컬 저장/복원, P98 BUSINESS 텍스트 브랜드 보관함, P99 네이티브 사용자 동의형 안전 외부 검색창. 기존 V2 문서/DB migration 대신 별도 로컬 메타데이터만 저장, 앱 HTTP 네트워크 차단 유지.
+3. **테스트:** P95 exact `e69dfed1` Linux #43551099424 2/2 SUCCESS Node167PASS, Win #43551099468 SUCCESS Node166PASS+desktop16. P96 exact `0ffcbbeb` Linux #43551475625 2/2 SUCCESS Node170PASS, Win #43551475613 SUCCESS Node169PASS+desktop16. P97 수정 exact `ed363a4f` Linux #43551962845 2/2 SUCCESS Node172PASS, Win #43551962840 SUCCESS Node171PASS+desktop16. P98 exact `1918a801` Linux #43552063732 2/2 SUCCESS Node174PASS, Win #43552063812 SUCCESS Node173PASS+desktop16. P99 source+CI test `0a0dec3e`: Linux #43552456521 /Win #43552456514 **종료 전 미검증**, policy #43552456710 SUCCESS. 모든 Windows Node 1OS SKIP, NSIS 설치/업그레이드. 실 고객PC/실PDF 5–10, LLM/OCR 미검증.
+4. **완료/진행/차단:** P95–P98 기술 PASS, P99 CI 검증 대기, P100 출처 북마크 앵커 미반영. OCR·GGUF·STEP6 검색 카드·정식 SKU entitlement·BUSINESS 일괄·고객QA·권리·구매자 Windows 검증 대기, 최종100 미달. [작업중], RELEASE HOLD, 미등록.
+5. **실패 근거/시도·피벗:** P97 Windows/Linux TS `savedAt:unknown` 2 build FAIL 동일 원인 → `typeof item.savedAt==='number'` 좁힘 단일 수정으로 재CI SUCCESS. P100 브라우저 테스트 앵커 불일치 1회 GitHub 쓰기 전에 중단; 추가 강제 문자열 교체하지 않고 분리/소스 위치 재확인. OCR 라이브러리/실모델 다운로드와 개인키 발급 무승인 강행 금지.
+6. **저장소/브랜치/SHA/경로:** `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, 최신 source `0a0dec3edb998cc8ea94bcffc3fa781c7d1c9377`; docs HEAD 갱신 후 readback. 주요 `src/step3/BatchImportPanel.tsx`, `src/commercial/offlineLicense.ts`, `src/step4/ProLayoutLibrary.tsx`, `src/step4/BusinessBrandLibrary.tsx`, `desktop/approved-search-link.cjs`.
+7. **실행·Production:** `npm test && npm run build` GitHub Actions Node22 Linux Chrome+Edge, Win Electron16/NSIS. Vercel/Production **미적용**, 크몽 판매물 미출시, 사용자 실 Windows10·11 미실행.
+8. **원본·백업·보안:** git parent `54e12b70`→P95 `e69dfed1`→P96 `0ffcbbeb`→P97 `6d68410f`→fix `ed363a4f`→P98 `1918a801`→P99 `a2b7feab`→test `0a0dec3e`. git revert 가능, force push 없음, main/PR10·V1/V2/고객 PDF/모델/비밀 unchanged.
+9. **다음 우선순위·승인:** P99 CI 완료 확인→오류 시 최소 수정→영구 GUI 판매용 서명키/런타임 라이선스 연계, 실제 OCR 엔진·한국어 모델 권리 승인 후 0원 실동작/CPU 검증, STEP6 화면형 결과, BUSINESS 브랜드 일괄. 기존 2026-11-14 13:00 통합 자동화에 폰으로 미승인 배점안/권리·추가 설치 결정, PC 필요 실제 PDF5–10와 Win10/11 수용/출시 승인 일괄 처리. 판매·라이선스/소스 병합·유료 비용은 명시 GO 대기.
+10. **시각·검증 경계:** 2026-11-14 KST, GitHub exact SHA 실제 Actions 및 raw 로그. 수치 `UNASSESSED`은 0% 뜻 아님; 내부 과거 85%는 별개. 코드 CI SUCCESS가 전체 SKU/인수 GO 아님. 문서 기준 SHA 이번 갱신 후 readback.
+
+## 2026-11-14 KST — P93/P94 기능 검증·최종완성률 산정 대기 (HANDOFF 필수10항)
+
+1. **목표·설계·기술:** 원본 7단계+3SKU(BASIC8/PRO20/BUSINESS30), 0원 로컬 React/TS/PDF.js/Electron, 전체 최종100%. 12영역 요구사항/배점 제안은 `docs/commercial/ASTRA_P100_SCOREBOARD_20261114.md`.
+2. **완료·차별·결정:** P93 PRO/BUSINESS 22개 전종 A4 PDF 실제 Chrome/Edge 출력 검증. P94 BUSINESS 로컬 로고·브랜드명·꼬리말·브랜드 색·JSON 불러오기/내보내기. DB 직접 migration(A)은 동의/호환성 위험이 있어 session-only + 수동 JSON(B)을 채택. 기존 STEP1/2/3 변경 없이 작동.
+3. **테스트:** 기능 SHA `39acc84f48bf1edda4b2687e896dc833ab398e92` Linux #43549158873 2/2 Chrome/Edge SUCCESS Node165/165 + TypeScript/Vite build, Win #43549158855 SUCCESS Node164PASS/1SKIP desktop16 PASS, NSIS 설치·제거·업그레이드 V2 데이터 유지, gate #43549159013 SUCCESS. 실제 Win10/11 사용자·5~10 실PDF/모델·상업권 전부 미검증.
+4. **완료/진행/대기:** 새 기능·CI 끝, 기술 병목 A04/06/07/08/09/10/11/12은 남음. **공식 최종완성률 UNASSESSED / 100% 미달**, 내부85%는 역사적 잠정. [작업중], RELEASE HOLD, 크몽 등록0.
+5. **실패 근거/대안:** P95 STEP3 다중 PDF 큐 `ImportPanel.tsx` 자동 문자열 통합 CRLF/anchor 2회 실패, 원격 GitHub 쓰기 전 중지. 부작용0. 재시도 반복 금지, 다음 작업은 독립 컴포넌트로 피벗 및 실제 브라우저 연결 검증. OCR/LLM 자료 무단 다운로드 금지.
+6. **저장소·브랜치·SHA:** `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`; P94 기능 `39acc84f`, P93 기능 `ffd7a3dd`, docs HEAD 이번 커밋 후 재조회. 핵심 `src/step4/brandKit.ts`, `src/step2/Workspace.tsx`, `tests/step4-style-preset-browser.mjs`.
+7. **배포·실행:** `npm test && npm run build`, hosted Linux Chrome/Edge·Windows NSIS. Vercel/Production 미적용, 물리 PC 미검증. 공개 사이트·크몽 상품 미출시.
+8. **원본·백업·인증:** 작업 전 Git parent `b8b29bc1`→P93 `ffd7a3dd`→P94 `39acc84f`; Git non-force revert 가능. STEP1 localStorage V1/STEP2 IndexedDB V2·main·PR10·고객 PDF/모델·비밀/구매자 자료 불변.
+9. **다음 우선순위/승인:** 13:00 기존 합동 요청에서 12개 배점 제안 승인, 허가 PDF5~10 원본 대조 및 실 Win10/11·폰트/모델 라이선스·0원 OCR/LLM 설치/보안·판매 결정 모음. 그 뒤 P95 독립 안전 큐, PRO 영구 라이브러리, BUSINESS 정식 entitlement·배치·브랜드, OCR/모델 품질. 100점/상용 GO 전 고객 수용 필요.
+10. **갱신 시점/범위:** 2026-11-14 KST, 원격 Actions 완료 verdict 및 raw 로그, 정확 기능 SHA 기준. 새 문서 HEAD는 별도 조회, 문서 커밋은 새 기능 검증 SHA가 아님. 중앙 `kmong-productization` 동일 수치/범위 동기화 필요.
+
+## 2026-11-14 KST — P92 CI 종료 확정 인수요약 (10항)
+
+1. **목표·기술:** 원래 STEP1~7·BASIC8/PRO20/BUSINESS30 전체 100% 최종설계, 무료 로컬 React/TypeScript/Electron/PDF.js.
+2. **변경·선택:** P91 옵트인 외부 이미지 검색 링크, P92 22종 고급 임시 시안 JSON 레이아웃 ID만 수동 저장/재사용, 원본 내용·IDB V2 스키마 불변.
+3. **정확 SHA 테스트:** `b8b29bc13fe09a7220ed47b5139e5f41c3e5140f` [Linux #43547702092](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43547702092) **2/2 SUCCESS, Node163 PASS/0 FAIL, Chrome+Edge, TS/Vite build 및 A4 인쇄**; [Win #43547702089](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43547702089) **SUCCESS, Node162 PASS/0 FAIL/OS 1SKIP, desktop16/16, NSIS install/uninstall/upgrade/V2 유지**; [policy #43547702386](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43547702386) SUCCESS. 실제 고객PC·고객 PDF는 수행하지 않음.
+4. **완료/대기:** 2개 기능 추가·기존 회귀 검증 완료. STEP6 실제 검색 결과 수집, STEP7 OCR, 실 GGUF, 정식 3 SKU 저장/권한/브랜드/배치, 고객·권리·판매 검증 미달. 공식 UNASSESSED, P100 미달, RELEASE HOLD.
+5. **문제·전환·재시도:** 무료 수동 검색/휴대용 파일로 외부 PDF·유료 API·영구 DB migration 위험 회피. 정규식/스키마 부정 입력 PASS; 미검증은 고객 인수·상용성이지 새 CI failure 아님.
+6. **Repo/브랜치/SHA:** `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`; 기능 SHA `b8b29bc1`, 직전 문서 SHA `cfb5bcdcf7f3`, 본 문서 HEAD는 커밋 후 조회. 핵심 `src/step4/advancedLayoutPreset.ts`, `src/step6/*`, `tests/*preset*.test.ts`, browser tests.
+7. **배포·환경:** GitHub Actions hosted Ubuntu Chrome/Edge+Windows NSIS; Vercel/Production 미적용, 사용자 물리 Win10/11 미검증.
+8. **원본·보안·복구:** main/PR10·STEP1 v1/STEP2 IDB V2·고객PDF/모델/토큰 불변, parent SHA 기반 revert 가능. 고객 자료 업로드·무단 다운로드/상용 배포 금지.
+9. **다음 우선순위·승인:** 13:00 기존 통합 사용자 알림에서 물리PC/5~10 실문서/모델·OCR 무료 설치/폰트·권리 일괄 안내; AI는 이후 OCR/정식 저장/브랜드 배치 구현·품질/권리 검증. 판매/병합/유료 결제 별도 소유자 GO 필요.
+10. **검증 시각·범위:** 2026-11-14 KST, GitHub 3개 Actions job verdict 및 실제 raw 로그에 근거. 전체100%/크몽 등록 미달 상태 보존.
+
+## 2026-11-14 KST — P92 STEP4 고급 시안 휴대용 파일 (10항)
+
+1. **목표/요구/기술:** 사용자 확정 7단계 전체·BASIC8/PRO20/BUSINESS30 100%, 0원 로컬 앱. React/TypeScript/Vite/Electron/PDF.js, 판매·실모델 별도 승인.
+2. **완료 변경/선정 근거:** 22종 임시 고급 레이아웃에 대해 `src/step4/advancedLayoutPreset.ts`의 JSON export/import + `src/step2/Workspace.tsx` UI. DB V2 스키마 직접 변경(A)은 동의/마이그레이션 위험이 크므로, 작은 JSON 수동 보관(B)을 먼저 선택. 레이아웃 ID 외 고객 내용 비포함.
+3. **테스트/결과:** 독립 Node22 P92 테스트 **2 PASS/0 FAIL**, 기존 P91 정확 SHA `be243985ff5c` Chrome/Edge Linux #43547363002 **2/2 GREEN, Node 161/161**, Windows #43547362316 **SUCCESS**, gate #43547362463 SUCCESS. P92 새 소스 `b8b29bc13fe0` CI Linux #43547702092, Win #43547702089 **진행 중(최종 미검증)**, gate #43547702386 SUCCESS. P92 새 브라우저 JSON roundtrip·보안회귀는 CI 종료 전 미확정.
+4. **완료/진행/대기/차단:** 기존 BASIC8 + 22개 고급 임시 출력, P91 STEP6 동의형 수동 검색, P92 JSON 재사용 구현. 원래 STEP6 앱내 카드/수집 및 STEP7 OCR, 오프라인 실제 LLM, PRO/BUSINESS 정식 저장/권한/배치·브랜드키트/고객 QA/권리/판매 GO 미완; 100% 미달.
+5. **문제·시도·전환:** 저장 스키마 직접 변환·외부 API/고객PDF 업로드/무단 다운로드는 회피. 유효 레이아웃 ID 22개·1KiB·정확 키 검증 방식 채택. P92 CI 미완료는 실패 단정하지 말고 확인 뒤 최소 수정.
+6. **Repo/브랜치/SHA/경로:** `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, 기능 SHA `b8b29bc13fe09a7220ed47b5139e5f41c3e5140f`, 이전 P91 `be243985ff5c`(승인보안 회귀). `src/step4/advancedLayoutPreset.ts`, `src/step6/*`, `tests/advanced-layout-preset.test.ts`, `tests/step4-style-preset-browser.mjs`.
+7. **Production/실행/환경:** `npm test && npm run build`, GitHub hosted Node22 Chrome/Edge Windows NSIS. Production URL 및 Vercel 프로젝트 **미적용**, 로컬 실제 Win10/11 **미검증**, 공개 판매 미등록.
+8. **원본/백업/비밀:** 부모 기능 SHA `be243985ff5c`로 Git revert 복구 가능. 기존 main/Draft PR10/설정·DB localStorage v1, IndexedDB v2·고객 PDF 불변. 파일명/고객자료/토큰/모델 가중치 GitHub 업로드 금지.
+9. **다음 작업/승인:** 정확 P92 SHA CI 완료 확인→실고객/물리PC/폰트·모델 권리/설치 검증→안전한 승인형 OCR/한국어 모델 및 PRO20/BUSINESS30 SKU 구현. 13시 소유자 PC 요청 `docs/commercial/ASTRA_OWNER_1300_CHECKLIST_20261114.md`에 일괄 보관, 중복 알림 금지. 출시/크몽 등록은 최종 사용자 GO 필요.
+10. **갱신/확인 시점:** 2026-11-14 KST, P91 정확 CI 결과·P92 source GitHub readback 및 Node22 분리 단위만 검증. 공식 `UNASSESSED`/[작업중]/RELEASE HOLD, 문서 기준 커밋 후 원격 확인. 임의 100%·95% 산정 금지.
+
+## 2026-11-14 KST — P91 STEP6 보안형 검색 연결 (10항 인수인계)
+
+1. **목표/확정 요구/기술:** Astra 원래 7단계·3 SKU 전체 최종설계 100%, 0원 로컬우선, React/TS/Vite/Electron/PDF.js. 웹 검색은 소유자가 수동 입력한 일반 키워드만.
+2. **완료 기능/선택 근거:** `src/step6/referenceDiscovery.ts`(고정 호스트 HTTPS URL/80자/제어문자 차단), `src/step6/ReferenceSearchPanel.tsx`(opt-in 검색/새 탭/다운로드 후 STEP5 로컬 분석), `src/step2/Workspace.tsx` 연결. 직접 원격 이미지 수집보다 비용 0원·저작권/개인 PDF 외부 전송 위험 낮은 수동 검색을 선택.
+3. **테스트/미검증:** Node22 독립 모듈 2 PASS/0 FAIL(컨테이너), 기존 159/159 PASS는 이전 정확 코드 `8d604a0644cc` 전용. 신규 소스 `95a7f7be6cab` CI 실행 중; 이번 추가 브라우저 동의·DB불변 회귀가 반영된 다음 SHA는 CI 종료 전 성공 주장 금지.
+4. **상태/중단:** STEP6 수동 탐색 링크 구현, 자동검색 카드·결과 직접 수집은 미구현. PRO20/BUSINESS30 정식 저장/entitlement/배치·브랜드 기능, OCR, 모델, PDF·Windows 실사용 시험, 판매 인수 미완. 공식 **UNASSESSED/100% 미달** [작업중], RELEASE HOLD.
+5. **문제/피벗:** 승인 안 된 외부 PDF 전송·원격 모델/API·구독·DB 스키마 변환을 회피. 링크 검색 수동 방식으로 전환; 라이선스나 OCR 정확도를 보장하지 않음. 2회 실패 반복 재시도 없음.
+6. **저장소/브랜치/SHA/경로:** `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, P91 기능 HEAD `95a7f7be6cab5a98637fceac7f50196eb1bac219`; 본 문서 포함 최신 SHA는 커밋 후 재확인. 핵심 `src/step6/*`, `tests/reference-discovery.test.ts`, `tests/step5-reference-browser.mjs`.
+7. **배포/환경:** 기존 GitHub Actions Node22/Chrome/Edge + Windows NSIS; Production/Vercel **미적용**, Windows 물리 PC 미검증. 명령 `npm test && npm run build`, 워크플로 `.github/workflows/ci.yml`.
+8. **원본/백업/보안:** 부모 커밋 `b9065bfb5e46`로 소스 회귀 가능; v1/localStorage·V2/IndexedDB·원본 PDF·Draft PR10·main·원격 설정 불변. PDF/고객자료/토큰/모델 가중치 업로드 금지.
+9. **다음 우선순위/승인:** P91 정확 SHA CI 확인→오류만 최소 수정→STEP4 PRO20/BUSINESS30 완성 및 STEP7 OCR/오프라인 한국어 모델 실제 권리 검증. 오후 1시 사용자 PC·실PDF/Windows/라이선스/무료 모델·OCR 다운로드 동의 일괄 요청; 판매·서명·배포는 별도 GO.
+10. **갱신 시점/검증 범위:** 2026-11-14 KST, GitHub branch source readback + Node22 독립 테스트. 문서 전용/회귀 추가 커밋을 전체 통과 SHA로 오인하지 않음.
+
+## 2026-11-14 KST — P90 정확 SHA 최종 CI 3/3 GREEN 및 인수검사 최신화
+
+- **실제 코드/테스트 SHA `8d604a0644cc74f9bf6ebc35dca7c64a17a3245b`**: [Linux Chrome+Edge #43545039341](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43545039341) **2/2 SUCCESS**. GitHub 실제 raw job 로그 npm **159/159 PASS, 0 FAIL**, TS/Vite build PASS, 양 브라우저 기존 데이터·PDF 스모크 통과, P89 22종 구조형 후보 및 실제 A4 출력 마커 PASS. [Windows NSIS #43545039441](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43545039441) **SUCCESS**: Electron native smoke/unsigned 설치·실행·제거·업그레이드 기존 IndexedDB V2 유지. [최종설계 policy #43545039836](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43545039836) SUCCESS(증빙 정책).
+- P90 신규 보수적 검토기: +/- 금액·날짜·비율·URL·한국어 인용·부정/금지 표현의 변경 제안을 검사해 실패시 거부, 합성 한국어 20건 + 핵심 부정 3건. 실제 모델 파일 실행은 `RELEASE_MANIFEST=null`로 **금지**. 자동 규칙 검사 ≠ 오프라인 LLM 또는 완전 의미보존.
+- P89 기존 8개 + 추가 22개 구조 시안: 실제 Chrome/Edge 임시 UI 22종과 A4 1종/저장불변 테스트 통과. 그러나 PRO20/BUSINESS30 **영구 레이아웃 저장·실사용 권한·고객 전수 PDF 출력 미검증**.
+- P88 5~10건 오프라인 소유자 문서 검수 지원은 합성/CI 성공이지만 실제 5~10건 사용자 소유 PDF 작업 **미실행**. OCR 0원 설계/공식 Tesseract Apache-2.0 자료 검토 문서는 작성했으나 **OCR 바이너리·언어팩 다운로드/실행 0회**, 별도 사용자 승인 대기.
+- **최종 상태:** 원래 7단계+SKU 전체 공식 완료율 `UNASSESSED`, **100% 미달**. 이전 엔지니어링 추정 85%는 과거 내부 수치일 뿐 최종 완료율 아님. [작업중], RELEASE HOLD, 크몽 상품 미등록, 3개 SKU 미출시. Production/Vercel 미적용.
+- **다음:** 별도 사용자 승인 필요한 실제 한국어 Qwen GGUF/llama.cpp·Tesseract OCR·인터넷 레퍼런스 질의/저장 스키마·서명·판매 판단을 오후 1시 예약에서 한 번에 요청. 사용자 PC/실PDF·폰트·출력/권리 검증 전 GO 금지. GitHub main/PR10·사용자 원본 v1/V2 미변경.
+- 문서 최신화 커밋은 코드를 재검증한 새 SHA로 착각하지 않는다. 정확 기능 검증 SHA는 위 `8d604a06`.
+
+## 2026-11-14 KST — P90 보호 토큰 가드 / 오프라인 OCR 비용 설계 인수인계
+
+1. **최종 목표/기술:** Astra 기존 7단계+상용 3 SKU(3만/6만/9만 원)의 원문 보존/옵트인 로컬 AI, React/PDF.js/Electron+Node. 전체 100% 목표, 공식률 UNASSESSED.
+2. **신규 구현:** `desktop/local-model-controller.cjs` 위험 구문 보호가 기존 ASCII 숫자/인용만 보던 것을 수치 부호·통화·굽은 따옴표·한글 부정/금지/취소까지 확장. `tests/local-model-controller.test.cjs`에 20개 한국어 골든 입력과 3개 핵심 보호 검증 추가. `RELEASE_MANIFEST=null` 유지(실모델/다운로드 없음). 독립 CLI OCR(A) vs WASM(B) 무상 설계·권리 조사 `docs/commercial/ASTRA_ZERO_COST_OCR_DECISION_20261114.md` (코드 미구현).
+3. **테스트 상태:** 별도 Node22.16.0 20/20 합성 부호·부정 시나리오 PASS. P90 정확 source SHA `8d604a0644cc74f9bf6ebc35dca7c64a17a3245b`: [Linux Chrome/Edge #43545039341](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43545039341)와 [Windows #43545039441](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43545039441) 실행 중; npm test/build 스텝 SUCCESS 확인, 최종 3개 job verdict/실기기 **미확정**. [최종설계 정책 #43545039836](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43545039836) SUCCESS는 증거 정책만.
+4. **완료/진행/대기:** P89 임시 레이아웃 22개 정확 SHA `cabe0adf79a3` Chrome+Edge 2/2, Node157/157, Windows SUCCESS. P90 단위 코드는 원격에 반영, Hosted 전체 검증 진행 중. 실모델·실 OCR·PRO20/BUSINESS30 영구 저장·권한·실고객 수용 미완, 판매 HOLD.
+5. **실패/전환:** P90 현재 신규 회귀 실패 증거 없음, 정규식 독립 재현 20/20. OCR은 Tesseract(A)/WASM(B) 비교만 했고 승인 이전에 다운로드/실행하지 않음. 새 CI 결과 확인 전 성공 주장 금지.
+6. **저장소/브랜치/SHA:** `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, P90 소스 `8d604a0644cc74f9bf6ebc35dca7c64a17a3245b`, 이전 P89 `cabe0adf79a3`, 문서 HEAD는 지금 커밋 후 재확인. Draft PR10 미병합.
+7. **배포/환경:** GitHub Actions Node22/Chrome/Edge + hosted Windows Electron NSIS. Vercel/Production 미적용. 사용자 PC 미실행, 공개 판매 미등록.
+8. **원본·안전/백업:** STEP1 localStorage/STEP2 IndexedDB V2/원본 PDF/main/기존 PR/모델 가중치/토큰 불변. Git parent SHA 복구 가능. 고객 문서 외부 업로드 금지.
+9. **다음 작업 및 사용자 승인:** 새 CI exact SHA 결과 검사→오류면 근본 원인만 보정→상용 한국어 GGUF/실 CPU 다운로드 및 OCR 프로그램·언어팩은 오후 1시 사용자 승인 요청에 일괄 포함, 파일·권리 확인 전 다운로드 금지. 원래 7단계/PRO20·BUSINESS30 영구기능·실고객 Windows 5–10 PDF/지원·서명/크몽 GO 모두 따로 검증.
+10. **갱신:** 2026-11-14 KST, 로컬 20개 합성보호 검사+원격 GitHub 최신 소스/진행 중 Actions와 공개 Tesseract 라이선스 문서 기준. `[작업중]`, 공식 UNASSESSED, 출시/판매 NO-GO 불변.
+
+## 2026-11-14 KST — P89 정확 소스 SHA Chrome·Edge·Windows 검증 완료
+
+- 코드/테스트 SHA `cabe0adf79a3724066c367ac7cbdb3955bbc113a` [Linux Chrome+Edge Actions #43544304090](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43544304090) **2/2 SUCCESS**: npm 단위 **157/157 PASS, 0 FAIL**, TS/Vite build PASS; Chrome/Edge 양 브라우저 실제 `PASS P89 PRO/BUSINESS TEMPORARY` 로그(22개 선택·서로 다른 computed DOM geometry/실제 A4 PDF/기존 IndexedDB V2 불변), STEP4 기존 파일 프리셋/취소/복원 PASS.
+- [Windows NSIS #43544304096](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43544304096) **SUCCESS**: 설치형/업그레이드·기존 기본 8종 출력/데이터 유지 등 기존 Windows 회귀 PASS. 22개 고급 시안을 Windows 설치형에서 각각 출력한 증거는 없음. [설계 gate #43544304524](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43544304524) SUCCESS(정책만).
+- **검증된 결과:** BASIC 8종 불변 + 고급 **임시 시안 22개** 선택/출력, 저장된 디자인/콘텐츠 미변경. **검증되지 않은 것:** 실제 PRO20/BUSINESS30 영구 재사용·Entitlement/30개의 PDF 전수 인쇄/실 고객 출력·실 PC·오프라인 한국어 모델/STEP6/7/상용권·판매 승인.
+- **공식 완성률 UNASSESSED / 100% 미달 / 기존 기술85% 잠정(역사 기록) / Astra [작업중] / RELEASE HOLD·미등록**. 최종상품으로 상향 산정 금지.
+- 문서 전용 이번 갱신은 테스트 후 상태 기록이며 테스트된 코드 SHA를 새 문서 HEAD로 바꾸지 않는다.
+
+## 2026-11-14 KST — P89 22개 추가 임시 레이아웃 인수인계 (10항)
+1. **목표·기술:** 전체 100% 최종설계 중 PRO20/BUSINESS30 고유 조판 부족을 무료·오프라인 React/TS/CSS/Electron으로 최소위험 보강.
+2. **범위·근거:** 기존 BASIC 8개 보존, 추가 12/10 임시 조판·미리보기/새 PDF 시험, 구조 11개 계열과 개별 여백·정렬·타이틀·구획 사용. 별도 V2 DB schema 변경 없이 교체 가능 후보를 먼저 검증하는 방식을 선택.
+3. **테스트:** 단위 `tests/sku-layout-candidates.test.ts`, 실제 Chrome·Edge 22개 CSS 구조 및 1개 A4 출력·기존 V2 불변 테스트를 추가. 정확 SHA `cabe0adf79a3` CI #43544304090 Linux Chrome/Edge 및 #43544304096 Windows **진행 중/최종 결과 미확인**, 최종설계 정책 #43544304524 SUCCESS. 이전 P88 CI SUCCESS는 별개.
+4. **상태:** 시안 코드 완료, E2E/Win 설치형 결과 대기. 실판매 PRO20/BUSINESS30 기능·영구템플릿·SKU entitlement/실고객 수용 미완. 최종률 UNASSESSED, 목표100 미달/[작업중]/RELEASE HOLD.
+5. **오류·재시도:** 최초 브라우저 테스트 PDF info 정규식에서 literal `\\s` 오타 발견, 실제 실행 전 테스트 코드만 정정(cabe0adf). 새로운 실행의 FAIL 여부는 아직 확인 안 됨; 실제 실패 근거 없이 무의미한 반복 금지.
+6. **저장소·SHA·경로:** `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, 기능 최초 `81aa46f9980188070c612a8becb1ddbb56ec5d1d`, 최종 수정 `cabe0adf79a3724066c367ac7cbdb3955bbc113a`; `src/step4/skuLayoutCandidates.ts`, `src/step2/Workspace.tsx`, `src/styles.css`, `tests/sku-layout-candidates.test.ts`, STEP4 browser E2E.
+7. **배포·환경:** Production/Vercel 미적용. Node22 `npm test`, `npm run build`; Linux Chrome/Edge, hosted Windows Electron NSIS, 실제 소비자 설치 미실행.
+8. **원본·보안/백업:** Git 이전 `50f9a057` 보존, 기존 IndexedDB V2/v1 localStorage/원본 PDF/비밀/이미지/모델 무변경, 퍼블릭 GitHub에는 합성 테스트만.
+9. **다음 작업·승인:** CI 종료 후 실패 원인별 최소수정, 고급 22개 PDF 개별 인쇄·다페이지 및 육안 수용, 향후 실제 저장·라이선스/검색/OCR/모델 다운로드·외부 전송·출시 사전 승인.
+10. **시점:** 2026-11-14 KST, GitHub 기능 SHA/코드 diff 확인, CI 실행 중; 문서 기준 SHA는 후속 GitHub HEAD 재확인. P88 5/5 및 이전 CI PASS와 P89 새 결과를 혼동하지 않는다.
+
+## 2026-11-14 KST — ASTRA P88 새 기능 SHA CI 완전 확인 (최종설계 100% 미달)
+
+- **기능 SHA** `fb3b02217c6c4223df49c2141e9373f08317a66c`: GitHub Blob이 로컬 합성검증 Node22.16.0 5/5 PASS인 새 P88 검수 도구 및 테스트와 각각 동일(`3c6a4fcd...`, `e14d18f8...`).
+- [Windows NSIS #43541356233](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43541356233) **COMPLETED SUCCESS**: build/desktop native smoke/unsigned NSIS/설치→실행→제거/0.1.0→0.1.1 업그레이드 이후 STEP2 IndexedDB 유지/installer SHA 보고·아티팩트 업로드.
+- [Chrome+Edge #43541356242](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43541356242) **COMPLETED SUCCESS**: npm test + npm run build, Chromium Chrome 인쇄/상태저장, Microsoft Edge A4 PDF/IndexedDB smoke 각각 SUCCESS.
+- [최종설계 증거 정책 #43541356536](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43541356536) **COMPLETED SUCCESS**: 점수 과장 없이 evidence/scope gate 통과. 이것은 제품 100% 수용 아님.
+- 이후 문서 전용 [크몽 상품 초안](docs/commercial/ASTRA_KMONG_LISTING_DRAFT_20261114.md), [7단계 전체 100% 격차표](docs/commercial/ASTRA_FINAL_BLUEPRINT_100_GATES_20261114.md), [Apache/MIT 모델 라이선스 1차 조사](docs/commercial/ASTRA_MODEL_LICENSE_PRECHECK_20261114.md) 작성. 이 3개 docs-only 커밋은 테스트 대상 소스 변경 없음.
+- **정식 전체 완성률 UNASSESSED·100% 미달 / 역사상 내부 엔지니어링 잠정 85%**. 5~10 허가된 고객 PDF, 물리 Windows10·11, 20/30 디자인, STEP6 공개 레퍼런스 검색/STEP7 OCR, 실제 한국어 GGUF, 상용 사용권·SKU entitlement/출시 승인 미완; `[작업중]`, `RELEASE HOLD`, `미등록`. Production/Vercel 미적용.
+- 아래 과거 작업 로그는 변경하지 않음; 후속 실제 개발·검증 때만 상태 갱신. 개인 PDF/경로/모델 가중치/토큰 GitHub 업로드 금지.
+
+## 2026-11-14 KST — ASTRA P100 재개/P88 검수 도구 인수인계 (필수 10항)
+
+1. **목표·용도·확정 요구·기술:** 원래 7단계/상용 30k·60k·90k 8/20/30 템플릿과 동등한 오프라인 한국어 윤문까지 포함하는 Astra PDF Redesigner의 최종설계 100%를 목표로 재개. React19/TS5/Vite7/PDF.js/Electron NSIS, 로컬·데이터 보존 우선.
+2. **완료·변경·결정 근거:** 새 P88 `scripts/owner-batch-acceptance.mjs`/단위 5개를 추가해 기존 STEP7 SHA·수동 7항목 검수의 5~10개 오프라인 집계를 제공. 실고객 PDF를 공개 CI로 보내는 방식 대신 로컬 해시 검사를 선택(비용/보안/유지보수 우위). 원문 파일과 저장 DB 변경 없음.
+3. **테스트/미검증:** Node22.16.0 단독 합성 5 PASS/0 FAIL/0 SKIP, `node --check` PASS. 합성 PDF는 헤더만 있으므로 실제 파싱/육안/구매자 Win10·11, 새 SHA 전체 npm/Chrome/Edge/Windows hosted CI는 **검증 대기**. 이전 0db2acb5 CI는 과거 기준.
+4. **단계·차단·중단:** P88 로컬 구현 및 단위검증 완료, 원격 CI/통합 검증 대기. 최종 100% 미달, 공식 최종완성률 UNASSESSED; 기존 엔지니어링 추정 85% 역사 수치 유지. [작업중]·RELEASE HOLD·미등록.
+5. **오류·원인·시도·대안:** 신규 구현에서 현재 단위 실패 없음. 생략 없는 실고객 PDF 충실도·실기기 검증은 장비/원본이 없어 불가능; 대안은 사용자 소유 PC 오프라인 검수, 퍼블릭 GitHub에는 합성만. 반복 무의미 CI·원본 업로드 금지.
+6. **GitHub/브랜치/SHA/경로:** `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, 최신 기능 SHA는 커밋 후 GitHub HEAD로 확인. 기준 parent `2c2bef5288257d9405bb912aa838ca071703e0ed`, Draft PR10 미병합. `scripts/owner-batch-acceptance.mjs`, `tests/owner-batch-acceptance.test.mjs`, `docs/commercial/ASTRA_OWNER_BATCH_ACCEPTANCE_20261114.md`. 허브 `hibi89/hackathon-command-center-2026@kmong-productization`, 마커 커밋 `e1bbafc8`.
+7. **배포/환경:** 개발 `npm test`, `npm run build`, `npm run desktop:verify`, `npm run desktop:package`. Production URL/Vercel 해당 없음. Windows NSIS 이전 합성 PASS, 실제 고객 출시 NO-GO.
+8. **원본/백업/보안:** STEP1 localStorage v1/STEP2 IndexedDB V2 및 모든 원본 설계·PDF 수정 금지, Git 이전 SHA 롤백. 실제 고객 PDF·절대경로 manifest·모델 가중치/GitHub 비밀 업로드 금지, CLI 외부 연결0/원본 읽기전용.
+9. **다음 우선·승인:** 새 SHA CI 성공 확인; PRO20·BUSINESS30 고유 디자인/템플릿 저장·배치·브랜드 기능 구현과 회귀. 실제 한국어 GGUF/런타임은 사용자 승인·재배포권·성능을 먼저 확보(무단 다운로드 금지). 사용자는 원본 PDF 5~10개 준비, 실제 Windows10·11 설치·PDF 출력 육안 검수, 판매·지원·라이선스 최종 GO.
+10. **갱신 기준:** 2026-11-14 KST, 현재 범위 로컬 Node22 합성 5 tests/소스 읽기·기능 브랜치 변경. CI·물리 고객 컴퓨터·사용권 최종 확인 안 됨. 문서 자체 HEAD는 새 커밋 후 재조회, 기존 증거 SHA `0db2acb5`로 새 코드 성공 주장 금지.
+
+## 2026-11-13 KST — ASTRA 사용자 개입 필요 · 명시적 작업 종료 인수인계 (필수 10항)
+1. **목표·기술**: 원본 PDF→로컬 구조화→검수→새 A4 출력의 Astra PDF Redesigner(React/TS/Vite/Electron/PDF.js). 최종 목표 95% 유지.
+2. **완료 기능·결정 근거**: P85 이미지 페이지별 이동 위험, P86 전체 텍스트 읽기 순서 위험, P87 소유자 7항목 수동 검수·JSON. 최신 사용자 직접 지시로 개발 `[작업중]` 해제, `[사용자 개입 필요]`로 전환. **95% 달성 아님**.
+3. **실제 테스트**: 기능 SHA `0db2acb5185445d342f97062a6962ec52a08a1fe` Linux/Chrome/Edge #43243819225 150/150 PASS 2/2 SUCCESS; Windows #43243819123 149 PASS/1 SKIP, desktop 16 PASS, 8/8 A4, NSIS 설치/제거/업그레이드 1/1 SUCCESS. 이번 상태 변경에서는 코드를 수정하거나 CI를 실행하지 않음. 실구매자 PC·실고객 PDF **미검증**.
+4. **상태·중단 지점**: 엔지니어링 **85% 잠정**, 목표 **95% 미달**. **RELEASE HOLD**, 외부 판매 불가. 중앙 상태 **[사용자 개입 필요]**, 사용자 재개 지시 전 Astra 개발 대기.
+5. **오류·시도·전환**: P82/P83 PDF.js constructPath 오분류 P84 수정 검증; P86 중간 Edge CDP 시간초과 후 P87 최신 성공. 재작업 반복 금지. 병목은 고객 PDF/물리 Windows/라이선스 승인 및 미구현 PRO/BUSINESS.
+6. **저장소·브랜치·SHA·경로**: `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, 최신 기능 SHA `0db2acb51854`, 기존 문서 `deb87550fa48`; Draft PR #10 미병합. 해총 `hibi89/hackathon-command-center-2026@kmong-productization` 중앙 감사표 `docs/audits/KMONG_16_CURRENT_20261111.md`.
+7. **배포·환경**: `npm test`, `npm run build`, GitHub Chrome/Edge 및 Windows Electron/NSIS 자동 검증. Production/Vercel 해당 없음; 상용 출시/배포 없음.
+8. **원본·백업·인증 관리**: Git 커밋으로 기능·문서 이전 상태 복구 가능, 원본 PDF/IndexedDB V2 유지, 토큰·개인정보·유료 모델 다운로드/외부 데이터 전송/권한 변경 없음. 원본·main 및 타제품 변경 금지.
+9. **다음 작업·승인·완료 기준**: 사용자가 원본 사용 허용 PDF 5–10개 제공·검수하고 실제 Windows 사용, 모델/폰트 재배포 권리 및 SKU/판매 승인. PRO20/BUSINESS30 고유 디자인 구현·실제 품질/서명 보강 후 최신 기능 SHA CI/실사용 검증, 그때 95% 판정. 그 전에는 Astra `[작업중]` 표식 재설정 금지.
+10. **갱신 기준**: 2026-11-13 KST. 기능 검증은 2026-11-12 수행한 정확 SHA CI 근거; 현 상태 변경은 문서만. 문서 SHA는 기록된 GitHub 새 HEAD를 확인. 운영 원칙은 Astra 한정 사용자 최신 지시 우선.
+
+## 2026-11-12 KST — ASTRA P85–P87 owner-acceptance handoff (10 required fields)
+1. Goal/tech: Astra existing offline React19/TS5/Vite7/Electron44/PDF.js program, final 95% target, source/output PDF preservation first; existing 7-step blueprint controls scope.
+2. Completed/choices: P85 same-index raster image draw count differences, P86 document-wide reading-order risk with identical token multiset, P87 transient 7-item visual checklist and safe offline JSON. Chose schema-preserving low-cost verification over unapproved new persistent theme/migration and falsely certifying PDF visual fidelity.
+3. Tests: latest exact functional `0db2acb5185445d342f97062a6962ec52a08a1fe` Linux Chrome+Edge #43243819225 SUCCESS 2/2, Node150 PASS/0 FAIL and build; Windows #43243819123 SUCCESS 1/1, Node149PASS/1SKIP, desktop16PASS, 8/8 unique A4, NSIS install/remove and upgrade preserve assets PASS. Actual buyer-owned Windows/real customer PDFs NOT VERIFIED.
+4. State: P85/P86/P87 functionality integrated and full synthetic CI green. Product engineering score 85 provisional, target 95 NOT reached, all tiers RELEASE HOLD, central Astra [작업중] must remain.
+5. Failures/root/pivot: P86 #43243356071 Linux run FAILED on Edge CDP cold-start 60-second DevToolsActivePort timeout with attempts=0, not code test; browser fixed at no code change via fresh runner P87 Edge SUCCESS. P85 both runs success; no futile retry. Earlier P84 PDF.js constructPath root resolved and green.
+6. Repo/branch/SHA: `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112` functional head `0db2acb5`, PR #10 still Draft open; paths `src/step7/{tokenParity,pdfPaintSignals,OfflinePdfReview}.ts[x]`, CLI `scripts/owner-pdf-source-output-review.mjs`, STEP7 tests, evidence docs. Hub `hibi89/hackathon-command-center-2026@kmong-productization`.
+7. Runtime/deploy: Node22 npm test/build, hosted Chrome/Edge and Windows Electron NSIS test workflows. Vercel Production not applicable; no release or market upload.
+8. Originals/backup/security: prior recoverable head `a8b1e9f00ab4ef3e658415b17029c288c49122c0` and git history, main/PR3/PR4 unchanged, no source PDF/customer upload, no IndexDB V2 schema migration, secrets, paid model/API or permission edits.
+9. Next: verify owner-consented 5–10 real PDFs and buyer Windows10/11, decide and implement actual PRO20/BUSINESS30 unique layouts with schema compatibility approval, approved licensed Korean GGUF/model and rights, signed installer and sale policies; no 95 claim or marker removal before all objective gates.
+10. 2026-11-12 KST, verification scope: GitHub exact source and run IDs/logs, Linux Node/browsers, hosted Windows NSIS, synthetic fixtures. Product docs updated here, CI result applies to function SHA `0db2acb5`; documentation HEAD must be read back.
+
+## 2026-11-12 KST — ASTRA P84 red-to-green exact-source CI, 10-point handoff
+1. Goal, requirements, tech: ASTRA offline React/TypeScript/Vite/Electron/PDF.js local source/output PDF redesign, user-requested 95 engineering readiness and no customer document transfer. Preserve original seven-stage design and approval boundaries.
+2. Completed feature and reason: P82/P83 PDF.js vector comparison originally broken; P84 analyzes `OPS.constructPath` embedded paint opcode `argsArray[i][0]` rather than only top-level `OPS.stroke`. Browser GUI/CLI updated, test helper strengthened; alternative full-page pixel equivalence rejected for misleading fidelity claims.
+3. Tests/proof: pre-fix 36bc Linux #43233430431 FAILED 146P/2F, Windows #43233430460 FAILED 145P/2F/1S, actual Edge warning 0 expected2. Corrected `ceef31d121d3d2a89448220326c89ecb1bc6066a`: Linux Chrome+Edge #43235958596 SUCCESS 2/2, Node 148P/0F, build, browser STEP7; Windows #43235958651 SUCCESS 1/1, Node147P/0F/1S, desktop16P, 8/8 A4, NSIS install/uninstall/upgrader PASS. Buyer-owned physical PC / real customer docs still unverified.
+4. Done/ongoing/waiting: P84 source and synthetic GitHub CI verified; 85% provisional engineering stays; 95 target NOT MET, release HOLD. Hub product `[작업중]` MUST STAY.
+5. Root/error/failed methods: P82/P83 assumed PDF.js standalone OPS.stroke; actual operators are constructPath, exposed by diagnostic 2bbadf; diagnostic removed after narrow fix. Earlier PR-only workflow query returned zero but push workflows did exist, avoid using that tool for coverage claims. Corrected read-only GitHub Actions REST GET.
+6. Repository/branch/SHA/paths: `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, functional SHA `ceef31d121d3d2a89448220326c89ecb1bc6066a`; changed helper `src/step7/pdfPaintSignals.ts`, UI `src/step7/OfflinePdfReview.tsx`, CLI `scripts/owner-pdf-source-output-review.mjs`, two tests. Draft PR #10, main untouched. Hub `hibi89/hackathon-command-center-2026@kmong-productization`.
+7. Run/deploy: Node22 `npm test`, `npm run build`, `npm run desktop:verify`; GitHub Linux Chrome/Edge and hosted Windows Electron installer. Vercel/Production N/A, no sales or production deployment. Hosted Windows is not buyer Windows.
+8. Original/backup/auth: P83 pre-fix source 36bc and P84 parent 2bbadf remain recoverable in Git history; original owner PDFs, IndexedDB V2, secrets, paid APIs, fonts/models, permissions untouched. No destructive reset.
+9. Next priority/criteria: customer-approved 5–10 actual PDF layout/readability checks; native buyer Windows10/11 and license/redistribution acceptance, PRO20/BUSINESS30 original layouts and approved offline Korean LLM; no claim of 95 until independently proven. No scope reduction or model downloads without explicit owner consent.
+10. Updated 2026-11-12 KST. Verified exact source GitHub commit, 2 successful push workflows with 3 total jobs and raw logs, tests, installer and main/PR state; documentation commit SHA to verify after write.
+
+## 2026-11-12 KST — ASTRA P82/P83 vector stroke handoff (10 required)
+1. Goal/tech: Raise local PDF redesign product to verified 95%, React19/TS5/Vite7/Electron44/PDF.js, unchanged user-approved offline scope.
+2. Features/design: compared pixel raster verification (high cost and misleading for redesign) vs count-only vector stroke painting (chosen). P82 flags missing table border strokes despite equal text; P83 flags cross-page displacement despite equal global strokes.
+3. Testing: exact Git blob source 0399a2c8 and test adf5c769 verified locally, Node22.16 scoped 3PASS/0FAIL, standalone tsc PASS. Synthetic text-identical PDF 4 vs 3 vector strokes checked by PyMuPDF. Original npm test/build/Chrome/Edge/Windows full PDF.js NOT VERIFIED.
+4. Status: P82/P83 committed, current 85% provisional, P95 not achieved, RELEASE HOLD, product [작업중] preserved.
+5. Errors/blocker: no full private repository mount/checkout available, GitHub fetch_commit_workflow_runs reports 0 PR runs and combined status empty; historical successful P75 CI not latest source evidence. No assertions about real renderer or device acceptance.
+6. GitHub: hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112 latest code 36bc458da322ebb77b9b48190857112b637ea7bf, source parent 31304eae, Draft PR10 unmerged. Hub hibi89/hackathon-command-center-2026@kmong-productization; scoreboard must be checked at latest HEAD before edit.
+7. Runtime/deploy: Node22 npm test/build/desktop:verify, Chrome/Edge smoke, Windows NSIS install/upgrade; Production Vercel N/A, no deployed/paid service or release.
+8. Source/backup/security: base 6eacf9f7 and P82/P83 Git history recoverable; customer PDF/IndexedDB V2 and original feature owner data untouched. No secrets, external document upload, fonts/models, permission changes.
+9. Next: full exact-SHA CI, buyer-owned PDF consent and visual/table acceptance; only with explicit authorization licensed model/PRO20/BUSINESS30 commercial gate. Do not release or remove [작업중] before verified 95%.
+10. Updated 2026-11-12 KST; limited verified scope exact helper/test blobs, synthetic PyMuPDF, GitHub source diffs and docs. GitHub doc HEAD readback pending.
+
+## 2026-11-12 KST — ASTRA P79–P81 handoff (10 required fields)
+1. Goal/technology: ASTRA locally processed PDF redesign to 95%; React19/TypeScript5/Vite7/Electron44/PDF.js; authorized current feature-only code and tests, no paid/external features.
+2. Features/decisions: P79 selected cancellation via AbortController/PDF.js over mere busy reset; P80 preserved numeric sign over mere digit count; P81 prechecked token bounds and loops instead of catching stack overflow. Original V2 and docs preserved.
+3. Tests: exact Git helper blob `4513d760` SHA match, Node22 isolated tests 11PASS/0FAIL, 1000 sign fuzz, 300001 token controlled limit, TypeScript `tsc` standalone PASS. Full app npm/build/browser/Windows/CI latest SHA NOT VERIFIED.
+4. Status: new functional code completed, engineering 85% provisional, P95 not met, release HOLD, ASTRA [작업중] marker kept.
+5. Error/attempt/pivot: old token spread failed with actual RangeError; changed to bounded loops then 11/11 PASS. Browser changed-file stale busy bug fixed in source and synthetic browser regression added but not run. GitHub workflow query reports no PR-triggered runs and empty status (not CI result); previous container git DNS unavailable, no unproductive repeat.
+6. GitHub: `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`; P79 `3739ede47ce9361073ac1939e44599fa7d734a52`, P80 `c2003ced478a379360e4ed9ec38982c9a650d49c`, latest code `d417eb91e31f5781fded65120bcfc363a4ea97c2`; Draft PR10 unmerged, main unchanged. Hub `hibi89/hackathon-command-center-2026@kmong-productization`.
+7. Deployment: Node22 npm test, npm run build, npm run desktop:verify plus Chrome/Edge GitHub Actions & Windows NSIS workflows; actual Vercel Production N/A, no release or owner Windows run.
+8. Originals/security: original feature parent `736c2930` recoverable, no customer source PDFs or IndexedDB V2 edited; no secrets, models, real consumer uploads or permission changes; GitHub history preserves rollback.
+9. Next priority/completion: run exact latest SHA full CI including actual browser and Windows, add owner-consented 5–10 PDF acceptance and physical buyer device check, obtain necessary rights/design/model decisions; leave [작업중] until 95 proven, no auto-unmark at switch/end.
+10. Updated 2026-11-12 KST; source/test diff + exact core blob and isolated local tests verified, full browser/Windows/external acceptance NOT VERIFIED. This handoff documentation commit SHA should be read back.
+
+## 2026-11-12 KST — ASTRA P78 within-page order safety continuation (10 points)
+1. Goal / scope: 95% Astra Kmong product using existing local React19/Vite7/TS5/Electron44/PDF.js, no external PDF upload, OCR, commercial rights bypass.
+2. Chosen design: A full semantic/PDF layout equivalence would overclaim visual/OCR truth; B linear advisory token order count with multiset guard chosen. Reports only risk count; keeps original contents unchanged. Previously P76 detected page swaps and P77 prevented error cleanup deletion.
+3. Tests: exact Git blob `f249d24dcaad06d9050e3ab470c39c96707074d1` local SHA match; Node22.16 5/5 deterministic unit PASS, 300 fuzz cases + 300k token stress PASS, TypeScript tsc standalone PASS. Three integration tests added but exact new-SHA full npm/PDF.js/browser/Windows not yet executed; no claim of CI pass.
+4. Status: P78 code committed; current engineering score 85% provisional, 95 NOT achieved, SALE HOLD, work marker maintained.
+5. Failure/blocker: full private/public checkout unavailable from local container due github.com DNS; existing connector provides per-file source but no comprehensive repo runtime. New SHA commit statuses empty/PR workflow list empty, not proof either way. Don't repeat destructive or meaningless CI retries.
+6. GitHub: `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, new code SHA `071978729197c671f2a41b0e1ce6ad838ce24f8b`; exact six paths checked. Draft PR #10 unmerged; pre-change SHA `1151a0d6` reversible; hub `hibi89/hackathon-command-center-2026@kmong-productization`.
+7. Deployment/run: Node22 npm test/build/desktop:verify + Chrome/Edge/Windows workflows; no Vercel Production, no release, no billing or permission changes.
+8. Backup/auth/data: all customer PDFs and local V2 unmodified; only synthetic test fixtures, no API keys, no new data uploads; Git history is rollback source.
+9. Next steps: exact commit full npm/build/Chrome/Edge/Windows tests; real owner-consented 5–10 PDF visual acceptance and PRO20/BUSINESS30 design/approved local Korean model/rights support where required. Keep [작업중] until actual target verified.
+10. Timestamp: 2026-11-12 KST; scope GitHub source diff/blob, isolated local TypeScript & stress regression, CI status queries; documents based on functional SHA; documentation-only HEAD should be read back after commit.
+
+## 2026-11-12 KST — ASTRA P76/P77 partial development, P95 not certified (10 points)
+1. Goal/tech: achieve Astra Kmong 95%; existing local React19/Vite7/TS5/Electron44/PDF.js offline PDF redesign. No owner approval for external services, OCR, LLM, schema changes or sale.
+2. Work/design: A inode-check-before-output-delete still TOCTOU; B no pathname removal after write failure, HOLD outputs, selected. P76 now flags page-local text movement with matching global tokens in CLI/GUI; P77 keeps replaced owner files after second output write fails.
+3. Proof/tests: GitHub changed file diff exactly 2+4, source SHA 047d48372f4e5c997bf6f24683a90cd05c506873; exact Git blob tokenParity SHA 6a9ebc5c3f08ebca0e567cf0d920803141d0eb46 Linux Node22.16 6/6 assertions pass. Original complete npm/build/browser/Windows CI NOT VERIFIED at new SHA. P75 historic Chrome+Edge+Windows CI successful only for SHA 3b3c6f73.
+4. State: implemented fixes, 85% provisional remains, target95 NOT MET, sale RELEASE HOLD, no customer release.
+5. Error/cause/pivot: previous post-error pathname deletion may remove a concurrently replaced owner artifact. Removed cleanup rather than adding race-prone inode retry. GitHub workflow-run connector only lists PR runs and yielded none; combined status empty, inconclusive. Local full git checkout DNS failure; do not repeat identical network attempt.
+6. Repository/branch/SHA: hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112, code commits 702032f0 and 047d4837, original branch parent dc69f7e7, main and Draft PR10 not merged; modified CLI/UI/token helper and 3 tests.
+7. Runtime: Node22 npm install --no-audit --no-fund; npm test; npm run build; npm run desktop:verify; hosted browser/Windows workflows. Vercel/Production not applicable; no deploy or billing change.
+8. Originals/backup/secret: baseline dc69f7e7 and Git history support restore. Original customer PDFs, local IndexedDB V2, source documents, assets, permissions and secrets untouched; synthetic fixtures only.
+9. Next: exact-SHA full CI, Chrome/Edge browser and Windows NSIS; 5–10 consented buyer PDFs, PRO20/BUSINESS30 designs, local LLM redistribution/license, physical Windows and legal sale gates. No 95/100 label without objectively satisfied criteria.
+10. As of 2026-11-12 KST: remote code commits and diff checked, component exact-blob local execution checked, full CI and physical customer acceptance NOT VERIFIED. Documentation commit SHA readback pending.
+
+## 2026-11-12 KST — ASTRA P71–P75 85% provisional engineering, exact-SHA cross-platform CI, 10-point handoff
+1. Objective/confirmed scope/technology: user directed urgent remaining <85 Kmong product excluding REA_APP and others in parallel; selected Astra PDF Redesigner starting70% provisional. React19/Vite7/TypeScript5/Electron44/PDF.js, local-only source PDF→redesign→PDF save; original 7-step roadmap with no OCR/models/network grants.
+2. Delivered/decisions: alternative A trusting A4/marker as equivalence rejected; B independent source/output PDF actual selected-text tokens, numeric/duplicates/raster/A4 risk, optional original STEP7 manual review receipt+project backup+output SHA chain and offline HTML/JSON chosen. New `scripts/owner-pdf-source-output-review.mjs`, `src/step7/tokenParity.ts`, `src/step7/OfflinePdfReview.tsx`; only minimal Root/Workspace route/button, no schema/user data changes. Tests `tests/owner-pdf-source-output-review.test.mjs`, `tests/step7-token-parity.test.ts`, `tests/step7-pdf-review-browser.mjs`.
+3. Exact tests: code SHA `3b3c6f73a11d1791076eb5a860f14f87691844b5`; [CI #43118808792](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43118808792) Chrome+Edge jobs 2/2 SUCCESS, Node134 PASS/0 FAIL, build, actual Chrome/Edge PASS STEP7 PDF PAIR. [Windows #43118808750](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43118808750) 1/1 SUCCESS, Node133 PASS/1 SKIP/0 FAIL, desktop16 PASS, packaged EXE/unsigned NSIS install/uninstall/upgrade PASS; no customer physical Win10/11 or original exact pixel/fidelity/legal review.
+4. Done: engineering internal scope 70→85% provisional (+5 SHA chain,+4 UI PDF-to-PDF,+3 offline HTML/JSON,+3 measured cross-OS regression). P1–5 preserved; P6 no autonomous search; P7 no OCR. Buyer sale all three SKUs NO-GO, RELEASE HOLD. Draft PR #10 unmerged.
+5. Failure/root and retry: first code SHA `a27347dcc0b48cdf2bd5857aec260b7bd5f76d4f` CI failed because `Array.map(path.resolve)` passes index as `paths[2]` argument. Minimal lambda fix at `2b5a000fee5f03f486925f1c2112025215c583e6` verified Linux browser/Windows full SUCCESS; UI SHA `d5b1cd12...` also fully green; final image parity/sha display `3b3c6f73a11d1791076eb5a860f14f87691844b5` full green. Do not repeat old error, never claim exact original-pixel clone.
+6. Source/branch/SHA/main: `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, exact functional `3b3c6f73a11d1791076eb5a860f14f87691844b5`; parent base `feature/astra-p52-to-p70-20261111@8f987462dc7c2edd02303ec32c9813340170860a`, main untouched. Draft [PR #10](https://github.com/hibi89/astra_pdf_redesigner/pull/10). Paths per item2 plus `.github/workflows/ci.yml` and `windows-desktop.yml`, `package.json`, `docs/commercial/ASTRA_P85_PDF_PAIR_REVIEW_20261112.md`, STATUS/HANDOFF. Hub Kmong roster sync separately verify latest remote.
+7. Runtime/Production: `npm install --no-audit --no-fund && npm test && npm run build`; Electron Windows via `npm run desktop:verify`, unsigned NSIS. No Vercel, API/cloud/deploy applicable. Hosted CI Windows is not owner's physical PC. 30MiB source/output, 50 pages, bounded token and private file; no model download.
+8. Originals/backup/auth: Existing STEP1 localStorage v1, STEP2 IndexedDB V2 and main/integration/old PR3/4/9 intact, no original PDF/customer data uploaded. New feature branch parent supports Git revert, no force pushes, source files read-only, owner outputs new filenames only. No credentials/PII/Font license originals collected.
+9. Next priority/completion: acquire explicit owner approval before real customer PDFs/external search/model downloads/paid services/licensing/merge/publish. Real owner native Windows10/11 with consented 5–10 PDF docs, table/image/font layout/page-by-page inspection, PRO 20 and BUSINESS 30 distinct designs, local Korean LLM license/capability, support/licensing/legal signage and separate per-SKU release. Do not score 100% or claim fidelity certification from token match.
+10. Updated 2026-11-12 KST. Source test SHA `3b3c6f73a11d1791076eb5a860f14f87691844b5`, browser CI #43118808792, Windows CI #43118808750 all terminal SUCCESS. Documentation SHA must be verified after writing; exact programmatical identity checked with GitHub API.
+
 ## Current handoff — remote `9e131b2` (2026-10-29)
 
 1. Repository `hibi89/astra_pdf_redesigner`, branch `integration/astra-commercial-core`; remote HEAD `9e131b296bd17a75595769a36d9ebfc954e3c0c9`. Draft PR #9 remains open/unmerged; do not merge.

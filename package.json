@@ -7,12 +7,15 @@
     "dev": "vite --host 127.0.0.1",
     "build": "tsc --noEmit && vite build",
     "preview": "vite preview --host 127.0.0.1",
-    "test": "node --check tests/step3-browser.mjs && node --experimental-strip-types --test tests/*.test.ts tests/local-model-controller.test.cjs tests/pdf-integrity-audit.test.cjs tests/pdf-output-audit.test.cjs",
+    "test": "node --check tests/step3-browser.mjs && node --experimental-strip-types --test tests/*.test.ts tests/local-model-controller.test.cjs tests/local-ocr-controller.test.cjs tests/approved-search-link.test.cjs tests/pdf-integrity-audit.test.cjs tests/pdf-output-audit.test.cjs tests/owner-pdf-source-output-review.test.mjs tests/owner-batch-acceptance.test.mjs tests/ocr-supply-chain-preflight.test.cjs tests/ocr-release-hold-gate.test.cjs tests/ocr-pe-import-audit.test.cjs tests/pdf-export-ipc-guard.test.cjs tests/owner-ollama-controller.test.cjs",
     "desktop:run": "npm run build && electron .",
     "desktop:smoke": "electron . --astra-desktop-smoke",
-    "desktop:test": "node --test tests/desktop-shell.test.cjs",
+    "desktop:test": "node --test tests/desktop-shell.test.cjs tests/approved-search-link.test.cjs tests/local-ocr-controller.test.cjs tests/ocr-supply-chain-preflight.test.cjs tests/ocr-release-hold-gate.test.cjs tests/ocr-pe-import-audit.test.cjs tests/pdf-export-ipc-guard.test.cjs tests/owner-ollama-controller.test.cjs",
     "desktop:verify": "node desktop/verify-bundle.cjs && npm run desktop:test",
-    "desktop:package": "npm run build && electron-builder --win nsis --x64 --publish never"
+    "desktop:package": "npm run build && electron-builder --win nsis --x64 --publish never",
+    "ocr:preflight": "node desktop/ocr-supply-chain-preflight.cjs",
+    "ocr:release-gate": "node desktop/ocr-release-hold-gate.cjs",
+    "prebuild": "node desktop/ocr-release-hold-gate.cjs"
   },
   "dependencies": {
     "react": "^19.2.0",

@@ -5,6 +5,7 @@ on:
       - 'feature/windows-electron-*'
       - 'integration/astra-commercial-core'
       - 'feature/astra-p52-to-p70-20261111'
+      - 'feature/astra-p71-pdf-source-parity-20261112'
     paths-ignore:
       - '**/*.md'
       - 'docs/**'
@@ -26,12 +27,17 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Existing STEP1/STEP2 unit regressions
         run: npm test
+      - name: P106 offline Windows Authenticode evidence synthetic checks
+        shell: pwsh
+        run: ./tests/ocr-windows-authenticode-evidence.test.ps1
       - name: Build React and verify desktop assets
         run: |
           npm run build
           npm run desktop:verify
       - name: Native Electron renderer smoke (isolated temp profile)
         run: npm run desktop:smoke
+      - name: Reject unapproved native OCR assets before packaging
+        run: npm run ocr:release-gate
       - name: Build unsigned Windows x64 NSIS installer
         run: npx electron-builder --win nsis --x64 --publish never
         env:
@@ -57,6 +63,8 @@ jobs:
           Move-Item -LiteralPath $base[0].FullName -Destination $dest
           node tests/prepare-upgrade-candidate.cjs
           if ($LASTEXITCODE -ne 0) { throw 'Failed to prepare ephemeral upgrade version' }
+      - name: Reject unapproved native OCR assets before packaging
+        run: npm run ocr:release-gate
       - name: Build version 0.1.1 NSIS candidate with same application code
         run: npx electron-builder --win nsis --x64 --publish never
         env:
