@@ -1,9 +1,10 @@
 import {useEffect,useState} from 'react';
 import {skuLayoutCandidate} from './skuLayoutCandidates.ts';
+import {runSkuGatedAction} from '../commercial/skuActionGate.ts';
 import {PRO_LIBRARY_MAX,readLocalLayoutLibrary,writeLocalLayoutLibrary,type SavedLayout} from './savedLayoutLibrary.ts';
 
-interface Props {disabled:boolean;selectedId?:string;onRestore:(id:string)=>void}
-export default function ProLayoutLibrary({disabled,selectedId,onRestore}:Props){
+interface Props {disabled:boolean;licenseReceipt:string;selectedId?:string;onRestore:(id:string)=>void}
+export default function ProLayoutLibrary({disabled,licenseReceipt,selectedId,onRestore}:Props){
  const [items,setItems]=useState<SavedLayout[]>([]);
  const [name,setName]=useState('내 레이아웃');
  const [error,setError]=useState('');
@@ -14,15 +15,18 @@ export default function ProLayoutLibrary({disabled,selectedId,onRestore}:Props){
  },[]);
  const save=()=>{
    if(!selectedId||!skuLayoutCandidate(selectedId)||disabled||corrupt)return;
-   try{
-     const next=[...items,{id:crypto.randomUUID(),name:name.trim(),layoutId:selectedId,savedAt:Date.now()}];
-     writeLocalLayoutLibrary(localStorage,next);setItems(next);setError('');
-   }catch(e){setError(e instanceof Error?e.message:'레이아웃을 로컬에 저장하지 못했습니다.');}
+   void runSkuGatedAction(['template-save'],licenseReceipt,()=>{
+     try{const next=[...items,{id:crypto.randomUUID(),name:name.trim(),layoutId:selectedId,savedAt:Date.now()}];
+       writeLocalLayoutLibrary(localStorage,next);setItems(next);setError('');}
+     catch(e){setError(e instanceof Error?e.message:'레이아웃을 로컬에 저장하지 못했습니다.');}
+   }).catch(e=>setError(e instanceof Error?e.message:'사용권 확인 실패'));
  };
  const remove=(id:string)=>{
    if(disabled||corrupt||!window.confirm('저장한 레이아웃 선택 기록을 삭제하시겠습니까? 기존 문서 내용은 그대로입니다.'))return;
-   try{const next=items.filter(x=>x.id!==id);writeLocalLayoutLibrary(localStorage,next);setItems(next);setError('');}
-   catch(e){setError(e instanceof Error?e.message:'목록을 삭제할 수 없습니다.');}
+   void runSkuGatedAction(['template-save'],licenseReceipt,()=>{
+     try{const next=items.filter(x=>x.id!==id);writeLocalLayoutLibrary(localStorage,next);setItems(next);setError('');}
+     catch(e){setError(e instanceof Error?e.message:'목록을 삭제할 수 없습니다.');}
+   }).catch(e=>setError(e instanceof Error?e.message:'사용권 확인 실패'));
  };
  return <section className="pro-layout-library no-print" data-pro-layout-library aria-label="PRO 로컬 디자인 보관함">
    <h3>PRO · 내 레이아웃 보관함 (이 기기)</h3>
