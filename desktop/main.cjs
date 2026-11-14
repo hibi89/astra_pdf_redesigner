@@ -123,7 +123,7 @@ function registerPdfSaving(){
     assertTrustedPdfSaveRequest(event,mainWindow);
     return customerSkuActionGuard.runPdf({
       event,mainWindow,receipt:licenseContext&&licenseContext.receipt,
-      layoutId:licenseContext&&licenseContext.layoutId,brand:licenseContext&&licenseContext.brand,
+      layoutId:licenseContext?licenseContext.layoutId:null,brand:licenseContext?licenseContext.brand:false,
       requestId:licenseContext&&licenseContext.requestId,
     },async()=>{
     const expectedTextMarkers=validOutputMarkers(rawExpectedTextMarkers);
