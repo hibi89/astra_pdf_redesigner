@@ -83,7 +83,7 @@ try{
   ];
   const projectBeforeReferences=await projectFingerprint(true);
   for(const sample of referenceCases){
-    if(document.querySelector('[data-reference-analysis]'))await clearReference();
+    if(await evaluate("Boolean(document.querySelector('[data-reference-analysis]'))"))await clearReference();
     const originalFile=await uploadImage(sample.name);
     await eventually(()=>evaluate("Boolean(document.querySelector('[data-reference-analysis]'))"));
     await eventually(()=>evaluate("document.querySelector('.project-paper')?.classList.contains('paper-theme-"+sample.theme+"')"));
