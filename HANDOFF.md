@@ -1,3 +1,16 @@
+## 2026-11-14 KST — P102 Windows OCR 인수인계 10항 (최신)
+
+1. **목표/기술:** Astra PDF STEP1~7·BASIC/PRO/BUSINESS 사용자 100점 설계 기준, 로컬 Tesseract/Electron/PDF.js/React·기존 사용자 데이터 안전/0원 운영.
+2. **결정·구현:** Windows Tesseract 5 최신 공식 설치파일 부재·UB Mannheim 제3자 확인. 기본 무배포(OFF) 유지. P102 UTF8 native stdout 보존, PSM3/6 allowlist·UI, Windows temp PNG 재시도/실패 비성공, 페이지 캔버스 4096px/8MP 가드 추가.
+3. **테스트:** tests/local-ocr-controller.test.cjs 신규 한글 바이트 split·PSM 주입·cleanup failure 회귀 3종 추가; npm test/desktop:test 기존 OCR 포함 확인. GitHub 코드 연결 11개 정적 확인. **P102 exact-source Node/TS/Chrome/Edge/Windows CI 모두 실행 결과 미확인**, 신규 PASS 수치 주장 불가. P101 Linux 과거 7/7+실 Tesseract synthetic20 중 15 exact 별도 근거.
+4. **완료/진행/차단:** 코드·테스트·문서 GitHub 원격 반영. 실제 Windows OCR 바이너리·DLL·traineddata 사용권/디지털 서명/해시·실 Win10/11·OCR 품질·고객 PDF5~10·LLM/상용 3SKU 모두 미검증. 최종100 미달·RELEASE HOLD.
+5. **시도/결함/전환:** native stdout chunk-by-chunk UTF8 디코딩의 다중바이트 한글 깨짐 위험을 Buffer.concat으로 수정, 모드 문자열 CLI 주입 허용 금지, 임시파일 rm 실패를 성공으로 숨기지 않도록 수정. 공개 Actions URL 읽기 불가/커넥터 실행목록 제한이라 CI 성공 간주 금지. 다음엔 GitHub Actions 정확 SHA 확인 또는 독립 재현 환경으로 대체.
+6. **저장소·브랜치·SHA·주요 경로:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112; **최종 P102 기능 소스 SHA 5d87df4ef2f9f6b6cefd6f51f52d7f66de0d2d71**, 정책/공급망 문서 커밋 d062320a2e7ce5725d77ef036b9a0b2806010459. desktop/local-ocr-controller.cjs, desktop/main.cjs, preload.cjs, src/desktopPdf.ts, src/step7/LocalOcrPanel.tsx, tests/local-ocr-controller.test.cjs. 이 문서 커밋으로 HEAD 갱신 가능.
+7. **Production/실행:** Node22 npm test/build, npm run desktop:verify/smoke, Windows NSIS CI; Production/Vercel 미적용, 크몽 판매·배포 없음.
+8. **원본/백업/인증:** Git 이전 SHA 복원 가능, main/PR10/STEP1 localStorage V1·STEP2 IndexedDB V2·원본 PDF/고객자료·개인키·모델바이너리/NOTICE 변경 없음. OCR_MANIFEST=null.
+9. **다음 작업/기준·승인:** P102 정확 SHA CI Linux/Chrome/Edge/Windows 전 검증, DLL/재배포권/sha256/NOTICE/SBOM 포함 재배포 승인 전 공급망 프리플라이트, PSM3/6 합성표/한글 숫자 골든, 실 PDF 5~10·실 Win10/11 수용·사용자 판매 별도 승인. 무료 OCR 개발 승인 완료, 같은 승인 재요청 금지.
+10. **KST 확인·증거:** 2026-11-14 KST GitHub 커넥터로 실제 소스/테스트 연결 11개 확인. 공식 12영역 가중치 합계100 승인·증거점수 UNASSESSED, 과거 내부 기술85% 구분. P102 자료 docs/commercial/ASTRA_P102_WINDOWS_OCR_SUPPLY_CHAIN_20261114.md. 문서 기준 커밋은 작성 후 HEAD 별도 대조.
+
 ## 2026-11-14 KST — P101 실 Tesseract 골든20 / 재현 자동화 인수인계 10항 (최신)
 
 1. **목표·스택·요구:** 사용자 최종설계 STEP1~7+3SKU 100점 기준, 무료 로컬 OCR/Tesseract + React/PDF.js/Electron. 원본 데이터 보존·오프라인 검수 초안·유료서비스0. 공식 완성률 UNASSESSED/100% 미달.
