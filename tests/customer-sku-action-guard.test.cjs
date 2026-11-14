@@ -100,7 +100,7 @@ test('P125 missing pin, wrong issuer, malformed, tampered, expired, and invalid-
  const other= createGuard(b);
  const noPin=createCustomerSkuActionGuard({customerBuildEnabled:true,issuerPublicJwk:null,issuerThumbprintSha256:null,nowSeconds:()=>NOW});
  for(const [candidate,policy] of [
-  [valid,guard],[valid,other],['not-json',guard],[tampered,guard],[expired,guard],[badSeat,guard],[valid,noPin],
+  [valid,other],['not-json',guard],[tampered,guard],[expired,guard],[badSeat,guard],[valid,noPin],
  ]){
   const f=frameFixture();let sideEffects=0;
   await assert.rejects(policy.run({...f,receipt:candidate,requestId:requestId(),requiredCapabilities:['business-layout']},()=>{sideEffects++;}),/Customer SKU action denied/);
