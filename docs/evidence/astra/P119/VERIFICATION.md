@@ -1,40 +1,23 @@
 # P119 — Windows Tesseract 공급처 후보 감사
 
-**판정:** BLOCKED · 인정 0/1점 · 잠정 완성률 57/100 유지  
-**감사일:** 2026-11-15 KST · **코드 검증 SHA:** `420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02`  
+**판정:** BLOCKED · 인정 0/1점 · 잠정 완성률 61/100  
+**최신 감사 코드 SHA:** [`0f82c8f0764cd00460abe3b27f97b497ce61ceb5`](https://github.com/hibi89/astra_pdf_redesigner/commit/0f82c8f0764cd00460abe3b27f97b497ce61ceb5)  
+**정확 SHA Actions:** Linux [#43647106432](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106432) PASS · Windows [#43647106409](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106409) PASS · 정본 정책 [#43647106804](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106804) PASS  
 **공식 수용:** UNASSESSED · **출시:** RELEASE HOLD · **OCR_MANIFEST:** null
 
-## 범위와 실행
+## 공급 후보 감사 결과
 
-기존 공급망 사전검사기, PE import 감사기, Windows Authenticode 합성 회귀를 확인했다. P119 요구에 따라 저장소에는 Tesseract 설치 파일이나 언어 데이터, 고객 PDF를 넣지 않았다. GitHub 공개 API와 저장소 파일 메타데이터만 조사했다. 전체 후보별 값은 [SUPPLIER_CANDIDATE_AUDIT.json](SUPPLIER_CANDIDATE_AUDIT.json)에 보존했다.
+- UB-Mannheim Tesseract v5.4.0.20240606 Windows installer는 GitHub Release metadata에 SHA-256 digest가 없어 이 후보를 승인하지 않았다.
+- Upstream Tesseract v5.5.3 Windows installer는 GitHub Release asset digest `bee9e3434bd94fd65387d9be28cd467a41f61b1275383b55b0f59a1331270ae4`를 Windows runner에서 재계산해 일치시켰다. 이 asset은 일회성 GitHub-hosted Windows runner에서만 다운로드·설치했으며 저장소에 커밋하거나 제품에 번들하지 않았다.
+- Windows Authenticode 검증은 `UnknownError`를 반환했다. 서명 주체는 `CN=Universität Mannheim, O=Universität Mannheim, S=Baden-Württemberg, C=DE`, thumbprint `2F92CB990D57719BDCCA2D72134378614A040D9B`이며, Windows가 서명 인증서 또는 timestamp가 유효 기간 내에 있지 않다고 보고했다.
+- 설치 결과에서 73개 최상위 PE 항목을 관찰했다. 정적 감사기가 56개 PE 파일의 import 그래프를 따라 direct import 286개(시스템 DLL 157, 번들 dependency 129), delay import 0개를 분류했고, 모든 import closure가 닫혔다. 감사 수정은 공급자 신뢰나 서명 승인으로 간주하지 않는다.
+- 설치물에 보인 고지 파일은 `doc/AUTHORS`, `doc/LICENSE`였다. 모든 dependency의 정확한 버전, 해당 license/NOTICE 매핑 및 이 특정 bundle의 재배포 권리는 아직 입증되지 않았다.
+- eng/kor 언어 데이터는 `tesseract-ocr/tessdata_best` commit `e12c65a915945e4c28e237a9b52bc4a8f39a0cec`에 고정했다. eng SHA-256 `8280aed0782fe27257a68ea10fe7ef324ca0f8d85bd2fd145d1c2b560bcb66ba`, kor SHA-256 `f888d4038348a0c3d25151e7f452bda0d74ca275b18cab146798bcbb94084fff`.
 
-## 확인된 공개 근거
+## 실제 OCR 실행과 범위
 
-- [UB-Mannheim/tesseract](https://github.com/UB-Mannheim/tesseract)는 upstream [tesseract-ocr/tesseract](https://github.com/tesseract-ocr/tesseract)의 fork이며 Apache-2.0로 표시된다. Windows 설치 후보는 [v5.4.0.20240606](https://github.com/UB-Mannheim/tesseract/releases/tag/v5.4.0.20240606), 2024-06-08 공개, `tesseract-ocr-w64-setup-5.4.0.20240606.exe`, 50,175,248 bytes다. GitHub Release API의 `digest`는 `null`; 정확 바이너리 SHA-256은 공개되지 않았다.
-- upstream Tesseract의 [5.5.4 release](https://github.com/tesseract-ocr/tesseract/releases/tag/5.5.4)는 2026-10-28 공개됐고 release binary asset이 없다. 이는 UB-Mannheim 후보의 버전·공급 경로를 별도로 검증해야 한다는 뜻이며, 승인 또는 거부의 보안 판정으로 사용하지 않았다.
-- [tessdata_best](https://github.com/tesseract-ocr/tessdata_best) README와 repo metadata는 Apache-2.0을 표시한다. main commit `e12c65a915945e4c28e237a9b52bc4a8f39a0cec`에서 eng 모델 15,400,601 bytes / Git blob SHA-1 `176dc3220de7db34d3b3aecbfa42043a6038348b`, kor 모델 12,528,128 bytes / Git blob SHA-1 `c82615b5228c9981c33a0985b32224d97b7fb43a`를 확인했다. 이 값은 Git blob SHA-1이며 파일 SHA-256이 아니다.
-- [Leptonica license text](https://github.com/DanBloomberg/leptonica/blob/master/leptonica-license.txt)는 소스 트리에 있으나 repo license metadata는 `NOASSERTION`이다. 후보 설치 파일 안의 Leptonica 버전, DLL 구성, 해당 바이너리의 고지 포함 여부는 연결되지 않았다.
+동일 Windows run은 합성 kor+eng 입력 12개를 실제 Tesseract 5.5.3으로 처리했다: 9개 exact, 3개 오인식/누락, 평균 공백 정규화 CER 0.0486. 상세 수치와 PE inventory는 [Actions OCR report artifact 14134094222](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106409/artifacts/14134094222) (SHA-256 `d3466b486c91b2e24edb638104e7bc5ffeb8a11c9e889f641ebcc5e726ecc193`)에 보존했다. 고객 PDF, 외부 추론 API, 제품 번들, production OCR은 사용하지 않았다.
 
-## 왜 차단했는가
+## 판정 이유
 
-GitHub release metadata만으로 설치 파일의 Authenticode 서명, x64 PE 헤더, direct/delay-load DLL import 폐쇄, 설치 묶음과 kor/eng 파일의 정확한 대응, 필수 third-party NOTICE, 해당 묶음의 재배포권을 입증할 수 없다. P119는 별도 다운로드/동봉 없이 후보 근거를 정리하도록 하므로 이 감사를 위해 설치 파일을 내려받지 않았다. 공급처와 재배포권이 확인되지 않은 상태라 P119 점수는 0점이며, 기존 `OCR_MANIFEST=null` 및 RELEASE HOLD를 유지한다.
-
-## 테스트 및 정확 SHA
-
-- P118 기능 SHA `420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02`에서 Linux [#43633902801](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633902801) SUCCESS: Node 276/276, build PASS. 전체 test suite에는 synthetic OCR supply preflight/release-hold/PE 검사가 포함된다.
-- 같은 SHA에서 Windows [#43633902770](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633902770) SUCCESS: Node 275 PASS / 1 Windows 전용 SKIP / 0 FAIL, desktop 73/73, synthetic Authenticode 회귀 PASS, NSIS lifecycle PASS.
-- 같은 SHA의 final blueprint policy [#43633903290](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633903290) SUCCESS.
-- 위 테스트는 synthetic fail-closed 경계만 검증하며, 실제 공급자 바이너리나 OCR 실행을 검증하지 않는다. 이 P119 변경은 GitHub 문서/증거만 추가했으므로 기능 점수는 증가하지 않는다.
-
-## 결과
-
-P119 BLOCKED / +0. A07은 5/12, 총점은 57/100이다. 실제 Windows Tesseract 서명·hash·PE/DLL closure·candidate bundle redistribution은 미검증. P120/P121은 P119 실자산 승인 의존성이 충족되지 않아 BLOCKED. 다음 독립 작업은 P122다.
-
-
-## 2026-11-15 KST — upstream GitHub asset Windows Actions re-audit (no score)
-
-A later exploratory run found and downloaded only on the disposable GitHub-hosted Windows runner the upstream [tesseract-ocr/tesseract 5.5.3 release asset](https://github.com/tesseract-ocr/tesseract/releases/tag/5.5.3). GitHub's release metadata publishes SHA-256 `bee9e3434bd94fd65387d9be28cd467a41f61b1275383b55b0f59a1331270ae4`; the runner matched it exactly. This narrows the earlier no-digest finding for the UB-Mannheim 5.4 candidate, but it does not approve the new asset.
-
-The exact Windows run at source SHA [`e293fcdc585792d1985cba5f31b032d050ede11c`](https://github.com/hibi89/astra_pdf_redesigner/commit/e293fcdc585792d1985cba5f31b032d050ede11c), [#43644765268](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43644765268), ran the real installer in a temporary runner folder and observed 73 top-level PE files. Installer Authenticode was `UnknownError`: signer subject Universidad Mannheim, thumbprint `2F92CB990D57719BDCCA2D72134378614A040D9B`; Windows reported a certificate validity-period error. The extracted runtime includes unsigned DLLs and only `doc/AUTHORS` and `doc/LICENSE`; dependency-specific NOTICE/license mapping and static import closure remain unproven (the audit uncovered missing Windows system-DLL classifications such as `msimg32.dll`, `wldap32.dll`, `dnsapi.dll`, and `dwrite.dll`). No binary was committed, bundled, or enabled in the product. The current parser correction SHA [`5a0c32c3358834557b76da739ee3d97a2c6e612b`](https://github.com/hibi89/astra_pdf_redesigner/commit/5a0c32c3358834557b76da739ee3d97a2c6e612b) passed exact-SHA Linux [#43646062853](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43646062853), Windows [#43646062862](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43646062862), and policy [#43646063260](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43646063260). The Windows report artifact [14134331658](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43646062862/artifacts/14134331658) stores the exact kor/eng SHA-256, 12 CER/numeric observations and current DLL closure finding. It does not relax release policy.
-
-The release digest and a successful OCR execution are evidence of provenance/feasibility, not evidence that the installed bundle is signed-valid or license-complete. **P119 remains BLOCKED +0; `OCR_MANIFEST=null`, RELEASE HOLD.**
+자산 byte hash와 static import closure가 확인됐지만 Authenticode는 유효하지 않은 상태로 판정됐고, dependency license/NOTICE 및 이 installer bundle의 재배포권 mapping도 끝나지 않았다. 따라서 P119는 **BLOCKED +0**이다. `OCR_MANIFEST=null`, OCR 비활성, RELEASE HOLD를 유지한다. P120의 12개 sample OCR은 실행 가능성 근거일 뿐 공급 승인이나 앱 acceptance가 아니다. 상세 후보별 원장은 [SUPPLIER_CANDIDATE_AUDIT.json](SUPPLIER_CANDIDATE_AUDIT.json)에 있다.

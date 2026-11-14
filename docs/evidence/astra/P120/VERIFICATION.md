@@ -1,17 +1,19 @@
-# P120 — 실제 Windows Tesseract kor+eng 평가 (승인 선행조건 대기)
+# P120 — 실제 Windows Tesseract kor+eng 평가
 
-**상태:** BLOCKED · 인정 0/1점 · 실제 실행 가능성은 입증, P119 공급 승인과 전체 수용조건 미완 · 잠정 총점 61/100
+**상태:** BLOCKED · 인정 0/1점 · 잠정 총점 61/100  
+**정확 코드 SHA:** [`0f82c8f0764cd00460abe3b27f97b497ce61ceb5`](https://github.com/hibi89/astra_pdf_redesigner/commit/0f82c8f0764cd00460abe3b27f97b497ce61ceb5)  
+**Actions:** Linux [#43647106432](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106432) PASS · Windows [#43647106409](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106409) PASS · 정본 정책 [#43647106804](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106804) PASS
 
-## 실제 GitHub Actions 실행
+## 실제 Windows 실행
 
-정확 source SHA [`e293fcdc585792d1985cba5f31b032d050ede11c`](https://github.com/hibi89/astra_pdf_redesigner/commit/e293fcdc585792d1985cba5f31b032d050ede11c)의 Windows workflow [#43646062862](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43646062862)에서 공식 GitHub release asset SHA-256과 commit 고정 `tessdata_best` kor/eng 데이터로 Tesseract `5.5.3.20260724`를 임시 실행했다. 합성 한국어 사례 12개 전부 실제 OCR했고, 자동 적용이나 고객 데이터 사용은 없었다.
+GitHub-hosted Windows Server 2025 runner에서 upstream Tesseract 5.5.3.20260724와 commit 고정 `tessdata_best` kor/eng를 임시 경로에서 실행했다. installer release SHA-256 `bee9e3434bd94fd65387d9be28cd467a41f61b1275383b55b0f59a1331270ae4`가 GitHub Release digest와 일치했다.
 
-- **9/12 exact**, 3건 오인식/누락. 공백을 정규화한 평균 CER **0.0486**.
-- `매출액`을 `매줄액`으로 인식 (CER 0.0667).
-- `2,300,000원`을 `22300,000원`으로 인식 (CER 0.0625, 중요 숫자 불일치).
-- `증빙 자료는 외부 전송 금지` 일부 누락 (CER 0.4545).
-- 나머지 9건은 정확. 페이지별 기대/인식 텍스트, fixture SHA-256, CER, 중요 숫자 일치 여부는 [Actions OCR report artifact](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43644765268/artifacts/14133059583)에 기록됐다. 이 실행에서는 OCR 실행 자체가 성공했으나 제품 release signoff는 하지 않았다.
+- 12개 자체 합성 한국어 사례 중 **9개 exact / 3개 오인식·누락**, 평균 공백 정규화 CER **0.0486**.
+- `매출액` → `매줄액` (CER 0.0667).
+- `2,300,000원` → `22300,000원` (CER 0.0625, 중요 숫자 불일치).
+- `증빙 자료는 외부 전송 금지` 문구 일부 누락 (CER 0.4545).
+- 나머지 9건은 정확했다. 상세 report 및 PE import inventory는 [Actions artifact 14134094222](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106409/artifacts/14134094222)에 있으며 SHA-256은 `d3466b486c91b2e24edb638104e7bc5ffeb8a11c9e889f641ebcc5e726ecc193`.
 
-## 점수 보류 이유
+## 미완료 acceptance와 점수
 
-P120의 선행 P119는 여전히 BLOCKED다. 설치 파일의 Authenticode는 `UnknownError`, DLL import closure와 모든 third-party license/NOTICE mapping은 미입증이다. 실제 엔진 smoke는 P120의 앱 내 원문 대조 경고·PSM3/6·취소 UI와 Electron IPC/V2 불변성까지 검증하지 않았다. 따라서 **P120 BLOCKED +0**이며 OCR_MANIFEST=null 및 RELEASE HOLD를 유지한다. 전체 PSM/취소/수동 검수·Electron 경로는 승인 가능한 공급 자산 선행 검증 뒤에만 진행한다.
+이 실행은 실제 OCR 엔진과 오류 사례를 입증하지만 P119 공급처 승인, 제품 UI의 원문 대조·오류 경고, PSM 3/6 선택, 취소·정리 동작을 검증하지 않았다. 그래서 **P120 BLOCKED +0**이다. P121의 실제 Electron IPC/V2 불변성도 차단 상태다. OCR_MANIFEST는 null이고 제품 OCR은 비활성, RELEASE HOLD를 유지한다.

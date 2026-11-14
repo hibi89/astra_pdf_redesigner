@@ -9,7 +9,7 @@
 **저장소:** hibi89/astra_pdf_redesigner
 **설계 기준 코드 SHA:** 26aff40d6de524c2430f8a6b325d906cea67f7e1
 **설계 이전 문서 HEAD:** 7ed25d4f04ba10bad18e96c6986bb9a5e97a0b08
-**현재 총괄 잠정 검증 점수:** 57/100 (P114/P115/P116/P117/P118 VERIFIED; G55 PASS), **공식 사용자/구매자 최종 수용률:** UNASSESSED, **RELEASE HOLD**, 크몽 미등록.
+**현재 총괄 잠정 검증 점수:** 61/100 (P114/P115/P116/P117/P118/P122/P125 VERIFIED; G55 PASS; P119/P120/P121/P123/P124/P126 BLOCKED +0; G60/G65/G70 NOT PASSED), **공식 사용자/구매자 최종 수용률:** UNASSESSED, **RELEASE HOLD**, 크몽 미등록.
 
 ## 1. 변경 금지·우선순위
 
@@ -127,7 +127,7 @@
 
 #### P120 — 실 Tesseract 한국어 인식 난도별 측정·오인식 공개 (A07 +1점, 누적 상한 59/100)
 
-- **선행:** P119. 현재 상태: **BLOCKED, +0점**. Windows Actions의 실제 12개 합성 kor+eng run은 가능(9 exact/3 errors, mean CER 0.0486)했으나 P119 서명·권리 승인 및 PSM/UI/취소 acceptance 미완료; [증거](../evidence/astra/P120/VERIFICATION.md).
+- **선행:** P119. 현재 상태: **BLOCKED, +0점**. 정확 SHA [`0f82c8f0764cd00460abe3b27f97b497ce61ceb5`](https://github.com/hibi89/astra_pdf_redesigner/commit/0f82c8f0764cd00460abe3b27f97b497ce61ceb5)의 Windows [#43647106409](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106409)에서 12개 실제 kor+eng sample을 실행(9 exact/3 errors, mean CER 0.0486)했고, Linux [#43647106432](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106432) 및 정책 [#43647106804](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106804)도 PASS. P119 서명·권리 승인 및 PSM/UI/취소 acceptance 미완료; [증거](../evidence/astra/P120/VERIFICATION.md).
 - **수정 후보 경로:** tools/verify-real-korean-ocr.py; src/step7/LocalOcrPanel.tsx; tests/step7-local-ocr-browser.mjs. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 한글·숫자·부정문·표·두 단·회전·저해상·잡음 스캔을 공용/자체 합성 PDF 이미지로 재생성. OCR의 원문 대조 UI와 누락·오인식 경고, PSM 3/6 선택·취소 기능을 검수.
 - **수용 테스트/증거:** 사전에 고정한 최소 12개 합성 OCR 원본을 실제 Tesseract kor+eng으로 실행하고 페이지별 CER/중요 수치 일치·검출 실패를 CSV/JSON에 기록. 오류를 자동승인/무경고 성공 처리한 0건; 실제 OCR 성공 1건 이상과 오류 실패사례 1건 이상 재현.
@@ -223,3 +223,8 @@
 70~100 상세 잔여 30점과 사용자가 개입해야 할 최종 승인 장벽은 docs/commercial/ASTRA_INSTANT_70_TO_100_HANDOFF_20261114.md에 따로 기록한다. 모든 항목의 사용자가 확정한 배점과 원본 설계는 동일하다.
 
 **최종 확인:** P114–P118 VERIFIED, G55 PASS; P119–P121 BLOCKED +0; P122 VERIFIED +2; P123/P124 BLOCKED +0; P125 VERIFIED +2; P126 BLOCKED +0; current provisional task sum 61/100. Latest verified feature SHA `88c56e4188754f960ae94281b6d68e37b5081b62`, exact-SHA Linux #43641402429, Windows #43641402454, and blueprint #43641402742 all SUCCESS. G60 NOT PASSED because actual Windows Tesseract/OCR evidence is missing; G65/G70 not passed. Official acceptance UNASSESSED, RELEASE HOLD.
+
+
+## 2026-11-15 latest P119/P120 runner re-audit (no score)
+
+Exact audit/code SHA [`0f82c8f0764cd00460abe3b27f97b497ce61ceb5`](https://github.com/hibi89/astra_pdf_redesigner/commit/0f82c8f0764cd00460abe3b27f97b497ce61ceb5) passed Linux [#43647106432](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106432), Windows [#43647106409](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106409), and final policy [#43647106804](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106804). The Windows report artifact [14134094222](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106409/artifacts/14134094222) SHA-256 is `d3466b486c91b2e24edb638104e7bc5ffeb8a11c9e889f641ebcc5e726ecc193`. Static PE import closure is now closed (56 files, 286 direct imports, 0 delayed; 157 system/129 bundled), and real OCR ran 12 cases (9 exact, 3 errors, CER 0.0486). P119 stays BLOCKED +0 because Authenticode is UnknownError and bundle license/NOTICE/redistribution rights remain unverified. P120 stays BLOCKED +0 because P119 and full app review/PSM/cancel acceptance remain incomplete. Score 61/100; G60/G65/G70 not passed; OCR_MANIFEST=null; RELEASE HOLD.

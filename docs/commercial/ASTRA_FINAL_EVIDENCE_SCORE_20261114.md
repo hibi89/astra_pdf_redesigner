@@ -7,7 +7,7 @@
 
 사용자가 확정한 A01~A12 12개 영역의 100점 배점 **그대로** 사용한다. 아래 1점 단위 부분 수용 분해는 사용자 승인된 배점의 변경이 아니라 **총괄이 제안하는 잠정 검증 체크포인트**다. 각 항목은 코드 실행 및 CI·합성 브라우저 검증 증거가 있는 기능에만 부분 점수를 부여한다. 정식 판매·원본 내용 품질·실 물리 PC·구매자 최종 승인은 CI로 대신하지 않는다.
 
-이 표의 **잠정 59%는 공식 확정 수용률과 다르며, 내부 기술 85%/95%나 출시 준비도에 전용할 수 없다.** 사용자가 부분 배점·수용기준을 확정하고 미확인 사항을 직접 검수할 때 공식 값을 산정한다.
+이 표의 **잠정 61%는 공식 확정 수용률과 다르며, 내부 기술 85%/95%나 출시 준비도에 전용할 수 없다.** 사용자가 부분 배점·수용기준을 확정하고 미확인 사항을 직접 검수할 때 공식 값을 산정한다.
 
 | 영역 | 사용자 확정 배점 | 이번 회차까지 잠정 인정 | 남은 점수 | 인정한 합성/코드·출력 증거 | 반드시 남은 수용 |
 |---|---:|---:|---:|---|---|
@@ -127,3 +127,8 @@ P114(PDF 읽기 순서·수동 원문 대조), P115(원본/출력 15쌍 비교),
 ## P119/P120 actual Windows Actions experiment (no score)
 
 Exact Windows Tesseract 5.5.3 run #43644765268 on code SHA e293fcdc585792d1985cba5f31b032d050ede11c executed 12 synthetic kor+eng images: 9 exact, three misrecognition/omission, mean whitespace-normalized CER 0.0486, with one critical amount mismatch (2,300,000→22300,000). The pinned official release asset digest matched. Authenticode returned UnknownError; dependency import closure and bundled third-party notices remain unproven. P119/P120 remain blocked +0 under the prerequisite and full UI acceptance rules; score stays 61/100, G60 not passed.
+
+
+## P119/P120 actual Windows re-audit — no added score
+
+At exact audit SHA [`0f82c8f0764cd00460abe3b27f97b497ce61ceb5`](https://github.com/hibi89/astra_pdf_redesigner/commit/0f82c8f0764cd00460abe3b27f97b497ce61ceb5), Linux [#43647106432](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106432), Windows [#43647106409](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106409), and final policy [#43647106804](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106804) passed. Tesseract 5.5.3 ran on 12 synthetic kor+eng cases: 9 exact, 3 errors, CER 0.0486, including a critical `2,300,000원→22300,000원` mismatch. Static PE imports were closed across 56 files. Authenticode returned UnknownError; dependency NOTICE/license and exact-bundle redistribution rights remain unverified. P119/P120/P121 receive no score; provisional total remains 61/100 and G60 is NOT PASSED. Official acceptance UNASSESSED, OCR_MANIFEST=null, RELEASE HOLD. [Report artifact 14134094222](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106409/artifacts/14134094222) (SHA-256 `d3466b486c91b2e24edb638104e7bc5ffeb8a11c9e889f641ebcc5e726ecc193`).

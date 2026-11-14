@@ -1,3 +1,11 @@
+## 2026-11-15 KST — P119/P120 Windows 재감사 · +0점 · 잠정 61/100
+
+- **정확 코드 SHA:** [`0f82c8f0764cd00460abe3b27f97b497ce61ceb5`](https://github.com/hibi89/astra_pdf_redesigner/commit/0f82c8f0764cd00460abe3b27f97b497ce61ceb5); import 감사에서 Windows 시스템 DLL `usp10.dll` 분류와 회귀 검사를 추가했다.
+- **Actions:** Linux [#43647106432](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106432) PASS, Windows [#43647106409](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106409) PASS, 정본 정책 [#43647106804](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106804) PASS. 세 run 모두 정확 SHA `0f82c8f0764cd00460abe3b27f97b497ce61ceb5`.
+- **P119:** upstream Tesseract 5.5.3 자산 SHA-256 검증 일치. 실제 Windows runner PE static import closure 56 files / 286 direct / 0 delayed (157 system, 129 bundled) PASS. Authenticode는 `UnknownError`; installer에 보인 AUTHORS/LICENSE만으로 dependency NOTICE와 재배포권을 확인할 수 없어 **BLOCKED +0**.
+- **P120:** Windows 실제 kor+eng OCR 12건: 9 exact, 3 오류·누락, CER 0.0486. `2,300,000원→22300,000원` 숫자 오류가 재현됐다. 공급 승인 및 앱 UI의 원문 대조·PSM 3/6·취소 acceptance 미완으로 **BLOCKED +0**. [Report artifact 14134094222](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106409/artifacts/14134094222), SHA-256 `d3466b486c91b2e24edb638104e7bc5ffeb8a11c9e889f641ebcc5e726ecc193`.
+- **진행률·게이트:** 점수 61/100 변동 없음. G55 PASS; G60/G65/G70 NOT PASSED. OCR_MANIFEST=null, 공식 수용 UNASSESSED, RELEASE HOLD. P121/P126은 OCR 공급 승인 또는 선행 IPC 수용에 의존하고 P123/P124는 GitHub에서 접근 가능한 라이선스 명시 4B 모델 및 CPU 실측이 필요하다. 독립 진행 가능한 P114–P126 작업은 현재 없음.
+
 ## 2026-11-15 KST — P125 VERIFIED +2 · 잠정 61/100 · G60 미통과
 - **완료:** P125(A09) main-process signed SKU action boundary. BASIC/PRO/BUSINESS 권한, 만료·발급자·서명·좌석·SKU 검증을 Electron main에서 side effect 전 수행한다. trusted top-frame, one-time request ID, 4096회 fail-closed bound. test-only JWK는 매 테스트 중 생성하며 저장소에 private key를 두지 않았다.
 - **정확 기능·회귀 SHA:** `88c56e4188754f960ae94281b6d68e37b5081b62`. [P125 검증서](docs/evidence/astra/P125/VERIFICATION.md). Production issuer JWK/pin은 null, customer build false, 기존 demo preview 유지.

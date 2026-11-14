@@ -5,8 +5,8 @@
   "branch": "feature/astra-p71-pdf-source-parity-20261112",
   "decision": "BLOCKED",
   "credit_earned": 0,
-  "score_before": 57,
-  "score_after": 57,
+  "score_before": 61,
+  "score_after": 61,
   "official_acceptance": "UNASSESSED",
   "release": "RELEASE HOLD",
   "ocr_manifest": null,
@@ -90,11 +90,11 @@
     }
   ],
   "blockers": [
-    "The GitHub release asset has digest:null and no published SHA-256; the candidate executable's exact bytes are therefore unpinned.",
-    "Authenticode publisher/signature, PE direct and delay-load imports, and runtime DLL closure were not inspectable without obtaining the installer binary.",
-    "The candidate installer was not mapped to the listed kor/eng model sources or to a complete dependency and notice inventory.",
-    "Tesseract/tessdata source licenses are visible, but redistribution rights and required notices for this exact installer bundle remain unconfirmed.",
-    "P119 stop condition applies: keep OCR_MANIFEST=null and RELEASE HOLD; do not award credit or commit any vendor binary."
+    "The UB-Mannheim v5.4.0.20240606 candidate release digest is null; it is not approved.",
+    "The upstream Tesseract 5.5.3 Windows asset SHA-256 is pinned and matched, but Authenticode returned UnknownError due a certificate validity-period error.",
+    "The Windows Actions PE auditor closed the observed static import inventory (56 PE files, 286 direct imports, 0 delayed imports); this is not supplier/signature approval.",
+    "The candidate installer showed only doc/AUTHORS and doc/LICENSE; dependency-specific license/NOTICE mapping and redistribution rights for this exact bundle remain unconfirmed.",
+    "P119 remains BLOCKED +0. Keep OCR_MANIFEST=null and RELEASE HOLD; no binary is committed or bundled."
   ],
   "github_sources": [
     "https://api.github.com/repos/UB-Mannheim/tesseract",
@@ -128,5 +128,70 @@
     "linux_workflow_run": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43646062853",
     "blueprint_workflow_run": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43646063260",
     "report_artifact": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43646062862/artifacts/14134331658"
+  },
+  "latest_github_hosted_windows_audit": {
+    "code_sha": "0f82c8f0764cd00460abe3b27f97b497ce61ceb5",
+    "actions": {
+      "linux": 43647106432,
+      "windows": 43647106409,
+      "blueprint": 43647106804,
+      "all": "SUCCESS"
+    },
+    "installer": {
+      "repository": "https://github.com/tesseract-ocr/tesseract",
+      "release": "5.5.3",
+      "asset": "tesseract-ocr-w64-setup-5.5.3.20260724.exe",
+      "url": "https://github.com/tesseract-ocr/tesseract/releases/download/5.5.3/tesseract-ocr-w64-setup-5.5.3.20260724.exe",
+      "release_sha256": "bee9e3434bd94fd65387d9be28cd467a41f61b1275383b55b0f59a1331270ae4",
+      "download_scope": "disposable GitHub-hosted Windows runner only; not committed or bundled"
+    },
+    "authenticode": {
+      "status": "UnknownError",
+      "status_message": "A required certificate is not within its validity period when verifying against the current system clock or the timestamp in the signed file.",
+      "signer_subject": "CN=Universität Mannheim, O=Universität Mannheim, S=Baden-Württemberg, C=DE",
+      "signer_thumbprint": "2F92CB990D57719BDCCA2D72134378614A040D9B",
+      "timestamp_subject": "CN=PN: Zeitstempel 2026, O=DFN-CERT Services GmbH, L=Hamburg, S=Hamburg, C=DE"
+    },
+    "observed_pe_files": 73,
+    "import_closure": {
+      "status": "static-imports-closed",
+      "audited_pe_files": 56,
+      "direct_imports": 286,
+      "delay_imports": 0,
+      "windows_system_imports": 157,
+      "bundled_dependency_imports": 129
+    },
+    "license_files": [
+      "doc/AUTHORS",
+      "doc/LICENSE"
+    ],
+    "dependency_license_notice_mapping": "NOT_VERIFIED",
+    "exact_bundle_redistribution_rights": "NOT_CONFIRMED",
+    "language_data": {
+      "repository": "https://github.com/tesseract-ocr/tessdata_best",
+      "commit": "e12c65a915945e4c28e237a9b52bc4a8f39a0cec",
+      "eng_sha256": "8280aed0782fe27257a68ea10fe7ef324ca0f8d85bd2fd145d1c2b560bcb66ba",
+      "kor_sha256": "f888d4038348a0c3d25151e7f452bda0d74ca275b18cab146798bcbb94084fff"
+    },
+    "actual_ocr": {
+      "cases": 12,
+      "exact": 9,
+      "errors": 3,
+      "mean_whitespace_normalized_cer": 0.0486,
+      "critical_number_mismatch": "2,300,000원→22300,000원"
+    },
+    "report_artifact": {
+      "id": 14134094222,
+      "url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106409/artifacts/14134094222",
+      "sha256": "d3466b486c91b2e24edb638104e7bc5ffeb8a11c9e889f641ebcc5e726ecc193"
+    },
+    "decision": "BLOCKED",
+    "credit_earned": 0,
+    "blockers": [
+      "Authenticode UnknownError/certificate validity-period error",
+      "dependency-specific license/NOTICE mapping not established",
+      "redistribution rights for the exact installed bundle not confirmed",
+      "Keep OCR_MANIFEST=null and RELEASE HOLD"
+    ]
   }
 }
