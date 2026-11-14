@@ -1,3 +1,16 @@
+## 2026-11-15 KST — P119 공급자 근거 BLOCKED · 잠정 57/100 인수인계
+
+1. **완료 판정:** P119 Windows Tesseract 공급처·재배포 감사를 수행했다. UB-Mannheim v5.4.0.20240606 installer의 GitHub Release `digest`가 `null`이고 SHA-256·Authenticode·실제 PE/DLL closure·candidate bundle의 재배포 권리가 입증되지 않아 P119는 **BLOCKED, +0점**이다.
+2. **정확한 대상/변경:** 기능 코드는 수정하지 않았다. 출처 evidence와 P119–P121 차단 문서, 상태/점수/작업원장만 기록했다. 자세히: [P119 verification](docs/evidence/astra/P119/VERIFICATION.md), [candidate JSON](docs/evidence/astra/P119/SUPPLIER_CANDIDATE_AUDIT.json), [P120](docs/evidence/astra/P120/VERIFICATION.md), [P121](docs/evidence/astra/P121/VERIFICATION.md).
+3. **점수:** P119 +0, A07 5/12, 총 잠정 57/100. 사용자 배점 고정. 공식 수용 UNASSESSED, RELEASE HOLD, `OCR_MANIFEST=null`.
+4. **공개 출처 사실:** installer candidate 50,175,248 bytes, release v5.4.0.20240606 (2024-06-08); upstream v5.5.4 (2026-10-28)에는 Windows binary asset 없음. tessdata_best main의 kor/eng Git blob SHA-1 및 크기는 기록했으나 파일 SHA-256은 없음. Leptonica exact installer mapping/NOTICE 포함을 확인하지 못했다.
+5. **테스트 결과:** 공급처 바이너리 검사는 NOT RUN/BLOCKED. 기존 synthetic fail-closed tests exact code SHA `420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02`: Linux [#43633902801](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633902801) SUCCESS 276/276+build; Windows [#43633902770](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633902770) SUCCESS 275 PASS/1 OS-only SKIP, desktop 73/73, synthetic Authenticode; policy [#43633903290](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633903290) SUCCESS. 이 결과는 실제 공급처 승인으로 해석하지 않는다.
+6. **종속 차단:** P120 실 OCR 및 P121 Electron native OCR 시험 모두 P119 승인 자산이 없어 BLOCKED/0점이며 실제 실행·CER artifact 없음.
+7. **보존 상태:** STEP1 V1, STEP2 V2, BASIC8/PRO20/BUSINESS30, 서명키/고객 build 차단, 원본·고객 데이터 보존. OCR_MANIFEST=null 및 RELEASE HOLD 유지.
+8. **GitHub-only:** source audit는 GitHub 공개 repository/release metadata, Actions는 GitHub-hosted prior verification만 사용. 로컬 PC, 외부 CI, Vercel, 유료서비스, 외부 추론 API 사용 없음; 바이너리 다운로드/커밋 없음.
+9. **한계·미검증:** asset hash/서명/PE imports/runtime DLL, exact bundled kor+eng, candidate NOTICE/re-distribution rights, 실제 OCR 품질 모두 미검증. 공식 구매자 수용은 UNASSESSED.
+10. **다음:** 독립 P122 (127.0.0.1 고정 Ollama 동의/오래된 응답·원문 변경 방어) 진행. P120/P121은 공급자 승인 근거가 제공되면 재개한다.
+
 ## 2026-11-15 KST — P118 VERIFIED · 잠정 57/100 GitHub-only 인수인계 (10항)
 
 1. **목표·범위:** P114~P118을 최신 기존 feature branch에서 검증했다. 사용자 확정 A01~A12 배점, STEP1 V1·STEP2 V2, BASIC8/PRO20/BUSINESS30, 서명·출시 차단 정책을 보존한다. 70점 후 GPT-6 High 독립 검수는 사용자 요청 시 진행한다.

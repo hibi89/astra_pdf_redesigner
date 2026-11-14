@@ -1,6 +1,6 @@
 # Astra PDF Redesigner — 12영역 최종설계 증거 기반 잠정 완성률
 
-**기준일: 2026-11-15 KST · P118 검증 기능 SHA `420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02` · 잠정 57/100점 (57%).**
+**기준일: 2026-11-15 KST · 마지막 검증 기능 SHA `420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02` · P119 BLOCKED +0 · 잠정 57/100점 (57%).**
 **공식 구매자 최종 수용률: UNASSESSED. 출시: RELEASE HOLD.**
 
 ## 산정 원칙
@@ -17,13 +17,21 @@
 | A04 8/20/30 레이아웃·브랜드·다중 PDF | 15 | **14** | 1 | BASIC8 + PRO12 + BUSINESS10 구조 차별성·실제 A4 PDF를 Chrome/Edge 30/30 검증; P112/P117 2~20개 문서 세션 브랜드 계획과 2/5/20개 개별 A4 출력·취소·V2 불변을 Chrome/Edge에서 확인. 배치 로고 포함·영구 저장은 미구현. | 최종 구매자 시각 품질·고객 수용 |
 | A05 로컬 디자인 참고·적용 | 5 | **4** | 1 | PNG/JPEG/WebP/PDF 로컬 분석·미리보기·적용/Undo; Chrome/Edge 8종 합성 metric, source SHA·V2 전체 저장소 불변 및 손상 PDF fail-closed | 실구매자 레퍼런스 품질·폰트/권리·고객 PDF 수용
 | A06 온라인 레퍼런스 | 5 | **4** | 1 | 안전한 브라우저 검색 링크·URL/권리메모 로컬 기록  P112 저장된 HTTPS 출처→사용자 파일 선택→STEP5 로컬 분석 직접 연결, 권리·파일 동일성 인증/내장 검색 카드 없음. | 내장 검색 결과·출처 검증·STEP5 직접 연결 |
-| A07 OCR·콘텐츠 안전·STEP7 | 12 | **5** | 7 | STEP7 PDF 대조·수동 검토·출시 OCR 차단 정책/검사  P113 원본 페이지 임시 이미지·OCR 텍스트 좌우 수동 대조 체크. 별도 로컬 Tesseract 5.5.0 한국어 합성 2/3 정확(1 실패), 앱 설치형/정식 재배포 미검증. | 합법 공급처의 Tesseract 실제 한국어 OCR·표/스캔 정확도 |
+| A07 OCR·콘텐츠 안전·STEP7 | 12 | **5** | 7 | STEP7 PDF 대조·수동 검토·출시 OCR 차단 정책/검사, P113 PNG/OCR 수동 대조. P119 UB-Mannheim 공급처 후보 audit BLOCKED +0: GitHub installer digest null, Authenticode/PE·DLL closure 및 bundle 재배포권 미확인. OCR_MANIFEST=null. | 승인 공급처의 Windows Tesseract 실제 한국어 OCR·표/스캔 정확도 |
 | A08 한국어 로컬 AI 윤문 | 14 | **2** | 12 | 제어기 골격은 존재하지만 실 모델 추론 없음(0점)  P111 소유자 설치 로컬 Ollama 고정 주소 Qwen3 동의 기반 UI·프로세스 어댑터·Diff/되돌리기, 합성 mock 검증; Astra 실제 CPU 모델 추론/문장 품질은 미검증. | 상업 재배포 가능한 GGUF/CPU 실제 동작·품질·비교·되돌림 |
 | A09 라이선스·SKU·지원 | 11 | **5** | 6 | P96 서명 검증, P107 기능 매트릭스, P108 발급/연장, P109 GUI 실행 게이트, **P110 Electron PDF IPC main-frame/URL 검사** | 판매자 실제 공개키 pin·안전 발급/재발급/환불/철회·기기 수/오프라인 운영·same-frame IPC 우회·지원 약관 |
 | A10 Windows 설치·복구 | 5 | 3 | 2 | CI Windows unsigned NSIS 설치·제거·업그레이드, A4/IndexedDB·PNG 보존 | 실 Win10/11 물리 설치·서명/SmartScreen |
 | A11 허가 PDF 5~10건 검수 | 7 | 0 | 7 | 합성 도구는 존재하나 실제 사용자 승인 문서 0건 | 실제 허가 PDF 5~10건 독립 대조/육안 수용 |
 | A12 판매·법적·최종 승인 | 2 | 0 | 2 | 상품 등록 초안만 존재 | 저작권·재배포권·크몽 등록·최종 구매자 승인 |
 | **합계** | **100** | **57** | **43** | **잠정 증거 기반 구현·검증 점수** | **공식 수용 미완** |
+
+## P119 +0점 — Windows Tesseract 공급처 후보 감사 (BLOCKED)
+
+- **판정:** P119는 공급처 바이너리 SHA-256, Authenticode, PE imports/DLL closure, exact kor/eng payload mapping, candidate NOTICE와 재배포권을 입증할 수 없어 0/1점이다. 점수 57/100 및 A07 5/12 유지.
+- GitHub UB-Mannheim v5.4.0.20240606 release asset은 50,175,248 bytes지만 release API `digest=null`; 실제 바이너리는 별도 다운로드/동봉 금지 지시에 따라 취득하지 않았다.
+- Tesseract/tessdata source LICENSE Apache-2.0 표기, tessdata repo main commit에서 kor/eng의 size·Git blob SHA-1을 확인했다. Git blob SHA-1은 파일 SHA-256이 아니다. Leptonica license file과 repo metadata `NOASSERTION`를 기록했으나 installer dependency/NOTICE 연결을 증명하지 못했다.
+- 기존 P104/P105/P106 synthetic checks는 정확 기능 SHA `420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02`에서 통과했지만 이는 실제 supplier sign/hash/license나 OCR 품질 증거가 아니다. [P119 검증서](../evidence/astra/P119/VERIFICATION.md)와 [기계 판독 후보 감사](../evidence/astra/P119/SUPPLIER_CANDIDATE_AUDIT.json).
+- P120/P121은 P119 승인 자산이 없어 BLOCKED/0점. `OCR_MANIFEST=null`, RELEASE HOLD 유지. 다음 독립 작업 P122.
 
 ## P118 +1점 — 로컬 레퍼런스 분석·비파괴 적용·재현성
 

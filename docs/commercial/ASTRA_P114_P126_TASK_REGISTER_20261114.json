@@ -293,7 +293,7 @@
       "credit_max": 1,
       "provisional_ceiling_if_all_pass": 58,
       "depends_on": [],
-      "status": "PENDING",
+      "status": "BLOCKED",
       "credit_earned": 0,
       "expected_paths": [
         "desktop/ocr-supply-chain-preflight.cjs",
@@ -304,10 +304,10 @@
       "implementation": "별도 다운로드/동봉 없이 공식 공급처 후보의 버전·해시·Authenticode·PE import/delay-load DLL 폐쇄성·tessdata kor/eng·재배포권 증거를 정리한다. 데이터/고객 PDF 없이 증거·검증기만 유지.",
       "acceptance": "Windows 테스트에서 정상·변조·누락·DLL 경로 오염·서명 없음·라이선스 고지 없음 케이스의 거부 동작, SBOM/NOTICE 후보별 근거 파일, 출처 날짜·버전·파일 해시 기록.",
       "blockers": "공급처/재배포권이 미확인되면 P119 점수 미인정, OCR_MANIFEST=null·RELEASE HOLD 유지. 임의 바이너리와 개인키 GitHub 반입 금지.",
-      "evidence_feature_sha": null,
-      "linux_workflow_url": null,
-      "windows_workflow_url": null,
-      "blueprint_workflow_url": null,
+      "evidence_feature_sha": "420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02",
+      "linux_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633902801",
+      "windows_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633902770",
+      "blueprint_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633903290",
       "executor": "Codex 6 Luna Max",
       "execution_medium": "GitHub-only",
       "runner": "windows-latest official artifact SHA/AuthentiCode/PE/license",
@@ -317,9 +317,17 @@
         "Windows Electron/NSIS when relevant",
         "Final blueprint policy"
       ],
-      "evidence_linux_run": null,
-      "evidence_windows_run": null,
-      "evidence_blueprint_run": null
+      "evidence_linux_run": 43633902801,
+      "evidence_windows_run": 43633902770,
+      "evidence_blueprint_run": 43633903290,
+      "actual_result": "BLOCKED +0. GitHub candidate metadata audit recorded; release asset digest is null and exact Windows binary SHA-256, Authenticode, PE direct/delay-load DLL closure, bundle NOTICE/re-distribution rights are unverified. Existing synthetic preflight/Authenticode tests passed on the unchanged code SHA only; no vendor binary or real OCR was downloaded/run. OCR_MANIFEST=null; RELEASE HOLD.",
+      "blockers_observed": [
+        "UB-Mannheim v5.4.0.20240606 Windows asset release digest=null; no published exact binary SHA-256.",
+        "Authenticode, PE direct/delay-load import and runtime DLL closure not verified without binary.",
+        "Candidate installer to kor/eng model versions and dependency NOTICE mapping unverified.",
+        "Redistribution rights for this exact candidate bundle unconfirmed."
+      ],
+      "supplier_audit_path": "docs/evidence/astra/P119/SUPPLIER_CANDIDATE_AUDIT.json"
     },
     {
       "id": "P120",
@@ -329,7 +337,7 @@
       "depends_on": [
         "P119"
       ],
-      "status": "PENDING",
+      "status": "BLOCKED",
       "credit_earned": 0,
       "expected_paths": [
         "tools/verify-real-korean-ocr.py",
@@ -354,7 +362,12 @@
       ],
       "evidence_linux_run": null,
       "evidence_windows_run": null,
-      "evidence_blueprint_run": null
+      "evidence_blueprint_run": null,
+      "actual_result": "NOT RUN; BLOCKED by P119 supplier hash/signature/redistribution evidence. No actual Tesseract kor+eng run or CER corpus; no score.",
+      "blockers_observed": [
+        "P119 is BLOCKED; OCR_MANIFEST remains null and no supplier-approved Windows Tesseract asset is available.",
+        "No mock/synthetic OCR result was credited as actual Tesseract execution."
+      ]
     },
     {
       "id": "P121",
@@ -365,7 +378,7 @@
         "P119",
         "P120"
       ],
-      "status": "PENDING",
+      "status": "BLOCKED",
       "credit_earned": 0,
       "expected_paths": [
         "desktop/local-ocr-controller.cjs",
@@ -393,7 +406,12 @@
       ],
       "evidence_linux_run": null,
       "evidence_windows_run": null,
-      "evidence_blueprint_run": null
+      "evidence_blueprint_run": null,
+      "actual_result": "NOT RUN; BLOCKED by unapproved P119 asset and P120 actual OCR prerequisite. No Electron native OCR subprocess evidence; no score.",
+      "blockers_observed": [
+        "P119 is BLOCKED; OCR_MANIFEST remains null and no supplier-approved Windows Tesseract asset is available.",
+        "No mock/synthetic OCR result was credited as actual Tesseract execution."
+      ]
     },
     {
       "id": "P122",

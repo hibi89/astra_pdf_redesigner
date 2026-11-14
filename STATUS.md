@@ -1,3 +1,13 @@
+## 2026-11-15 KST — P119 BLOCKED · P120/P121 BLOCKED · 잠정 57/100
+
+- **P119:** Windows Tesseract 후보 공급망 감사 결과 0/1점. 공개 UB-Mannheim v5.4.0.20240606 installer의 GitHub release asset metadata는 50,175,248 bytes, `digest:null`; 실제 SHA-256, Authenticode, PE direct/delay-load DLL 폐쇄, 설치파일 속 kor/eng·dependency 목록 및 해당 묶음 재배포권을 입증하지 못했다. P119 지시대로 설치 바이너리/모델을 다운로드하거나 저장소에 동봉하지 않았다.
+- **출처 조사:** upstream Tesseract 5.5.4 release는 2026-10-28 공개됐으나 Windows asset 없음. tessdata_best의 eng/kor 파일은 GitHub main commit `e12c65a915945e4c28e237a9b52bc4a8f39a0cec`에서 존재/크기/Git blob SHA-1을 확인했지만 SHA-256은 없음(바이너리 미취득). Tesseract/tessdata 소스는 Apache-2.0 표기. Leptonica 후보 LICENSE는 있으나 repo metadata NOASSERTION이며 후보 설치물과 dependency/NOTICE 매핑 미확인.
+- **기능·차단 정책:** 기존 공급망 검증기는 합성 manifest byte/hash/PE imports, 누락·변조·경로 오염을 거부하고 결과를 review-required로 제한한다. `OCR_MANIFEST=null`, OCR 비활성, RELEASE HOLD를 유지했다. 상세 [P119 감사·검증](docs/evidence/astra/P119/VERIFICATION.md) 및 [후보 JSON](docs/evidence/astra/P119/SUPPLIER_CANDIDATE_AUDIT.json).
+- **테스트 근거:** 실제 공급자 자산 검증은 SKIP/BLOCKED. 기존 synthetic suite는 code SHA `420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02`에서 Linux [#43633902801](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633902801) PASS (Node 276/276/build), Windows [#43633902770](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633902770) PASS (Node 275 + 1 OS-only SKIP, desktop 73/73, synthetic Authenticode tests), blueprint [#43633903290](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633903290) PASS. 이 CI는 공급자 승인이나 OCR 실행 증거가 아니다.
+- **P120/P121:** P119 공급 자산 승인 미달로 실제 Tesseract 및 Electron IPC subprocess 시험을 실행하지 않았다. 각각 0점 BLOCKED 기록: [P120](docs/evidence/astra/P120/VERIFICATION.md), [P121](docs/evidence/astra/P121/VERIFICATION.md).
+- **점수·진행:** A07 5/12, 총 57/100 유지. G55 PASS, G60 미도달. 공식 수용 UNASSESSED, RELEASE HOLD. 다음 독립 작업 P122.
+- **변경 파일:** P119–P121 evidence/JSON 및 상업용 진행 문서만. 제품 기능·OCR manifest·고객 데이터 변경 없음.
+
 ## 2026-11-15 KST — Astra P118 검증 완료, 잠정 57/100
 
 - **완료 작업:** P118 (A05 로컬 레퍼런스 분석·비파괴 적용/재현성), VERIFIED +1.

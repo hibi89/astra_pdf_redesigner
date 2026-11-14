@@ -1,6 +1,6 @@
 # Astra PDF Redesigner — P114~P126 실행 설계 및 50→70점 검증 공시
 
-> **[2026-11-14 최신 사용자 위임으로 실행자 변경]** 50→70(P114~P126) 구현·테스트·GitHub 커밋 담당은 **Codex 6 Luna Max**. 오직 **GitHub 기존 feature 브랜치 + GitHub-hosted Actions**만 사용한다. 이전 Instant 담당 표기는 이 범위에서 대체한다. 상세 실행 환경·실모델/실OCR blocking·한도 규정은 [Codex Github-only 런북](ASTRA_CODEX_LUNA_MAX_GITHUB_ONLY_P114_P126_20261114.md) 및 [작업 원장](ASTRA_P114_P126_TASK_REGISTER_20261114.json)을 우선한다. **설계 기준 50/100; 현재 P114/P115/P116/P117/P118 VERIFIED, G55 PASS, 잠정 57/100, 다음 P119; 공식 UNASSESSED, RELEASE HOLD. 이 문서 수정은 기능 개발이나 CI 통과가 아니다.** 70점 이후 P127+ 담당자는 이번 위임에서 지정하지 않았다.
+> **[2026-11-14 최신 사용자 위임으로 실행자 변경]** 50→70(P114~P126) 구현·테스트·GitHub 커밋 담당은 **Codex 6 Luna Max**. 오직 **GitHub 기존 feature 브랜치 + GitHub-hosted Actions**만 사용한다. 이전 Instant 담당 표기는 이 범위에서 대체한다. 상세 실행 환경·실모델/실OCR blocking·한도 규정은 [Codex Github-only 런북](ASTRA_CODEX_LUNA_MAX_GITHUB_ONLY_P114_P126_20261114.md) 및 [작업 원장](ASTRA_P114_P126_TASK_REGISTER_20261114.json)을 우선한다. **설계 기준 50/100; P114/P115/P116/P117/P118 VERIFIED, G55 PASS, P119/P120/P121 BLOCKED +0, 잠정 57/100, 다음 독립 P122; 공식 UNASSESSED, RELEASE HOLD. 이 문서 수정은 기능 개발이나 CI 통과가 아니다.** 70점 이후 P127+ 담당자는 이번 위임에서 지정하지 않았다.
 
 
 > 설계 승인 문맥: 2026-11-14 21:55 KST, 사용자 지시: GPT-6 High가 최종설계 기반 작업을 분해·공시하고, Codex 6 Luna Max가 구현과 GitHub 검증·인수인계를 직접 담당. High는 사용자 요청 시 최종 별도 검수 담당. 이 문서는 **계획 공시**이며 기능 구현·테스트 또는 70점 달성을 의미하지 않는다.
@@ -58,9 +58,9 @@
 | P116 BASIC 8 / PRO 20 / BUSINESS 30 디자인 차별성·A4 출력 검수 | A04 | +1 | 55/100 | P115 | VERIFIED |
 | P117 BUSINESS 다중 문서 브랜드 반복 출력 및 SKU 우회 회귀 | A04 | +1 | 56/100 | P116 | VERIFIED |
 | P118 로컬 레퍼런스 분석→비파괴 적용·재현성 강화 | A05 | +1 | 57/100 | P116 | VERIFIED |
-| P119 Windows Tesseract 공급처·해시·DLL·LICENSE 감사 재현 | A07 | +1 | 58/100 | 없음 | PENDING |
-| P120 실 Tesseract 한국어 인식 난도별 측정·오인식 공개 | A07 | +1 | 59/100 | P119 | PENDING |
-| P121 Electron OCR IPC 실실행 및 실패 복구 | A07 | +1 | 60/100 | P119, P120 | PENDING |
+| P119 Windows Tesseract 공급처·해시·DLL·LICENSE 감사 재현 | A07 | +1 | 58/100 | 없음 | BLOCKED (+0) |
+| P120 실 Tesseract 한국어 인식 난도별 측정·오인식 공개 | A07 | +1 | 59/100 | P119 | BLOCKED (+0) |
+| P121 Electron OCR IPC 실실행 및 실패 복구 | A07 | +1 | 60/100 | P119, P120 | BLOCKED (+0) |
 | P122 Ollama 명시 동의·출처 고정·오래된 응답·의미 변경 방어 | A08 | +2 | 62/100 | 없음 | PENDING |
 | P123 실 Qwen3 한국어 CPU 추론 및 데이터 무결성 시험 | A08 | +3 | 65/100 | P122 | PENDING |
 | P124 3SKU 공통 윤문 실제 GUI 회귀·문단 승인/되돌림 | A08 | +2 | 67/100 | P123, P117 | PENDING |
@@ -118,7 +118,7 @@
 
 #### P119 — Windows Tesseract 공급처·해시·DLL·LICENSE 감사 재현 (A07 +1점, 누적 상한 58/100)
 
-- **선행:** 없음. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
+- **선행:** 없음. **담당:** Codex 6 Luna Max. 현재 상태: **BLOCKED, +0점**. [GitHub 후보 감사](../evidence/astra/P119/VERIFICATION.md); release SHA-256/AuthentiCode/PE closure/candidate redistribution rights not evidenced. Keep OCR_MANIFEST=null.
 - **수정 후보 경로:** desktop/ocr-supply-chain-preflight.cjs; desktop/ocr-pe-import-audit.cjs; tests/ocr-supply-chain-preflight.test.cjs; tests/ocr-windows-authenticode-evidence.test.ps1. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 별도 다운로드/동봉 없이 공식 공급처 후보의 버전·해시·Authenticode·PE import/delay-load DLL 폐쇄성·tessdata kor/eng·재배포권 증거를 정리한다. 데이터/고객 PDF 없이 증거·검증기만 유지.
 - **수용 테스트/증거:** Windows 테스트에서 정상·변조·누락·DLL 경로 오염·서명 없음·라이선스 고지 없음 케이스의 거부 동작, SBOM/NOTICE 후보별 근거 파일, 출처 날짜·버전·파일 해시 기록.
@@ -127,7 +127,7 @@
 
 #### P120 — 실 Tesseract 한국어 인식 난도별 측정·오인식 공개 (A07 +1점, 누적 상한 59/100)
 
-- **선행:** P119. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
+- **선행:** P119. **담당:** Codex 6 Luna Max. 현재 상태: **BLOCKED, +0점** (P119 승인 공급 자산 없음; [차단 기록](../evidence/astra/P120/VERIFICATION.md)).
 - **수정 후보 경로:** tools/verify-real-korean-ocr.py; src/step7/LocalOcrPanel.tsx; tests/step7-local-ocr-browser.mjs. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 한글·숫자·부정문·표·두 단·회전·저해상·잡음 스캔을 공용/자체 합성 PDF 이미지로 재생성. OCR의 원문 대조 UI와 누락·오인식 경고, PSM 3/6 선택·취소 기능을 검수.
 - **수용 테스트/증거:** 사전에 고정한 최소 12개 합성 OCR 원본을 실제 Tesseract kor+eng으로 실행하고 페이지별 CER/중요 수치 일치·검출 실패를 CSV/JSON에 기록. 오류를 자동승인/무경고 성공 처리한 0건; 실제 OCR 성공 1건 이상과 오류 실패사례 1건 이상 재현.
@@ -136,7 +136,7 @@
 
 #### P121 — Electron OCR IPC 실실행 및 실패 복구 (A07 +1점, 누적 상한 60/100)
 
-- **선행:** P119, P120. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
+- **선행:** P119, P120. **담당:** Codex 6 Luna Max. 현재 상태: **BLOCKED, +0점** (asset and actual OCR prerequisites unavailable; [차단 기록](../evidence/astra/P121/VERIFICATION.md)).
 - **수정 후보 경로:** desktop/local-ocr-controller.cjs; desktop/main.cjs; desktop/preload.cjs; src/step7/LocalOcrPanel.tsx; tests/local-ocr-controller.test.cjs; tests/step7-local-ocr-browser.mjs. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 승인된 테스트 자산을 CI 임시 디렉터리로만 사용해 실제 native OCR subprocess 호출/취소·timeout·temp 삭제·문서 V2 미수정·원본 PNG 대조까지 연결. 릴리스 manifest와 별도 시험 주입 분리.
 - **수용 테스트/증거:** Windows Electron 격리 프로필에서 PNG→kor+eng OCR 미승인 초안 반환과 실제 취소·시간제한·깨진 입력 거부·임시 파일 삭제를 확인. 외부 네트워크/자동 반영/고객 원본 전송 0, 기존 NSIS PASS.
@@ -222,4 +222,4 @@
 
 70~100 상세 잔여 30점과 사용자가 개입해야 할 최종 승인 장벽은 docs/commercial/ASTRA_INSTANT_70_TO_100_HANDOFF_20261114.md에 따로 기록한다. 모든 항목의 사용자가 확정한 배점과 원본 설계는 동일하다.
 
-**최종 확인:** 이 계획 문서는 원래 50→70 실행 기준이다. P114/P115/P116/P117/P118 VERIFIED, G55 PASS; P119~P126 PENDING. 현재 검증 기능 SHA `420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02`, 잠정 57/100, 다음 P119. 공식 UNASSESSED, RELEASE HOLD.
+**최종 확인:** P114–P118 VERIFIED, G55 PASS; P119–P121 BLOCKED at 0 credit; current provisional 57/100. Latest verified code SHA `420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02`. Next independent task P122. Official acceptance UNASSESSED, RELEASE HOLD.

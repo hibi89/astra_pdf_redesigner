@@ -3,7 +3,11 @@
 **2026-11-14 KST 최신 사용자 위임.** P114~P126은 **Codex 6 Luna Max**가 실행하고 GPT-6 High는 이번 설계 공시·완료 후 사용자 호출 시 독립 최종 검수를 맡는다. P127~P138의 실행자 지정은 이번 위임에 포함되지 않는다.
 
 **저장소:** `hibi89/astra_pdf_redesigner` · **기존 작업 브랜치:** `feature/astra-p71-pdf-source-parity-20261112` · **기준 기능 SHA:** `26aff40d6de524c2430f8a6b325d906cea67f7e1`.
-**기준 점수:** 위임 시 50/100. 현재 P114/P115/P116/P117/P118 VERIFIED, G55 PASS, 잠정 57/100, 다음 P119; 목표 70/100. 공식 사용자/구매자 수용률 `UNASSESSED`, 출시 `RELEASE HOLD`, 크몽 미등록. 이 런북은 실행 절차이며 점수 증거는 각 작업 검증서와 정확 SHA Actions다.
+**기준 점수:** 위임 시 50/100. 현재 P114/P115/P116/P117/P118 VERIFIED, G55 PASS, P119/P120/P121 BLOCKED(+0), 잠정 57/100, 다음 독립 P122; 목표 70/100. 공식 사용자/구매자 수용률 `UNASSESSED`, 출시 `RELEASE HOLD`, 크몽 미등록. 이 런북은 실행 절차이며 점수 증거는 각 작업 검증서와 정확 SHA Actions다.
+
+## P119 audit outcome — BLOCKED, 0 credit (2026-11-15 KST)
+
+The GitHub-hosted release candidate is identified, but its installer asset has `digest:null`. No installer SHA-256, Authenticode signer, PE import/delay-load closure, exact kor/eng payload mapping, dependency NOTICE set, or candidate-bundle redistribution approval is evidenced. No vendor binary was downloaded or committed. `OCR_MANIFEST=null`; P120/P121 cannot run. See [P119 verification](../evidence/astra/P119/VERIFICATION.md). Score remains 57/100; next independent task P122.
 
 ## P118 실행 결과 — VERIFIED · 잠정 57/100
 
@@ -46,8 +50,8 @@
 | P116 | A04 | +1 | 55/100 | Chrome/Edge A4 출력; BASIC 8+PRO 12+BUSINESS 10=30시안 조판 구별·잘림 0 |
 | P117 | A04 | +1 | 56/100 | Node·Chrome/Edge·Windows Electron; 2/5/20개 V2 문서 브랜드 재사용·취소·개별 출력·권한 우회 |
 | P118 | A05 | +1 | 57/100 | Chrome/Edge; 로컬 PNG/JPEG/PDF ≥8종 선택/적용/취소·Undo·복원, URL 자동 다운로드 금지 |
-| P119 | A07 | +1 | 58/100 | Windows Actions; Tesseract 출처·SHA256·Authenticode/PE/DLL·kor/eng·LICENSE/NOTICE. 미확인 시 BLOCKED |
-| P120 | A07 | +1 | 59/100 | GitHub Actions 실제 kor+eng Tesseract; 합성 스캔 ≥12종 CER/오인식/부정·금액/표 위험 측정(mock 불인정) |
+| P119 | A07 | +1 | 58/100 | BLOCKED(+0): release digest null, binary SHA/AuthentiCode/PE-DLL closure/bundle rights unknown |
+| P120 | A07 | +1 | 59/100 | BLOCKED(+0): no P119-approved supplier asset; actual OCR not run |
 | P121 | A07 | +1 | 60/100 | Windows Actions Electron IPC 실제 Tesseract subprocess; PNG→text·취소·timeout·임시파일 정리/원본 V2 불변 |
 | P122 | A08 | +2 | 62/100 | Node+Electron 부정 테스트 ≥30건; 127.0.0.1 고정·동의·출력 바운드·레이스·숫자·부정문 방어 |
 | P123 | A08 | +3 | 65/100 | Ubuntu Actions CPU-only 실제 qwen3:4b-instruct, 공식 SHA/권리/모델 버전 검증, 한국어 문단 ≥30·유효제안 ≥5, CPU/RAM/시간 측정. 모델 가중치 확보 불가시 BLOCKED |
@@ -92,14 +96,14 @@
 - **차단:** 실제 글꼴·저작권 판정이나 임의 URL 스크래핑으로 대체하지 않는다.
 - **GitHub 증거 산출물:** `docs/evidence/astra/P118/VERIFICATION.md`에 재현 명령/runner OS·실행 유형(mock/real)/합성 fixture 해시·실제 PASS/FAIL/SKIP·정확 기능 SHA·3개 CI workflow 링크·지원/미지원 범위·가점 근거 기재. **VERIFIED/+1점.** 정확 SHA·3개 Actions·실패 후보와 수용 증거는 P118 검증서에 기록했다.
 
-#### P119 (A07 +1; 선행: 없음)
+#### P119 (A07 +1; 선행: 없음) — BLOCKED, +0
 - **수정 경로:** desktop/ocr-supply-chain-preflight.cjs; desktop/ocr-pe-import-audit.cjs; tests/ocr-supply-chain-preflight.test.cjs; tests/ocr-windows-authenticode-evidence.test.ps1.
 - **개발:** 별도 다운로드/동봉 없이 공식 공급처 후보의 버전·해시·Authenticode·PE import/delay-load DLL 폐쇄성·tessdata kor/eng·재배포권 증거를 정리한다. 데이터/고객 PDF 없이 증거·검증기만 유지.
 - **검증:** Windows 테스트에서 정상·변조·누락·DLL 경로 오염·서명 없음·라이선스 고지 없음 케이스의 거부 동작, SBOM/NOTICE 후보별 근거 파일, 출처 날짜·버전·파일 해시 기록.
 - **차단:** 공급처/재배포권이 미확인되면 P119 점수 미인정, OCR_MANIFEST=null·RELEASE HOLD 유지. 임의 바이너리와 개인키 GitHub 반입 금지.
 - **GitHub 증거 산출물:** `docs/evidence/astra/P119/VERIFICATION.md`에 재현 명령/runner OS·실행 유형(mock/real)/합성 fixture 해시·실제 PASS/FAIL/SKIP·정확 기능 SHA·3개 CI workflow 링크·지원/미지원 범위·가점 근거 기재. **현재 PENDING/0점**.
 
-#### P120 (A07 +1; 선행: P119)
+#### P120 (A07 +1; 선행: P119) — BLOCKED, +0; actual Tesseract not run without approved asset.
 - **수정 경로:** tools/verify-real-korean-ocr.py; src/step7/LocalOcrPanel.tsx; tests/step7-local-ocr-browser.mjs.
 - **개발:** 한글·숫자·부정문·표·두 단·회전·저해상·잡음 스캔을 공용/자체 합성 PDF 이미지로 재생성. OCR의 원문 대조 UI와 누락·오인식 경고, PSM 3/6 선택·취소 기능을 검수.
 - **검증:** 사전에 고정한 최소 12개 합성 OCR 원본을 실제 Tesseract kor+eng으로 실행하고 페이지별 CER/중요 수치 일치·검출 실패를 CSV/JSON에 기록. 오류를 자동승인/무경고 성공 처리한 0건; 실제 OCR 성공 1건 이상과 오류 실패사례 1건 이상 재현.
