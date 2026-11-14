@@ -1,3 +1,11 @@
+## 2026-11-14 KST — P110 PDF IPC 프레임 신뢰경계 강화 + 잠정 최종설계 42/100점 (정확 SHA 3/3 CI SUCCESS)
+
+- **기능 SHA `5ed3525947f0225888963806f95d8f821ca03394`**: `desktop/pdf-export-ipc-guard.cjs` 추가. Electron PDF 저장 IPC에서 window/webContents 생존·동일 sender·최상위 senderFrame·정확 `astra://app/index.html` 두 URL 비교 후에만 printToPDF/저장 허용. P110 신규 6개 합성 정책 테스트를 `npm test`와 `npm run desktop:test` 양쪽 등록(첫 CI의 테스트 목록 누락을 발견해 정확 SHA에서 재검증). 기존 개발용 Electron PDF·V2/PNG 회귀 보존. 고객 상용 빌드는 계속 미승인·원래 공개키 pin null.
+- [Linux Chrome/Edge #43593105358](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43593105358) **2/2 SUCCESS**, Node **247PASS/0FAIL/0SKIP**, Chrome/Edge 실제 합성 A4/IDB PASS. [Windows Electron·NSIS #43593105373](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43593105373) **SUCCESS**, Node **246PASS/0FAIL/1 symlink SKIP**, desktop **65PASS/0FAIL**, 설치·제거/0.1.0→0.1.1 V2/PNG 보존 PASS. [최종설계 정책 #43593105644](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43593105644) **SUCCESS**, 정확 기능 SHA 3/3 워크플로 SUCCESS 및 원시 Node·Windows logs 확인.
+- 사용자 최종설계 12영역 가중 합계 100은 불변. 총괄이 새로 제시한 **잠정 증거 기반 완성률 41→42/100(+1%p, A09 4→5/11)**. 계산 기준·누적 근거·58점 미충족 사유는 `docs/commercial/ASTRA_FINAL_EVIDENCE_SCORE_20261114.md`에 고정. **공식 구매자 수용률 UNASSESSED**, 점수 42는 사용자 승인 부분점수·출시 승인 아님.
+- same-frame 직접 IPC·변조된 고객 바이너리에서 상용 SKU 유효성 검증과 강한 DRM을 해결한 것은 아님. 정식 서명 키·재발급/환불·장치·실물Win10/11·실 허가PDF5~10·정식 한글 OCR/로컬 AI는 미구현/미검증. **[작업중], RELEASE HOLD, 크몽 미등록, OCR_MANIFEST=null, main/PR10·원본/V1/V2 보존**.
+- 다음 P111: 메인 프로세스 서명 검증/상용 실행 경로 독립 보호와 위협모델 검토, 이후 가장 큰 A08/A07 미충족 고정 장벽에 집중. 유료·판매자키·배포·보안 권한 변경은 별도 승인.
+
 ## 2026-11-14 KST — P109 SKU GUI·PDF 실행 경로 서명 권한 3/3 정확 SHA 검증 완료
 
 - **기능 SHA `ee7ed4eaacf44a08800b56639d2178f5df76e7d3`**. src/commercial/skuActionGate.ts + CommercialLicensePanel.tsx, Workspace/BatchImportPanel/ProLayoutLibrary/BusinessBrandLibrary 실행 경로에 P107 발급자 지문/서명 영수증 재검증 호출 연결. PDF 저장은 BASIC/PRO/BUSINESS 선택 레이아웃·BUSINESS 브랜드 동시 권한을 저장 직전에 판단. 다중 PDF 개별 저장, 템플릿·브랜드 로컬 보관함 저장/삭제, 시안/브랜드 가져오기·내보내기 UI 내부 접근 검사. 영수증은 React 메모리 전용, V1/V2 영구 저장/서버 전송 없음. P109 신규 합성 회귀 **5/5 PASS**.
