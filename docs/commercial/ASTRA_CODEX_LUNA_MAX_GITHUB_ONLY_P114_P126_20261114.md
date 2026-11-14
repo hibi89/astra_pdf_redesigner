@@ -3,7 +3,7 @@
 **2026-11-14 KST 최신 사용자 위임.** P114~P126은 **Codex 6 Luna Max**가 실행하고 GPT-6 High는 이번 설계 공시·완료 후 사용자 호출 시 독립 최종 검수를 맡는다. P127~P138의 실행자 지정은 이번 위임에 포함되지 않는다.
 
 **저장소:** `hibi89/astra_pdf_redesigner` · **기존 작업 브랜치:** `feature/astra-p71-pdf-source-parity-20261112` · **기준 기능 SHA:** `26aff40d6de524c2430f8a6b325d906cea67f7e1`.
-**완성률:** 총괄 잠정 50/100, 목표 70/100 (+20); 공식 사용자/구매자 수용률 `UNASSESSED`, 출시 `RELEASE HOLD`, 크몽 미등록. **이 문서는 설계만 공시하며 구현·검증 및 새 점수 달성을 주장하지 않는다.**
+**기준 점수:** 위임 시 50/100. 현재 P114/P115 VERIFIED, 잠정 54/100, 다음 P116; 목표 70/100. 공식 사용자/구매자 수용률 `UNASSESSED`, 출시 `RELEASE HOLD`, 크몽 미등록. 이 런북은 실행 절차이며 점수 증거는 각 작업 검증서와 정확 SHA Actions다.
 
 ## 1. 최종설계/권한
 - 사용자 확정 12영역 A01~A12 100점 가중치, STEP1~7 로드맵, BASIC8/PRO20/BUSINESS30 고정. 배점 변경/임의 70% 선언 금지.
@@ -38,14 +38,14 @@
 - **개발:** 현재 재구성 로직을 보존하며 PDF.js 글자별 위치·bbox·벡터 위험 신호를 사용해 읽기 순서/표 의심/좌우열 충돌을 명시적으로 검수 대기 처리. 불확실한 블록은 자동 재정렬·저장하지 않는다.
 - **검증:** 직접 생성한 합성 PDF 최소 12종(단일열/2단/표격자/회전/혼합이미지/숫자·부정문/텍스트 뒤섞임 포함). 필수 원문 토큰 누락·열순서 오류를 무경고 정상으로 처리한 0건, 선택형 원문 대비 화면과 위험 경고를 실제 Chrome·Edge에서 확인.
 - **차단:** 자료 형식별 판정이 불완전하면 위험·미지원 상태로 남기고 점수 0. 경고 추가만 하고 실제 수동 대조 경로가 끊기면 불합격.
-- **GitHub 증거 산출물:** `docs/evidence/astra/P114/VERIFICATION.md`에 재현 명령/runner OS·실행 유형(mock/real)/합성 fixture 해시·실제 PASS/FAIL/SKIP·정확 기능 SHA·3개 CI workflow 링크·지원/미지원 범위·가점 근거 기재. **현재 PENDING/0점**.
+- **GitHub 증거 산출물:** `docs/evidence/astra/P114/VERIFICATION.md`에 재현 명령/runner OS·실행 유형(mock/real)/합성 fixture 해시·실제 PASS/FAIL/SKIP·정확 기능 SHA·3개 CI workflow 링크·지원/미지원 범위·가점 근거 기재. **VERIFIED/+2점; 정확 기능 SHA `9c3c506ecae49b68f207e6022c6b136da515b7e5`**.
 
 #### P115 (A03 +2; 선행: P114)
 - **수정 경로:** src/step3/sourceReview.ts; src/step7/OfflinePdfReview.tsx; src/step2/Workspace.tsx; tests/step3-browser.mjs; tests/step7-pdf-review-browser.mjs.
 - **개발:** 원본 글자·수치·기호·부정문·링크의 추출/수정/출력 간 차이를 계층별로 구분하고, 수동 복구·승인·되돌림을 원본 위치와 연결. 원본 해시는 불변, 사용자 승인 전 V2 영구 저장 불가.
 - **검증:** 난이도 있는 합성 PDF 최소 15건의 실제 소스/출력 A4 대조. 금액·날짜·부정 변경 0건 무승인 출력; 누락·중복 탐지가 실패한 사례는 미지원/수동대조 처리; 취소·오류 후 V1/V2 및 원본 SHA 유지.
 - **차단:** 표 셀 정확 재구성이나 이미지 원본 픽셀 보존을 약속하지 말 것. 인간 검수 없는 완전보존 주장은 실격.
-- **GitHub 증거 산출물:** `docs/evidence/astra/P115/VERIFICATION.md`에 재현 명령/runner OS·실행 유형(mock/real)/합성 fixture 해시·실제 PASS/FAIL/SKIP·정확 기능 SHA·3개 CI workflow 링크·지원/미지원 범위·가점 근거 기재. **현재 PENDING/0점**.
+- **GitHub 증거 산출물:** `docs/evidence/astra/P115/VERIFICATION.md`에 재현 명령/runner OS·실행 유형(mock/real)/합성 fixture 해시·실제 PASS/FAIL/SKIP·정확 기능 SHA·3개 CI workflow 링크·지원/미지원 범위·가점 근거 기재. **VERIFIED/+2점; 정확 기능 SHA `a89c7a7dfbb2e18ef1c5f328e248d2e60ec69a0d`**.
 
 #### P116 (A04 +1; 선행: P115)
 - **수정 경로:** src/step4/skuLayoutCandidates.ts; src/step2/Workspace.tsx; tests/step4-*.mjs; tests/step4-*.test.ts.
