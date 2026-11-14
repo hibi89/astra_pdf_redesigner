@@ -103,6 +103,21 @@ try{
  await evaluate("document.querySelector('[data-extended-layout-cancel]').click()");
  await eventually(()=>evaluate("!document.querySelector('.project-paper')?.dataset.advancedLayout"));
  assert.deepEqual(await evaluate(stored),advancedPrior,'Advanced cancel keeps original V2');
+  // Portable advanced-layout receipt: browser export/import without writes to IndexedDB.
+  await evaluate("document.querySelector('[data-extended-layout-id=pro-01]').click()");
+  await eventually(()=>evaluate("document.querySelector('.project-paper')?.dataset.advancedLayout"),x=>x==='pro-01');
+  await evaluate("document.querySelector('[data-advanced-preset-export]').click()");
+  const advancedJson=await evaluate("(async()=>await window.__astraPresetBlob.text())()");
+  const advancedReceipt=JSON.parse(advancedJson);
+  assert.deepEqual(Object.keys(advancedReceipt).sort(),['format','layoutId','version']);
+  assert.equal(advancedReceipt.layoutId,'pro-01');
+  assert.doesNotMatch(advancedJson,/assetId|content|sections|PDF-/);
+  await evaluate("document.querySelector('[data-extended-layout-cancel]').click()");
+  await evaluate("(()=>{const f=new File(["+JSON.stringify(advancedJson)+"],'advanced-layout.json',{type:'application/json'});const d=new DataTransfer();d.items.add(f);const i=document.querySelector('[data-advanced-preset-file]');i.files=d.files;i.dispatchEvent(new Event('change',{bubbles:true}));})()");
+  await eventually(()=>evaluate("document.querySelector('.project-paper')?.dataset.advancedLayout"),x=>x==='pro-01');
+  assert.deepEqual(await evaluate(stored),advancedPrior,'Portable advanced layout must not write V2 document');
+  await evaluate("document.querySelector('[data-extended-layout-cancel]').click()");
+
  console.log('PASS P89 PRO/BUSINESS TEMPORARY: 22 selectable unique DOM geometries, real A4 PDF, V2 unchanged');
  console.log('PASS STEP4 PORTABLE STYLE: file export/import, transient preview/cancel, apply/undo, A4 PDF, tamper and original V2 preservation');
 }finally{

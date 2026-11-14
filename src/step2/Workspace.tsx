@@ -15,6 +15,7 @@ import {pdfOutputImageCount,pdfOutputTextMarkers} from './outputMarkers.ts';
 import {downloadStylePreset,importStylePreset} from '../step4/stylePreset.ts';
 import {SKU_LAYOUT_CANDIDATES,skuLayoutCandidate} from '../step4/skuLayoutCandidates.ts';
 import ReferenceSearchPanel from '../step6/ReferenceSearchPanel.tsx';
+import {downloadAdvancedLayoutPreset,importAdvancedLayoutPreset} from '../step4/advancedLayoutPreset.ts';
 import {makeSourceReviewReceipt,downloadSourceReviewReceipt} from '../step3/reviewReceipt.ts';
 
 const allThemes=[...THEMES,
@@ -82,6 +83,8 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
   const [styleCompareOpen,setStyleCompareOpen]=useState(false);
   const [styleCompareGalleryOpen,setStyleCompareGalleryOpen]=useState(false);
   const [advancedPreview,setAdvancedPreview]=useState<{documentId:string;layoutId:string}|null>(null);
+  const [advancedPresetError,setAdvancedPresetError]=useState('');
+  const advancedPresetInput=useRef<HTMLInputElement|null>(null);
   const [previewTheme,setPreviewTheme]=useState<{documentId:string;theme:ThemeId}|null>(null);
   const [styleUndo,setStyleUndo]=useState<Record<string,StyleUndoEntry[]>>({});
   const [portableStyle,setPortableStyle]=useState<{documentId:string;name:string;design:DesignSettings}|null>(null);
@@ -223,6 +226,15 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
       setPortableStyleError('');
     }catch(error){setPortableStyle(null);setPortableStyleError(error instanceof Error?error.message:'프리셋을 열 수 없습니다.');}
   };
+  const loadAdvancedPreset=async(file:File)=>{
+    try{
+      const preset=await importAdvancedLayoutPreset(file);
+      if(!doc||!editable)return;
+      closeStyleCompare();clearReference();setPortableStyle(null);
+      setAdvancedPreview({documentId:doc.id,layoutId:preset.layoutId});
+      setAdvancedPresetError('');
+    }catch(error){setAdvancedPresetError(error instanceof Error?error.message:'레이아웃 파일을 열 수 없습니다.');}
+  };
   const cancelReferenceRender=()=>{const task=referenceRenderTask.current;referenceRenderTask.current=null;try{task?.cancel();}catch{}};
   const clearReference=()=>{
     cancelReferenceRender();
@@ -234,7 +246,7 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
   };
   useEffect(()=>()=>{if(referenceImage?.url)URL.revokeObjectURL(referenceImage.url);},[referenceImage]);
   useEffect(()=>()=>{referenceVersion.current++;cancelReferenceRender();const session=referencePdfSession.current;referencePdfSession.current=null;if(session)void session.loading.destroy().catch(()=>{});},[]);
-  useEffect(()=>{clearReference();setPortableStyle(null);setPortableStyleError('');setAdvancedPreview(null);},[doc?.id]);
+  useEffect(()=>{clearReference();setPortableStyle(null);setPortableStyleError('');setAdvancedPreview(null);setAdvancedPresetError('');},[doc?.id]);
   const analyzeReference=async(file:File)=>{
     setPortableStyle(null);clearReference();const version=referenceVersion.current;setReferenceError('');
     if(file.type==='application/pdf'||/\.pdf$/i.test(file.name)){
@@ -519,6 +531,16 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
                 aria-pressed={activeAdvancedLayoutId===layout.id}
                 onClick={()=>{closeStyleCompare();clearReference();setPortableStyle(null);setAdvancedPreview({documentId:doc.id,layoutId:layout.id});}}>{layout.label}</button>)}
             </div>
+            <div className="toolbar project-toolbar">
+              <button type="button" className="secondary-button" data-advanced-preset-export disabled={!editable||!activeAdvancedLayoutId}
+                onClick={()=>{try{if(activeAdvancedLayoutId)downloadAdvancedLayoutPreset(activeAdvancedLayoutId);setAdvancedPresetError('');}catch(error){setAdvancedPresetError(error instanceof Error?error.message:'고급 레이아웃 파일을 저장할 수 없습니다.');}}}>선택 레이아웃 파일로 저장</button>
+              <button type="button" className="secondary-button" data-advanced-preset-import disabled={!editable}
+                onClick={()=>advancedPresetInput.current?.click()}>고급 레이아웃 파일 다시 열기</button>
+            </div>
+            <input ref={advancedPresetInput} className="hidden-input" type="file" accept=".json,application/json" data-advanced-preset-file
+              aria-label="고급 레이아웃 JSON 선택" onChange={event=>{const file=event.target.files?.[0];event.target.value='';if(file)void loadAdvancedPreset(file);}}/>
+            {advancedPresetError&&<p role="alert" className="warning" data-advanced-preset-error>{advancedPresetError}</p>}
+            <p className="help-text">이 JSON에는 레이아웃 ID만 저장합니다. PDF 내용·이미지·문서 설정은 포함되지 않습니다. 현재 V2 프로젝트 저장소나 판매 권한은 변경하지 않습니다.</p>
             {activeAdvancedLayoutId&&<div className="advanced-layout-preview-note" role="status" data-extended-layout-status>
               {skuLayoutCandidate(activeAdvancedLayoutId)?.label} · 임시 미리보기/출력만 지원, 저장 데이터는 변경되지 않습니다.
               <div className="toolbar project-toolbar"><button type="button" className="secondary-button" data-extended-layout-cancel onClick={()=>setAdvancedPreview(null)}>기본 디자인으로 돌아가기</button></div>
