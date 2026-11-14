@@ -1,3 +1,16 @@
+## 2026-11-14 KST — P91 STEP6 보안형 검색 연결 (10항 인수인계)
+
+1. **목표/확정 요구/기술:** Astra 원래 7단계·3 SKU 전체 최종설계 100%, 0원 로컬우선, React/TS/Vite/Electron/PDF.js. 웹 검색은 소유자가 수동 입력한 일반 키워드만.
+2. **완료 기능/선택 근거:** `src/step6/referenceDiscovery.ts`(고정 호스트 HTTPS URL/80자/제어문자 차단), `src/step6/ReferenceSearchPanel.tsx`(opt-in 검색/새 탭/다운로드 후 STEP5 로컬 분석), `src/step2/Workspace.tsx` 연결. 직접 원격 이미지 수집보다 비용 0원·저작권/개인 PDF 외부 전송 위험 낮은 수동 검색을 선택.
+3. **테스트/미검증:** Node22 독립 모듈 2 PASS/0 FAIL(컨테이너), 기존 159/159 PASS는 이전 정확 코드 `8d604a0644cc` 전용. 신규 소스 `95a7f7be6cab` CI 실행 중; 이번 추가 브라우저 동의·DB불변 회귀가 반영된 다음 SHA는 CI 종료 전 성공 주장 금지.
+4. **상태/중단:** STEP6 수동 탐색 링크 구현, 자동검색 카드·결과 직접 수집은 미구현. PRO20/BUSINESS30 정식 저장/entitlement/배치·브랜드 기능, OCR, 모델, PDF·Windows 실사용 시험, 판매 인수 미완. 공식 **UNASSESSED/100% 미달** [작업중], RELEASE HOLD.
+5. **문제/피벗:** 승인 안 된 외부 PDF 전송·원격 모델/API·구독·DB 스키마 변환을 회피. 링크 검색 수동 방식으로 전환; 라이선스나 OCR 정확도를 보장하지 않음. 2회 실패 반복 재시도 없음.
+6. **저장소/브랜치/SHA/경로:** `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, P91 기능 HEAD `95a7f7be6cab5a98637fceac7f50196eb1bac219`; 본 문서 포함 최신 SHA는 커밋 후 재확인. 핵심 `src/step6/*`, `tests/reference-discovery.test.ts`, `tests/step5-reference-browser.mjs`.
+7. **배포/환경:** 기존 GitHub Actions Node22/Chrome/Edge + Windows NSIS; Production/Vercel **미적용**, Windows 물리 PC 미검증. 명령 `npm test && npm run build`, 워크플로 `.github/workflows/ci.yml`.
+8. **원본/백업/보안:** 부모 커밋 `b9065bfb5e46`로 소스 회귀 가능; v1/localStorage·V2/IndexedDB·원본 PDF·Draft PR10·main·원격 설정 불변. PDF/고객자료/토큰/모델 가중치 업로드 금지.
+9. **다음 우선순위/승인:** P91 정확 SHA CI 확인→오류만 최소 수정→STEP4 PRO20/BUSINESS30 완성 및 STEP7 OCR/오프라인 한국어 모델 실제 권리 검증. 오후 1시 사용자 PC·실PDF/Windows/라이선스/무료 모델·OCR 다운로드 동의 일괄 요청; 판매·서명·배포는 별도 GO.
+10. **갱신 시점/검증 범위:** 2026-11-14 KST, GitHub branch source readback + Node22 독립 테스트. 문서 전용/회귀 추가 커밋을 전체 통과 SHA로 오인하지 않음.
+
 ## 2026-11-14 KST — P90 정확 SHA 최종 CI 3/3 GREEN 및 인수검사 최신화
 
 - **실제 코드/테스트 SHA `8d604a0644cc74f9bf6ebc35dca7c64a17a3245b`**: [Linux Chrome+Edge #43545039341](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43545039341) **2/2 SUCCESS**. GitHub 실제 raw job 로그 npm **159/159 PASS, 0 FAIL**, TS/Vite build PASS, 양 브라우저 기존 데이터·PDF 스모크 통과, P89 22종 구조형 후보 및 실제 A4 출력 마커 PASS. [Windows NSIS #43545039441](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43545039441) **SUCCESS**: Electron native smoke/unsigned 설치·실행·제거·업그레이드 기존 IndexedDB V2 유지. [최종설계 policy #43545039836](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43545039836) SUCCESS(증빙 정책).

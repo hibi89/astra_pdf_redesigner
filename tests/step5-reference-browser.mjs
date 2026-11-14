@@ -43,6 +43,21 @@ try{
   await eventually(()=>evaluate("Boolean(document.querySelector('.doc-list-item.active')&&document.querySelector('.project-paper'))"));
   const stored="(async()=>{const db=await new Promise((resolve,reject)=>{const r=indexedDB.open('astra-pdf-redesigner:v2');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});try{const id=await new Promise((resolve,reject)=>{const r=db.transaction('meta','readonly').objectStore('meta').get('activeDocumentId');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});return await new Promise((resolve,reject)=>{const r=db.transaction('documents','readonly').objectStore('documents').get(id);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}finally{db.close()}})()";
   const before=await eventually(()=>evaluate(stored),doc=>Boolean(doc?.id&&doc?.design&&doc?.content));
+  // STEP6 opt-in browser navigation: no search links before consent, only manually supplied terms.
+  assert.equal(await evaluate("document.querySelectorAll('[data-step6-google],[data-step6-bing]').length"),0);
+  await evaluate("(()=>{const i=document.querySelector('[data-step6-query]');const set=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set;set.call(i,'보고서 A4 디자인');i.dispatchEvent(new Event('input',{bubbles:true}));})()");
+  assert.equal(await evaluate("document.querySelectorAll('[data-step6-google],[data-step6-bing]').length"),0,'No external links before consent');
+  await evaluate("document.querySelector('[data-step6-consent]').click()");
+  const referenceLinks=await eventually(()=>evaluate("(()=>{const a=document.querySelector('[data-step6-google]'),b=document.querySelector('[data-step6-bing]');return a&&b?{google:a.href,bing:b.href,rel:a.rel,target:a.target}:null})()"));
+  assert.equal(new URL(referenceLinks.google).hostname,'www.google.com');
+  assert.equal(new URL(referenceLinks.bing).hostname,'www.bing.com');
+  assert.equal(new URL(referenceLinks.google).searchParams.get('q'),'보고서 A4 디자인');
+  assert.equal(referenceLinks.target,'_blank');assert.match(referenceLinks.rel,/noopener/);
+  await evaluate("(()=>{const i=document.querySelector('[data-step6-query]');const set=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set;set.call(i,'브랜드 템플릿');i.dispatchEvent(new Event('input',{bubbles:true}));})()");
+  await eventually(()=>evaluate("document.querySelectorAll('[data-step6-google],[data-step6-bing]').length"),x=>x===0);
+  assert.deepEqual((await evaluate(stored)).content,before.content,'STEP6 search must not modify persisted document content');
+  assert.deepEqual((await evaluate(stored)).design,before.design,'STEP6 search must not modify persisted design');
+
   const uploadImage=()=>evaluate(`(async()=>{const canvas=document.createElement('canvas');canvas.width=100;canvas.height=100;const c=canvas.getContext('2d');c.fillStyle='#fff';c.fillRect(0,0,100,100);c.fillStyle='#3f644d';c.fillRect(25,25,50,50);const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));const transfer=new DataTransfer();transfer.items.add(new File([blob],'reference.png',{type:'image/png'}));const input=document.querySelector('.reference-style-panel input[type=file]');input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}))})()`);
   await uploadImage();
   await eventually(()=>evaluate("Boolean(document.querySelector('[data-reference-analysis]'))"));

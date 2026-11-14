@@ -1,3 +1,11 @@
+## 2026-11-14 KST — STEP6 무료 검색 동의형 연결·P91 작업
+
+- 정확 소스 HEAD `95a7f7be6cab5a98637fceac7f50196eb1bac219`: React STEP6 검색 패널, 수동 키워드만 허용, Google/Bing 고정 HTTPS 새 탭 링크, 개별 클릭 전 동의 요구. PDF 바이트·파일명·프로젝트 데이터 자동 전송 없음. 기존 STEP5 사용자가 직접 내려받은 권리 확보 파일만 로컬 분석. 외부 API·유료 결제·schema 변경 없음.
+- Node22 독립 모듈 테스트 **2/2 PASS** 및 정적 URL/전송 방지 자체검사 PASS(컨테이너 재현, 전체 npm suite 아님). exact HEAD GitHub CI Linux Chrome/Edge #43547118090 및 Windows #43547118003 **진행 중**; 최종설계 증거 게이트 #43547118295 SUCCESS(증거정책만).
+- 추가 Chrome/Edge 실제 브라우저에서 수동입력·동의 전 링크 차단·동의 후 HTTPS 키워드 전달·검색어 변경 시 동의 해제·IndexedDB 불변을 검증하는 회귀를 `tests/step5-reference-browser.mjs`에 보강. 이 테스트가 포함된 다음 SHA 전체 CI는 **미검증**.
+- STEP6 인터넷 결과 자동 수집/라이선스 판정/앱 내 카드 검색은 미구현이며 STEP6 전체 완료가 아님. PRO20/BUSINESS30 정식·OCR·실한국어 모델/성능·실사용 Windows·5~10 실제 PDF·상용권/사용자 수용·출시도 그대로 미완. 공식 최종완성률 **UNASSESSED / 100% 미달**, [작업중]·RELEASE HOLD·미등록 유지.
+- 오후 1시 사용자 PC 일괄 요청은 `docs/commercial/ASTRA_OWNER_1300_CHECKLIST_20261114.md`로 수집. 기존 자동 예약 중복 생성 금지. 기존 STEP1 v1/STEP2 IndexedDB V2·원본 PDF·main·Draft PR10 불변. Production/Vercel 미적용.
+
 ## 2026-11-14 KST — P90 정확 SHA 최종 CI 3/3 GREEN 및 인수검사 최신화
 
 - **실제 코드/테스트 SHA `8d604a0644cc74f9bf6ebc35dca7c64a17a3245b`**: [Linux Chrome+Edge #43545039341](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43545039341) **2/2 SUCCESS**. GitHub 실제 raw job 로그 npm **159/159 PASS, 0 FAIL**, TS/Vite build PASS, 양 브라우저 기존 데이터·PDF 스모크 통과, P89 22종 구조형 후보 및 실제 A4 출력 마커 PASS. [Windows NSIS #43545039441](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43545039441) **SUCCESS**: Electron native smoke/unsigned 설치·실행·제거·업그레이드 기존 IndexedDB V2 유지. [최종설계 policy #43545039836](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43545039836) SUCCESS(증빙 정책).
