@@ -1,3 +1,10 @@
+## 2026-11-14 KST — P104 정확 SHA OCR 공급망·Windows 패키징 3/3 CI 최종 성공
+
+- **최종 기능/회귀 SHA:** e2fd0797990ce94e7f7a68720ece3617f9d114db. [Linux Chrome+Edge #43574432110](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43574432110) **2/2 JOB SUCCESS**, Node 210/210 PASS/0 FAIL/0 SKIP, Vite/TypeScript build 및 Chrome/Edge 각각 실제 PDF.js synthetic scan review E2E PASS(네트워크 외부 요청0).
+- [Windows Electron·NSIS #43574432095](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43574432095) **SUCCESS** Node **209 PASS / 1 Windows symlink SKIP / 0 FAIL**, desktop **48/48 PASS**, Windows exe smoke·NSIS 설치/제거·0.1.0→0.1.1 기존 IndexedDB V2/PNG 보존 PASS. **첫·두 번째 NSIS 빌드 모두** OCR `RELEASE_HOLD/nativeOcrAssetsBundled:false/productOcrEnabled:false` 게이트 실제 PASS. [정본 정책 #43574432327](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43574432327) SUCCESS(공식 최종100% 인증 아님).
+- 이전 P104 '신규 Linux/Windows CI 미확인' 기록은 정확 SHA 원시 로그로 **성공 확인하여 정정**. 공급망 사전검증 합성 PE/DLL/언어팩 15 + 출시보류 차단 6 사례가 210 Node 테스트에 포함. 실제 제3자 Windows Tesseract 파일을 공급받아 설치·서명·재배포권·DLL 의존 그래프/한국어 품질까지 검증한 것은 **아님**. 실제 라이선스·DLL·설치파일 출처는 계속 HOLD, OCR_MANIFEST=null.
+- 코드 저장소 hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112, P104 공급망 문서 docs/commercial/ASTRA_P104_WINDOWS_OCR_PREFLIGHT_20261114.md. STEP1/2 저장 원본, main/PR10, 사용자 PDF·데이터 불변. 공식 12개 항목 최종 점수 UNASSESSED/100% 미달, [작업중]/RELEASE HOLD/크몽 미등록/Vercel 미적용. 다음은 실제 Windows OCR 공급처·DLL/Authenticode·재배포권 확인과 물리 Windows10/11·고객 PDF 검수.
+
 ## 2026-11-14 KST — P104 Windows OCR 사전공급망/라이선스·NSIS 출시 보류 방어
 
 - **최종 P104 코드 SHA e2fd0797990ce94e7f7a68720ece3617f9d114db**: `desktop/ocr-supply-chain-preflight.cjs` 외부 Windows x64 OCR 자산 manifest(원본 배포 URL/SHA, 파일별 SHA/크기, DLL·kor·eng 전수재고, LICENSE/NOTICE 증빙 ID·URL) 검증. 미등록 DLL·무허가 경로·중복 대소문자 이름·심볼릭 링크/하드링크·파일 내용 변조·PE32+ x64 불일치·누락된 저작권 증빙은 차단. **통과해도 review-required(법적 재배포/서명/DLL closure/실행 허가 모두 false)**.
