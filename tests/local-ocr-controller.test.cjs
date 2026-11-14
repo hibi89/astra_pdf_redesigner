@@ -64,7 +64,9 @@ test('OCR requires all pinned hashes, rejects symlink escape',async()=>{
   assert.equal((await createLocalOcrController({resourcesDir:f.root,manifest:bad}).status()).status,'unavailable');
   assert.equal((await createLocalOcrController({resourcesDir:f.root,manifest:f.manifest}).status()).status,'available');
   const kor=path.join(f.root,'astra-local-ocr','tessdata','kor.traineddata');
-  fs.unlinkSync(kor);fs.symlinkSync(path.join(f.root,'astra-local-ocr','bin','tesseract.exe'),kor);
+  fs.unlinkSync(kor);
+  try{fs.symlinkSync(path.join(f.root,'astra-local-ocr','bin','tesseract.exe'),kor);}
+  catch(error){if(process.platform==='win32'&&error?.code==='EPERM')return;throw error;}
   assert.equal((await createLocalOcrController({resourcesDir:f.root,manifest:f.manifest}).status()).status,'unavailable');
  }finally{f.cleanup();}
 });
