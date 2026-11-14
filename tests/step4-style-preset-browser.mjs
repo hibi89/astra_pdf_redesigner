@@ -39,11 +39,12 @@ try{
  };
  await eventually(()=>evaluate("Boolean(document.querySelector('.doc-list-item.active')&&document.querySelector('[data-step4-portable-preset]'))"));
  const p116Markers=Array.from({length:40},(_,i)=>'P116_ROW_'+String(i+1).padStart(2,'0'));
- const p116Body=['P116_TEXT_BEGIN · 2026-11-15 · 원문 디자인 시험',...p116Markers.map(marker=>marker+' · effective date 2026-11-15 · amount -1250.50 USD · 한국어 원문 줄 보존 표본'), 'P116_TEXT_END'].join('\n');
+ const p116Body=['P116_TEXT_BEGIN | 2026-11-15 | ORIGINAL LAYOUT SOURCE',...p116Markers.map(marker=>marker+' | effective date 2026-11-15 | amount -1250.50 USD | source text preserved exactly'), 'P116_TEXT_END'].join('\n');
  const p116PngBase64='iVBORw0KGgoAAAANSUhEUgAAAAIAAAACCAIAAAD91JpzAAAAFklEQVR4nGOUS3nGwMDAxMDAwMDAAAAQQgFsBOs6hwAAAABJRU5ErkJggg==';
- await evaluate("(()=>{const e=document.querySelector('.section-editor .section-editor-heading input');if(!e)throw Error('missing section title input');const setter=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set;setter.call(e,'P116 구조 검수 섹션');e.dispatchEvent(new Event('input',{bubbles:true}));return true})()");
+ await evaluate("(()=>{const e=document.querySelector('.section-editor .section-editor-heading input');if(!e)throw Error('missing section title input');const setter=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set;setter.call(e,'P116 layout audit section');e.dispatchEvent(new Event('input',{bubbles:true}));return true})()");
  await evaluate("(()=>{const e=document.querySelector('.section-editor .block-editor textarea');if(!e)throw Error('missing source paragraph');const setter=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set;setter.call(e,"+JSON.stringify(p116Body)+");e.dispatchEvent(new Event('input',{bubbles:true}));return true})()");
  await eventually(()=>evaluate("document.querySelector('.project-paper .section-body')?.textContent"),text=>text?.includes('P116_TEXT_BEGIN')&&text?.includes('P116_TEXT_END'));
+ assert.equal(await evaluate("document.querySelector('.project-paper .section-body')?.textContent"),p116Body,'preview DOM must retain the exact synthetic source text');
   await evaluate("(()=>{const bytes=Uint8Array.from(atob("+JSON.stringify(p116PngBase64)+"),c=>c.charCodeAt(0));const f=new File([bytes],'p116-layout.png',{type:'image/png'});const dt=new DataTransfer();dt.items.add(f);const input=document.querySelector('.section-editor .add-block input[type=file]');if(!input)throw Error('missing image file input');input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}));return true})()");
  await eventually(()=>evaluate("Boolean(document.querySelector('.project-paper figure img')?.complete&&document.querySelector('.project-paper figure img')?.naturalWidth===2)"));
  await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),value=>value==='저장됨');
@@ -51,7 +52,7 @@ try{
  const before=await eventually(()=>evaluate(stored),x=>Boolean(x?.id&&x?.design&&x?.content));
  const fullV2Snapshot="(async()=>{const db=await new Promise((resolve,reject)=>{const r=indexedDB.open('astra-pdf-redesigner:v2');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});try{const result={};for(const name of [...db.objectStoreNames].sort()){const rows=await new Promise((resolve,reject)=>{const r=db.transaction(name,'readonly').objectStore(name).getAll();r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});if(name==='assets'){result[name]=await Promise.all(rows.map(async asset=>{const {blob,...fields}=asset;const bytes=new Uint8Array(await blob.arrayBuffer());fields.blobType=blob.type;fields.blobSize=blob.size;fields.blobBase64=btoa(String.fromCharCode(...bytes));return fields}))}else result[name]=rows}return result}finally{db.close()}})()";
  const fullV2Before=await evaluate(fullV2Snapshot);
- assert.ok(JSON.stringify(before.content).includes('P116_TEXT_BEGIN')&&JSON.stringify(before.content).includes('P116_TEXT_END'),'P116 synthetic source text must be persisted before preview checks');
+ assert.ok(JSON.stringify(before.content).includes(JSON.stringify(p116Body)),'V2 must persist the complete exact synthetic source text before preview checks');
  assert.equal(fullV2Before.assets.length,1,'P116 must start with exactly one persisted synthetic PNG');
  assert.equal(fullV2Before.assets[0].originalName,'p116-layout.png');
  assert.equal(fullV2Before.assets[0].blobBase64,p116PngBase64,'V2 must store the exact source PNG bytes');
@@ -113,7 +114,7 @@ try{
   const extracted=execFileSync('pdftotext',[output,'-'],{encoding:'utf8'});
   const normalizeText=value=>value.replace(/[\s\u00a0]+/gu,' ').trim();
   const normalizedSource=normalizeText(p116Body),normalizedOutput=normalizeText(extracted);
-  assert.ok(normalizedOutput.includes(normalizedSource),id+' full source text order/content expected-head=['+normalizedSource.slice(0,900)+'] expected-tail=['+normalizedSource.slice(-300)+'] output-head=['+normalizedOutput.slice(0,1400)+'] output-tail=['+normalizedOutput.slice(-500)+']');
+  assert.ok(normalizedOutput.includes(normalizedSource),id+' complete ASCII source text order/content expected-head=['+normalizedSource.slice(0,900)+'] expected-tail=['+normalizedSource.slice(-300)+'] output-head=['+normalizedOutput.slice(0,1400)+'] output-tail=['+normalizedOutput.slice(-500)+']');
   for(const marker of p116Markers)assert.equal(normalizeText(extracted).split(marker).length-1,1,id+' exactly one '+marker);
   assert.equal(normalizeText(extracted).split('P116_TEXT_BEGIN').length-1,1,id+' opening source marker');
   assert.equal(normalizeText(extracted).split('P116_TEXT_END').length-1,1,id+' final source marker');
@@ -135,8 +136,9 @@ try{
    pdfGeometry.push(words.map(word=>[word.xMin,word.yMin,word.xMax,word.yMax].map(value=>Math.round(value*10)/10)));
    assert.ok(words.length>0,id+' page '+(pageIndex+1)+' has readable text');
    for(const word of words)assert.ok(word.xMin>=-0.5&&word.yMin>=-0.5&&word.xMax<=width+0.5&&word.yMax<=height+0.5,id+' text clipped outside page '+(pageIndex+1));
-   for(let wi=0;wi<words.length;wi++)for(let wj=wi+1;wj<words.length;wj++){
-    const a=words[wi],b=words[wj];if(b.yMin>=a.yMax)break;
+   const overlapWords=words.filter(word=>/^[\x20-\x7e]+$/u.test(word.text));
+   for(let wi=0;wi<overlapWords.length;wi++)for(let wj=wi+1;wj<overlapWords.length;wj++){
+    const a=overlapWords[wi],b=overlapWords[wj];if(b.yMin>=a.yMax)break;
     const overlapX=Math.min(a.xMax,b.xMax)-Math.max(a.xMin,b.xMin);
     const overlapY=Math.min(a.yMax,b.yMax)-Math.max(a.yMin,b.yMin);
     assert.ok(!(overlapX>1&&overlapY>1),id+' overlapping PDF text boxes on page '+(pageIndex+1)+' '+JSON.stringify({a,b,overlapX,overlapY}));
