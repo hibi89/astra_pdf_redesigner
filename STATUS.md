@@ -1,3 +1,9 @@
+## 2026-11-15 KST — P119 alternate Windows asset audit · +0 · 61/100
+
+- **SHA:** [`c365ba07df29cd6228a794f0c420230d448f91ee`](https://github.com/hibi89/astra_pdf_redesigner/commit/c365ba07df29cd6228a794f0c420230d448f91ee). Linux [#43650366545](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366545) PASS (Node 290/290); Windows [#43650366554](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366554) PASS (Node 289 PASS/0 FAIL/1 OS SKIP; desktop 86/86; OCR step PASS); policy [#43650366939](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366939) PASS.
+- **Alternative asset:** official Tesseract 5.5.0 Windows release matched SHA-256 `f3fc4236425b690c8be756f35793f77394ee004be0a6460a440c754d892f68bc` from pinned GitHub manifest. Authenticode returned `UnknownError` (certificate validity-period error), same Universität Mannheim thumbprint as 5.5.3; candidate was not installed. [Audit artifact 14135377855](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366554/artifacts/14135377855) SHA-256 `068625dc9be4c29db76b7b8fd8f29c20dda3d4a4c06954ee87d202e2c1abe472`.
+- **P119/P120:** 5.5.3 actual OCR and static closure remain exploratory evidence; exact bundle license/NOTICE and redistribution remain unresolved. P119/P120/P121 BLOCKED +0; 61/100; G60/G65/G70 NOT PASSED; OCR_MANIFEST=null; RELEASE HOLD. Continue P119 with pinned 5.4.0 candidate audit if available.
+
 ## 2026-11-15 KST — P119/P120 Windows 재감사 · +0점 · 잠정 61/100
 
 - **정확 코드 SHA:** [`0f82c8f0764cd00460abe3b27f97b497ce61ceb5`](https://github.com/hibi89/astra_pdf_redesigner/commit/0f82c8f0764cd00460abe3b27f97b497ce61ceb5); import 감사에서 Windows 시스템 DLL `usp10.dll` 분류와 회귀 검사를 추가했다.

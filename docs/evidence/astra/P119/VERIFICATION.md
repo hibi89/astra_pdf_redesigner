@@ -1,8 +1,8 @@
 # P119 — Windows Tesseract 공급처 후보 감사
 
 **판정:** BLOCKED · 인정 0/1점 · 잠정 완성률 61/100  
-**최신 감사 코드 SHA:** [`0f82c8f0764cd00460abe3b27f97b497ce61ceb5`](https://github.com/hibi89/astra_pdf_redesigner/commit/0f82c8f0764cd00460abe3b27f97b497ce61ceb5)  
-**정확 SHA Actions:** Linux [#43647106432](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106432) PASS · Windows [#43647106409](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106409) PASS · 정본 정책 [#43647106804](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106804) PASS  
+**최신 감사 코드 SHA:** [`c365ba07df29cd6228a794f0c420230d448f91ee`](https://github.com/hibi89/astra_pdf_redesigner/commit/0f82c8f0764cd00460abe3b27f97b497ce61ceb5)  
+**정확 SHA Actions:** Linux [#43650366545](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106432) PASS · Windows [#43650366554](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106409) PASS · 정본 정책 [#43650366939](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106804) PASS  
 **공식 수용:** UNASSESSED · **출시:** RELEASE HOLD · **OCR_MANIFEST:** null
 
 ## 공급 후보 감사 결과
@@ -21,3 +21,9 @@
 ## 판정 이유
 
 자산 byte hash와 static import closure가 확인됐지만 Authenticode는 유효하지 않은 상태로 판정됐고, dependency license/NOTICE 및 이 installer bundle의 재배포권 mapping도 끝나지 않았다. 따라서 P119는 **BLOCKED +0**이다. `OCR_MANIFEST=null`, OCR 비활성, RELEASE HOLD를 유지한다. P120의 12개 sample OCR은 실행 가능성 근거일 뿐 공급 승인이나 앱 acceptance가 아니다. 상세 후보별 원장은 [SUPPLIER_CANDIDATE_AUDIT.json](SUPPLIER_CANDIDATE_AUDIT.json)에 있다.
+
+## 2026-11-15 — 추가 upstream 5.5.0 후보 감사 (P119, no score)
+
+정확 SHA [`c365ba07df29cd6228a794f0c420230d448f91ee`](https://github.com/hibi89/astra_pdf_redesigner/commit/c365ba07df29cd6228a794f0c420230d448f91ee)의 Linux [#43650366545](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366545), Windows [#43650366554](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366554), 정본 정책 [#43650366939](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366939)가 모두 SUCCESS했다. Windows Actions에서 official upstream release `tesseract-ocr-w64-setup-5.5.0.20241111.exe`를 검사했다. Scoop manifest [08f0339](https://github.com/anderlli0053/DEV-tools/blob/08f0339f698c7b0dab04f1b69f74deaa42dde98a/bucket/tesseract.json)의 pin `f3fc4236425b690c8be756f35793f77394ee004be0a6460a440c754d892f68bc`와 다운로드 asset SHA-256이 일치했다. Windows Authenticode는 이 후보에서도 `UnknownError`를 반환했고 동일한 Universität Mannheim signer/thumbprint `2F92CB990D57719BDCCA2D72134378614A040D9B`를 관찰했다. Timestamp signer는 Sectigo Public Time Stamping Signer R35였고 Windows는 인증서 유효기간 오류를 보고했다. 감사는 서명이 `Valid`가 아니어서 설치 전에 fail-closed 중단했으므로 이 후보의 PE closure·license inventory는 실행하지 않았다. [후보 감사 report artifact 14135377855](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366554/artifacts/14135377855) SHA-256 `068625dc9be4c29db76b7b8fd8f29c20dda3d4a4c06954ee87d202e2c1abe472`에 결과를 보존했다.
+
+따라서 5.5.0도 승인 후보가 아니다. 5.5.3의 import closure 및 실제 OCR 증거는 유지되지만 서명·bundle NOTICE/license·재배포 근거가 없어 P119/P120은 각각 BLOCKED +0이다. 제품 OCR_MANIFEST=null, RELEASE HOLD.
