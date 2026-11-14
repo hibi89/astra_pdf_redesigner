@@ -1,6 +1,6 @@
 # Astra PDF Redesigner — 12영역 최종설계 증거 기반 잠정 완성률
 
-**기준일: 2026-11-14 KST · 기능 SHA `5ed3525947f0225888963806f95d8f821ca03394` · 잠정 42/100점 (42%).**
+**기준일: 2026-11-14 KST · 기능 SHA `26aff40d6de524c2430f8a6b325d906cea67f7e1` · 잠정 50/100점 (50%).**
 **공식 구매자 최종 수용률: UNASSESSED. 출시: RELEASE HOLD.**
 
 ## 산정 원칙
@@ -14,16 +14,24 @@
 | A01 회고록 입력·저장·A4 | 4 | 3 | 1 | STEP1 필드·V1 자동 저장·Chrome/Edge A4 출력 | 사용자 실제 회고록 인쇄 |
 | A02 문서·이미지·V2 | 6 | 5 | 1 | STEP2 블록·이미지·IndexedDB V2/PNG·파일 복원·NSIS 업그레이드 | 구매자 물리 PC 복원 |
 | A03 기존 PDF 가져오기·원문 대조 | 14 | 8 | 6 | PDF.js 원본 추출·수동 승인·텍스트/이미지 대조·암호/손상/스캔 경고·출력 합성 회귀 | 실제 표·다단·도형·누락·의미 정확도 확인 |
-| A04 8/20/30 레이아웃·브랜드·다중 PDF | 15 | 10 | 5 | BASIC8 + PRO12 + BUSINESS10 시안 출력·브랜드·PRO 수동 큐·저장 시연 | 30종 완제품 품질·브랜드 일괄 적용·구매자 수용 |
+| A04 8/20/30 레이아웃·브랜드·다중 PDF | 15 | **12** | 3 | BASIC8 + PRO12 + BUSINESS10 시안 출력·브랜드·PRO 수동 큐·저장 시연  P112 2~20개 문서에 동일 BUSINESS 텍스트 브랜드·레이아웃 세션 계획/개별 PDF 출력 경로 추가. 자동 일괄 파일 출력·로고 포함·영구 저장은 미구현. | 30종 완제품 품질·브랜드 일괄 적용·구매자 수용 |
 | A05 로컬 디자인 참고·적용 | 5 | 3 | 2 | 이미지·PDF 로컬 색상/타이포 분석·비파괴 스타일 적용 | 실제 레퍼런스 품질 및 복원 |
-| A06 온라인 레퍼런스 | 5 | 2 | 3 | 안전한 브라우저 검색 링크·URL/권리메모 로컬 기록 | 내장 검색 결과·출처 검증·STEP5 직접 연결 |
-| A07 OCR·콘텐츠 안전·STEP7 | 12 | 3 | 9 | STEP7 PDF 대조·수동 검토·출시 OCR 차단 정책/검사 | 합법 공급처의 Tesseract 실제 한국어 OCR·표/스캔 정확도 |
-| A08 한국어 로컬 AI 윤문 | 14 | 0 | 14 | 제어기 골격은 존재하지만 실 모델 추론 없음(0점) | 상업 재배포 가능한 GGUF/CPU 실제 동작·품질·비교·되돌림 |
+| A06 온라인 레퍼런스 | 5 | **4** | 1 | 안전한 브라우저 검색 링크·URL/권리메모 로컬 기록  P112 저장된 HTTPS 출처→사용자 파일 선택→STEP5 로컬 분석 직접 연결, 권리·파일 동일성 인증/내장 검색 카드 없음. | 내장 검색 결과·출처 검증·STEP5 직접 연결 |
+| A07 OCR·콘텐츠 안전·STEP7 | 12 | **5** | 7 | STEP7 PDF 대조·수동 검토·출시 OCR 차단 정책/검사  P113 원본 페이지 임시 이미지·OCR 텍스트 좌우 수동 대조 체크. 별도 로컬 Tesseract 5.5.0 한국어 합성 2/3 정확(1 실패), 앱 설치형/정식 재배포 미검증. | 합법 공급처의 Tesseract 실제 한국어 OCR·표/스캔 정확도 |
+| A08 한국어 로컬 AI 윤문 | 14 | **2** | 12 | 제어기 골격은 존재하지만 실 모델 추론 없음(0점)  P111 소유자 설치 로컬 Ollama 고정 주소 Qwen3 동의 기반 UI·프로세스 어댑터·Diff/되돌리기, 합성 mock 검증; Astra 실제 CPU 모델 추론/문장 품질은 미검증. | 상업 재배포 가능한 GGUF/CPU 실제 동작·품질·비교·되돌림 |
 | A09 라이선스·SKU·지원 | 11 | **5** | 6 | P96 서명 검증, P107 기능 매트릭스, P108 발급/연장, P109 GUI 실행 게이트, **P110 Electron PDF IPC main-frame/URL 검사** | 판매자 실제 공개키 pin·안전 발급/재발급/환불/철회·기기 수/오프라인 운영·same-frame IPC 우회·지원 약관 |
 | A10 Windows 설치·복구 | 5 | 3 | 2 | CI Windows unsigned NSIS 설치·제거·업그레이드, A4/IndexedDB·PNG 보존 | 실 Win10/11 물리 설치·서명/SmartScreen |
 | A11 허가 PDF 5~10건 검수 | 7 | 0 | 7 | 합성 도구는 존재하나 실제 사용자 승인 문서 0건 | 실제 허가 PDF 5~10건 독립 대조/육안 수용 |
 | A12 판매·법적·최종 승인 | 2 | 0 | 2 | 상품 등록 초안만 존재 | 저작권·재배포권·크몽 등록·최종 구매자 승인 |
-| **합계** | **100** | **42** | **58** | **잠정 증거 기반 구현·검증 점수** | **공식 수용 미완** |
+| **합계** | **100** | **50** | **50** | **잠정 증거 기반 구현·검증 점수** | **공식 수용 미완** |
+
+## P111~P113 +8점 (이번 회차)
+
+- **총괄 잠정 42→50/100점(+8)**: A04 10→12(+2), A06 2→4(+2), A07 3→5(+2), A08 0→2(+2). 사용자 확정 영역별 최대점수는 변경하지 않으며 부분 인정 기준은 총괄 잠정. 현재 잔여50. **공식 사용자/구매자 수용점수는 UNASSESSED, RELEASE HOLD.**
+- **정확 기능 SHA `26aff40d6de524c2430f8a6b325d906cea67f7e1`:** [Linux Chrome/Edge #43595956953](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43595956953) 2/2 SUCCESS, Node263PASS/0FAIL/0SKIP, Chrome·Edge 실제 합성 PDF/V2 보존. [Windows Electron/NSIS #43595956932](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43595956932) SUCCESS, Node262PASS/0FAIL/1 OS SKIP, desktop73PASS/0FAIL, unsigned 설치/제거, 0.1.0→0.1.1 V2+PNG 보존. [정본 정책 #43595957159](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43595957159) SUCCESS. 정확 SHA 3/3+raw job logs.
+- **A08 한계:** Ollama 테스트는 local HTTP **mock**, 사용자 PC에 실제 모델이 있어도 Astra의 문단별 실추론·CPU 시간·의미/숫자 보존은 아직 미검증. 실제 모델(2.5GB GGUF 등)은 **동봉·업로드·재배포하지 않음.** 로컬 앱 프로세스에서 127.0.0.1로 명시 승인된 문단을 보내는 별도 프로세스 기반이므로 완전 제로 전송/무조건 의미 보존 주장 금지.
+- **A07 실제 공급자 독립 실험:** 이 실행 환경 Tesseract 5.5.0 kor+eng, NanumGothic 48pt 합성 PNG 3건 중 **2건 100% 문자열 일치/1건 수치·순서 변형**. 제품 Electron OCR 파이프라인 및 Windows 벤더 SHA/AuthentiCode 검증은 별개. 재현 코드 `tools/verify-real-korean-ocr.py`, release OCR manifest null.
+- **A04/A06 한계:** 여러 문서 동일 브랜드는 세션 메모리·텍스트만, 사용자는 각 문서를 열어 PDF를 수동 저장. URL 출처는 사용자 메모와 파일의 동일성/이용권이 미확인이고, 자동 웹 다운로드 없음.
 
 ## 증거 및 증분
 - **P109 이전 기준:** 41/100 잠정 (A09 4/11). 정확 SHA `ee7ed4eaacf44a08800b56639d2178f5df76e7d3`, [Linux/Chrome/Edge](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43591625251) / [Windows](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43591625273) / [정본 정책](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43591625548) 3/3 SUCCESS.
