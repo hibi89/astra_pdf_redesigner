@@ -1,6 +1,6 @@
 # Astra PDF Redesigner — P114~P126 실행 설계 및 50→70점 검증 공시
 
-> **[2026-11-14 최신 사용자 위임으로 실행자 변경]** 50→70(P114~P126) 구현·테스트·GitHub 커밋 담당은 **Codex 6 Luna Max**. 오직 **GitHub 기존 feature 브랜치 + GitHub-hosted Actions**만 사용한다. 이전 Instant 담당 표기는 이 범위에서 대체한다. 상세 실행 환경·실모델/실OCR blocking·한도 규정은 [Codex Github-only 런북](ASTRA_CODEX_LUNA_MAX_GITHUB_ONLY_P114_P126_20261114.md) 및 [작업 원장](ASTRA_P114_P126_TASK_REGISTER_20261114.json)을 우선한다. **설계 기준 50/100; P114/P115/P116/P117/P118 VERIFIED, G55 PASS, P119/P120/P121 BLOCKED +0, P122 VERIFIED +2, P123/P124 BLOCKED +0, 잠정 59/100, 다음 P125; 공식 UNASSESSED, RELEASE HOLD. 이 문서 수정은 기능 개발이나 CI 통과가 아니다.** 70점 이후 P127+ 담당자는 이번 위임에서 지정하지 않았다.
+> **[2026-11-14 최신 사용자 위임으로 실행자 변경]** 50→70(P114~P126) 구현·테스트·GitHub 커밋 담당은 **Codex 6 Luna Max**. 오직 **GitHub 기존 feature 브랜치 + GitHub-hosted Actions**만 사용한다. 이전 Instant 담당 표기는 이 범위에서 대체한다. 상세 실행 환경·실모델/실OCR blocking·한도 규정은 [Codex Github-only 런북](ASTRA_CODEX_LUNA_MAX_GITHUB_ONLY_P114_P126_20261114.md) 및 [작업 원장](ASTRA_P114_P126_TASK_REGISTER_20261114.json)을 우선한다. **설계 기준 50/100; P114/P115/P116/P117/P118 VERIFIED, G55 PASS, P119/P120/P121 BLOCKED +0, P122 VERIFIED +2, P123/P124 BLOCKED +0, P125 VERIFIED +2, 잠정 61/100, G60 NOT PASSED, P126 BLOCKED; 공식 UNASSESSED, RELEASE HOLD. 이 문서 수정은 기능 개발이나 CI 통과가 아니다.** 70점 이후 P127+ 담당자는 이번 위임에서 지정하지 않았다.
 
 
 > 설계 승인 문맥: 2026-11-14 21:55 KST, 사용자 지시: GPT-6 High가 최종설계 기반 작업을 분해·공시하고, Codex 6 Luna Max가 구현과 GitHub 검증·인수인계를 직접 담당. High는 사용자 요청 시 최종 별도 검수 담당. 이 문서는 **계획 공시**이며 기능 구현·테스트 또는 70점 달성을 의미하지 않는다.
@@ -64,8 +64,8 @@
 | P122 Ollama 명시 동의·출처 고정·오래된 응답·의미 변경 방어 | A08 | +2 | 62/100 | 없음 | VERIFIED (+2) |
 | P123 실 Qwen3 한국어 CPU 추론 및 데이터 무결성 시험 | A08 | +3 | 65/100 | P122 | BLOCKED +0 |
 | P124 3SKU 공통 윤문 실제 GUI 회귀·문단 승인/되돌림 | A08 | +2 | 67/100 | P123, P117 | BLOCKED +0 |
-| P125 Electron 메인 프로세스 상용 PDF IPC·오프라인 영수증 직접 호출 게이트 | A09 | +2 | 69/100 | P117, P122 | PENDING |
-| P126 Windows 설치형 실제 상태 복구·실패주입·업그레이드 회귀 | A10 | +1 | 70/100 | P117, P121, P125 | PENDING |
+| P125 Electron 메인 프로세스 상용 PDF IPC·오프라인 영수증 직접 호출 게이트 | A09 | +2 | 69/100 | P117, P122 | VERIFIED +2 |
+| P126 Windows 설치형 실제 상태 복구·실패주입·업그레이드 회귀 | A10 | +1 | 70/100 | P117, P121, P125 | BLOCKED +0 |
 
 ### 작업별 상세 설계
 
@@ -172,7 +172,7 @@
 
 #### P125 — Electron 메인 프로세스 상용 PDF IPC·오프라인 영수증 직접 호출 게이트 (A09 +2점, 누적 상한 69/100)
 
-- **선행:** P117, P122. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
+- **선행:** P117, P122. **담당:** Codex 6 Luna Max. 현재 상태: VERIFIED +2. 기능 SHA `88c56e4188754f960ae94281b6d68e37b5081b62`; Linux #43641402429, Windows #43641402454, blueprint #43641402742 exact SHA SUCCESS.
 - **수정 후보 경로:** desktop/pdf-export-ipc-guard.cjs; desktop/main.cjs; src/commercial/skuActionGate.ts; src/commercial/skuAccess.ts; tests/pdf-export-ipc-guard.test.cjs; tests/sku-action-gate.test.ts. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 현재 고객용 플래그 false/issuer JWK null 상태 유지. 고객 경계에서 renderer 직접 호출·구독 없이 발급되지 않은 서명·만료·좌석·SKU를 main에서 거부하는 독립 테스트 가능한 정책 모듈 작성. 시험용 ephemeral JWK와 정식 판매자 키를 분리, 실제 고객 enable은 불허.
 - **수용 테스트/증거:** signed synthetic BASIC/PRO/BUSINESS 권한표, 만료·발급자 mismatch·위조·직접 IPC·프레임 재사용·이중 호출의 side effect 0 차단, 개발용 demo 기능 회귀, 무결한 signed fixture의 명시된 시험 경로만 PASS.
@@ -181,7 +181,7 @@
 
 #### P126 — Windows 설치형 실제 상태 복구·실패주입·업그레이드 회귀 (A10 +1점, 누적 상한 70/100)
 
-- **선행:** P117, P121, P125. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
+- **선행:** P117, P121, P125. **담당:** Codex 6 Luna Max. 현재 상태: BLOCKED +0. P125 VERIFIED이나 P121이 승인된 Windows Tesseract 자산/실제 Electron OCR 부족으로 BLOCKED; P126 종속성 충족 전 기능회귀 점수 없음.
 - **수정 후보 경로:** tests/windows-installer-lifecycle.ps1; tests/windows-installer-version-upgrade.ps1; tests/step2-cold-migration.mjs; .github/workflows/windows-desktop.yml. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 기존 같은 코드의 버전번호만 다른 업그레이드 검사를 넘어, 수정된 앱 코드를 포함한 실제 설치·제거·재설치·손상 저장·용량 부족·복구 흐름을 합성 문서/이미지로 검증. 새 구매자 PC 성능은 추정하지 않는다.
 - **수용 테스트/증거:** Windows GitHub runner에서 실 EXE 기동·다중 이미지 V2·Step1 V1 복구·업그레이드 후 바이트/해시 일치, 실패 시 원본 보존·새 상태 손실 0, 설치/제거 흔적 및 로그 무민감정보. Linux/Windows/정본 3개 워크플로 정확 SHA SUCCESS.

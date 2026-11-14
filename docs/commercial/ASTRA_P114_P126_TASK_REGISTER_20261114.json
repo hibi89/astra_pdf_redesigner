@@ -6,7 +6,7 @@
   "branch": "feature/astra-p71-pdf-source-parity-20261112",
   "base_feature_sha": "26aff40d6de524c2430f8a6b325d906cea67f7e1",
   "base_docs_sha": "7ed25d4f04ba10bad18e96c6986bb9a5e97a0b08",
-  "current_verified_provisional": 59,
+  "current_verified_provisional": 61,
   "target_provisional": 70,
   "official_acceptance": "UNASSESSED",
   "release": "RELEASE HOLD",
@@ -565,8 +565,8 @@
         "P117",
         "P122"
       ],
-      "status": "PENDING",
-      "credit_earned": 0,
+      "status": "VERIFIED",
+      "credit_earned": 2,
       "expected_paths": [
         "desktop/pdf-export-ipc-guard.cjs",
         "desktop/main.cjs",
@@ -578,10 +578,10 @@
       "implementation": "현재 고객용 플래그 false/issuer JWK null 상태 유지. 고객 경계에서 renderer 직접 호출·구독 없이 발급되지 않은 서명·만료·좌석·SKU를 main에서 거부하는 독립 테스트 가능한 정책 모듈 작성. 시험용 ephemeral JWK와 정식 판매자 키를 분리, 실제 고객 enable은 불허.",
       "acceptance": "signed synthetic BASIC/PRO/BUSINESS 권한표, 만료·발급자 mismatch·위조·직접 IPC·프레임 재사용·이중 호출의 side effect 0 차단, 개발용 demo 기능 회귀, 무결한 signed fixture의 명시된 시험 경로만 PASS.",
       "blockers": "React 버튼 잠금만으로 2점을 인정하지 않는다. 릴리스 키 null, customer build flag=false, 판매자 비밀키 생성·커밋 금지. renderer를 신뢰한 단순 license flag는 불합격.",
-      "evidence_feature_sha": null,
-      "linux_workflow_url": null,
-      "windows_workflow_url": null,
-      "blueprint_workflow_url": null,
+      "evidence_feature_sha": "88c56e4188754f960ae94281b6d68e37b5081b62",
+      "linux_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43641402429",
+      "windows_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43641402454",
+      "blueprint_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43641402742",
       "executor": "Codex 6 Luna Max",
       "execution_medium": "GitHub-only",
       "runner": "Node WebCrypto synthetic signer+Windows Electron main IPC adversarial",
@@ -591,9 +591,53 @@
         "Windows Electron/NSIS when relevant",
         "Final blueprint policy"
       ],
-      "evidence_linux_run": null,
-      "evidence_windows_run": null,
-      "evidence_blueprint_run": null
+      "evidence_linux_run": 43641402429,
+      "evidence_windows_run": 43641402454,
+      "evidence_blueprint_run": 43641402742,
+      "actual_changed_paths": [
+        "desktop/customer-sku-action-guard.cjs",
+        "desktop/pdf-export-ipc-guard.cjs",
+        "desktop/main.cjs",
+        "desktop/preload.cjs",
+        "src/desktopPdf.ts",
+        "src/step2/Workspace.tsx",
+        "tests/customer-sku-action-guard.test.cjs",
+        "tests/pdf-export-ipc-guard.test.cjs",
+        "package.json"
+      ],
+      "verification_summary": "VERIFIED +2. Exact-SHA Linux Node 285/285, build, Chrome and Edge full regression PASS; Windows Node 284 PASS/1 OS-only SKIP/0 FAIL, desktop 81/81, Electron smoke, NSIS install/uninstall and 0.1.0→0.1.1 STEP2 doc+PNG preservation PASS; final blueprint SUCCESS. Main-process guard verifies signed synthetic BASIC/PRO/BUSINESS capability matrix, expiry/issuer/signature/seats, exact trusted frame, and duplicate request IDs before PDF side effect. Production issuer/pin null, customer build false, internal preview preserved.",
+      "failed_candidates": [
+        {
+          "sha": "6f471e5db5b4e854641664134e4bac4f524fdea1",
+          "windows_run": 43640212478,
+          "result": "FAIL, 0 credit",
+          "reason": "P125 fixture/assertion regressions failed during initial candidate."
+        },
+        {
+          "sha": "edb05b288afffcc298826b8917aeb520d65eb2af",
+          "windows_run": 43640300740,
+          "result": "FAIL, 0 credit",
+          "reason": "P125 invalid-case test still expected denial of a valid signed synthetic receipt; test fixture corrected later."
+        },
+        {
+          "sha": "da79aea2bf1775cae0e95143db703cff61318350",
+          "windows_run": 43640481199,
+          "result": "FAIL, 0 credit",
+          "reason": "P125 rejected-case fixture was not yet corrected."
+        },
+        {
+          "sha": "0353a9dbe75d9ea6f9254f63a4b2e82988004d8f",
+          "windows_run": 43640770179,
+          "result": "FAIL, 0 credit",
+          "reason": "P125 rejected-case test still had an incorrect expectation; per-case diagnostic added."
+        },
+        {
+          "sha": "440cae43022314684bb5d291107521853c10b3be",
+          "windows_run": 43640998165,
+          "result": "FAIL, 0 credit",
+          "reason": "Test incorrectly rejected a valid receipt signed by the fixed test pin when the context repeated that key; corrected to use an attacker-signed receipt and attacker-supplied key."
+        }
+      ]
     },
     {
       "id": "P126",
@@ -605,7 +649,7 @@
         "P121",
         "P125"
       ],
-      "status": "PENDING",
+      "status": "BLOCKED",
       "credit_earned": 0,
       "expected_paths": [
         "tests/windows-installer-lifecycle.ps1",
@@ -631,7 +675,13 @@
       ],
       "evidence_linux_run": null,
       "evidence_windows_run": null,
-      "evidence_blueprint_run": null
+      "evidence_blueprint_run": null,
+      "actual_result": "BLOCKED +0. P125 is verified, but P121 prerequisite remains blocked because no approved/verified Windows Tesseract asset or real Electron OCR test was available. P126 installation/recovery failure-injection work was not started; P125 Windows NSIS/upgrade checks are not double-counted as P126.",
+      "blockers_observed": [
+        "P121 depends on blocked P119/P120; no approved Windows Tesseract artifact and actual OCR subprocess fixture exists.",
+        "The P126 plan explicitly depends on P121; dependency gate is unmet.",
+        "P125 Windows NSIS tests are P125/P122 regressions, not the distinct P126 corruption/low-disk/reinstall/recovery acceptance."
+      ]
     }
   ],
   "score_formula": "50 + sum(verified task credit_earned), each <= credit_max, no credit for plans or unverified runs",
@@ -677,12 +727,12 @@
     }
   },
   "last_updated_kst": "2026-11-15",
-  "last_completed_task": "P122",
-  "next_independent_task": "P125",
+  "last_completed_task": "P125",
+  "next_independent_task": "NONE — P126 blocked by P121; resolve P119-P121 approved OCR supplier/runner prerequisite",
   "gates": {
     "G55": "PASS",
     "G60": "NOT PASSED — P119/P120/P121 actual Windows Tesseract OCR evidence BLOCKED",
     "G65": "NOT PASSED — P123 actual Qwen3 inference BLOCKED",
-    "G70": "NOT PASSED — P124/P126 acceptance not complete"
+    "G70": "NOT PASSED — P124 and P126 acceptance incomplete"
   }
 }

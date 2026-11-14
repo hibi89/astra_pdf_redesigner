@@ -1,6 +1,6 @@
 # Astra PDF Redesigner — 12영역 최종설계 증거 기반 잠정 완성률
 
-**기준일: 2026-11-15 KST · 마지막 검증 기능 SHA `d2a84d03ac8c791e74470e756cb6417a356776c3` · P122 VERIFIED +2 · 잠정 59/100점 (59%); P119/P120/P121 BLOCKED +0.**
+**기준일: 2026-11-15 KST · 마지막 검증 기능 SHA `88c56e4188754f960ae94281b6d68e37b5081b62` · P125 VERIFIED +2 · 잠정 61/100점 (61%); P119/P120/P121/P123/P124/P126 BLOCKED +0. G60 NOT PASSED.**
 **공식 구매자 최종 수용률: UNASSESSED. 출시: RELEASE HOLD.**
 
 ## 산정 원칙
@@ -19,16 +19,25 @@
 | A06 온라인 레퍼런스 | 5 | **4** | 1 | 안전한 브라우저 검색 링크·URL/권리메모 로컬 기록  P112 저장된 HTTPS 출처→사용자 파일 선택→STEP5 로컬 분석 직접 연결, 권리·파일 동일성 인증/내장 검색 카드 없음. | 내장 검색 결과·출처 검증·STEP5 직접 연결 |
 | A07 OCR·콘텐츠 안전·STEP7 | 12 | **5** | 7 | STEP7 PDF 대조·수동 검토·출시 OCR 차단 정책/검사, P113 PNG/OCR 수동 대조. P119 UB-Mannheim 공급처 후보 audit BLOCKED +0: GitHub installer digest null, Authenticode/PE·DLL closure 및 bundle 재배포권 미확인. OCR_MANIFEST=null. | 승인 공급처의 Windows Tesseract 실제 한국어 OCR·표/스캔 정확도 |
 | A08 한국어 로컬 AI 윤문 | 14 | **4** | 10 | P111 로컬 Ollama 동의 UI/controller; P122 mock/static E2E +2. P123/P124 BLOCKED +0: official GitHub has no 4B weights/release asset; no model SHA/actual CPU/3-SKU test. | 상업 재배포 가능한 model license/hash, real Qwen3 CPU execution/quality, buyer review |
-| A09 라이선스·SKU·지원 | 11 | **5** | 6 | P96 서명 검증, P107 기능 매트릭스, P108 발급/연장, P109 GUI 실행 게이트, **P110 Electron PDF IPC main-frame/URL 검사** | 판매자 실제 공개키 pin·안전 발급/재발급/환불/철회·기기 수/오프라인 운영·same-frame IPC 우회·지원 약관 |
+| A09 라이선스·SKU·지원 | 11 | **7** | 4 | P96 서명 검증, P107 기능 매트릭스, P108 발급/연장, P109 GUI gate, P110 main-frame guard, P125 main-process signed receipt/SKU boundary +2 (ephemeral synthetic keys; production issuer remains null) | 실판매자 pin·발급/환불/철회/기기 seat lifecycle·고객지원 약관·실제 customer build |
 | A10 Windows 설치·복구 | 5 | 3 | 2 | CI Windows unsigned NSIS 설치·제거·업그레이드, A4/IndexedDB·PNG 보존 | 실 Win10/11 물리 설치·서명/SmartScreen |
 | A11 허가 PDF 5~10건 검수 | 7 | 0 | 7 | 합성 도구는 존재하나 실제 사용자 승인 문서 0건 | 실제 허가 PDF 5~10건 독립 대조/육안 수용 |
 | A12 판매·법적·최종 승인 | 2 | 0 | 2 | 상품 등록 초안만 존재 | 저작권·재배포권·크몽 등록·최종 구매자 승인 |
 | **합계** | **100** | **57** | **43** | **잠정 증거 기반 구현·검증 점수** | **공식 수용 미완** |
 
+## P125 +2점 — Electron main-process 서명·SKU side-effect 경계 (A09)
+- **판정:** 59→61/100, A09 5→7/11. A01~A12 확정 최대배점은 불변. P125가 작업 점수 합계를 60 초과했어도 **G60은 NOT PASSED**: P119–P121에서 승인 Tesseract 공급자/실 Windows OCR/IPC 증거가 아직 없다. Gate score는 61점과 별도로 적용된다.
+- **기능 SHA:** `88c56e4188754f960ae94281b6d68e37b5081b62`. main-process guard는 issuer JWK/pin 및 customer flag를 제품 상수에서만 읽고 IPC에서 받은 issuer를 신뢰하지 않는다. PDF IPC의 exact top-frame·URL 검사 뒤, 만료/issuer/signature/seat/tier와 BASIC8·PRO12·BUSINESS10/brand 권한을 확인하고 action ID를 side effect 전에 한 번만 예약한다. Ephemeral P-256 key/영수증은 테스트 실행 중 생성되며 저장소·제품·release에 보관되지 않는다.
+- [Linux #43641402429](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43641402429) SUCCESS — Node 285/285, TypeScript/Vite build PASS. Chrome/Edge full PDF, layout, P117/P118/P122 browser regressions PASS.
+- [Windows #43641402454](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43641402454) SUCCESS — Node 284 PASS / 1 Windows OS-only SKIP / 0 FAIL, desktop 81/81. Electron smoke, NSIS installed EXE, uninstall, and in-place 0.1.0→0.1.1 upgrade preserve existing STEP2 document+PNG.
+- [Final blueprint #43641402742](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43641402742) SUCCESS; all three runs have exact head SHA `88c56e4188754f960ae94281b6d68e37b5081b62`.
+- Matrix/attack tests verify all six capabilities for signed synthetic BASIC/PRO/BUSINESS entitlements; invalid/missing issuer, wrong issuer, tampering, expiry, invalid seat, attacker-supplied JWK, wrong/cross frame, reused frame and duplicate request ID never run their protected side effect. Default internal preview succeeds. **Production issuer and pin stay null; customer build stays false; no seller key created.** This is a main boundary prototype, not a shipped customer entitlement system/DRM.
+- Failed candidate notes: Windows run `#43640998165` at `440cae43022314684bb5d291107521853c10b3be` rejected a valid same-pinned-key receipt in the test; corrected fixture uses attacker-signed receipt/key. Earlier failed Windows test candidates received 0; final exact SHA only is scored. [P125 verification](../evidence/astra/P125/VERIFICATION.md).
+
 ## P123/P124 +0점 — 실제 Qwen3 미실행, dependent GUI 검증 차단 (A08)
 - **P123 BLOCKED 0/3:** 공식 [QwenLM/Qwen3 GitHub main](https://github.com/QwenLM/Qwen3/tree/7a2f61ffc7a20d47efcd2bf97f6f2bf52729042e) 및 [release API](https://api.github.com/repos/QwenLM/Qwen3/releases?per_page=10) 조사 결과 main commit `7a2f61ffc7a20d47efcd2bf97f6f2bf52729042e`, GitHub Releases 0개, 저장소는 source/docs/report이며 4B weights/release asset을 제공하지 않는다. 공식 README는 checkpoint를 Hugging Face/ModelScope에서 받도록 안내하고 model별 license files도 Hugging Face repo에 있다고 설명한다. 이 실행은 GitHub-only이므로 모델을 외부 host에서 가져오지 않았고 사용자 PC의 로컬 Qwen도 접근하지 않았다. 모델 파일 exact SHA/license mapping, 설치·추론, CPU/RAM/latency 및 30개 real-inference 결과는 전부 **NOT RUN**. [P123 차단 검증서](../evidence/astra/P123/VERIFICATION.md).
 - **P124 BLOCKED 0/2:** P117 dependency는 충족됐으나 P123 실제 모델이 없어 Windows Electron 3-SKU 실모델 제안·승인/거절/Undo·출력 원문 동일성 acceptance 미실행. P122 mock 결과를 재사용하지 않는다. [P124 차단 검증서](../evidence/astra/P124/VERIFICATION.md).
-- A08 4/14, 잠정 총 59/100 유지; 공식 수용 UNASSESSED, RELEASE HOLD. G60은 P119–P121 실제 Tesseract/OCR 증거 미달, G65는 실모델 미측정으로 PASS하지 않았다.
+- P123/P124는 A08 4/14와 각 0점 유지; P125 이후 현재 잠정 총 61/100. 공식 수용 UNASSESSED, RELEASE HOLD. G60은 P119–P121 실제 Tesseract/OCR 증거 미달, G65는 실모델 미측정으로 PASS하지 않았다.
 
 ## P122 +2점 — 로컬 동의·stale response·원문 보호 (A08)
 
@@ -112,4 +121,4 @@ P114(PDF 읽기 순서·수동 원문 대조), P115(원본/출력 15쌍 비교),
 - 같은 권한을 가진 정상 최상위 렌더러의 JS/직접 IPC 호출이나 재포장된 앱을 강력 DRM으로 막는 기술이 아니다. **고객용 상용 보안 완료를 주장하지 않는다.**
 
 ## 후속
-다음 실행은 **P125 main-process signed SKU boundary**다. P119~P121 Windows Tesseract 실제 검증 및 P123/P124 Qwen3 CPU/Electron 경로는 각 공급 자산·실측이 가능해질 때까지 BLOCKED/0점으로 유지한다. G60/G65/G70은 각 기준 점수에서 별도 증거로 판정한다. 공식 구매자 수용은 UNASSESSED, RELEASE HOLD를 유지한다.
+다음 P126은 P121 의존성이 미충족되어 BLOCKED다. P119~P121 Windows Tesseract 실제 검증과 P123/P124 Qwen3 CPU/Electron 경로도 승인 모델·OCR 자산 및 실측 수단이 확보될 때까지 BLOCKED/0점이다. G60/G65/G70은 각 기준 점수에서 별도 증거로 판정한다. 공식 구매자 수용은 UNASSESSED, RELEASE HOLD를 유지한다.
