@@ -1,3 +1,13 @@
+## 2026-11-14 KST — P101 실제 Tesseract 한글 골든20 재현 (합성 Linux / 판매 HOLD)
+
+- **코드/재현 스크립트:** scripts/generate-ocr-golden.py와 scripts/run-ocr-golden.cjs 신규 추가. 단순 스캔·어려운 합성 조건(한글/영문/음수/금액/날짜/블러/회전/명암/글자 크기) 20 PNG를 로컬 글꼴로 생성하고, 입력 SHA 및 Tesseract 바이너리·kor+eng 언어팩을 SHA-256 고정한 뒤 실제 desktop/local-ocr-controller.cjs를 실행한다. OCR 문자열 자체를 테스트 로그에 저장하지 않고 집계/불일치 사례 번호만 출력. 사용자 고객 PDF·기존 IndexedDB·판매 자산 업로드/수정 없음.
+- **원격과 동일 바이트 검증:** 생성기 Git Blob **3a156177c3ecdb92b12db0760c7c88b9b1de2abd**, 실제 OCR 골든 실행기 Git Blob **9b0405d1b3aff34471edb5728b3f80f4c6631d5c**. Node22 로컬 실행본·GitHub SHA 일치. 오리지널 합성 PNG와 생성기 재생성 PNG 20/20 SHA 일치.
+- **실제 오프라인 엔진:** 테스트 환경 Linux Tesseract 5.5.0 / Leptonica 1.84.1, 설치 경로 /usr/bin/tesseract, kor/eng 언어팩을 격리 temp로 복사해 **테스트 전용 주입 manifest**로 실행. 실행파일 SHA256 **74b76a5b994adcc18be362bf64ed5118082b2401d5d9a35242e92fc4c62e2b4b**, kor 데이터 **6b85e11d9bbf07863b97b3523b1b112844c43e713df8b66418a081fd1060b3b2**, eng 데이터 **7d4322bd2a7749724879683fc3912cb542f19906c83bcc1a52132556427170b2**. **배포용 Windows 실행파일·DLL·모델 아님, 권리·상용 패키지 재배포 미승인**.
+- **측정 결과:** 실제 20/20 OCR 응답 status=review, 공백 제거·NFC 기준 완전일치 **15/20**, 오인식 **5/20**(사례 2,8,13,16,17), 사례별 평균 문자 오류율 **약 2.2%**, 실행 20건 합계 약 **4.1~4.3초**(해당 Linux 호스트 한정). 불가→물가, 2,300,000→22300,000, A-101→4-101 등 의미/숫자 훼손 사례 확인. 이 결과는 **OCR 사용 가능 골격의 실작동 근거**이지 원문 보존 충실도 통과가 아니며 5개 정확 불일치로 수동 검토/보정 필수.
+- **재현:** Python Pillow+사용권 확인된 로컬 한국어 폰트로 generator에 --out/--font 전달. Linux에서 runner에 samples-dir, tesseract 실행파일, kor.traineddata, eng.traineddata 절대경로를 순서대로 전달. 무료, 네트워크/클라우드/외부 PDF 전송 0. Python/Node 버전 및 로컬 글꼴 차이가 있으므로 OS 간 동일 OCR 성능 보장 없음.
+- **이번 실행/상품 구분:** 이전 P101 mock 단위 **7 PASS/0 FAIL**, 실제 Linux 합성 OCR 골든20 실행(완전일치15/20), 앱 React/Chrome·Edge 및 Windows NSIS 전체 exact SHA **미검증**, 실 한글 PDF 스캔20건/고객 승인5~10 PDF/Windows10·11·재배포/코드서명/진짜 로컬 LLM 등 미충족. 앱 기본 OCR_MANIFEST=null로 **실제품 OCR 버튼 비활성**, 최종설계 공식 UNASSESSED/100% 미달, [작업중]/RELEASE HOLD/크몽 미등록. 실판매/원본 외부전송 금지.
+- 다음: 자동화 실제 CI 로그 확인 → Windows 라이선스/해시 고정 Tesseract 패키지+CLI 한국어 골든 E2E → UI 테스트/안전 저장·수동 검수 → 실제 PDF·3SKU/LLM/상용 QA.
+
 ## 2026-11-14 KST — P101 OCR 입력 검증 강화 + 정확 원격 Blob 로컬 7/7 PASS
 
 - P101 기능/테스트 최신 정확 소스 SHA **d6dcf80bc024c2a36ab40738cbed1d7b28e4711f** (feature/astra-p71-pdf-source-parity-20261112). src/step7/ocrEligibility.ts로 선택 가능한 원본 텍스트가 있는 페이지를 OCR에서 제외(스캔/비선택 텍스트만 제안); LocalOcrPanel.tsx에 실제 PDF.js getTextContent() 검사 후 차단. PDF 추출/기존 V1/V2 저장 데이터 변경 없음.
