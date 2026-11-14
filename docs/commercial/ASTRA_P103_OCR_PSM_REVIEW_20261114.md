@@ -33,3 +33,11 @@
 - tests/step7-local-ocr-browser.mjs: 별도 합성 스캔 PDF의 실제 PDF.js 렌더 + 가짜 native OCR 검토 응답. 페이지·모드 변경 시 이전 초안 폐기/원문 데이터 불변/외부 네트워크0. CI Chrome·Edge 실행 경로에 추가.
 - 신규 최종 개발 코드 SHA: f9672f12b2d40106bdcc244e2675c903b3c98888. 이 SHA의 Chrome·Edge/Windows CI는 이 문서 작성 시 진행 중·미확인. 이전 P102 성공을 P103 성공 증거로 이전하지 않는다.
 - 실제 OCR 패키지 release manifest null, Windows 바이너리·kor/eng·의존 DLL 라이선스/재배포·고객 Win10/11·실 PDF5~10·3SKU/LLM·판매 승인은 미충족. 전체 공식 UNASSESSED/100% 미달, [작업중], RELEASE HOLD, 크몽 미등록.
+
+## P103 신규 정확 코드 SHA 3/3 CI 최종 확인 (추가 증거)
+
+- P103 기능 코드 SHA **f9672f12b2d40106bdcc244e2675c903b3c98888**.
+- [Linux Chrome+Edge #43571908499](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43571908499): **2/2 jobs SUCCESS**, Node22 **189 PASS/0 FAIL/0 SKIP**, build PASS. **Chrome/Edge 각각** 실제 PDF.js 합성 스캔 페이지→bounded PNG→모의 native OCR 초안, 페이지/PSM 전환 후 이전 초안 폐기, 요청 외부전송0을 확인하는 신규 브라우저 E2E **PASS STEP7 OCR UI** 로그.
+- [Windows Electron/NSIS #43571908498](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43571908498): **SUCCESS**, npm test **188 PASS/0 FAIL/1 Windows symlink SKIP**, desktop **27/27 PASS**, Windows 패키지/NSIS 설치·제거/0.1.0→0.1.1 기존 IndexedDB V2·PNG 보존 PASS.
+- [설계 정책 #43571908709](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43571908709): **SUCCESS**, 실제 고객 최종수용 인증과 구분.
+- 이번 P103의 신규 합성 UI E2E는 **모의 native OCR 응답**을 사용함. 상품 내 OCR_MANIFEST=null로 Windows Tesseract/언어팩을 활성화하거나 테스트한 것이 아님. 물리 Win10·11, 실제 고객 PDF/실 모델 한국어 추론, Windows DLL/NOTICE/재배포·상용 SKU 수용은 미완료. RELEASE HOLD 유지.
