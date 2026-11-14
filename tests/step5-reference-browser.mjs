@@ -65,26 +65,27 @@ try{
     assert.ok(values.every(value=>Number.isFinite(value)&&value>=0&&value<=100),'Metrics must be finite percentages');
     return values;
   };
-  const uploadImage=async(name='vector-like')=>evaluate("(async()=>{const name="+JSON.stringify(name)+";const canvas=document.createElement('canvas');canvas.width=120;canvas.height=160;const c=canvas.getContext('2d');const white=()=>{c.fillStyle='#fff';c.fillRect(0,0,120,160)};switch(name){case 'scan-like':white();c.fillStyle='#252525';for(let y=12,row=0;y<150;y+=12,row++){c.fillRect(8+(row%3),y,104,5);for(let x=12;x<70;x+=18)c.fillRect(x,y+1,7,3)}break;case 'vector-like':white();c.fillStyle='#3f644d';c.fillRect(12,10,96,40);c.fillStyle='#252525';for(let y=62;y<145;y+=14)c.fillRect(12,y,78-(y%3)*4,4);break;case 'wide-whitespace':white();c.fillStyle='#202020';c.fillRect(42,56,36,48);break;case 'dense':c.fillStyle='#252525';c.fillRect(0,0,120,160);break;case 'margin-heavy':white();c.fillStyle='#202020';c.fillRect(30,32,60,96);break;case 'korean':white();c.fillStyle='#202020';c.font='18px sans-serif';c.fillText('한글 원문 2026',10,42);c.fillText('표와 여백 확인',10,80);c.fillText('문서 보존 테스트',10,118);c.fillRect(10,132,70,3);break;case 'transparent':c.fillStyle='#202020';c.fillRect(30,40,60,80);break;case 'low-contrast':white();c.fillStyle='#dedede';c.fillRect(20,20,80,120);break;default:throw new Error('Unknown synthetic reference '+name)}const blob=await new Promise(resolve=>canvas.toBlob(resolve,'image/png'));const file=new File([blob],name+'.png',{type:'image/png'});const digest=async item=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await item.arrayBuffer()))).map(value=>value.toString(16).padStart(2,'0')).join('');window.__astraReferenceOriginalFile=file;window.__astraReferenceOriginalHash=await digest(file);const transfer=new DataTransfer();transfer.items.add(file);const input=document.querySelector('.reference-style-panel input[type=file]');input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));return{size:file.size,sha256:window.__astraReferenceOriginalHash}})()");
-  const readFileFingerprint=()=>evaluate("(async()=>{const file=window.__astraReferenceOriginalFile;if(!file)throw Error('Missing held reference file');const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await file.arrayBuffer()))).map(value=>value.toString(16).padStart(2,'0')).join('');return{size:file.size,sha256:hash}})()");
+  const uploadImage=async(name='vector-like')=>evaluate("(async()=>{const name="+JSON.stringify(name)+";const canvas=document.createElement('canvas');canvas.width=120;canvas.height=160;const c=canvas.getContext('2d');const white=()=>{c.fillStyle='#fff';c.fillRect(0,0,120,160)};switch(name){case 'scan-like':white();c.fillStyle='#252525';for(let y=12,row=0;y<150;y+=12,row++){c.fillRect(8+(row%3),y,104,5);for(let x=12;x<70;x+=18)c.fillRect(x,y+1,7,3)}break;case 'vector-like':white();c.fillStyle='#3f644d';c.fillRect(12,10,96,40);c.fillStyle='#252525';for(let y=62;y<145;y+=14)c.fillRect(12,y,78-(y%3)*4,4);break;case 'wide-whitespace':white();c.fillStyle='#202020';c.fillRect(42,56,36,48);break;case 'dense':c.fillStyle='#252525';c.fillRect(0,0,120,160);break;case 'margin-heavy':white();c.fillStyle='#202020';c.fillRect(30,32,60,96);break;case 'korean':white();c.fillStyle='#202020';c.font='18px sans-serif';c.fillText('한글 원문 2026',10,42);c.fillText('표와 여백 확인',10,80);c.fillText('문서 보존 테스트',10,118);c.fillRect(10,132,70,3);break;case 'transparent':c.fillStyle='#202020';c.fillRect(30,40,60,80);break;case 'low-contrast':white();c.fillStyle='#dedede';c.fillRect(20,20,80,120);break;default:throw new Error('Unknown synthetic reference '+name)}const mime=name==='vector-like'?'image/webp':name==='wide-whitespace'?'image/jpeg':'image/png';const blob=await new Promise(resolve=>canvas.toBlob(resolve,mime,.94));if(!blob||blob.type!==mime)throw Error('Synthetic reference MIME unsupported: '+mime);const extension=mime==='image/jpeg'?'jpg':mime.split('/')[1];const file=new File([blob],name+'.'+extension,{type:mime});const digest=async item=>Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await item.arrayBuffer()))).map(value=>value.toString(16).padStart(2,'0')).join('');window.__astraReferenceOriginalFile=file;window.__astraReferenceOriginalHash=await digest(file);const transfer=new DataTransfer();transfer.items.add(file);const input=document.querySelector('.reference-style-panel input[type=file]');input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));return{size:file.size,type:file.type,sha256:window.__astraReferenceOriginalHash}})()");
+  const readFileFingerprint=()=>evaluate("(async()=>{const file=window.__astraReferenceOriginalFile;if(!file)throw Error('Missing held reference file');const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await file.arrayBuffer()))).map(value=>value.toString(16).padStart(2,'0')).join('');return{size:file.size,type:file.type,sha256:hash}})()");
   const clearReference=async()=>{
     await evaluate("document.querySelector('.reference-style-panel [data-reference-analysis] .text-button').click()");
     await eventually(()=>evaluate("!document.querySelector('[data-reference-analysis]')"));
   };
   const referenceCases=[
-    {name:'scan-like',white:[65,100],density:[0,35],margins:[[0,20],[0,20],[0,20],[0,20]],theme:'minimal'},
-    {name:'vector-like',white:[65,100],density:[0,35],margins:[[0,20],[0,20],[0,25],[0,20]],theme:'minimal',accent:'#3f644d'},
-    {name:'wide-whitespace',white:[90,100],density:[0,10],margins:[[30,40],[30,40],[30,40],[30,40]],theme:'minimal'},
-    {name:'dense',white:[0,0],density:[100,100],margins:[[0,0],[0,0],[0,0],[0,0]],theme:'compact'},
-    {name:'margin-heavy',white:[65,75],density:[25,35],margins:[[15,25],[20,30],[15,25],[20,30]],theme:'minimal'},
-    {name:'korean',white:[65,100],density:[0,35],margins:[[0,25],[0,25],[0,25],[0,25]],theme:'minimal'},
-    {name:'transparent',white:[65,75],density:[25,35],margins:[[20,30],[20,30],[20,30],[20,30]],theme:'minimal'},
-    {name:'low-contrast',white:[45,55],density:[45,55],margins:[[10,15],[15,20],[10,15],[15,20]],theme:'minimal'},
+    {name:'scan-like',mime:'image/png',white:[65,100],density:[0,35],margins:[[0,20],[0,20],[0,20],[0,20]],theme:'minimal'},
+    {name:'vector-like',mime:'image/webp',white:[65,100],density:[0,35],margins:[[0,20],[0,20],[0,25],[0,20]],theme:'minimal',accent:'#3f644d'},
+    {name:'wide-whitespace',mime:'image/jpeg',white:[90,100],density:[0,10],margins:[[30,40],[30,40],[30,40],[30,40]],theme:'minimal'},
+    {name:'dense',mime:'image/png',white:[0,0],density:[100,100],margins:[[0,0],[0,0],[0,0],[0,0]],theme:'compact'},
+    {name:'margin-heavy',mime:'image/png',white:[65,75],density:[25,35],margins:[[15,25],[20,30],[15,25],[20,30]],theme:'minimal'},
+    {name:'korean',mime:'image/png',white:[65,100],density:[0,35],margins:[[0,25],[0,25],[0,25],[0,25]],theme:'minimal'},
+    {name:'transparent',mime:'image/png',white:[65,75],density:[25,35],margins:[[20,30],[20,30],[20,30],[20,30]],theme:'minimal'},
+    {name:'low-contrast',mime:'image/png',white:[45,55],density:[45,55],margins:[[10,15],[15,20],[10,15],[15,20]],theme:'minimal'},
   ];
   const projectBeforeReferences=await projectFingerprint(true);
   for(const sample of referenceCases){
     if(await evaluate("Boolean(document.querySelector('[data-reference-analysis]'))"))await clearReference();
     const originalFile=await uploadImage(sample.name);
+    assert.equal(originalFile.type,sample.mime,sample.name+' uses the planned real image MIME path');
     await eventually(()=>evaluate("Boolean(document.querySelector('[data-reference-analysis]'))"));
     await eventually(()=>evaluate("document.querySelector('.project-paper')?.classList.contains('paper-theme-"+sample.theme+"')"));
     const values=metricValues(await evaluate("document.querySelector('.reference-analysis .reference-metrics')?.textContent"));
@@ -95,7 +96,7 @@ try{
     assert.equal(await projectFingerprint(true),projectBeforeReferences,sample.name+' preview must not write any V2 document, asset, active ID or metadata bytes');
     assert.deepEqual(await readFileFingerprint(),originalFile,sample.name+' source File bytes must remain unchanged');
   }
-  console.log('PASS P118 IMAGE MATRIX: 8 synthetic scan/vector/whitespace/dense/margin/Korean/transparent/low-contrast references; bounded metrics, accent, source SHA-256 and complete V2 store unchanged');
+  console.log('PASS P118 IMAGE MATRIX: 8 synthetic PNG/JPEG/WebP scan/vector/whitespace/dense/margin/Korean/transparent/low-contrast references; bounded metrics, accent, source SHA-256 and complete V2 store unchanged');
   await uploadImage();
   await eventually(()=>evaluate("Boolean(document.querySelector('[data-reference-analysis]'))"));
 
@@ -123,7 +124,7 @@ try{
   assert.deepEqual(undone.content,before.content);
   const projectBeforePdf=await projectFingerprint(true);
   const pdf64=Buffer.from(makeMixedLayoutPdf()).toString('base64');
-  const pdfUploadInfo=await evaluate("(async()=>{const data=Uint8Array.from(atob("+JSON.stringify(pdf64)+"),c=>c.charCodeAt(0));const file=new File([data],'reference.pdf',{type:'application/pdf'});window.__astraReferenceOriginalFile=file;const sha256=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await file.arrayBuffer()))).map(value=>value.toString(16).padStart(2,'0')).join('');window.__astraReferenceOriginalHash=sha256;const transfer=new DataTransfer();transfer.items.add(file);const input=document.querySelector('.reference-style-panel input[type=file]');input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));return{size:file.size,sha256}})()");
+  const pdfUploadInfo=await evaluate("(async()=>{const data=Uint8Array.from(atob("+JSON.stringify(pdf64)+"),c=>c.charCodeAt(0));const file=new File([data],'reference.pdf',{type:'application/pdf'});window.__astraReferenceOriginalFile=file;const sha256=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await file.arrayBuffer()))).map(value=>value.toString(16).padStart(2,'0')).join('');window.__astraReferenceOriginalHash=sha256;const transfer=new DataTransfer();transfer.items.add(file);const input=document.querySelector('.reference-style-panel input[type=file]');input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));return{size:file.size,type:file.type,sha256}})()");
   await eventually(()=>evaluate("document.querySelector('.reference-style-panel select')?.options.length"),count=>count===2);
   const pdfPages=[];
   for(const page of ['1','2']){
@@ -145,7 +146,7 @@ try{
   await evaluate("document.querySelector('.reference-style-panel .text-button').click()");
   assert.deepEqual((await evaluate(stored)).design,before.design,'Cancel must leave persisted design unchanged');
   const malformedPdf=Buffer.from('%PDF-1.7\nSynthetic malformed reference without objects or xref','ascii').toString('base64');
-  const malformedInfo=await evaluate("(async()=>{const bytes=Uint8Array.from(atob("+JSON.stringify(malformedPdf)+"),c=>c.charCodeAt(0));const file=new File([bytes],'malformed.pdf',{type:'application/pdf'});window.__astraReferenceOriginalFile=file;const sha256=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await file.arrayBuffer()))).map(value=>value.toString(16).padStart(2,'0')).join('');window.__astraReferenceOriginalHash=sha256;const transfer=new DataTransfer();transfer.items.add(file);const input=document.querySelector('.reference-style-panel input[type=file]');input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));return{size:file.size,sha256}})()");
+  const malformedInfo=await evaluate("(async()=>{const bytes=Uint8Array.from(atob("+JSON.stringify(malformedPdf)+"),c=>c.charCodeAt(0));const file=new File([bytes],'malformed.pdf',{type:'application/pdf'});window.__astraReferenceOriginalFile=file;const sha256=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await file.arrayBuffer()))).map(value=>value.toString(16).padStart(2,'0')).join('');window.__astraReferenceOriginalHash=sha256;const transfer=new DataTransfer();transfer.items.add(file);const input=document.querySelector('.reference-style-panel input[type=file]');input.files=transfer.files;input.dispatchEvent(new Event('change',{bubbles:true}));return{size:file.size,type:file.type,sha256}})()");
   const malformedAlert=await eventually(()=>evaluate("document.querySelector('.reference-style-panel [role=alert]')?.textContent"),message=>Boolean(message));
   assert.ok(malformedAlert.trim().length>0,'Malformed PDF must explain the failed analysis');
   assert.equal(await evaluate("Boolean(document.querySelector('[data-reference-analysis]'))"),false,'Malformed PDF must fail closed without a preview or apply action');
