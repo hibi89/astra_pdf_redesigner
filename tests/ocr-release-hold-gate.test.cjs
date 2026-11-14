@@ -45,3 +45,15 @@ test('OCR release gate detects new Electron extraResources configuration',()=>{
  assert.throws(()=>verifyOcrReleaseHold(f.root),/new-electron-extra-resources-must-be-audited/);}
  finally{f.cleanup();}
 });
+
+
+test('OCR release gate refuses extra package file globs that could smuggle assets',()=>{
+ const f=fixture();
+ try{
+  const configFile=path.join(f.root,'electron-builder.yml');
+  const original=fs.readFileSync(configFile,'utf8');
+  assert.ok(original.includes('  - package.json'));
+  fs.writeFileSync(configFile,original.replace('  - package.json','  - package.json\n  - ocr-binaries/**'));
+  assert.throws(()=>verifyOcrReleaseHold(f.root),/packaging-files-changed-review-required/);
+ }finally{f.cleanup();}
+});
