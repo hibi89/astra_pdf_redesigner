@@ -1,3 +1,16 @@
+## 2026-11-14 KST — P101 실 Tesseract 골든20 / 재현 자동화 인수인계 10항 (최신)
+
+1. **목표·스택·요구:** 사용자 최종설계 STEP1~7+3SKU 100점 기준, 무료 로컬 OCR/Tesseract + React/PDF.js/Electron. 원본 데이터 보존·오프라인 검수 초안·유료서비스0. 공식 완성률 UNASSESSED/100% 미달.
+2. **완료 기능·결정:** 스캔-only 판별과 PNG CRC/청크 검사 보강. 테스트를 고의로 어려운 한영·숫자·명암·기울임·흐림 20개 합성 이미지로 재생성/실 Tesseract 실행. 소스 스크립트 scripts/generate-ocr-golden.py 및 scripts/run-ocr-golden.cjs 원격 커밋. 상용 바이너리/언어팩 번들은 활성화하지 않음.
+3. **테스트 명령·실측:** Node22 로컬 동일 Blob 단위 7 PASS/0 FAIL/0 SKIP; strict TS PASS. 실제 Linux Tesseract 5.5.0 kor+eng 20/20 review 반환/정확한 문자열 15/20/오인식5/20/평균 사례별 CER 2.2%/약 4.1~4.3초. 신규 생성기와 실행기를 이용해 20 PNG 해시와 결과를 재현. **전체 npm build/Chrome/Edge/Windows NSIS exact SHA CI는 조회 불가·미검증**.
+4. **완료·진행·대기·차단:** P101 OCR 컨트롤러·GUI 비파괴 소스 구현, Linux OCR CLI 실추론 단위 확인. 원본 보존 실PDF5~10/고객 물리 Win10·11/실 GUI 연동/정식 DLL·언어팩 LICENSE/NOTICE/원본 A07 수동 검수/3SKU/LLM 미완, RELEASE HOLD.
+5. **오류 근거·원인·대안:** 실제 합성 사례 2 불가→물가, 8 2,300,000→22300,000, 13 AI→시, 16 숫자 구분자 오류, 17 A-101→4-101. OCR은 의미·숫자 무손실 보증 불가하여 manual reviewOnly/approved:false 유지. test runner의 regex 이중 escaping 초기 코드 오류를 발견해 소스 e81afaaf에서 수정, 최신 직접 재실행 PASS. GUI/Win 성공으로 과장 금지.
+6. **저장소/브랜치/SHA·경로:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112; 최신 소스+하네스 commit **e81afaafcb93a55f0d9ca6eb3ad827edebb72231**; STATUS 갱신 **622632a50d87584a0b7aceb54b49661b928d1e5d**. 실제 실행 코어 blob ebfce5b8, mock test f7b448e0, eligibility 11bdc938/a26b1e0e, Python generator 3a156177, Node runner 9b0405d1. 주요 desktop/local-ocr-controller.cjs, src/step7/*, tests/*, scripts/generate-ocr-golden.py, scripts/run-ocr-golden.cjs.
+7. **Production/실행 명령/환경:** npm test/build, npm run desktop:verify/smoke, Windows NSIS, Vercel N/A. Linux 골든: python scripts/generate-ocr-golden.py --out <빈폴더> --font <로컬 한글폰트>; node scripts/run-ocr-golden.cjs <샘플폴더> <tesseract바이너리> <kor.traineddata> <eng.traineddata>. 이 명령은 OS/폰트/패키지 설치에 의존하며 대고객 품질 확정 아님.
+8. **원본·백업·보안·권리:** 기존 main/Draft PR10/V1 localStorage/V2 IndexedDB/원본 PDF·사용자 기밀·한글 폰트·실 binaries 무변경, 외부 PDF 업로드0. Linux 시험 바이너리 파일·kor/eng 언어팩은 임시 공간 테스트 후 삭제, 상용 Windows 패키지 포함0. Git history SHA 롤백 가능.
+9. **다음 우선순위·기준/승인:** exact SHA GitHub Actions 검증 → 무료 정식 Windows Tesseract 배포 경로·DLL/NOTICE·언어팩 해시 및 권리 확인 → 20 실 PDF/로컬 CPU/취소·실 UI·원문/수동 승인 회귀 → 실고객5~10/Win10·11·3SKU/LLM·최종 상용 판매 승인. 사용자 이미 무료 OCR 코드와 100점 배점 승인했으므로 재요청 금지. 유료결제/외부전송/출시는 별도.
+10. **갱신 일시·범위·문서 SHA:** 2026-11-14 KST, 독립 컨테이너 Linux Node22·Python Pillow·Tesseract5.5 실 20건과 정확 소스 blob 확인, GitHub 원격 문서 반영. 본 HANDOFF 자체 commit은 다음 조회로 확인. GitHub Actions/Windows/고객 실제 PDF 검증하지 않음.
+
 ## 2026-11-14 KST — P101 OCR 보완 검증 인수인계 (10항 최신)
 
 1. **목표·요구·기술:** Astra 원본 7단계 및 3SKU 최종 100점 가중 범위. OCR은 승인된 무료 오프라인 Tesseract/PDF.js/React/Electron, 원본·고객 자료 무전송, 결과 검수 전 미승인 초안.
