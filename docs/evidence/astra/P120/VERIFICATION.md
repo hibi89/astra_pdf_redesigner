@@ -4,7 +4,7 @@
 
 ## 실제 GitHub Actions 실행
 
-정확 source SHA [`e293fcdc585792d1985cba5f31b032d050ede11c`](https://github.com/hibi89/astra_pdf_redesigner/commit/e293fcdc585792d1985cba5f31b032d050ede11c)의 Windows workflow [#43644765268](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43644765268)에서 공식 GitHub release asset SHA-256과 commit 고정 `tessdata_best` kor/eng 데이터로 Tesseract `5.5.3.20260724`를 임시 실행했다. 합성 한국어 사례 12개 전부 실제 OCR했고, 자동 적용이나 고객 데이터 사용은 없었다.
+정확 source SHA [`e293fcdc585792d1985cba5f31b032d050ede11c`](https://github.com/hibi89/astra_pdf_redesigner/commit/e293fcdc585792d1985cba5f31b032d050ede11c)의 Windows workflow [#43646062862](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43646062862)에서 공식 GitHub release asset SHA-256과 commit 고정 `tessdata_best` kor/eng 데이터로 Tesseract `5.5.3.20260724`를 임시 실행했다. 합성 한국어 사례 12개 전부 실제 OCR했고, 자동 적용이나 고객 데이터 사용은 없었다.
 
 - **9/12 exact**, 3건 오인식/누락. 공백을 정규화한 평균 CER **0.0486**.
 - `매출액`을 `매줄액`으로 인식 (CER 0.0667).

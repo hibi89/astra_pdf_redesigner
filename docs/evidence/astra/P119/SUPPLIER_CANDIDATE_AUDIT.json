@@ -122,8 +122,11 @@
     "language_data_commit": "e12c65a915945e4c28e237a9b52bc4a8f39a0cec",
     "eng_sha256": "8280aed0782fe27257a68ea10fe7ef324ca0f8d85bd2fd145d1c2b560bcb66ba",
     "kor_sha256": "f888d4038348a0c3d25151e7f452bda0d74ca275b18cab146798bcbb94084fff",
-    "windows_workflow_run": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43644765268",
-    "evidence_source_sha": "e293fcdc585792d1985cba5f31b032d050ede11c",
-    "product_ocr_enabled": false
+    "windows_workflow_run": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43646062862",
+    "evidence_source_sha": "5a0c32c3358834557b76da739ee3d97a2c6e612b",
+    "product_ocr_enabled": false,
+    "linux_workflow_run": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43646062853",
+    "blueprint_workflow_run": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43646063260",
+    "report_artifact": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43646062862/artifacts/14134331658"
   }
 }
