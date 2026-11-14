@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import {comparePdfTokenLists,countPdfPerPageTokenDifferences,countPdfPerPageOrderRisks,hasPdfDocumentTextOrderRisk,tokenizePdfText} from '../src/step7/tokenParity.ts';
+import {comparePdfTokenLists,comparePdfValueLists,countPdfPerPageTokenDifferences,countPdfPerPageOrderRisks,hasPdfDocumentTextOrderRisk,normalizePdfLinkTarget,tokenizePdfLinks,tokenizePdfNegationTokens,tokenizePdfSymbols,tokenizePdfText} from '../src/step7/tokenParity.ts';
 
 test('STEP7 lexical comparison keeps source and output order-independent counts',()=>{
  const source=tokenizePdfText(['원문 001, 매출 3,500.', '결론 A-01']);
@@ -112,4 +112,30 @@ test('STEP7 global order risk catches reordered sections even when page counts a
  assert.equal(hasPdfDocumentTextOrderRisk(source,tokenizePdfText(['different'])),false);
  assert.equal(hasPdfDocumentTextOrderRisk([],[]),false);
  assert.throws(()=>hasPdfDocumentTextOrderRisk(Array(300001).fill('x'),[]),/제한/);
+});
+
+
+test('STEP7 symbol parity detects lost currency, punctuation and number signs without source text',()=>{
+ const before=tokenizePdfSymbols(['Total: -$1,200.50 (due)']);
+ const after=tokenizePdfSymbols(['Total: $1,200.50 due']);
+ const diff=comparePdfValueLists(before,after);
+ assert.ok(diff.missingValues>=3);
+ assert.ok(diff.addedValues>=0);
+ assert.doesNotMatch(JSON.stringify(diff),/Total|due|1,200/);
+});
+
+test('STEP7 negation parity covers English and Korean refusal/status markers',()=>{
+ assert.deepEqual(tokenizePdfNegationTokens(['Payment NOT APPROVED; NO transfer; without consent']),['not','no','without']);
+ assert.deepEqual(tokenizePdfNegationTokens(['승인하지않음 결재 안됨 금지 미승인']),['승인하지않음','안됨','금지','미승인']);
+ const before=tokenizePdfNegationTokens(['payment not approved']);
+ const after=tokenizePdfNegationTokens(['payment approved']);
+ assert.deepEqual(comparePdfValueLists(before,after),{sourceValues:1,outputValues:0,missingValues:1,addedValues:0});
+});
+
+test('STEP7 visible and annotation link targets compare without exporting their value',()=>{
+ assert.deepEqual(tokenizePdfLinks(['See https://Example.test/policy/1001.']),['https://example.test/policy/1001']);
+ assert.equal(normalizePdfLinkTarget('https://EXAMPLE.test/policy/1001'),'https://example.test/policy/1001');
+ const diff=comparePdfValueLists(['https://example.test/policy/1001'],['https://example.test/policy/1002']);
+ assert.deepEqual(diff,{sourceValues:1,outputValues:1,missingValues:1,addedValues:1});
+ assert.doesNotMatch(JSON.stringify(diff),/example|policy|1001|1002/);
 });

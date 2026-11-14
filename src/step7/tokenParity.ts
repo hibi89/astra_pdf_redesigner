@@ -81,3 +81,44 @@ export function hasPdfDocumentTextOrderRisk(
  const diff=comparePdfTokenLists(source,output);
  return diff.missingTokens===0&&diff.addedTokens===0;
 }
+
+
+export interface ValueParity {sourceValues:number;outputValues:number;missingValues:number;addedValues:number}
+export function comparePdfValueLists(source:readonly string[],output:readonly string[]):ValueParity{
+ const limit=1_500_000;if(source.length>limit||output.length>limit)throw Error('PDF 비교 신호 제한을 초과했습니다.');
+ const counts=new Map<string,number>();for(const value of source)counts.set(value,(counts.get(value)||0)+1);
+ let addedValues=0;for(const value of output){const count=counts.get(value)||0;if(count)counts.set(value,count-1);else addedValues++;}
+ let missingValues=0;for(const count of counts.values())missingValues+=count;
+ return{sourceValues:source.length,outputValues:output.length,missingValues,addedValues};
+}
+export function tokenizePdfSymbols(chunks:readonly string[]):string[]{
+ const symbols=chunks.join('\n').normalize('NFC').match(/[\p{P}\p{S}]/gu)||[];
+ if(symbols.length>1_500_000)throw Error('PDF 기호 검수 제한을 초과했습니다.');
+ return symbols;
+}
+export function tokenizePdfNegationTokens(chunks:readonly string[]):string[]{
+ const english=new Set(['not','no','never','without','none','neither','nor','cannot','non']);
+ return tokenizePdfText(chunks).filter(token=>{
+  if(english.has(token))return true;
+  if(token==='안'||/^(?:안되|안된|안하|안함|안됨)/u.test(token))return true;
+  return ['않','없','못','아니','불가','금지','미승인','미포함','미수령','미동의','미허가'].some(marker=>token.includes(marker));
+ });
+}
+export function normalizePdfLinkTarget(raw:string):string{
+ let value=raw.normalize('NFC').trim().replace(/[),.;!?]+$/u,'');
+ if(!value)return'';
+ if(/^www\./iu.test(value))value='https://'+value;
+ if(/^mailto:/iu.test(value))return'mailto:'+value.slice(7);
+ try{const parsed=new URL(value);if(parsed.protocol==='http:'||parsed.protocol==='https:')
+  return parsed.protocol.toLowerCase()+'//'+parsed.host.toLowerCase()+parsed.pathname+parsed.search+parsed.hash;
+ }catch{/* Named PDF destinations are compared as local opaque values. */}
+ return value;
+}
+export function tokenizePdfLinks(chunks:readonly string[]):string[]{
+ const pattern=/(?:https?:\/\/|www\.)[^\s<>"']+|mailto:[^\s<>"']+/giu,links:string[]=[];
+ for(const chunk of chunks)for(const match of chunk.normalize('NFC').match(pattern)||[]){
+  const normalized=normalizePdfLinkTarget(match);if(normalized)links.push(normalized);
+  if(links.length>300_000)throw Error('PDF 링크 검수 제한을 초과했습니다.');
+ }
+ return links;
+}
