@@ -1,3 +1,9 @@
+## 2026-11-14 KST — P107 exact source signed 3SKU policy 3/3 GitHub CI 성공
+
+- 최종 검증 코드 SHA **0d3501d0cf51f3b5e87370f6a973fbb01d72e697**, 신규 src/commercial/skuAccess.ts+tests/sku-access.test.ts (WebCrypto 합성 서명 SKU권한/위조/발급자/pin/만료 대응7회귀). 상용 issuer JWK/thumbprint null, production SKU access=DENY. BASIC/PRO/BUSINESS 기능 허용정책 엔진만 완성, GUI/실 라이선스/판매 허가는 아직 없음.
+- [Linux Chrome·Edge #43583817449](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43583817449) **2/2 SUCCESS, Node228 PASS/0 FAIL/0 SKIP**, Chrome/Edge synthetic PDF.js·OCR 검수·원본/IndexedDB V2 보호 PASS. [Windows Electron·NSIS #43583817441](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43583817441) **SUCCESS, Node227 PASS/0 FAIL/1 symlink OS SKIP**, desktop59 PASS/0 FAIL, NSIS 0.1.0→0.1.1 사용자 데이터/PNG 보존 PASS, P106 Authenticode synthetic PASS, OCR_RELEASE_HOLD PASS. [정본 정책 #43583817679](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43583817679) SUCCESS. 전체 **3/3 workflow SUCCESS**, raw job logs 확인.
+- 아래 P107 초기 'CI 진행중' 표시를 exact SHA 로그로 성공 정정, 역사 보존. A09 11점 최종수용 완료는 아님: 실제 판매자 pin/GUI 락/기기·갱신·취소·고객 권리/물리 Windows 미구현. 실제 Tesseract/한국어 LLM 및 실 허가 PDF5~10 미확인. 전체 공식률 **UNASSESSED/100% 미달**, Astra [작업중], RELEASE HOLD, 크몽 미등록, Vercel 미적용. 기존 main/PR10/V1/V2/8디자인+22시안·원본 PDF/비밀 변경0.
+
 ## 2026-11-14 KST — P107 signed SKU capability policy (전체 CI 결과 대기)
 
 - A09 전체 11점 요구 중 일부: P96 검증 서명 ECDSA-P256 receipt + RFC7638 vendor JWK thumbprint pin → 6개 SKU capability 매트릭스. 신규 src/commercial/skuAccess.ts / tests/sku-access.test.ts 7개 공격·권한 회귀. BASIC base only / PRO 20-layout + template-save·batch-pdf / BUSINESS 30-layout·brand-kit까지 허용 후보를 검증된 receipt로만 판정. 정식 판매자 key/pin은 null이므로 실제 제품 상용 권한 모두 거부; 시험용 서명키는 테스트 메모리에만 존재. 기존 Workspace 프로토타입·V1/V2 저장값 불변.

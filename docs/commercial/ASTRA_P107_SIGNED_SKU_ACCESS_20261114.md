@@ -44,3 +44,11 @@ At first documentation commit, exact SHA policy SUCCESS; Linux/Windows unit and 
 ## Release boundary
 
 Full final score UNASSESSED; P107 does not prove 100% or A09 11 points. OCR_MANIFEST=null, native Tesseract and Korean CPU local AI models not approved for resale. Existing owner PDF, localStorage V1, IndexedDB V2, main and Draft PR10 unchanged. No external transfer, vendor key or private key, product registration, sale or Vercel production deployment.
+
+## P107 exact SHA CI final record — 2026-11-14 KST
+
+- Function SHA 0d3501d0cf51f3b5e87370f6a973fbb01d72e697.
+- Linux Chrome+Edge #43583817449: 2/2 SUCCESS; Node 228 PASS, 0 FAIL, 0 SKIP; Chrome+Edge synthetic PDF import/OCR review, persistence and source preservation PASS.
+- Windows NSIS #43583817441: SUCCESS; Node 227 PASS, 0 FAIL, 1 pre-existing symlink permission SKIP; desktop 59 PASS; Windows Authenticode synthetic and release HOLD gate PASS, NSIS install/removal and upgrade 0.1.0 to 0.1.1 preserving existing IndexedDB V2/PNG PASS.
+- Blueprint evidence policy #43583817679: SUCCESS; overall 3/3 workflows completed SUCCESS. Previous initial CI-in-progress record superseded, not deleted.
+- Synthetic keys do not constitute a trusted publisher public key. Commercial JWK/issuer pin remain null, production check denies, and no GUI license enforcement or buyer machine/key issuance has occurred. A09 11 points not fully accepted. Overall final 12-domain score UNASSESSED, RELEASE HOLD.
