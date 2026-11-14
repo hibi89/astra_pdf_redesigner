@@ -259,19 +259,20 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
   };
   const applyBrand=()=>{
     if(!doc||!editable||!businessActive)return;
-    try{setBrandApplied(validateBusinessBrandKit(brandDraft));setBrandError('');}
+    try{guarded(['brand-kit'],()=>{setBrandApplied(validateBusinessBrandKit(brandDraft));setBrandError('');});}
     catch(error){setBrandError(error instanceof Error?error.message:'브랜드 입력을 확인하세요.');}
   };
   const loadBusinessBrand=async(file:File)=>{
     try{
       const kit=await importBusinessBrandKit(file);
       if(!doc||!editable)return;
-      setBrandDraft(kit);setBrandApplied(kit);setBrandError('');
+      await runSkuGatedAction(['brand-kit'],licenseReceipt,()=>{setBrandDraft(kit);setBrandApplied(kit);setBrandError('');});
     }catch(error){setBrandError(error instanceof Error?error.message:'브랜드 파일을 불러올 수 없습니다.');}
   };
   const loadBrandLogo=async(file:File)=>{
     const id=doc?.id;
     try{
+      await runSkuGatedAction(['brand-kit'],licenseReceipt,()=>undefined);
       if(!id||!editable||file.size<1||file.size>2*1024*1024||
         !['image/png','image/jpeg','image/webp'].includes(file.type))throw new Error('로고는 2MiB 이하 PNG/JPEG/WebP만 허용합니다.');
       const header=new Uint8Array(await file.slice(0,65536).arrayBuffer());
@@ -585,15 +586,15 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
             </div>
             <div className="toolbar project-toolbar">
               <button type="button" className="secondary-button" data-advanced-preset-export disabled={!editable||!activeAdvancedLayoutId}
-                onClick={()=>{try{if(activeAdvancedLayoutId)downloadAdvancedLayoutPreset(activeAdvancedLayoutId);setAdvancedPresetError('');}catch(error){setAdvancedPresetError(error instanceof Error?error.message:'고급 레이아웃 파일을 저장할 수 없습니다.');}}}>선택 레이아웃 파일로 저장</button>
+                onClick={()=>guarded(['template-save'],()=>{try{if(activeAdvancedLayoutId)downloadAdvancedLayoutPreset(activeAdvancedLayoutId);setAdvancedPresetError('');}catch(error){setAdvancedPresetError(error instanceof Error?error.message:'고급 레이아웃 파일을 저장할 수 없습니다.');}})}>선택 레이아웃 파일로 저장</button>
               <button type="button" className="secondary-button" data-advanced-preset-import disabled={!editable}
                 onClick={()=>advancedPresetInput.current?.click()}>고급 레이아웃 파일 다시 열기</button>
             </div>
             <input ref={advancedPresetInput} className="hidden-input" type="file" accept=".json,application/json" data-advanced-preset-file
               aria-label="고급 레이아웃 JSON 선택" onChange={event=>{const file=event.target.files?.[0];event.target.value='';if(file)void loadAdvancedPreset(file);}}/>
             {advancedPresetError&&<p role="alert" className="warning" data-advanced-preset-error>{advancedPresetError}</p>}
-            <ProLayoutLibrary disabled={!editable} selectedId={activeAdvancedLayoutId}
-              onRestore={layoutId=>{closeStyleCompare();clearReference();setPortableStyle(null);setAdvancedPreview({documentId:doc.id,layoutId});}}/>
+            <ProLayoutLibrary disabled={!editable} licenseReceipt={licenseReceipt} selectedId={activeAdvancedLayoutId}
+              onRestore={layoutId=>guarded([layoutSkuCapability(layoutId)],()=>{closeStyleCompare();clearReference();setPortableStyle(null);setAdvancedPreview({documentId:doc.id,layoutId});})}/>
             <p className="help-text">이 JSON에는 레이아웃 ID만 저장합니다. PDF 내용·이미지·문서 설정은 포함되지 않습니다. 현재 V2 프로젝트 저장소나 판매 권한은 변경하지 않습니다.</p>
             {activeAdvancedLayoutId&&<div className="advanced-layout-preview-note" role="status" data-extended-layout-status>
               {skuLayoutCandidate(activeAdvancedLayoutId)?.label} · 임시 미리보기/출력만 지원, 저장 데이터는 변경되지 않습니다.
@@ -628,12 +629,12 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
               <button type="button" className="text-button" disabled={!brandLogoUrl} onClick={()=>setBrandLogoUrl(null)}>로고 제거</button>
             </div>
             <div className="toolbar project-toolbar">
-              <button type="button" className="secondary-button" data-business-brand-export disabled={!editable||!brandApplied} onClick={()=>{try{if(brandApplied)downloadBusinessBrandKit(brandApplied);setBrandError('');}catch(e){setBrandError(e instanceof Error?e.message:'브랜드 파일을 저장할 수 없습니다.');}}}>브랜드 텍스트 JSON 저장</button>
+              <button type="button" className="secondary-button" data-business-brand-export disabled={!editable||!brandApplied} onClick={()=>guarded(['brand-kit'],()=>{try{if(brandApplied)downloadBusinessBrandKit(brandApplied);setBrandError('');}catch(e){setBrandError(e instanceof Error?e.message:'브랜드 파일을 저장할 수 없습니다.');}})}>브랜드 텍스트 JSON 저장</button>
               <button type="button" className="secondary-button" data-business-brand-import disabled={!editable} onClick={()=>brandImportInput.current?.click()}>브랜드 JSON 다시 열기</button>
               <input className="hidden-input" ref={brandImportInput} data-business-brand-file type="file" accept=".json,application/json" onChange={e=>{const f=e.target.files?.[0];e.target.value='';if(f)void loadBusinessBrand(f);}}/>
             </div>
-            <BusinessBrandLibrary disabled={!editable||!businessActive} kit={businessActive?brandApplied:null}
-              onRestore={kit=>{setBrandDraft(kit);setBrandApplied(kit);setBrandError('');}}/>
+            <BusinessBrandLibrary disabled={!editable||!businessActive} licenseReceipt={licenseReceipt} kit={businessActive?brandApplied:null}
+              onRestore={kit=>guarded(['brand-kit'],()=>{setBrandDraft(kit);setBrandApplied(kit);setBrandError('');})}/>
             {brandError&&<p role="alert" className="warning" data-business-brand-error>{brandError}</p>}
             {brandApplied&&<p role="status" className="help-text" data-business-brand-status>임시 적용 중 · 실제 문서 V2는 변경되지 않았습니다. 정식 BUSINESS 사용권/영구 저장 기능은 아직 미구현입니다.</p>}
           </section>
