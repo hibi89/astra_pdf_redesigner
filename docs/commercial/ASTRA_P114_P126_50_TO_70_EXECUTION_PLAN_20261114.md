@@ -1,6 +1,6 @@
 # Astra PDF Redesigner — P114~P126 실행 설계 및 50→70점 검증 공시
 
-> **[2026-11-14 최신 사용자 위임으로 실행자 변경]** 50→70(P114~P126) 구현·테스트·GitHub 커밋 담당은 **Codex 6 Luna Max**. 오직 **GitHub 기존 feature 브랜치 + GitHub-hosted Actions**만 사용한다. 이전 Instant 담당 표기는 이 범위에서 대체한다. 상세 실행 환경·실모델/실OCR blocking·한도 규정은 [Codex Github-only 런북](ASTRA_CODEX_LUNA_MAX_GITHUB_ONLY_P114_P126_20261114.md) 및 [작업 원장](ASTRA_P114_P126_TASK_REGISTER_20261114.json)을 우선한다. **설계 기준 50/100; P114/P115/P116/P117/P118 VERIFIED, G55 PASS, P119/P120/P121 BLOCKED +0, 잠정 57/100, 다음 독립 P122; 공식 UNASSESSED, RELEASE HOLD. 이 문서 수정은 기능 개발이나 CI 통과가 아니다.** 70점 이후 P127+ 담당자는 이번 위임에서 지정하지 않았다.
+> **[2026-11-14 최신 사용자 위임으로 실행자 변경]** 50→70(P114~P126) 구현·테스트·GitHub 커밋 담당은 **Codex 6 Luna Max**. 오직 **GitHub 기존 feature 브랜치 + GitHub-hosted Actions**만 사용한다. 이전 Instant 담당 표기는 이 범위에서 대체한다. 상세 실행 환경·실모델/실OCR blocking·한도 규정은 [Codex Github-only 런북](ASTRA_CODEX_LUNA_MAX_GITHUB_ONLY_P114_P126_20261114.md) 및 [작업 원장](ASTRA_P114_P126_TASK_REGISTER_20261114.json)을 우선한다. **설계 기준 50/100; P114/P115/P116/P117/P118 VERIFIED, G55 PASS, P119/P120/P121 BLOCKED +0, P122 VERIFIED +2, 잠정 59/100, 다음 P123; 공식 UNASSESSED, RELEASE HOLD. 이 문서 수정은 기능 개발이나 CI 통과가 아니다.** 70점 이후 P127+ 담당자는 이번 위임에서 지정하지 않았다.
 
 
 > 설계 승인 문맥: 2026-11-14 21:55 KST, 사용자 지시: GPT-6 High가 최종설계 기반 작업을 분해·공시하고, Codex 6 Luna Max가 구현과 GitHub 검증·인수인계를 직접 담당. High는 사용자 요청 시 최종 별도 검수 담당. 이 문서는 **계획 공시**이며 기능 구현·테스트 또는 70점 달성을 의미하지 않는다.
@@ -61,7 +61,7 @@
 | P119 Windows Tesseract 공급처·해시·DLL·LICENSE 감사 재현 | A07 | +1 | 58/100 | 없음 | BLOCKED (+0) |
 | P120 실 Tesseract 한국어 인식 난도별 측정·오인식 공개 | A07 | +1 | 59/100 | P119 | BLOCKED (+0) |
 | P121 Electron OCR IPC 실실행 및 실패 복구 | A07 | +1 | 60/100 | P119, P120 | BLOCKED (+0) |
-| P122 Ollama 명시 동의·출처 고정·오래된 응답·의미 변경 방어 | A08 | +2 | 62/100 | 없음 | PENDING |
+| P122 Ollama 명시 동의·출처 고정·오래된 응답·의미 변경 방어 | A08 | +2 | 62/100 | 없음 | VERIFIED (+2) |
 | P123 실 Qwen3 한국어 CPU 추론 및 데이터 무결성 시험 | A08 | +3 | 65/100 | P122 | PENDING |
 | P124 3SKU 공통 윤문 실제 GUI 회귀·문단 승인/되돌림 | A08 | +2 | 67/100 | P123, P117 | PENDING |
 | P125 Electron 메인 프로세스 상용 PDF IPC·오프라인 영수증 직접 호출 게이트 | A09 | +2 | 69/100 | P117, P122 | PENDING |
@@ -145,7 +145,7 @@
 
 #### P122 — Ollama 명시 동의·출처 고정·오래된 응답·의미 변경 방어 (A08 +2점, 누적 상한 62/100)
 
-- **선행:** 없음. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
+- **선행:** 없음. **담당:** Codex 6 Luna Max. 현재 상태: **VERIFIED +2점**; [P122 검증서](../evidence/astra/P122/VERIFICATION.md). Code SHA `d2a84d03ac8c791e74470e756cb6417a356776c3`; Linux #43638127671, Windows #43638127695, policy #43638128095 exact SHA SUCCESS. A08 2→4; total 57→59/100. G60 not reached.
 - **수정 후보 경로:** desktop/owner-ollama-controller.cjs; desktop/main.cjs; desktop/preload.cjs; desktop/local-model-controller.cjs; src/humanize/LocalModelReview.tsx; tests/owner-ollama-controller.test.cjs. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 고정 127.0.0.1/기존 Qwen3 model ID만 허용, user-selected URL/프록시·redirect·cloud fallback 금지. IPC 인자·주문·모델 출력 상한·오래된 문서/블록 응답·취소/동시 요청·숫자/날짜/부정/이름/표/URL 정합 검증 후 사용자 승인 단계 유지.
 - **수용 테스트/증거:** 합성/공격 golden 최소 30문단(금액·부정·명시 거부·시간·동시 실행·문서 전환 포함), 동의 없을 때 추론 요청 0, auto-apply 0, 변경된 원문에 오래된 후보 적용 0, 예외 뒤 원문 보존 100%. 코드와 Electron 브리지 회귀 모두 PASS.
@@ -222,4 +222,4 @@
 
 70~100 상세 잔여 30점과 사용자가 개입해야 할 최종 승인 장벽은 docs/commercial/ASTRA_INSTANT_70_TO_100_HANDOFF_20261114.md에 따로 기록한다. 모든 항목의 사용자가 확정한 배점과 원본 설계는 동일하다.
 
-**최종 확인:** P114–P118 VERIFIED, G55 PASS; P119–P121 BLOCKED at 0 credit; current provisional 57/100. Latest verified code SHA `420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02`. Next independent task P122. Official acceptance UNASSESSED, RELEASE HOLD.
+**최종 확인:** P114–P118 VERIFIED, G55 PASS; P119–P121 BLOCKED +0; P122 VERIFIED +2; current provisional 59/100. Latest verified code SHA `d2a84d03ac8c791e74470e756cb6417a356776c3`. Next P123 (actual Qwen3 CPU inference). G60 not reached. Official acceptance UNASSESSED, RELEASE HOLD.

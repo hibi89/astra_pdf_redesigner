@@ -1,6 +1,6 @@
 # Astra PDF Redesigner — 12영역 최종설계 증거 기반 잠정 완성률
 
-**기준일: 2026-11-15 KST · 마지막 검증 기능 SHA `420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02` · P119 BLOCKED +0 · 잠정 57/100점 (57%).**
+**기준일: 2026-11-15 KST · 마지막 검증 기능 SHA `d2a84d03ac8c791e74470e756cb6417a356776c3` · P122 VERIFIED +2 · 잠정 59/100점 (59%); P119/P120/P121 BLOCKED +0.**
 **공식 구매자 최종 수용률: UNASSESSED. 출시: RELEASE HOLD.**
 
 ## 산정 원칙
@@ -18,12 +18,21 @@
 | A05 로컬 디자인 참고·적용 | 5 | **4** | 1 | PNG/JPEG/WebP/PDF 로컬 분석·미리보기·적용/Undo; Chrome/Edge 8종 합성 metric, source SHA·V2 전체 저장소 불변 및 손상 PDF fail-closed | 실구매자 레퍼런스 품질·폰트/권리·고객 PDF 수용
 | A06 온라인 레퍼런스 | 5 | **4** | 1 | 안전한 브라우저 검색 링크·URL/권리메모 로컬 기록  P112 저장된 HTTPS 출처→사용자 파일 선택→STEP5 로컬 분석 직접 연결, 권리·파일 동일성 인증/내장 검색 카드 없음. | 내장 검색 결과·출처 검증·STEP5 직접 연결 |
 | A07 OCR·콘텐츠 안전·STEP7 | 12 | **5** | 7 | STEP7 PDF 대조·수동 검토·출시 OCR 차단 정책/검사, P113 PNG/OCR 수동 대조. P119 UB-Mannheim 공급처 후보 audit BLOCKED +0: GitHub installer digest null, Authenticode/PE·DLL closure 및 bundle 재배포권 미확인. OCR_MANIFEST=null. | 승인 공급처의 Windows Tesseract 실제 한국어 OCR·표/스캔 정확도 |
-| A08 한국어 로컬 AI 윤문 | 14 | **2** | 12 | 제어기 골격은 존재하지만 실 모델 추론 없음(0점)  P111 소유자 설치 로컬 Ollama 고정 주소 Qwen3 동의 기반 UI·프로세스 어댑터·Diff/되돌리기, 합성 mock 검증; Astra 실제 CPU 모델 추론/문장 품질은 미검증. | 상업 재배포 가능한 GGUF/CPU 실제 동작·품질·비교·되돌림 |
+| A08 한국어 로컬 AI 윤문 | 14 | **4** | 10 | P111 로컬 Ollama 동의 UI/controller; P122 mock/static E2E +2: Chrome/Edge explicit-consent/stale-scope/manual review/Undo, 30 synthetic golden critical-token guard, Electron IPC regression. No real Qwen3 CPU inference; semantic preservation/quality not certified. | 상업 재배포 가능한 model license/hash, real Qwen3 CPU execution/quality, buyer review |
 | A09 라이선스·SKU·지원 | 11 | **5** | 6 | P96 서명 검증, P107 기능 매트릭스, P108 발급/연장, P109 GUI 실행 게이트, **P110 Electron PDF IPC main-frame/URL 검사** | 판매자 실제 공개키 pin·안전 발급/재발급/환불/철회·기기 수/오프라인 운영·same-frame IPC 우회·지원 약관 |
 | A10 Windows 설치·복구 | 5 | 3 | 2 | CI Windows unsigned NSIS 설치·제거·업그레이드, A4/IndexedDB·PNG 보존 | 실 Win10/11 물리 설치·서명/SmartScreen |
 | A11 허가 PDF 5~10건 검수 | 7 | 0 | 7 | 합성 도구는 존재하나 실제 사용자 승인 문서 0건 | 실제 허가 PDF 5~10건 독립 대조/육안 수용 |
 | A12 판매·법적·최종 승인 | 2 | 0 | 2 | 상품 등록 초안만 존재 | 저작권·재배포권·크몽 등록·최종 구매자 승인 |
 | **합계** | **100** | **57** | **43** | **잠정 증거 기반 구현·검증 점수** | **공식 수용 미완** |
+
+## P122 +2점 — 로컬 동의·stale response·원문 보호 (A08)
+
+- **판정:** 57→59/100, A08 2→4/14. 사용자 확정 영역 배점 불변. G55 PASS 유지; 59점이라 G60 미도달.
+- 코드 SHA `d2a84d03ac8c791e74470e756cb6417a356776c3`. 문서/블록 ID scope와 원문 텍스트가 바뀌면 in-flight 요청을 취소·무효화하며, 승인/Undo도 동일 scope에 한정한다. 숫자·날짜·통화·부정문·이름·표 행·URL·인용은 보수적 문자열 검증으로 보호한다.
+- [Linux #43638127671](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43638127671) SUCCESS — Node 278/278, build PASS; 실제 Chrome·Edge에서 동의 전 요청0, auto-apply0, same-text cross-scope/changed-text stale 응답 차단, 수동 승인/Undo, 오류·취소 후 원문 유지, external requests0.
+- [Windows #43638127695](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43638127695) SUCCESS — Node 277 PASS/1 OS-only SKIP/0 FAIL, desktop 74/74, Electron/NSIS smoke/install/uninstall/upgrade PASS. [Final blueprint #43638128095](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43638128095) SUCCESS. 세 run exact head SHA는 동일.
+- 최초 후보 `45affeef40c96cb4991fadd6da6c706fa84afd41` [Linux #43637402373](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43637402373)은 overescaped regex/IPC fixture assertion 3건 실패, 무가점. 고친 최종 SHA의 full CI에서 회귀 통과.
+- 이 작업은 30개 synthetic golden + mock UI/Electron bridge만 검증했다. 실제 Qwen3 CPU 추론, license/hash, latency/memory, 문장 품질 미검증이며 P123/P124로 중복 계산하지 않는다. [P122 검증서](../evidence/astra/P122/VERIFICATION.md).
 
 ## P119 +0점 — Windows Tesseract 공급처 후보 감사 (BLOCKED)
 

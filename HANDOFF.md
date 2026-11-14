@@ -1,3 +1,16 @@
+## 2026-11-15 KST — P122 VERIFIED · 잠정 59/100 GitHub-only 인수인계 (10항)
+
+1. **완료 작업:** P122(A08) +2점. 127.0.0.1 고정 Ollama/model, 명시 동의, 모델 응답 검증, stale-response cancel, 수동 승인/Undo를 보강했다.
+2. **정확 기능 SHA:** `d2a84d03ac8c791e74470e756cb6417a356776c3`; [P122 검증서](docs/evidence/astra/P122/VERIFICATION.md). 변경은 controller, LocalModelReview/Workspace, 30-case golden, Electron IPC test, synthetic Chrome/Edge harness 및 CI wiring이다.
+3. **Linux:** [#43638127671](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43638127671) SUCCESS exact SHA. Node 278/278, build PASS; Chrome/Edge에서 동의 전 제안 호출0, auto-apply0, 문서·블록 scope/본문 변경 stale 응답 거부, 승인·Undo·예외/취소 원문 보존·외부 요청0.
+4. **Windows:** [#43638127695](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43638127695) SUCCESS exact SHA. Node 277 PASS/1 OS-only SKIP/0 FAIL, desktop 74/74, Electron smoke, P106 synthetic audit, NSIS 설치·실행·제거·0.1.0→0.1.1 기존 V2 문서+PNG 보존 PASS.
+5. **정책:** [#43638128095](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43638128095) SUCCESS at exact SHA.
+6. **Golden evidence:** 30개 합성 긍정/공격 사례에서 숫자·날짜·금액·부정문·이름·표 행·URL·인용 변조를 fail-closed 처리한다. 고위험 문장은 보수적으로 거부하며 의미 보존을 보증하지 않는다.
+7. **점수:** A08 2→4/14, 총 57→59/100. P122에서 +2만 반영. G55 PASS, G60은 59점이라 미도달.
+8. **시도 실패:** 최초 SHA `45affeef40c96cb4991fadd6da6c706fa84afd41`, Linux [#43637402373](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43637402373) regex/test escaping 오류 3건 FAIL·0점; 수정 SHA 최종 full CI 통과.
+9. **차단/보존:** P119/P120/P121 BLOCKED 0점; OCR_MANIFEST=null, RELEASE HOLD. 실제 Qwen3 CPU 추론·품질·모델 권리/hash 미검증. STEP1 V1, STEP2 V2, BASIC8/PRO20/BUSINESS30, seller key/customer build gate 불변.
+10. **다음:** P123 actual Qwen3 local CPU model availability, source/license/hash/runner constraints check. P119 supplier artifact remains external blocker; official buyer acceptance UNASSESSED.
+
 ## 2026-11-15 KST — P119 공급자 근거 BLOCKED · 잠정 57/100 인수인계
 
 1. **완료 판정:** P119 Windows Tesseract 공급처·재배포 감사를 수행했다. UB-Mannheim v5.4.0.20240606 installer의 GitHub Release `digest`가 `null`이고 SHA-256·Authenticode·실제 PE/DLL closure·candidate bundle의 재배포 권리가 입증되지 않아 P119는 **BLOCKED, +0점**이다.

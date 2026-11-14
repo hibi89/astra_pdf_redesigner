@@ -3,7 +3,14 @@
 **2026-11-14 KST 최신 사용자 위임.** P114~P126은 **Codex 6 Luna Max**가 실행하고 GPT-6 High는 이번 설계 공시·완료 후 사용자 호출 시 독립 최종 검수를 맡는다. P127~P138의 실행자 지정은 이번 위임에 포함되지 않는다.
 
 **저장소:** `hibi89/astra_pdf_redesigner` · **기존 작업 브랜치:** `feature/astra-p71-pdf-source-parity-20261112` · **기준 기능 SHA:** `26aff40d6de524c2430f8a6b325d906cea67f7e1`.
-**기준 점수:** 위임 시 50/100. 현재 P114/P115/P116/P117/P118 VERIFIED, G55 PASS, P119/P120/P121 BLOCKED(+0), 잠정 57/100, 다음 독립 P122; 목표 70/100. 공식 사용자/구매자 수용률 `UNASSESSED`, 출시 `RELEASE HOLD`, 크몽 미등록. 이 런북은 실행 절차이며 점수 증거는 각 작업 검증서와 정확 SHA Actions다.
+**기준 점수:** 위임 시 50/100. 현재 P114/P115/P116/P117/P118 VERIFIED, G55 PASS, P119/P120/P121 BLOCKED(+0), P122 VERIFIED(+2), 잠정 59/100, 다음 P123; 목표 70/100. 공식 사용자/구매자 수용률 `UNASSESSED`, 출시 `RELEASE HOLD`, 크몽 미등록. 이 런북은 실행 절차이며 점수 증거는 각 작업 검증서와 정확 SHA Actions다.
+
+## P122 VERIFIED — A08 +2 (2026-11-15 KST; provisional 59/100)
+
+- Code SHA `d2a84d03ac8c791e74470e756cb6417a356776c3`; [verification record](../evidence/astra/P122/VERIFICATION.md).
+- [Linux #43638127671](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43638127671): SUCCESS, Node 278/278, build; Chrome and Edge mock UI. [Windows #43638127695](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43638127695): SUCCESS, Node277 PASS/1 OS SKIP, desktop74/74, Electron bridge smoke, NSIS install/uninstall/upgrade. [Policy #43638128095](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43638128095): SUCCESS. All head SHA exactly d2a84d03ac8c791e74470e756cb6417a356776c3.
+- 30 synthetic golden positive/adversarial paragraphs; Chrome/Edge verify consent, fixed scope, stale response rejection, manual apply/Undo, exception/cancel preservation and no external request. No real model inference.
+- A08 2→4/14; total 57→59/100. G55 PASS, G60 not reached. P119/P120/P121 remain blocked; next P123 real Qwen3 CPU availability/rights/hash check.
 
 ## P119 audit outcome — BLOCKED, 0 credit (2026-11-15 KST)
 
@@ -52,8 +59,8 @@ The GitHub-hosted release candidate is identified, but its installer asset has `
 | P118 | A05 | +1 | 57/100 | Chrome/Edge; 로컬 PNG/JPEG/PDF ≥8종 선택/적용/취소·Undo·복원, URL 자동 다운로드 금지 |
 | P119 | A07 | +1 | 58/100 | BLOCKED(+0): release digest null, binary SHA/AuthentiCode/PE-DLL closure/bundle rights unknown |
 | P120 | A07 | +1 | 59/100 | BLOCKED(+0): no P119-approved supplier asset; actual OCR not run |
-| P121 | A07 | +1 | 60/100 | Windows Actions Electron IPC 실제 Tesseract subprocess; PNG→text·취소·timeout·임시파일 정리/원본 V2 불변 |
-| P122 | A08 | +2 | 62/100 | Node+Electron 부정 테스트 ≥30건; 127.0.0.1 고정·동의·출력 바운드·레이스·숫자·부정문 방어 |
+| P121 | A07 | +1 | 60/100 | BLOCKED(+0): P119 supplier asset and P120 actual OCR prerequisites unavailable |
+| P122 | A08 | +2 | 62/100 | VERIFIED(+2): 30 golden + Chrome/Edge mock UI + Windows Electron bridge; exact code SHA d2a84d03; actual model remains untested |
 | P123 | A08 | +3 | 65/100 | Ubuntu Actions CPU-only 실제 qwen3:4b-instruct, 공식 SHA/권리/모델 버전 검증, 한국어 문단 ≥30·유효제안 ≥5, CPU/RAM/시간 측정. 모델 가중치 확보 불가시 BLOCKED |
 | P124 | A08 | +2 | 67/100 | Windows-hosted Electron/동등 검증된 runner 실제 Qwen 4B 윤문 ≥10회, 3SKU 동일 모델, Diff/Undo/미승인 변경 0(mock 단독 불인정) |
 | P125 | A09 | +2 | 69/100 | Node WebCrypto 합성 서명+Windows Electron IPC; 위조·만료·타등급·직접 IPC 차단. 정식 seller JWK/pin=null 보존 |
@@ -101,7 +108,7 @@ The GitHub-hosted release candidate is identified, but its installer asset has `
 - **개발:** 별도 다운로드/동봉 없이 공식 공급처 후보의 버전·해시·Authenticode·PE import/delay-load DLL 폐쇄성·tessdata kor/eng·재배포권 증거를 정리한다. 데이터/고객 PDF 없이 증거·검증기만 유지.
 - **검증:** Windows 테스트에서 정상·변조·누락·DLL 경로 오염·서명 없음·라이선스 고지 없음 케이스의 거부 동작, SBOM/NOTICE 후보별 근거 파일, 출처 날짜·버전·파일 해시 기록.
 - **차단:** 공급처/재배포권이 미확인되면 P119 점수 미인정, OCR_MANIFEST=null·RELEASE HOLD 유지. 임의 바이너리와 개인키 GitHub 반입 금지.
-- **GitHub 증거 산출물:** `docs/evidence/astra/P119/VERIFICATION.md`에 재현 명령/runner OS·실행 유형(mock/real)/합성 fixture 해시·실제 PASS/FAIL/SKIP·정확 기능 SHA·3개 CI workflow 링크·지원/미지원 범위·가점 근거 기재. **현재 PENDING/0점**.
+- **GitHub 증거 산출물:** `docs/evidence/astra/P119/VERIFICATION.md`에 재현 명령/runner OS·실행 유형(mock/real)/합성 fixture 해시·실제 PASS/FAIL/SKIP·정확 기능 SHA·3개 CI workflow 링크·지원/미지원 범위·가점 근거 기재. **BLOCKED/0점 기록**.
 
 #### P120 (A07 +1; 선행: P119) — BLOCKED, +0; actual Tesseract not run without approved asset.
 - **수정 경로:** tools/verify-real-korean-ocr.py; src/step7/LocalOcrPanel.tsx; tests/step7-local-ocr-browser.mjs.
@@ -110,14 +117,14 @@ The GitHub-hosted release candidate is identified, but its installer asset has `
 - **차단:** 기존 3개 중 2개 정확 일치를 품질 100%로 주장하지 말 것. 실제 공급자 실행 없이 mock 결과만으로 점수 부여 금지.
 - **GitHub 증거 산출물:** `docs/evidence/astra/P120/VERIFICATION.md`에 재현 명령/runner OS·실행 유형(mock/real)/합성 fixture 해시·실제 PASS/FAIL/SKIP·정확 기능 SHA·3개 CI workflow 링크·지원/미지원 범위·가점 근거 기재. **현재 PENDING/0점**.
 
-#### P121 (A07 +1; 선행: P119, P120)
+#### P121 (A07 +1; 선행: P119, P120) — BLOCKED, +0; no approved Tesseract asset.
 - **수정 경로:** desktop/local-ocr-controller.cjs; desktop/main.cjs; desktop/preload.cjs; src/step7/LocalOcrPanel.tsx; tests/local-ocr-controller.test.cjs; tests/step7-local-ocr-browser.mjs.
 - **개발:** 승인된 테스트 자산을 CI 임시 디렉터리로만 사용해 실제 native OCR subprocess 호출/취소·timeout·temp 삭제·문서 V2 미수정·원본 PNG 대조까지 연결. 릴리스 manifest와 별도 시험 주입 분리.
 - **검증:** Windows Electron 격리 프로필에서 PNG→kor+eng OCR 미승인 초안 반환과 실제 취소·시간제한·깨진 입력 거부·임시 파일 삭제를 확인. 외부 네트워크/자동 반영/고객 원본 전송 0, 기존 NSIS PASS.
 - **차단:** 자산의 라이선스·서명/해시가 검증되지 않으면 실제 테스트 대신 HOLD, 점수 0. 시험 manifest를 production 상수로 이식 금지.
 - **GitHub 증거 산출물:** `docs/evidence/astra/P121/VERIFICATION.md`에 재현 명령/runner OS·실행 유형(mock/real)/합성 fixture 해시·실제 PASS/FAIL/SKIP·정확 기능 SHA·3개 CI workflow 링크·지원/미지원 범위·가점 근거 기재. **현재 PENDING/0점**.
 
-#### P122 (A08 +2; 선행: 없음)
+#### P122 (A08 +2; 선행: 없음) — VERIFIED, +2; current score 59/100.
 - **수정 경로:** desktop/owner-ollama-controller.cjs; desktop/main.cjs; desktop/preload.cjs; desktop/local-model-controller.cjs; src/humanize/LocalModelReview.tsx; tests/owner-ollama-controller.test.cjs.
 - **개발:** 고정 127.0.0.1/기존 Qwen3 model ID만 허용, user-selected URL/프록시·redirect·cloud fallback 금지. IPC 인자·주문·모델 출력 상한·오래된 문서/블록 응답·취소/동시 요청·숫자/날짜/부정/이름/표/URL 정합 검증 후 사용자 승인 단계 유지.
 - **검증:** 합성/공격 golden 최소 30문단(금액·부정·명시 거부·시간·동시 실행·문서 전환 포함), 동의 없을 때 추론 요청 0, auto-apply 0, 변경된 원문에 오래된 후보 적용 0, 예외 뒤 원문 보존 100%. 코드와 Electron 브리지 회귀 모두 PASS.

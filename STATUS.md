@@ -1,3 +1,14 @@
+## 2026-11-15 KST — P122 VERIFIED · 잠정 59/100
+
+- **완료 작업:** P122(A08) +2점. 고정 loopback/model, 명시 동의, 오래된 문서·블록 응답 폐기, 원문 안전검사를 실제 Chrome/Edge mock UI와 Electron bridge 회귀로 확인했다. [P122 검증서](docs/evidence/astra/P122/VERIFICATION.md).
+- **정확 기능 SHA:** `d2a84d03ac8c791e74470e756cb6417a356776c3`. 30개 synthetic golden(이름·표·숫자·날짜·금액·부정·URL·인용)과 scope-bound proposal/Undo를 추가했다. 실제 Qwen3 실행은 없다.
+- **Linux PASS:** [#43638127671](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43638127671), exact SHA. Node 278/278, build PASS; Chrome/Edge UI에서 무동의 호출0·자동 적용0·동일 문구 다른 block stale proposal0·원문 유지·외부 요청0.
+- **Windows PASS:** [#43638127695](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43638127695), exact SHA. Node 277 PASS/1 Windows OS-only SKIP/0 FAIL, desktop 74/74, Electron bridge smoke, P106 synthetic, NSIS 설치/제거/업그레이드 및 STEP2 문서+PNG 보존 PASS.
+- **정본 정책 PASS:** [#43638128095](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43638128095), exact SHA.
+- **실패 후보:** `45affeef40c96cb4991fadd6da6c706fa84afd41` Linux [#43637402373](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43637402373)은 escape 오류 3건으로 FAIL·0점. 수정 최종 SHA에서 전체 CI를 통과했다.
+- **점수:** A08 2→4/14, 57→59/100. P119/P120/P121은 0점 BLOCKED. G55 PASS, G60 미도달. 공식 수용 UNASSESSED, RELEASE HOLD.
+- **다음:** P123 실 Qwen3:4b-instruct CPU 추론 환경·권리·모델 hash 확인. P119/P120/P121은 Tesseract 공급 자산/권리 확인 전 계속 차단.
+
 ## 2026-11-15 KST — P119 BLOCKED · P120/P121 BLOCKED · 잠정 57/100
 
 - **P119:** Windows Tesseract 후보 공급망 감사 결과 0/1점. 공개 UB-Mannheim v5.4.0.20240606 installer의 GitHub release asset metadata는 50,175,248 bytes, `digest:null`; 실제 SHA-256, Authenticode, PE direct/delay-load DLL 폐쇄, 설치파일 속 kor/eng·dependency 목록 및 해당 묶음 재배포권을 입증하지 못했다. P119 지시대로 설치 바이너리/모델을 다운로드하거나 저장소에 동봉하지 않았다.
