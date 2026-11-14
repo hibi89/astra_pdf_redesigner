@@ -1,5 +1,6 @@
 import {useEffect,useRef,useState} from 'react';
 import workerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
+import {pageNeedsOcr} from './ocrEligibility.ts';
 
 // Source PDF remains in renderer memory. OCR outputs are never written to V1/V2.
 // This is an owner-reviewed draft only; scanned text is not authenticated.
@@ -59,6 +60,8 @@ export default function LocalOcrPanel(){
    if(pdf.numPages<1||pdf.numPages>MAX_PAGES||pageNumber>pdf.numPages)
     throw Error('50페이지 이내 PDF의 존재하는 페이지를 선택하세요.');
    const page=await pdf.getPage(pageNumber);if(!current())return;
+   const textContent=await page.getTextContent();if(!current())return;
+   if(!pageNeedsOcr(textContent.items))throw Error('이 페이지에는 선택 가능한 원문 텍스트가 있습니다. OCR로 덮어쓰지 말고 기존 PDF 검수 기능을 이용하세요.');
    const native=page.getViewport({scale:1});
    const scale=Math.min(2,Math.sqrt(MAX_PIXELS/(native.width*native.height)));
    const viewport=page.getViewport({scale});
