@@ -38,6 +38,26 @@ $state = [ordered]@{
 function Save-Report {
   $state | ConvertTo-Json -Depth 12 | Set-Content -LiteralPath $reportPath -Encoding UTF8
 }
+function Normalize-OcrText([string]$Text) {
+  return ([string]$Text -replace '\s+','').Normalize([Text.NormalizationForm]::FormC)
+}
+function Get-EditDistance([string]$Left,[string]$Right) {
+  $previous = [int[]]::new($Right.Length + 1)
+  for ($j = 0; $j -le $Right.Length; $j++) { $previous[$j] = $j }
+  for ($i = 1; $i -le $Left.Length; $i++) {
+    $current = [int[]]::new($Right.Length + 1)
+    $current[0] = $i
+    for ($j = 1; $j -le $Right.Length; $j++) {
+      $cost = if ($Left[$i - 1] -ceq $Right[$j - 1]) { 0 } else { 1 }
+      $current[$j] = [Math]::Min([Math]::Min($current[$j - 1] + 1, $previous[$j] + 1), $previous[$j - 1] + $cost)
+    }
+    $previous = $current
+  }
+  return $previous[$Right.Length]
+}
+function Get-CriticalNumbers([string]$Text) {
+  return @([regex]::Matches($Text,'(?<![A-Za-z0-9])[-+]?\d[\d,]*(?:\.\d+)?%?(?![A-Za-z0-9])') | ForEach-Object { $_.Value })
+}
 try {
   Save-Report
   Invoke-WebRequest -Uri $releaseUrl -OutFile $installerPath -MaximumRedirection 5
@@ -127,10 +147,21 @@ try {
     $raw = & $engine $filename stdout -l kor+eng --psm 6 --tessdata-dir $dataRoot 2>&1
     $exit = $LASTEXITCODE
     $recognized = (($raw | ForEach-Object { [string]$_ }) -join ([Environment]::NewLine)).Trim()
+    $expectedNormalized = Normalize-OcrText $sourceTexts[$i]
+    $recognizedNormalized = Normalize-OcrText $recognized
+    $editDistance = Get-EditDistance $expectedNormalized $recognizedNormalized
+    $cer = if ($expectedNormalized.Length -eq 0) { 1.0 } else { [Math]::Round($editDistance / $expectedNormalized.Length, 4) }
+    $expectedNumbers = @(Get-CriticalNumbers $sourceTexts[$i])
+    $recognizedNumbers = @(Get-CriticalNumbers $recognized)
     $results += [ordered]@{
       case = $i + 1; expected = $sourceTexts[$i]; recognized = $recognized
-      exact = ($recognized -eq $sourceTexts[$i]); engine_exit = $exit
-      fixture_sha256 = $fixtureHash; difficulty = if ($difficult) { 'small_low_contrast' } elseif ($i -ge 4) { 'medium' } else { 'easy' }
+      exact = ($expectedNormalized -ceq $recognizedNormalized)
+      character_error_rate = $cer
+      critical_numbers_expected = $expectedNumbers
+      critical_numbers_recognized = $recognizedNumbers
+      critical_numbers_match = (($expectedNumbers -join '|') -ceq ($recognizedNumbers -join '|'))
+      engine_exit = $exit; fixture_sha256 = $fixtureHash
+      difficulty = if ($difficult) { 'small_low_contrast' } elseif ($i -ge 4) { 'medium' } else { 'easy' }
     }
     if ($exit -ne 0) { throw "TESSERACT_OCR_EXIT_CASE_$($i + 1)_$exit" }
   }
