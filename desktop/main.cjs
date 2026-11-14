@@ -11,7 +11,9 @@ const {acceptanceDomSource,MARKERS}=require('./pdf-acceptance-fixture.cjs');
 const {runStep2ProjectAcceptance}=require('./step2-project-acceptance.cjs');
 const {runStep3ProjectAcceptance}=require('./step3-project-acceptance.cjs');
 const {createLocalModelController}=require('./local-model-controller.cjs');
+const {createLocalOcrController}=require('./local-ocr-controller.cjs');
 const localModel=createLocalModelController({resourcesDir:process.resourcesPath});
+const localOcr=createLocalOcrController({resourcesDir:process.resourcesPath});
 
 const APP_URL='astra://app/index.html';
 const SMOKE=process.argv.includes('--astra-desktop-smoke');
@@ -172,6 +174,23 @@ function registerLocalModel(){
   });
 }
 
+function registerLocalOcr(){
+  const trusted=event=>mainWindow&&!mainWindow.isDestroyed()&&
+    event.sender===mainWindow.webContents&&isAppUrl(event.sender.getURL());
+  ipcMain.handle('astra:local-ocr-status',async event=>{
+    if(!trusted(event))throw Error('Untrusted OCR status request');
+    return localOcr.status();
+  });
+  ipcMain.handle('astra:local-ocr-recognize',async(event,pngBytes)=>{
+    if(!trusted(event))throw Error('Untrusted OCR request');
+    return localOcr.recognizePng(pngBytes);
+  });
+  ipcMain.handle('astra:local-ocr-cancel',async event=>{
+    if(!trusted(event))throw Error('Untrusted OCR cancellation request');
+    return localOcr.cancel();
+  });
+}
+
 function createWindow(){
   mainWindow=new BrowserWindow({
     width:1360,height:900,minWidth:900,minHeight:620,
@@ -278,6 +297,7 @@ if(lock){
       configureSession();
       registerPdfSaving();
       registerLocalModel();
+      registerLocalOcr();
       await createWindow();
       if(SMOKE){
         await runSmoke(mainWindow);
