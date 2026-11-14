@@ -181,9 +181,9 @@ function registerLocalOcr(){
     if(!trusted(event))throw Error('Untrusted OCR status request');
     return localOcr.status();
   });
-  ipcMain.handle('astra:local-ocr-recognize',async(event,pngBytes)=>{
+  ipcMain.handle('astra:local-ocr-recognize',async(event,pngBytes,layoutMode)=>{
     if(!trusted(event))throw Error('Untrusted OCR request');
-    return localOcr.recognizePng(pngBytes);
+    return localOcr.recognizePng(pngBytes,layoutMode);
   });
   ipcMain.handle('astra:local-ocr-cancel',async event=>{
     if(!trusted(event))throw Error('Untrusted OCR cancellation request');
