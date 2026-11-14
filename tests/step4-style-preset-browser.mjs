@@ -128,6 +128,29 @@ try{
   assert.deepEqual(await evaluate(stored),advancedPrior,'Portable advanced layout must not write V2 document');
   await evaluate("document.querySelector('[data-extended-layout-cancel]').click()");
 
+
+ // P94 BUSINESS branded letterhead is opt-in, has A4 output, and does not modify stored V2.
+ await evaluate("document.querySelector('[data-extended-layout-id=business-01]').click()");
+ await eventually(()=>evaluate("document.querySelector('.project-paper')?.dataset.advancedLayout"),x=>x==='business-01');
+ await evaluate("(()=>{const i=document.querySelector('[data-business-brand-name]');const setter=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set;setter.call(i,'합성 테스트 회사');i.dispatchEvent(new Event('input',{bubbles:true}));})()");
+ await evaluate("document.querySelector('[data-business-brand-apply]').click()");
+ await eventually(()=>evaluate("document.querySelector('[data-business-brand-header]')?.textContent"),x=>x?.includes('합성 테스트 회사'));
+ assert.deepEqual(await evaluate(stored),advancedPrior,'Brand preview must not mutate saved V2');
+ const brandedOutput=await send('Page.printToPDF',{printBackground:true,preferCSSPageSize:true});
+ const brandedBytes=Buffer.from(brandedOutput.data,'base64');assert.equal(brandedBytes.subarray(0,5).toString(),'%PDF-');
+ const brandedPath=join(profile,'business-branded-a4.pdf');writeFileSync(brandedPath,brandedBytes);
+ assert.match(execFileSync('pdfinfo',[brandedPath],{encoding:'utf8'}),/Page size:\s+[0-9.]+ x [0-9.]+ pts \(A4\)/);
+ await evaluate("document.querySelector('[data-business-brand-export]').click()");
+ const brandedJson=await evaluate("(async()=>await window.__astraPresetBlob.text())()");
+ assert.equal(JSON.parse(brandedJson).kit.name,'합성 테스트 회사');
+ assert.doesNotMatch(brandedJson,/sourcePdf|assetId|base64|sections/);
+ await evaluate("document.querySelector('[data-business-brand-clear]').click()");
+ await eventually(()=>evaluate("!document.querySelector('[data-business-brand-header]')"));
+ await evaluate("(()=>{const f=new File(["+JSON.stringify(brandedJson)+"],'brand.json',{type:'application/json'});const d=new DataTransfer();d.items.add(f);const i=document.querySelector('[data-business-brand-file]');i.files=d.files;i.dispatchEvent(new Event('change',{bubbles:true}));})()");
+ await eventually(()=>evaluate("document.querySelector('[data-business-brand-header]')?.textContent"),x=>x?.includes('합성 테스트 회사'));
+ assert.deepEqual(await evaluate(stored),advancedPrior,'Brand JSON import must not mutate saved V2');
+ await evaluate("document.querySelector('[data-business-brand-clear]').click()");
+ await evaluate("document.querySelector('[data-extended-layout-cancel]').click()");
  console.log('PASS P93 PRO/BUSINESS 22/22: unique DOM geometries, every A4 PDF output audited, V2 unchanged');
  console.log('PASS STEP4 PORTABLE STYLE: file export/import, transient preview/cancel, apply/undo, A4 PDF, tamper and original V2 preservation');
 }finally{

@@ -16,6 +16,7 @@ import {downloadStylePreset,importStylePreset} from '../step4/stylePreset.ts';
 import {SKU_LAYOUT_CANDIDATES,skuLayoutCandidate} from '../step4/skuLayoutCandidates.ts';
 import ReferenceSearchPanel from '../step6/ReferenceSearchPanel.tsx';
 import {downloadAdvancedLayoutPreset,importAdvancedLayoutPreset} from '../step4/advancedLayoutPreset.ts';
+import {downloadBusinessBrandKit,importBusinessBrandKit,validateBusinessBrandKit,type BusinessBrandKit} from '../step4/brandKit.ts';
 import {makeSourceReviewReceipt,downloadSourceReviewReceipt} from '../step3/reviewReceipt.ts';
 
 const allThemes=[...THEMES,
@@ -35,10 +36,12 @@ function useAssetUrls(assets:readonly ImageAsset[]):Record<string,string>{
     setUrls(created);return()=>{for(const value of Object.values(created))URL.revokeObjectURL(value);};
   },[assets]);return urls;
 }
-export function ProjectPreview({doc,urls,previewTheme,previewDesign,previewLayoutId}: {doc:ProjectDocument;urls:Record<string,string>;previewTheme?:ThemeId;previewDesign?:DesignSettings;previewLayoutId?:string}){
+export function ProjectPreview({doc,urls,previewTheme,previewDesign,previewLayoutId,brandKit,brandLogoUrl}: {doc:ProjectDocument;urls:Record<string,string>;previewTheme?:ThemeId;previewDesign?:DesignSettings;previewLayoutId?:string;brandKit?:BusinessBrandKit|null;brandLogoUrl?:string|null}){
   const advanced=skuLayoutCandidate(previewLayoutId);
+  const branded=advanced?.tier==='business'&&brandKit ? brandKit : null;
   const sections=visibleSections(doc);const design=advanced?{...doc.design,theme:advanced.baseTheme}:previewDesign??(previewTheme?{...doc.design,theme:previewTheme}:doc.design);
-  return <article className={`document paper-theme-${design.theme} paper-font-${design.font} paper-size-${design.textSize} project-paper ${advanced?'paper-advanced-'+advanced.id:''}`} data-advanced-layout={advanced?.id} style={{'--accent':design.accent} as CSSProperties} aria-label="문서 미리보기">
+  return <article className={`document paper-theme-${design.theme} paper-font-${design.font} paper-size-${design.textSize} project-paper ${advanced?'paper-advanced-'+advanced.id:''}`} data-advanced-layout={advanced?.id} style={{'--accent':branded?.accent??design.accent} as CSSProperties} aria-label="문서 미리보기">
+    {branded&&<div className="business-brand-header" data-business-brand-header>{brandLogoUrl&&<img className="business-brand-logo" src={brandLogoUrl} alt="브랜드 로고" data-business-logo/>}<div><strong>{branded.name}</strong>{branded.tagline&&<span>{branded.tagline}</span>}</div></div>}
     <div className="document-heading">
       {design.theme==='diary'&&<span className="document-eyebrow">LEARNING JOURNAL</span>}
       {design.theme==='report'&&<span className="document-eyebrow">DOCUMENT REPORT</span>}
@@ -70,6 +73,7 @@ export function ProjectPreview({doc,urls,previewTheme,previewDesign,previewLayou
         })}
       </section>)}
     </div>
+    {branded&&branded.footer&&<footer className="business-brand-footer" data-business-brand-footer>{branded.footer}</footer>}
   </article>;
 }
 
@@ -84,6 +88,12 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
   const [styleCompareGalleryOpen,setStyleCompareGalleryOpen]=useState(false);
   const [advancedPreview,setAdvancedPreview]=useState<{documentId:string;layoutId:string}|null>(null);
   const [advancedPresetError,setAdvancedPresetError]=useState('');
+  const [brandDraft,setBrandDraft]=useState<BusinessBrandKit>({name:'',tagline:'',footer:'',accent:PALETTE[0].value});
+  const [brandApplied,setBrandApplied]=useState<BusinessBrandKit|null>(null);
+  const [brandLogoUrl,setBrandLogoUrl]=useState<string|null>(null);
+  const [brandError,setBrandError]=useState('');
+  const brandImportInput=useRef<HTMLInputElement|null>(null);
+  const brandLogoInput=useRef<HTMLInputElement|null>(null);
   const advancedPresetInput=useRef<HTMLInputElement|null>(null);
   const [previewTheme,setPreviewTheme]=useState<{documentId:string;theme:ThemeId}|null>(null);
   const [styleUndo,setStyleUndo]=useState<Record<string,StyleUndoEntry[]>>({});
@@ -156,6 +166,7 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
   const urls=useAssetUrls(w.assets);
   const doc=w.document;
   const activeAdvancedLayoutId=doc&&advancedPreview?.documentId===doc.id?advancedPreview.layoutId:undefined;
+  const businessActive=skuLayoutCandidate(activeAdvancedLayoutId)?.tier==='business';
   const referencePreviewDesign=doc&&referencePreview?.documentId===doc.id?referencePreview.design:undefined;
   const portablePreviewDesign=doc&&portableStyle?.documentId===doc.id?portableStyle.design:undefined;
   const activePreviewDesign=referencePreviewDesign??portablePreviewDesign;
@@ -235,6 +246,33 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
       setAdvancedPresetError('');
     }catch(error){setAdvancedPresetError(error instanceof Error?error.message:'레이아웃 파일을 열 수 없습니다.');}
   };
+  const applyBrand=()=>{
+    if(!doc||!editable||!businessActive)return;
+    try{setBrandApplied(validateBusinessBrandKit(brandDraft));setBrandError('');}
+    catch(error){setBrandError(error instanceof Error?error.message:'브랜드 입력을 확인하세요.');}
+  };
+  const loadBusinessBrand=async(file:File)=>{
+    try{
+      const kit=await importBusinessBrandKit(file);
+      if(!doc||!editable)return;
+      setBrandDraft(kit);setBrandApplied(kit);setBrandError('');
+    }catch(error){setBrandError(error instanceof Error?error.message:'브랜드 파일을 불러올 수 없습니다.');}
+  };
+  const loadBrandLogo=async(file:File)=>{
+    const id=doc?.id;
+    try{
+      if(!id||!editable||file.size<1||file.size>2*1024*1024||
+        !['image/png','image/jpeg','image/webp'].includes(file.type))throw new Error('로고는 2MiB 이하 PNG/JPEG/WebP만 허용합니다.');
+      const header=new Uint8Array(await file.slice(0,65536).arrayBuffer());
+      const mime=imageType(header),dimensions=mime?imageDimensions(header,mime):null;
+      if(mime!==file.type||!dimensions||dimensions.width<1||dimensions.height<1||
+         dimensions.width*dimensions.height>4_000_000)throw new Error('로고 형식·크기가 올바르지 않습니다.');
+      const bitmap=await createImageBitmap(file);
+      try{if(bitmap.width*bitmap.height>4_000_000)throw new Error('로고 이미지가 너무 큽니다.');}finally{bitmap.close();}
+      if(w.document?.id!==id)return;
+      setBrandLogoUrl(URL.createObjectURL(file));setBrandError('');
+    }catch(error){setBrandError(error instanceof Error?error.message:'로고 파일을 불러올 수 없습니다.');}
+  };
   const cancelReferenceRender=()=>{const task=referenceRenderTask.current;referenceRenderTask.current=null;try{task?.cancel();}catch{}};
   const clearReference=()=>{
     cancelReferenceRender();
@@ -246,7 +284,8 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
   };
   useEffect(()=>()=>{if(referenceImage?.url)URL.revokeObjectURL(referenceImage.url);},[referenceImage]);
   useEffect(()=>()=>{referenceVersion.current++;cancelReferenceRender();const session=referencePdfSession.current;referencePdfSession.current=null;if(session)void session.loading.destroy().catch(()=>{});},[]);
-  useEffect(()=>{clearReference();setPortableStyle(null);setPortableStyleError('');setAdvancedPreview(null);setAdvancedPresetError('');},[doc?.id]);
+  useEffect(()=>{clearReference();setPortableStyle(null);setPortableStyleError('');setAdvancedPreview(null);setAdvancedPresetError('');setBrandApplied(null);setBrandDraft({name:'',tagline:'',footer:'',accent:PALETTE[0].value});setBrandError('');setBrandLogoUrl(null);},[doc?.id]);
+  useEffect(()=>()=>{if(brandLogoUrl)URL.revokeObjectURL(brandLogoUrl);},[brandLogoUrl]);
   const analyzeReference=async(file:File)=>{
     setPortableStyle(null);clearReference();const version=referenceVersion.current;setReferenceError('');
     if(file.type==='application/pdf'||/\.pdf$/i.test(file.name)){
@@ -470,7 +509,7 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
           <section className="style-compare-card" data-style-compare-candidate><h3>비교 후보 · {allThemes.find(theme=>theme.id===previewThemeId)?.label}</h3><div className="style-compare-card-viewport"><ProjectPreview doc={doc} urls={urls} previewDesign={{...doc.design,theme:previewThemeId}}/></div></section>
         </div>:null}
         <div className={`paper-surface ${doc&&styleCompareOpen&&styleCompareGalleryOpen&&previewThemeId?'style-compare-print-candidate':''}`}>
-          {doc?<ProjectPreview doc={doc} urls={urls} previewTheme={previewThemeId} previewDesign={activePreviewDesign} previewLayoutId={activeAdvancedLayoutId}/>:<div className="document">{w.ready?'문서를 열 수 없습니다.':'불러오는 중…'}</div>}
+          {doc?<ProjectPreview doc={doc} urls={urls} previewTheme={previewThemeId} previewDesign={activePreviewDesign} previewLayoutId={activeAdvancedLayoutId} brandKit={brandApplied} brandLogoUrl={brandLogoUrl}/>:<div className="document">{w.ready?'문서를 열 수 없습니다.':'불러오는 중…'}</div>}
         </div>
         <p className="print-tip no-print">Chrome/Edge에서 PDF로 저장, A4, 머리글·바닥글 해제를 확인하세요. 인쇄는 이미지 로딩이 완료될 때까지 기다립니다.</p>
       </div>
@@ -545,6 +584,41 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
               {skuLayoutCandidate(activeAdvancedLayoutId)?.label} · 임시 미리보기/출력만 지원, 저장 데이터는 변경되지 않습니다.
               <div className="toolbar project-toolbar"><button type="button" className="secondary-button" data-extended-layout-cancel onClick={()=>setAdvancedPreview(null)}>기본 디자인으로 돌아가기</button></div>
             </div>}
+          </section>
+          <section className="panel" aria-label="BUSINESS 브랜드 키트" data-business-brand-panel>
+            <h3>BUSINESS · 브랜드 키트 (로컬 시험)</h3>
+            <p className="help-text">BUSINESS 레이아웃을 선택하면 회사명·브랜드 색상·로고·머리말/꼬리말을 시험 적용할 수 있습니다. 원본 PDF와 저장된 문서 데이터에는 영향을 주지 않습니다. 화면을 닫으면 로고가 사라지며, 브랜드 텍스트 JSON에는 로고 이미지가 포함되지 않습니다.</p>
+            {!businessActive&&<p role="status" className="help-text">위의 BUSINESS 시안 중 하나를 선택하면 적용 버튼이 활성화됩니다.</p>}
+            <label className="field">회사·브랜드 이름
+              <input data-business-brand-name maxLength={60} disabled={!editable} value={brandDraft.name} onChange={e=>setBrandDraft(v=>({...v,name:e.target.value}))}/>
+            </label>
+            <label className="field">머리말 보조 문구
+              <input data-business-brand-tagline maxLength={100} disabled={!editable} value={brandDraft.tagline} onChange={e=>setBrandDraft(v=>({...v,tagline:e.target.value}))}/>
+            </label>
+            <label className="field">꼬리말 문구
+              <input data-business-brand-footer maxLength={150} disabled={!editable} value={brandDraft.footer} onChange={e=>setBrandDraft(v=>({...v,footer:e.target.value}))}/>
+            </label>
+            <label className="field">브랜드 강조 색상
+              <select data-business-brand-accent disabled={!editable} value={brandDraft.accent} onChange={e=>setBrandDraft(v=>({...v,accent:e.target.value}))}>
+                {PALETTE.map(color=><option key={color.value} value={color.value}>{color.label}</option>)}
+              </select>
+            </label>
+            <div className="toolbar project-toolbar">
+              <button type="button" className="secondary-button" data-business-brand-apply disabled={!editable||!businessActive} onClick={applyBrand}>브랜드 미리보기 적용</button>
+              <button type="button" className="secondary-button" data-business-brand-clear disabled={!brandApplied&&!brandLogoUrl} onClick={()=>{setBrandApplied(null);setBrandLogoUrl(null);setBrandError('');}}>브랜드 적용 취소</button>
+            </div>
+            <div className="toolbar project-toolbar">
+              <button type="button" className="secondary-button" data-business-brand-logo-picker disabled={!editable||!businessActive} onClick={()=>brandLogoInput.current?.click()}>로컬 로고 불러오기</button>
+              <input className="hidden-input" ref={brandLogoInput} data-business-brand-logo-input type="file" accept="image/png,image/jpeg,image/webp" onChange={e=>{const f=e.target.files?.[0];e.target.value='';if(f)void loadBrandLogo(f);}}/>
+              <button type="button" className="text-button" disabled={!brandLogoUrl} onClick={()=>setBrandLogoUrl(null)}>로고 제거</button>
+            </div>
+            <div className="toolbar project-toolbar">
+              <button type="button" className="secondary-button" data-business-brand-export disabled={!editable||!brandApplied} onClick={()=>{try{if(brandApplied)downloadBusinessBrandKit(brandApplied);setBrandError('');}catch(e){setBrandError(e instanceof Error?e.message:'브랜드 파일을 저장할 수 없습니다.');}}}>브랜드 텍스트 JSON 저장</button>
+              <button type="button" className="secondary-button" data-business-brand-import disabled={!editable} onClick={()=>brandImportInput.current?.click()}>브랜드 JSON 다시 열기</button>
+              <input className="hidden-input" ref={brandImportInput} data-business-brand-file type="file" accept=".json,application/json" onChange={e=>{const f=e.target.files?.[0];e.target.value='';if(f)void loadBusinessBrand(f);}}/>
+            </div>
+            {brandError&&<p role="alert" className="warning" data-business-brand-error>{brandError}</p>}
+            {brandApplied&&<p role="status" className="help-text" data-business-brand-status>임시 적용 중 · 실제 문서 V2는 변경되지 않았습니다. 정식 BUSINESS 사용권/영구 저장 기능은 아직 미구현입니다.</p>}
           </section>
           <section className="panel portable-style-panel" aria-label="디자인 프리셋 가져오기 및 내보내기" data-step4-portable-preset>
             <div className="panel-heading"><h2>디자인 프리셋 파일</h2><span className="panel-caption">문서 내용은 포함하지 않습니다</span></div>

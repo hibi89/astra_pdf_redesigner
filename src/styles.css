@@ -453,3 +453,15 @@ button:disabled{cursor:not-allowed;opacity:.48}select{min-height:38px;padding:7p
 .advanced-layout-grid button{font-size:11px;padding:7px 5px;border:1px solid #d7e0e7;border-radius:6px;background:#fff}
 .advanced-layout-grid button[aria-pressed="true"]{border:2px solid #3e738a;background:#e9f3f7;font-weight:bold}
 @media print{.advanced-layout-panel{display:none!important}}
+
+/* BUSINESS logo and letterhead are local ephemeral preview elements, included in the same A4 print DOM. */
+.project-paper .business-brand-header{display:flex;align-items:center;gap:5mm;border-bottom:1.5pt solid var(--accent);padding:0 0 4mm;margin:0 0 7mm;break-inside:avoid-page}
+.project-paper .business-brand-header strong{display:block;color:var(--accent);font-size:1em;font-weight:800;overflow-wrap:anywhere}
+.project-paper .business-brand-header span{display:block;font-size:.72em;overflow-wrap:anywhere;line-height:1.4}
+.project-paper .business-brand-logo{display:block;max-width:27mm;max-height:16mm;object-fit:contain}
+.project-paper .business-brand-footer{margin-top:7mm;padding-top:3mm;border-top:1px solid var(--accent);text-align:right;font-size:.72em;overflow-wrap:anywhere;break-inside:avoid-page}
+@media print{
+ .project-paper .business-brand-header,.project-paper .business-brand-footer{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+ .project-paper .business-brand-header{break-inside:avoid}
+ .project-paper .business-brand-footer{break-inside:avoid}
+}
