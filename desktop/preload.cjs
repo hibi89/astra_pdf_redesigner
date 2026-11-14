@@ -7,4 +7,7 @@ contextBridge.exposeInMainWorld('astraDesktop',Object.freeze({
   localModelStatus:()=>ipcRenderer.invoke('astra:local-model-status'),
   localModelPropose:text=>ipcRenderer.invoke('astra:local-model-propose',text),
   localModelCancel:()=>ipcRenderer.invoke('astra:local-model-cancel'),
+  localOcrStatus:()=>ipcRenderer.invoke('astra:local-ocr-status'),
+  localOcrRecognizePng:bytes=>ipcRenderer.invoke('astra:local-ocr-recognize',bytes),
+  localOcrCancel:()=>ipcRenderer.invoke('astra:local-ocr-cancel'),
 }));
