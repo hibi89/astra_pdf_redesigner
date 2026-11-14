@@ -1,15 +1,27 @@
+## 2026-11-15 KST — P116 VERIFIED · G55 PASS / 잠정 55/100 GitHub-only 인수인계 (10항)
+
+1. **목표·범위:** 사용자 확정 A01~A12, STEP1 V1·STEP2 V2, BASIC8/PRO20/BUSINESS30, 출시 차단 정책을 유지하며 P114~P116을 검증했다. GPT-6 High는 70점 후 사용자 요청 시 독립 검수한다.
+2. **완료 작업·변경 파일:** P116(A04)에서 기존 30개 레이아웃의 실제 A4 PDF 구조·텍스트·이미지 회귀를 추가했다. 제품 레이아웃 코드는 그대로이며 변경 파일은 `tests/step4-style-preset-browser.mjs` 하나다. 상세: `docs/evidence/astra/P116/VERIFICATION.md`.
+3. **검증 기능 SHA:** `b03583f12c5eb212dd0207fb539593ec7c2b8df3`. Linux #43618379958: npm test 269/269, build PASS, Chrome 및 Edge 각각 30/30 A4 PDF·문자 순서·40개 표식·PNG/V2·경계/겹침 PASS. Windows #43618379926: 268 PASS, 1 OS 전용 SKIP, 0 FAIL; desktop 73/73, 설치/업그레이드 PASS. 정책 #43618380099 PASS.
+4. **점수·별도 게이트:** P116 +1, A04 12→13/15, 잠정 54→55/100. G55를 별도 PASS로 적용했다. P114+P115+P116 증거는 `docs/evidence/astra/G55/VERIFICATION.md`. 공식 구매자 수용은 UNASSESSED.
+5. **실패 후보·시험 판정:** SHA `254e8c2b39488c0e2caad733b88fb2abfe04f31f`의 Linux #43618017819은 PDF 추출 공백 정규화 차이로 실패했고 0점 처리했다. 최종 SHA에서 문자 순서 비교와 개별 표식 검사를 수정해 통과시켰다. 다른 실험 실패 후보도 점수 미인정.
+6. **저장소·커밋:** `hibi89/astra_pdf_redesigner`, `feature/astra-p71-pdf-source-parity-20261112`; 검증 코드는 위 정확 SHA. 증거/상태 문서는 별도 문서 커밋으로 기록한다.
+7. **런너·자료:** GitHub-hosted Linux/Windows만 사용. 합성 ASCII 원문·2×2 PNG 사용, Actions에서 60개 브라우저 PDF를 임시 생성·검사·폐기. 고객 원본·유료 API/CI·외부 AI 추론·Vercel 사용 없음.
+8. **정확 SHA CI:** [Linux #43618379958](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43618379958), [Windows #43618379926](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43618379926), [정책 #43618380099](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43618380099) 모두 SUCCESS, 각각 head SHA `b03583f12c5eb212dd0207fb539593ec7c2b8df3`.
+9. **미검증·차단:** Poppler CJK 텍스트 계층/한국어 추출 정합, 고객 PDF와 실제 구매자 시각 품질, 종이 출력, 물리 Win10/11은 미검증. STEP1 V1, STEP2 V2, SKU·서명키·OCR/고객 출시 차단은 유지. 공식 수용 UNASSESSED, RELEASE HOLD.
+10. **다음:** P117 BUSINESS 다중 문서 브랜드 재사용·저장·취소·SKU 우회 회귀. G60/G65/G70은 각각 별도 증거 후 적용.
 ## 2026-11-15 KST — P115 VERIFIED / 잠정 54/100 GitHub-only 인수인계 (10항)
 
 1. **목표·범위:** Astra STEP1~7, 확정 A01~A12 가중치, P114~P126 50→70 실행 순서, BASIC8/PRO20/BUSINESS30 보존. GPT-6 High는 사용자 호출 시 별도 독립 검수.
 2. **완료·변경:** P115는 원본/출력 PDF의 숫자 포함 토큰, 기호, 부정 표현, 링크 및 추가/중복 토큰 차이를 페이지 위치와 함께 분리한다. 수동 검토·취소/오류 복구를 유지하고 원본 SHA, V1/V2 및 자동승인 금지를 검증했다. 변경: `src/step7/OfflinePdfReview.tsx`, `src/step7/tokenParity.ts`, `tests/fixtures/step7-pdf-parity-corpus.mjs`, `tests/step7-pdf-review-browser.mjs`, `tests/step7-token-parity.test.ts`.
 3. **테스트·정확 SHA:** 기능 SHA `a89c7a7dfbb2e18ef1c5f328e248d2e60ec69a0d`. [Linux #43612143269](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43612143269) SUCCESS: Node 269PASS/0FAIL/0SKIP, build PASS, Chrome·Edge 각 15/15 실제 A4 합성 쌍 대조, 오류/취소·원본 SHA/V1/V2 불변 PASS. [Windows #43612143223](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43612143223) SUCCESS: Node 268PASS/0FAIL/1 Windows 전용 SKIP, desktop 73PASS/0FAIL, NSIS 설치·실행·제거·0.1.0→0.1.1 V2 문서/PNG 보존 PASS. [정본 정책 #43612143523](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43612143523) SUCCESS.
-4. **완료/진행/차단:** P115 VERIFIED +2, A03 10→12/14, 전체 잠정 52→54/100. P114/P115 완료, 다음 P116. 공식 구매자 최종 수용 UNASSESSED, RELEASE HOLD, 고객 판매 빌드 비활성.
+4. **당시 P115 결과:** P115 +2, A03 10→12/14, 누적 52→54/100. 이후 P116/G55 최신 결과는 이 파일 최상단 인수인계에 기록했다. 공식 구매자 최종 수용 UNASSESSED, RELEASE HOLD.
 5. **오류·시도:** #43611032904 V1 합성 기준 데이터 누락, #43611361119 SHA helper import 누락, #43611776507 마이그레이션 기준 스냅샷 순서 오류. 테스트를 각각 보정했고 실패 후보 가점은 0. 최종 SHA에서 세 Actions 전체 PASS.
 6. **저장소·버전:** `hibi89/astra_pdf_redesigner`, `feature/astra-p71-pdf-source-parity-20261112`. 검증 기능 SHA `a89c7a7dfbb2e18ef1c5f328e248d2e60ec69a0d`. 증거 `docs/evidence/astra/P115/VERIFICATION.md`, 등록 `docs/commercial/ASTRA_P114_P126_TASK_REGISTER_20261114.json`; 문서 동기화 SHA는 기능 검증 SHA와 구분한다.
 7. **실행 환경:** GitHub-hosted Ubuntu Node22 Chrome/Edge 및 Windows Electron/NSIS만 사용. 입력 15쌍과 데이터는 합성. 사용자 로컬 PC, 외부 CI, Vercel, 유료 서비스, 외부 AI API, 고객 원본 전송 없음.
 8. **CI 링크:** [Linux Chrome/Edge #43612143269](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43612143269), [Windows Electron/NSIS #43612143223](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43612143223), [Final blueprint policy #43612143523](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43612143523). 세 실행은 모두 정확 SHA `a89c7a7dfbb2e18ef1c5f328e248d2e60ec69a0d`.
 9. **수용 범위/미검증:** 합성 PDF에서 숫자·날짜·기호·부정·링크 차이 대조와 V1/V2/원본 무손상만 입증. 실제 표·다단 의미 정확성, 이미지 픽셀 재구성, 고객 PDF·물리 Win10/11·Windows OCR·Qwen3 CPU·구매자 수용은 미검증. 점수는 잠정, 공식 수용 UNASSESSED, RELEASE HOLD.
-10. **다음:** P116의 30개 BASIC8/PRO20/BUSINESS30 A4 디자인 검수를 수행한다. P116 완료 후 55점 G55 별도 게이트를 적용한다. 이후 60/65/70 게이트를 유지하고 70점 이후 개발은 별도 지시를 따른다.
+10. **당시 다음:** P116 30개 A4 검수 및 G55 별도 게이트. 완료 결과와 현재 다음 작업 P117은 최상단 인수인계에 기록했다.
 
 ## 2026-11-14 21:55 KST — P114~P126 50→70 High 설계 공시 / Instant 인수인계 10항
 

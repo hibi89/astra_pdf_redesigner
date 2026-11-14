@@ -3,8 +3,15 @@
 **2026-11-14 KST 최신 사용자 위임.** P114~P126은 **Codex 6 Luna Max**가 실행하고 GPT-6 High는 이번 설계 공시·완료 후 사용자 호출 시 독립 최종 검수를 맡는다. P127~P138의 실행자 지정은 이번 위임에 포함되지 않는다.
 
 **저장소:** `hibi89/astra_pdf_redesigner` · **기존 작업 브랜치:** `feature/astra-p71-pdf-source-parity-20261112` · **기준 기능 SHA:** `26aff40d6de524c2430f8a6b325d906cea67f7e1`.
-**기준 점수:** 위임 시 50/100. 현재 P114/P115 VERIFIED, 잠정 54/100, 다음 P116; 목표 70/100. 공식 사용자/구매자 수용률 `UNASSESSED`, 출시 `RELEASE HOLD`, 크몽 미등록. 이 런북은 실행 절차이며 점수 증거는 각 작업 검증서와 정확 SHA Actions다.
+**기준 점수:** 위임 시 50/100. 현재 P114/P115/P116 VERIFIED, G55 PASS, 잠정 55/100, 다음 P117; 목표 70/100. 공식 사용자/구매자 수용률 `UNASSESSED`, 출시 `RELEASE HOLD`, 크몽 미등록. 이 런북은 실행 절차이며 점수 증거는 각 작업 검증서와 정확 SHA Actions다.
 
+## P116 실행 결과 및 G55 별도 통과 기록
+
+- **P116 VERIFIED:** 기능 SHA `b03583f12c5eb212dd0207fb539593ec7c2b8df3`; 변경 파일 `tests/step4-style-preset-browser.mjs` 한 개. A04 +1, 12→13/15; 총점 54→55/100.
+- [Linux #43618379958](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43618379958) SUCCESS — 269/269 Node, build PASS, Chrome/Edge 각각 30개 실제 A4 PDF·구조 시그니처 30/30·원문 표식/PNG/V2/페이지·겹침 검사 PASS.
+- [Windows #43618379926](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43618379926) SUCCESS — Node 268 PASS/1 OS SKIP/0 FAIL, desktop 73/73, 설치·업그레이드 PASS. [정본 정책 #43618380099](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43618380099) SUCCESS. 모든 run head SHA `b03583f12c5eb212dd0207fb539593ec7c2b8df3`.
+- **G55 별도 PASS:** P114/P115/P116의 원문/읽기 순서 및 실제 30종 A4 회귀 조건 확인. [P116 검증서](../evidence/astra/P116/VERIFICATION.md), [G55 검증서](../evidence/astra/G55/VERIFICATION.md). 공식 수용 UNASSESSED / RELEASE HOLD / 다음 P117.
+- 한계: 합성 ASCII PDF 추출과 제품 브라우저·CI 렌더링만 입증한다. 한국어/CJK 텍스트 계층·실구매자 품질·물리 Win10/11은 미검증.
 ## 1. 최종설계/권한
 - 사용자 확정 12영역 A01~A12 100점 가중치, STEP1~7 로드맵, BASIC8/PRO20/BUSINESS30 고정. 배점 변경/임의 70% 선언 금지.
 - 실행 경로는 **GitHub 저장소 + GitHub-hosted Actions**로 한정: 코드·이슈·커밋·테스트·증거 및 인수인계는 GitHub. 사용자 PC, 타 CI, 타 연결 앱, Vercel/Production, 유료 GPU/API, 외부 AI inference, 고객 문서의 외부 전송은 불가.
@@ -52,7 +59,7 @@
 - **개발:** 기존 기본 8개와 추가 PRO 12개, BUSINESS 10개의 조판 가족·제목·구분선·컬럼·여백을 독립 비교. 기존 기능/브랜드 스타일 변경 없이 클리핑·겹침·페이지 누락 검출과 비교 화면을 고도화.
 - **검증:** 실제 Chrome·Edge 렌더링과 생성 PDF를 총 30시안 모두 점검. 서로 다른 레이아웃의 구조적 특징 목록과 PDF 페이지·최종 줄 누락 0, 원문 동일성·PNG 보존 결과를 첨부.
 - **차단:** 색상만 바꾼 시안을 새로운 디자인으로 세지 않는다. 실제 구매자 시각 품질 최종 승인은 여전히 A04 마지막 점수에 남긴다.
-- **GitHub 증거 산출물:** `docs/evidence/astra/P116/VERIFICATION.md`에 재현 명령/runner OS·실행 유형(mock/real)/합성 fixture 해시·실제 PASS/FAIL/SKIP·정확 기능 SHA·3개 CI workflow 링크·지원/미지원 범위·가점 근거 기재. **현재 PENDING/0점**.
+- **GitHub 증거 산출물:** `docs/evidence/astra/P116/VERIFICATION.md`에 재현 명령/runner OS·실행 유형(mock/real)/합성 fixture 해시·실제 PASS/FAIL/SKIP·정확 기능 SHA·3개 CI workflow 링크·지원/미지원 범위·가점 근거 기재. **VERIFIED/+1점; 기능 SHA `b03583f12c5eb212dd0207fb539593ec7c2b8df3`, Linux #43618379958, Windows #43618379926, 정책 #43618380099.**
 
 #### P117 (A04 +1; 선행: P116)
 - **수정 경로:** src/step4/brandBatchPlan.ts; src/step4/BusinessBrandLibrary.tsx; src/step2/Workspace.tsx; src/commercial/skuActionGate.ts; tests/brand-batch-plan.test.ts.

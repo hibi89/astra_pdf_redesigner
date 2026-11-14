@@ -1,3 +1,16 @@
+## 2026-11-15 KST — Astra P116 검증 완료·G55 통과, 잠정 55/100
+
+- **완료 작업 ID:** P116(A04, +1) 및 별도 점수 게이트 G55(PASS).
+- **기능 SHA / 변경 파일:** `b03583f12c5eb212dd0207fb539593ec7c2b8df3`; `tests/step4-style-preset-browser.mjs`만 변경. 기존 BASIC8/PRO12/BUSINESS10 제품 코드는 수정하지 않고 30개 실제 PDF 검증을 재현 가능한 회귀로 고정했다.
+- **Linux PASS:** [#43618379958](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43618379958), exact SHA. npm test 269/269, npm run build PASS. Chrome와 Edge 각각 BASIC 8 + PRO 12 + BUSINESS 10의 실제 A4 PDF 30/30을 생성·검증했다. 구조 시그니처 30종 고유, 40개 고유 표식·시작/끝·문자 순서, 페이지 경계, 줄 겹침, PNG 임베드, 모든 STEP2 V2 store와 PNG 바이트 불변 PASS.
+- **Windows PASS:** [#43618379926](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43618379926), exact SHA. Node 268 PASS / 1 Windows 전용 SKIP / 0 FAIL; desktop 73/73 PASS; Electron/NSIS 설치·실행·제거·0.1.0→0.1.1 V2 업그레이드 PASS.
+- **정본 정책 PASS:** [#43618380099](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43618380099), exact SHA. 세 workflow run 모두 head SHA `b03583f12c5eb212dd0207fb539593ec7c2b8df3`.
+- **G55 별도 판정:** P114, P115, P116 실제 PDF 원문/순서 대조와 30종 A4 회귀 조건을 확인하고 PASS. [G55 검증서](docs/evidence/astra/G55/VERIFICATION.md).
+- **잠정 점수:** A04 12→13/15, 총 54→55/100. 사용자 확정 A01~A12 최대 배점 변경 없음. 작업 증거는 [P116 검증서](docs/evidence/astra/P116/VERIFICATION.md), [점수표](docs/commercial/ASTRA_FINAL_EVIDENCE_SCORE_20261114.md), [작업 원장](docs/commercial/ASTRA_P114_P126_TASK_REGISTER_20261114.json)에 기록.
+- **실패 후보:** 이전 SHA `254e8c2b39488c0e2caad733b88fb2abfe04f31f`의 Linux #43618017819는 PDF 추출기 공백 차이로 실패(0점). 최종 검증 SHA에서 비교를 보정했다.
+- **한계:** PDF 텍스트 추출 검증은 합성 ASCII 본문과 공백 제외 문자 순서에 한정된다. CJK PDF text-layer/한국어 추출, 고객 자료·실구매자 시각 승인·물리 Win10/11은 미검증. 공식 구매자 수용 UNASSESSED, RELEASE HOLD 유지.
+- **다음 작업:** P117. OCR_MANIFEST=null, PRODUCTION_ISSUER_JWK=null, seller thumbprint=null, ASTRA_CUSTOMER_BUILD_ENABLED=false 및 기존 데이터/기능 보존.
+
 ## 2026-11-15 KST — Astra P115 검증 완료, 잠정 54/100
 
 - **완료 작업:** P115 (A03 원본/출력 PDF 글자·수치·기호·부정문·링크 차이 대조). 숫자 포함 토큰, 기호/구두점, 한국어·영어 부정 표현, 링크 대상과 추가/중복 토큰을 페이지 위험과 함께 구분한다. 수동 검토를 유지하고 V1/V2 저장을 자동 승인하지 않는다.
@@ -6,7 +19,7 @@
 - **중간 실패와 수정:** #43611032904는 hosted V1 기준 데이터 누락, #43611361119는 테스트 SHA helper import 누락, #43611776507은 V1→V2 마이그레이션 전후 스냅샷 순서 오류로 실패했다. 모두 테스트 준비를 수정했고 점수는 부여하지 않았다. 최종 SHA 3개 Actions가 모두 성공했다.
 - **점수·상태:** P115 +2점, A03 10→12/14, 총 잠정 **52→54/100**. P114/P115 VERIFIED, 다음 P116. 공식 구매자 수용 **UNASSESSED**, 출시 **RELEASE HOLD**. 확정 가중치·STEP1 V1·STEP2 V2·BASIC8/PRO20/BUSINESS30·서명키와 출시 차단 상태 불변.
 - **제한:** 실제 고객 PDF와 표/다단 의미 정확도, 이미지 원본 픽셀 재현, 물리 Win10/11, 실제 Tesseract OCR·Qwen3 CPU 추론은 미검증. 15쌍 전부 합성 PDF.
-- **다음 작업:** P116에서 BASIC8/PRO20/BUSINESS30 총 30개 디자인의 Chrome/Edge A4 출력과 잘림·누락 검사를 수행한다. 55/100 도달 시 G55 별도 검증을 통과하기 전 추가 점수를 인정하지 않는다.
+- **당시 다음 작업:** P116에서 30개 A4 디자인을 검수하고 G55를 별도로 통과하는 것이었다. 완료 결과와 P117 다음 단계는 이 파일 최상단 최신 상태에 기록했다.
 
 
 ## 2026-11-15 KST — Astra P114 검증 완료, 잠정 52/100

@@ -6,7 +6,7 @@
   "branch": "feature/astra-p71-pdf-source-parity-20261112",
   "base_feature_sha": "26aff40d6de524c2430f8a6b325d906cea67f7e1",
   "base_docs_sha": "7ed25d4f04ba10bad18e96c6986bb9a5e97a0b08",
-  "current_verified_provisional": 54,
+  "current_verified_provisional": 55,
   "target_provisional": 70,
   "official_acceptance": "UNASSESSED",
   "release": "RELEASE HOLD",
@@ -154,8 +154,8 @@
       "depends_on": [
         "P115"
       ],
-      "status": "PENDING",
-      "credit_earned": 0,
+      "status": "VERIFIED",
+      "credit_earned": 1,
       "expected_paths": [
         "src/step4/skuLayoutCandidates.ts",
         "src/step2/Workspace.tsx",
@@ -165,10 +165,10 @@
       "implementation": "기존 기본 8개와 추가 PRO 12개, BUSINESS 10개의 조판 가족·제목·구분선·컬럼·여백을 독립 비교. 기존 기능/브랜드 스타일 변경 없이 클리핑·겹침·페이지 누락 검출과 비교 화면을 고도화.",
       "acceptance": "실제 Chrome·Edge 렌더링과 생성 PDF를 총 30시안 모두 점검. 서로 다른 레이아웃의 구조적 특징 목록과 PDF 페이지·최종 줄 누락 0, 원문 동일성·PNG 보존 결과를 첨부.",
       "blockers": "색상만 바꾼 시안을 새로운 디자인으로 세지 않는다. 실제 구매자 시각 품질 최종 승인은 여전히 A04 마지막 점수에 남긴다.",
-      "evidence_feature_sha": null,
-      "linux_workflow_url": null,
-      "windows_workflow_url": null,
-      "blueprint_workflow_url": null,
+      "evidence_feature_sha": "b03583f12c5eb212dd0207fb539593ec7c2b8df3",
+      "linux_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43618379958",
+      "windows_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43618379926",
+      "blueprint_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43618380099",
       "executor": "Codex 6 Luna Max",
       "execution_medium": "GitHub-only",
       "runner": "Chrome/Edge 30-layout output",
@@ -178,9 +178,13 @@
         "Windows Electron/NSIS when relevant",
         "Final blueprint policy"
       ],
-      "evidence_linux_run": null,
-      "evidence_windows_run": null,
-      "evidence_blueprint_run": null
+      "evidence_linux_run": 43618379958,
+      "evidence_windows_run": 43618379926,
+      "evidence_blueprint_run": 43618380099,
+      "actual_changed_paths": [
+        "tests/step4-style-preset-browser.mjs"
+      ],
+      "actual_result": "Chrome and Edge each generated and audited BASIC 8 + PRO 12 + BUSINESS 10 actual A4 PDFs. 30/30 distinct structural signatures excluding palette colors; source marker/order, embedded PNG and full STEP2 V2 store/asset bytes preserved. Linux/Windows/final blueprint workflows passed at exact feature SHA."
     },
     {
       "id": "P117",
@@ -552,12 +556,12 @@
     }
   ],
   "score_formula": "50 + sum(verified task credit_earned), each <= credit_max, no credit for plans or unverified runs",
-  "next_task": "P116",
+  "next_task": "P117",
   "notes": [
     "immutable original blueprint",
     "preserve main and PR #10",
     "no seller key or model bundle",
-    "P114 and P115 are VERIFIED with exact-SHA GitHub Actions; P116 is next."
+    "P114, P115 and P116 VERIFIED with exact-SHA GitHub Actions; G55 PASS; current 55/100; P117 is next."
   ],
   "executor_model": "Codex 6 Luna Max",
   "scope": "50-to-70 only; P127+ executor not assigned by this user instruction",
@@ -576,5 +580,21 @@
     "Changing release flags, seller keys, issuer JWK pin, GitHub permissions or repository visibility",
     "Changing main, draft PR #10 or any other central ledger product"
   ],
-  "score_policy": "Only VERIFIED with exact feature commit SHA and required GitHub Actions and real evidence may earn credit; other status earns zero. User official acceptance remains UNASSESSED"
+  "score_policy": "Only VERIFIED with exact feature commit SHA and required GitHub Actions and real evidence may earn credit; other status earns zero. User official acceptance remains UNASSESSED",
+  "verification_gates": {
+    "G55": {
+      "status": "PASS",
+      "verified_at_kst": "2026-11-15",
+      "evidence_path": "docs/evidence/astra/G55/VERIFICATION.md",
+      "feature_sha": "b03583f12c5eb212dd0207fb539593ec7c2b8df3",
+      "covered_tasks": [
+        "P114",
+        "P115",
+        "P116"
+      ],
+      "credit_earned": 0,
+      "official_acceptance": "UNASSESSED",
+      "release": "RELEASE HOLD"
+    }
+  }
 }
