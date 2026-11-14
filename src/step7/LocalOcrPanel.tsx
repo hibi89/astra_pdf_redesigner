@@ -12,6 +12,7 @@ export default function LocalOcrPanel(){
  const [status,setStatus]=useState('로컬 OCR 엔진을 확인 중입니다.');
  const [source,setSource]=useState<File|null>(null);
  const [pageNumber,setPageNumber]=useState(1);
+ const [layoutMode,setLayoutMode]=useState<3|6>(6);
  const [text,setText]=useState('');
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState('');
@@ -74,7 +75,7 @@ export default function LocalOcrPanel(){
     canvas.toBlob(item=>item?resolve(item):reject(Error('PNG로 변환하지 못했습니다.')),'image/png'));
    canvas.width=0;canvas.height=0;
    if(!current())return;
-   const response=await window.astraDesktop.localOcrRecognizePng(new Uint8Array(await blob.arrayBuffer()));
+   const response=await window.astraDesktop.localOcrRecognizePng(new Uint8Array(await blob.arrayBuffer()),layoutMode);
    if(!current())return;
    if(response.status==='review'&&response.reviewOnly===true&&response.approved===false&&response.externalTransfer===false&&typeof response.text==='string'){
     setText(response.text);
@@ -98,6 +99,14 @@ export default function LocalOcrPanel(){
    <input type="number" min="1" max={MAX_PAGES} value={pageNumber} disabled={busy}
     data-step7-ocr-page onChange={e=>setPageNumber(Math.max(1,Math.min(MAX_PAGES,Number(e.target.value)||1)))}/>
   </label>}
+  <label className="field">스캔 페이지 구성
+   <select data-step7-ocr-layout-mode value={layoutMode} disabled={busy||!available}
+    onChange={e=>setLayoutMode(e.target.value==='3'?3:6)}>
+    <option value={6}>일반 단락 한 영역 (PSM 6)</option>
+    <option value={3}>표·여러 영역 자동 분석 (PSM 3)</option>
+   </select>
+  </label>
+  <p className="help-text">자동 분석 모드도 표 셀 순서·수치 정확도를 보장하지 않습니다. 결과를 원본과 대조하세요.</p>
   <div className="toolbar">
    <button type="button" disabled={!available||!source||busy} data-step7-ocr-run onClick={()=>void run()}>선택한 페이지 OCR 초안 생성</button>
    {busy&&<button type="button" className="secondary-button" data-step7-ocr-cancel onClick={cancel}>인식 취소</button>}
