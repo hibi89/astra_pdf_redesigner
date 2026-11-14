@@ -1,3 +1,13 @@
+## 2026-11-14 KST — ASTRA P88 새 기능 SHA CI 완전 확인 (최종설계 100% 미달)
+
+- **기능 SHA** `fb3b02217c6c4223df49c2141e9373f08317a66c`: GitHub Blob이 로컬 합성검증 Node22.16.0 5/5 PASS인 새 P88 검수 도구 및 테스트와 각각 동일(`3c6a4fcd...`, `e14d18f8...`).
+- [Windows NSIS #43541356233](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43541356233) **COMPLETED SUCCESS**: build/desktop native smoke/unsigned NSIS/설치→실행→제거/0.1.0→0.1.1 업그레이드 이후 STEP2 IndexedDB 유지/installer SHA 보고·아티팩트 업로드.
+- [Chrome+Edge #43541356242](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43541356242) **COMPLETED SUCCESS**: npm test + npm run build, Chromium Chrome 인쇄/상태저장, Microsoft Edge A4 PDF/IndexedDB smoke 각각 SUCCESS.
+- [최종설계 증거 정책 #43541356536](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43541356536) **COMPLETED SUCCESS**: 점수 과장 없이 evidence/scope gate 통과. 이것은 제품 100% 수용 아님.
+- 이후 문서 전용 [크몽 상품 초안](docs/commercial/ASTRA_KMONG_LISTING_DRAFT_20261114.md), [7단계 전체 100% 격차표](docs/commercial/ASTRA_FINAL_BLUEPRINT_100_GATES_20261114.md), [Apache/MIT 모델 라이선스 1차 조사](docs/commercial/ASTRA_MODEL_LICENSE_PRECHECK_20261114.md) 작성. 이 3개 docs-only 커밋은 테스트 대상 소스 변경 없음.
+- **정식 전체 완성률 UNASSESSED·100% 미달 / 역사상 내부 엔지니어링 잠정 85%**. 5~10 허가된 고객 PDF, 물리 Windows10·11, 20/30 디자인, STEP6 공개 레퍼런스 검색/STEP7 OCR, 실제 한국어 GGUF, 상용 사용권·SKU entitlement/출시 승인 미완; `[작업중]`, `RELEASE HOLD`, `미등록`. Production/Vercel 미적용.
+- 아래 과거 작업 로그는 변경하지 않음; 후속 실제 개발·검증 때만 상태 갱신. 개인 PDF/경로/모델 가중치/토큰 GitHub 업로드 금지.
+
 ## 2026-11-14 KST — 사용자 재개, 최종설계 100% 목표 / P88 오프라인 5–10 PDF 배치 인수검수
 
 - **사용자 최신 지시:** 기존 11/13 중단·[사용자 개입 필요] 상태를 폐기하고 100% 완성 작업 재개. 해총 Astra [작업중] 중앙 커밋 `e1bbafc864ccd935cfc8ba68f9a43b049ea92f4b`.
