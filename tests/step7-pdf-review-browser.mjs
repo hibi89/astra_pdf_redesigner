@@ -1,5 +1,6 @@
 // STEP7: real Chrome/Edge PDF A vs output B, no PDF upload or stored V2 changes.
 import assert from 'node:assert/strict';
+import {createHash} from 'node:crypto';
 import {mkdtempSync,rmSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
