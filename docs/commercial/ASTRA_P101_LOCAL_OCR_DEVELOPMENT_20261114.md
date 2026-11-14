@@ -29,3 +29,11 @@ P101은 개발 회차 번호이며 최종 완성률이나 인증 수치가 아�
 1. GitHub 최신 SHA에서 Node/빌드/Chrome/Edge/Windows NSIS 검증, 실패 근거 확인→최소 수정. 테스트를 제외하거나 성공처럼 표시하지 않음.
 2. 정식 Tesseract 버전·DLL·kor/eng 언어팩 출처와 저작권/NOTICE 및 SHA256 pin 확보 후 실 오프라인 OCR 골든 20종 수행. 전까지 UI disabled.
 3. OCR 초안을 원본 페이지·좌표/수정/승인과 연동하고 취소/실패/복구 테스트. 실 고객 PDF·물리 Windows·상품 3등급/AI/판매 승인과 별도 수용.
+
+## 2026-11-14 KST — 재현용 Linux 실제 OCR 20종 후속 검증
+
+- 재현 코드: scripts/generate-ocr-golden.py, scripts/run-ocr-golden.cjs. 로컬 NanumGothic/Pillow로 합성 PNG 20장 생성→각 PNG SHA를 manifest에 기록→Linux Tesseract 5.5.0 + kor/eng를 전용 임시 폴더에 복사해 정확한 SHA manifest로 코어 실행. 추출한 고객 내용/텍스트는 로그·보고서에 출력하지 않음.
+- 환경: Python 3 Pillow, Node 22.16, Linux Tesseract 5.5.0/Leptonica1.84.1. synthetic generation 원본 20 vs 재생성 20 PNG SHA **20/20 일치**; 단위 OCR controller+eligibility **7/7 PASS**, TS strict PASS. 원격 파일 및 로컬 실행본 Git Blob SHA 6종 동일: ebfce5b8, f7b448e0, 11bdc938, a26b1e0e, 3a156177, 9b0405d1.
+- 실제 gold 실행 결과: OCR status=review 20/20; 공백 제거·NFC 기준 문자열 완전일치 **15/20**, 불일치 **5/20**(사례 2,8,13,16,17), 평균 사례별 CER **2.2%**, 약 4.1~4.3초/20장 (현재 Linux 환경). 숫자 2,300,000→22300,000 및 A-101→4-101, 부정 관련 불가→물가 오인식 발견. 의미 정확·텍스트 충실도 인증 아님.
+- 개발 회차 중 최초 runner의 정규식 이중 escaping 오류는 e81afaaf에서 교정, 실제 Node runner로 전체20종 재실행 PASS; 사용자 원본/정식 Windows OCR 배포자산/제품 OCR_MANIFEST(null) 변경 0.
+- 완성 판단: 실제 Linux 오프라인 CLI 독립실행은 확인되었지만, Windows 상용 바이너리와 DLL/사용권/언어팩 재배포, 실제 고객 PDF/Windows10·11, 최종 React·Chrome/Edge·Windows NSIS CI 등은 여전히 **미검증**. 골든 정확률75%는 전체 제품 최종완성률이 아니다. 수동 검수·RELEASE HOLD 유지.
