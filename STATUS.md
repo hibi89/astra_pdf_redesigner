@@ -1,3 +1,11 @@
+## 2026-11-14 21:55 KST — Astra High 설계 공시, Instant 개발 담당 전환 (기능 변경 없음)
+
+- **이번 회차 완료:** 사용자 최종설계 가중치 A01~A12 합계100을 보존한 [P114~P126 50→70 상세 실행계획](docs/commercial/ASTRA_P114_P126_50_TO_70_EXECUTION_PLAN_20261114.md), [13개 JSON 작업 원장](docs/commercial/ASTRA_P114_P126_TASK_REGISTER_20261114.json), [70→100 Instant 인수인계·High 최종감사 기준](docs/commercial/ASTRA_INSTANT_70_TO_100_HANDOFF_20261114.md)을 `feature/astra-p71-pdf-source-parity-20261112` 브랜치에 GitHub 문서로 공시. 설계 담당 **GPT-6 High** / 실제 구현·테스트·GitHub 최신화 담당 **GPT-6 Instant** / 완료 후 사용자 요청 시 High 별도 감사.
+- **배점·상태 불변:** 50점 기준 기능 SHA `26aff40d6de524c2430f8a6b325d906cea67f7e1` (이전 [Linux #43595956953](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43595956953), [Windows #43595956932](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43595956932), [정본 #43595957159](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43595957159) **3/3 SUCCESS**). 이 설계 회차에는 앱 코드·테스트·배포를 **실행/수정하지 않았음**. 잠정 50/100 유지, 공식 사용자/구매자 수용률 **UNASSESSED**, [작업중], **RELEASE HOLD**, 크몽 미등록, Vercel 미적용.
+- **작업 원장 검증:** P114~P126 13개, 모두 PENDING, 계획상 추가 +20점, 영역별 70점 목표 합계=70. 55·60·65·70 검증 게이트를 계획에 고정. P123 실제 Qwen3 CPU 추론, P119~P121 실제 Windows Tesseract가 막히면 **미인정**, mock·문서로 대체해 점수 뻥튀기 금지. P127~P138 후보 30점은 실사용/고객 승인 자료가 없으면 100% 인정 불가.
+- **다음 시작점:** Instant는 P114를 실제 구현하고 테스트 스크립트에 회귀를 등록한 뒤 정확 기능 SHA Linux/Win/정본 CI 확인, STATUS/HANDOFF·점수표 및 필요시 중앙 원장을 최신 HEAD에 fast-forward 반영. 매번 +점수는 새 SHA 실행 검증 후에만. High 재검수는 사용자 재호출 시 실행.
+- **보존:** main/Draft PR #10·고객 원본·STEP1 localStorage V1·STEP2 IndexedDB V2·8/20/30 시안·생산 issuer pin=null, ASTRA_CUSTOMER_BUILD_ENABLED=false, OCR_MANIFEST=null, 비밀/권한/요금/배포/중앙 타상품 무변경. **설계만 공시; P114 코드 미착수**.
+
 ## 2026-11-14 KST — P111~P113 확정 설계 잠정 완성률 50/100(+8%p), 정확 기능 SHA 3/3 CI SUCCESS
 
 - **검증된 기능 SHA `26aff40d6de524c2430f8a6b325d906cea67f7e1`**: A08(0→2/14) 사용자 설치 Qwen3/Ollama 127.0.0.1 로컬 AI 옵트인 어댑터, 고정 모델/URL·수동 문단 윤문 Diff/승인/거부/되돌림·숫자/부정문 변경 차단 및 timeout/cancel/단일실행. 실제 모델 추론은 이 제품으로 직접 테스트하지 않았으며 합성 HTTP 테스트 8건(로컬 실제 모델 미동봉/미실행). A04(10→12/15) BUSINESS 2~20문서 세션 텍스트 브랜드/레이아웃 일괄 미리보기→문서별 출력, 문서 V2 영구변경 없음. A06(2→4/5) 기록한 출처→사용자 로컬 파일 직접 선택→STEP5 디자인 분석 연계, 권리/URL 일치 자동 확인하지 않음. A07(3→5/12) 스캔 원본 임시 PNG와 OCR 초안 나란히 비교+숫자/의미/표 읽기 순서 수동 확인, 자동 승인·원본 변경 없음.
