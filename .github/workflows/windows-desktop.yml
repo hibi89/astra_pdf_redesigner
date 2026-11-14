@@ -27,6 +27,9 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Existing STEP1/STEP2 unit regressions
         run: npm test
+      - name: P106 offline Windows Authenticode evidence synthetic checks
+        shell: pwsh
+        run: ./tests/ocr-windows-authenticode-evidence.test.ps1
       - name: Build React and verify desktop assets
         run: |
           npm run build
