@@ -1,3 +1,10 @@
+## 2026-11-14 KST — P109 SKU GUI·PDF 실행 경로 서명 권한 3/3 정확 SHA 검증 완료
+
+- **기능 SHA `ee7ed4eaacf44a08800b56639d2178f5df76e7d3`**. src/commercial/skuActionGate.ts + CommercialLicensePanel.tsx, Workspace/BatchImportPanel/ProLayoutLibrary/BusinessBrandLibrary 실행 경로에 P107 발급자 지문/서명 영수증 재검증 호출 연결. PDF 저장은 BASIC/PRO/BUSINESS 선택 레이아웃·BUSINESS 브랜드 동시 권한을 저장 직전에 판단. 다중 PDF 개별 저장, 템플릿·브랜드 로컬 보관함 저장/삭제, 시안/브랜드 가져오기·내보내기 UI 내부 접근 검사. 영수증은 React 메모리 전용, V1/V2 영구 저장/서버 전송 없음. P109 신규 합성 회귀 **5/5 PASS**.
+- 정확 SHA [Linux Chrome·Edge #43591625251](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43591625251) **2/2 SUCCESS**, Node **241PASS/0FAIL/0SKIP**, TypeScript/Vite build, 실제 Chrome·Edge A4 PDF·IndexedDB V2/원본 회귀 PASS. [Windows Electron·NSIS #43591625273](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43591625273) **SUCCESS**, Node **240PASS/0FAIL/1 OS symlink SKIP**, desktop **59PASS/0FAIL**, unsigned 설치·제거, 0.1.0→0.1.1 IndexedDB V2/PNG 보존 PASS, OCR RELEASE HOLD PASS. [최종설계 정책 #43591625548](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43591625548) **SUCCESS**. 원시 job logs 및 정확 SHA 직접 확인, 전체 3/3 SUCCESS.
+- 내부 개발용 시안을 보존하기 위해 `ASTRA_CUSTOMER_BUILD_ENABLED=false`; 실제 판매자 `PRODUCTION_ISSUER_JWK`와 thumbprint는 **null**, 고객용 코드는 상용 기능 **fail-closed**. 검증 성공=실제 고객 라이선스/판매 승인 아님. Electron main IPC 직접 호출·브라우저 기본 인쇄·변조 바이너리의 DRM 우회 방지, 환불/철회·기기 수, 실제 키 안전 운영 및 물리 Win10/11 고객 PDF5~10 검수 미완. main/PR10·원본PDF·V1/V2·기존 시안 보존, OCR_MANIFEST=null, Vercel 미적용.
+- 증거: `docs/commercial/ASTRA_P109_GUI_SKU_GATES_20261114.md`. 공식 12영역 A01~A12 사용자 가중치 승인, **최종 수용률 UNASSESSED/100% 미달**, [작업중], **RELEASE HOLD**, 크몽 미등록. 다음 P110: Electron main IPC PDF 저장 신뢰경계/고객용 배포 분리, 직접 호출·만료/취소 정책 검수. 유료·키 발급·보안설정/실배포 변경은 별도 승인.
+
 ## 2026-11-14 KST — P108 exact code SHA 발급·연장 정책 Linux/Windows/정본 3/3 CI SUCCESS 최종 정정
 
 - **기능 SHA 0bf9c7bb125b25b3441117a6e54ba53ac05cba67**, 소유자 비추출 ECDSA P256 CryptoKey 요구, P96 canonical 서명 영수증 생성·서명 즉시 확인, 이전 영수증 진위 확인 후 동일 ID·tier·seats로 issuedAt와 expiresAt 단조 증가 연장. src/commercial/offlineLicenseIssuer.ts·tests/offline-license-issuer.test.ts 신규. 테스트 ephemeral 개인키만 사용, 실제 seller private/public key 발급·보관/영수증 상용 배포 없음.

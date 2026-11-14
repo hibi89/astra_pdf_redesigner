@@ -4,6 +4,8 @@
 
 **갱신:** 2026-11-14 KST. **12영역 100점 가중치 사용자 승인 완료. 현재 공식 증거 점수: `산정 대기` (0% 아님), 목표: 100%.** 과거 내부 기술 지표 `85% (잠정·구 범위)`를 별도 보존. 실제 제품/고객 수용/판매 진척률과 혼동 금지. 기준 정본: `REQUIREMENTS.md`, `docs/ASTRA_ORIGINAL_ROADMAP.txt`, `docs/BLUEPRINT.md`, `docs/commercial/PRODUCT_SPEC_V1.md`.
 
+> **P109 (2026-11-14) A09 SKU GUI 실행 경로 추적:** 기능 SHA `ee7ed4eaacf44a08800b56639d2178f5df76e7d3`. 오프라인 서명 영수증 확인 패널 + 상용 고객 실행 경로의 BASIC/PRO/BUSINESS 레이아웃 선택·PDF 저장, PRO 배치 PDF 최종 저장/보관함, BUSINESS 브랜드 키트 저장·적용에 P107 검증기를 호출. 5개 신규 합성 회귀 PASS. Linux Node241/241, Windows Node240PASS/1 OS SKIP+desktop59 PASS, Chrome/Edge/Win NSIS 정확 SHA [3개 Actions](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43591625251) **3/3 SUCCESS**. 실제 판매자 issuer pin null, 고객용 build flag=false, 기존 내부 시안은 개발용으로만 유지. 고객 바이너리/IPC 직접 출력 우회·환불/장치/실 사용자 수용 미완. **공식 UNASSESSED, RELEASE HOLD, 상용 완료 아님.**
+
 > **P108 (2026-11-14) A09 코드 추적 업데이트:** 기능 SHA 0bf9c7bb125b25b3441117a6e54ba53ac05cba67; 기존 P96/P107에 더해 src/commercial/offlineLicenseIssuer.ts 신규 오프라인 서명 발급·연장 정책과 tests/offline-license-issuer.test.ts 합성8건. 정식 판매자 개인키·public JWK pin=없음, 발급 GUI·상용 license 유통·기기 인증·취소/환불 및 UI/수출 기능 잠금 미완. **A09 11점 최종 수용 아님, 공식 12영역 UNASSESSED/100% 미달.** 정확 SHA CI 3개 run의 전체 판정은 STATUS 최상단을 따름.
 
 
