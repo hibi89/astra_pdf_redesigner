@@ -30,6 +30,17 @@ jobs:
       - name: P106 offline Windows Authenticode evidence synthetic checks
         shell: pwsh
         run: ./tests/ocr-windows-authenticode-evidence.test.ps1
+      - name: P119/P120 real Windows Tesseract smoke (synthetic input, isolated runner)
+        shell: pwsh
+        run: ./tests/windows-real-tesseract-ocr.ps1
+      - name: Upload synthetic OCR audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: astra-p119-p120-windows-ocr-report
+          path: ${{ runner.temp }}/astra-p119-p120-report.json
+          if-no-files-found: warn
+          retention-days: 7
       - name: Build React and verify desktop assets
         run: |
           npm run build
