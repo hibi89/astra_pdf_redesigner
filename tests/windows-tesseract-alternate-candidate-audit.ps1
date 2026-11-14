@@ -8,6 +8,7 @@ $reportPath = Join-Path $env:RUNNER_TEMP 'astra-p119-tesseract-5.5.0-audit.json'
 $installerPath = Join-Path $env:RUNNER_TEMP 'tesseract-5.5.0-setup-exploratory.exe'
 $installRoot = Join-Path $env:RUNNER_TEMP 'astra-p119-tesseract-5.5.0-exploratory'
 $releaseUrl = 'https://github.com/tesseract-ocr/tesseract/releases/download/5.5.0/tesseract-ocr-w64-setup-5.5.0.20241111.exe'
+$expectedInstallerSha256 = 'f3fc4236425b690c8be756f35793f77394ee004be0a6460a440c754d892f68bc'
 $state = [ordered]@{
   schema = 'astra-p119-windows-alternate-candidate-v1'
   status = 'RUNNING'
@@ -18,6 +19,9 @@ $state = [ordered]@{
   external_inference_api_used = $false
   release_url = $releaseUrl
   github_release_digest = $null
+  release_sha256_expected = $expectedInstallerSha256
+  expected_sha256_source = 'https://github.com/anderlli0053/DEV-tools/blob/08f0339f698c7b0dab04f1b69f74deaa42dde98a/bucket/tesseract.json'
+  expected_sha256_source_commit = '08f0339f698c7b0dab04f1b69f74deaa42dde98a'
   installer_sha256_actual = $null
   installer_signature = $null
   version_output = $null
@@ -31,6 +35,8 @@ try {
   Save-Report
   Invoke-WebRequest -Uri $releaseUrl -OutFile $installerPath -MaximumRedirection 5
   $state.installer_sha256_actual = (Get-FileHash -LiteralPath $installerPath -Algorithm SHA256).Hash.ToLowerInvariant()
+  if ($state.installer_sha256_actual -ne $expectedInstallerSha256) { throw 'PINNED_TESSERACT_5_5_0_SHA256_MISMATCH' }
+  Save-Report
   $signature = Get-AuthenticodeSignature -LiteralPath $installerPath
   $state.installer_signature = [ordered]@{
     status = [string]$signature.Status
@@ -39,8 +45,11 @@ try {
     signer_thumbprint = if ($signature.SignerCertificate) { [string]$signature.SignerCertificate.Thumbprint } else { $null }
     timestamp_subject = if ($signature.TimeStamperCertificate) { [string]$signature.TimeStamperCertificate.Subject } else { $null }
   }
+  Save-Report
+  if ($signature.Status -ne 'Valid') { throw 'TESSERACT_5_5_0_AUTHENTICODE_NOT_VALID' }
   if (Test-Path -LiteralPath $installRoot) { throw 'REFUSE_TO_OVERWRITE_TEMP_INSTALL_ROOT' }
-  $proc = Start-Process -FilePath $installerPath -ArgumentList @('/S', "/D=$installRoot") -Wait -PassThru
+  $proc = Start-Process -FilePath $installerPath -ArgumentList @('/S', "/D=$installRoot") -PassThru
+  if (!$proc.WaitForExit(90000)) { Stop-Process -Id $proc.Id -Force -ErrorAction SilentlyContinue; throw 'TESSERACT_5_5_0_INSTALLER_TIMEOUT_90S' }
   if ($proc.ExitCode -ne 0) { throw "TESSERACT_INSTALLER_EXIT_$($proc.ExitCode)" }
   $engines = @(Get-ChildItem -LiteralPath $installRoot -Filter 'tesseract.exe' -File -Recurse)
   if ($engines.Count -ne 1) { throw "EXPECTED_ONE_TESSERACT_ENGINE_FOUND_$($engines.Count)" }

@@ -36,6 +36,7 @@ jobs:
       - name: P119 alternate official Windows candidate audit (exploratory, no product change)
         shell: pwsh
         run: ./tests/windows-tesseract-alternate-candidate-audit.ps1
+        timeout-minutes: 5
       - name: Upload alternate Windows supplier audit report
         if: always()
         uses: actions/upload-artifact@v4
