@@ -1,3 +1,10 @@
+## 2026-11-14 KST — P103 OCR PSM 실측 비교·초안 페이지/모드 귀속 보강
+
+- **P102 기능 SHA 5d87df4ef2f9f6b6cefd6f51f52d7f66de0d2d71 정확 CI 성공 확인:** [Linux Chrome+Edge #43568805209](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43568805209) 2/2 SUCCESS, Node **189/189 PASS·0FAIL**, TS/Vite build PASS, 실제 합성 브라우저 검증. [Windows NSIS #43568805220](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43568805220) SUCCESS, Node **188 PASS/0FAIL/1 Windows symlink SKIP**, desktop **27/27 PASS**, EXE/설치·제거/업그레이드 후 V2/PNG 보존. [정책 #43568805420](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43568805420) SUCCESS(100% 실상품 인증 아님). 이전 P102 'CI 미확인' 기록은 본 기록으로 정정.
+- 실제 Linux Tesseract 5.5/kor+eng 합성 20종 **PSM6 정확15/20·평균 CER2.2%** / **PSM3 정확5/20·평균 CER51.28%**. 동일 NanumGothic 생성기 Git Blob 3a156177, 독립 동일 이미지/공백 제거 NFC 비교. 일반 단문 성능은 PSM6 우세이나 6개 복합 다단·표 사전 실험에서는 PSM3가 일부 표식을 더 인식해 일률적 승자 아님. 모두 수동 원문 대조 필요. 상세 `docs/commercial/ASTRA_P103_OCR_PSM_REVIEW_20261114.md`.
+- **P103 코드 SHA f9672f12b2d40106bdcc244e2675c903b3c98888:** 골든 실행기 PSM 선택 인수(3/6), STEP7 UI 페이지·PSM 전환 시 이전 초안 폐기 및 생성 페이지/모드·수정 여부 명시, 합성 스캔 PDF의 실제 PDF.js 렌더+모의 OCR 결과 Chrome·Edge E2E 신규 추가/CI 연결. 자동 사용자 원문 수정·DB쓰기 없음. **이 SHA의 CI는 현재 진행 중이며 최종 미검증**. P102 PASS로 P103 PASS를 대체하지 않음.
+- 기존 Tesseract Windows 실제 바이너리+DLL/NOTICE·재배포 SHA·Win10/11 실PC·고객 PDF5~10·GGUF·정식 3SKU 라이선스/권리/판매 승인 미충족. OCR_MANIFEST=null, 원본 V1/V2·main/PR10/고객 파일 변경0. **전체 최종점수 UNASSESSED/100% 미달 · [작업중] · RELEASE HOLD · 크몽 미등록**.
+
 ## 2026-11-14 KST — P102 OCR Windows 공급망/UTF-8/PSM/임시파일 보강
 
 - **정본 기능 SHA:** 5d87df4ef2f9f6b6cefd6f51f52d7f66de0d2d71. 원격 P102 코드: OCR stdout UTF-8 한글 파편 디코딩 문제 수정(바이트 누적 후 단일 디코딩), PSM 3/6만 허용 및 STEP7 사용자 선택, 임시 PNG 삭제 재시도·정리 실패 시 비성공 처리, OCR 페이지 Canvas 최대 4096px/8MP. 회귀 3종(한글 바이트 분할/PSM 제한·주입 차단/삭제 실패) 신규 추가.
