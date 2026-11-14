@@ -146,3 +146,25 @@ test('OCR accepts only fixed PSM 3 or 6; arbitrary native CLI args are refused',
   assert.equal(calls[1].args.at(-1),'6');
  }finally{f.cleanup();}
 });
+
+
+test('OCR cleanup failure cannot be reported as an approved or successful transcript',async()=>{
+ const f=fixture(),calls=[];
+ let cleanupAttempts=0;
+ try{
+  const c=createLocalOcrController({
+   resourcesDir:f.root,manifest:f.manifest,spawnProcess:fakeSpawn(calls),
+   removePrivateDir:async dir=>{
+    cleanupAttempts++;
+    // Model a Windows file lock after removing this synthetic fixture.
+    fs.rmSync(dir,{recursive:true,force:true});
+    throw Error('EBUSY');
+   },
+  });
+  const result=await c.recognizePng(png());
+  assert.deepEqual(result,{status:'error',reason:'temporary-cleanup-failed'});
+  assert.equal(cleanupAttempts,1);
+  assert.equal(calls.length,1);
+  assert.equal((await c.cancel()).status,'idle');
+ }finally{f.cleanup();}
+});
