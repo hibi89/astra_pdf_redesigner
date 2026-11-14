@@ -11,6 +11,9 @@ function textItem(text, x, y, angle=0, charSpacing=0) {
   const spacing=charSpacing?' '+charSpacing+' Tc':'';
   return 'BT /F1 12 Tf'+spacing+' '+placement+'('+escapePdfText(text)+') Tj ET';
 }
+function wideTextItem(text,x,y,horizontalScale=240) {
+  return 'BT /F1 12 Tf '+horizontalScale+' Tz '+x+' '+y+' Td ('+escapePdfText(text)+') Tj ET';
+}
 function line(x1,y1,x2,y2) {
   return x1+' '+y1+' m '+x2+' '+y2+' l S';
 }
@@ -38,7 +41,7 @@ export const STEP3_LAYOUT_RISK_CASES=Object.freeze([
   {id:'rotated-grid',expectedReview:true,markers:['GRID_NORMAL_2401','GRID_ROTATED_2402'],
     commands:[...gridLines,textItem('GRID_NORMAL_2401',55,565),textItem('GRID_ROTATED_2402',310,510,90)]},
   {id:'sparse-wide-text',expectedReview:true,markers:['WIDE_SPARSE_A_2501','WIDE_SPARSE_B_2502'],
-    commands:[textItem('WIDE_SPARSE_A_2501',40,720,0,18),textItem('WIDE_SPARSE_B_2502',40,680,0,18)]},
+    commands:[wideTextItem('WIDE_SPARSE_A_2501',40,720),wideTextItem('WIDE_SPARSE_B_2502',40,680)]},
   {id:'out-of-page-text',expectedReview:true,markers:['OUTSIDE_PAGE_2601','INSIDE_PAGE_2602'],
     commands:[textItem('OUTSIDE_PAGE_2601',-30,700),textItem('INSIDE_PAGE_2602',40,660)]},
   {id:'numeric-negation-grid',expectedReview:true,markers:['TOTAL_2750','NOT_APPROVED_2701','CELL_NUMBER_2702'],
