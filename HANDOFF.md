@@ -1,3 +1,16 @@
+## 2026-11-14 KST — P99 CI 완료 readback 및 인수인계 10항 (최신)
+
+1. **목표/기술:** 원본 7단계·3SKU 전체100%, 오프라인 우선 React/TS/Electron/PDF.js·0원, 최종률 UNASSESSED.
+2. **완료 기능/설계:** P95 파일별 수동 검수 PRO 배치; P96 ECDSA-256 진짜 서명 검증 모듈(판매키 미발급), P97 PRO 레이아웃 로컬 보관, P98 BUSINESS 브랜드 텍스트 보관, P99 안전 URL만 시스템 외부 브라우저로 띄우기 전 별도 native 확인창 (실 GUI 사람 클릭 시험 대기). V2 문서/원본 PDF 미변경.
+3. **테스트:** 최신 정확 source `0a0dec3edb998cc8ea94bcffc3fa781c7d1c9377`: Linux [#43552456521](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43552456521) **2/2 SUCCESS Node177/177 PASS**, Windows [#43552456514](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43552456514) **SUCCESS Node176 PASS/1 OS SKIP desktop19/19**, 설치·제거·업그레이드 V2/PDF 보존. 정책 [#43552456710](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43552456710) SUCCESS. 실제 물리 Win10/11·PDF5~10/OCR/모델·클릭 웹브라우저 미검증.
+4. **진척/대기:** P95–P99 기능 또는 경계선 보안 CI SUCCESS. 원래 STEP6 완전 검색결과 카드·STEP7 OCR 실제 실행·한국어 GGUF 모델/CPU·SKU GUI entitlement·BUSINESS 일괄·인수/권리/판매 GO 미완. 공식 P100 UNASSESSED, [작업중]/HOLD/미등록.
+5. **오류·근거/대안:** P97 최초 unknown savedAt 타입 오류 CI FAIL을 좁힘 수정으로 재CI 성공. P100 참고 출처 북마크 테스트 앵커 불일치로 커밋 전 중단, 기존 기능 유지; 후속 컴포넌트 분리나 실제 승인 기반 검색 제공 API가 마련될 때 재평가.
+6. **저장소/브랜치/SHA:** `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, code SHA `0a0dec3e`, 전 문서 HEAD `cf3813d3`, 새 docs HEAD는 커밋 후 확인. 핵심 파일은 STATUS 상단 및 P95–P99 인수 항목 참조.
+7. **배포/실행:** `npm test && npm run build`, Chrome/Edge GitHub Linux runners, Windows Node22 Electron NSIS. Production/Vercel **미적용**, 설치형 미출시/실고객 Windows 검증 전 보류.
+8. **백업·비밀:** git parent SHA 역변환 가능, force push 없음; main/PR10/V1 localStorage/V2 IndexedDB/고객 PDF·모델·실 라이선스 키 불변, 외부 원문 전송0.
+9. **다음 작업/승인:** 오후 1시(2026-11-14 KST) 기존 통합 1회 알림에서 폰 12영역 배점/권리·실 모델·OCR·정식 발급키 승인, PC 5~10 허가 PDF/Win10·11 설치 인수/실제 검색 페이지·국문 폰트 검증을 묶음. 미승인 유료결제·소유자 원본 업로드·상용키 생성·크몽 등록 실행 금지.
+10. **갱신일/검증 범위:** 2026-11-14 KST raw GitHub Actions exact SHA 전체 verdict, Node/desktop counters, 보류 항목·정본 요구를 구분. 문서 커밋 자체는 기능 CI가 아님.
+
 ## 2026-11-14 KST — P95~P99 개발·회귀 및 100% 목표 인수인계 (필수 10항)
 
 1. **목표·기술·확정:** 사용자 7단계+크몽 3SKU(BASIC8/PRO20/BUSINESS30), 0원 로컬 React/TypeScript/Electron/PDF.js. 최종 100%, 공식률 UNASSESSED/미달. 미승인 12항 100점 배점안은 `docs/commercial/ASTRA_P100_SCOREBOARD_20261114.md`.

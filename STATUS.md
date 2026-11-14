@@ -1,3 +1,9 @@
+## 2026-11-14 KST — P99 exact test-command SHA CI 3/3 SUCCESS (latest)
+
+- 정확 기능+보안 회귀 SHA `0a0dec3edb998cc8ea94bcffc3fa781c7d1c9377`: [Linux Chrome+Edge #43552456521](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43552456521) **2/2 SUCCESS, Node177/177 PASS, 0 FAIL**, TypeScript/Vite 빌드와 기존 V2/STEP3/STEP4/STEP5 기능 회귀. [Windows NSIS #43552456514](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43552456514) **SUCCESS, Node176 PASS/0 FAIL/1 OS SKIP, desktop19/19 PASS**, 안전 외부 검색 allowlist/무단 schemes 거부/네이티브 재확인 코드 테스트, NSIS install/uninstall/0.1.0→0.1.1 V2 문서·PNG 보존. [evidence gate #43552456710](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43552456710) SUCCESS(정책 증거만).
+- Windows GitHub runner에서 `shell.openExternal` 클릭→실제 시스템 브라우저 실행 자체는 GUI 자동시험 미구현, 사용자 물리 PC 미검증. P99은 사용자 동의한 외부 검색 페이지 안전 연결이고, **원래 STEP6 앱 내 결과 카드·출처/라이선스 자동 수집의 대체가 아님**. 현재 앱은 인터넷 PDF 업로드 금지·내부 HTTP 차단 유지.
+- P95/P96/P97/P98 이전 정확 SHA 모두 3/3 CI SUCCESS 상태. 공식 전체100% **UNASSESSED/미달** (역사적 내부85% 별도), 실 OCR·GGUF·정식 라이선스 GUI·CUSTOMER Win10/11 실PDF5~10·권리/소유자 판매 GO 등 미완. [작업중]/RELEASE HOLD/크몽 미등록. 사용자 13시 기존 통합 예약에서 실 PC·권리 및 배점 승인 한번에 안내. 문서 커밋을 새 기능 검증 SHA로 오인 금지.
+
 ## 2026-11-14 KST — P95~P99 독립 개발·실CI 증거 및 공식 P100 (최신)
 
 - **공식 최종완성률: UNASSESSED / 목표 100% / 미달.** 사용자 확정 원본 7단계와 3SKU 전체가 분모. 과거 85%는 엔지니어링 내부 잠정치이며 공식 퍼센트가 아님. 사용자 미승인 12영역 100점 배점안은 `docs/commercial/ASTRA_P100_SCOREBOARD_20261114.md`. 계산·출시 승인 전 가산 금지.
