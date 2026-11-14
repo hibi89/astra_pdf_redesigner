@@ -99,7 +99,7 @@ try{
  const printedBytes=Buffer.from(printed.data,'base64');
  assert.equal(printedBytes.subarray(0,5).toString(),'%PDF-');
  const printedPath=join(profile,'advanced-layout-a4.pdf');writeFileSync(printedPath,printedBytes);
- assert.match(execFileSync('pdfinfo',[printedPath],{encoding:'utf8'}),/Page size:\\s+[0-9.]+ x [0-9.]+ pts \\(A4\\)/);
+ assert.match(execFileSync('pdfinfo',[printedPath],{encoding:'utf8'}),/Page size:\s+[0-9.]+ x [0-9.]+ pts \(A4\)/);
  await evaluate("document.querySelector('[data-extended-layout-cancel]').click()");
  await eventually(()=>evaluate("!document.querySelector('.project-paper')?.dataset.advancedLayout"));
  assert.deepEqual(await evaluate(stored),advancedPrior,'Advanced cancel keeps original V2');
