@@ -1,6 +1,6 @@
 # Astra PDF Redesigner — P114~P126 실행 설계 및 50→70점 검증 공시
 
-> **[2026-11-14 최신 사용자 위임으로 실행자 변경]** 50→70(P114~P126) 구현·테스트·GitHub 커밋 담당은 **Codex 6 Luna Max**. 오직 **GitHub 기존 feature 브랜치 + GitHub-hosted Actions**만 사용한다. 이전 Instant 담당 표기는 이 범위에서 대체한다. 상세 실행 환경·실모델/실OCR blocking·한도 규정은 [Codex Github-only 런북](ASTRA_CODEX_LUNA_MAX_GITHUB_ONLY_P114_P126_20261114.md) 및 [작업 원장](ASTRA_P114_P126_TASK_REGISTER_20261114.json)을 우선한다. **설계 기준 50/100; 현재 P114/P115/P116 VERIFIED, G55 PASS, 잠정 55/100, 다음 P117; 공식 UNASSESSED, RELEASE HOLD. 이 문서 수정은 기능 개발이나 CI 통과가 아니다.** 70점 이후 P127+ 담당자는 이번 위임에서 지정하지 않았다.
+> **[2026-11-14 최신 사용자 위임으로 실행자 변경]** 50→70(P114~P126) 구현·테스트·GitHub 커밋 담당은 **Codex 6 Luna Max**. 오직 **GitHub 기존 feature 브랜치 + GitHub-hosted Actions**만 사용한다. 이전 Instant 담당 표기는 이 범위에서 대체한다. 상세 실행 환경·실모델/실OCR blocking·한도 규정은 [Codex Github-only 런북](ASTRA_CODEX_LUNA_MAX_GITHUB_ONLY_P114_P126_20261114.md) 및 [작업 원장](ASTRA_P114_P126_TASK_REGISTER_20261114.json)을 우선한다. **설계 기준 50/100; 현재 P114/P115/P116/P117 VERIFIED, G55 PASS, 잠정 56/100, 다음 P118; 공식 UNASSESSED, RELEASE HOLD. 이 문서 수정은 기능 개발이나 CI 통과가 아니다.** 70점 이후 P127+ 담당자는 이번 위임에서 지정하지 않았다.
 
 
 > 설계 승인 문맥: 2026-11-14 21:55 KST, 사용자 지시: GPT-6 High가 최종설계 기반 작업을 분해·공시하고, Codex 6 Luna Max가 구현과 GitHub 검증·인수인계를 직접 담당. High는 사용자 요청 시 최종 별도 검수 담당. 이 문서는 **계획 공시**이며 기능 구현·테스트 또는 70점 달성을 의미하지 않는다.
@@ -9,7 +9,7 @@
 **저장소:** hibi89/astra_pdf_redesigner
 **설계 기준 코드 SHA:** 26aff40d6de524c2430f8a6b325d906cea67f7e1
 **설계 이전 문서 HEAD:** 7ed25d4f04ba10bad18e96c6986bb9a5e97a0b08
-**현재 총괄 잠정 검증 점수:** 55/100 (P114/P115/P116 VERIFIED; G55 PASS), **공식 사용자/구매자 최종 수용률:** UNASSESSED, **RELEASE HOLD**, 크몽 미등록.
+**현재 총괄 잠정 검증 점수:** 56/100 (P114/P115/P116/P117 VERIFIED; G55 PASS), **공식 사용자/구매자 최종 수용률:** UNASSESSED, **RELEASE HOLD**, 크몽 미등록.
 
 ## 1. 변경 금지·우선순위
 
@@ -56,7 +56,7 @@
 | P114 다단·표·텍스트 순서 위험 검출 보강 | A03 | +2 | 52/100 | 없음 | VERIFIED |
 | P115 원본→추출→새 PDF 콘텐츠 대조·복구 경로 실증 | A03 | +2 | 54/100 | P114 | VERIFIED |
 | P116 BASIC 8 / PRO 20 / BUSINESS 30 디자인 차별성·A4 출력 검수 | A04 | +1 | 55/100 | P115 | VERIFIED |
-| P117 BUSINESS 다중 문서 브랜드 반복 출력 및 SKU 우회 회귀 | A04 | +1 | 56/100 | P116 | PENDING |
+| P117 BUSINESS 다중 문서 브랜드 반복 출력 및 SKU 우회 회귀 | A04 | +1 | 56/100 | P116 | VERIFIED |
 | P118 로컬 레퍼런스 분석→비파괴 적용·재현성 강화 | A05 | +1 | 57/100 | P116 | PENDING |
 | P119 Windows Tesseract 공급처·해시·DLL·LICENSE 감사 재현 | A07 | +1 | 58/100 | 없음 | PENDING |
 | P120 실 Tesseract 한국어 인식 난도별 측정·오인식 공개 | A07 | +1 | 59/100 | P119 | PENDING |
@@ -98,12 +98,13 @@
 
 #### P117 — BUSINESS 다중 문서 브랜드 반복 출력 및 SKU 우회 회귀 (A04 +1점, 누적 상한 56/100)
 
-- **선행:** P116. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
-- **수정 후보 경로:** src/step4/brandBatchPlan.ts; src/step4/BusinessBrandLibrary.tsx; src/step2/Workspace.tsx; src/commercial/skuActionGate.ts; tests/brand-batch-plan.test.ts. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
-- **구현 지시:** 기존 2~20개 세션 브랜드 계획을 문서별 미리보기·저장·전환·계획 취소까지 연결. 각 문서마다 텍스트 브랜드·로고 미지원 고지를 정확히 표시하고 PDF 저장 직전에 BUSINESS/brand-kit 재확인.
-- **수용 테스트/증거:** 2/5/20개 합성 V2 문서 전환·개별 PDF 저장, 비대상 문서 오염 0, 계획 취소 후 원래 스타일 복원, 무효/중복 ID 및 라이선스 위조 거부, NSIS 업그레이드 기존 데이터 보존.
-- **STOP/점수 금지:** 고객용 실제 issuer pin 없이 판매용 사용권 활성화하지 않는다. 일괄 자동 저장/원본 PDF 덮어쓰기·V2 무단 변경 금지.
-- **종료 산출물:** 원본/출력·테스트 재현 명령과 PASS/FAIL/SKIP, 기능 SHA와 CI URL, 위험·미검증·점수 변화, 변경 요약을 STATUS.md와 HANDOFF.md에 기록. 코드 증거 없는 문서만의 증가 0.
+- **선행:** P116. **담당:** Codex 6 Luna Max. 상태: VERIFIED, +1점.
+- **실제 변경:** `src/step2/Workspace.tsx`에서 새 BUSINESS batch plan이 이전 대상을 병합하지 않고 교체한다. 회귀는 `tests/brand-batch-plan.test.ts`, `tests/sku-action-gate.test.ts`, `tests/step4-brand-batch-browser.mjs`, Chrome/Edge workflow wiring으로 고정했다.
+- **정확 기능 SHA:** `c4d96dc02fb616e44773871952343161079e293b`. [Linux #43622221289](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43622221289) 271/271 Node·build·Chrome/Edge PASS; [Windows #43622221235](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43622221235) 270 PASS/1 OS SKIP, desktop 73/73, NSIS·STEP2 업그레이드 보존 PASS; [정본 정책 #43622221573](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43622221573) PASS. 세 run 모두 exact SHA.
+- **실제 수용 결과:** Chrome/Edge 각각 합성 21개 V2 문서에서 2/5/20개 대상 전환 및 총 27개 개별 A4 PDF, 비대상 문서 브랜드/레이아웃 오염 0, 취소 후 원래 스타일 21/21 복원, V2 문서·assets 불변. 위조 BUSINESS+brand-kit 영수증은 상용 side effect 전에 거부.
+- **실패 후보:** `e57396a47c2fdb46214601795df91fca6e44f16f` Linux #43621810438은 꼬리말 selector 충돌로 실패해 0점. input 한정 selector의 검증 SHA에서 세 필수 workflow 재실행 통과.
+- **남은 범위:** 배치 로고 포함, 고객 issuer pin·판매용 활성화, 고객 육안 수용, 실제 Win10/11 미검증. [P117 검증서](../evidence/astra/P117/VERIFICATION.md). 공식 UNASSESSED/RELEASE HOLD 유지.
+- **종료 산출물:** 정확 SHA, 3개 Actions, PASS/FAIL/SKIP, 점수, 실패 후보 및 다음 P118을 STATUS/HANDOFF와 작업 JSON에 기록.
 
 #### P118 — 로컬 레퍼런스 분석→비파괴 적용·재현성 강화 (A05 +1점, 누적 상한 57/100)
 
@@ -220,4 +221,4 @@
 
 70~100 상세 잔여 30점과 사용자가 개입해야 할 최종 승인 장벽은 docs/commercial/ASTRA_INSTANT_70_TO_100_HANDOFF_20261114.md에 따로 기록한다. 모든 항목의 사용자가 확정한 배점과 원본 설계는 동일하다.
 
-**최종 확인:** 이 계획 문서는 원래 50→70 실행 기준이다. P114/P115/P116 VERIFIED, G55 PASS; P117~P126 PENDING. 현재 검증 기능 SHA `b03583f12c5eb212dd0207fb539593ec7c2b8df3`, 잠정 55/100, 다음 P117. 공식 UNASSESSED, RELEASE HOLD.
+**최종 확인:** 이 계획 문서는 원래 50→70 실행 기준이다. P114/P115/P116/P117 VERIFIED, G55 PASS; P118~P126 PENDING. 현재 검증 기능 SHA `c4d96dc02fb616e44773871952343161079e293b`, 잠정 56/100, 다음 P118. 공식 UNASSESSED, RELEASE HOLD.

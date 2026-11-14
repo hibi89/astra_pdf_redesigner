@@ -1,3 +1,16 @@
+## 2026-11-15 KST — P117 VERIFIED · 잠정 56/100 GitHub-only 인수인계 (10항)
+
+1. **목표·범위:** P114–P117 검증을 마쳤다. 사용자 확정 A01~A12, STEP1 V1·STEP2 V2, BASIC8/PRO20/BUSINESS30, 서명·출시 차단 정책을 보존한다. GPT-6 High의 독립 검수는 사용자가 70점 달성 뒤 요청할 때 수행한다.
+2. **완료 작업·변경:** P117(A04 +1). 이전 배치 대상을 누적 병합하던 BUSINESS plan 갱신을 새 선택으로 교체한다. Chrome/Edge 실제 UI 회귀와 위조 license guard 회귀를 추가했다. 상세 [P117 검증서](docs/evidence/astra/P117/VERIFICATION.md).
+3. **최종 기능 SHA:** `c4d96dc02fb616e44773871952343161079e293b`; 기능 코드 변경은 부모 커밋 `e57396a47c2fdb46214601795df91fca6e44f16f` 및 테스트 선택자 수정 커밋 `c4d96dc02fb616e44773871952343161079e293b`에 반영됐다. 변경 파일: `src/step2/Workspace.tsx`, `tests/brand-batch-plan.test.ts`, `tests/sku-action-gate.test.ts`, `tests/step4-brand-batch-browser.mjs`, `.github/workflows/ci.yml`.
+4. **정확 SHA Actions:** Linux #43622221289 (Node 271/271, build, Chrome+Edge PASS), Windows #43622221235 (Node 270 PASS/1 OS SKIP, desktop 73/73, NSIS PASS), 정책 #43622221573; 모두 head SHA `c4d96dc02fb616e44773871952343161079e293b`.
+5. **기능 수용 증거:** Chrome·Edge 각각 21개 합성 V2 문서에서 2/5/20개 계획을 전환하고 총 27개 개별 A4 PDF를 검사했다. 비대상 미오염, 취소 뒤 21/21 원래 테마 복원과 V2 문서·assets 불변 PASS. Windows 0.1.0→0.1.1 NSIS 업그레이드 후 기존 STEP2 문서+PNG 보존 PASS.
+6. **점수:** P117 +1, A04 13→14/15, 잠정 총점 55→56/100. A01~A12 최대 배점 변경 없음. G55는 이미 별도 PASS이고 G60/G65/G70은 미도달.
+7. **시도 판정:** 초기 SHA `e57396a47c2fdb46214601795df91fca6e44f16f`의 Linux #43621810438은 브라우저 test의 꼬리말 선택자 충돌로 실패해 0점. 선택자를 좁힌 최종 SHA에서 세 필수 workflow를 재실행해 모두 PASS했다.
+8. **미검증·차단:** 다중 배치 로고, 실제 고객 issuer pin/서명 발급·상용 사용권, 고객 문서·구매자 육안 수용, 물리 Win10/11은 미검증. 공식 수용 UNASSESSED, RELEASE HOLD 유지.
+9. **저장소·진행률:** 기존 branch `feature/astra-p71-pdf-source-parity-20261112`만 사용했다. 코드·증거·진행률·핸드오프는 GitHub에 기록 중이며 사용자의 로컬 PC/외부 CI/Vercel/유료서비스/외부 추론 API를 사용하지 않았다.
+10. **다음:** P118 로컬 레퍼런스 분석→비파괴 적용·재현성 강화. 목표 70점 달성 전까지 P114–P126 순서와 별도 G60/G65/G70 증거 게이트를 유지한다.
+
 ## 2026-11-15 KST — P116 VERIFIED · G55 PASS / 잠정 55/100 GitHub-only 인수인계 (10항)
 
 1. **목표·범위:** 사용자 확정 A01~A12, STEP1 V1·STEP2 V2, BASIC8/PRO20/BUSINESS30, 출시 차단 정책을 유지하며 P114~P116을 검증했다. GPT-6 High는 70점 후 사용자 요청 시 독립 검수한다.

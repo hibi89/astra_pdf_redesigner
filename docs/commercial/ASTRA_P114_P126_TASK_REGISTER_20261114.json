@@ -6,7 +6,7 @@
   "branch": "feature/astra-p71-pdf-source-parity-20261112",
   "base_feature_sha": "26aff40d6de524c2430f8a6b325d906cea67f7e1",
   "base_docs_sha": "7ed25d4f04ba10bad18e96c6986bb9a5e97a0b08",
-  "current_verified_provisional": 55,
+  "current_verified_provisional": 56,
   "target_provisional": 70,
   "official_acceptance": "UNASSESSED",
   "release": "RELEASE HOLD",
@@ -194,8 +194,8 @@
       "depends_on": [
         "P116"
       ],
-      "status": "PENDING",
-      "credit_earned": 0,
+      "status": "VERIFIED",
+      "credit_earned": 1,
       "expected_paths": [
         "src/step4/brandBatchPlan.ts",
         "src/step4/BusinessBrandLibrary.tsx",
@@ -206,10 +206,10 @@
       "implementation": "기존 2~20개 세션 브랜드 계획을 문서별 미리보기·저장·전환·계획 취소까지 연결. 각 문서마다 텍스트 브랜드·로고 미지원 고지를 정확히 표시하고 PDF 저장 직전에 BUSINESS/brand-kit 재확인.",
       "acceptance": "2/5/20개 합성 V2 문서 전환·개별 PDF 저장, 비대상 문서 오염 0, 계획 취소 후 원래 스타일 복원, 무효/중복 ID 및 라이선스 위조 거부, NSIS 업그레이드 기존 데이터 보존.",
       "blockers": "고객용 실제 issuer pin 없이 판매용 사용권 활성화하지 않는다. 일괄 자동 저장/원본 PDF 덮어쓰기·V2 무단 변경 금지.",
-      "evidence_feature_sha": null,
-      "linux_workflow_url": null,
-      "windows_workflow_url": null,
-      "blueprint_workflow_url": null,
+      "evidence_feature_sha": "c4d96dc02fb616e44773871952343161079e293b",
+      "linux_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43622221289",
+      "windows_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43622221235",
+      "blueprint_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43622221573",
       "executor": "Codex 6 Luna Max",
       "execution_medium": "GitHub-only",
       "runner": "Node+Chrome/Edge+Windows Electron",
@@ -219,9 +219,25 @@
         "Windows Electron/NSIS when relevant",
         "Final blueprint policy"
       ],
-      "evidence_linux_run": null,
-      "evidence_windows_run": null,
-      "evidence_blueprint_run": null
+      "evidence_linux_run": 43622221289,
+      "evidence_windows_run": 43622221235,
+      "evidence_blueprint_run": 43622221573,
+      "actual_changed_paths": [
+        "src/step2/Workspace.tsx",
+        "tests/brand-batch-plan.test.ts",
+        "tests/sku-action-gate.test.ts",
+        "tests/step4-brand-batch-browser.mjs",
+        ".github/workflows/ci.yml"
+      ],
+      "verification_summary": "VERIFIED +1: 21 synthetic V2 docs; Chrome/Edge each exact 2/5/20 target switching and 27 individual A4 PDFs; no non-target pollution; cancel restores 21/21 original themes; all 21 V2 docs and assets store unchanged. Forged combined BUSINESS+brand-kit receipt rejected before side effect. Windows NSIS 0.1.0->0.1.1 upgrade preserves STEP2 document and PNG. Exact SHA Linux 271/271 + build, Windows 270 PASS/1 OS SKIP/0 FAIL and desktop 73/73, blueprint policy all SUCCESS.",
+      "evidence_attempts": [
+        {
+          "feature_sha": "e57396a47c2fdb46214601795df91fca6e44f16f",
+          "linux_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43621810438",
+          "result": "FAIL, 0 credit",
+          "reason": "P117 browser test matched preview footer rather than input due ambiguous selector; corrected to input[data-business-brand-footer] before final verification."
+        }
+      ]
     },
     {
       "id": "P118",
@@ -556,12 +572,12 @@
     }
   ],
   "score_formula": "50 + sum(verified task credit_earned), each <= credit_max, no credit for plans or unverified runs",
-  "next_task": "P117",
+  "next_task": "P118",
   "notes": [
     "immutable original blueprint",
     "preserve main and PR #10",
     "no seller key or model bundle",
-    "P114, P115 and P116 VERIFIED with exact-SHA GitHub Actions; G55 PASS; current 55/100; P117 is next."
+    "P114–P117 VERIFIED; G55 PASS; current 56/100; next P118. P117 first browser candidate failure was corrected before credit; final exact-SHA Linux/Windows/policy runs PASS."
   ],
   "executor_model": "Codex 6 Luna Max",
   "scope": "50-to-70 only; P127+ executor not assigned by this user instruction",
@@ -596,5 +612,6 @@
       "official_acceptance": "UNASSESSED",
       "release": "RELEASE HOLD"
     }
-  }
+  },
+  "last_updated_kst": "2026-11-15"
 }

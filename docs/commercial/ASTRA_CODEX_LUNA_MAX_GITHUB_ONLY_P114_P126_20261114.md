@@ -3,7 +3,14 @@
 **2026-11-14 KST 최신 사용자 위임.** P114~P126은 **Codex 6 Luna Max**가 실행하고 GPT-6 High는 이번 설계 공시·완료 후 사용자 호출 시 독립 최종 검수를 맡는다. P127~P138의 실행자 지정은 이번 위임에 포함되지 않는다.
 
 **저장소:** `hibi89/astra_pdf_redesigner` · **기존 작업 브랜치:** `feature/astra-p71-pdf-source-parity-20261112` · **기준 기능 SHA:** `26aff40d6de524c2430f8a6b325d906cea67f7e1`.
-**기준 점수:** 위임 시 50/100. 현재 P114/P115/P116 VERIFIED, G55 PASS, 잠정 55/100, 다음 P117; 목표 70/100. 공식 사용자/구매자 수용률 `UNASSESSED`, 출시 `RELEASE HOLD`, 크몽 미등록. 이 런북은 실행 절차이며 점수 증거는 각 작업 검증서와 정확 SHA Actions다.
+**기준 점수:** 위임 시 50/100. 현재 P114/P115/P116/P117 VERIFIED, G55 PASS, 잠정 56/100, 다음 P118; 목표 70/100. 공식 사용자/구매자 수용률 `UNASSESSED`, 출시 `RELEASE HOLD`, 크몽 미등록. 이 런북은 실행 절차이며 점수 증거는 각 작업 검증서와 정확 SHA Actions다.
+
+## P117 실행 결과 — VERIFIED · 잠정 56/100
+
+- 기능 SHA `c4d96dc02fb616e44773871952343161079e293b`, A04 +1 (13→14/15). 정확 SHA [Linux #43622221289](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43622221289), [Windows #43622221235](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43622221235), [정책 #43622221573](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43622221573) 모두 SUCCESS.
+- Chrome/Edge 각각 21개 V2 문서로 2/5/20 대상 반복 적용 및 27개 개별 A4 PDF, 비대상 격리·취소 복원·V2 무변경 PASS. Windows NSIS 0.1.0→0.1.1 뒤 STEP2 문서+PNG 보존 PASS.
+- 최초 후보 `e57396a47c2fdb46214601795df91fca6e44f16f`의 Linux #43621810438은 테스트 selector 문제로 실패하고 0점. 수정 최종 SHA에서 세 workflow를 다시 통과.
+- [P117 검증서](../evidence/astra/P117/VERIFICATION.md). 다음은 P118; 공식 UNASSESSED, RELEASE HOLD.
 
 ## P116 실행 결과 및 G55 별도 통과 기록
 
@@ -62,11 +69,12 @@
 - **GitHub 증거 산출물:** `docs/evidence/astra/P116/VERIFICATION.md`에 재현 명령/runner OS·실행 유형(mock/real)/합성 fixture 해시·실제 PASS/FAIL/SKIP·정확 기능 SHA·3개 CI workflow 링크·지원/미지원 범위·가점 근거 기재. **VERIFIED/+1점; 기능 SHA `b03583f12c5eb212dd0207fb539593ec7c2b8df3`, Linux #43618379958, Windows #43618379926, 정책 #43618380099.**
 
 #### P117 (A04 +1; 선행: P116)
-- **수정 경로:** src/step4/brandBatchPlan.ts; src/step4/BusinessBrandLibrary.tsx; src/step2/Workspace.tsx; src/commercial/skuActionGate.ts; tests/brand-batch-plan.test.ts.
-- **개발:** 기존 2~20개 세션 브랜드 계획을 문서별 미리보기·저장·전환·계획 취소까지 연결. 각 문서마다 텍스트 브랜드·로고 미지원 고지를 정확히 표시하고 PDF 저장 직전에 BUSINESS/brand-kit 재확인.
-- **검증:** 2/5/20개 합성 V2 문서 전환·개별 PDF 저장, 비대상 문서 오염 0, 계획 취소 후 원래 스타일 복원, 무효/중복 ID 및 라이선스 위조 거부, NSIS 업그레이드 기존 데이터 보존.
-- **차단:** 고객용 실제 issuer pin 없이 판매용 사용권 활성화하지 않는다. 일괄 자동 저장/원본 PDF 덮어쓰기·V2 무단 변경 금지.
-- **GitHub 증거 산출물:** `docs/evidence/astra/P117/VERIFICATION.md`에 재현 명령/runner OS·실행 유형(mock/real)/합성 fixture 해시·실제 PASS/FAIL/SKIP·정확 기능 SHA·3개 CI workflow 링크·지원/미지원 범위·가점 근거 기재. **현재 PENDING/0점**.
+- **상태 VERIFIED, +1:** 기능 SHA `c4d96dc02fb616e44773871952343161079e293b`; 실제 제품 수정은 BUSINESS batch plan을 현재 선택으로 교체하는 `src/step2/Workspace.tsx` 변경이다.
+- **검증 경로:** 21개 synthetic V2 문서로 Chrome·Edge에서 2/5/20 대상 전환, 총 27개 개별 A4 PDF/브라우저, 비대상 격리·취소 후 스타일 복원·V2 문서/assets 불변; ID/위조 SKU guard 단위 테스트; Windows Electron/NSIS 업그레이드 후 기존 STEP2 문서+PNG 보존.
+- **정확 SHA Actions:** [Linux #43622221289](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43622221289) 271/271+build+Chrome/Edge PASS; [Windows #43622221235](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43622221235) 270 PASS/1 OS SKIP, desktop 73/73, NSIS PASS; [정책 #43622221573](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43622221573) PASS.
+- **실패 후보:** `e57396a47c2fdb46214601795df91fca6e44f16f` Linux #43621810438은 브라우저 꼬리말 selector 충돌로 실패, 0점. 고친 검증 SHA는 필수 세 workflow 모두 SUCCESS.
+- **제한:** 배치 로고, 실제 seller pin/판매용 사용권 활성화, 사용자 실제 문서·물리 Win10/11은 미검증. RELEASE HOLD 유지.
+- **GitHub 증거:** [P117 검증서](../evidence/astra/P117/VERIFICATION.md).
 
 #### P118 (A05 +1; 선행: P116)
 - **수정 경로:** src/step5/referenceAnalysis.ts; src/step2/Workspace.tsx; tests/step5-reference-browser.mjs; tests/step5-*.test.ts.

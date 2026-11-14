@@ -1,3 +1,14 @@
+## 2026-11-15 KST — Astra P117 검증 완료, 잠정 56/100
+
+- **완료 작업:** P117 (A04 다중 문서 BUSINESS 브랜드 출력/SKU 우회 회귀) VERIFIED, +1점.
+- **최종 기능 SHA:** `c4d96dc02fb616e44773871952343161079e293b`. 변경 파일: `src/step2/Workspace.tsx`, `tests/brand-batch-plan.test.ts`, `tests/sku-action-gate.test.ts`, `tests/step4-brand-batch-browser.mjs`, `.github/workflows/ci.yml`.
+- **Linux PASS:** [#43622221289](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43622221289), exact SHA. npm test 271/271, build PASS. Chrome·Edge 각각 2/5/20 대상 계획과 27개 개별 A4 PDF PASS; 미선택 격리·취소 복원·V2 문서/assets 불변 PASS.
+- **Windows PASS:** [#43622221235](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43622221235), exact SHA. Node 270 PASS / 1 Windows 전용 SKIP / 0 FAIL, desktop 73/73 PASS. Electron/NSIS 설치·실행·제거 및 0.1.0→0.1.1 업그레이드 후 STEP2 문서+PNG 보존 PASS.
+- **정본 정책 PASS:** [#43622221573](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43622221573), exact SHA. 세 필수 run 모두 head SHA `c4d96dc02fb616e44773871952343161079e293b`.
+- **점수:** A04 13→14/15, 총 55→56/100. 공식 구매자 최종 수용률 UNASSESSED, RELEASE HOLD. 고객 issuer pin, SKU/서명키 활성화, OCR 차단은 변경하지 않았다.
+- **실패 후보:** 초기 SHA `e57396a47c2fdb46214601795df91fca6e44f16f` Linux #43621810438은 테스트의 모호한 꼬리말 selector로 실패(0점). 수정 SHA에서 전체 필수 Actions 재통과. [P117 검증서](docs/evidence/astra/P117/VERIFICATION.md).
+- **다음 작업:** P118. G55 PASS 유지; G60/G65/G70은 각각 별도 증거 후 적용.
+
 ## 2026-11-15 KST — Astra P116 검증 완료·G55 통과, 잠정 55/100
 
 - **완료 작업 ID:** P116(A04, +1) 및 별도 점수 게이트 G55(PASS).
