@@ -50,6 +50,11 @@ try{
  const before=await eventually(()=>evaluate(snapshot),x=>Boolean(x?.id&&x?.content));
  await evaluate("document.querySelector('[data-step7-open-pdf-review]').click()");
  await eventually(()=>evaluate("Boolean(document.querySelector('[data-step7-pdf-review]'))"));
+ // The web/Chrome/Edge version must not pretend that unbundled native OCR is ready.
+ await eventually(()=>evaluate("Boolean(document.querySelector('[data-step7-local-ocr]'))"));
+ assert.equal(await evaluate("document.querySelector('[data-step7-ocr-run]')?.disabled"),true);
+ assert.equal(await evaluate("document.querySelector('[data-step7-ocr-file]')?.disabled"),true);
+ assert.equal(await evaluate("document.querySelector('[data-step7-ocr-status]')?.textContent.includes('브라우저 모드')"),true);
  const upload=async(selector,pdf,name)=>evaluate(`(()=>{const bytes=Uint8Array.from(atob(${JSON.stringify(pdf.toString('base64'))}),c=>c.charCodeAt(0));const f=new File([bytes],${JSON.stringify(name)},{type:'application/pdf'});const dt=new DataTransfer();dt.items.add(f);const input=document.querySelector(${JSON.stringify(selector)});input.files=dt.files;input.dispatchEvent(new Event('change',{bubbles:true}));return true})()`);
  const src=makeMixedLayoutPdf(1);
  const out=Buffer.from(src.toString('binary').replace('40 820 Td','41 820 Td'),'binary');
