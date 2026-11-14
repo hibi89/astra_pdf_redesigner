@@ -499,7 +499,7 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
                 {block.kind==='heading'&&<label className="field"><span className="visually-hidden">소제목 {bi+1}</span><input disabled={!editable} value={block.text} onChange={e=>changeBlock(section.id,block.id,b=>b.kind==='heading'?{...b,text:e.target.value}:b)}/></label>}
                 {block.kind==='paragraph'&&<RuleReview text={block.text} disabled={!editable}
                   onApply={value=>changeBlock(section.id,block.id,b=>b.kind==='paragraph'?{...b,text:value}:b)}/>}
-                {block.kind==='paragraph'&&<LocalModelReview text={block.text} disabled={!editable}
+                {block.kind==='paragraph'&&<LocalModelReview text={block.text} sourceScope={doc.id+':'+section.id+':'+block.id} disabled={!editable}
                   onApply={value=>changeBlock(section.id,block.id,b=>b.kind==='paragraph'?{...b,text:value}:b)}/>}
                 {reviewableOrigin(block.origin)&&<div className="m06-block-origin no-print" data-m06-origin data-m06-page={block.origin.page}>
                   <span className="help-text">원본 PDF 출처: {block.origin.page}페이지 · x={block.origin.x}pt · y={block.origin.y}pt (추정)</span>

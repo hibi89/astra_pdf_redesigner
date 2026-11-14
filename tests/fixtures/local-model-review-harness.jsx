@@ -21,13 +21,16 @@ window.astraDesktop={
 };
 function Harness(){
  const [text,setText]=useState('문서를 확인하였습니다.');
+ const [scope,setScope]=useState('synthetic-doc-a:block-a');
  const [applyCount,setApplyCount]=useState(0);
  const apply=next=>{setText(next);setApplyCount(value=>value+1);};
  return React.createElement(React.Fragment,null,
   React.createElement('label',null,'Synthetic source',
    React.createElement('textarea',{ 'data-model-source':true,value:text,
     onChange:event=>setText(event.target.value)})),
-  React.createElement(LocalModelReview,{text,disabled:false,onApply:apply}),
+  React.createElement('button',{'data-change-scope':true,onClick:()=>setScope(value=>value==='synthetic-doc-a:block-a'?'synthetic-doc-b:block-b':'synthetic-doc-a:block-a')},'Change synthetic document/block'),
+  React.createElement(LocalModelReview,{text,sourceScope:scope,disabled:false,onApply:apply}),
+  React.createElement('output',{'data-model-scope':true},scope),
   React.createElement('output',{'data-model-value':true},text),
   React.createElement('output',{'data-model-apply-count':true},String(applyCount)),
  );

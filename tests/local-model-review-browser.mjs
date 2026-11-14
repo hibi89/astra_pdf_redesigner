@@ -61,20 +61,31 @@ try{
  await click('[data-local-ai-run]');
  await eventually(()=>evaluate("window.__astraModelMock.calls.length"),value=>value===1);
  assert.equal(await evaluate("window.__astraModelMock.calls[0].consent"),true);
- // The source changes while request 0 is pending. The stale response is cancelled and cannot be approved.
- const changed='새 문서 2026년 11월 15일을 확인하였습니다.';
- await setSource(changed);
+ // A document/block switch with identical text still changes request scope. Its old response must die.
+ await click('[data-change-scope]');
  await eventually(()=>evaluate("window.__astraModelMock.cancelCalls"),value=>value===1);
+ assert.equal(await evaluate("document.querySelector('[data-model-value]').textContent"),'문서를 확인하였습니다.');
  await evaluate("window.__astraModelMock.resolve(0,{status:'proposal',suggested:'문서를 확인했습니다.',externalTransfer:false})");
  await pause(150);
- assert.equal(await evaluate("document.querySelector('[data-local-ai-proposal]')===null"),true,'stale proposal stays hidden');
+ assert.equal(await evaluate("document.querySelector('[data-local-ai-proposal]')===null"),true,'same-text stale proposal stays hidden');
+ assert.equal(await evaluate("Number(document.querySelector('[data-model-apply-count]').textContent)"),0);
+ // A changed source also invalidates an in-flight response.
+ const changed='새 문서 2026년 11월 15일을 확인하였습니다.';
+ await click('[data-local-ai-run]');
+ await eventually(()=>evaluate("window.__astraModelMock.calls.length"),value=>value===2);
+ assert.equal(await evaluate("window.__astraModelMock.calls[1].text"),'문서를 확인하였습니다.');
+ await setSource(changed);
+ await eventually(()=>evaluate("window.__astraModelMock.cancelCalls"),value=>value===2);
+ await evaluate("window.__astraModelMock.resolve(1,{status:'proposal',suggested:'문서를 확인했습니다.',externalTransfer:false})");
+ await pause(150);
+ assert.equal(await evaluate("document.querySelector('[data-local-ai-proposal]')===null"),true,'changed-text stale proposal stays hidden');
  assert.equal(await evaluate("document.querySelector('[data-model-value]').textContent"),changed,'stale response preserves current source');
  assert.equal(await evaluate("Number(document.querySelector('[data-model-apply-count]').textContent)"),0);
  // Fresh proposal is visible only as a before/after draft; applying requires the explicit user button.
  await click('[data-local-ai-run]');
- await eventually(()=>evaluate("window.__astraModelMock.calls.length"),value=>value===2);
- assert.equal(await evaluate("window.__astraModelMock.calls[1].text"),changed);
- await evaluate("window.__astraModelMock.resolve(1,{status:'proposal',suggested:'새 문서 2026년 11월 15일을 검토했습니다.',externalTransfer:false})");
+ await eventually(()=>evaluate("window.__astraModelMock.calls.length"),value=>value===3);
+ assert.equal(await evaluate("window.__astraModelMock.calls[2].text"),changed);
+ await evaluate("window.__astraModelMock.resolve(2,{status:'proposal',suggested:'새 문서 2026년 11월 15일을 검토했습니다.',externalTransfer:false})");
  await eventually(()=>evaluate("Boolean(document.querySelector('[data-local-ai-proposal]'))"));
  assert.equal(await evaluate("Number(document.querySelector('[data-model-apply-count]').textContent)"),0,'proposal never auto-applies');
  assert.equal(await evaluate("document.querySelector('[data-model-value]').textContent"),changed);
@@ -87,17 +98,17 @@ try{
  assert.equal(await evaluate("document.querySelector('[data-model-value]').textContent"),changed,'Undo restores exact source');
  // A rejected exception leaves the original paragraph and application count unchanged.
  await click('[data-local-ai-run]');
- await eventually(()=>evaluate("window.__astraModelMock.calls.length"),value=>value===3);
- await evaluate("window.__astraModelMock.reject(2)");
+ await eventually(()=>evaluate("window.__astraModelMock.calls.length"),value=>value===5);
+ await evaluate("window.__astraModelMock.reject(3)");
  await eventually(()=>evaluate("document.querySelector('[data-local-ai-status]')?.textContent"),value=>value?.includes('원문은 유지'));
  assert.equal(await evaluate("document.querySelector('[data-model-value]').textContent"),changed);
  assert.equal(await evaluate("Number(document.querySelector('[data-model-apply-count]').textContent)"),2);
  // Explicit cancellation also discards a later response.
  await click('[data-local-ai-run]');
- await eventually(()=>evaluate("window.__astraModelMock.calls.length"),value=>value===4);
+ await eventually(()=>evaluate("window.__astraModelMock.calls.length"),value=>value===5);
  await click('[data-local-ai-cancel]');
- await eventually(()=>evaluate("window.__astraModelMock.cancelCalls"),value=>value===2);
- await evaluate("window.__astraModelMock.resolve(3,{status:'proposal',suggested:'새 문서 2026년 11월 15일을 확인했습니다.',externalTransfer:false})");
+ await eventually(()=>evaluate("window.__astraModelMock.cancelCalls"),value=>value===3);
+ await evaluate("window.__astraModelMock.resolve(4,{status:'proposal',suggested:'새 문서 2026년 11월 15일을 확인했습니다.',externalTransfer:false})");
  await pause(150);
  assert.equal(await evaluate("document.querySelector('[data-local-ai-proposal]')===null"),true,'cancelled response is discarded');
  assert.equal(await evaluate("document.querySelector('[data-model-value]').textContent"),changed);
@@ -105,8 +116,8 @@ try{
  // Withdraw consent and verify the button closes before another inference call.
  await click('[data-local-ai-consent]');
  assert.equal(await evaluate("document.querySelector('[data-local-ai-run]').disabled"),true);
- assert.equal(await evaluate("window.__astraModelMock.calls.length"),4);
- assert.deepEqual(await evaluate("window.__astraModelMock.calls.map(call=>call.consent)"),[true,true,true,true]);
+ assert.equal(await evaluate("window.__astraModelMock.calls.length"),5);
+ assert.deepEqual(await evaluate("window.__astraModelMock.calls.map(call=>call.consent)"),[true,true,true,true,true]);
  assert.deepEqual(external,[],'no external request was made');
  console.log('PASS P122 local model UI: explicit consent, stale-response discard, manual apply/Undo, error preservation, cancel, no external calls');
 }finally{

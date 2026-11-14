@@ -1,8 +1,8 @@
 import {useEffect,useRef,useState} from 'react';
 import {ruleDiff} from './rules.ts';
-type Props={text:string;disabled:boolean;onApply:(text:string)=>void};
+type Props={text:string;sourceScope:string;disabled:boolean;onApply:(text:string)=>void};
 type Proposal={before:string;after:string};
-export default function LocalModelReview({text,disabled,onApply}:Props){
+export default function LocalModelReview({text,sourceScope,disabled,onApply}:Props){
  const [ready,setReady]=useState(false);
  const [consent,setConsent]=useState(false);
  const [checking,setChecking]=useState(false);
@@ -14,16 +14,19 @@ export default function LocalModelReview({text,disabled,onApply}:Props){
  const busyRef=useRef(false);
  useEffect(()=>()=>{generation.current++;if(busyRef.current)void window.astraDesktop?.localModelCancel?.();},[]);
  const observedText=useRef(text);
+ const observedScope=useRef(sourceScope);
  useEffect(()=>{
-  if(observedText.current===text)return;
-  observedText.current=text;
+  const scopeChanged=observedScope.current!==sourceScope;
+  const textChanged=observedText.current!==text;
+  if(!scopeChanged&&!textChanged)return;
+  observedText.current=text;observedScope.current=sourceScope;
   generation.current++;
   if(busyRef.current){
    busyRef.current=false;setBusy(false);
    void window.astraDesktop?.localModelCancel?.();
   }
-  setProposal(current=>current?.before===text?current:null);
- },[text]);
+  setProposal(current=>!scopeChanged&&current?.before===text?current:null);
+ },[sourceScope,text]);
  const probe=async()=>{
   const fn=window.astraDesktop?.localModelStatus;
   if(!fn){setMessage('로컬 AI는 설치형 Electron에서만 사용할 수 있습니다.');return;}
