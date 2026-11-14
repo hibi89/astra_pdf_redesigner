@@ -1,3 +1,16 @@
+## 2026-11-14 KST — P103 정확 SHA CI 3/3 성공 인수인계 (최신 10항)
+
+1. **목표·요구·기술:** 사용자 원본 7단계+3SKU 12영역 100점 전체, React/TypeScript/PDF.js/Electron/Tesseract. 원본/사용자 저장 데이터 보존, OCR 미승인 검수, 출시 RELEASE HOLD.
+2. **구현·근거:** P102 보안 OCR 기반 유지, P103 신규 골든 러너 PSM3/6 선택·STEP7 페이지/모드 변경 시 과거 초안 폐기·OCR 초안 페이지/모드 출처와 수동 수정 여부 표시. 스캔 PDF 실제 브라우저 렌더에 모의 OCR 백엔드 사용한 E2E 추가. 단문20+복합6 합성 실 Tesseract 품질 비교, PSM6 기본 및 PSM3 수동 대안.
+3. **테스트 명령·성공/실패/범위:** 정확 기능 SHA **f9672f12b2d40106bdcc244e2675c903b3c98888**. [Chrome+Edge #43571908499](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43571908499) 2/2 SUCCESS, Node189PASS/0FAIL, npm run build PASS, Chrome와 Edge 각각 **PASS STEP7 OCR UI**. [Windows #43571908498](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43571908498) 1/1 SUCCESS, Node188PASS/0FAIL/1 OS-only symlink SKIP, desktop27/27PASS, NSIS install/uninstall·0.1.0→0.1.1 V2 PNG 보존 PASS. [정본 정책 #43571908709](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43571908709) SUCCESS(100% 합격 아님). 실 고객 OCR/Win10·11 미검증.
+4. **완료/진행/대기·차단:** P103 코드·UI·Chrome/Edge/Windows hosted 합성 테스트 통과. OCR_MANIFEST=null, Windows 정식 native Tesseract+DLL/kor+eng 미번들/미사용. 표·다단 오인식 가능, 실제 PDF 원문 복원·고객 PC/LLM/3SKU 정식 상용·판매 승인 미충족. 공식 최종점수 UNASSESSED, 100% 미달/[작업중]/RELEASE HOLD/크몽 미등록.
+5. **오류/원인·시도·전환:** P102 CI 접근 이슈는 GitHub REST workflow runs/jobs/logs 정확 SHA 조회로 해소. PSM3 단문20 중 5 exact/CER51.28%로 누락 다수 → PSM6 기본 유지(15 exact/CER2.2%). 복합6 경우 PSM3가 표/박스 표식을 더 찾기도 하여 사용자가 직접 모드 선택·대조, 자동 인증 금지. P103 새 스캔 UI E2E는 Chrome/Edge 모두 녹색. 동일 실패 방식을 반복하지 않음.
+6. **저장소/브랜치/SHA·경로:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112, 기능 f9672f12b2d40106bdcc244e2675c903b3c98888. docs/commercial/ASTRA_P103_OCR_PSM_REVIEW_20261114.md, src/step7/LocalOcrPanel.tsx, scripts/run-ocr-golden.cjs, tests/step7-local-ocr-browser.mjs, .github/workflows/ci.yml. 제품 STATUS 문서 업데이트 e1c0682d6cfdd7e25b4bfbd3d1a6768f69e3bceb, 본 HANDOFF 갱신 SHA는 이후 HEAD 확인.
+7. **Production/실행 명령·환경:** Node22 npm test/npm run build, 실제 Chrome/Edge 브라우저 E2E 및 Windows hosted NSIS/Electron, Vercel 미적용. OS별 상품 구매자 물리 테스트·실 Tesseract Windows 실행은 미검증. PSM3/6 실 비교는 Linux5.5·Pillow/NanumGothic 합성 샘플.
+8. **원본 위치/백업·인증 관리·수정 금지:** Git 직전 SHA 롤백 가능. 사용자 V1 localStorage·V2 IndexedDB, 원본 docs/ASTRA_ORIGINAL_ROADMAP.txt, main/Draft PR10, 비밀키·고객 PDF/실 라이선스 자산 변경0. OCR 데이터는 별도 미승인 메모리 초안, 클라우드 원문 전송0/고객파일 GitHub 업로드0. OCR 배포 manifest null.
+9. **다음 작업/우선순위/승인:** ①Windows Tesseract 공급처·DLL/kor/eng 정확 버전 SHA·라이선스/NOTICE/SBOM 사전 검증(승인 전 번들 금지) ②전용 OCR 실제 Windows Native+페이지별 혼합/스캔·표 정확도·CPU/취소 회귀 ③고객 허가 PDF5~10 원문/출력 수동 검수와 물리 Win10/11 설치·인쇄 ④3SKU/실 GGUF/소유자 최종 판매 승인. 무료 OCR 코드 개발/100점 배점은 기존 승인 완료, 반복 승인 요청 금지. 유료구매·외부원문 전송·등록/배포는 별도.
+10. **KST 갱신/정확 검증 범위·문서 기준:** 2026-11-14 KST, GitHub Actions 3/3 raw logs 직접 조회, 합성 UI E2E Chrome/Edge 각 PASS·Windows hosted Node/desktop/NSIS PASS. Linux 실 Tesseract 20/6 합성 비교는 윈도우 사용성·판매성 증거 아님. 최종 HEAD 확인 필요, 코드 f9672f12/문서 커밋 구분.
+
 ## 2026-11-14 KST — P103 실 OCR 모드 비교·프론트엔드 초안 귀속 인수인계 10항
 
 1. **목표/기술/정본:** 사용자 확정 STEP1~7 및 BASIC8/PRO20/BUSINESS30, 12영역 총 100점. React/TS/PDF.js/Electron/무료 로컬 Tesseract. 고객 내용·원본 무손상, 전체 공식 최종률 UNASSESSED/100% 미달.
