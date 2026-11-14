@@ -1,3 +1,16 @@
+## 2026-11-14 KST — P95~P99 개발·회귀 및 100% 목표 인수인계 (필수 10항)
+
+1. **목표·기술·확정:** 사용자 7단계+크몽 3SKU(BASIC8/PRO20/BUSINESS30), 0원 로컬 React/TypeScript/Electron/PDF.js. 최종 100%, 공식률 UNASSESSED/미달. 미승인 12항 100점 배점안은 `docs/commercial/ASTRA_P100_SCOREBOARD_20261114.md`.
+2. **완료·설계근거:** P95 독립 BatchImportPanel 로컬 PDF2–10개 수동 개별 인수 (기존 PDF 업로드 로직 재사용), P96 서버 없는 ECDSA 오프라인 서명 검증 모듈, P97 고급 레이아웃 별도 로컬 저장/복원, P98 BUSINESS 텍스트 브랜드 보관함, P99 네이티브 사용자 동의형 안전 외부 검색창. 기존 V2 문서/DB migration 대신 별도 로컬 메타데이터만 저장, 앱 HTTP 네트워크 차단 유지.
+3. **테스트:** P95 exact `e69dfed1` Linux #43551099424 2/2 SUCCESS Node167PASS, Win #43551099468 SUCCESS Node166PASS+desktop16. P96 exact `0ffcbbeb` Linux #43551475625 2/2 SUCCESS Node170PASS, Win #43551475613 SUCCESS Node169PASS+desktop16. P97 수정 exact `ed363a4f` Linux #43551962845 2/2 SUCCESS Node172PASS, Win #43551962840 SUCCESS Node171PASS+desktop16. P98 exact `1918a801` Linux #43552063732 2/2 SUCCESS Node174PASS, Win #43552063812 SUCCESS Node173PASS+desktop16. P99 source+CI test `0a0dec3e`: Linux #43552456521 /Win #43552456514 **종료 전 미검증**, policy #43552456710 SUCCESS. 모든 Windows Node 1OS SKIP, NSIS 설치/업그레이드. 실 고객PC/실PDF 5–10, LLM/OCR 미검증.
+4. **완료/진행/차단:** P95–P98 기술 PASS, P99 CI 검증 대기, P100 출처 북마크 앵커 미반영. OCR·GGUF·STEP6 검색 카드·정식 SKU entitlement·BUSINESS 일괄·고객QA·권리·구매자 Windows 검증 대기, 최종100 미달. [작업중], RELEASE HOLD, 미등록.
+5. **실패 근거/시도·피벗:** P97 Windows/Linux TS `savedAt:unknown` 2 build FAIL 동일 원인 → `typeof item.savedAt==='number'` 좁힘 단일 수정으로 재CI SUCCESS. P100 브라우저 테스트 앵커 불일치 1회 GitHub 쓰기 전에 중단; 추가 강제 문자열 교체하지 않고 분리/소스 위치 재확인. OCR 라이브러리/실모델 다운로드와 개인키 발급 무승인 강행 금지.
+6. **저장소/브랜치/SHA/경로:** `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, 최신 source `0a0dec3edb998cc8ea94bcffc3fa781c7d1c9377`; docs HEAD 갱신 후 readback. 주요 `src/step3/BatchImportPanel.tsx`, `src/commercial/offlineLicense.ts`, `src/step4/ProLayoutLibrary.tsx`, `src/step4/BusinessBrandLibrary.tsx`, `desktop/approved-search-link.cjs`.
+7. **실행·Production:** `npm test && npm run build` GitHub Actions Node22 Linux Chrome+Edge, Win Electron16/NSIS. Vercel/Production **미적용**, 크몽 판매물 미출시, 사용자 실 Windows10·11 미실행.
+8. **원본·백업·보안:** git parent `54e12b70`→P95 `e69dfed1`→P96 `0ffcbbeb`→P97 `6d68410f`→fix `ed363a4f`→P98 `1918a801`→P99 `a2b7feab`→test `0a0dec3e`. git revert 가능, force push 없음, main/PR10·V1/V2/고객 PDF/모델/비밀 unchanged.
+9. **다음 우선순위·승인:** P99 CI 완료 확인→오류 시 최소 수정→영구 GUI 판매용 서명키/런타임 라이선스 연계, 실제 OCR 엔진·한국어 모델 권리 승인 후 0원 실동작/CPU 검증, STEP6 화면형 결과, BUSINESS 브랜드 일괄. 기존 2026-11-14 13:00 통합 자동화에 폰으로 미승인 배점안/권리·추가 설치 결정, PC 필요 실제 PDF5–10와 Win10/11 수용/출시 승인 일괄 처리. 판매·라이선스/소스 병합·유료 비용은 명시 GO 대기.
+10. **시각·검증 경계:** 2026-11-14 KST, GitHub exact SHA 실제 Actions 및 raw 로그. 수치 `UNASSESSED`은 0% 뜻 아님; 내부 과거 85%는 별개. 코드 CI SUCCESS가 전체 SKU/인수 GO 아님. 문서 기준 SHA 이번 갱신 후 readback.
+
 ## 2026-11-14 KST — P93/P94 기능 검증·최종완성률 산정 대기 (HANDOFF 필수10항)
 
 1. **목표·설계·기술:** 원본 7단계+3SKU(BASIC8/PRO20/BUSINESS30), 0원 로컬 React/TS/PDF.js/Electron, 전체 최종100%. 12영역 요구사항/배점 제안은 `docs/commercial/ASTRA_P100_SCOREBOARD_20261114.md`.

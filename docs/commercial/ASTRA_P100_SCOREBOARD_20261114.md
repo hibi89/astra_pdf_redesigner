@@ -1,5 +1,7 @@
 # Astra PDF Redesigner — 최종완성률 추적표 / 100% 전체 설계
 
+> P95~P99 최신 개발/검증: `STATUS.md`, `HANDOFF.md` 상단. P95 PRO 수동 다중 PDF Chrome/Edge/Win 성공, P96 offline signed license verifier 모듈 CI 성공, P97 PRO 저장형 레이아웃 라이브러리 수정 후 CI 성공, P98 BUSINESS 브랜드 라이브러리 CI 성공, P99 안전 외부검색 2026-11-14 검증 진행중. 공식 최종완성률은 사용자 배점 미승인으로 여전히 UNASSESSED/목표100% 미달.
+
 **갱신:** 2026-11-14 KST. **공식 최종완성률: `UNASSESSED` (숫자 미확정, 0% 아님), 목표: 100%.** 과거 내부 기술 지표 `85% (잠정·구 범위)`를 별도 보존. 실제 제품/고객 수용/판매 진척률과 혼동 금지. 기준 정본: `REQUIREMENTS.md`, `docs/ASTRA_ORIGINAL_ROADMAP.txt`, `docs/BLUEPRINT.md`, `docs/commercial/PRODUCT_SPEC_V1.md`.
 
 ## 정확 SHA 증거
@@ -15,12 +17,12 @@
 | A01 | STEP1 회고록 입력·저장·A4 | `src/App.tsx`; P94 브라우저/Windows CI | 합성 기술 PASS·고객 검수 대기 | 4 |
 | A02 | STEP2 섹션/이미지/문서 영구저장·복원 | `src/step2/*`; P94 IndexedDB/NSIS | 합성 기술 PASS·실 PC 대기 | 6 |
 | A03 | STEP3 PDF 업로드·원문 대조·확정 | `src/step3/*`; 기존 브라우저 E2E | 실 문서 5~10개 육안·표/이미지 누락 판단 대기 | 14 |
-| A04 | STEP4 8/20/30 고유 조판·스타일·브랜드/배치 | `src/step4/*`; 22종 A4+P94 BUSINESS 로고/JSON | P93/P94 새 기능 기술 PASS, 정식 레이아웃·영구 저장·PRO 배치/브랜드 적용/권한 미완 | 15 |
+| A04 | STEP4 8/20/30 고유 조판·스타일·브랜드/배치 | P93 22/22 A4; P95 PDF 개별 인수; P97 PRO 24시안 로컬 저장; P98 BUSINESS 12브랜드 텍스트/로고 시험 | P95/P97/P98 합성·Chrome/Edge·Win PASS, 영구 30종 정식 SKU 사용권·BUSINESS 일괄 적용·고객 PDF 수용 미완 | 15 |
 | A05 | STEP5 로컬 레퍼런스 분석/적용·복원 | `src/step5/referenceAnalysis.ts` | 합성 검증·실고객 원본 디자인 수용 대기 | 5 |
-| A06 | STEP6 인터넷 레퍼런스 탐색/STEP5 연결 | `src/step6/*` 수동 옵트인 검색링크 | 앱 내 검색 결과·권리/출처 처리 미완 | 5 |
+| A06 | STEP6 인터넷 레퍼런스 탐색/STEP5 연결 | `src/step6/*` 옵트인 검색 URL+`desktop/approved-search-link.cjs` 외부 브라우저 native 확인 | P99 정확 CI 검증 중; 앱 내부 검색 결과·출처/권리·자동 STEP5 결과 연동 미구현 | 5 |
 | A07 | STEP7 실제 OCR/콘텐츠 안전/통합 | `src/step7/*`; 구조·토큰·PDF 대조 | 실제 OCR 미연동·표/다단 수용·실 PDF 미완 | 12 |
 | A08 | BASIC/PRO/BUSINESS 공통 진짜 로컬 한국어 LLM 윤문 | `desktop/local-model-controller.cjs` 안전 골격 | 실제 GGUF/llama.cpp·CPU·품질·권리 미검증, `RELEASE_MANIFEST=null` | 14 |
-| A09 | SKU 차등·라이선스·설치/지원/환불 | `PRODUCT_SPEC_V1.md`, 가격 문서 | 기능 entitlement·정식 재배포물 미구현 | 11 |
+| A09 | SKU 차등·라이선스·설치/지원/환불 | `src/commercial/offlineLicense.ts`, P96 ECDSA P-256 3SKU 검증 Node170 + Win169 PASS | 공개키 pin·상용 개인키·GUI entitlement 잠금/활성화·재발급·기기수·약관 미구현, 실제 판매 불가 | 11 |
 | A10 | Win10·Win11 설치·보안·인쇄·복구 | Windows CI NSIS 업그레이드 | GitHub runner PASS, 실제 물리 PC/서명·SmartScreen 미수용 | 5 |
 | A11 | 5~10개 허가된 PDF 수동 비교·고객 승인 | `scripts/owner-batch-acceptance.mjs` | 합성 검수 도구 PASS, 실제 건수 0·수동 승인 없음 | 7 |
 | A12 | 크몽 등록·자료·구매자/법적 최종 승인 | `ASTRA_KMONG_LISTING_DRAFT_20261114.md` | 초안만 존재, 실 등록 0/SALE HOLD | 2 |
