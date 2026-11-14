@@ -103,6 +103,7 @@ try{
   assert.equal(screen.imageCount,1,id+' visible PNG count');
   assert.equal(screen.imagesLoaded,true,id+' image decode');
   assert.deepEqual(screen.overflow,[],id+' browser preview horizontal clipping');
+  assert.deepEqual(screen.lineOverlaps,[],id+' browser preview text-line overlap');
   const pdf=await send('Page.printToPDF',{printBackground:true,preferCSSPageSize:true});
   const bytes=Buffer.from(pdf.data,'base64');
   assert.equal(bytes.subarray(0,5).toString(),'%PDF-',id+' real browser PDF signature');
