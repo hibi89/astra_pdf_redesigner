@@ -1,3 +1,14 @@
+## 2026-11-15 KST — Astra P115 검증 완료, 잠정 54/100
+
+- **완료 작업:** P115 (A03 원본/출력 PDF 글자·수치·기호·부정문·링크 차이 대조). 숫자 포함 토큰, 기호/구두점, 한국어·영어 부정 표현, 링크 대상과 추가/중복 토큰을 페이지 위험과 함께 구분한다. 수동 검토를 유지하고 V1/V2 저장을 자동 승인하지 않는다.
+- **정확 기능 SHA:** `a89c7a7dfbb2e18ef1c5f328e248d2e60ec69a0d`. P114 기능 SHA 이후 5개 커밋, 변경 파일: `src/step7/OfflinePdfReview.tsx`, `src/step7/tokenParity.ts`, `tests/fixtures/step7-pdf-parity-corpus.mjs`, `tests/step7-pdf-review-browser.mjs`, `tests/step7-token-parity.test.ts`.
+- **검증 PASS:** [Linux Chrome/Edge #43612143269](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43612143269) exact SHA — Node 269/269, build PASS, Chrome·Edge 각각 합성 A4 원본/출력 15/15 대조, 취소·잘못된 PDF 복구 및 원본 SHA·STEP1 V1·모든 STEP2 V2 store 불변 PASS. [Windows Electron/NSIS #43612143223](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43612143223) — Node 268 PASS/0 FAIL/1 Windows 전용 SKIP, desktop 73/73, 설치·제거 및 0.1.0→0.1.1 업그레이드 뒤 STEP2 문서/PNG 보존 PASS. [정본 정책 #43612143523](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43612143523) PASS(구조 증거 검사 전용).
+- **중간 실패와 수정:** #43611032904는 hosted V1 기준 데이터 누락, #43611361119는 테스트 SHA helper import 누락, #43611776507은 V1→V2 마이그레이션 전후 스냅샷 순서 오류로 실패했다. 모두 테스트 준비를 수정했고 점수는 부여하지 않았다. 최종 SHA 3개 Actions가 모두 성공했다.
+- **점수·상태:** P115 +2점, A03 10→12/14, 총 잠정 **52→54/100**. P114/P115 VERIFIED, 다음 P116. 공식 구매자 수용 **UNASSESSED**, 출시 **RELEASE HOLD**. 확정 가중치·STEP1 V1·STEP2 V2·BASIC8/PRO20/BUSINESS30·서명키와 출시 차단 상태 불변.
+- **제한:** 실제 고객 PDF와 표/다단 의미 정확도, 이미지 원본 픽셀 재현, 물리 Win10/11, 실제 Tesseract OCR·Qwen3 CPU 추론은 미검증. 15쌍 전부 합성 PDF.
+- **다음 작업:** P116에서 BASIC8/PRO20/BUSINESS30 총 30개 디자인의 Chrome/Edge A4 출력과 잘림·누락 검사를 수행한다. 55/100 도달 시 G55 별도 검증을 통과하기 전 추가 점수를 인정하지 않는다.
+
+
 ## 2026-11-15 KST — Astra P114 검증 완료, 잠정 52/100
 
 - **완료 작업:** P114 (A03 PDF 읽기 순서·위험 레이아웃 수동 대조). 불확실한 소스 순서를 자동 재정렬하지 않고 원문 추출 순서로 보여주며, 위험 페이지별 확인과 전체 확인을 모두 거쳐야 V2에 저장된다. 수정 시 두 확인을 해제한다.
