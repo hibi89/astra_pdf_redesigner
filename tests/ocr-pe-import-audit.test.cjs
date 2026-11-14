@@ -68,6 +68,9 @@ test('P105 LDAP networking import wldap32.dll is classified as Windows system li
 test('P105 DNS resolver import dnsapi.dll is classified as Windows system library',()=>{
  assert.equal(graph(inspectPeStaticImports(image('dnsapi.dll'))).systemImportCount,1);
 });
+test('P105 DirectWrite import dwrite.dll is classified as Windows system library',()=>{
+ assert.equal(graph(inspectPeStaticImports(image('dwrite.dll'))).systemImportCount,1);
+});
 test('P105 API-set imports are OS-classified',()=>{
  assert.equal(graph(inspectPeStaticImports(image('api-ms-win-core-file-l1-2-0.dll'))).systemImportCount,1);
 });

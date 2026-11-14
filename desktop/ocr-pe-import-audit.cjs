@@ -1,7 +1,7 @@
 'use strict';
 // P105: static PE evidence only; no binary execution, signature or release approval.
 const MAX_PE_BYTES=64*1024*1024;
-const SYSTEM=new Set('advapi32.dll bcrypt.dll cabinet.dll comctl32.dll msimg32.dll comdlg32.dll crypt32.dll dnsapi.dll gdi32.dll gdi32full.dll imm32.dll iphlpapi.dll kernel32.dll kernelbase.dll msvcrt.dll ntdll.dll ole32.dll oleaut32.dll rpcrt4.dll secur32.dll shell32.dll shlwapi.dll user32.dll userenv.dll version.dll winhttp.dll wininet.dll winmm.dll wldap32.dll ws2_32.dll ucrtbase.dll'.split(' '));
+const SYSTEM=new Set('advapi32.dll bcrypt.dll cabinet.dll comctl32.dll msimg32.dll comdlg32.dll crypt32.dll dnsapi.dll dwrite.dll gdi32.dll gdi32full.dll imm32.dll iphlpapi.dll kernel32.dll kernelbase.dll msvcrt.dll ntdll.dll ole32.dll oleaut32.dll rpcrt4.dll secur32.dll shell32.dll shlwapi.dll user32.dll userenv.dll version.dll winhttp.dll wininet.dll winmm.dll wldap32.dll ws2_32.dll ucrtbase.dll'.split(' '));
 function fail(m){throw Error('pe-import:'+m);}
 function check(b,p,n){if(!Number.isSafeInteger(p)||!Number.isSafeInteger(n)||p<0||n<0||p>b.length||n>b.length-p)fail('out-of-bounds');}
 function inspectPeStaticImports(b){
