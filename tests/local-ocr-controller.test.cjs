@@ -126,3 +126,23 @@ test('OCR reassembles split UTF-8 Korean bytes without replacement characters',a
   assert.equal(result.text.includes('\ufffd'),false);
  }finally{f.cleanup();}
 });
+
+
+test('OCR accepts only fixed PSM 3 or 6; arbitrary native CLI args are refused',async()=>{
+ const f=fixture(),calls=[];
+ try{
+  const controller=createLocalOcrController({
+   resourcesDir:f.root,manifest:f.manifest,spawnProcess:fakeSpawn(calls)
+  });
+  const malicious=await controller.recognizePng(png(),'--psm 0');
+  assert.deepEqual(malicious,{status:'error',reason:'invalid-layout-mode'});
+  assert.equal(calls.length,0,'Untrusted layout mode must not start a native process');
+  const mixed=await controller.recognizePng(png(),3);
+  assert.equal(mixed.status,'review');
+  assert.equal(calls.length,1);
+  assert.equal(calls[0].args.at(-1),'3');
+  const paragraph=await controller.recognizePng(png(),6);
+  assert.equal(paragraph.status,'review');
+  assert.equal(calls[1].args.at(-1),'6');
+ }finally{f.cleanup();}
+});
