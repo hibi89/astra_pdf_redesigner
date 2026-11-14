@@ -13,6 +13,7 @@ import pdfWorkerUrl from 'pdfjs-dist/build/pdf.worker.min.mjs?url';
 import {imageDimensions,imageType} from './images.ts';
 import {pdfOutputImageCount,pdfOutputTextMarkers} from './outputMarkers.ts';
 import {downloadStylePreset,importStylePreset} from '../step4/stylePreset.ts';
+import {SKU_LAYOUT_CANDIDATES,skuLayoutCandidate} from '../step4/skuLayoutCandidates.ts';
 import {makeSourceReviewReceipt,downloadSourceReviewReceipt} from '../step3/reviewReceipt.ts';
 
 const allThemes=[...THEMES,
@@ -32,9 +33,10 @@ function useAssetUrls(assets:readonly ImageAsset[]):Record<string,string>{
     setUrls(created);return()=>{for(const value of Object.values(created))URL.revokeObjectURL(value);};
   },[assets]);return urls;
 }
-export function ProjectPreview({doc,urls,previewTheme,previewDesign}: {doc:ProjectDocument;urls:Record<string,string>;previewTheme?:ThemeId;previewDesign?:DesignSettings}){
-  const sections=visibleSections(doc);const design=previewDesign??(previewTheme?{...doc.design,theme:previewTheme}:doc.design);
-  return <article className={`document paper-theme-${design.theme} paper-font-${design.font} paper-size-${design.textSize} project-paper`} style={{'--accent':design.accent} as CSSProperties} aria-label="문서 미리보기">
+export function ProjectPreview({doc,urls,previewTheme,previewDesign,previewLayoutId}: {doc:ProjectDocument;urls:Record<string,string>;previewTheme?:ThemeId;previewDesign?:DesignSettings;previewLayoutId?:string}){
+  const advanced=skuLayoutCandidate(previewLayoutId);
+  const sections=visibleSections(doc);const design=advanced?{...doc.design,theme:advanced.baseTheme}:previewDesign??(previewTheme?{...doc.design,theme:previewTheme}:doc.design);
+  return <article className={`document paper-theme-${design.theme} paper-font-${design.font} paper-size-${design.textSize} project-paper ${advanced?'paper-advanced-'+advanced.id:''}`} data-advanced-layout={advanced?.id} style={{'--accent':design.accent} as CSSProperties} aria-label="문서 미리보기">
     <div className="document-heading">
       {design.theme==='diary'&&<span className="document-eyebrow">LEARNING JOURNAL</span>}
       {design.theme==='report'&&<span className="document-eyebrow">DOCUMENT REPORT</span>}
@@ -78,6 +80,7 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
   const [activeStage,setActiveStage]=useState<1|2|3|4>(1);
   const [styleCompareOpen,setStyleCompareOpen]=useState(false);
   const [styleCompareGalleryOpen,setStyleCompareGalleryOpen]=useState(false);
+  const [advancedPreview,setAdvancedPreview]=useState<{documentId:string;layoutId:string}|null>(null);
   const [previewTheme,setPreviewTheme]=useState<{documentId:string;theme:ThemeId}|null>(null);
   const [styleUndo,setStyleUndo]=useState<Record<string,StyleUndoEntry[]>>({});
   const [portableStyle,setPortableStyle]=useState<{documentId:string;name:string;design:DesignSettings}|null>(null);
@@ -148,6 +151,7 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
   },[w.ready,w.document?.id]);
   const urls=useAssetUrls(w.assets);
   const doc=w.document;
+  const activeAdvancedLayoutId=doc&&advancedPreview?.documentId===doc.id?advancedPreview.layoutId:undefined;
   const referencePreviewDesign=doc&&referencePreview?.documentId===doc.id?referencePreview.design:undefined;
   const portablePreviewDesign=doc&&portableStyle?.documentId===doc.id?portableStyle.design:undefined;
   const activePreviewDesign=referencePreviewDesign??portablePreviewDesign;
@@ -229,7 +233,7 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
   };
   useEffect(()=>()=>{if(referenceImage?.url)URL.revokeObjectURL(referenceImage.url);},[referenceImage]);
   useEffect(()=>()=>{referenceVersion.current++;cancelReferenceRender();const session=referencePdfSession.current;referencePdfSession.current=null;if(session)void session.loading.destroy().catch(()=>{});},[]);
-  useEffect(()=>{clearReference();setPortableStyle(null);setPortableStyleError('');},[doc?.id]);
+  useEffect(()=>{clearReference();setPortableStyle(null);setPortableStyleError('');setAdvancedPreview(null);},[doc?.id]);
   const analyzeReference=async(file:File)=>{
     setPortableStyle(null);clearReference();const version=referenceVersion.current;setReferenceError('');
     if(file.type==='application/pdf'||/\.pdf$/i.test(file.name)){
@@ -453,7 +457,7 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
           <section className="style-compare-card" data-style-compare-candidate><h3>비교 후보 · {allThemes.find(theme=>theme.id===previewThemeId)?.label}</h3><div className="style-compare-card-viewport"><ProjectPreview doc={doc} urls={urls} previewDesign={{...doc.design,theme:previewThemeId}}/></div></section>
         </div>:null}
         <div className={`paper-surface ${doc&&styleCompareOpen&&styleCompareGalleryOpen&&previewThemeId?'style-compare-print-candidate':''}`}>
-          {doc?<ProjectPreview doc={doc} urls={urls} previewTheme={previewThemeId} previewDesign={activePreviewDesign}/>:<div className="document">{w.ready?'문서를 열 수 없습니다.':'불러오는 중…'}</div>}
+          {doc?<ProjectPreview doc={doc} urls={urls} previewTheme={previewThemeId} previewDesign={activePreviewDesign} previewLayoutId={activeAdvancedLayoutId}/>:<div className="document">{w.ready?'문서를 열 수 없습니다.':'불러오는 중…'}</div>}
         </div>
         <p className="print-tip no-print">Chrome/Edge에서 PDF로 저장, A4, 머리글·바닥글 해제를 확인하세요. 인쇄는 이미지 로딩이 완료될 때까지 기다립니다.</p>
       </div>
@@ -467,7 +471,7 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
         {doc ? <>
           <section className="panel settings-panel"><div className="panel-heading"><h2>디자인 설정</h2><span className="panel-caption">원문은 변경하지 않습니다</span></div>
             <div className="setting-block"><h3>테마</h3><div className="theme-options">{allThemes.map(theme=><label className={`theme-option ${doc.design.theme===theme.id?'selected':''}`} key={theme.id}><input disabled={!editable} type="radio" name="v2theme" checked={doc.design.theme===theme.id} onChange={()=>{
-              setPortableStyle(null);clearReference();editDoc(d=>({...d,design:{...d.design,theme:theme.id}}));
+              setAdvancedPreview(null);setPortableStyle(null);clearReference();editDoc(d=>({...d,design:{...d.design,theme:theme.id}}));
               if(styleCompareOpen&&doc)setPreviewTheme({documentId:doc.id,theme:theme.id});
             }}/><span><strong>{theme.label}</strong><small>{theme.description}</small></span></label>)}</div></div>
             <div className="setting-block"><h3>포인트 색상</h3><div className="swatches">{PALETTE.map(color=><label title={color.label} className={`swatch-wrap ${doc.design.accent===color.value?'active':''}`} key={color.value}><input disabled={!editable} type="radio" name="v2accent" aria-label={color.label} checked={doc.design.accent===color.value} onChange={()=>{setPortableStyle(null);clearReference();editDoc(d=>({...d,design:{...d.design,accent:color.value}}));}}/><span className="swatch" style={{backgroundColor:color.value}}/></label>)}</div></div>
@@ -505,6 +509,19 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
                 </button>}
               </div>
             </>}
+          </section>
+          <section className="panel advanced-layout-panel" aria-label="추가 인쇄 레이아웃 시험" data-extended-layout-panel>
+            <h3>고급 레이아웃 출력 실험 · 22개 시안</h3>
+            <p className="help-text">기존 BASIC 8개에 PRO 후보 12개와 BUSINESS 후보 10개를 더한 구조 실험입니다. 디자인은 현재 문서에서만 미리보기·PDF 출력 가능하며, 프로젝트에 영구 저장되거나 SKU 사용권을 부여하지 않습니다. 상용 판매 준비 완료가 아닙니다.</p>
+            <div className="advanced-layout-grid" role="group" aria-label="고급 인쇄 시안">
+              {SKU_LAYOUT_CANDIDATES.map(layout=><button type="button" key={layout.id} data-extended-layout-id={layout.id}
+                aria-pressed={activeAdvancedLayoutId===layout.id}
+                onClick={()=>{closeStyleCompare();clearReference();setPortableStyle(null);setAdvancedPreview({documentId:doc.id,layoutId:layout.id});}}>{layout.label}</button>)}
+            </div>
+            {activeAdvancedLayoutId&&<div className="advanced-layout-preview-note" role="status" data-extended-layout-status>
+              {skuLayoutCandidate(activeAdvancedLayoutId)?.label} · 임시 미리보기/출력만 지원, 저장 데이터는 변경되지 않습니다.
+              <div className="toolbar project-toolbar"><button type="button" className="secondary-button" data-extended-layout-cancel onClick={()=>setAdvancedPreview(null)}>기본 디자인으로 돌아가기</button></div>
+            </div>}
           </section>
           <section className="panel portable-style-panel" aria-label="디자인 프리셋 가져오기 및 내보내기" data-step4-portable-preset>
             <div className="panel-heading"><h2>디자인 프리셋 파일</h2><span className="panel-caption">문서 내용은 포함하지 않습니다</span></div>

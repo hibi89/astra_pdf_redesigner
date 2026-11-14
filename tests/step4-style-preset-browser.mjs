@@ -79,6 +79,31 @@ try{
  await eventually(()=>evaluate("Boolean(document.querySelector('[data-style-preset-error]'))"));
  assert.equal(await evaluate("Boolean(document.querySelector('[data-style-preset-preview]'))"),false);
  assert.deepEqual(await evaluate(stored),restored,'Tampered preset must not modify the document after completed apply/undo');
+
+ const advancedList=await evaluate("Array.from(document.querySelectorAll('[data-extended-layout-id]')).map(button=>button.dataset.extendedLayoutId)");
+ assert.equal(advancedList.length,22);
+ assert.equal(new Set(advancedList).size,22);
+ const advancedPrior=await evaluate(stored);
+ const geometry=[];
+ for(const id of advancedList){
+   await evaluate("document.querySelector('[data-extended-layout-id="+JSON.stringify(id)+"]').click()");
+   await eventually(()=>evaluate("document.querySelector('.project-paper')?.dataset.advancedLayout"),x=>x===id);
+   const values=await evaluate("(()=>{const p=document.querySelector('.project-paper'),h=p.querySelector('.document-heading'),s=p.querySelector('.document-section h2');const a=getComputedStyle(p),b=getComputedStyle(h),c=s&&getComputedStyle(s);return [a.paddingTop,a.paddingLeft,b.textAlign,b.borderLeftWidth,b.borderTopWidth,b.borderRightWidth,b.backgroundColor,c?.borderLeftWidth,c?.borderRightWidth,c?.borderBottomWidth]})()");
+   geometry.push(JSON.stringify(values));
+ }
+ assert.equal(new Set(geometry).size,22,'Every advanced candidate must have a unique computed geometry signature');
+ assert.deepEqual(await evaluate(stored),advancedPrior,'Transient advanced layouts never modify V2');
+ const chosen=advancedList.at(-1);
+ await evaluate("document.querySelector('[data-extended-layout-id="+JSON.stringify(chosen)+"]').click()");
+ const printed=await send('Page.printToPDF',{printBackground:true,preferCSSPageSize:true});
+ const printedBytes=Buffer.from(printed.data,'base64');
+ assert.equal(printedBytes.subarray(0,5).toString(),'%PDF-');
+ const printedPath=join(profile,'advanced-layout-a4.pdf');writeFileSync(printedPath,printedBytes);
+ assert.match(execFileSync('pdfinfo',[printedPath],{encoding:'utf8'}),/Page size:\\s+[0-9.]+ x [0-9.]+ pts \\(A4\\)/);
+ await evaluate("document.querySelector('[data-extended-layout-cancel]').click()");
+ await eventually(()=>evaluate("!document.querySelector('.project-paper')?.dataset.advancedLayout"));
+ assert.deepEqual(await evaluate(stored),advancedPrior,'Advanced cancel keeps original V2');
+ console.log('PASS P89 PRO/BUSINESS TEMPORARY: 22 selectable unique DOM geometries, real A4 PDF, V2 unchanged');
  console.log('PASS STEP4 PORTABLE STYLE: file export/import, transient preview/cancel, apply/undo, A4 PDF, tamper and original V2 preservation');
 }finally{
  try{ws?.close();}catch{}

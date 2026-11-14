@@ -246,3 +246,210 @@ button:disabled{cursor:not-allowed;opacity:.48}select{min-height:38px;padding:7p
 
 .style-compare-print-candidate{display:none}
 @media print{.style-compare-print-candidate{display:block!important}}
+
+
+/* P89: 12 PRO and 10 BUSINESS exploratory geometries, no V2 schema change.
+   A print trial is NOT a shipped paid template or fidelity certification. */
+.project-paper.paper-advanced-pro-01{padding:12mm 12mm 17mm;line-height:1.60}
+.project-paper.paper-advanced-pro-01 .document-heading{border:0;border-radius:0;background:transparent;margin:0 0 10mm;padding:5mm 6mm;box-shadow:none;text-align:left;border:2px solid var(--accent);border-left-width:7px;background:#f5f8fa}
+.project-paper.paper-advanced-pro-01 .document-heading h1{font-size:1.70em;line-height:1.26;margin:3mm 0 3mm;letter-spacing:-.04em}
+.project-paper.paper-advanced-pro-01 .document-meta{justify-content:flex-start}
+.project-paper.paper-advanced-pro-01 .document-section{margin-bottom:7mm}
+.project-paper.paper-advanced-pro-01 .document-section h2{font-size:0.920em;border-left:4px solid var(--accent);padding:2mm 0 2mm 5mm;margin-bottom:2mm;break-after:avoid-page}
+.project-paper.paper-advanced-pro-01 .block-prose{line-height:1.620}
+@media print{.project-paper.paper-advanced-pro-01{padding:12mm 12mm 17mm!important}}
+
+.project-paper.paper-advanced-pro-02{padding:14mm 17mm 19mm;line-height:1.67}
+.project-paper.paper-advanced-pro-02 .document-heading{border:0;border-radius:0;background:transparent;margin:0 0 12mm;padding:5mm 6mm;box-shadow:none;text-align:center;border-left:7px solid var(--accent);padding-left:9mm;background:#f8fafb}
+.project-paper.paper-advanced-pro-02 .document-heading h1{font-size:1.90em;line-height:1.26;margin:3mm 0 3mm;letter-spacing:-.04em}
+.project-paper.paper-advanced-pro-02 .document-meta{justify-content:center}
+.project-paper.paper-advanced-pro-02 .document-section{margin-bottom:9mm}
+.project-paper.paper-advanced-pro-02 .document-section h2{font-size:0.975em;border-bottom:2px solid var(--accent);padding:1mm 0 3mm;margin-bottom:3mm;break-after:avoid-page}
+.project-paper.paper-advanced-pro-02 .block-prose{line-height:1.695}
+@media print{.project-paper.paper-advanced-pro-02{padding:14mm 17mm 19mm!important}}
+
+.project-paper.paper-advanced-pro-03{padding:16mm 22mm 21mm;line-height:1.74}
+.project-paper.paper-advanced-pro-03 .document-heading{border:0;border-radius:0;background:transparent;margin:0 0 14mm;padding:5mm 6mm;box-shadow:none;text-align:right;border-top:6px solid var(--accent);border-bottom:2px solid #a5b4bc;background:#edf4f7}
+.project-paper.paper-advanced-pro-03 .document-heading h1{font-size:2.10em;line-height:1.26;margin:3mm 0 3mm;letter-spacing:-.04em}
+.project-paper.paper-advanced-pro-03 .document-meta{justify-content:flex-end}
+.project-paper.paper-advanced-pro-03 .document-section{margin-bottom:11mm}
+.project-paper.paper-advanced-pro-03 .document-section h2{font-size:1.030em;border-top:1px solid var(--accent);border-bottom:1px solid #c2cdd4;padding:3mm 0;margin-bottom:4mm;break-after:avoid-page}
+.project-paper.paper-advanced-pro-03 .block-prose{line-height:1.770}
+@media print{.project-paper.paper-advanced-pro-03{padding:16mm 22mm 21mm!important}}
+
+.project-paper.paper-advanced-pro-04{padding:18mm 14mm 23mm;line-height:1.81}
+.project-paper.paper-advanced-pro-04 .document-heading{border:0;border-radius:0;background:transparent;margin:0 0 16mm;padding:5mm 6mm;box-shadow:none;text-align:left;border-right:6px solid var(--accent);padding-right:9mm;background:#f5f5f1}
+.project-paper.paper-advanced-pro-04 .document-heading h1{font-size:2.30em;line-height:1.26;margin:3mm 0 3mm;letter-spacing:-.04em}
+.project-paper.paper-advanced-pro-04 .document-meta{justify-content:flex-start}
+.project-paper.paper-advanced-pro-04 .document-section{margin-bottom:13mm}
+.project-paper.paper-advanced-pro-04 .document-section h2{font-size:1.085em;border-right:4px solid var(--accent);padding:2mm 5mm 2mm 0;margin-bottom:5mm;break-after:avoid-page}
+.project-paper.paper-advanced-pro-04 .block-prose{line-height:1.845}
+@media print{.project-paper.paper-advanced-pro-04{padding:18mm 14mm 23mm!important}}
+
+.project-paper.paper-advanced-pro-05{padding:20mm 19mm 25mm;line-height:1.88}
+.project-paper.paper-advanced-pro-05 .document-heading{border:0;border-radius:0;background:transparent;margin:0 0 18mm;padding:5mm 6mm;box-shadow:none;text-align:right;border:1.5px solid #8fa2ac;border-radius:12px;background:#f3f7f9}
+.project-paper.paper-advanced-pro-05 .document-heading h1{font-size:2.50em;line-height:1.26;margin:3mm 0 3mm;letter-spacing:-.04em}
+.project-paper.paper-advanced-pro-05 .document-meta{justify-content:flex-end}
+.project-paper.paper-advanced-pro-05 .document-section{margin-bottom:15mm}
+.project-paper.paper-advanced-pro-05 .document-section h2{font-size:1.140em;border-left:4px solid var(--accent);padding:2mm 0 2mm 5mm;margin-bottom:2mm;break-after:avoid-page}
+.project-paper.paper-advanced-pro-05 .block-prose{line-height:1.920}
+@media print{.project-paper.paper-advanced-pro-05{padding:20mm 19mm 25mm!important}}
+
+.project-paper.paper-advanced-pro-06{padding:22mm 24mm 27mm;line-height:1.95}
+.project-paper.paper-advanced-pro-06 .document-heading{border:0;border-radius:0;background:transparent;margin:0 0 20mm;padding:5mm 6mm;box-shadow:none;text-align:left;border-bottom:6px solid var(--accent);padding-bottom:12mm;background:transparent}
+.project-paper.paper-advanced-pro-06 .document-heading h1{font-size:1.70em;line-height:1.26;margin:3mm 0 3mm;letter-spacing:-.04em}
+.project-paper.paper-advanced-pro-06 .document-meta{justify-content:flex-start}
+.project-paper.paper-advanced-pro-06 .document-section{margin-bottom:17mm}
+.project-paper.paper-advanced-pro-06 .document-section h2{font-size:0.920em;border-bottom:2px solid var(--accent);padding:1mm 0 3mm;margin-bottom:3mm;break-after:avoid-page}
+.project-paper.paper-advanced-pro-06 .block-prose{line-height:1.995}
+@media print{.project-paper.paper-advanced-pro-06{padding:22mm 24mm 27mm!important}}
+
+.project-paper.paper-advanced-pro-07{padding:24mm 16mm 29mm;line-height:2.02}
+.project-paper.paper-advanced-pro-07 .document-heading{border:0;border-radius:0;background:transparent;margin:0 0 10mm;padding:5mm 6mm;box-shadow:none;text-align:center;border-top:1px solid #8798a6;border-bottom:4px double var(--accent);padding-bottom:7mm}
+.project-paper.paper-advanced-pro-07 .document-heading h1{font-size:1.90em;line-height:1.26;margin:3mm 0 3mm;letter-spacing:-.04em}
+.project-paper.paper-advanced-pro-07 .document-meta{justify-content:center}
+.project-paper.paper-advanced-pro-07 .document-section{margin-bottom:7mm}
+.project-paper.paper-advanced-pro-07 .document-section h2{font-size:0.975em;border-top:1px solid var(--accent);border-bottom:1px solid #c2cdd4;padding:3mm 0;margin-bottom:4mm;break-after:avoid-page}
+.project-paper.paper-advanced-pro-07 .block-prose{line-height:1.620}
+@media print{.project-paper.paper-advanced-pro-07{padding:24mm 16mm 29mm!important}}
+
+.project-paper.paper-advanced-pro-08{padding:12mm 21mm 17mm;line-height:1.60}
+.project-paper.paper-advanced-pro-08 .document-heading{border:0;border-radius:0;background:transparent;margin:0 0 12mm;padding:5mm 6mm;box-shadow:none;text-align:right;border-left:12px solid #d1dce3;padding-left:12mm;border-bottom:1px solid var(--accent)}
+.project-paper.paper-advanced-pro-08 .document-heading h1{font-size:2.10em;line-height:1.26;margin:3mm 0 3mm;letter-spacing:-.04em}
+.project-paper.paper-advanced-pro-08 .document-meta{justify-content:flex-end}
+.project-paper.paper-advanced-pro-08 .document-section{margin-bottom:9mm}
+.project-paper.paper-advanced-pro-08 .document-section h2{font-size:1.030em;border-right:4px solid var(--accent);padding:2mm 5mm 2mm 0;margin-bottom:5mm;break-after:avoid-page}
+.project-paper.paper-advanced-pro-08 .block-prose{line-height:1.695}
+@media print{.project-paper.paper-advanced-pro-08{padding:12mm 21mm 17mm!important}}
+
+.project-paper.paper-advanced-pro-09{padding:14mm 13mm 19mm;line-height:1.67}
+.project-paper.paper-advanced-pro-09 .document-heading{border:0;border-radius:0;background:transparent;margin:0 0 14mm;padding:5mm 6mm;box-shadow:none;text-align:center;border-top:3px dotted var(--accent);border-bottom:1px solid #8c9da5;padding-top:5mm}
+.project-paper.paper-advanced-pro-09 .document-heading h1{font-size:2.30em;line-height:1.26;margin:3mm 0 3mm;letter-spacing:-.04em}
+.project-paper.paper-advanced-pro-09 .document-meta{justify-content:center}
+.project-paper.paper-advanced-pro-09 .document-section{margin-bottom:11mm}
+.project-paper.paper-advanced-pro-09 .document-section h2{font-size:1.085em;border-left:4px solid var(--accent);padding:2mm 0 2mm 5mm;margin-bottom:2mm;break-after:avoid-page}
+.project-paper.paper-advanced-pro-09 .block-prose{line-height:1.770}
+@media print{.project-paper.paper-advanced-pro-09{padding:14mm 13mm 19mm!important}}
+
+.project-paper.paper-advanced-pro-10{padding:16mm 18mm 21mm;line-height:1.74}
+.project-paper.paper-advanced-pro-10 .document-heading{border:0;border-radius:0;background:transparent;margin:0 0 16mm;padding:5mm 6mm;box-shadow:none;text-align:right;border-top:3px double var(--accent);border-bottom:3px double var(--accent);padding-top:8mm;padding-bottom:10mm}
+.project-paper.paper-advanced-pro-10 .document-heading h1{font-size:2.50em;line-height:1.26;margin:3mm 0 3mm;letter-spacing:-.04em}
+.project-paper.paper-advanced-pro-10 .document-meta{justify-content:flex-end}
+.project-paper.paper-advanced-pro-10 .document-section{margin-bottom:13mm}
+.project-paper.paper-advanced-pro-10 .document-section h2{font-size:1.140em;border-bottom:2px solid var(--accent);padding:1mm 0 3mm;margin-bottom:3mm;break-after:avoid-page}
+.project-paper.paper-advanced-pro-10 .block-prose{line-height:1.845}
+@media print{.project-paper.paper-advanced-pro-10{padding:16mm 18mm 21mm!important}}
+
+.project-paper.paper-advanced-pro-11{padding:18mm 23mm 23mm;line-height:1.81}
+.project-paper.paper-advanced-pro-11 .document-heading{border:0;border-radius:0;background:transparent;margin:0 0 18mm;padding:5mm 6mm;box-shadow:none;text-align:left;border-right:10px solid #dbe6ed;border-top:2px solid var(--accent);padding-right:10mm}
+.project-paper.paper-advanced-pro-11 .document-heading h1{font-size:1.70em;line-height:1.26;margin:3mm 0 3mm;letter-spacing:-.04em}
+.project-paper.paper-advanced-pro-11 .document-meta{justify-content:flex-start}
+.project-paper.paper-advanced-pro-11 .document-section{margin-bottom:15mm}
+.project-paper.paper-advanced-pro-11 .document-section h2{font-size:0.920em;border-top:1px solid var(--accent);border-bottom:1px solid #c2cdd4;padding:3mm 0;margin-bottom:4mm;break-after:avoid-page}
+.project-paper.paper-advanced-pro-11 .block-prose{line-height:1.920}
+@media print{.project-paper.paper-advanced-pro-11{padding:18mm 23mm 23mm!important}}
+
+.project-paper.paper-advanced-pro-12{padding:20mm 15mm 25mm;line-height:1.88}
+.project-paper.paper-advanced-pro-12 .document-heading{border:0;border-radius:0;background:transparent;margin:0 0 20mm;padding:5mm 6mm;box-shadow:none;text-align:center;border:2px solid var(--accent);border-left-width:7px;background:#f5f8fa}
+.project-paper.paper-advanced-pro-12 .document-heading h1{font-size:1.90em;line-height:1.26;margin:3mm 0 3mm;letter-spacing:-.04em}
+.project-paper.paper-advanced-pro-12 .document-meta{justify-content:center}
+.project-paper.paper-advanced-pro-12 .document-section{margin-bottom:17mm}
+.project-paper.paper-advanced-pro-12 .document-section h2{font-size:0.975em;border-right:4px solid var(--accent);padding:2mm 5mm 2mm 0;margin-bottom:5mm;break-after:avoid-page}
+.project-paper.paper-advanced-pro-12 .block-prose{line-height:1.995}
+@media print{.project-paper.paper-advanced-pro-12{padding:20mm 15mm 25mm!important}}
+
+.project-paper.paper-advanced-business-01{padding:22mm 20mm 27mm;line-height:1.95}
+.project-paper.paper-advanced-business-01 .document-heading{border:0;border-radius:0;background:transparent;margin:0 0 10mm;padding:5mm 6mm;box-shadow:none;text-align:left;border-left:7px solid var(--accent);padding-left:9mm;background:#f8fafb}
+.project-paper.paper-advanced-business-01 .document-heading h1{font-size:2.10em;line-height:1.26;margin:3mm 0 3mm;letter-spacing:-.04em}
+.project-paper.paper-advanced-business-01 .document-meta{justify-content:flex-start}
+.project-paper.paper-advanced-business-01 .document-section{margin-bottom:7mm}
+.project-paper.paper-advanced-business-01 .document-section h2{font-size:1.030em;border-left:4px solid var(--accent);padding:2mm 0 2mm 5mm;margin-bottom:2mm;break-after:avoid-page}
+.project-paper.paper-advanced-business-01 .block-prose{line-height:1.620}
+@media print{.project-paper.paper-advanced-business-01{padding:22mm 20mm 27mm!important}}
+
+.project-paper.paper-advanced-business-02{padding:24mm 12mm 29mm;line-height:2.02}
+.project-paper.paper-advanced-business-02 .document-heading{border:0;border-radius:0;background:transparent;margin:0 0 12mm;padding:5mm 6mm;box-shadow:none;text-align:center;border-top:6px solid var(--accent);border-bottom:2px solid #a5b4bc;background:#edf4f7}
+.project-paper.paper-advanced-business-02 .document-heading h1{font-size:2.30em;line-height:1.26;margin:3mm 0 3mm;letter-spacing:-.04em}
+.project-paper.paper-advanced-business-02 .document-meta{justify-content:center}
+.project-paper.paper-advanced-business-02 .document-section{margin-bottom:9mm}
+.project-paper.paper-advanced-business-02 .document-section h2{font-size:1.085em;border-bottom:2px solid var(--accent);padding:1mm 0 3mm;margin-bottom:3mm;break-after:avoid-page}
+.project-paper.paper-advanced-business-02 .block-prose{line-height:1.695}
+@media print{.project-paper.paper-advanced-business-02{padding:24mm 12mm 29mm!important}}
+
+.project-paper.paper-advanced-business-03{padding:12mm 17mm 17mm;line-height:1.60}
+.project-paper.paper-advanced-business-03 .document-heading{border:0;border-radius:0;background:transparent;margin:0 0 14mm;padding:5mm 6mm;box-shadow:none;text-align:right;border-right:6px solid var(--accent);padding-right:9mm;background:#f5f5f1}
+.project-paper.paper-advanced-business-03 .document-heading h1{font-size:2.50em;line-height:1.26;margin:3mm 0 3mm;letter-spacing:-.04em}
+.project-paper.paper-advanced-business-03 .document-meta{justify-content:flex-end}
+.project-paper.paper-advanced-business-03 .document-section{margin-bottom:11mm}
+.project-paper.paper-advanced-business-03 .document-section h2{font-size:1.140em;border-top:1px solid var(--accent);border-bottom:1px solid #c2cdd4;padding:3mm 0;margin-bottom:4mm;break-after:avoid-page}
+.project-paper.paper-advanced-business-03 .block-prose{line-height:1.770}
+@media print{.project-paper.paper-advanced-business-03{padding:12mm 17mm 17mm!important}}
+
+.project-paper.paper-advanced-business-04{padding:14mm 22mm 19mm;line-height:1.67}
+.project-paper.paper-advanced-business-04 .document-heading{border:0;border-radius:0;background:transparent;margin:0 0 16mm;padding:5mm 6mm;box-shadow:none;text-align:left;border:1.5px solid #8fa2ac;border-radius:12px;background:#f3f7f9}
+.project-paper.paper-advanced-business-04 .document-heading h1{font-size:1.70em;line-height:1.26;margin:3mm 0 3mm;letter-spacing:-.04em}
+.project-paper.paper-advanced-business-04 .document-meta{justify-content:flex-start}
+.project-paper.paper-advanced-business-04 .document-section{margin-bottom:13mm}
+.project-paper.paper-advanced-business-04 .document-section h2{font-size:0.920em;border-right:4px solid var(--accent);padding:2mm 5mm 2mm 0;margin-bottom:5mm;break-after:avoid-page}
+.project-paper.paper-advanced-business-04 .block-prose{line-height:1.845}
+@media print{.project-paper.paper-advanced-business-04{padding:14mm 22mm 19mm!important}}
+
+.project-paper.paper-advanced-business-05{padding:16mm 14mm 21mm;line-height:1.74}
+.project-paper.paper-advanced-business-05 .document-heading{border:0;border-radius:0;background:transparent;margin:0 0 18mm;padding:5mm 6mm;box-shadow:none;text-align:right;border-bottom:6px solid var(--accent);padding-bottom:12mm;background:transparent}
+.project-paper.paper-advanced-business-05 .document-heading h1{font-size:1.90em;line-height:1.26;margin:3mm 0 3mm;letter-spacing:-.04em}
+.project-paper.paper-advanced-business-05 .document-meta{justify-content:flex-end}
+.project-paper.paper-advanced-business-05 .document-section{margin-bottom:15mm}
+.project-paper.paper-advanced-business-05 .document-section h2{font-size:0.975em;border-left:4px solid var(--accent);padding:2mm 0 2mm 5mm;margin-bottom:2mm;break-after:avoid-page}
+.project-paper.paper-advanced-business-05 .block-prose{line-height:1.920}
+@media print{.project-paper.paper-advanced-business-05{padding:16mm 14mm 21mm!important}}
+
+.project-paper.paper-advanced-business-06{padding:18mm 19mm 23mm;line-height:1.81}
+.project-paper.paper-advanced-business-06 .document-heading{border:0;border-radius:0;background:transparent;margin:0 0 20mm;padding:5mm 6mm;box-shadow:none;text-align:left;border-top:1px solid #8798a6;border-bottom:4px double var(--accent);padding-bottom:7mm}
+.project-paper.paper-advanced-business-06 .document-heading h1{font-size:2.10em;line-height:1.26;margin:3mm 0 3mm;letter-spacing:-.04em}
+.project-paper.paper-advanced-business-06 .document-meta{justify-content:flex-start}
+.project-paper.paper-advanced-business-06 .document-section{margin-bottom:17mm}
+.project-paper.paper-advanced-business-06 .document-section h2{font-size:1.030em;border-bottom:2px solid var(--accent);padding:1mm 0 3mm;margin-bottom:3mm;break-after:avoid-page}
+.project-paper.paper-advanced-business-06 .block-prose{line-height:1.995}
+@media print{.project-paper.paper-advanced-business-06{padding:18mm 19mm 23mm!important}}
+
+.project-paper.paper-advanced-business-07{padding:20mm 24mm 25mm;line-height:1.88}
+.project-paper.paper-advanced-business-07 .document-heading{border:0;border-radius:0;background:transparent;margin:0 0 10mm;padding:5mm 6mm;box-shadow:none;text-align:center;border-left:12px solid #d1dce3;padding-left:12mm;border-bottom:1px solid var(--accent)}
+.project-paper.paper-advanced-business-07 .document-heading h1{font-size:2.30em;line-height:1.26;margin:3mm 0 3mm;letter-spacing:-.04em}
+.project-paper.paper-advanced-business-07 .document-meta{justify-content:center}
+.project-paper.paper-advanced-business-07 .document-section{margin-bottom:7mm}
+.project-paper.paper-advanced-business-07 .document-section h2{font-size:1.085em;border-top:1px solid var(--accent);border-bottom:1px solid #c2cdd4;padding:3mm 0;margin-bottom:4mm;break-after:avoid-page}
+.project-paper.paper-advanced-business-07 .block-prose{line-height:1.620}
+@media print{.project-paper.paper-advanced-business-07{padding:20mm 24mm 25mm!important}}
+
+.project-paper.paper-advanced-business-08{padding:22mm 16mm 27mm;line-height:1.95}
+.project-paper.paper-advanced-business-08 .document-heading{border:0;border-radius:0;background:transparent;margin:0 0 12mm;padding:5mm 6mm;box-shadow:none;text-align:right;border-top:3px dotted var(--accent);border-bottom:1px solid #8c9da5;padding-top:5mm}
+.project-paper.paper-advanced-business-08 .document-heading h1{font-size:2.50em;line-height:1.26;margin:3mm 0 3mm;letter-spacing:-.04em}
+.project-paper.paper-advanced-business-08 .document-meta{justify-content:flex-end}
+.project-paper.paper-advanced-business-08 .document-section{margin-bottom:9mm}
+.project-paper.paper-advanced-business-08 .document-section h2{font-size:1.140em;border-right:4px solid var(--accent);padding:2mm 5mm 2mm 0;margin-bottom:5mm;break-after:avoid-page}
+.project-paper.paper-advanced-business-08 .block-prose{line-height:1.695}
+@media print{.project-paper.paper-advanced-business-08{padding:22mm 16mm 27mm!important}}
+
+.project-paper.paper-advanced-business-09{padding:24mm 21mm 29mm;line-height:2.02}
+.project-paper.paper-advanced-business-09 .document-heading{border:0;border-radius:0;background:transparent;margin:0 0 14mm;padding:5mm 6mm;box-shadow:none;text-align:center;border-top:3px double var(--accent);border-bottom:3px double var(--accent);padding-top:8mm;padding-bottom:10mm}
+.project-paper.paper-advanced-business-09 .document-heading h1{font-size:1.70em;line-height:1.26;margin:3mm 0 3mm;letter-spacing:-.04em}
+.project-paper.paper-advanced-business-09 .document-meta{justify-content:center}
+.project-paper.paper-advanced-business-09 .document-section{margin-bottom:11mm}
+.project-paper.paper-advanced-business-09 .document-section h2{font-size:0.920em;border-left:4px solid var(--accent);padding:2mm 0 2mm 5mm;margin-bottom:2mm;break-after:avoid-page}
+.project-paper.paper-advanced-business-09 .block-prose{line-height:1.770}
+@media print{.project-paper.paper-advanced-business-09{padding:24mm 21mm 29mm!important}}
+
+.project-paper.paper-advanced-business-10{padding:12mm 13mm 17mm;line-height:1.60}
+.project-paper.paper-advanced-business-10 .document-heading{border:0;border-radius:0;background:transparent;margin:0 0 16mm;padding:5mm 6mm;box-shadow:none;text-align:right;border-right:10px solid #dbe6ed;border-top:2px solid var(--accent);padding-right:10mm}
+.project-paper.paper-advanced-business-10 .document-heading h1{font-size:1.90em;line-height:1.26;margin:3mm 0 3mm;letter-spacing:-.04em}
+.project-paper.paper-advanced-business-10 .document-meta{justify-content:flex-end}
+.project-paper.paper-advanced-business-10 .document-section{margin-bottom:13mm}
+.project-paper.paper-advanced-business-10 .document-section h2{font-size:0.975em;border-bottom:2px solid var(--accent);padding:1mm 0 3mm;margin-bottom:3mm;break-after:avoid-page}
+.project-paper.paper-advanced-business-10 .block-prose{line-height:1.845}
+@media print{.project-paper.paper-advanced-business-10{padding:12mm 13mm 17mm!important}}
+
+.advanced-layout-preview-note{margin-top:9px;padding:10px;border:1px solid #a3b9c5;border-radius:8px;background:#f4f8fa;font-size:12px;line-height:1.5}
+.advanced-layout-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.advanced-layout-grid button{font-size:11px;padding:7px 5px;border:1px solid #d7e0e7;border-radius:6px;background:#fff}
+.advanced-layout-grid button[aria-pressed="true"]{border:2px solid #3e738a;background:#e9f3f7;font-weight:bold}
+@media print{.advanced-layout-panel{display:none!important}}
