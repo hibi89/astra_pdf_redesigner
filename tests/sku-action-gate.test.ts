@@ -32,3 +32,14 @@ test('P109 existing preview callbacks retain operation and output behavior',asyn
  assert.equal(await runSkuGatedAction(['business-layout','brand-kit'],'',()=>{calls++;return 'preview';}),'preview');
  assert.equal(calls,1);
 });
+
+test('P117 forged receipt cannot authorize BUSINESS branded PDF side effects',async()=>{
+ let calls=0;
+ await assert.rejects(
+  runCustomerLicensedAction(['business-layout','brand-kit'],'forged:business-brand',()=>{calls++;return 'saved';}),
+  SkuAccessDeniedError,
+ );
+ assert.equal(calls,0);
+ assert.equal(ASTRA_CUSTOMER_BUILD_ENABLED,false,
+  'the internal preview must remain distinct from a sellable customer build');
+});

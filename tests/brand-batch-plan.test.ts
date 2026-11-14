@@ -33,3 +33,19 @@ test('P112 never upgrades corrupt/invalid kit metadata to a saved V2 document',(
  assert.equal(original.name,'테스트 회사');
  assert.equal(plan[ids[1]].kit.name,'테스트 회사');
 });
+
+test('P117 creates exact isolated 2, 5 and 20 document plans',()=>{
+ const known=Array.from({length:21},(_,i)=>'p117-doc-'+String(i).padStart(2,'0'));
+ for(const count of [2,5,20]){
+  const selected=known.slice(0,count);
+  const plan=makeBrandBatchPlan(known,selected,'business-01',brand);
+  assert.deepEqual(Object.keys(plan),selected);
+  assert.equal(Object.keys(plan).length,count);
+  for(const id of selected){
+   assert.equal(plan[id].layoutId,'business-01');
+   assert.deepEqual(plan[id].kit,brand);
+  }
+  assert.deepEqual(known.filter(id=>!selected.includes(id)).filter(id=>id in plan),[],
+   'unselected documents must never enter the current plan');
+ }
+});

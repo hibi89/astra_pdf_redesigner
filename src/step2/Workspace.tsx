@@ -658,7 +658,7 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
               disabled={!editable||!businessActive||!brandApplied||brandBatchIds.length<2||brandBatchIds.length>20}
               onClick={()=>guarded(['business-layout','brand-kit'],()=>{
                try{const plan=makeBrandBatchPlan(w.documents.map(item=>item.id),brandBatchIds,activeAdvancedLayoutId!,brandApplied!);
-                setBrandBatchPlan(old=>({...old,...plan}));setBrandBatchStatus('일괄 적용 '+Object.keys(plan).length+'건 · 문서를 열어 개별 PDF 저장하세요.');}
+                setBrandBatchPlan(plan);setBrandBatchStatus('일괄 적용 '+Object.keys(plan).length+'건 · 문서를 열어 개별 PDF 저장하세요.');}
                catch(e){setBrandBatchStatus(e instanceof Error?e.message:'브랜드 일괄 적용 불가');}
               })}>선택 문서에 브랜드 일괄 적용</button>
              <button className="text-button" type="button" data-business-batch-clear disabled={!Object.keys(brandBatchPlan).length}
