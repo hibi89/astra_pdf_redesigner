@@ -1,3 +1,16 @@
+## 2026-11-14 KST — P92 CI 종료 확정 인수요약 (10항)
+
+1. **목표·기술:** 원래 STEP1~7·BASIC8/PRO20/BUSINESS30 전체 100% 최종설계, 무료 로컬 React/TypeScript/Electron/PDF.js.
+2. **변경·선택:** P91 옵트인 외부 이미지 검색 링크, P92 22종 고급 임시 시안 JSON 레이아웃 ID만 수동 저장/재사용, 원본 내용·IDB V2 스키마 불변.
+3. **정확 SHA 테스트:** `b8b29bc13fe09a7220ed47b5139e5f41c3e5140f` [Linux #43547702092](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43547702092) **2/2 SUCCESS, Node163 PASS/0 FAIL, Chrome+Edge, TS/Vite build 및 A4 인쇄**; [Win #43547702089](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43547702089) **SUCCESS, Node162 PASS/0 FAIL/OS 1SKIP, desktop16/16, NSIS install/uninstall/upgrade/V2 유지**; [policy #43547702386](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43547702386) SUCCESS. 실제 고객PC·고객 PDF는 수행하지 않음.
+4. **완료/대기:** 2개 기능 추가·기존 회귀 검증 완료. STEP6 실제 검색 결과 수집, STEP7 OCR, 실 GGUF, 정식 3 SKU 저장/권한/브랜드/배치, 고객·권리·판매 검증 미달. 공식 UNASSESSED, P100 미달, RELEASE HOLD.
+5. **문제·전환·재시도:** 무료 수동 검색/휴대용 파일로 외부 PDF·유료 API·영구 DB migration 위험 회피. 정규식/스키마 부정 입력 PASS; 미검증은 고객 인수·상용성이지 새 CI failure 아님.
+6. **Repo/브랜치/SHA:** `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`; 기능 SHA `b8b29bc1`, 직전 문서 SHA `cfb5bcdcf7f3`, 본 문서 HEAD는 커밋 후 조회. 핵심 `src/step4/advancedLayoutPreset.ts`, `src/step6/*`, `tests/*preset*.test.ts`, browser tests.
+7. **배포·환경:** GitHub Actions hosted Ubuntu Chrome/Edge+Windows NSIS; Vercel/Production 미적용, 사용자 물리 Win10/11 미검증.
+8. **원본·보안·복구:** main/PR10·STEP1 v1/STEP2 IDB V2·고객PDF/모델/토큰 불변, parent SHA 기반 revert 가능. 고객 자료 업로드·무단 다운로드/상용 배포 금지.
+9. **다음 우선순위·승인:** 13:00 기존 통합 사용자 알림에서 물리PC/5~10 실문서/모델·OCR 무료 설치/폰트·권리 일괄 안내; AI는 이후 OCR/정식 저장/브랜드 배치 구현·품질/권리 검증. 판매/병합/유료 결제 별도 소유자 GO 필요.
+10. **검증 시각·범위:** 2026-11-14 KST, GitHub 3개 Actions job verdict 및 실제 raw 로그에 근거. 전체100%/크몽 등록 미달 상태 보존.
+
 ## 2026-11-14 KST — P92 STEP4 고급 시안 휴대용 파일 (10항)
 
 1. **목표/요구/기술:** 사용자 확정 7단계 전체·BASIC8/PRO20/BUSINESS30 100%, 0원 로컬 앱. React/TypeScript/Vite/Electron/PDF.js, 판매·실모델 별도 승인.

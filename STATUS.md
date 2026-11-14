@@ -1,3 +1,10 @@
+## 2026-11-14 KST — P92 정확 기능 SHA 전체 CI 3/3 SUCCESS (최신 검증)
+
+- 소스/테스트 SHA **`b8b29bc13fe09a7220ed47b5139e5f41c3e5140f`**: [Linux Chrome+Edge #43547702092](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43547702092) **2/2 SUCCESS**. 실제 GitHub build/test 로그 Node22 **163/163 PASS, 0 FAIL**, TypeScript/Vite build PASS; Chrome/Edge 브라우저 STEP5·STEP6 동의 후만 검색 링크·STEP4 22시안 JSON 내보내기/가져오기·데이터 불변·실제 A4 PDF 회귀 통과.
+- [Windows NSIS #43547702089](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43547702089) **SUCCESS**, Node **162 PASS/0 FAIL**(+OS 차이 1SKIP), desktop test **16/16 PASS**, unsigned NSIS 설치·바로가기·제거·0.1.0→0.1.1 업그레이드 및 기존 V2 문서·PNG 유지 PASS. [최종설계 증거정책 #43547702386](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43547702386) SUCCESS는 정본 evidence policy 판정.
+- 기능 검증 3개 워크플로가 모두 녹색이지만 테스트는 합성/runner 기준이며 **원본7단계+상용 SKU 최종 100%는 미달**. 실제 Win10·11 물리 사용·허가 PDF5~10건의 사람 육안 인수·OCR 실동작/한국어 GGUF 추론 품질·폰트/모델 재배포·정식 PRO20/BUSINESS30 영구 라이브러리/entitlement·브랜드/배치·최종 판매/지원/환불 승인 미충족. STEP6은 외부 검색수집이 아닌 사용자 수동 검색 링크임.
+- 공식 `UNASSESSED`/[작업중]/RELEASE HOLD/미등록/Production 미적용 유지. 사용자 13시 일괄 PC/권리 검수 안내 `docs/commercial/ASTRA_OWNER_1300_CHECKLIST_20261114.md`. GitHub 문서 HEAD는 이번 반영 뒤 재확인; **정확 기능 증거는 `b8b29bc1`**. 기존 원본·DB V2·PR10/main 손대지 않음.
+
 ## 2026-11-14 KST — P92 고급 레이아웃 22종 휴대용 JSON 재사용 구현
 
 - P92 **소스 SHA `b8b29bc13fe09a7220ed47b5139e5f41c3e5140f`**: `src/step4/advancedLayoutPreset.ts`의 22종 고급 ID만 JSON `astra-advanced-layout`/version1으로 안전 내보내기·재불러오기. 1KiB 상한·스키마 키 정확 검사·유효 ID 체크·불량/임의 추가 필드 거부. `Workspace.tsx`에 UI 통합 및 브라우저 V2 저장 불변 회귀 추가, 데이터베이스 스키마 마이그레이션·PDF/에셋 직렬화·원본 수정 없음.
