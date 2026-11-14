@@ -13,7 +13,8 @@ function fakePe(machine=0x8664){
  const out=Buffer.alloc(512);
  out.write('MZ',0,'ascii');out.writeUInt32LE(0x80,0x3c);
  out.write('PE\0\0',0x80,'ascii');out.writeUInt16LE(machine,0x84);
- out.writeUInt16LE(0x20b,0x98);
+ out.writeUInt16LE(240,0x94);out.writeUInt16LE(0x20b,0x98);
+ out.writeUInt32LE(0x200,0x98+60);out.writeUInt32LE(16,0x98+108);
  return out;
 }
 function fixture(){

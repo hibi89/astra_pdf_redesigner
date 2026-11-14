@@ -5,6 +5,7 @@ const fs=require('node:fs');
 const fsp=require('node:fs/promises');
 const path=require('node:path');
 const crypto=require('node:crypto');
+const {inspectPeStaticImports,verifyPeImportClosure,MAX_PE_BYTES}=require('./ocr-pe-import-audit.cjs');
 
 const SHA=/^[0-9a-f]{64}$/;
 const ID=/^[a-z0-9][a-z0-9._-]{1,63}$/;
@@ -134,12 +135,16 @@ async function hashFile(file,expected){
   const before=await opened.stat();
   if(!before.isFile()||before.nlink>1||before.size!==expected.bytes)
    fail('asset-size-mismatch');
+  const peAsset=['engine','dependency'].includes(expected.kind);
+  if(peAsset&&expected.bytes>MAX_PE_BYTES)fail('pe-image-too-large-for-static-import-audit');
+  const peChunks=peAsset?[]:null;
   const sha=crypto.createHash('sha256');
   let counted=0;
   const header=Buffer.alloc(4096);let headerSize=0;
   const stream=opened.createReadStream({autoClose:false,highWaterMark:64*1024});
   for await(const chunk of stream){
    sha.update(chunk);counted+=chunk.length;
+   if(peChunks)peChunks.push(chunk);
    if(headerSize<header.length){
     const n=Math.min(header.length-headerSize,chunk.length);
     chunk.copy(header,headerSize,0,n);headerSize+=n;
@@ -153,10 +158,12 @@ async function hashFile(file,expected){
   if(sha.digest('hex')!==expected.sha256)fail('asset-sha256-mismatch');
   if(['engine','dependency'].includes(expected.kind))
    verifyPeHeader(header.subarray(0,headerSize));
+  const imports=peChunks?inspectPeStaticImports(Buffer.concat(peChunks)):null;
   if(['license','notice'].includes(expected.kind)){
    const text=await fsp.readFile(file,'utf8');
    if(text.includes('\ufffd')||text.trim().length<24)fail('license-or-notice-invalid');
   }
+  return imports;
  }finally{await opened.close().catch(()=>{});}
 }
 async function auditOcrWindowsBundle(bundlePath,manifestPath){
@@ -174,21 +181,25 @@ async function auditOcrWindowsBundle(bundlePath,manifestPath){
  const observed=await enumerate(bundle);
  if(observed.length!==audit.fileCount)fail('unlisted-or-missing-asset');
  const observedLower=new Set();
+ const peEvidence=new Map();
  for(const relative of observed){
   const key=relative.toLowerCase();
   if(observedLower.has(key))fail('duplicate-asset');
   observedLower.add(key);
   const expected=audit.byName.get(key);
   if(!expected||relative!==expected.path)fail('unlisted-or-case-mismatched-asset');
-  await hashFile(path.join(bundle,...relative.split('/')),expected);
+  const imports=await hashFile(path.join(bundle,...relative.split('/')),expected);
+  if(imports)peEvidence.set(relative,imports);
  }
  for(const key of audit.byName.keys()){
   if(!observedLower.has(key))fail('unlisted-or-missing-asset');
  }
+ const importEvidence=verifyPeImportClosure(peEvidence,audit.byName);
  return Object.freeze({
   status:'review-required',platform:'windows-x64',assetCount:audit.fileCount,
   dllCount:audit.dependencyCount,licenseEvidenceCount:audit.licenseCount,
   totalVerifiedBytes:audit.totalDeclared,hashesVerified:true,
+  staticPeImportsInspected:true,...importEvidence,
   legalRedistributionApproved:false,installerSignatureVerified:false,
   dllRuntimeDependencyClosureVerified:false,productOcrEnabled:false,
  });
