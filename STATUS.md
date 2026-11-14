@@ -1,3 +1,11 @@
+## 2026-11-14 KST — P101 OCR 입력 검증 강화 + 정확 원격 Blob 로컬 7/7 PASS
+
+- P101 기능/테스트 최신 정확 소스 SHA **d6dcf80bc024c2a36ab40738cbed1d7b28e4711f** (feature/astra-p71-pdf-source-parity-20261112). src/step7/ocrEligibility.ts로 선택 가능한 원본 텍스트가 있는 페이지를 OCR에서 제외(스캔/비선택 텍스트만 제안); LocalOcrPanel.tsx에 실제 PDF.js getTextContent() 검사 후 차단. PDF 추출/기존 V1/V2 저장 데이터 변경 없음.
+- desktop/local-ocr-controller.cjs의 이전 IHDR-only 입력 검사를 PNG 전체 청크 길이·CRC32·IDAT/IEND 유무·메모리 상한 검증으로 강화했다. 유효한 로컬 PNG 4x4 및 손상된 CRC 합성 fixture로 부정 검사. 실제 OCR 실행 바이너리는 **여전히 미번들/OCR_MANIFEST=null**.
+- **실제 로컬 단위 검증:** Node.js 22.16.0 동일 소스 격리 복사본 컨트롤러/eligibility 7 PASS / 0 FAIL / 0 SKIP. 파일 내용 Git Blob SHA: OCR controller **ebfce5b831dfb4c73310ab4f6fced876664bc8d0**, OCR controller test **f7b448e05cba48ff3a3f24be106153ced9f6b735**, eligibility **11bdc9383fdad6b048fcbcb43ae6af4c045f5c31**, eligibility test **a26b1e0e6cc5c5891f780806da1e3e6e6f05d5f9**. Github 원격 내용 일치 확인. eligibility strict TypeScript 검사 PASS.
+- **미검증:** 전체 npm test/build/Chrome·Edge/Windows Electron·NSIS exact SHA CI 결과(연결 도구로 조회 불가), 실제 OCR 한영 스캔 인식 20종·Tesseract 바이너리 kor+eng/NOTICE/재배포권·실 Windows10/11·허가 실 PDF5~10건/상품 인수. 전체 공식 최종설계 **UNASSESSED/100% 미달**, [작업중], RELEASE HOLD, 크몽 미등록.
+- 인수인계: HANDOFF.md, docs/commercial/ASTRA_P101_LOCAL_OCR_DEVELOPMENT_20261114.md. 다음은 정확 SHA CI 확인·최소수정 → 검증된 Tesseract 공급원/실인식 E2E → 수용 조건 증거 기반 재산정.
+
 ## 2026-11-14 KST — P101 로컬 OCR 백엔드·STEP7 화면 연결 (신규 검증 대기)
 
 - 사용자 승인된 0원 OCR 개발 범위에서 독립 Tesseract 실행 컨트롤러, PNG 8MiB/8MP 가드, kor/eng 및 바이너리 SHA256 검증, 단일 실행/취소/20초 타임아웃, 임시파일 비공개·삭제, Electron 신뢰 IPC, 스캔 PDF 한 페이지 미승인 OCR 초안 UI를 추가했다. GitHub 최신 작성 코드 커밋 **deeb1ed94a00cb25cfc1efafcf8e33fab1f9847b**(문서 전 마지막 소스 SHA). 
