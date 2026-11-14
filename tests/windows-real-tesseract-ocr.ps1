@@ -58,8 +58,11 @@ try {
   if (Test-Path -LiteralPath $installRoot) { throw 'REFUSE_TO_OVERWRITE_TEMP_INSTALL_ROOT' }
   $proc = Start-Process -FilePath $installerPath -ArgumentList @('/S', "/D=$installRoot") -Wait -PassThru
   if ($proc.ExitCode -ne 0) { throw "TESSERACT_INSTALLER_EXIT_$($proc.ExitCode)" }
-  $engine = Join-Path $installRoot 'bin/tesseract.exe'
-  if (!(Test-Path -LiteralPath $engine -PathType Leaf)) { throw 'TESSERACT_ENGINE_MISSING_AFTER_INSTALL' }
+  $engines = @(Get-ChildItem -LiteralPath $installRoot -Filter 'tesseract.exe' -File -Recurse)
+  if ($engines.Count -ne 1) { throw "EXPECTED_ONE_TESSERACT_ENGINE_FOUND_$($engines.Count)" }
+  $engine = $engines[0].FullName
+  $installRoot = $engines[0].DirectoryName
+  $dataRoot = Join-Path $installRoot 'tessdata'
   New-Item -ItemType Directory -Path $dataRoot -Force | Out-Null
 
   foreach ($lang in @('eng','kor')) {
@@ -133,13 +136,13 @@ try {
   }
   $state.ocr_results = $results
   $state.license_file_names = @(Get-ChildItem -LiteralPath $installRoot -Recurse -File -ErrorAction SilentlyContinue | Where-Object { $_.Name -match 'LICENSE|NOTICE|COPYING|AUTHORS' } | ForEach-Object { $_.FullName.Substring($installRoot.Length + 1).Replace('\','/') })
-  $state.runtime_files = @(Get-ChildItem -LiteralPath (Join-Path $installRoot 'bin') -File | Where-Object { $_.Extension -in @('.exe','.dll') } | ForEach-Object {
+  $state.runtime_files = @(Get-ChildItem -LiteralPath $installRoot -File | Where-Object { $_.Extension -in @('.exe','.dll') } | ForEach-Object {
     $s = Get-AuthenticodeSignature -LiteralPath $_.FullName
     [ordered]@{ path = $_.Name; bytes = $_.Length; sha256 = (Get-FileHash -LiteralPath $_.FullName -Algorithm SHA256).Hash.ToLowerInvariant(); authenticode = [string]$s.Status; signer = if ($s.SignerCertificate) { [string]$s.SignerCertificate.Subject } else { $null } }
   })
   $auditPath = Join-Path (Split-Path -Parent $PSScriptRoot) 'scripts/audit-tesseract-installed-pe.cjs'
   try {
-    $nodeOut = & node $auditPath (Join-Path $installRoot 'bin')
+    $nodeOut = & node $auditPath ($installRoot)
     if ($LASTEXITCODE -ne 0) { throw 'STATIC_IMPORT_CHECK_EXIT' }
     $state.import_closure = ($nodeOut -join ([Environment]::NewLine)) | ConvertFrom-Json
   } catch {
@@ -150,9 +153,11 @@ try {
   Write-Host "PASS P120: actual Tesseract $($state.version_output[0]); $($results.Count) synthetic Korean kor+eng cases executed; exact=$(@($results | Where-Object exact).Count); mismatch=$(@($results | Where-Object { !$_.exact }).Count)"
   Write-Host "P119 OBSERVED installer Authenticode=$($state.installer_signature.status); release SHA256=$hash; product OCR remains disabled"
   Write-Host "P119/P120 REPORT: $reportPath"
+  Write-Host (($state | ConvertTo-Json -Depth 12 -Compress))
 } catch {
   $state.status = 'FAILED'
   $state.error = $_.Exception.Message
   Save-Report
+  Write-Host (($state | ConvertTo-Json -Depth 12 -Compress))
   throw
 }
