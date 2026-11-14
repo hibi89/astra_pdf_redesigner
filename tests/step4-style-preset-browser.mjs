@@ -97,6 +97,11 @@ try{
  assert.equal(await evaluate("Boolean(document.querySelector('[data-style-preset-preview]'))"),false);
  assert.deepEqual(await evaluate(stored),restored,'Tampered preset must not modify the document after completed apply/undo');
 
+ const stableMatrixBefore=await eventually(async()=>{const first=await evaluate(stored);await pause(550);const second=await evaluate(stored);return{first,second}},value=>Boolean(value.first?.id&&JSON.stringify(value.first)===JSON.stringify(value.second)));
+ const matrixBefore=stableMatrixBefore.second;
+ assert.deepEqual(matrixBefore.content,before.content,'existing portable preset apply/undo must restore all source content');
+ assert.deepEqual(matrixBefore.design,before.design,'existing portable preset apply/undo must restore the original design');
+ const fullV2MatrixBefore=await evaluate(fullV2Snapshot);
  const geometry=[];
  const layoutSignature=()=>evaluate("(()=>{const p=document.querySelector('.project-paper'),h=p.querySelector('.document-heading'),s=p.querySelector('.document-section'),sh=s?.querySelector('h2'),b=p.querySelector('.block-prose');const a=getComputedStyle(p),c=getComputedStyle(h),d=s&&getComputedStyle(s),e=sh&&getComputedStyle(sh),f=b&&getComputedStyle(b);return{paper:[a.paddingTop,a.paddingRight,a.paddingBottom,a.paddingLeft,a.lineHeight],title:[c.textAlign,c.fontSize,c.lineHeight,c.marginTop,c.marginBottom,c.paddingTop,c.paddingRight,c.paddingBottom,c.paddingLeft,c.borderTopWidth,c.borderRightWidth,c.borderBottomWidth,c.borderLeftWidth],section:[d?.marginBottom,d?.paddingTop,d?.paddingRight,d?.paddingBottom,d?.paddingLeft,e?.fontSize,e?.textAlign,e?.lineHeight,e?.marginBottom,e?.paddingTop,e?.paddingRight,e?.paddingBottom,e?.paddingLeft,e?.borderTopWidth,e?.borderRightWidth,e?.borderBottomWidth,e?.borderLeftWidth],body:[f?.fontSize,f?.lineHeight]}})()");
  const auditLayout=async id=>{
@@ -172,8 +177,8 @@ try{
   geometry.push(JSON.stringify(await layoutSignature())+measured.pdfGeometry);
  }
  assert.equal(new Set(geometry).size,30,'All eight BASIC and 22 PRO/BUSINESS PDFs must have distinct structural signatures; color-only variants do not count');
- assert.deepEqual(await evaluate(stored),before,'Thirty real PDF previews cannot modify V2 document content or design');
- assert.deepEqual(await evaluate(fullV2Snapshot),fullV2Before,'Thirty previews must preserve every V2 store and the exact source PNG bytes');
+ assert.deepEqual(await evaluate(stored),matrixBefore,'Thirty real PDF previews cannot modify V2 document content, design or timestamps');
+ assert.deepEqual(await evaluate(fullV2Snapshot),fullV2MatrixBefore,'Thirty previews must preserve every V2 store and the exact source PNG bytes');
  console.log('PASS P116 LAYOUT MATRIX: BASIC 8 + PRO 12 + BUSINESS 10 = 30/30 structurally distinct actual Chrome/Edge A4 PDFs; full text/order, all 40 markers, PNG bytes, V2 stores, page bounds and text-overlap checks PASS');
  const chosen=advancedList.at(-1);
  await evaluate("document.querySelector('[data-extended-layout-id="+JSON.stringify(chosen)+"]').click()");
