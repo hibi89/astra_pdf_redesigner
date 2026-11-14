@@ -428,7 +428,7 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
           </>}
         </section>
         <CommercialLicensePanel receipt={licenseReceipt} onChange={setLicenseReceipt}/>
-        <BatchImportPanel disabled={!editable} onImport={w.importPdfDraft} onSourceCommitted={onSourceCommitted}/>
+        <BatchImportPanel disabled={!editable} licenseReceipt={licenseReceipt} onImport={w.importPdfDraft} onSourceCommitted={onSourceCommitted}/>
         {sourceReview&&sourceReview.documentId===doc?.id&&
           <section ref={sourcePanel} tabIndex={-1} className="panel studio-source-panel no-print" aria-label="원본 PDF와 새 디자인 대조"
             data-source-document-id={sourceReview.documentId}>
