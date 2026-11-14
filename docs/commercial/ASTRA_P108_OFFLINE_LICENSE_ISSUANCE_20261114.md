@@ -34,3 +34,11 @@ Function SHA 0bf9c7bb125b25b3441117a6e54ba53ac05cba67.
 - Final blueprint policy: https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43586747799
 
 At this initial document commit, policy SUCCESS and main Linux/Windows npm test/build steps PASS, complete browser+installer workflows still running. Only exact SHA final logs may upgrade this conclusion.
+
+## P108 exact SHA CI final evidence (2026-11-14 KST)
+
+Function commit: 0bf9c7bb125b25b3441117a6e54ba53ac05cba67.
+- Linux Chrome/Edge run #43586747520: 2/2 SUCCESS; raw Node job log 236 PASS / 0 FAIL / 0 SKIP, P108 new 8 cases #71–#78 PASS, React build and synthetic Chrome/Edge PDF review with V2 IndexedDB preservation PASS.
+- Windows Electron/NSIS run #43586747579: SUCCESS; raw Node log 235 PASS / 0 FAIL / 1 Windows symlink-permission SKIP; desktop 59 PASS / 0 FAIL; P106 synthetic Authenticode evidence and native OCR RELEASE_HOLD PASS; NSIS 0.1.0 to 0.1.1 preserves existing V2 and PNG PASS.
+- Final blueprint policy run #43586747799 SUCCESS. Total exact-feature-SHA 3/3 workflow SUCCESS, not an endorsement of customer-facing releases.
+- No vendor private key, production issuer public pin, operational license generator UI, real offline revocation, device activation, real OCR model, approved Korean model or buyer original PDF acceptance. A09 still incomplete; whole product official UNASSESSED and RELEASE HOLD.

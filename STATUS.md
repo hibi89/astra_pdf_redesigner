@@ -1,3 +1,9 @@
+## 2026-11-14 KST — P108 exact code SHA 발급·연장 정책 Linux/Windows/정본 3/3 CI SUCCESS 최종 정정
+
+- **기능 SHA 0bf9c7bb125b25b3441117a6e54ba53ac05cba67**, 소유자 비추출 ECDSA P256 CryptoKey 요구, P96 canonical 서명 영수증 생성·서명 즉시 확인, 이전 영수증 진위 확인 후 동일 ID·tier·seats로 issuedAt와 expiresAt 단조 증가 연장. src/commercial/offlineLicenseIssuer.ts·tests/offline-license-issuer.test.ts 신규. 테스트 ephemeral 개인키만 사용, 실제 seller private/public key 발급·보관/영수증 상용 배포 없음.
+- [Linux Chrome/Edge #43586747520](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43586747520) 2/2 SUCCESS, Node **236PASS/0FAIL/0SKIP**, 새 P108 8/8 PASS, 실제 Chrome/Edge 합성 PDF.js/OCR UI·IndexedDB V2 보존 PASS. [Windows NSIS #43586747579](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43586747579) SUCCESS, Node **235PASS/0FAIL/1 OS symlink SKIP**, desktop **59PASS/0FAIL**, P106 Windows Authenticode synthetic/NSIS 설치·업그레이드 0.1.0→0.1.1 V2·PNG 보존·OCR_RELEASE_HOLD PASS. [정본정책 #43586747799](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43586747799) SUCCESS. **정확 SHA 전체 3/3 workflow SUCCESS**. GitHub raw job logs 확인, 아래 'CI 진행중' 잠정 기록은 본 최종 결과로 정정·역사 보존.
+- A09 상용 발급 운영도구/실 키·pin·GUI 액션 권한·좌석 기기 인증/이전 영수증 철회·환불 승인 미완, BASIC·PRO 1석/BUSINESS 최대2석은 기술 초안일 뿐 판매 약관 최종 승인 아님. A07 실제 OCR·A08 한국어 CPU LLM·물리Win10/11·허가 실제 PDF5~10 품질수용 미검증. **공식 최종12영역 UNASSESSED/100 미달**, [작업중], RELEASE HOLD, 크몽 미등록, Vercel 미적용, main/PR10/원본 PDF/V1/V2·디자인8+22/비밀 불변.
+
 ## 2026-11-14 KST — P108 오프라인 라이선스 서명 발급·단조 연장 (정확 CI 전체 진행 중)
 
 - 새 **기능 SHA 0bf9c7bb125b25b3441117a6e54ba53ac05cba67**: src/commercial/offlineLicenseIssuer.ts 신설. 소유자 제공 비추출 ECDSA P256 키로 기존 P96 canonical v1 영수증 발급, 사전 발급자 public JWK thumbprint/키 쌍 일치 확인, 발급 직후 P96 검사 재확인. 서명된 이전 영수증만 같은 licenseId/productMajor/tier/seats에 연장 발급, 발행시각과 만료시각 단조 증가 강제. BASIC·PRO 1석/BUSINESS 최대2석은 **기술 초안이며 고객·법적 승인 아님**. 기존 화면/엔진·테스트 외 비밀/원본 변경 없음.
