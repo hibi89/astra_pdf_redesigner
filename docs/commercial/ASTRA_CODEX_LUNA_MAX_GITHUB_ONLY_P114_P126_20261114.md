@@ -3,7 +3,16 @@
 **2026-11-14 KST 최신 사용자 위임.** P114~P126은 **Codex 6 Luna Max**가 실행하고 GPT-6 High는 이번 설계 공시·완료 후 사용자 호출 시 독립 최종 검수를 맡는다. P127~P138의 실행자 지정은 이번 위임에 포함되지 않는다.
 
 **저장소:** `hibi89/astra_pdf_redesigner` · **기존 작업 브랜치:** `feature/astra-p71-pdf-source-parity-20261112` · **기준 기능 SHA:** `26aff40d6de524c2430f8a6b325d906cea67f7e1`.
-**기준 점수:** 위임 시 50/100. 현재 P114/P115/P116/P117 VERIFIED, G55 PASS, 잠정 56/100, 다음 P118; 목표 70/100. 공식 사용자/구매자 수용률 `UNASSESSED`, 출시 `RELEASE HOLD`, 크몽 미등록. 이 런북은 실행 절차이며 점수 증거는 각 작업 검증서와 정확 SHA Actions다.
+**기준 점수:** 위임 시 50/100. 현재 P114/P115/P116/P117/P118 VERIFIED, G55 PASS, 잠정 57/100, 다음 P119; 목표 70/100. 공식 사용자/구매자 수용률 `UNASSESSED`, 출시 `RELEASE HOLD`, 크몽 미등록. 이 런북은 실행 절차이며 점수 증거는 각 작업 검증서와 정확 SHA Actions다.
+
+## P118 실행 결과 — VERIFIED · 잠정 57/100
+
+- 검증 기능 SHA 420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02, A05 +1 (3→4/5). 제품 소스 변경은 없고 tests/step5-reference-browser.mjs, tests/step5-reference-analysis.test.ts를 추가/확장했다.
+- [Linux #43633902801](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633902801) SUCCESS: Node 276/276, build PASS, Chrome/Edge에서 PNG/JPEG/WebP 8종 범위·2페이지 PDF·비파괴 저장/Undo·손상 PDF 거부 PASS.
+- [Windows #43633902770](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633902770) SUCCESS: Node 275 PASS/1 OS SKIP/0 FAIL, desktop 73/73, Electron/NSIS 설치·업그레이드·STEP2 V2 문서/PNG 보존 PASS. [정본 정책 #43633903290](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633903290) SUCCESS. 세 run의 exact head SHA는 모두 420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02.
+- 원본 레퍼런스 SHA-256·전체 documents/assets/meta store 불변을 Chrome/Edge에서 확인했다. Apply/PDF/Undo 후 content/design 복원. OCR/폰트/저작권 판정은 하지 않는다.
+- 최초 후보 e2a7c04e693dea194b30aa11c4ee7cb20819739d Linux #43624942512는 Node DOM 참조 오류로 실패(0점). 수정 SHA에서 추가 파일형식 회귀 포함 전체 CI 통과.
+- [P118 검증서](../evidence/astra/P118/VERIFICATION.md). 공식 수용 UNASSESSED, RELEASE HOLD. 다음 P119.
 
 ## P117 실행 결과 — VERIFIED · 잠정 56/100
 
@@ -81,7 +90,7 @@
 - **개발:** 로컬 PNG/JPEG/WebP/PDF의 색상·여백·텍스트 크기 추정과 미리보기/적용/취소·Undo·프리셋 재열기 흐름을 동일 기준으로 검증. 표/폰트·권리는 추정 불가라고 고지.
 - **검증:** 스캔/벡터/여백 과다/다중 페이지/한글 최소 8종 합성 레퍼런스, 2개 브라우저에서 예상 범위 및 전후 저장 복원, 프로젝트 바이트와 원본 파일 무변경, 비정상 PDF fail-closed.
 - **차단:** 실제 글꼴·저작권 판정이나 임의 URL 스크래핑으로 대체하지 않는다.
-- **GitHub 증거 산출물:** `docs/evidence/astra/P118/VERIFICATION.md`에 재현 명령/runner OS·실행 유형(mock/real)/합성 fixture 해시·실제 PASS/FAIL/SKIP·정확 기능 SHA·3개 CI workflow 링크·지원/미지원 범위·가점 근거 기재. **현재 PENDING/0점**.
+- **GitHub 증거 산출물:** `docs/evidence/astra/P118/VERIFICATION.md`에 재현 명령/runner OS·실행 유형(mock/real)/합성 fixture 해시·실제 PASS/FAIL/SKIP·정확 기능 SHA·3개 CI workflow 링크·지원/미지원 범위·가점 근거 기재. **VERIFIED/+1점.** 정확 SHA·3개 Actions·실패 후보와 수용 증거는 P118 검증서에 기록했다.
 
 #### P119 (A07 +1; 선행: 없음)
 - **수정 경로:** desktop/ocr-supply-chain-preflight.cjs; desktop/ocr-pe-import-audit.cjs; tests/ocr-supply-chain-preflight.test.cjs; tests/ocr-windows-authenticode-evidence.test.ps1.

@@ -1,6 +1,6 @@
 # Astra PDF Redesigner — 12영역 최종설계 증거 기반 잠정 완성률
 
-**기준일: 2026-11-15 KST · P117 검증 기능 SHA `c4d96dc02fb616e44773871952343161079e293b` · 잠정 56/100점 (56%).**
+**기준일: 2026-11-15 KST · P118 검증 기능 SHA `420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02` · 잠정 57/100점 (57%).**
 **공식 구매자 최종 수용률: UNASSESSED. 출시: RELEASE HOLD.**
 
 ## 산정 원칙
@@ -15,7 +15,7 @@
 | A02 문서·이미지·V2 | 6 | 5 | 1 | STEP2 블록·이미지·IndexedDB V2/PNG·파일 복원·NSIS 업그레이드 | 구매자 물리 PC 복원 |
 | A03 기존 PDF 가져오기·원문 대조 | 14 | **12** | 2 | PDF.js 원본 추출·수동 승인·텍스트/이미지 대조·암호/손상/스캔 경고; **P114 Chrome/Edge 12종 위험 레이아웃·페이지별 승인 저장 게이트·원문 순서 보존; P115 Chrome/Edge 각각 15종 A4 차이 매트릭스(숫자·기호·부정·링크)와 원본 SHA/V1/V2 불변** | 실제 표·다단·도형·누락·의미 정확도 확인 |
 | A04 8/20/30 레이아웃·브랜드·다중 PDF | 15 | **14** | 1 | BASIC8 + PRO12 + BUSINESS10 구조 차별성·실제 A4 PDF를 Chrome/Edge 30/30 검증; P112/P117 2~20개 문서 세션 브랜드 계획과 2/5/20개 개별 A4 출력·취소·V2 불변을 Chrome/Edge에서 확인. 배치 로고 포함·영구 저장은 미구현. | 최종 구매자 시각 품질·고객 수용 |
-| A05 로컬 디자인 참고·적용 | 5 | 3 | 2 | 이미지·PDF 로컬 색상/타이포 분석·비파괴 스타일 적용 | 실제 레퍼런스 품질 및 복원 |
+| A05 로컬 디자인 참고·적용 | 5 | **4** | 1 | PNG/JPEG/WebP/PDF 로컬 분석·미리보기·적용/Undo; Chrome/Edge 8종 합성 metric, source SHA·V2 전체 저장소 불변 및 손상 PDF fail-closed | 실구매자 레퍼런스 품질·폰트/권리·고객 PDF 수용
 | A06 온라인 레퍼런스 | 5 | **4** | 1 | 안전한 브라우저 검색 링크·URL/권리메모 로컬 기록  P112 저장된 HTTPS 출처→사용자 파일 선택→STEP5 로컬 분석 직접 연결, 권리·파일 동일성 인증/내장 검색 카드 없음. | 내장 검색 결과·출처 검증·STEP5 직접 연결 |
 | A07 OCR·콘텐츠 안전·STEP7 | 12 | **5** | 7 | STEP7 PDF 대조·수동 검토·출시 OCR 차단 정책/검사  P113 원본 페이지 임시 이미지·OCR 텍스트 좌우 수동 대조 체크. 별도 로컬 Tesseract 5.5.0 한국어 합성 2/3 정확(1 실패), 앱 설치형/정식 재배포 미검증. | 합법 공급처의 Tesseract 실제 한국어 OCR·표/스캔 정확도 |
 | A08 한국어 로컬 AI 윤문 | 14 | **2** | 12 | 제어기 골격은 존재하지만 실 모델 추론 없음(0점)  P111 소유자 설치 로컬 Ollama 고정 주소 Qwen3 동의 기반 UI·프로세스 어댑터·Diff/되돌리기, 합성 mock 검증; Astra 실제 CPU 모델 추론/문장 품질은 미검증. | 상업 재배포 가능한 GGUF/CPU 실제 동작·품질·비교·되돌림 |
@@ -23,7 +23,16 @@
 | A10 Windows 설치·복구 | 5 | 3 | 2 | CI Windows unsigned NSIS 설치·제거·업그레이드, A4/IndexedDB·PNG 보존 | 실 Win10/11 물리 설치·서명/SmartScreen |
 | A11 허가 PDF 5~10건 검수 | 7 | 0 | 7 | 합성 도구는 존재하나 실제 사용자 승인 문서 0건 | 실제 허가 PDF 5~10건 독립 대조/육안 수용 |
 | A12 판매·법적·최종 승인 | 2 | 0 | 2 | 상품 등록 초안만 존재 | 저작권·재배포권·크몽 등록·최종 구매자 승인 |
-| **합계** | **100** | **56** | **44** | **잠정 증거 기반 구현·검증 점수** | **공식 수용 미완** |
+| **합계** | **100** | **57** | **43** | **잠정 증거 기반 구현·검증 점수** | **공식 수용 미완** |
+
+## P118 +1점 — 로컬 레퍼런스 분석·비파괴 적용·재현성
+
+- **잠정 점수:** 56→57/100(+1), A05 3→4/5. 공식 구매자 수용 UNASSESSED, RELEASE HOLD.
+- **정확 검증 SHA:** 420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02. 변경 파일은 tests/step5-reference-browser.mjs, tests/step5-reference-analysis.test.ts이며 제품 로직 변경은 없다.
+- [Linux #43633902801](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633902801) SUCCESS — Node 276/276, build PASS; Chrome과 Edge 8개 PNG/JPEG/WebP 합성 레퍼런스의 예상 metric 범위·테마/색상, 2페이지 PDF 분석, 원본 SHA·V2 store 불변, apply/PDF/undo/cancel, malformed PDF fail-closed.
+- [Windows #43633902770](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633902770) SUCCESS — Node 275 PASS/1 OS-only SKIP/0 FAIL, desktop 73/73, Electron/NSIS 설치·실행·제거·0.1.0→0.1.1 STEP2 문서+PNG 보존 PASS. [정본 정책 #43633903290](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633903290) SUCCESS. 세 run 모두 exact head SHA 420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02.
+- 최초 후보 e2a7c04e693dea194b30aa11c4ee7cb20819739d, [Linux #43624942512](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43624942512)은 Node 문맥에서 document를 직접 조회한 브라우저 테스트 오류로 실패해 0점 처리했다. 수정 SHA에서 full regression을 재실행했다.
+- 합성 사례 및 GitHub-hosted runner만 검증했다. 실제 폰트·저작권, 구매자 품질, 고객 PDF, 한글 OCR/의미 추출은 미검증이며 RELEASE HOLD를 유지한다. [P118 검증서](../evidence/astra/P118/VERIFICATION.md).
 
 ## P117 +1점 — BUSINESS 다중 문서 개별 PDF 출력·계획 교체
 

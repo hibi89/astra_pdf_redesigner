@@ -6,7 +6,7 @@
   "branch": "feature/astra-p71-pdf-source-parity-20261112",
   "base_feature_sha": "26aff40d6de524c2430f8a6b325d906cea67f7e1",
   "base_docs_sha": "7ed25d4f04ba10bad18e96c6986bb9a5e97a0b08",
-  "current_verified_provisional": 56,
+  "current_verified_provisional": 57,
   "target_provisional": 70,
   "official_acceptance": "UNASSESSED",
   "release": "RELEASE HOLD",
@@ -247,8 +247,8 @@
       "depends_on": [
         "P116"
       ],
-      "status": "PENDING",
-      "credit_earned": 0,
+      "status": "VERIFIED",
+      "credit_earned": 1,
       "expected_paths": [
         "src/step5/referenceAnalysis.ts",
         "src/step2/Workspace.tsx",
@@ -258,10 +258,10 @@
       "implementation": "로컬 PNG/JPEG/WebP/PDF의 색상·여백·텍스트 크기 추정과 미리보기/적용/취소·Undo·프리셋 재열기 흐름을 동일 기준으로 검증. 표/폰트·권리는 추정 불가라고 고지.",
       "acceptance": "스캔/벡터/여백 과다/다중 페이지/한글 최소 8종 합성 레퍼런스, 2개 브라우저에서 예상 범위 및 전후 저장 복원, 프로젝트 바이트와 원본 파일 무변경, 비정상 PDF fail-closed.",
       "blockers": "실제 글꼴·저작권 판정이나 임의 URL 스크래핑으로 대체하지 않는다.",
-      "evidence_feature_sha": null,
-      "linux_workflow_url": null,
-      "windows_workflow_url": null,
-      "blueprint_workflow_url": null,
+      "evidence_feature_sha": "420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02",
+      "linux_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633902801",
+      "windows_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633902770",
+      "blueprint_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633903290",
       "executor": "Codex 6 Luna Max",
       "execution_medium": "GitHub-only",
       "runner": "Chrome/Edge local references",
@@ -271,9 +271,21 @@
         "Windows Electron/NSIS when relevant",
         "Final blueprint policy"
       ],
-      "evidence_linux_run": null,
-      "evidence_windows_run": null,
-      "evidence_blueprint_run": null
+      "evidence_linux_run": 43633902801,
+      "evidence_windows_run": 43633902770,
+      "evidence_blueprint_run": 43633903290,
+      "actual_changed_paths": [
+        "tests/step5-reference-browser.mjs",
+        "tests/step5-reference-analysis.test.ts"
+      ],
+      "verification_summary": "VERIFIED +1: Chrome/Edge each analyzed 8 synthetic PNG/JPEG/WebP cases within metric ranges; 2-page PDF selectable text/no-OCR disclosures, source SHA-256 and complete STEP2 V2 documents/assets/meta/asset SHA unchanged during analysis; apply/PDF output/cancel/undo/design+content restore and malformed PDF fail-closed. Linux 276/276 tests+build PASS; Windows 275 PASS/1 OS SKIP, desktop 73/73, NSIS install/upgrade PASS; policy PASS. All final runs exact SHA 420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02.",
+      "failed_candidates": [
+        {
+          "sha": "e2a7c04e693dea194b30aa11c4ee7cb20819739d",
+          "linux_run": 43624942512,
+          "reason": "Browser DOM was referenced in the Node test context; corrected to CDP Runtime.evaluate. No credit."
+        }
+      ]
     },
     {
       "id": "P119",

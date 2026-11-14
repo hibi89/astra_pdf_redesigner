@@ -1,3 +1,15 @@
+## 2026-11-15 KST — Astra P118 검증 완료, 잠정 57/100
+
+- **완료 작업:** P118 (A05 로컬 레퍼런스 분석·비파괴 적용/재현성), VERIFIED +1.
+- **검증 SHA:** 420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02. 변경: tests/step5-reference-browser.mjs, tests/step5-reference-analysis.test.ts; 제품 코드 변경 없음.
+- **Linux PASS:** [#43633902801](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633902801), exact SHA. Node 276/276, build PASS. Chrome·Edge 각각 PNG/JPEG/WebP 8종 metric 범위, PDF 2페이지 selectable text·no-OCR 고지, preset·A4 PDF·apply/undo/cancel·content 복원 PASS. 손상 PDF fail-closed.
+- **Windows PASS:** [#43633902770](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633902770), exact SHA. Node 275 PASS / 1 Windows 전용 SKIP / 0 FAIL, desktop 73/73. Electron/NSIS 설치·실행·제거 및 0.1.0→0.1.1 업그레이드 뒤 STEP2 문서+PNG 보존 PASS.
+- **정본 정책 PASS:** [#43633903290](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633903290), exact SHA. 세 필수 run의 head SHA는 모두 420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02.
+- **비파괴 증거:** Chrome/Edge 양쪽에서 전체 V2 documents/assets/meta와 원본 이미지/PDF 파일 SHA-256 불변. Apply 후 Undo 시 content/design 복원. OCR·폰트·저작권 자동판정 없음.
+- **점수:** A05 3→4/5, 총 56→57/100. 공식 수용 UNASSESSED, RELEASE HOLD. G55 PASS, G60 미도달.
+- **실패 후보:** e2a7c04e693dea194b30aa11c4ee7cb20819739d Linux #43624942512는 Node 문맥 DOM 참조 오류로 실패(0점). 수정된 최종 SHA에서 전체 CI 재통과. [P118 검증서](docs/evidence/astra/P118/VERIFICATION.md).
+- **다음 작업:** P119 Windows Tesseract 공급처·해시·DLL·라이선스 증거 감사.
+
 ## 2026-11-15 KST — Astra P117 검증 완료, 잠정 56/100
 
 - **완료 작업:** P117 (A04 다중 문서 BUSINESS 브랜드 출력/SKU 우회 회귀) VERIFIED, +1점.

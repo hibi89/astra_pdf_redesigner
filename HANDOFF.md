@@ -1,3 +1,16 @@
+## 2026-11-15 KST — P118 VERIFIED · 잠정 57/100 GitHub-only 인수인계 (10항)
+
+1. **목표·범위:** P114~P118을 최신 기존 feature branch에서 검증했다. 사용자 확정 A01~A12 배점, STEP1 V1·STEP2 V2, BASIC8/PRO20/BUSINESS30, 서명·출시 차단 정책을 보존한다. 70점 후 GPT-6 High 독립 검수는 사용자 요청 시 진행한다.
+2. **완료 작업·변경:** P118(A05 +1). 기존 로컬 레퍼런스 분석·비파괴 적용을 보강된 회귀로 검증했다. 변경 파일은 tests/step5-reference-browser.mjs, tests/step5-reference-analysis.test.ts; 제품 소스 변경은 없다. [P118 검증서](docs/evidence/astra/P118/VERIFICATION.md).
+3. **최종 검증 기능 SHA:** 420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02. Chrome/Edge 각각 PNG/JPEG/WebP 8종, 2페이지 PDF, 저장·취소·Undo·손상 PDF fail-closed와 V2/source 바이트 불변을 확인했다.
+4. **정확 SHA Actions:** [Linux #43633902801](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633902801) Node 276/276·build·Chrome/Edge PASS; [Windows #43633902770](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633902770) Node 275 PASS/1 OS SKIP, desktop 73/73, NSIS 설치/업그레이드 PASS; [정본 정책 #43633903290](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633903290) PASS. 세 run의 head SHA는 모두 420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02.
+5. **수용 증거:** 8개 raster 사례의 예상 metric 범위·테마·색상을 양 브라우저에서 확인했다. 원본 파일 SHA-256과 전체 IndexedDB documents/assets/meta 및 asset SHA는 preview/PDF 분석 중 불변. Apply·PDF 출력·Undo 후 content/design 복원. 손상 PDF는 오류만 표시하고 미리보기·적용을 제공하지 않는다.
+6. **점수:** P118 +1, A05 3→4/5, 총 56→57/100. 사용자 확정 배점 불변. G55 PASS 유지, G60 미도달. 공식 수용 UNASSESSED, RELEASE HOLD.
+7. **실패 후보:** e2a7c04e693dea194b30aa11c4ee7cb20819739d Linux #43624942512는 Node 문맥의 브라우저 DOM 직접 참조로 실패(0점). CDP 평가로 수정했고 PNG/JPEG/WebP 전체 범위 최종 SHA에서 세 필수 workflow 재통과.
+8. **미검증·차단:** 실제 폰트/권리·저작물 사용권, 구매자 레퍼런스 품질, 고객 PDF 수용, 물리 Win10/11, 한글 OCR/의미 인식은 미검증. OCR 및 판매 차단 정책은 변경하지 않았다.
+9. **저장소:** hibi89/astra_pdf_redesigner의 feature/astra-p71-pdf-source-parity-20261112만 사용했다. GitHub-hosted Actions만으로 검증했다.
+10. **다음:** P119 Windows Tesseract 공급처/해시/DLL/LICENSE 감사. 실 공급처·재배포권 근거가 없으면 0점으로 두고 다음 독립 작업을 진행한다.
+
 ## 2026-11-15 KST — P117 VERIFIED · 잠정 56/100 GitHub-only 인수인계 (10항)
 
 1. **목표·범위:** P114–P117 검증을 마쳤다. 사용자 확정 A01~A12, STEP1 V1·STEP2 V2, BASIC8/PRO20/BUSINESS30, 서명·출시 차단 정책을 보존한다. GPT-6 High의 독립 검수는 사용자가 70점 달성 뒤 요청할 때 수행한다.

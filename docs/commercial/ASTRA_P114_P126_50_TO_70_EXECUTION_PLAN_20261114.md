@@ -1,6 +1,6 @@
 # Astra PDF Redesigner — P114~P126 실행 설계 및 50→70점 검증 공시
 
-> **[2026-11-14 최신 사용자 위임으로 실행자 변경]** 50→70(P114~P126) 구현·테스트·GitHub 커밋 담당은 **Codex 6 Luna Max**. 오직 **GitHub 기존 feature 브랜치 + GitHub-hosted Actions**만 사용한다. 이전 Instant 담당 표기는 이 범위에서 대체한다. 상세 실행 환경·실모델/실OCR blocking·한도 규정은 [Codex Github-only 런북](ASTRA_CODEX_LUNA_MAX_GITHUB_ONLY_P114_P126_20261114.md) 및 [작업 원장](ASTRA_P114_P126_TASK_REGISTER_20261114.json)을 우선한다. **설계 기준 50/100; 현재 P114/P115/P116/P117 VERIFIED, G55 PASS, 잠정 56/100, 다음 P118; 공식 UNASSESSED, RELEASE HOLD. 이 문서 수정은 기능 개발이나 CI 통과가 아니다.** 70점 이후 P127+ 담당자는 이번 위임에서 지정하지 않았다.
+> **[2026-11-14 최신 사용자 위임으로 실행자 변경]** 50→70(P114~P126) 구현·테스트·GitHub 커밋 담당은 **Codex 6 Luna Max**. 오직 **GitHub 기존 feature 브랜치 + GitHub-hosted Actions**만 사용한다. 이전 Instant 담당 표기는 이 범위에서 대체한다. 상세 실행 환경·실모델/실OCR blocking·한도 규정은 [Codex Github-only 런북](ASTRA_CODEX_LUNA_MAX_GITHUB_ONLY_P114_P126_20261114.md) 및 [작업 원장](ASTRA_P114_P126_TASK_REGISTER_20261114.json)을 우선한다. **설계 기준 50/100; 현재 P114/P115/P116/P117/P118 VERIFIED, G55 PASS, 잠정 57/100, 다음 P119; 공식 UNASSESSED, RELEASE HOLD. 이 문서 수정은 기능 개발이나 CI 통과가 아니다.** 70점 이후 P127+ 담당자는 이번 위임에서 지정하지 않았다.
 
 
 > 설계 승인 문맥: 2026-11-14 21:55 KST, 사용자 지시: GPT-6 High가 최종설계 기반 작업을 분해·공시하고, Codex 6 Luna Max가 구현과 GitHub 검증·인수인계를 직접 담당. High는 사용자 요청 시 최종 별도 검수 담당. 이 문서는 **계획 공시**이며 기능 구현·테스트 또는 70점 달성을 의미하지 않는다.
@@ -9,7 +9,7 @@
 **저장소:** hibi89/astra_pdf_redesigner
 **설계 기준 코드 SHA:** 26aff40d6de524c2430f8a6b325d906cea67f7e1
 **설계 이전 문서 HEAD:** 7ed25d4f04ba10bad18e96c6986bb9a5e97a0b08
-**현재 총괄 잠정 검증 점수:** 56/100 (P114/P115/P116/P117 VERIFIED; G55 PASS), **공식 사용자/구매자 최종 수용률:** UNASSESSED, **RELEASE HOLD**, 크몽 미등록.
+**현재 총괄 잠정 검증 점수:** 57/100 (P114/P115/P116/P117/P118 VERIFIED; G55 PASS), **공식 사용자/구매자 최종 수용률:** UNASSESSED, **RELEASE HOLD**, 크몽 미등록.
 
 ## 1. 변경 금지·우선순위
 
@@ -57,7 +57,7 @@
 | P115 원본→추출→새 PDF 콘텐츠 대조·복구 경로 실증 | A03 | +2 | 54/100 | P114 | VERIFIED |
 | P116 BASIC 8 / PRO 20 / BUSINESS 30 디자인 차별성·A4 출력 검수 | A04 | +1 | 55/100 | P115 | VERIFIED |
 | P117 BUSINESS 다중 문서 브랜드 반복 출력 및 SKU 우회 회귀 | A04 | +1 | 56/100 | P116 | VERIFIED |
-| P118 로컬 레퍼런스 분석→비파괴 적용·재현성 강화 | A05 | +1 | 57/100 | P116 | PENDING |
+| P118 로컬 레퍼런스 분석→비파괴 적용·재현성 강화 | A05 | +1 | 57/100 | P116 | VERIFIED |
 | P119 Windows Tesseract 공급처·해시·DLL·LICENSE 감사 재현 | A07 | +1 | 58/100 | 없음 | PENDING |
 | P120 실 Tesseract 한국어 인식 난도별 측정·오인식 공개 | A07 | +1 | 59/100 | P119 | PENDING |
 | P121 Electron OCR IPC 실실행 및 실패 복구 | A07 | +1 | 60/100 | P119, P120 | PENDING |
@@ -108,12 +108,13 @@
 
 #### P118 — 로컬 레퍼런스 분석→비파괴 적용·재현성 강화 (A05 +1점, 누적 상한 57/100)
 
-- **선행:** P116. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
-- **수정 후보 경로:** src/step5/referenceAnalysis.ts; src/step2/Workspace.tsx; tests/step5-reference-browser.mjs; tests/step5-*.test.ts. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
-- **구현 지시:** 로컬 PNG/JPEG/WebP/PDF의 색상·여백·텍스트 크기 추정과 미리보기/적용/취소·Undo·프리셋 재열기 흐름을 동일 기준으로 검증. 표/폰트·권리는 추정 불가라고 고지.
-- **수용 테스트/증거:** 스캔/벡터/여백 과다/다중 페이지/한글 최소 8종 합성 레퍼런스, 2개 브라우저에서 예상 범위 및 전후 저장 복원, 프로젝트 바이트와 원본 파일 무변경, 비정상 PDF fail-closed.
-- **STOP/점수 금지:** 실제 글꼴·저작권 판정이나 임의 URL 스크래핑으로 대체하지 않는다.
-- **종료 산출물:** 원본/출력·테스트 재현 명령과 PASS/FAIL/SKIP, 기능 SHA와 CI URL, 위험·미검증·점수 변화, 변경 요약을 STATUS.md와 HANDOFF.md에 기록. 코드 증거 없는 문서만의 증가 0.
+- **선행:** P116. **담당:** Codex 6 Luna Max. 상태: VERIFIED, +1점. A05 3→4/5, 총 56→57/100.
+- **실제 변경:** tests/step5-reference-browser.mjs, tests/step5-reference-analysis.test.ts. 기존 src/step5/referenceAnalysis.ts와 src/step2/Workspace.tsx 기능을 확장된 검증에 사용했으며 제품 소스 변경은 없다.
+- **정확 검증 SHA:** 420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02. Linux [#43633902801](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633902801) SUCCESS: Node 276/276, build, Chrome/Edge; Windows [#43633902770](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633902770) SUCCESS: Node 275 PASS/1 OS SKIP, desktop 73/73, NSIS; 정본 정책 [#43633903290](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43633903290) SUCCESS. 세 run 모두 exact SHA.
+- **실제 수용 결과:** Chrome/Edge 각각 8종 PNG/JPEG/WebP 합성 이미지의 예상 metric 범위·테마·accent PASS; 2페이지 selectable-text PDF 분석 및 OCR 미수행 고지 PASS. 원본 source SHA-256과 전체 V2 documents/assets/meta, asset SHA 및 active ID 불변. apply/PDF 출력/cancel/Undo/preset 흐름과 content/design 복원 PASS. %PDF- 서명만 가진 비정상 PDF는 오류 표시, preview/apply 없음, source/V2 불변.
+- **실패 후보:** e2a7c04e693dea194b30aa11c4ee7cb20819739d Linux #43624942512는 브라우저 테스트에서 Node 문맥 DOM 참조 오류로 실패해 0점. CDP 평가로 수정, JPEG/WebP 입력도 추가하고 최종 SHA에서 세 필수 workflow 재통과.
+- **한계/STOP:** 합성 샘플만 검증. 실제 글꼴·저작권·구매자 시각 품질·고객 PDF·한글 OCR/의미 인식 불가. URL scraping으로 대체하지 않는다. 공식 UNASSESSED/RELEASE HOLD 유지.
+- **종료 산출물:** [P118 검증서](../evidence/astra/P118/VERIFICATION.md), STATUS/HANDOFF, 작업 JSON, 최종 점수표에 exact SHA·3 CI URL·PASS/FAIL/SKIP·제한·다음 P119 기록.
 
 #### P119 — Windows Tesseract 공급처·해시·DLL·LICENSE 감사 재현 (A07 +1점, 누적 상한 58/100)
 
@@ -221,4 +222,4 @@
 
 70~100 상세 잔여 30점과 사용자가 개입해야 할 최종 승인 장벽은 docs/commercial/ASTRA_INSTANT_70_TO_100_HANDOFF_20261114.md에 따로 기록한다. 모든 항목의 사용자가 확정한 배점과 원본 설계는 동일하다.
 
-**최종 확인:** 이 계획 문서는 원래 50→70 실행 기준이다. P114/P115/P116/P117 VERIFIED, G55 PASS; P118~P126 PENDING. 현재 검증 기능 SHA `c4d96dc02fb616e44773871952343161079e293b`, 잠정 56/100, 다음 P118. 공식 UNASSESSED, RELEASE HOLD.
+**최종 확인:** 이 계획 문서는 원래 50→70 실행 기준이다. P114/P115/P116/P117/P118 VERIFIED, G55 PASS; P119~P126 PENDING. 현재 검증 기능 SHA `420da8fdf1fdda21a3196e40ac84d6ca5f7d3e02`, 잠정 57/100, 다음 P119. 공식 UNASSESSED, RELEASE HOLD.
