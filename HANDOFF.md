@@ -1,3 +1,16 @@
+## 2026-11-14 KST — P104 Windows OCR 공급망 사전 검증 10항 (최신)
+
+1. **목표·용도·확정 요구·기술:** Astra PDF STEP1~7, BASIC/PRO/BUSINESS 사용자 원본 12영역/100점·원본 무손상·무료 로컬 OCR 사전 안전 감사. Node22 CJS, Win64 PE 헤더, SHA-256, Electron Builder NSIS. 무료 OCR 코드/배점은 승인됨. 판매·유료결제·외부 고객 자료 전송 미승인.
+2. **완료 기능/변경/근거:** 공급망 옵션 A(검증 후 허가된 오프라인 Windows DLL/EXE/lang 번들) 선택, B(별도 사용자 설치/지원비 증가) 대안. 실제 파일 반입 전 offline manifest 검사, per-file SHA/bytes/PE x64, 라이선스·NOTICE 인벤토리, symlink/hardlink/추가DLL/경로/extraResources/extraFiles 차단. 성공해도 `review-required`로 귀결, legalRedistributionApproved=false. 현재 패키지 자체 release HOLD.
+3. **테스트/명령·성공/실패수:** tests/ocr-supply-chain-preflight.test.cjs 15개 + tests/ocr-release-hold-gate.test.cjs 6개, npm test/desktop:test 연결; prebuild+Windows 0.1.0/0.1.1 직전 `npm run ocr:release-gate` 필수. 실제 CI 정확 코드 e2fd0797990ce94e7f7a68720ece3617f9d114db 설계 게이트 #43574432327 SUCCESS, Linux/Chrome/Edge #43574432110·Windows NSIS #43574432095 전체 최종 로그 **확인 중**, 통과 주장 금지. 이전 P103 SHA f9672f12 CI는 3/3 SUCCESS(이력 분리).
+4. **완료/진행/대기/차단:** 안전검사·패키징 차단 코드 GitHub 반영, 정책 성공. 실제 서명된 Windows exe와 모든 DLL·kor/eng/실물 해시·AuthentiCode·DLL import closure/업스트림 재배포권 및 LICENSE/NOTICE 육안 법무확인 미완, Release HOLD. 실제 고객 Win10/11·PDF5~10·모델/3SKU/판매수용 미검증.
+5. **오류/실패 근거·원인·시도·재시도 금지·대안:** 초기 검사에서 정상 Unix directory nlink>1도 불법 하드링크로 잘못 분류할 가능성 파악 → 일반 디렉터리 허용·파일 하드링크만 거부. Electron files glob에 새 폴더만 더하면 OCR 네이티브 파일이 우회될 위험 확인 → 정확 3개 files allowlist 검증+회귀 추가. unsigned DLL/가짜 법적 증빙은 사전 검사 성공으로 판매 가능 판정 불가; 별도 법무/서명·실 실행 필요.
+6. **저장소/브랜치/SHA/경로:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112. 최신 **기능·테스트 SHA e2fd0797990ce94e7f7a68720ece3617f9d114db**, 문서 docs/commercial/ASTRA_P104_WINDOWS_OCR_PREFLIGHT_20261114.md. 대상 desktop/ocr-supply-chain-preflight.cjs, desktop/ocr-release-hold-gate.cjs, tests/ocr-*.test.cjs, .github/workflows/windows-desktop.yml, package.json.
+7. **Production URL·Vercel·명령·환경:** Vercel 미적용(Windows Electron/NSIS), npm test/build, npm run desktop:test, npm run ocr:release-gate; 미래 자산 검증시 `npm run ocr:preflight -- <assets-folder> <manifest.json>`(현재 실제 바이너리 없음). CI Windows hosted 테스트는 물리 구매자 PC의 정상보증 아님.
+8. **원본/백업·인증·수정 금지:** 개발 브랜치 과거 SHA에서 복구 가능. main/PR10, 사용자 PDF·STEP1 localStorage V1·STEP2 IndexedDB V2·등록 이력·서명키/비밀·구매자 데이터 미수정, 실제 OCR 바이너리/모델/폰트 ZIP 미다운로드·미번들. OCR_MANIFEST=null.
+9. **다음 작업 우선순위/완료기준·승인:** e2fd0797 exact SHA Linux Chrome/Edge + Windows NSIS Actions 완료 결론/원시 로그 확인→필요시 테스트/경로 최소 수정→Windows 설치파일/EXE/DLL/thumbprint/SBOM·LICENSE/NOTICE·실 Win OCR 독립 실행→원문 검수/실 고객 PDF5~10·3SKU/모델·최종 판매 승인. 무료 코드 승인 재요청 금지. 구매·전송/상품 등록·범위변경/외부 인증은 사전 승인.
+10. **최신화 KST·확인시점·검증 범위·문서 기준커밋:** 2026-11-14 KST, 코드 SHA e2fd0797; GitHub 실제 파일·CI 정책 확인, Linux/Windows full CI 결론 확인 전 미검증. 문서/중앙 원장은 마지막 커밋 SHA를 별도로 재확인. 본 문서는 P104 코드 개발 기록이며 최종 제품100% 완료 주장 아님.
+
 ## 2026-11-14 KST — P103 정확 SHA CI 3/3 성공 인수인계 (최신 10항)
 
 1. **목표·요구·기술:** 사용자 원본 7단계+3SKU 12영역 100점 전체, React/TypeScript/PDF.js/Electron/Tesseract. 원본/사용자 저장 데이터 보존, OCR 미승인 검수, 출시 RELEASE HOLD.
