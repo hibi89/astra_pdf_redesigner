@@ -93,3 +93,22 @@ test('P111 renderer UI explicitly asks consent, displays before/after and retain
  assert.ok(main.includes("if(explicitConsent!==true)return{status:'error',reason:'local-model-consent-required'};"));
  assert.ok(preload.includes("ipcRenderer.invoke('astra:local-model-propose',text,explicitConsent)"));
 });
+
+test('P122 Electron IPC keeps the trusted sender and consent argument order',()=>{
+ const fs=require('node:fs'),path=require('node:path');
+ const main=fs.readFileSync(path.join(__dirname,'../desktop/main.cjs'),'utf8');
+ const preload=fs.readFileSync(path.join(__dirname,'../desktop/preload.cjs'),'utf8');
+ const controller=fs.readFileSync(path.join(__dirname,'../desktop/owner-ollama-controller.cjs'),'utf8');
+ const start=main.indexOf("ipcMain.handle('astra:local-model-propose'");
+ const end=main.indexOf("ipcMain.handle('astra:local-model-cancel'",start);
+ assert.ok(start>=0&&end>start,'proposal IPC handler is present');
+ const handler=main.slice(start,end);
+ assert.match(handler,/async\\(event,text,explicitConsent\\)/);
+ assert.ok(handler.indexOf('if(!trusted(event))')<handler.indexOf('if(explicitConsent!==true)'));
+ assert.ok(handler.includes("ownerOllama.propose(text,{explicitConsent:true})"));
+ assert.ok(preload.includes("localModelPropose:(text,explicitConsent)=>ipcRenderer.invoke('astra:local-model-propose',text,explicitConsent)"));
+ assert.ok(controller.includes("const BASE='http://127.0.0.1:11434'"));
+ assert.ok(controller.includes("const MODEL='qwen3:4b-instruct'"));
+ assert.ok(controller.includes("redirect:'error'"));
+ assert.ok(!handler.includes('url')&&!handler.includes('modelId'));
+});

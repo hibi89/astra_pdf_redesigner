@@ -51,6 +51,7 @@ jobs:
           CHROME_PATH="$CHROME_BIN" node tests/step5-reference-browser.mjs
           CHROME_PATH="$CHROME_BIN" node tests/step7-pdf-review-browser.mjs
           CHROME_PATH="$CHROME_BIN" node tests/step7-local-ocr-browser.mjs
+          CHROME_PATH="$CHROME_BIN" node tests/local-model-review-browser.mjs
           CHROME_PATH="$CHROME_BIN" node tests/step4-style-preset-browser.mjs
           CHROME_PATH="$CHROME_BIN" node tests/step4-brand-batch-browser.mjs
           CHROME_PATH="$CHROME_BIN" node tests/step2-multitab.mjs
@@ -109,6 +110,7 @@ jobs:
           CHROME_PATH="$EDGE_BIN" node tests/step5-reference-browser.mjs
           CHROME_PATH="$EDGE_BIN" node tests/step7-pdf-review-browser.mjs
           CHROME_PATH="$EDGE_BIN" node tests/step7-local-ocr-browser.mjs
+          CHROME_PATH="$EDGE_BIN" node tests/local-model-review-browser.mjs
           CHROME_PATH="$EDGE_BIN" node tests/step4-style-preset-browser.mjs
           CHROME_PATH="$EDGE_BIN" node tests/step4-brand-batch-browser.mjs
           CHROME_PATH="$EDGE_BIN" node tests/step3-browser.mjs

@@ -13,6 +13,17 @@ export default function LocalModelReview({text,disabled,onApply}:Props){
  const generation=useRef(0);
  const busyRef=useRef(false);
  useEffect(()=>()=>{generation.current++;if(busyRef.current)void window.astraDesktop?.localModelCancel?.();},[]);
+ const observedText=useRef(text);
+ useEffect(()=>{
+  if(observedText.current===text)return;
+  observedText.current=text;
+  generation.current++;
+  if(busyRef.current){
+   busyRef.current=false;setBusy(false);
+   void window.astraDesktop?.localModelCancel?.();
+  }
+  setProposal(current=>current?.before===text?current:null);
+ },[text]);
  const probe=async()=>{
   const fn=window.astraDesktop?.localModelStatus;
   if(!fn){setMessage('로컬 AI는 설치형 Electron에서만 사용할 수 있습니다.');return;}
