@@ -7,6 +7,7 @@ import {pageNeedsOcr} from './ocrEligibility.ts';
 const MAX_PDF_BYTES=30*1024*1024;
 const MAX_PAGES=50;
 const MAX_PIXELS=8_000_000;
+const MAX_CANVAS_EDGE=4096;
 export default function LocalOcrPanel(){
  const [available,setAvailable]=useState(false);
  const [status,setStatus]=useState('로컬 OCR 엔진을 확인 중입니다.');
@@ -64,11 +65,19 @@ export default function LocalOcrPanel(){
    const textContent=await page.getTextContent();if(!current())return;
    if(!pageNeedsOcr(textContent.items))throw Error('이 페이지에는 선택 가능한 원문 텍스트가 있습니다. OCR로 덮어쓰지 말고 기존 PDF 검수 기능을 이용하세요.');
    const native=page.getViewport({scale:1});
-   const scale=Math.min(2,Math.sqrt(MAX_PIXELS/(native.width*native.height)));
+   if(!Number.isFinite(native.width)||!Number.isFinite(native.height)||
+      native.width<1||native.height<1)
+    throw Error('스캔 페이지 크기가 올바르지 않습니다.');
+   const scale=Math.min(2,Math.sqrt(MAX_PIXELS/(native.width*native.height)),
+    MAX_CANVAS_EDGE/native.width,MAX_CANVAS_EDGE/native.height);
+   if(!Number.isFinite(scale)||scale<0.01)throw Error('페이지가 OCR 허용 크기를 초과했습니다.');
    const viewport=page.getViewport({scale});
    const canvas=document.createElement('canvas');
    canvas.width=Math.ceil(viewport.width);canvas.height=Math.ceil(viewport.height);
-   if(canvas.width*canvas.height>MAX_PIXELS)throw Error('OCR 래스터 크기 상한을 초과했습니다.');
+   if(canvas.width*canvas.height>MAX_PIXELS||
+      canvas.width>MAX_CANVAS_EDGE||canvas.height>MAX_CANVAS_EDGE||
+      canvas.width<1||canvas.height<1)
+    throw Error('OCR 래스터 크기 상한을 초과했습니다.');
    const ctx=canvas.getContext('2d');if(!ctx)throw Error('로컬 PDF 이미지 렌더링을 준비하지 못했습니다.');
    await page.render({canvas,canvasContext:ctx,viewport}).promise;if(!current())return;
    const blob=await new Promise<Blob>((resolve,reject)=>
