@@ -1,8 +1,9 @@
 import {useEffect,useState} from 'react';
 import type {BusinessBrandKit} from './brandKit.ts';
+import {runSkuGatedAction} from '../commercial/skuActionGate.ts';
 import {BUSINESS_LIBRARY_MAX,readLocalBrandLibrary,writeLocalBrandLibrary,type SavedBrandKit} from './businessBrandLibrary.ts';
-interface Props{disabled:boolean;kit:BusinessBrandKit|null;onRestore:(kit:BusinessBrandKit)=>void}
-export default function BusinessBrandLibrary({disabled,kit,onRestore}:Props){
+interface Props{disabled:boolean;licenseReceipt:string;kit:BusinessBrandKit|null;onRestore:(kit:BusinessBrandKit)=>void}
+export default function BusinessBrandLibrary({disabled,licenseReceipt,kit,onRestore}:Props){
  const [items,setItems]=useState<SavedBrandKit[]>([]);
  const [error,setError]=useState('');
  const [corrupt,setCorrupt]=useState(false);
@@ -10,15 +11,18 @@ export default function BusinessBrandLibrary({disabled,kit,onRestore}:Props){
    catch{setError('브랜드 목록이 손상되어 자동 덮어쓰기를 차단했습니다. 로컬 프로필을 보존하세요.');setCorrupt(true);}},[]);
  const save=()=>{
    if(!kit||corrupt||disabled)return;
-   try{
-     const next=[...items,{id:crypto.randomUUID(),label:kit.name,kit,savedAt:Date.now()}];
-     writeLocalBrandLibrary(localStorage,next);setItems(next);setError('');
-   }catch(e){setError(e instanceof Error?e.message:'브랜드 저장에 실패했습니다.');}
+   void runSkuGatedAction(['brand-kit'],licenseReceipt,()=>{
+     try{const next=[...items,{id:crypto.randomUUID(),label:kit.name,kit,savedAt:Date.now()}];
+       writeLocalBrandLibrary(localStorage,next);setItems(next);setError('');}
+     catch(e){setError(e instanceof Error?e.message:'브랜드 저장에 실패했습니다.');}
+   }).catch(e=>setError(e instanceof Error?e.message:'사용권 확인 실패'));
  };
  const remove=(id:string)=>{
    if(disabled||corrupt||!window.confirm('브랜드 텍스트 보관 기록을 삭제하시겠습니까? 현재 문서와 로고는 변경되지 않습니다.'))return;
-   try{const next=items.filter(x=>x.id!==id);writeLocalBrandLibrary(localStorage,next);setItems(next);setError('');}
-   catch(e){setError(e instanceof Error?e.message:'브랜드 삭제에 실패했습니다.');}
+   void runSkuGatedAction(['brand-kit'],licenseReceipt,()=>{
+     try{const next=items.filter(x=>x.id!==id);writeLocalBrandLibrary(localStorage,next);setItems(next);setError('');}
+     catch(e){setError(e instanceof Error?e.message:'브랜드 삭제에 실패했습니다.');}
+   }).catch(e=>setError(e instanceof Error?e.message:'사용권 확인 실패'));
  };
  return <section data-business-brand-library className="business-brand-library no-print" aria-label="BUSINESS 로컬 브랜드 보관함">
    <h3>BUSINESS · 내 브랜드 보관함</h3>
