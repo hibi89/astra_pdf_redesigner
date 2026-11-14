@@ -10,9 +10,8 @@ const {PassThrough}=require('node:stream');
 const {createLocalOcrController,validatePng,OCR_MANIFEST}=require('../desktop/local-ocr-controller.cjs');
 const hash=b=>crypto.createHash('sha256').update(b).digest('hex');
 function png(w=4,h=4){
- const b=Buffer.alloc(33);Buffer.from([137,80,78,71,13,10,26,10]).copy(b);
- b.writeUInt32BE(13,8);b.write('IHDR',12,'ascii');
- b.writeUInt32BE(w,16);b.writeUInt32BE(h,20);b[24]=8;b[25]=2;
+ const b=Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAYAAACp8Z5+AAAAFklEQVR4nGP8////fwYkwMSABggLAAAGXQQE3kxYjAAAAABJRU5ErkJggg==','base64');
+ b.writeUInt32BE(w,16);b.writeUInt32BE(h,20);
  return new Uint8Array(b);
 }
 function fixture(){
@@ -55,6 +54,7 @@ test('OCR rejects malformed PNG, excessive pixels, unsupported data',()=>{
  assert.throws(()=>validatePng(Buffer.alloc(33)),/invalid-image/);
  assert.throws(()=>validatePng(png(5000,5000)),/image-pixel-limit/);
  assert.throws(()=>validatePng(new Uint8Array(8*1024*1024+1)),/invalid-image/);
+ const bad=png();bad[40]^=1;assert.throws(()=>validatePng(bad),/invalid-image/,'Tampered IDAT CRC must fail');
  assert.deepEqual(validatePng(png()).subarray(0,8),Buffer.from([137,80,78,71,13,10,26,10]));
 });
 test('OCR requires all pinned hashes, rejects symlink escape',async()=>{
