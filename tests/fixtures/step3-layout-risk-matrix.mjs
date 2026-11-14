@@ -42,7 +42,7 @@ export const STEP3_LAYOUT_RISK_CASES=Object.freeze([
     commands:[...gridLines,textItem('GRID_NORMAL_2401',55,565),textItem('GRID_ROTATED_2402',310,510,90)]},
   {id:'sparse-wide-text',expectedReview:true,markers:['WIDE_SPARSE_A_2501','WIDE_SPARSE_B_2502'],
     commands:[wideTextItem('WIDE_SPARSE_A_2501',40,720),wideTextItem('WIDE_SPARSE_B_2502',40,680)]},
-  {id:'out-of-page-text',expectedReview:true,markers:['OUTSIDE_PAGE_2601','INSIDE_PAGE_2602'],
+  {id:'out-of-page-text',expectedReview:true,markers:['SIDE_PAGE_2601','INSIDE_PAGE_2602'],
     commands:[textItem('OUTSIDE_PAGE_2601',-30,700),textItem('INSIDE_PAGE_2602',40,660)]},
   {id:'numeric-negation-grid',expectedReview:true,markers:['TOTAL_2750','NOT_APPROVED_2701','CELL_NUMBER_2702'],
     commands:[...gridLines,textItem('TOTAL_2750',55,565),textItem('NOT_APPROVED_2701',310,565),textItem('CELL_NUMBER_2702',55,510)]},
