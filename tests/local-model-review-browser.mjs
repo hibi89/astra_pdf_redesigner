@@ -89,26 +89,39 @@ try{
  await eventually(()=>evaluate("Boolean(document.querySelector('[data-local-ai-proposal]'))"));
  assert.equal(await evaluate("Number(document.querySelector('[data-model-apply-count]').textContent)"),0,'proposal never auto-applies');
  assert.equal(await evaluate("document.querySelector('[data-model-value]').textContent"),changed);
+ // A completed proposal is also tied to its source scope and cannot surface on an identical block.
+ await click('[data-change-scope]');
+ assert.equal(await evaluate("document.querySelector('[data-local-ai-proposal]')===null"),true,'proposal is hidden immediately after scope changes');
+ assert.equal(await evaluate("document.querySelector('[data-local-ai-accept]')===null"),true,'stale proposal cannot be accepted');
+ assert.equal(await evaluate("Number(document.querySelector('[data-model-apply-count]').textContent)"),0);
+ await click('[data-local-ai-run]');
+ await eventually(()=>evaluate("window.__astraModelMock.calls.length"),value=>value===4);
+ await evaluate("window.__astraModelMock.resolve(3,{status:'proposal',suggested:'새 문서 2026년 11월 15일을 검토했습니다.',externalTransfer:false})");
+ await eventually(()=>evaluate("Boolean(document.querySelector('[data-local-ai-proposal]'))"));
  await click('[data-local-ai-accept]');
  await eventually(()=>evaluate("Number(document.querySelector('[data-model-apply-count]').textContent)"),value=>value===1);
  const approved='새 문서 2026년 11월 15일을 검토했습니다.';
  assert.equal(await evaluate("document.querySelector('[data-model-value]').textContent"),approved);
+ await click('[data-change-scope]');
+ assert.equal(await evaluate("document.querySelector('[data-local-ai-undo]')===null"),true,'Undo is scoped to the paragraph that was approved');
+ await click('[data-change-scope]');
+ await eventually(()=>evaluate("Boolean(document.querySelector('[data-local-ai-undo]'))"));
  await click('[data-local-ai-undo]');
  await eventually(()=>evaluate("Number(document.querySelector('[data-model-apply-count]').textContent)"),value=>value===2);
  assert.equal(await evaluate("document.querySelector('[data-model-value]').textContent"),changed,'Undo restores exact source');
  // A rejected exception leaves the original paragraph and application count unchanged.
  await click('[data-local-ai-run]');
- await eventually(()=>evaluate("window.__astraModelMock.calls.length"),value=>value===4);
- await evaluate("window.__astraModelMock.reject(3)");
+ await eventually(()=>evaluate("window.__astraModelMock.calls.length"),value=>value===5);
+ await evaluate("window.__astraModelMock.reject(4)");
  await eventually(()=>evaluate("document.querySelector('[data-local-ai-status]')?.textContent"),value=>value?.includes('원문은 유지'));
  assert.equal(await evaluate("document.querySelector('[data-model-value]').textContent"),changed);
  assert.equal(await evaluate("Number(document.querySelector('[data-model-apply-count]').textContent)"),2);
  // Explicit cancellation also discards a later response.
  await click('[data-local-ai-run]');
- await eventually(()=>evaluate("window.__astraModelMock.calls.length"),value=>value===5);
+ await eventually(()=>evaluate("window.__astraModelMock.calls.length"),value=>value===6);
  await click('[data-local-ai-cancel]');
  await eventually(()=>evaluate("window.__astraModelMock.cancelCalls"),value=>value===3);
- await evaluate("window.__astraModelMock.resolve(4,{status:'proposal',suggested:'새 문서 2026년 11월 15일을 확인했습니다.',externalTransfer:false})");
+ await evaluate("window.__astraModelMock.resolve(5,{status:'proposal',suggested:'새 문서 2026년 11월 15일을 확인했습니다.',externalTransfer:false})");
  await pause(150);
  assert.equal(await evaluate("document.querySelector('[data-local-ai-proposal]')===null"),true,'cancelled response is discarded');
  assert.equal(await evaluate("document.querySelector('[data-model-value]').textContent"),changed);
@@ -116,8 +129,8 @@ try{
  // Withdraw consent and verify the button closes before another inference call.
  await click('[data-local-ai-consent]');
  assert.equal(await evaluate("document.querySelector('[data-local-ai-run]').disabled"),true);
- assert.equal(await evaluate("window.__astraModelMock.calls.length"),5);
- assert.deepEqual(await evaluate("window.__astraModelMock.calls.map(call=>call.consent)"),[true,true,true,true,true]);
+ assert.equal(await evaluate("window.__astraModelMock.calls.length"),6);
+ assert.deepEqual(await evaluate("window.__astraModelMock.calls.map(call=>call.consent)"),[true,true,true,true,true,true]);
  assert.deepEqual(external,[],'no external request was made');
  console.log('PASS P122 local model UI: explicit consent, stale-response discard, manual apply/Undo, error preservation, cancel, no external calls');
 }finally{

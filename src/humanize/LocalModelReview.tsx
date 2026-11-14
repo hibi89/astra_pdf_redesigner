@@ -1,7 +1,7 @@
 import {useEffect,useRef,useState} from 'react';
 import {ruleDiff} from './rules.ts';
 type Props={text:string;sourceScope:string;disabled:boolean;onApply:(text:string)=>void};
-type Proposal={before:string;after:string};
+type Proposal={before:string;after:string;sourceScope:string};
 export default function LocalModelReview({text,sourceScope,disabled,onApply}:Props){
  const [ready,setReady]=useState(false);
  const [consent,setConsent]=useState(false);
@@ -49,7 +49,7 @@ export default function LocalModelReview({text,sourceScope,disabled,onApply}:Pro
    const response=await fn(before,true);
    if(current!==generation.current)return;
    if(response.status==='proposal'&&response.externalTransfer===false&&typeof response.suggested==='string'){
-    setProposal({before,after:response.suggested});
+    setProposal({before,after:response.suggested,sourceScope});
     setMessage('로컬 모델 제안 초안입니다. 원문과 뜻·고유명사·수치를 직접 확인한 뒤 적용하세요.');
    }else{
     setMessage('윤문 제안이 거부되었거나 모델이 준비되지 않았습니다. 원문은 변경되지 않았습니다.');
@@ -59,8 +59,8 @@ export default function LocalModelReview({text,sourceScope,disabled,onApply}:Pro
  };
  const cancel=()=>{generation.current++;setBusy(false);busyRef.current=false;
   void window.astraDesktop?.localModelCancel?.();setMessage('로컬 추론을 중단했습니다. 원문은 유지됩니다.');};
- const fresh=!!proposal&&proposal.before===text;
- const canUndo=!!undo&&undo.after===text;
+ const fresh=!!proposal&&proposal.before===text&&proposal.sourceScope===sourceScope;
+ const canUndo=!!undo&&undo.after===text&&undo.sourceScope===sourceScope;
  const accept=()=>{
   if(!fresh||!proposal||disabled)return;
   const chosen=proposal;
