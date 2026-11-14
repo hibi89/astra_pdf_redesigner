@@ -12,8 +12,10 @@ const {acceptanceDomSource,MARKERS}=require('./pdf-acceptance-fixture.cjs');
 const {runStep2ProjectAcceptance}=require('./step2-project-acceptance.cjs');
 const {runStep3ProjectAcceptance}=require('./step3-project-acceptance.cjs');
 const {createLocalModelController}=require('./local-model-controller.cjs');
+const {createOwnerOllamaController}=require('./owner-ollama-controller.cjs');
 const {createLocalOcrController}=require('./local-ocr-controller.cjs');
 const localModel=createLocalModelController({resourcesDir:process.resourcesPath});
+const ownerOllama=createOwnerOllamaController();
 const localOcr=createLocalOcrController({resourcesDir:process.resourcesPath});
 
 const APP_URL='astra://app/index.html';
@@ -162,15 +164,21 @@ function registerLocalModel(){
     event.sender===mainWindow.webContents&&isAppUrl(event.sender.getURL());
   ipcMain.handle('astra:local-model-status',async event=>{
     if(!trusted(event))throw Error('Untrusted model status request');
-    return localModel.status();
+    const packaged=await localModel.status();
+    return packaged.status==='available'?packaged:ownerOllama.status();
   });
-  ipcMain.handle('astra:local-model-propose',async(event,text)=>{
+  ipcMain.handle('astra:local-model-propose',async(event,text,explicitConsent)=>{
     if(!trusted(event))throw Error('Untrusted model proposal request');
-    return localModel.propose(text);
+    if(explicitConsent!==true)return{status:'error',reason:'local-model-consent-required'};
+    const packaged=await localModel.status();
+    return packaged.status==='available'?localModel.propose(text):
+      ownerOllama.propose(text,{explicitConsent:true});
   });
   ipcMain.handle('astra:local-model-cancel',async event=>{
     if(!trusted(event))throw Error('Untrusted model cancellation request');
-    return localModel.cancel();
+    const owner=ownerOllama.cancel();
+    const packaged=localModel.cancel();
+    return owner.status==='cancel-requested'?owner:packaged;
   });
 }
 
