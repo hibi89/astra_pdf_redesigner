@@ -15,11 +15,14 @@ export default function LocalOcrPanel(){
  const [pageNumber,setPageNumber]=useState(1);
  const [layoutMode,setLayoutMode]=useState<3|6>(6);
  const [text,setText]=useState('');
+ const [previewUrl,setPreviewUrl]=useState<string|null>(null);
+ const [manualChecks,setManualChecks]=useState({numbers:false,meaning:false,layout:false});
  const [draftOrigin,setDraftOrigin]=useState<{page:number;mode:3|6}|null>(null);
  const [draftEdited,setDraftEdited]=useState(false);
  const [busy,setBusy]=useState(false);
  const [error,setError]=useState('');
  const epoch=useRef(0);
+ useEffect(()=>()=>{if(previewUrl)URL.revokeObjectURL(previewUrl);},[previewUrl]);
  useEffect(()=>{
   let active=true;
   const bridge=window.astraDesktop?.localOcrStatus;
@@ -36,7 +39,7 @@ export default function LocalOcrPanel(){
  const choose=(file:File|null)=>{
   epoch.current++;
   if(busy)void window.astraDesktop?.localOcrCancel?.();
-  setBusy(false);setText('');setDraftOrigin(null);setDraftEdited(false);setError('');setPageNumber(1);
+  setBusy(false);setText('');setPreviewUrl(null);setManualChecks({numbers:false,meaning:false,layout:false});setDraftOrigin(null);setDraftEdited(false);setError('');setPageNumber(1);
   if(!file){setSource(null);return;}
   if(!/\.pdf$/i.test(file.name)||file.size<10||file.size>MAX_PDF_BYTES){
    setSource(null);setError('30MiB 이하 PDF 파일만 선택하세요.');return;
@@ -44,14 +47,14 @@ export default function LocalOcrPanel(){
   setSource(file);
  };
  const cancel=()=>{
-  epoch.current++;setBusy(false);setText('');setDraftOrigin(null);setDraftEdited(false);setError('OCR 실행을 취소했습니다. 기존 문서에는 변경이 없습니다.');
+  epoch.current++;setBusy(false);setText('');setPreviewUrl(null);setManualChecks({numbers:false,meaning:false,layout:false});setDraftOrigin(null);setDraftEdited(false);setError('OCR 실행을 취소했습니다. 기존 문서에는 변경이 없습니다.');
   void window.astraDesktop?.localOcrCancel?.();
  };
  const run=async()=>{
   if(!source||!available||busy||!window.astraDesktop?.localOcrRecognizePng)return;
   const token=++epoch.current;
   const current=()=>epoch.current===token;
-  setBusy(true);setText('');setDraftOrigin(null);setDraftEdited(false);setError('');
+  setBusy(true);setText('');setPreviewUrl(null);setManualChecks({numbers:false,meaning:false,layout:false});setDraftOrigin(null);setDraftEdited(false);setError('');
   let loader:null|{destroy:()=>Promise<void>}=null;
   try{
    const bytes=await source.arrayBuffer();if(!current())return;
@@ -90,6 +93,8 @@ export default function LocalOcrPanel(){
    if(!current())return;
    if(response.status==='review'&&response.reviewOnly===true&&response.approved===false&&response.externalTransfer===false&&typeof response.text==='string'){
     setText(response.text);
+    setPreviewUrl(URL.createObjectURL(blob));
+    setManualChecks({numbers:false,meaning:false,layout:false});
     setDraftOrigin({page:pageNumber,mode:layoutMode});
    }else throw Error(response.status==='unavailable'?'OCR 엔진 파일이 아직 포함되지 않았습니다.':
     response.reason==='cancelled'?'OCR 실행을 취소했습니다.':'OCR 결과를 확인할 수 없습니다. 다른 페이지를 시도하세요.');
@@ -111,14 +116,14 @@ export default function LocalOcrPanel(){
    <input type="number" min="1" max={MAX_PAGES} value={pageNumber} disabled={busy}
     data-step7-ocr-page onChange={e=>{
      setPageNumber(Math.max(1,Math.min(MAX_PAGES,Number(e.target.value)||1)));
-     setText('');setDraftOrigin(null);setDraftEdited(false);setError('');
+     setText('');setPreviewUrl(null);setManualChecks({numbers:false,meaning:false,layout:false});setDraftOrigin(null);setDraftEdited(false);setError('');
     }}/>
   </label>}
   <label className="field">스캔 페이지 구성
    <select data-step7-ocr-layout-mode value={layoutMode} disabled={busy||!available}
     onChange={e=>{
      setLayoutMode(e.target.value==='3'?3:6);
-     setText('');setDraftOrigin(null);setDraftEdited(false);setError('');
+     setText('');setPreviewUrl(null);setManualChecks({numbers:false,meaning:false,layout:false});setDraftOrigin(null);setDraftEdited(false);setError('');
     }}>
     <option value={6}>일반 단락 한 영역 (PSM 6)</option>
     <option value={3}>표·여러 영역 자동 분석 (PSM 3)</option>
@@ -132,7 +137,17 @@ export default function LocalOcrPanel(){
   {error&&<p className="warning" role="alert" data-step7-ocr-error>{error}</p>}
   {text&&<div>
    <p className="warning" role="status" data-step7-ocr-draft-origin>OCR 미승인 초안 · {draftOrigin?.page}페이지 · PSM {draftOrigin?.mode}{draftEdited?' · 수동 수정 있음':''}. 반드시 원본 PDF와 대조하고 필요한 부분만 수동으로 사용하세요.</p>
-   <label className="field">검토·수정할 수 있는 OCR 초안<textarea data-step7-ocr-draft rows={10} value={text} onChange={e=>{setText(e.target.value);setDraftEdited(true);}}/></label>
+   {previewUrl&&<div className="reference-image-row" data-step7-ocr-side-by-side>
+      <div><strong>선택된 원본 페이지의 임시 이미지</strong><img src={previewUrl} alt="OCR 대상 스캔 PDF 페이지 · 사용자가 수동 대조" style={{width:'100%',height:'auto',maxWidth:'100%'}}/></div>
+      <p className="help-text">원본 페이지와 인식 결과의 글자·숫자·셀 순서를 반드시 비교하세요. 임시 이미지와 OCR 초안은 세션에서만 유지됩니다.</p>
+   </div>}
+   <label className="field">검토·수정할 수 있는 OCR 초안<textarea data-step7-ocr-draft rows={10} value={text} onChange={e=>{setText(e.target.value);setDraftEdited(true);setManualChecks({numbers:false,meaning:false,layout:false});}}/></label>
+   <div role="group" aria-label="OCR 수동 원본 대조 체크리스트" data-step7-ocr-manual-checks>
+    <label><input type="checkbox" checked={manualChecks.numbers} onChange={e=>setManualChecks(v=>({...v,numbers:e.target.checked}))}/> 날짜·숫자·금액 원문 대조</label>
+    <label><input type="checkbox" checked={manualChecks.meaning} onChange={e=>setManualChecks(v=>({...v,meaning:e.target.checked}))}/> 부정문·이름·문장 의미 대조</label>
+    <label><input type="checkbox" checked={manualChecks.layout} onChange={e=>setManualChecks(v=>({...v,layout:e.target.checked}))}/> 표·다단·이미지/누락 대조</label>
+    <p role="status" data-step7-ocr-manual-status>{Object.values(manualChecks).filter(Boolean).length}/3 수동 확인 · 자동 정확도 인증 아님</p>
+   </div>
    <p className="help-text">이 화면을 닫으면 초안은 사라집니다. 프로젝트·원본 PDF·저장 문서는 변경되지 않습니다.</p>
   </div>}
  </section>;
