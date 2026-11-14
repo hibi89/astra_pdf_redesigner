@@ -11,6 +11,9 @@ declare global {
       localModelStatus?:()=>Promise<{status:'available'|'unavailable';modelId?:string;reason?:string}>;
       localModelPropose?:(text:string)=>Promise<{status:string;suggested?:string;reason?:string}>;
       localModelCancel?:()=>Promise<{status:string}>;
+      localOcrStatus?:()=>Promise<{status:'available'|'unavailable';engineId?:string;reason?:string}>;
+      localOcrRecognizePng?:(bytes:Uint8Array)=>Promise<{status:string;text?:string;reason?:string;reviewOnly?:boolean;approved?:boolean;externalTransfer?:boolean}>;
+      localOcrCancel?:()=>Promise<{status:string}>;
     }>;
   }
 }
