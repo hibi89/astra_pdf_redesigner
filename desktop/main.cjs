@@ -257,6 +257,12 @@ async function runSmoke(win){
   if(modelStatus.status!=='unavailable')throw Error('Model must fail closed without shipped weights');
   const unavailableProposal=await evaluate("window.astraDesktop.localModelPropose('synthetic CI text')");
   if(unavailableProposal.status!=='unavailable')throw Error('Unshipped model unexpectedly executed');
+  const ocrBridge=await evaluate("typeof window.astraDesktop.localOcrRecognizePng==='function'");
+  if(!ocrBridge)throw Error('Secure local OCR bridge unavailable');
+  const ocrStatus=await evaluate('window.astraDesktop.localOcrStatus()');
+  if(ocrStatus.status!=='unavailable')throw Error('Unshipped OCR assets unexpectedly enabled');
+  const badOcr=await evaluate('window.astraDesktop.localOcrRecognizePng(new Uint8Array(33))');
+  if(badOcr.status!=='error'||badOcr.reason!=='invalid-image')throw Error('OCR image validation failed');
   const saved=await evaluate("window.astraDesktop.savePdf()");
   if(saved?.status!=='saved')throw Error('Desktop PDF export failed: '+JSON.stringify(saved));
   await evaluate("localStorage.removeItem('__astra_desktop_ci__')");
