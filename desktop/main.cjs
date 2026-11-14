@@ -7,6 +7,7 @@ const {pathToFileURL}=require('node:url');
 const {resolveBundleAsset}=require('./bundle-path.cjs');
 const {approvedSearchTarget}=require('./approved-search-link.cjs');
 const {auditOutputPdf}=require('./pdf-output-audit.cjs');
+const {assertTrustedPdfSaveRequest}=require('./pdf-export-ipc-guard.cjs');
 const {acceptanceDomSource,MARKERS}=require('./pdf-acceptance-fixture.cjs');
 const {runStep2ProjectAcceptance}=require('./step2-project-acceptance.cjs');
 const {runStep3ProjectAcceptance}=require('./step3-project-acceptance.cjs');
@@ -107,8 +108,7 @@ async function renderLocalPdf(){
 }
 function registerPdfSaving(){
   ipcMain.handle('astra:save-pdf',async(event,rawExpectedTextMarkers,expectedRasterImages=0)=>{
-    if(!mainWindow||event.sender!==mainWindow.webContents||
-       !isAppUrl(event.sender.getURL()))throw Error('Blocked untrusted PDF export request');
+    assertTrustedPdfSaveRequest(event,mainWindow);
     const expectedTextMarkers=validOutputMarkers(rawExpectedTextMarkers);
     if(!Number.isInteger(expectedRasterImages)||expectedRasterImages<0||expectedRasterImages>5000)throw Error('Invalid PDF image review count');
     // Smoke mode uses an isolated test-only directory. It never opens the
