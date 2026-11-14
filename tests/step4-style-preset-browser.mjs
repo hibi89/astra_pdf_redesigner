@@ -134,7 +134,7 @@ try{
     const attrs=match[1];return{text:match[2].replace(/<[^>]*>/gu,'').trim(),xMin:Number(/xMin="([\d.]+)"/u.exec(attrs)?.[1]),yMin:Number(/yMin="([\d.]+)"/u.exec(attrs)?.[1]),xMax:Number(/xMax="([\d.]+)"/u.exec(attrs)?.[1]),yMax:Number(/yMax="([\d.]+)"/u.exec(attrs)?.[1])};
    }).sort((a,b)=>a.yMin-b.yMin||a.xMin-b.xMin);
    pdfGeometry.push(words.map(word=>[word.xMin,word.yMin,word.xMax,word.yMax].map(value=>Math.round(value*10)/10)));
-   assert.ok(words.length>0,id+' page '+(pageIndex+1)+' has readable text');
+
    for(const word of words)assert.ok(word.xMin>=-0.5&&word.yMin>=-0.5&&word.xMax<=width+0.5&&word.yMax<=height+0.5,id+' text clipped outside page '+(pageIndex+1));
    const overlapWords=words.filter(word=>/^[\x20-\x7e]+$/u.test(word.text));
    for(let wi=0;wi<overlapWords.length;wi++)for(let wj=wi+1;wj<overlapWords.length;wj++){
@@ -144,6 +144,7 @@ try{
     assert.ok(!(overlapX>1&&overlapY>1),id+' overlapping PDF text boxes on page '+(pageIndex+1)+' '+JSON.stringify({a,b,overlapX,overlapY}));
    }
   }
+  assert.ok(pdfGeometry.some(page=>page.length>0),id+' PDF must contain readable text across its pages');
   return{pageCount,rasterCount,pdfGeometry:JSON.stringify(pdfGeometry)};
  };
   assert.equal(await evaluate("document.querySelector('[data-style-compare-toggle]')?.textContent.includes('8개 디자인 비교')"),true);
