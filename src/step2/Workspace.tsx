@@ -17,6 +17,7 @@ import {downloadStylePreset,importStylePreset} from '../step4/stylePreset.ts';
 import {SKU_LAYOUT_CANDIDATES,skuLayoutCandidate} from '../step4/skuLayoutCandidates.ts';
 import ReferenceSearchPanel from '../step6/ReferenceSearchPanel.tsx';
 import {downloadAdvancedLayoutPreset,importAdvancedLayoutPreset} from '../step4/advancedLayoutPreset.ts';
+import ProLayoutLibrary from '../step4/ProLayoutLibrary.tsx';
 import {downloadBusinessBrandKit,importBusinessBrandKit,validateBusinessBrandKit,type BusinessBrandKit} from '../step4/brandKit.ts';
 import {makeSourceReviewReceipt,downloadSourceReviewReceipt} from '../step3/reviewReceipt.ts';
 
@@ -580,6 +581,8 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
             <input ref={advancedPresetInput} className="hidden-input" type="file" accept=".json,application/json" data-advanced-preset-file
               aria-label="고급 레이아웃 JSON 선택" onChange={event=>{const file=event.target.files?.[0];event.target.value='';if(file)void loadAdvancedPreset(file);}}/>
             {advancedPresetError&&<p role="alert" className="warning" data-advanced-preset-error>{advancedPresetError}</p>}
+            <ProLayoutLibrary disabled={!editable} selectedId={activeAdvancedLayoutId}
+              onRestore={layoutId=>{closeStyleCompare();clearReference();setPortableStyle(null);setAdvancedPreview({documentId:doc.id,layoutId});}}/>
             <p className="help-text">이 JSON에는 레이아웃 ID만 저장합니다. PDF 내용·이미지·문서 설정은 포함되지 않습니다. 현재 V2 프로젝트 저장소나 판매 권한은 변경하지 않습니다.</p>
             {activeAdvancedLayoutId&&<div className="advanced-layout-preview-note" role="status" data-extended-layout-status>
               {skuLayoutCandidate(activeAdvancedLayoutId)?.label} · 임시 미리보기/출력만 지원, 저장 데이터는 변경되지 않습니다.

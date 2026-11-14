@@ -151,6 +151,20 @@ try{
  assert.deepEqual(await evaluate(stored),advancedPrior,'Brand JSON import must not mutate saved V2');
  await evaluate("document.querySelector('[data-business-brand-clear]').click()");
  await evaluate("document.querySelector('[data-extended-layout-cancel]').click()");
+
+ // P97 permanent independent PRO layout library: explicit save/reload/restore, no V2 mutation.
+ await evaluate("document.querySelector('[data-extended-layout-id=pro-03]').click()");
+ await eventually(()=>evaluate("document.querySelector('.project-paper')?.dataset.advancedLayout"),v=>v==='pro-03');
+ await evaluate("document.querySelector('[data-pro-layout-save]').click()");
+ await eventually(()=>evaluate("document.querySelector('[data-pro-layout-count]')?.textContent.includes('1/24')"));
+ const storedPro=await evaluate("localStorage.getItem('astra.pro-layout-library.v1')");
+ assert.equal(JSON.parse(storedPro).items[0].layoutId,'pro-03');
+ assert.deepEqual(await evaluate(stored),advancedPrior,'Stored layout ID must not mutate saved document');
+ await evaluate("document.querySelector('[data-extended-layout-cancel]').click()");
+ await evaluate("document.querySelector('[data-pro-layout-restore]').click()");
+ await eventually(()=>evaluate("document.querySelector('.project-paper')?.dataset.advancedLayout"),v=>v==='pro-03');
+ assert.deepEqual(await evaluate(stored),advancedPrior);
+ console.log('PASS P97 PRO LIBRARY: local saved ID and preview restore independent of V2 document');
  console.log('PASS P93 PRO/BUSINESS 22/22: unique DOM geometries, every A4 PDF output audited, V2 unchanged');
  console.log('PASS STEP4 PORTABLE STYLE: file export/import, transient preview/cancel, apply/undo, A4 PDF, tamper and original V2 preservation');
 }finally{
