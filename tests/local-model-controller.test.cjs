@@ -75,3 +75,39 @@ test('M03-B validation blocks numbers, quoted spans, URLs and empty output',()=>
   assert.equal(validateSuggestion('참고 https://example.com','참고 https://other.com'),false);
   assert.equal(validateSuggestion('문서를 확인하였습니다.',''),false);
 });
+
+
+test('P90 local model guard: 20 synthetic Korean golden suggestions preserve protected literals and negation',()=>{
+ const cases=[
+  ['문서를  확인하였습니다.','문서를 확인했습니다.',true],
+  ['계약서 원본을  확인하였습니다.','계약서 원본을 확인했습니다.',true],
+  ['금액은 30,000원으로  확정하였습니다.','금액은 30,000원으로 확정했습니다.',true],
+  ['결제 -100원으로 했습니다.','결제 +100원으로 했습니다.',false],
+  ['입금 +100원 입니다.','입금 100원 입니다.',false],
+  ['숫자 2026년 11월 14일','숫자 2026년 11월 15일',false],
+  ['이행하지 않습니다.','이행합니다.',false],
+  ['제안이 없습니다.','제안이 있습니다.',false],
+  ['결제를 안 합니다.','결제를 합니다.',false],
+  ['협조는 불가합니다.','협조는 가능합니다.',false],
+  ['등록이 금지됩니다.','등록이 허용됩니다.',false],
+  ['문서는 미승인 상태입니다.','문서는 승인 상태입니다.',false],
+  ['계약은 취소되었습니다.','계약은 유지되었습니다.',false],
+  ['본문에서 해당 항목을 제외하였습니다.','본문에서 해당 항목을 포함하였습니다.',false],
+  ['“원문”으로 작성한 문장입니다.','“수정”으로 작성한 문장입니다.',false],
+  ['‘원문’과 결론을 유지합니다.','‘수정’과 결론을 유지합니다.',false],
+  ['참고 https://example.com','참고 https://other.com',false],
+  ['비율은 25% 입니다.','비율은 30% 입니다.',false],
+  ['총 $100 입금하였습니다.','총 $200 입금했습니다.',false],
+  ['이름 홍길동께서 검토하였습니다.','이름 홍길동께서 검토했습니다.',true],
+ ];
+ assert.equal(cases.length,20);
+ for(const [before,after,expected] of cases){
+   assert.equal(validateSuggestion(before,after),expected,JSON.stringify({before,after}));
+ }
+});
+test('P90 local rewrite guard rejects numeric polarity and Korean negation without model weight',()=>{
+ assert.equal(validateSuggestion('잔고 -1200원입니다.','잔고 1200원입니다.'),false);
+ assert.equal(validateSuggestion('결제를 승인하지 않습니다.','결제를 승인합니다.'),false);
+ assert.equal(validateSuggestion('구매는 불가합니다.','구매는 가능합니다.'),false);
+ assert.equal(RELEASE_MANIFEST,null,'No real GGUF activation or download');
+});
