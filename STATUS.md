@@ -1,3 +1,12 @@
+## 2026-11-14 KST — 사용자 재개, 최종설계 100% 목표 / P88 오프라인 5–10 PDF 배치 인수검수
+
+- **사용자 최신 지시:** 기존 11/13 중단·[사용자 개입 필요] 상태를 폐기하고 100% 완성 작업 재개. 해총 Astra [작업중] 중앙 커밋 `e1bbafc864ccd935cfc8ba68f9a43b049ea92f4b`.
+- **이번 소스 기능:** 별도 `scripts/owner-batch-acceptance.mjs`로 STEP7 기존 PDF 원본/출력 SHA+수동 7항목 검수 기록을 로컬에서 5–10건 결합. 원본 내용·파일명·경로를 출력하지 않음; symlink/중복/변조/덮어쓰기 차단. `tests/owner-batch-acceptance.test.mjs`를 npm test에 추가. 구조·스키마 변경 없음.
+- **실제 실행:** Node22.16.0 로컬 합성 단위테스트 **5 PASS / 0 FAIL**, `node --check` PASS. 이 테스트의 PDF는 헤더만 있는 합성 검사용 바이트, 실제 PDF 파싱/Windows·CI 새 SHA는 **검증 대기**.
+- **완성 판단:** 기존 85% *엔지니어링 추정*과 새로운 사용자 최종설계 *공식 UNASSESSED* 구분; 100% 미달, 모든 SKU RELEASE HOLD/미등록. 구매자 PC/실PDF 5~10/PRO20/BUSINESS30/진짜 라이선스 확보 한국어 GGUF·GPU/CPU 성능·서명/상업권·고객 인수 미검증.
+- **원본 보호:** 기존 STEP1 v1, STEP2 IDB V2, main, PR3/4/10, PDF 원본, 사용자 데이터, 환경변수·모델/유료 서비스 변경 없음. 배포/Vercel 미적용. 테스트가 녹색이어도 판매 GO로 전환하지 않음.
+- **후속:** 새 GitHub 커밋 SHA에 연결된 Linux Chrome/Edge/Windows CI 확인 → 실패하면 원인별 최소 수정 → 소유자 Windows 실PDF 점검을 별도 요청 → PDF/모델 사용권 및 디자인 20/30 개발 순으로 검증.
+
 ## 2026-11-13 KST — 사용자 직접 지시로 ASTRA 개발 종료·[사용자 개입 필요] 인계
 - **최신 사용자 지시:** 목표 95% 달성 전이라도 Astra `[작업중]` 중앙 표식을 제거하고 `[사용자 개입 필요]`로 변경. 이는 앞선 일반 목표 잠금 지시를 **Astra에만** 명시적으로 변경한 것임. 해총 `kmong-productization/docs/audits/KMONG_16_CURRENT_20261111.md`에 반영, 중앙 표식 `[사용자 개입 필요]`.
 - **상태:** 현재 완료 엔지니어링 85% 잠정, 95% **미달**; 출시 **RELEASE HOLD**, BASIC/PRO/BUSINESS 판매 NO-GO. 기존 자동 CI 검증은 소스 `0db2acb5185445d342f97062a6962ec52a08a1fe` 기준 Linux/Chrome+Edge [#43243819225](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43243819225) 2/2 SUCCESS 150 PASS, Windows [#43243819123](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43243819123) 1/1 SUCCESS, 149 PASS/1 SKIP, desktop16 PASS, NSIS 설치·업그레이드 PASS. 최근 변경은 문서·상태만, 기능·실제 검증 재실행 없음.

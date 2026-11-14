@@ -1,3 +1,16 @@
+## 2026-11-14 KST — ASTRA P100 재개/P88 검수 도구 인수인계 (필수 10항)
+
+1. **목표·용도·확정 요구·기술:** 원래 7단계/상용 30k·60k·90k 8/20/30 템플릿과 동등한 오프라인 한국어 윤문까지 포함하는 Astra PDF Redesigner의 최종설계 100%를 목표로 재개. React19/TS5/Vite7/PDF.js/Electron NSIS, 로컬·데이터 보존 우선.
+2. **완료·변경·결정 근거:** 새 P88 `scripts/owner-batch-acceptance.mjs`/단위 5개를 추가해 기존 STEP7 SHA·수동 7항목 검수의 5~10개 오프라인 집계를 제공. 실고객 PDF를 공개 CI로 보내는 방식 대신 로컬 해시 검사를 선택(비용/보안/유지보수 우위). 원문 파일과 저장 DB 변경 없음.
+3. **테스트/미검증:** Node22.16.0 단독 합성 5 PASS/0 FAIL/0 SKIP, `node --check` PASS. 합성 PDF는 헤더만 있으므로 실제 파싱/육안/구매자 Win10·11, 새 SHA 전체 npm/Chrome/Edge/Windows hosted CI는 **검증 대기**. 이전 0db2acb5 CI는 과거 기준.
+4. **단계·차단·중단:** P88 로컬 구현 및 단위검증 완료, 원격 CI/통합 검증 대기. 최종 100% 미달, 공식 최종완성률 UNASSESSED; 기존 엔지니어링 추정 85% 역사 수치 유지. [작업중]·RELEASE HOLD·미등록.
+5. **오류·원인·시도·대안:** 신규 구현에서 현재 단위 실패 없음. 생략 없는 실고객 PDF 충실도·실기기 검증은 장비/원본이 없어 불가능; 대안은 사용자 소유 PC 오프라인 검수, 퍼블릭 GitHub에는 합성만. 반복 무의미 CI·원본 업로드 금지.
+6. **GitHub/브랜치/SHA/경로:** `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, 최신 기능 SHA는 커밋 후 GitHub HEAD로 확인. 기준 parent `2c2bef5288257d9405bb912aa838ca071703e0ed`, Draft PR10 미병합. `scripts/owner-batch-acceptance.mjs`, `tests/owner-batch-acceptance.test.mjs`, `docs/commercial/ASTRA_OWNER_BATCH_ACCEPTANCE_20261114.md`. 허브 `hibi89/hackathon-command-center-2026@kmong-productization`, 마커 커밋 `e1bbafc8`.
+7. **배포/환경:** 개발 `npm test`, `npm run build`, `npm run desktop:verify`, `npm run desktop:package`. Production URL/Vercel 해당 없음. Windows NSIS 이전 합성 PASS, 실제 고객 출시 NO-GO.
+8. **원본/백업/보안:** STEP1 localStorage v1/STEP2 IndexedDB V2 및 모든 원본 설계·PDF 수정 금지, Git 이전 SHA 롤백. 실제 고객 PDF·절대경로 manifest·모델 가중치/GitHub 비밀 업로드 금지, CLI 외부 연결0/원본 읽기전용.
+9. **다음 우선·승인:** 새 SHA CI 성공 확인; PRO20·BUSINESS30 고유 디자인/템플릿 저장·배치·브랜드 기능 구현과 회귀. 실제 한국어 GGUF/런타임은 사용자 승인·재배포권·성능을 먼저 확보(무단 다운로드 금지). 사용자는 원본 PDF 5~10개 준비, 실제 Windows10·11 설치·PDF 출력 육안 검수, 판매·지원·라이선스 최종 GO.
+10. **갱신 기준:** 2026-11-14 KST, 현재 범위 로컬 Node22 합성 5 tests/소스 읽기·기능 브랜치 변경. CI·물리 고객 컴퓨터·사용권 최종 확인 안 됨. 문서 자체 HEAD는 새 커밋 후 재조회, 기존 증거 SHA `0db2acb5`로 새 코드 성공 주장 금지.
+
 ## 2026-11-13 KST — ASTRA 사용자 개입 필요 · 명시적 작업 종료 인수인계 (필수 10항)
 1. **목표·기술**: 원본 PDF→로컬 구조화→검수→새 A4 출력의 Astra PDF Redesigner(React/TS/Vite/Electron/PDF.js). 최종 목표 95% 유지.
 2. **완료 기능·결정 근거**: P85 이미지 페이지별 이동 위험, P86 전체 텍스트 읽기 순서 위험, P87 소유자 7항목 수동 검수·JSON. 최신 사용자 직접 지시로 개발 `[작업중]` 해제, `[사용자 개입 필요]`로 전환. **95% 달성 아님**.
