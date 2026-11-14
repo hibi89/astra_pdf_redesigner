@@ -1,3 +1,10 @@
+## 2026-11-14 KST — P92 고급 레이아웃 22종 휴대용 JSON 재사용 구현
+
+- P92 **소스 SHA `b8b29bc13fe09a7220ed47b5139e5f41c3e5140f`**: `src/step4/advancedLayoutPreset.ts`의 22종 고급 ID만 JSON `astra-advanced-layout`/version1으로 안전 내보내기·재불러오기. 1KiB 상한·스키마 키 정확 검사·유효 ID 체크·불량/임의 추가 필드 거부. `Workspace.tsx`에 UI 통합 및 브라우저 V2 저장 불변 회귀 추가, 데이터베이스 스키마 마이그레이션·PDF/에셋 직렬화·원본 수정 없음.
+- 독립 Node22 모듈 테스트 P92 **2/2 PASS**(실제 저장소 전체 빌드와 다른 격리 미러), P91 이전 `be243985ff5c` **Node161/161 PASS + Chrome/Edge 2/2 SUCCESS + Windows 1/1 SUCCESS + 최종설계 정책 SUCCESS** ([Linux #43547363002](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43547363002), [Windows #43547362316](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43547362316)). P92 정확 소스 CI [Linux #43547702092](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43547702092) 및 [Windows #43547702089](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43547702089) **실행 중**, [설계 정책 #43547702386](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43547702386) SUCCESS. 최종 결과를 확인하기 전 P92 통합 통과 주장 금지.
+- 고급 JSON 파일 수동 재사용은 PRO20/BUSINESS30 완성·로컬 DB 영구 라이브러리·라이선스 entitlement·브랜드 키트·배치 작업이 아니다. STEP6 외부 이미지 검색은 소유자 동의형 링크만 구현(무자동검색/무 PDF 전송). OCR 실실행/상용 한국어 GGUF/물리 Win10·11/실PDF5~10/폰트·모델 재배포·실고객 인수·크몽 승인 **미완**.
+- 공식 최종설계율 **UNASSESSED, 100% 미달**; 역사적 엔지니어링 85% 재사용 금지. [작업중], BASIC/PRO/BUSINESS RELEASE HOLD, 미등록, Production/Vercel 미적용. 소유자 13시 작업 묶음: `docs/commercial/ASTRA_OWNER_1300_CHECKLIST_20261114.md`. 기존 main/PR10·사용자 데이터 보존.
+
 ## 2026-11-14 KST — STEP6 무료 검색 동의형 연결·P91 작업
 
 - 정확 소스 HEAD `95a7f7be6cab5a98637fceac7f50196eb1bac219`: React STEP6 검색 패널, 수동 키워드만 허용, Google/Bing 고정 HTTPS 새 탭 링크, 개별 클릭 전 동의 요구. PDF 바이트·파일명·프로젝트 데이터 자동 전송 없음. 기존 STEP5 사용자가 직접 내려받은 권리 확보 파일만 로컬 분석. 외부 API·유료 결제·schema 변경 없음.

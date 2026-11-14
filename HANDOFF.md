@@ -1,3 +1,16 @@
+## 2026-11-14 KST — P92 STEP4 고급 시안 휴대용 파일 (10항)
+
+1. **목표/요구/기술:** 사용자 확정 7단계 전체·BASIC8/PRO20/BUSINESS30 100%, 0원 로컬 앱. React/TypeScript/Vite/Electron/PDF.js, 판매·실모델 별도 승인.
+2. **완료 변경/선정 근거:** 22종 임시 고급 레이아웃에 대해 `src/step4/advancedLayoutPreset.ts`의 JSON export/import + `src/step2/Workspace.tsx` UI. DB V2 스키마 직접 변경(A)은 동의/마이그레이션 위험이 크므로, 작은 JSON 수동 보관(B)을 먼저 선택. 레이아웃 ID 외 고객 내용 비포함.
+3. **테스트/결과:** 독립 Node22 P92 테스트 **2 PASS/0 FAIL**, 기존 P91 정확 SHA `be243985ff5c` Chrome/Edge Linux #43547363002 **2/2 GREEN, Node 161/161**, Windows #43547362316 **SUCCESS**, gate #43547362463 SUCCESS. P92 새 소스 `b8b29bc13fe0` CI Linux #43547702092, Win #43547702089 **진행 중(최종 미검증)**, gate #43547702386 SUCCESS. P92 새 브라우저 JSON roundtrip·보안회귀는 CI 종료 전 미확정.
+4. **완료/진행/대기/차단:** 기존 BASIC8 + 22개 고급 임시 출력, P91 STEP6 동의형 수동 검색, P92 JSON 재사용 구현. 원래 STEP6 앱내 카드/수집 및 STEP7 OCR, 오프라인 실제 LLM, PRO/BUSINESS 정식 저장/권한/배치·브랜드키트/고객 QA/권리/판매 GO 미완; 100% 미달.
+5. **문제·시도·전환:** 저장 스키마 직접 변환·외부 API/고객PDF 업로드/무단 다운로드는 회피. 유효 레이아웃 ID 22개·1KiB·정확 키 검증 방식 채택. P92 CI 미완료는 실패 단정하지 말고 확인 뒤 최소 수정.
+6. **Repo/브랜치/SHA/경로:** `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, 기능 SHA `b8b29bc13fe09a7220ed47b5139e5f41c3e5140f`, 이전 P91 `be243985ff5c`(승인보안 회귀). `src/step4/advancedLayoutPreset.ts`, `src/step6/*`, `tests/advanced-layout-preset.test.ts`, `tests/step4-style-preset-browser.mjs`.
+7. **Production/실행/환경:** `npm test && npm run build`, GitHub hosted Node22 Chrome/Edge Windows NSIS. Production URL 및 Vercel 프로젝트 **미적용**, 로컬 실제 Win10/11 **미검증**, 공개 판매 미등록.
+8. **원본/백업/비밀:** 부모 기능 SHA `be243985ff5c`로 Git revert 복구 가능. 기존 main/Draft PR10/설정·DB localStorage v1, IndexedDB v2·고객 PDF 불변. 파일명/고객자료/토큰/모델 가중치 GitHub 업로드 금지.
+9. **다음 작업/승인:** 정확 P92 SHA CI 완료 확인→실고객/물리PC/폰트·모델 권리/설치 검증→안전한 승인형 OCR/한국어 모델 및 PRO20/BUSINESS30 SKU 구현. 13시 소유자 PC 요청 `docs/commercial/ASTRA_OWNER_1300_CHECKLIST_20261114.md`에 일괄 보관, 중복 알림 금지. 출시/크몽 등록은 최종 사용자 GO 필요.
+10. **갱신/확인 시점:** 2026-11-14 KST, P91 정확 CI 결과·P92 source GitHub readback 및 Node22 분리 단위만 검증. 공식 `UNASSESSED`/[작업중]/RELEASE HOLD, 문서 기준 커밋 후 원격 확인. 임의 100%·95% 산정 금지.
+
 ## 2026-11-14 KST — P91 STEP6 보안형 검색 연결 (10항 인수인계)
 
 1. **목표/확정 요구/기술:** Astra 원래 7단계·3 SKU 전체 최종설계 100%, 0원 로컬우선, React/TS/Vite/Electron/PDF.js. 웹 검색은 소유자가 수동 입력한 일반 키워드만.
