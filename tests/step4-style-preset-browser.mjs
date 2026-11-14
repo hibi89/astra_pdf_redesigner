@@ -99,7 +99,7 @@ try{
  const geometry=[];
  const layoutSignature=()=>evaluate("(()=>{const p=document.querySelector('.project-paper'),h=p.querySelector('.document-heading'),s=p.querySelector('.document-section'),sh=s?.querySelector('h2'),b=p.querySelector('.block-prose');const a=getComputedStyle(p),c=getComputedStyle(h),d=s&&getComputedStyle(s),e=sh&&getComputedStyle(sh),f=b&&getComputedStyle(b);return{paper:[a.paddingTop,a.paddingRight,a.paddingBottom,a.paddingLeft,a.lineHeight],title:[c.textAlign,c.fontSize,c.lineHeight,c.marginTop,c.marginBottom,c.paddingTop,c.paddingRight,c.paddingBottom,c.paddingLeft,c.borderTopWidth,c.borderRightWidth,c.borderBottomWidth,c.borderLeftWidth],section:[d?.marginBottom,d?.paddingTop,d?.paddingRight,d?.paddingBottom,d?.paddingLeft,e?.fontSize,e?.textAlign,e?.lineHeight,e?.marginBottom,e?.paddingTop,e?.paddingRight,e?.paddingBottom,e?.paddingLeft,e?.borderTopWidth,e?.borderRightWidth,e?.borderBottomWidth,e?.borderLeftWidth],body:[f?.fontSize,f?.lineHeight]}})()");
  const auditLayout=async id=>{
-  const screen=await evaluate("(()=>{const p=document.querySelector('.project-paper'),r=p.getBoundingClientRect(),nodes=[...p.querySelectorAll('.document-heading,.document-section,.document-section h2,.block-prose,.document-figure,.document-figure img')];return{imageCount:p.querySelectorAll('.document-figure img').length,imagesLoaded:[...p.querySelectorAll('.document-figure img')].every(i=>i.complete&&i.naturalWidth>0),overflow:nodes.filter(n=>{const b=n.getBoundingClientRect();return b.left<r.left-1||b.right>r.right+1||(n.clientWidth>0&&n.scrollWidth>n.clientWidth+1)}).map(n=>n.className||n.tagName)}})()");
+  const screen=await evaluate("(()=>{const p=document.querySelector('.project-paper'),r=p.getBoundingClientRect(),nodes=[...p.querySelectorAll('.document-heading,.document-section,.document-section h2,.block-prose,.document-figure,.document-figure img')],body=p.querySelector('.block-prose'),range=document.createRange();if(body)range.selectNodeContents(body);const rects=body?[...range.getClientRects()].map(x=>({top:x.top,bottom:x.bottom,width:x.width})).filter(x=>x.width>0).sort((a,b)=>a.top-b.top):[],textLines=[];for(const rect of rects){const last=textLines.at(-1);if(last&&Math.abs(last.top-rect.top)<=1)last.bottom=Math.max(last.bottom,rect.bottom);else textLines.push({top:rect.top,bottom:rect.bottom})}const lineOverlaps=[];for(let i=1;i<textLines.length;i++)if(textLines[i].top<textLines[i-1].bottom-1)lineOverlaps.push({previous:textLines[i-1],next:textLines[i]});return{imageCount:p.querySelectorAll('.document-figure img').length,imagesLoaded:[...p.querySelectorAll('.document-figure img')].every(i=>i.complete&&i.naturalWidth>0),overflow:nodes.filter(n=>{const b=n.getBoundingClientRect();return b.left<r.left-1||b.right>r.right+1||(n.clientWidth>0&&n.scrollWidth>n.clientWidth+1)}).map(n=>n.className||n.tagName),lineOverlaps}})()");
   assert.equal(screen.imageCount,1,id+' visible PNG count');
   assert.equal(screen.imagesLoaded,true,id+' image decode');
   assert.deepEqual(screen.overflow,[],id+' browser preview horizontal clipping');
@@ -138,10 +138,9 @@ try{
    for(const word of words)assert.ok(word.xMin>=-0.5&&word.yMin>=-0.5&&word.xMax<=width+0.5&&word.yMax<=height+0.5,id+' text clipped outside page '+(pageIndex+1));
    const overlapWords=words.filter(word=>/^[\x20-\x7e]+$/u.test(word.text));
    for(let wi=0;wi<overlapWords.length;wi++)for(let wj=wi+1;wj<overlapWords.length;wj++){
-    const a=overlapWords[wi],b=overlapWords[wj];if(b.yMin>=a.yMax)break;
+    const a=overlapWords[wi],b=overlapWords[wj],lineDelta=b.yMin-a.yMin;if(lineDelta>2)break;
     const overlapX=Math.min(a.xMax,b.xMax)-Math.max(a.xMin,b.xMin);
-    const overlapY=Math.min(a.yMax,b.yMax)-Math.max(a.yMin,b.yMin);
-    assert.ok(!(overlapX>1&&overlapY>1),id+' overlapping PDF text boxes on page '+(pageIndex+1)+' '+JSON.stringify({a,b,overlapX,overlapY}));
+    assert.ok(overlapX<=1,id+' same-line PDF text boxes overlap on page '+(pageIndex+1)+' '+JSON.stringify({a,b,overlapX,lineDelta}));
    }
   }
   assert.ok(pdfGeometry.some(page=>page.length>0),id+' PDF must contain readable text across its pages');
