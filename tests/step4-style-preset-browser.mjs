@@ -112,7 +112,8 @@ try{
   assert.ok(pageCount>=2,id+' long source must paginate without dropping the final content');
   const extracted=execFileSync('pdftotext',[output,'-'],{encoding:'utf8'});
   const normalizeText=value=>value.replace(/[\s\u00a0]+/gu,' ').trim();
-  assert.ok(normalizeText(extracted).includes(normalizeText(p116Body)),id+' full source text order/content');
+  const normalizedSource=normalizeText(p116Body),normalizedOutput=normalizeText(extracted);
+  assert.ok(normalizedOutput.includes(normalizedSource),id+' full source text order/content expected-head=['+normalizedSource.slice(0,900)+'] expected-tail=['+normalizedSource.slice(-300)+'] output-head=['+normalizedOutput.slice(0,1400)+'] output-tail=['+normalizedOutput.slice(-500)+']');
   for(const marker of p116Markers)assert.equal(normalizeText(extracted).split(marker).length-1,1,id+' exactly one '+marker);
   assert.equal(normalizeText(extracted).split('P116_TEXT_BEGIN').length-1,1,id+' opening source marker');
   assert.equal(normalizeText(extracted).split('P116_TEXT_END').length-1,1,id+' final source marker');
@@ -138,7 +139,7 @@ try{
     const a=words[wi],b=words[wj];if(b.yMin>=a.yMax)break;
     const overlapX=Math.min(a.xMax,b.xMax)-Math.max(a.xMin,b.xMin);
     const overlapY=Math.min(a.yMax,b.yMax)-Math.max(a.yMin,b.yMin);
-    assert.ok(!(overlapX>1&&overlapY>1),id+' overlapping PDF text boxes on page '+(pageIndex+1));
+    assert.ok(!(overlapX>1&&overlapY>1),id+' overlapping PDF text boxes on page '+(pageIndex+1)+' '+JSON.stringify({a,b,overlapX,overlapY}));
    }
   }
   return{pageCount,rasterCount,pdfGeometry:JSON.stringify(pdfGeometry)};
