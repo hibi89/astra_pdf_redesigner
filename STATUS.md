@@ -1,3 +1,12 @@
+## 2026-11-14 KST — P89 PRO/BUSINESS 추가 22개 임시 출력 시안 (검증 진행)
+
+- 소스 기준 **`cabe0adf79a3724066c367ac7cbdb3955bbc113a`** (최초 22종 구현 `81aa46f9980188070c612a8becb1ddbb56ec5d1d`, 후속 브라우저 PDF A4 정규식 테스트만 보정).
+- `src/step4/skuLayoutCandidates.ts`: 기존 BASIC 8종 외 PRO 시안 12개/BUSINESS 시안 10개를 선언하고, `Workspace.tsx`에 별도 **임시 미리보기 및 PDF 시험 출력 UI** 연결. `styles.css`에서 테마별 제목·프레임·테두리·여백·정렬·섹션 구획 22개 구조형 후보를 구현. 기존 V2 DesignSettings 스키마/데이터, main/PR, 과거 8종, 상품 권한 시스템 변경 없음.
+- `tests/sku-layout-candidates.test.ts` Node 단위 검사(22개 ID/계층/11개 패밀리/중복 형상/기존 스키마 무변경), `tests/step4-style-preset-browser.mjs` 실제 Chrome/Edge 선택 22개·계산 CSS 22개 구분·취소/IndexedDB 불변·A4 1종 인쇄 검사 추가.
+- **검증 상태:** GitHub Actions [Linux Chrome/Edge #43544304090](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43544304090), [Windows #43544304096](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43544304096) 실행 중; [최종설계 증거 규칙 #43544304524](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43544304524) SUCCESS. 신규 22 시안 전체 A4/Windows 실물 개별 출력·고객 수용은 **미검증**, CI 종료 전 PASS 주장 금지.
+- **판정:** 임시 출력 후보를 **상용 PRO20/BUSINESS30 완성이나 템플릿 영구 저장·SKU 라이선스라고 간주하지 않음**. 원본 최종설계 공식률 **UNASSESSED**, 100% 미달, 이전 기술85% 잠정, 해총 Astra [작업중]·RELEASE HOLD·미등록 그대로. 고객 실제 문서 5~10, 물리 PC, STEP6/7 OCR·레퍼런스 검색, 실제 한국어 GGUF/권리 승인 대기.
+- 후속: 해당 정확 SHA CI 완전 종료 판단→진짜 PDF 22/22 구조·인쇄 회귀/폰트·다페이지 개선→승인된 호환 스키마/라이선스 구현 전에는 판매 출고 금지. 
+
 ## 2026-11-14 KST — ASTRA P88 새 기능 SHA CI 완전 확인 (최종설계 100% 미달)
 
 - **기능 SHA** `fb3b02217c6c4223df49c2141e9373f08317a66c`: GitHub Blob이 로컬 합성검증 Node22.16.0 5/5 PASS인 새 P88 검수 도구 및 테스트와 각각 동일(`3c6a4fcd...`, `e14d18f8...`).

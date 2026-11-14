@@ -1,3 +1,15 @@
+## 2026-11-14 KST — P89 22개 추가 임시 레이아웃 인수인계 (10항)
+1. **목표·기술:** 전체 100% 최종설계 중 PRO20/BUSINESS30 고유 조판 부족을 무료·오프라인 React/TS/CSS/Electron으로 최소위험 보강.
+2. **범위·근거:** 기존 BASIC 8개 보존, 추가 12/10 임시 조판·미리보기/새 PDF 시험, 구조 11개 계열과 개별 여백·정렬·타이틀·구획 사용. 별도 V2 DB schema 변경 없이 교체 가능 후보를 먼저 검증하는 방식을 선택.
+3. **테스트:** 단위 `tests/sku-layout-candidates.test.ts`, 실제 Chrome·Edge 22개 CSS 구조 및 1개 A4 출력·기존 V2 불변 테스트를 추가. 정확 SHA `cabe0adf79a3` CI #43544304090 Linux Chrome/Edge 및 #43544304096 Windows **진행 중/최종 결과 미확인**, 최종설계 정책 #43544304524 SUCCESS. 이전 P88 CI SUCCESS는 별개.
+4. **상태:** 시안 코드 완료, E2E/Win 설치형 결과 대기. 실판매 PRO20/BUSINESS30 기능·영구템플릿·SKU entitlement/실고객 수용 미완. 최종률 UNASSESSED, 목표100 미달/[작업중]/RELEASE HOLD.
+5. **오류·재시도:** 최초 브라우저 테스트 PDF info 정규식에서 literal `\\s` 오타 발견, 실제 실행 전 테스트 코드만 정정(cabe0adf). 새로운 실행의 FAIL 여부는 아직 확인 안 됨; 실제 실패 근거 없이 무의미한 반복 금지.
+6. **저장소·SHA·경로:** `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, 기능 최초 `81aa46f9980188070c612a8becb1ddbb56ec5d1d`, 최종 수정 `cabe0adf79a3724066c367ac7cbdb3955bbc113a`; `src/step4/skuLayoutCandidates.ts`, `src/step2/Workspace.tsx`, `src/styles.css`, `tests/sku-layout-candidates.test.ts`, STEP4 browser E2E.
+7. **배포·환경:** Production/Vercel 미적용. Node22 `npm test`, `npm run build`; Linux Chrome/Edge, hosted Windows Electron NSIS, 실제 소비자 설치 미실행.
+8. **원본·보안/백업:** Git 이전 `50f9a057` 보존, 기존 IndexedDB V2/v1 localStorage/원본 PDF/비밀/이미지/모델 무변경, 퍼블릭 GitHub에는 합성 테스트만.
+9. **다음 작업·승인:** CI 종료 후 실패 원인별 최소수정, 고급 22개 PDF 개별 인쇄·다페이지 및 육안 수용, 향후 실제 저장·라이선스/검색/OCR/모델 다운로드·외부 전송·출시 사전 승인.
+10. **시점:** 2026-11-14 KST, GitHub 기능 SHA/코드 diff 확인, CI 실행 중; 문서 기준 SHA는 후속 GitHub HEAD 재확인. P88 5/5 및 이전 CI PASS와 P89 새 결과를 혼동하지 않는다.
+
 ## 2026-11-14 KST — ASTRA P88 새 기능 SHA CI 완전 확인 (최종설계 100% 미달)
 
 - **기능 SHA** `fb3b02217c6c4223df49c2141e9373f08317a66c`: GitHub Blob이 로컬 합성검증 Node22.16.0 5/5 PASS인 새 P88 검수 도구 및 테스트와 각각 동일(`3c6a4fcd...`, `e14d18f8...`).
