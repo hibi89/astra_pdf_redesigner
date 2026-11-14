@@ -1,6 +1,6 @@
 import {useEffect,useState} from 'react';
 import {MAX_SOURCES,readSources,writeSources,type SourceRecord} from './sourceRecords.ts';
-export default function SourceRecordsPanel(){
+export default function SourceRecordsPanel({onAnalyzeLocalFile}:{onAnalyzeLocalFile?:(source:SourceRecord)=>void}){
  const [title,setTitle]=useState('');
  const [url,setUrl]=useState('');
  const [note,setNote]=useState('');
@@ -32,6 +32,8 @@ export default function SourceRecordsPanel(){
   <p role="status" data-step6-source-count>보관된 출처 {items.length}/{MAX_SOURCES} · 모두 사용권 미검증</p>
   {items.map(item=><div className="mini-actions" key={item.id} data-step6-source-entry={item.id}>
    <strong>{item.title}</strong><code>{item.sourceUrl}</code><small>사용권 미검증 · {item.note}</small>
+   {onAnalyzeLocalFile&&<button type="button" className="secondary-button" data-step6-source-to-step5={item.id} disabled={corrupt}
+      onClick={()=>onAnalyzeLocalFile(item)}>로컬 파일로 STEP5 디자인 분석</button>}
    <button type="button" className="text-button" data-step6-source-remove={item.id} disabled={corrupt} onClick={()=>remove(item.id)}>기록 삭제</button>
   </div>)}
  </section>;

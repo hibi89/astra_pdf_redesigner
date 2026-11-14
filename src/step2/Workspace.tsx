@@ -22,6 +22,8 @@ import {downloadAdvancedLayoutPreset,importAdvancedLayoutPreset} from '../step4/
 import ProLayoutLibrary from '../step4/ProLayoutLibrary.tsx';
 import {downloadBusinessBrandKit,importBusinessBrandKit,validateBusinessBrandKit,type BusinessBrandKit} from '../step4/brandKit.ts';
 import BusinessBrandLibrary from '../step4/BusinessBrandLibrary.tsx';
+import {makeBrandBatchPlan,type PlannedBrand} from '../step4/brandBatchPlan.ts';
+import type {SourceRecord} from '../step6/sourceRecords.ts';
 import {makeSourceReviewReceipt,downloadSourceReviewReceipt} from '../step3/reviewReceipt.ts';
 import CommercialLicensePanel from '../commercial/CommercialLicensePanel.tsx';
 import {runSkuGatedAction,layoutSkuCapability,pdfExportCapabilities} from '../commercial/skuActionGate.ts';
@@ -100,6 +102,11 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
   const [brandApplied,setBrandApplied]=useState<BusinessBrandKit|null>(null);
   const [brandLogoUrl,setBrandLogoUrl]=useState<string|null>(null);
   const [brandError,setBrandError]=useState('');
+  const [brandBatchPlan,setBrandBatchPlan]=useState<Record<string,PlannedBrand>>({});
+  const [brandBatchIds,setBrandBatchIds]=useState<string[]>([]);
+  const [brandBatchStatus,setBrandBatchStatus]=useState('');
+  const [linkedReferenceSource,setLinkedReferenceSource]=useState<string|null>(null);
+  const pendingReferenceSource=useRef<SourceRecord|null>(null);
   const [licenseReceipt,setLicenseReceipt]=useState('');
   const guarded=(caps:readonly SkuCapability[],operation:()=>void|Promise<void>)=>{
     void runSkuGatedAction(caps,licenseReceipt,operation).catch(e=>w.setError(e instanceof Error?e.message:'사용권 확인 실패'));
@@ -177,8 +184,10 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
   },[w.ready,w.document?.id]);
   const urls=useAssetUrls(w.assets);
   const doc=w.document;
-  const activeAdvancedLayoutId=doc&&advancedPreview?.documentId===doc.id?advancedPreview.layoutId:undefined;
+  const plannedBrand=doc?brandBatchPlan[doc.id]:undefined;
+  const activeAdvancedLayoutId=doc?(advancedPreview?.documentId===doc.id?advancedPreview.layoutId:plannedBrand?.layoutId):undefined;
   const businessActive=skuLayoutCandidate(activeAdvancedLayoutId)?.tier==='business';
+  const activeBrandKit=businessActive?(brandApplied??plannedBrand?.kit??null):null;
   const referencePreviewDesign=doc&&referencePreview?.documentId===doc.id?referencePreview.design:undefined;
   const portablePreviewDesign=doc&&portableStyle?.documentId===doc.id?portableStyle.design:undefined;
   const activePreviewDesign=referencePreviewDesign??portablePreviewDesign;
@@ -292,7 +301,7 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
     referenceVersion.current++;
     if(referencePdfSession.current){void referencePdfSession.current.loading.destroy().catch(()=>{});referencePdfSession.current=null;}
     if(referenceImage?.url)URL.revokeObjectURL(referenceImage.url);
-    setReferenceImage(null);setReferencePdf(null);setReferenceMetrics(null);setReferencePdfTypography(null);setReferencePreview(null);setReferenceError('');setReferenceStatus('');
+    setReferenceImage(null);setReferencePdf(null);setReferenceMetrics(null);setReferencePdfTypography(null);setReferencePreview(null);setReferenceError('');setReferenceStatus('');setLinkedReferenceSource(null);
     if(referenceInput.current)referenceInput.current.value='';
   };
   useEffect(()=>()=>{if(referenceImage?.url)URL.revokeObjectURL(referenceImage.url);},[referenceImage]);
@@ -398,7 +407,7 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
       const missing=imageRefs.filter(id=>!w.assets.some(a=>a.id===id)||!urls[id]);if(missing.length)throw new Error('일부 이미지 파일이 누락되었습니다. 인쇄 전 문서를 확인해 주세요.');
       await Promise.all([...document.querySelectorAll<HTMLImageElement>('.project-paper img')].map(image=>image.decode()));
       await document.fonts.ready;
-      await runSkuGatedAction(pdfExportCapabilities(activeAdvancedLayoutId,Boolean(businessActive&&brandApplied)),licenseReceipt,
+      await runSkuGatedAction(pdfExportCapabilities(activeAdvancedLayoutId,Boolean(activeBrandKit)),licenseReceipt,
          ()=>savePdfFromEditor(pdfOutputTextMarkers(doc),pdfOutputImageCount(doc)));
     }catch(e){w.setError(e instanceof Error?`인쇄 준비 실패: ${e.message}`:'인쇄를 준비할 수 없습니다.');}finally{setPrintBusy(false);}
   };
@@ -526,7 +535,7 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
           <section className="style-compare-card" data-style-compare-candidate><h3>비교 후보 · {allThemes.find(theme=>theme.id===previewThemeId)?.label}</h3><div className="style-compare-card-viewport"><ProjectPreview doc={doc} urls={urls} previewDesign={{...doc.design,theme:previewThemeId}}/></div></section>
         </div>:null}
         <div className={`paper-surface ${doc&&styleCompareOpen&&styleCompareGalleryOpen&&previewThemeId?'style-compare-print-candidate':''}`}>
-          {doc?<ProjectPreview doc={doc} urls={urls} previewTheme={previewThemeId} previewDesign={activePreviewDesign} previewLayoutId={activeAdvancedLayoutId} brandKit={brandApplied} brandLogoUrl={brandLogoUrl}/>:<div className="document">{w.ready?'문서를 열 수 없습니다.':'불러오는 중…'}</div>}
+          {doc?<ProjectPreview doc={doc} urls={urls} previewTheme={previewThemeId} previewDesign={activePreviewDesign} previewLayoutId={activeAdvancedLayoutId} brandKit={activeBrandKit} brandLogoUrl={brandLogoUrl}/>:<div className="document">{w.ready?'문서를 열 수 없습니다.':'불러오는 중…'}</div>}
         </div>
         <p className="print-tip no-print">Chrome/Edge에서 PDF로 저장, A4, 머리글·바닥글 해제를 확인하세요. 인쇄는 이미지 로딩이 완료될 때까지 기다립니다.</p>
       </div>
@@ -638,6 +647,25 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
             </div>
             <BusinessBrandLibrary disabled={!editable||!businessActive} licenseReceipt={licenseReceipt} kit={businessActive?brandApplied:null}
               onRestore={kit=>guarded(['brand-kit'],()=>{setBrandDraft(kit);setBrandApplied(kit);setBrandError('');})}/>
+            <section className="business-batch-panel no-print" data-business-batch-panel aria-label="BUSINESS 여러 문서 브랜드 일괄 적용">
+             <h3>BUSINESS · 여러 문서에 같은 브랜드 적용 (현재 세션)</h3>
+             <p className="help-text">현재 문서에 적용한 BUSINESS 텍스트 브랜드를 2~20개 문서에 일괄 연결합니다. 문서함에서 각 문서를 열 때 같은 회사명·색상·머리말/꼬리말과 BUSINESS 조판을 미리 보고 각각 새 PDF로 저장할 수 있습니다. 로고 이미지는 문서별로 다시 지정하세요. 원본·IndexedDB V2·기존 문서 디자인은 변경되지 않으며 앱을 닫으면 이 계획은 사라집니다.</p>
+             <div role="group" aria-label="일괄 브랜드 적용 문서 선택">
+              {w.documents.map(item=><label key={item.id}><input type="checkbox" data-business-batch-target={item.id}
+                disabled={!editable} checked={brandBatchIds.includes(item.id)} onChange={event=>setBrandBatchIds(old=>event.target.checked?[...old.filter(id=>id!==item.id),item.id]:old.filter(id=>id!==item.id))}/>{item.name||'이름 없는 문서'}</label>)}
+             </div>
+             <button className="secondary-button" type="button" data-business-batch-apply
+              disabled={!editable||!businessActive||!brandApplied||brandBatchIds.length<2||brandBatchIds.length>20}
+              onClick={()=>guarded(['business-layout','brand-kit'],()=>{
+               try{const plan=makeBrandBatchPlan(w.documents.map(item=>item.id),brandBatchIds,activeAdvancedLayoutId!,brandApplied!);
+                setBrandBatchPlan(old=>({...old,...plan}));setBrandBatchStatus('일괄 적용 '+Object.keys(plan).length+'건 · 문서를 열어 개별 PDF 저장하세요.');}
+               catch(e){setBrandBatchStatus(e instanceof Error?e.message:'브랜드 일괄 적용 불가');}
+              })}>선택 문서에 브랜드 일괄 적용</button>
+             <button className="text-button" type="button" data-business-batch-clear disabled={!Object.keys(brandBatchPlan).length}
+              onClick={()=>{setBrandBatchPlan({});setBrandBatchStatus('일괄 적용 계획 취소 · 원본 문서 보존');}}>일괄 적용 취소</button>
+             {brandBatchStatus&&<p role="status" data-business-batch-status>{brandBatchStatus}</p>}
+             {plannedBrand&&<p role="status" data-business-batch-current>현재 문서에 세션 브랜드 계획 적용 중 · 실제 PDF 저장 전 미리보기를 확인하세요.</p>}
+            </section>
             {brandError&&<p role="alert" className="warning" data-business-brand-error>{brandError}</p>}
             {brandApplied&&<p role="status" className="help-text" data-business-brand-status>임시 적용 중 · 실제 문서 V2는 변경되지 않았습니다. 정식 BUSINESS 사용권/영구 저장 기능은 아직 미구현입니다.</p>}
           </section>
@@ -668,12 +696,13 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
             </div>}
           </section>
           <ReferenceSearchPanel/>
-          <SourceRecordsPanel/>
+          <SourceRecordsPanel onAnalyzeLocalFile={source=>{if(!editable)return;pendingReferenceSource.current=source;referenceInput.current?.click();}}/>
           <section className="panel reference-style-panel" aria-label="이미지 기반 디자인 제안">
             <div className="panel-heading"><h2>참고 이미지에서 디자인 제안</h2></div>
             <p className="help-text">이 기기 안에서 분석합니다. 색상, 여백, 시각적 밀도만 추정하며 텍스트와 글꼴은 인식하지 않습니다. 이미지는 문서에 저장하지 않습니다.</p>
-            <input ref={referenceInput} className="hidden-input" type="file" accept="image/png,image/jpeg,image/webp,application/pdf,.pdf" onChange={event=>{const file=event.target.files?.[0];event.target.value='';if(file)void analyzeReference(file);}}/>
-            <button type="button" className="secondary-button" disabled={!editable} onClick={()=>referenceInput.current?.click()}>이미지 또는 PDF 선택</button>
+            <input ref={referenceInput} className="hidden-input" type="file" accept="image/png,image/jpeg,image/webp,application/pdf,.pdf" onChange={event=>{const file=event.target.files?.[0];event.target.value='';const source=pendingReferenceSource.current;pendingReferenceSource.current=null;if(file){void analyzeReference(file);setLinkedReferenceSource(source?.title??null);}else setLinkedReferenceSource(null);}}/>
+            <button type="button" className="secondary-button" disabled={!editable} onClick={()=>{pendingReferenceSource.current=null;referenceInput.current?.click();}}>이미지 또는 PDF 선택</button>
+            {linkedReferenceSource&&<p role="note" data-step6-linked-reference>출처 기록 ‘{linkedReferenceSource}’과 사용자가 지정한 로컬 파일을 함께 검토 중입니다. 두 자료가 같은 저작물인지 및 이용 권리는 자동 인증되지 않습니다.</p>}
             {referenceError&&<p className="warning" role="alert">{referenceError}</p>}{referenceStatus&&<p className="help-text" role="status">{referenceStatus}</p>}
             {referencePdf&&<label className="field">참고 PDF 페이지<select disabled={!editable} value={referencePdf.page} onChange={event=>{const page=Number(event.target.value),file=referencePdf.file;cancelReferenceRender();setReferencePdf({...referencePdf,page});referenceVersion.current++;const version=referenceVersion.current;if(referenceImage?.url)URL.revokeObjectURL(referenceImage.url);setReferenceImage(null);setReferenceMetrics(null);setReferencePdfTypography(null);setReferencePreview(null);setReferenceError('');setReferenceStatus('PDF 페이지를 분석하고 있습니다…');void analyzeReferencePdf(file,page,version);}}>{Array.from({length:referencePdf.pages},(_,index)=><option key={index+1} value={index+1}>{index+1}페이지</option>)}</select></label>}
             {referenceImage&&referenceMetrics&&referencePreviewDesign&&<div className="reference-analysis" data-reference-analysis>
