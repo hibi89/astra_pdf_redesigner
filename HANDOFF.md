@@ -1,3 +1,16 @@
+## 2026-11-14 KST — P101 신규 로컬 OCR 개발 인수인계 (10항)
+
+1. **목표/기술:** 사용자 최종설계 STEP1~7 + 3SKU 100%, 무료 오프라인 Tesseract/PDF.js/React/TypeScript/Electron. 승인된 A01~A12 배점 100점, 증거점수 공식 UNASSESSED, 출시 HOLD.
+2. **구현/근거:** desktop/local-ocr-controller.cjs에 실행파일+kor/eng 해시 고정 필수, PNG 8MiB/8MP, 안전한 전용 임시파일·stdin 미사용·shell:false·timeout/취소/동시실행 제한. main/preload/desktopPdf 좁은 IPC, step7/LocalOcrPanel.tsx UI, Root STEP7 PDF 검수 하단 연결. 별도 검토 초안만 제공, 원문/DB 자동 변경 없음.
+3. **테스트/범위:** tests/local-ocr-controller.test.cjs 합성 무실행 가드/asset pin/취소/임시파일 제거, tests/step7-pdf-review-browser.mjs 브라우저 실패 폐쇄, Windows smoke IPC 검사, npm test와 desktop:test 명령에 추가. **신규 exact SHA의 실제 전체 npm/Chrome/Edge/Windows 결과는 미검증**. 이전 P100 Node179/178+desktop19 PASS 증거만 별도 보존, P101 통과로 전용 금지.
+4. **완료/진행/차단:** 소스·테스트 구현/원격 반영 완료. 배포 패키지에 OCR_MANIFEST=null·실바이너리/kor/eng 언어팩 미포함으로 실제 한국어 OCR 실행 불가; Golden20, 실 고객 PDF5~10, 물리PC/라이선스/권리·상용 심사 미완.
+5. **오류/근거/전환:** 인수 문서 최초 작성에서 JS 템플릿의 markdown backtick 구문 오류로 도구 요청 전 중단, backtick 없는 문서로 수정하여 GitHub 커밋 완료. 제품 실행 테스트 실패는 아직 확인되지 않음. 설치 자산 미검증 상태에서 임의 오픈/외부 다운로드 금지.
+6. **저장소·브랜치·SHA:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112. 마지막 소스 SHA **deeb1ed94a00cb25cfc1efafcf8e33fab1f9847b**; 이후 docs-only STATUS **e06ec9c665b52bee31b5d02765d9bbe1f03223ff**, 본 HANDOFF 갱신 시 HEAD 재확인. main/Draft PR10 불변.
+7. **배포/환경:** Node22 npm test/build, Chrome/Edge, Windows Electron NSIS hosted; Vercel Production 해당 없음. 설치형 합성 테스트가 실 Win10/11 구매자 수용을 대체하지 않음.
+8. **자산·백업/보안:** 원본 docs/ASTRA_ORIGINAL_ROADMAP.txt·설계PNG, V1 localStorage/V2 IndexedDB, 고객 PDF·모델 비밀·개인키 그대로. 신규 OCR은 임시 페이지 래스터 1장 메모리→격리 파일→정리, 외부 network/API/요금0. 기존 Git 부모 SHA로 코드 복원 가능.
+9. **다음 작업:** (1) 신규 exact-SHA GitHub Actions Linux/Chrome/Edge/Windows 로그 확인 및 오류 최소수정 (2) Tesseract Windows 공급원·DLL/LICENSE/NOTICE 및 kor/eng SHA 검증+승인 코드 manifest pin (3) 실 오프라인 한국어 스캔 골든 20종/취소/성능 회귀 (4) OCR 미승인 초안 수동 대조·확정, 이후 실고객/상품화 분리. 100%/판매GO 주장 금지.
+10. **시점/검증:** 2026-11-14 KST 원격 코드·문서 API 업데이트 결과 확인, 최신 CI 실행 결과 아직 별도 증거 없음. P101은 개발 회차 번호이며 공식 완성률이 아님. 상세 docs/commercial/ASTRA_P101_LOCAL_OCR_DEVELOPMENT_20261114.md.
+
 ## 2026-11-14 KST — 사용자 승인 최신 인수인계 (10항)
 
 1. 목표: 원본 STEP1~7+3SKU 전체 100%, 최종 12영역 가중치 승인.
