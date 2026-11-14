@@ -1,3 +1,9 @@
+## 2026-11-14 17:38 KST — P105 정확 기능 SHA Linux/Windows/정본 3/3 CI SUCCESS (최종 정정)
+
+- 정확 기능 SHA **d8e765ef538e6f41fa3fc870a9257238a7c4af98**: [Linux Chrome+Edge #43576345594](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43576345594) 2/2 SUCCESS, Node **221 PASS / 0 FAIL / 0 SKIP**, 빌드 및 Chrome/Edge synthetic PDF.js OCR 검수/원문·V2 보존 회귀 PASS. [Windows NSIS #43576345628](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43576345628) SUCCESS, Node **220 PASS / 0 FAIL / 1 Windows symlink SKIP**(221 total), 데스크톱 **59 PASS / 0 FAIL / 0 SKIP**, Electron smoke/패키징/0.1.0→0.1.1 in-place 업그레이드·기존 IndexedDB V2/PNG 보존 PASS. [최종설계 정책 #43576345809](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43576345809) SUCCESS. **전체 3/3 workflow SUCCESS**.
+- P105 신규 정적 PE import/delay DLL fail-closed 합성 11개를 기존 P104 테스트에 추가하여 exact-SHA CI로 검증. 인증된 실제 Windows Tesseract 공급처·Authenticode·실 인식·전 종속 DLL 동적 closure/재배포 적법성을 검증한 것은 아님. OCR_MANIFEST=null, legalRedistributionApproved=false, installerSignatureVerified=false, dllRuntimeDependencyClosureVerified=false, productOcrEnabled=false, NSIS RELEASE HOLD 유지.
+- 원본 PDF·STEP1 V1·STEP2 V2·디자인8종·main/PR10 불변. 전체 사용자 12영역 공식 **UNASSESSED/100% 미달**, Astra [작업중], 크몽 미등록, 실제 판매/일반 배포 미승인. 아래 P105 초기 'CI 진행 중' 기록은 본 정확 로그 결론으로 **정정**, 이력 삭제하지 않음.
+
 ## 2026-11-14 KST — P105 x64 PE static import + delay dependency fail-closed audit (정확 CI 최종 대기)
 
 - **실제 기능 커밋 SHA d8e765ef538e6f41fa3fc870a9257238a7c4af98** (기존 P104 HEAD 074b2402에서 일반 fast-forward). desktop/ocr-pe-import-audit.cjs 신규, 기존 P104 offline manifest/hash 검사와 결합: PE32+ optional header/section RVA, direct/delay imports, 안전 DLL 파일명, 시스템 DLL shadowing, 신고되지 않은 제3자 DLL 차단. 단일 PE 버퍼 64 MiB 초과는 자동 승인 없이 차단. 기존 원문/PDF/IndexedDB/NSIS HOLD/주 브랜치 불변.

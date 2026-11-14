@@ -39,3 +39,11 @@ Linux/Chrome/Edge https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43
 Windows Electron/NSIS https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43576345628
 Final blueprint https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43576345809
 At document creation, policy succeeded and Node/build/desktop smoke steps succeeded; other workflows were still in progress. Verify exact final conclusions before changing any completion claim.
+
+## Exact-SHA final CI confirmation — 2026-11-14 17:38 KST
+
+- Function commit: d8e765ef538e6f41fa3fc870a9257238a7c4af98.
+- Linux/Chrome/Edge run 43576345594: 2/2 SUCCESS, Node 221 PASS / 0 FAIL / 0 SKIP, Chrome and Edge synthetic PDF OCR review and persistence PASS.
+- Windows NSIS run 43576345628: SUCCESS, Node 220 PASS / 0 FAIL / 1 OS symlink SKIP; desktop 59 PASS / 0 FAIL, NSIS unsigned install/uninstall and 0.1.0->0.1.1 IndexedDB/PNG preservation PASS.
+- Final blueprint policy run 43576345809: SUCCESS. Overall 3/3 workflow SUCCESS.
+- This supersedes the initial in-progress note, not the RELEASE HOLD. Actual vendor installer signature, license rights, runtime DLL loader and physical Windows/customer OCR are unverified. Final owner blueprint score UNASSESSED.

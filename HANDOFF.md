@@ -1,3 +1,16 @@
+## 2026-11-14 17:38 KST — P105 정확 CI 검증 완료 최종 인수인계 10항
+
+1. **목표·요구·기술:** Astra PDF STEP1~7, BASIC/PRO/BUSINESS 최종설계 12영역 100점. 오프라인 Tesseract 공급망 정적 PE32+ x64 import 검증. React/PDF.js/Electron/Node22/NSIS. 원본 무손상/외부 API·과금 없음.
+2. **완료 변경·설계 근거:** 옵션 A 기존 P104 SHA-256 동일 바이트 스트림에서 정적 import/delay-load 검사(0원·오프라인/채택). 옵션 B Windows Authenticode/실제 DLL Loader만으로 검사(서명·동적검증에는 필요하지만 import inventory 대체 불가, 공급원 미확보로 보류). P105 새 parser, 기존 preflight 연결, 안전 실패 처리, 합성11회귀; P104 안전검사/릴리스 HOLD 보존.
+3. **테스트/정확 SHA PASS/FAIL/SKIP:** 기능 **d8e765ef538e6f41fa3fc870a9257238a7c4af98**. [Linux Chrome+Edge #43576345594](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43576345594) 2/2 SUCCESS, Node **221 PASS/0 FAIL/0 SKIP**, Chrome+Edge PDF.js 합성 OCR UI/저장 데이터 보존 PASS. [Windows #43576345628](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43576345628) 1/1 SUCCESS, Node **220 PASS/0 FAIL/1 symlink OS SKIP**, desktop **59 PASS/0 FAIL**, Electron NSIS 설치/제거·0.1.0→0.1.1 V2/PNG 보존 PASS. [정본 #43576345809](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43576345809) SUCCESS. 전체 3/3 SUCCESS. Linux/Windows raw job logs 확인.
+4. **완료/진행/대기·차단:** 정적 PE와 Linux/Windows 합성 E2E 통과. 실제 제3자 설치파일/EXE/DLL/kor+eng 정본 SHA·Authenticode/재배포권·NOTICE/SBOM·동적 로딩·물리 Win10/11·고객 PDF5~10·오프라인 한국어 AI·3SKU 인수 미검증. 전체 공식률 UNASSESSED/100 미달. RELEASE HOLD.
+5. **오류·원인·시도·대안:** 원자적 코드 커밋 최초 JS 문자열 구문오류(실제 원격 변경0), 수정 후 일반 nonforce fast-forward 성공. CI P105 전체 PASS 확인으로 초기 '진행중' 기록 정정. 정적 import 무결성=실 DLL 로딩 또는 재배포 적법성이라는 오인 금지. 공급원 미확보 상태에서 임의 서명해시/권리증거 생성 금지.
+6. **저장소/브랜치/SHA·경로:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112. 기능 d8e765ef538e6f41fa3fc870a9257238a7c4af98; desktop/ocr-pe-import-audit.cjs, desktop/ocr-supply-chain-preflight.cjs, tests/ocr-pe-import-audit.test.cjs, tests/ocr-supply-chain-preflight.test.cjs, package.json, docs/commercial/ASTRA_P105_PE_STATIC_IMPORT_REVIEW_20261114.md. 본 docs HEAD는 GitHub 최종 readback 필수.
+7. **Production·Vercel·실행:** 판매/배포 Vercel 미적용. Windows hosted unsigned NSIS와 설치 회귀 검증은 실 사용자 설치 테스트가 아님. npm test/npm run build/npm run desktop:test/npm run ocr:release-gate, 외부 실 자산 있을 때만 npm run ocr:preflight -- <assets-folder> <external-manifest>.
+8. **원본·백업·비밀·금지:** 기능 이전 부모 074b240244aad23631466894fd633efc86558f12로 정상 Git revert 가능. main/Draft PR10, 사용자 원본PDF·V1 localStorage·V2 IndexedDB·8디자인/기존 등록이력·비밀·서명키/권한 그대로. OCR_MANIFEST=null, 외부 전송/자동 다운로드/원본 변경/force push/무단 배포 없음.
+9. **다음 작업 우선순위·완료기준·승인:** (1) 적법한 Windows Tesseract 설치파일·DLL·kor+eng 공급자 해시/정확 버전/서명 인증서/법무 LICENSE·NOTICE·SBOM 확보 (2) 실제 DLL 로더·동적 의존성 및 Windows 한글/금액/표/다단 OCR (3) 독립 물리 Windows10/11·허가 PDF5~10·원문 보존 검수 (4) 3SKU/실 GGUF CPU/12영역100점·판매 승인. 무료 코드 승인 기확정, 모바일 사용자에게 PC 요구는 최종 단계로 일괄.
+10. **갱신 시각(KST)·확인 범위:** 2026-11-14 17:38 KST, GitHub Actions 정확 기능 SHA의 3/3 result + job raw logs 확인. 실 공급원/물리PC/고객·판매 검증 미진행, 공식 제품100% 증명 아님. 중앙 kmong-productization 원장 최신화는 별도 커밋 확인.
+
 ## 2026-11-14 KST — P105 다음 채팅 인수인계 10항 (CI 진행 중 잠정)
 
 1. **목표·용도·확정 요구·기술:** ASTRA PDF 원래 7단계, BASIC/PRO/BUSINESS, 사용자 최종설계 12영역 100점, 오프라인 OCR 공급망 신뢰 강화. Node22/PE32+ x64/React+PDF.js/Electron; 실제 고객 자료·판매·유료결제 없음.
