@@ -19,7 +19,7 @@
 | A03 | STEP3 PDF 업로드·원문 대조·확정 | `src/step3/*`; 기존 브라우저 E2E | 실 문서 5~10개 육안·표/이미지 누락 판단 대기 | 14 |
 | A04 | STEP4 8/20/30 고유 조판·스타일·브랜드/배치 | P93 22/22 A4; P95 PDF 개별 인수; P97 PRO 24시안 로컬 저장; P98 BUSINESS 12브랜드 텍스트/로고 시험 | P95/P97/P98 합성·Chrome/Edge·Win PASS, 영구 30종 정식 SKU 사용권·BUSINESS 일괄 적용·고객 PDF 수용 미완 | 15 |
 | A05 | STEP5 로컬 레퍼런스 분석/적용·복원 | `src/step5/referenceAnalysis.ts` | 합성 검증·실고객 원본 디자인 수용 대기 | 5 |
-| A06 | STEP6 인터넷 레퍼런스 탐색/STEP5 연결 | P99 `desktop/approved-search-link.cjs` 안전 외부 Google/Bing 검색+윈도우 확인; P100 `src/step6/sourceRecords.ts` 수동 URL·권리메모 로컬 보관 | P99 Chrome/Edge Node177/Win176·desktop19 PASS; P100 정확 CI 진행 중/미검증. 원래 앱내 검색 카드·자동수집·출처 확인/STEP5 직접 선택 연결·실 사용자 웹팝업 미완 | 5 |
+| A06 | STEP6 인터넷 레퍼런스 탐색/STEP5 연결 | P99 `desktop/approved-search-link.cjs` 안전 외부 Google/Bing 검색+윈도우 확인; P100 `src/step6/sourceRecords.ts` 수동 URL·권리메모 로컬 보관 | P99 Chrome/Edge Node177/Win176·desktop19 PASS; P100 Chrome/Edge Node179/Win Node178+desktop19 CI 3/3 SUCCESS. 원래 앱내 검색 카드·자동수집·출처 확인/STEP5 직접 선택 연결·실 사용자 웹팝업 미완 | 5 |
 | A07 | STEP7 실제 OCR/콘텐츠 안전/통합 | `src/step7/*`; 구조·토큰·PDF 대조 | 실제 OCR 미연동·표/다단 수용·실 PDF 미완 | 12 |
 | A08 | BASIC/PRO/BUSINESS 공통 진짜 로컬 한국어 LLM 윤문 | `desktop/local-model-controller.cjs` 안전 골격 | 실제 GGUF/llama.cpp·CPU·품질·권리 미검증, `RELEASE_MANIFEST=null` | 14 |
 | A09 | SKU 차등·라이선스·설치/지원/환불 | `src/commercial/offlineLicense.ts`, P96 ECDSA P-256 3SKU 검증 Node170 + Win169 PASS | 공개키 pin·상용 개인키·GUI entitlement 잠금/활성화·재발급·기기수·약관 미구현, 실제 판매 불가 | 11 |

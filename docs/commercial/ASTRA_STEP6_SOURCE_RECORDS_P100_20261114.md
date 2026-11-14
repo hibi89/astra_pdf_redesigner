@@ -10,8 +10,8 @@
 - 단위 테스트 `tests/source-records.test.ts` 및 Chrome/Edge 브라우저 `tests/step5-reference-browser.mjs`에 V2 내용·스타일 불변 회귀 추가.
 
 ## 이번 정확 코드/테스트 SHA 및 검증 상황
-- `2213e8e50759836b8c24bfbe7b037536a8fd995a`; [Linux/Chrome·Edge #43553461990](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43553461990), [Windows NSIS #43553462026](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43553462026) **CI 실행중, 최종 결과 확인 전**. [Policy #43553462320](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43553462320) SUCCESS는 증빙 게이트 정책만.
-- CI PASS 전 기능 완성/인수 확정 금지. 실제 제3자 디자인 출처·사용권/폰트 재배포 권리/고객 문서 수용도 미검증.
+- `2213e8e50759836b8c24bfbe7b037536a8fd995a`; [Linux/Chrome·Edge #43553461990](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43553461990), [Windows NSIS #43553462026](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43553462026) **3/3 SUCCESS — Linux Chrome+Edge Node179 PASS / Windows Node178 PASS+desktop19, NSIS 업그레이드 V2 데이터 보존**. [Policy #43553462320](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43553462320) SUCCESS는 증빙 게이트 정책만.
+- 합성/CI에서만 STEP6 출처 메타데이터 기능 검증. 사용자 물리 PC·실 저작권 권리/고객 원본 문서 인수 미확인. 실제 제3자 디자인 출처·사용권/폰트 재배포 권리/고객 문서 수용도 미검증.
 
 ## 아직 완료되지 않은 원래 STEP6
 - 외부 검색 제공처/API 허용된 검색 결과 썸네일·원본 링크·필터·즐겨찾기 컬렉션·중복 제거·한도/실패 처리·단일 검색결과→STEP5 자동 연결은 미구현.

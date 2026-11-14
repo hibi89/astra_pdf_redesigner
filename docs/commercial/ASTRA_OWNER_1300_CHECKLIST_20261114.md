@@ -29,3 +29,6 @@
 ### P99 정확 코드 새 CI 최종 확인
 - 기능·보안회귀 SHA `0a0dec3e` Linux Chrome/Edge 2/2 SUCCESS Node177 PASS, Windows NSIS SUCCESS Node176 PASS/desktop19 PASS. 이 결과로 합성 테스트 반복을 사용자에게 요구하지 않음.
 - 실 물리 Windows10/11에서 사용자가 직접 입력한 공개 검색어로 Google/Bing 시스템 브라우저 및 네이티브 추가 확인이 열리는지만 추후 검증. 개인 PDF/이름/문서제목을 검색어로 쓰거나 외부로 전달하지 않음.
+
+## 13시 최신 사용자 중복 요구 금지 — P100 STEP6 출처 보관 CI 통과
+- 코드 `2213e8e5` Chrome/Edge Linux Node179 PASS/Windows Node178 PASS+desktop19, 원본 V2 불변 확인. 사용자에게 이 기능을 별도 수동 테스트·개발하게 요청하지 않음. 실제 이미지 저작권/출처 수용과 물리 Windows·원본 PDF5~10/모델·OCR/판매 GO만 미해결로 요청.

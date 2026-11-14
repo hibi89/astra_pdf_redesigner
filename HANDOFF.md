@@ -1,3 +1,16 @@
+## 2026-11-14 KST — P100 STEP6 출처 보관 검증 성공 / 전체 제품 100% 미달 (10항)
+
+1. **목표·정본·기술:** 원본 STEP1~7+크몽 3SKU 100% 기준 React/TS/Electron/PDF.js, 공식률 UNASSESSED, 과거85% 내부 별도.
+2. **완료·근거:** P95 PRO 로컬 PDF 수동 순차 승인, P96 ECDSA 서명 검증 모듈, P97 PRO 저장 시안, P98 BUSINESS 브랜드 텍스트 보관, P99 안전 외부 Google/Bing 네이티브 확인, P100 참고 URL/권리 `UNVERIFIED` 별도 로컬 출처 목록. 사용자 원문·파일 원본 자동수집/전송 없음.
+3. **테스트:** 신규 정확 기능SHA `2213e8e50759836b8c24bfbe7b037536a8fd995a`, [Linux Chrome/Edge #43553461990](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43553461990) **2/2 SUCCESS, Node179/179 PASS**, [Win #43553462026](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43553462026) **SUCCESS, Node178 PASS/1OS SKIP, desktop19PASS, NSIS upgrade V2·PNG 보존**. P95~P99 정확 SHA/CI 이전 HANDOFF 기록 참조. 실 고객PC/실PDF·모델/OCR 검증 없음.
+4. **완료·진행·차단:** P100 로컬 출처 메타데이터 구현·회귀 3/3 성공, 원래 STEP6 검색결과 API/카드/STEP5 직접 연결 미완. 진짜 오프라인 LLM·OCR/스캔, 표·다단, 상용 GUI 사용권/브랜드 일괄·사용자 PC/실 PDF5~10·폰트/모델 rights·크몽/고객 수용 미완. 전체100 미달, RELEASE HOLD·미등록.
+5. **오류·근거·피벗:** P100 최초 브라우저 test 교체 위치 찾기 실패 GitHub 쓰기 전 중단→독립 파일·실존 브라우저 로그 앵커 사용해서 재설계/테스트 통과, 원본 프로젝트 V2 불변. P97 첫 TS 타입 오류는 수정 SHA `ed363a4f` 후 CI GREEN. 반복 무의미 재시도 금지.
+6. **저장소/브랜치/SHA:** `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, P100 기능 `2213e8e5`, 제품 직전 docs `83c65f23`, 크몽 listing-only docs `1d79bbca`. 이번 docs HEAD 커밋 후 조회. 주요 `src/step6/sourceRecords.ts`, `src/step6/SourceRecordsPanel.tsx`, `tests/step5-reference-browser.mjs`.
+7. **Production/환경:** GitHub Node22 Linux Chrome/Edge Windows Electron NSIS, Vercel/Production 미적용, 고객 설치·크몽 등록 없음.
+8. **원본·백업/비밀:** git parent SHA reversible, main/PR10/V1/V2/원본 PDF/모델/폰트/실 라이선스 발급키 불변. 고객 내용 자동 외부 네트워크0, 유료 결제0.
+9. **다음 우선순위/사용자 승인:** 2026-11-14 13:00 KST 기존 통합 알림에서 폰으로 12영역 배점 확정·모델/Tesseract 0원 권리/해시·오프라인 라이선스 발급 정책 승인, 외출 후 PC Win10/11+5~10 허가PDF 원문/출력7항 실검수/국문 글꼴·실 모델 CPU/판매 GO 별도 요청. 100%·등록완료·판매GO 증거 없이 확정 금지.
+10. **갱신/검증범위:** 2026-11-14 KST 실제 GitHub exact SHA Actions raw job log 3/3, 총 Node179/178+desktop19, P100은 내부 기능 번호이며 공식 완성률 아님. 문서 자체 커밋은 별도 코드 증명 불가.
+
 ## 2026-11-14 KST — P100 수동 출처 수집·오프라인 라이브러리 후속 인수 (10항)
 
 1. **목표·기술:** 원본STEP1~7+3SKU 전체100%, React/TS/Electron 로컬 우선, 제품 공식완성률 `UNASSESSED`/100% 미달.

@@ -1,3 +1,10 @@
+## 2026-11-14 KST — P100 수동 STEP6 출처 북마크 정확 SHA CI 3/3 SUCCESS (최신)
+
+- **P100은 개발 회차 번호**이고 전체 제품 **100% 완성 뜻 아님**. 원본 7단계/상용 SKU 전체의 공식 최종완성률 **`UNASSESSED` / 목표100% 미달**. 과거 내부 기술 85% 잠정 이력은 별개.
+- 기능·테스트 정확 SHA `2213e8e50759836b8c24bfbe7b037536a8fd995a`: [Linux Chrome+Edge #43553461990](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43553461990) **2/2 SUCCESS, Node179/179 PASS, 0 FAIL**, 새 출처 수동 보관·권리 `UNVERIFIED`·기존 V2 문서/스타일 불변 브라우저 실제 E2E PASS. [Windows NSIS #43553462026](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43553462026) **SUCCESS, Node178 PASS/0 FAIL/1 OS SKIP, desktop19/19 PASS**, 설치/제거/0.1.0→0.1.1 인플레이스 업그레이드 V2·PNG 보존. [정책 #43553462320](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43553462320) SUCCESS(증거 정책만).
+- STEP6 `src/step6/sourceRecords.ts` · `SourceRecordsPanel.tsx` 사용자 스스로 선택한 HTTPS URL/이름/미검증 권리메모 20개 별도 로컬 보관/삭제. 이미지/PDF 바이트·파일명·원문 데이터 자동 유출/다운로드0. **검색 결과 자체 API/카드/원본 저작권 검증·STEP5 자동 연결은 여전히 미구현.**
+- 앞 P95~P99 CI SUCCESS 기록은 아래에 보존. 실제 소유 Windows10/11·허가 실PDF5~10·실 OCR·한국어 GGUF·SKU 발급/entitlement·재배포/소유자 크몽 GO **미충족**, RELEASE HOLD/[작업중]/미등록. [13시 한 번에 요청](docs/commercial/ASTRA_OWNER_1300_CHECKLIST_20261114.md) 및 [전체 12영역 미승인 배점](docs/commercial/ASTRA_P100_SCOREBOARD_20261114.md).
+
 ## 2026-11-14 KST — STEP6 수동 출처 기록 보관 P100 기능 (제품 완성 100% 아님)
 
 - 기능 SHA `2213e8e50759836b8c24bfbe7b037536a8fd995a` 단계명 P100은 작업 번호이며 **공식 최종완성률 UNASSESSED / 목표100% 미달**. 별도 로컬 key·메모 등록 최대20건, HTTPS 출처 고정·권리 `UNVERIFIED`, 원본 PDF/그림 데이터 자동 수집·외부 API 네트워크0, 기존 IndexedDB V2 불변. UI `src/step6/SourceRecordsPanel.tsx`, 파서 `sourceRecords.ts`, Node·브라우저 회귀 추가.
