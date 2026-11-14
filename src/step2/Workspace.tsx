@@ -16,6 +16,7 @@ import {pdfOutputImageCount,pdfOutputTextMarkers} from './outputMarkers.ts';
 import {downloadStylePreset,importStylePreset} from '../step4/stylePreset.ts';
 import {SKU_LAYOUT_CANDIDATES,skuLayoutCandidate} from '../step4/skuLayoutCandidates.ts';
 import ReferenceSearchPanel from '../step6/ReferenceSearchPanel.tsx';
+import SourceRecordsPanel from '../step6/SourceRecordsPanel.tsx';
 import {downloadAdvancedLayoutPreset,importAdvancedLayoutPreset} from '../step4/advancedLayoutPreset.ts';
 import ProLayoutLibrary from '../step4/ProLayoutLibrary.tsx';
 import {downloadBusinessBrandKit,importBusinessBrandKit,validateBusinessBrandKit,type BusinessBrandKit} from '../step4/brandKit.ts';
@@ -654,6 +655,7 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
             </div>}
           </section>
           <ReferenceSearchPanel/>
+          <SourceRecordsPanel/>
           <section className="panel reference-style-panel" aria-label="이미지 기반 디자인 제안">
             <div className="panel-heading"><h2>참고 이미지에서 디자인 제안</h2></div>
             <p className="help-text">이 기기 안에서 분석합니다. 색상, 여백, 시각적 밀도만 추정하며 텍스트와 글꼴은 인식하지 않습니다. 이미지는 문서에 저장하지 않습니다.</p>

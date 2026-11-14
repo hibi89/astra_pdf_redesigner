@@ -97,6 +97,18 @@ try{
   assert.deepEqual(afterPdfAnalysis.content,before.content,'PDF reference analysis must preserve source content');
   await evaluate("document.querySelector('.reference-style-panel .text-button').click()");
   assert.deepEqual((await evaluate(stored)).design,before.design,'Cancel must leave persisted design unchanged');
+
+  // P100: owner-curated source metadata is isolated from IndexedDB and any network fetching.
+  await evaluate("(()=>{for(const [selector,value] of [['[data-step6-source-title]','합성 소스'],['[data-step6-source-url]','https://example.org/gallery'],['[data-step6-source-note]','권리 미확인']]){const i=document.querySelector(selector),proto=i.tagName==='TEXTAREA'?HTMLTextAreaElement.prototype:HTMLInputElement.prototype;Object.getOwnPropertyDescriptor(proto,'value').set.call(i,value);i.dispatchEvent(new Event('input',{bubbles:true}));}})()");
+  await evaluate("document.querySelector('[data-step6-source-add]').click()");
+  await eventually(()=>evaluate("document.querySelector('[data-step6-source-count]')?.textContent.includes('1/20')"));
+  const sources=await evaluate("JSON.parse(localStorage.getItem('astra.step6.sources.v1')).items");
+  assert.equal(sources.length,1);
+  assert.equal(sources[0].rights,'UNVERIFIED');
+  assert.equal(sources[0].sourceUrl,'https://example.org/gallery');
+  assert.deepEqual((await evaluate(stored)).content,before.content);
+  assert.deepEqual((await evaluate(stored)).design,before.design);
+  console.log('PASS P100 STEP6 SOURCE: local-only manually entered source record, rights UNVERIFIED, V2 unchanged');
   console.log('PASS STEP5: local image and selectable PDF-page analysis, A4 PDF output, transient preview, cancel, apply/undo and content preservation');
 }finally{
   try{ws?.close();}catch{}
