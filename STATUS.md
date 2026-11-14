@@ -1,3 +1,11 @@
+## 2026-11-14 KST — P89 정확 소스 SHA Chrome·Edge·Windows 검증 완료
+
+- 코드/테스트 SHA `cabe0adf79a3724066c367ac7cbdb3955bbc113a` [Linux Chrome+Edge Actions #43544304090](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43544304090) **2/2 SUCCESS**: npm 단위 **157/157 PASS, 0 FAIL**, TS/Vite build PASS; Chrome/Edge 양 브라우저 실제 `PASS P89 PRO/BUSINESS TEMPORARY` 로그(22개 선택·서로 다른 computed DOM geometry/실제 A4 PDF/기존 IndexedDB V2 불변), STEP4 기존 파일 프리셋/취소/복원 PASS.
+- [Windows NSIS #43544304096](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43544304096) **SUCCESS**: 설치형/업그레이드·기존 기본 8종 출력/데이터 유지 등 기존 Windows 회귀 PASS. 22개 고급 시안을 Windows 설치형에서 각각 출력한 증거는 없음. [설계 gate #43544304524](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43544304524) SUCCESS(정책만).
+- **검증된 결과:** BASIC 8종 불변 + 고급 **임시 시안 22개** 선택/출력, 저장된 디자인/콘텐츠 미변경. **검증되지 않은 것:** 실제 PRO20/BUSINESS30 영구 재사용·Entitlement/30개의 PDF 전수 인쇄/실 고객 출력·실 PC·오프라인 한국어 모델/STEP6/7/상용권·판매 승인.
+- **공식 완성률 UNASSESSED / 100% 미달 / 기존 기술85% 잠정(역사 기록) / Astra [작업중] / RELEASE HOLD·미등록**. 최종상품으로 상향 산정 금지.
+- 문서 전용 이번 갱신은 테스트 후 상태 기록이며 테스트된 코드 SHA를 새 문서 HEAD로 바꾸지 않는다.
+
 ## 2026-11-14 KST — P89 PRO/BUSINESS 추가 22개 임시 출력 시안 (검증 진행)
 
 - 소스 기준 **`cabe0adf79a3724066c367ac7cbdb3955bbc113a`** (최초 22종 구현 `81aa46f9980188070c612a8becb1ddbb56ec5d1d`, 후속 브라우저 PDF A4 정규식 테스트만 보정).
