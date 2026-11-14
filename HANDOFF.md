@@ -1,3 +1,16 @@
+## 2026-11-14 KST — P107 사용자 12영역 A09 오프라인 SKU 기능 권한 판정 10항 (CI 전체 진행중)
+
+1. 목표·요구·기술: Astra PDF STEP1~7, BASIC/PRO/BUSINESS 3SKU 8/20/30 조판·템플릿·다중 PDF·브랜드 사용권; A09는 100점 중 11점 영역. P96 ECDSA P-256 receipt verifier 위에 vendor-pinned JWK SHA-256 thumbprint(RFC7638)와 서명 기반 기능 허용 매트릭스를 구축한다. React/TypeScript/WebCrypto, 외부 API 0.
+2. 완료 기능 및 선택 근거: A. 서명 검증 + 공개키 thumbprint를 trusted build에 pin하고 기능 요청마다 검증하는 방식(채택, 별도 비용0); B. UI tier 문자열이나 localStorage 값으로 잠금 해제(빠르지만 조작 가능해 배제). src/commercial/skuAccess.ts 추가; BASIC base-layout만, PRO base/pro + template-save/batch-pdf, BUSINESS 전체 6개 capability. 서명·expiry 검증 전 기능 허용 금지. 실제 판매자 issuer key/pin은 null, 정식 상용 접근 전부 DENY. 기존 개발용 preview는 변경하지 않고 별도 완제품 SKU UI 통합이 필요.
+3. 테스트 명령·PASS/FAIL/SKIP: 기능 정확 SHA 0d3501d0cf51f3b5e87370f6a973fbb01d72e697. 신규 tests/sku-access.test.ts 7개 합성 WebCrypto 서명 receipt 회귀를 기존 npm test (tests/*.test.ts)에 자동 포함. GitHub Linux Chrome/Edge #43583817449, Windows NSIS #43583817441, 정책 #43583817679. 확인 시점 정책 SUCCESS, Linux npm test/build 및 Windows npm test + P106 step PASS. 전체 Actions 최종 결론 및 정확 수치는 진행 중/미확인. 실행 npm test, npm run build, npm run desktop:test, npm run ocr:release-gate.
+4. 완료·진행·차단: capability 검증 정책 코드 및 회귀 GitHub 반영. 정식 판매자 공개키/핀·라이선스 발급·장치수/재발급·GUI entitlement enforcement·실 구매자 Windows/판매약관/사용권·모델/OCR 품질 미구현·미검증. 공식 UNASSESSED, 100% 미달, RELEASE HOLD.
+5. 오류·원인·실패 대안: 기존 UI는 PRO/BUSINESS를 별도 명시한 개발 시험 시안으로 노출하므로, 실제 구매자 기능을 임의로 잠가 정상 기능을 훼손하지 않도록 읽기·저장·디자인 프로토타입 수정 금지. issuer key를 테스트 생성값으로 실제 제품에 pin하면 판매자 신뢰 위조 위험, 미설정 null 유지. 현 작업 검증 실패 발견 시 최소 수정 후 정확 SHA 재검증.
+6. 저장소·브랜치·SHA·주요 경로: hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112 / 기능 0d3501d0cf51f3b5e87370f6a973fbb01d72e697. src/commercial/skuAccess.ts, tests/sku-access.test.ts, 기존 src/commercial/offlineLicense.ts는 수정0. 상세 docs/commercial/ASTRA_P107_SIGNED_SKU_ACCESS_20261114.md.
+7. Production URL·Vercel·실행 환경: 로컬 전용 Windows/Electron/Node22 + GitHub Actions 합성. Vercel 미적용, 실제 크몽 판매 미등록, 발급 서버/클라우드 없음. 테스트 검증은 설치/배포 승인 아님.
+8. 원본·복구·보안: 직전 제품 HEAD 0b432f2598f121ae1a7f527bf4289ab92aed6a52 정상 Git revert 기반. main/Draft PR10, 원본 고객 PDF·STEP1 localStorage V1·STEP2 IndexedDB V2·고급 시안·기존 라이선스/판매 이력, GitHub secrets/키/환경 미수정. 새 라이선스 test key는 CI 메모리에서만 생성, 저장·배포하지 않음.
+9. 다음 단계·완료 기준·승인: (1) P107 정확 코드 SHA 전체 CI 및 로그 확인 (2) trusted publisher JWK thumbprint·라이선스 발급/기기 정책 및 철회 모델을 설계·증거 기반 승인 (3) 사용자 검수 후 실제 GUI/액션 진입점에 entitlement enforcement 통합하되 현재 개발용 프로토타입 보존 (4) P106 실제 Windows OCR 공급처 검증과 A08 한국어 로컬 LLM, 실 고객 PDF5~10, 최종 12영역 재산정. 무료 개발 승인 기확정, 출시/서명키/외부자료 전송/판매는 별도.
+10. 갱신 KST·검증 범위: 2026-11-14 KST. GitHub branch/기능 commit 및 Linux/Windows 중간 unit/build, 정책 PASS 일부 실증. 전체 Linux/Windows 최종은 미확인; 문서 SHA와 중앙 원장 최종 HEAD는 별도 readback. 기능권한 테스트 합격을 제품 판매 가능이나 A09 11/11점으로 간주 금지.
+
 ## 2026-11-14 KST — P106 기능 정확 SHA 3/3 CI 최종 성공 인수인계 10항
 
 1. **목표·최종 요구·기술:** Astra PDF 원래 7단계/3SKU/12영역100점, Windows 오프라인 Tesseract EXE/DLL/installer Authenticode·SHA 증거 검수. PowerShell Get-AuthenticodeSignature/Get-FileHash + Node/PDF.js/Electron; 배포·원본 변경 없음.
