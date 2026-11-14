@@ -2,14 +2,16 @@ import {useState} from 'react';
 import type {PdfDraft} from './structure.ts';
 import PdfImportPanel,{type ImportedPdfSource} from './ImportPanel.tsx';
 import {validateProPdfBatch} from './batchQueue.ts';
+import {runSkuGatedAction} from '../commercial/skuActionGate.ts';
 
 interface Props {
   disabled:boolean;
+  licenseReceipt:string;
   onImport:(draft:PdfDraft)=>Promise<string|false>;
   onSourceCommitted:(source:ImportedPdfSource)=>void;
 }
 /** PRO: each source is parsed in the existing review panel; never skip manual approval. */
-export default function BatchImportPanel({disabled,onImport,onSourceCommitted}:Props){
+export default function BatchImportPanel({disabled,licenseReceipt,onImport,onSourceCommitted}:Props){
   const [files,setFiles]=useState<File[]>([]);
   const [index,setIndex]=useState(0);
   const [waiting,setWaiting]=useState(false);
@@ -23,8 +25,10 @@ export default function BatchImportPanel({disabled,onImport,onSourceCommitted}:P
     try{
       const entries=Array.from(selection??[]);
       validateProPdfBatch(entries);
-      if(selected&&!window.confirm('기존 순차 검수 대기 목록을 새 목록으로 바꾸시겠습니까? 저장하지 않은 PDF 검수 내용은 사라집니다.'))return;
-      setFiles(entries);setIndex(0);setWaiting(false);setError('');setGeneration(v=>v+1);
+      void runSkuGatedAction([entries.length>1?'batch-pdf':'base-layout'],licenseReceipt,()=>{
+        if(selected&&!window.confirm('기존 순차 검수 대기 목록을 새 목록으로 바꾸시겠습니까? 저장하지 않은 PDF 검수 내용은 사라집니다.'))return;
+        setFiles(entries);setIndex(0);setWaiting(false);setError('');setGeneration(v=>v+1);
+      }).catch(e=>setError(e instanceof Error?e.message:'사용권 확인 실패'));
     }catch(e){setError(e instanceof Error?e.message:'PDF 대기 목록을 생성할 수 없습니다.');}
   };
   const clear=()=>{
@@ -53,11 +57,14 @@ export default function BatchImportPanel({disabled,onImport,onSourceCommitted}:P
         </p>
         <p className="help-text" data-pro-batch-current>현재 파일: {files[index]?.name}</p>
         {waiting&&!complete&&<button type="button" className="secondary-button" data-pro-batch-next disabled={disabled}
-          onClick={()=>{setIndex(v=>v+1);setWaiting(false);}}>다음 PDF 원본 대조 시작</button>}
+          onClick={()=>{void runSkuGatedAction(['batch-pdf'],licenseReceipt,()=>{setIndex(v=>v+1);setWaiting(false);})
+            .catch(e=>setError(e instanceof Error?e.message:'사용권 확인 실패'));}}>다음 PDF 원본 대조 시작</button>}
         <button type="button" className="text-button" data-pro-batch-clear onClick={clear}>목록 비우기 (저장한 문서 보존)</button>
       </>}
     </section>
     <PdfImportPanel key={selected?`pro-batch-${generation}-${index}`:`single-${generation}`}
-      disabled={disabled} initialFile={active} onImport={onImport} onSourceCommitted={committed}/>
+      disabled={disabled} initialFile={active}
+      onImport={draft=>runSkuGatedAction([selected?'batch-pdf':'base-layout'],licenseReceipt,()=>onImport(draft))}
+      onSourceCommitted={committed}/>
   </>;
 }
