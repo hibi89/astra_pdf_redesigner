@@ -1,3 +1,16 @@
+## 2026-11-14 KST — P104 정확 SHA 3/3 CI 검증 최종 인수인계 10항
+
+1. **목표·확정 요구·기술:** Astra STEP1~7/3SKU/최종12항100점, 로컬 Windows x64 OCR 바이너리 안전 감사·가드. React/TS/PDF.js/Electron/NSIS + Node22 SHA-256/PE32+ 사전검사, 유료/외부 전송0.
+2. **완료 기능/변경/선택 근거:** 휴먼 서명·법무 검토 선행 오프라인 번들(A) 우선, 별도 사용자설치(B) 대비 사용편의 우위. 출처·SHA/크기·모든 exe/DLL·kor+eng·LICENSE/NOTICE manifest 교차 검사와 우회(glob, symlink, hardlink, extraResources) 차단, OCR_RELEASE_HOLD 기본 유지. 성공 report도 review-required/legalRedistributionApproved:false. OCR 실행 자산은 실제 포함하지 않음.
+3. **정확 테스트/명령·PASS/FAIL/SKIP:** 기능 sha **e2fd0797990ce94e7f7a68720ece3617f9d114db**. [Linux Chrome+Edge #43574432110](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43574432110) 2/2 SUCCESS Node **210PASS/0FAIL/0SKIP**, npm run build PASS, 두 브라우저 STEP7 synthetic OCR review E2E PASS. [Windows #43574432095](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43574432095) SUCCESS Node **209PASS/0FAIL/1 Windows symlink 권한SKIP**, desktop **48PASS/0FAIL**, NSIS EXE/설치·제거/업그레이드 V2·PNG 보존 PASS, OCR release hold (기본 0.1.0·업그레이드0.1.1) 2회 PASS. [정본 정책 #43574432327](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43574432327) SUCCESS.
+4. **완료/진행/대기/차단:** GitHub 코드/합성 공급망 회귀 15+6, 안전 패키징 차단/CI 검증까지 완료. 사용자 실제 Win10/11·한글 OCR 엔진 실행·독립 공급처 EXE/DLL/kor+eng·SHA/Authenticode/법적 재배포/NOTICE·실고객 PDF5~10·한국어 AI/정식3SKU/판매 GO 미완. 최종100% 미달/UNASSESSED/RELEASE HOLD.
+5. **오류 근거/원인/시도/재시도 금지·대안:** 초기 디렉터리 hardlink 검사 false-positive 가능성 제거(파일 hardlink만 거부); Electron 파일 포함 목록 변경 우회 발견→정확 files 3개 allowlist+악성 추가 glob 회귀 적용. CI 실제 로그를 확인하여 이전 '미검증' 표현 정정. 이력상 이전 일부 커밋 실패를 최신 전체 성공으로 대체하되 실패 로그를 삭제하거나 force push하지 않음.
+6. **저장소/브랜치/SHA/경로:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112, 실행 코드 e2fd0797990ce94e7f7a68720ece3617f9d114db. desktop/ocr-supply-chain-preflight.cjs, desktop/ocr-release-hold-gate.cjs, tests/ocr-supply-chain-preflight.test.cjs, tests/ocr-release-hold-gate.test.cjs, package.json, .github/workflows/windows-desktop.yml, docs/commercial/ASTRA_P104_WINDOWS_OCR_PREFLIGHT_20261114.md. 문서 SHA는 본 update 후 확인.
+7. **배포/Production URL/실행 환경:** Windows NSIS 개발 설치기 CI에서만 합성 확인. Vercel N/A, 크몽 등록0. npm test; npm run build (prebuild OCR hold), npm run desktop:test; npm run ocr:release-gate; 실제 자산 확보 시 npm run ocr:preflight -- <folder> <json> (결과 review-required이고 출시허가 불가).
+8. **원본/백업/보안·수정금지:** main·Draft PR10·STEP1 localStorage V1·STEP2 IndexedDB V2·원본 PDF 및 고객 자료, 서명/환경·토큰/모델 자산 변경0. Git 이전 SHA로 원복 가능. 고객 실파일·바이너리 GitHub 저장0. OCR_MANIFEST=null.
+9. **다음 작업/절차/완료 조건·승인:** (1) 외부 공급처 Windows 설치파일/Authenticode와 EXE/DLL/kor+eng 실제 bytes 및 라이선스·NOTICE/SBOM 검수 (2) 전체 의존 DLL closure 및 런타임 서명/해시 재검증 후 사용자 사용 PC 조건 (3) Windows 실제 한글/숫자/표 OCR와 원본 PDF 대조·합성/실사용자 시나리오 (4) 3SKU/LLM/최종사용자 수용. 기존 무료 OCR 코딩 승인 재요청 금지, 외부 전송/유료 구매/권한·보안 변경/판매 GO 별도 승인.
+10. **갱신일시(KST)·확인시점·검증범위·문서기준:** 2026-11-14 KST, GitHub raw workflow job logs에서 정확 SHA 3/3 SUCCESS, Node Linux210 Windows209+1SKIP desktop48, Chrome/Edge OCR UI 및 NSIS2회 HOLD PASS. 기능 CI 성공≠재배포 라이선스·실 Win10/11·제품 공식100% 합격. HEAD는 문서 업데이트 직후 실제 비교.
+
 ## 2026-11-14 KST — P104 Windows OCR 공급망 사전 검증 10항 (최신)
 
 1. **목표·용도·확정 요구·기술:** Astra PDF STEP1~7, BASIC/PRO/BUSINESS 사용자 원본 12영역/100점·원본 무손상·무료 로컬 OCR 사전 안전 감사. Node22 CJS, Win64 PE 헤더, SHA-256, Electron Builder NSIS. 무료 OCR 코드/배점은 승인됨. 판매·유료결제·외부 고객 자료 전송 미승인.
