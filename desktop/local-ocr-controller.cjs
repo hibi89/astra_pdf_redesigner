@@ -21,14 +21,49 @@ function validManifest(m){
  return m&&m.id==='tesseract-kor-eng-v1'&&validEntry(m.binary,256*1024*1024)&&
   validEntry(m.kor,32*1024*1024)&&validEntry(m.eng,32*1024*1024);
 }
+// Reject truncated or malformed PNG chunks before any native subprocess reads them.
+const CRC_TABLE=Uint32Array.from({length:256},(_,i)=>{
+ let x=i;for(let bit=0;bit<8;bit++)x=x&1?0xedb88320^(x>>>1):x>>>1;
+ return x>>>0;
+});
+function chunkCrc(bytes,offset,length){
+ let crc=0xffffffff;
+ for(let i=offset;i<offset+4+length;i++)
+  crc=CRC_TABLE[(crc^bytes[i])&255]^(crc>>>8);
+ return(crc^0xffffffff)>>>0;
+}
 function validatePng(input){
- if(!(input instanceof Uint8Array)||input.byteLength<33||input.byteLength>MAX_PNG_BYTES)
+ if(!(input instanceof Uint8Array)||input.byteLength<45||input.byteLength>MAX_PNG_BYTES)
   throw Error('invalid-image');
  const bytes=Buffer.from(input.buffer,input.byteOffset,input.byteLength);
- if(!bytes.subarray(0,8).equals(PNG_SIGNATURE)||bytes.toString('ascii',12,16)!=='IHDR'||
-    bytes.readUInt32BE(8)!==13)throw Error('invalid-image');
- const w=bytes.readUInt32BE(16),h=bytes.readUInt32BE(20);
- if(w<1||h<1||w>10_000||h>10_000||w*h>MAX_PIXELS)throw Error('image-pixel-limit');
+ if(!bytes.subarray(0,8).equals(PNG_SIGNATURE))throw Error('invalid-image');
+ let pos=8,seenIdat=false,seenEnd=false,chunkCount=0;
+ while(pos<bytes.length){
+  if(++chunkCount>1024||bytes.length-pos<12)throw Error('invalid-image');
+  const length=bytes.readUInt32BE(pos);
+  if(length>bytes.length-pos-12)throw Error('invalid-image');
+  const type=bytes.toString('ascii',pos+4,pos+8);
+  if(!/^[A-Za-z]{4}$/.test(type))throw Error('invalid-image');
+  if(chunkCount===1){
+   if(type!=='IHDR'||length!==13)throw Error('invalid-image');
+   const w=bytes.readUInt32BE(pos+8),h=bytes.readUInt32BE(pos+12);
+   if(w<1||h<1||w>10000||h>10000||w*h>MAX_PIXELS)throw Error('image-pixel-limit');
+   const bitDepth=bytes[pos+16],color=bytes[pos+17];
+   if(bitDepth!==8||![0,2,3,4,6].includes(color)||
+      bytes[pos+18]!==0||bytes[pos+19]!==0||bytes[pos+20]>1)
+    throw Error('invalid-image');
+  }else if(type==='IHDR')throw Error('invalid-image');
+  if(type==='IDAT')seenIdat=true;
+  if(type==='IEND'){
+   if(length!==0||!seenIdat)throw Error('invalid-image');
+   seenEnd=true;
+  }
+  const actual=chunkCrc(bytes,pos+4,length);
+  if(actual!==bytes.readUInt32BE(pos+8+length))throw Error('invalid-image');
+  pos+=12+length;
+  if(seenEnd){if(pos!==bytes.length)throw Error('invalid-image');break;}
+ }
+ if(!seenEnd||!seenIdat)return (()=>{throw Error('invalid-image')})();
  return Buffer.from(bytes);
 }
 async function digest(file){
