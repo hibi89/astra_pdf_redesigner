@@ -7,6 +7,7 @@ import {type ImportedPdfSource} from '../step3/ImportPanel.tsx';
 import BatchImportPanel from '../step3/BatchImportPanel.tsx';
 import {hasDesktopPdfExport,savePdfFromEditor} from '../desktopPdf.ts';
 import RuleReview from '../humanize/RuleReview.tsx';
+import LocalModelReview from '../humanize/LocalModelReview.tsx';
 import SourceAnchorPreview from '../step3/SourceAnchorPreview.tsx';
 import {isReviewed,reviewableBlocks,reviewableOrigin,reviewSignature} from '../step3/sourceReview.ts';
 import {analyzePdfTypography,analyzeReferencePixels,suggestPdfBodyTextSize,type PdfTypographyMetrics,type ReferenceMetrics} from '../step5/referenceAnalysis.ts';
@@ -488,6 +489,8 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
                 {(block.kind==='paragraph'||block.kind==='caption')&&<label className="field"><span className="visually-hidden">{block.kind==='caption'?'캡션':'본문'} {bi+1}</span><textarea disabled={!editable} rows={block.kind==='caption'?2:4} value={block.text} onChange={e=>changeBlock(section.id,block.id,b=>b.kind==='paragraph'||b.kind==='caption'?{...b,text:e.target.value}:b)}/></label>}
                 {block.kind==='heading'&&<label className="field"><span className="visually-hidden">소제목 {bi+1}</span><input disabled={!editable} value={block.text} onChange={e=>changeBlock(section.id,block.id,b=>b.kind==='heading'?{...b,text:e.target.value}:b)}/></label>}
                 {block.kind==='paragraph'&&<RuleReview text={block.text} disabled={!editable}
+                  onApply={value=>changeBlock(section.id,block.id,b=>b.kind==='paragraph'?{...b,text:value}:b)}/>}
+                {block.kind==='paragraph'&&<LocalModelReview text={block.text} disabled={!editable}
                   onApply={value=>changeBlock(section.id,block.id,b=>b.kind==='paragraph'?{...b,text:value}:b)}/>}
                 {reviewableOrigin(block.origin)&&<div className="m06-block-origin no-print" data-m06-origin data-m06-page={block.origin.page}>
                   <span className="help-text">원본 PDF 출처: {block.origin.page}페이지 · x={block.origin.x}pt · y={block.origin.y}pt (추정)</span>
