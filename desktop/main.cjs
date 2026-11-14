@@ -264,7 +264,7 @@ async function runSmoke(win){
   const modelStatus=await evaluate('window.astraDesktop.localModelStatus()');
   if(modelStatus.status!=='unavailable')throw Error('Model must fail closed without shipped weights');
   const unavailableProposal=await evaluate("window.astraDesktop.localModelPropose('synthetic CI text')");
-  if(unavailableProposal.status!=='unavailable')throw Error('Unshipped model unexpectedly executed');
+  if(unavailableProposal.status!=='error'||unavailableProposal.reason!=='local-model-consent-required')throw Error('Unconsented local model call was not blocked');
   const ocrBridge=await evaluate("typeof window.astraDesktop.localOcrRecognizePng==='function'");
   if(!ocrBridge)throw Error('Secure local OCR bridge unavailable');
   const ocrStatus=await evaluate('window.astraDesktop.localOcrStatus()');
