@@ -1,3 +1,16 @@
+## 2026-11-14 KST — P103 실 OCR 모드 비교·프론트엔드 초안 귀속 인수인계 10항
+
+1. **목표/기술/정본:** 사용자 확정 STEP1~7 및 BASIC8/PRO20/BUSINESS30, 12영역 총 100점. React/TS/PDF.js/Electron/무료 로컬 Tesseract. 고객 내용·원본 무손상, 전체 공식 최종률 UNASSESSED/100% 미달.
+2. **완료/변경/근거:** P102 Unicode/임시PNG/허용 PSM 보강 CI 정확 SHA 성공. P103 단문 합성20 OCR 모드 PSM6/3 성능 비교 및 복합 구조6 탐색 후 기본6 유지/PSM3 선택형. STEP7 페이지·모드 전환 시 미승인 이전 OCR 초안과 provenance 삭제, 성공 시 페이지·모드 표시/사용자 편집표시. 합성 스캔 PDF 브라우저 E2E 추가.
+3. **실제 테스트/미검증:** P102 exact 기능 SHA 5d87df4ef2f9: Linux Chrome+Edge #43568805209 2/2 SUCCESS Node189PASS/0FAIL/0SKIP·build PASS, Windows #43568805220 SUCCESS Node188PASS/0FAIL/1 symlink OS SKIP+desktop27PASS·NSIS 설치/업그레이드 성공, 정책 #43568805420 SUCCESS. P103 신규 기능 SHA f9672f12b2d40106bdcc244e2675c903b3c98888 GitHub Chrome/Edge·Windows CI는 현재 실행중/미확인. Linux 실 Tesseract 5.5 PSM6 합성20 중15 exact/CER2.2%, PSM3 5 exact/CER51.28%. 합성 표식6장은 예비 탐색으로만 평가. 실고객·실 WinOCR 불인정.
+4. **완료/진행/대기/차단:** UI와 합성 E2E 코드 반영 완료, P102 exact CI green. P103 신규 CI 판단 대기. 실제 Windows 실행파일+kor/eng/DLL 정식 LICENSE·NOTICE/해시·실 Win10/11·허가 PDF5~10·한국어 GGUF CPU·3SKU 정식 권리·판매 승인 미충족; RELEASE HOLD.
+5. **오류/원인/시도/대안:** PDF 페이지 또는 PSM 변경 후 이전 초안이 남으면 다른 출처 텍스트 오인 가능 → 입력 변경 때 초안/출처 폐기, 성공 시 생성한 페이지/모드 명시. 골든 비교에서 PSM3 단문 누락 다수(5/20 정확) 확인 → 기본 PSM6 유지. 두 모드 모두 표 숫자/의미 자동 인증 불가, 수동 검수 보존. E2E 실패 시 실제 job log를 읽고 안전한 테스트·UI 최소 수정(테스트 생략 금지).
+6. **repo/branch/SHA/경로:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112. P102 기능5d87df4e / P103 기능 f9672f12b2d40106bdcc244e2675c903b3c98888. P103 문서 HEAD 1d951f39182b7a313ba5cd49b1d695a8ab4d6d78, STATUS 갱신 1be2518211c948ba9bfa5b8fd015aefeb3e4400a; 본 HANDOFF 이후 HEAD 재조회. 주요 src/step7/LocalOcrPanel.tsx, scripts/run-ocr-golden.cjs, tests/step7-local-ocr-browser.mjs, .github/workflows/ci.yml, docs/commercial/ASTRA_P103_OCR_PSM_REVIEW_20261114.md.
+7. **실행/Production/환경:** Node22 npm test/build, GitHub hosted Chrome/Edge actual browser, Windows NSIS/Electron. Vercel N/A, 크몽 미등록. Linux 실 OCR 비교는 Tesseract 5.5 kor+eng/Pillow/NanumGothic 합성20, 자료 외부업로드0.
+8. **원본/백업/인증/수정 금지:** 기존 main/PR10·STEP1 localStorage V1/STEP2 IndexedDB V2·원본 PDF/고객 파일·구매자 개인정보/비밀키 불변. Git parent SHA 회복 가능. OCR_MANIFEST=null, 정식 Windows 바이너리/모델/폰트 번들0; 유료 사용·외부 원문 전송·판매 없음.
+9. **다음 작업/완료 기준:** 먼저 P103 head SHA GitHub Actions Chrome·Edge E2E+Windows NSIS Node/React 실제 로그 성공/실패를 확인하고 최소 수정. 다음 PSM3/6 복합 6종 재현 생성기 고정/검증, Windows Tesseract DLL·언어팩·LICENSE/NOTICE·SBOM exact pin, 실제 무전송 한글 OCR/A4/취소·원문 보존·수동 검수. 최종100%는 사용자 실 PDF/물리 Windows/상용 권리·판매 별도 수용 필요. 사용자 무료 OCR 개발 승인 반복 요청 금지.
+10. **갱신일시/증거/기준커밋:** 2026-11-14 KST, GitHub API Actions raw job logs로 P102 exact SHA 3/3 확인, Python 로컬 synthetic 20+6 실OCR 비교, P103 코드 f9672f12 신규 CI 아직 최종 미확인. 본 문서 SHA는 새 HEAD로 확인하고 기능 SHA와 구분.
+
 ## 2026-11-14 KST — P102 Windows OCR 인수인계 10항 (최신)
 
 1. **목표/기술:** Astra PDF STEP1~7·BASIC/PRO/BUSINESS 사용자 100점 설계 기준, 로컬 Tesseract/Electron/PDF.js/React·기존 사용자 데이터 안전/0원 운영.
