@@ -1,3 +1,9 @@
+## 2026-11-14 11시 KST 공식 페이지 재확인 (다운로드 없음)
+
+- [Qwen 공식 GGUF 파일 목록](https://huggingface.co/Qwen/Qwen3-0.6B-GGUF/tree/main)에서 `Qwen3-0.6B-Q8_0.gguf` 약 **639MB** 표시, 모델 저장소 `apache-2.0`; 정확 LFS SHA 및 사용자 PC 성능 검증 전에는 패키징·완료 주장 금지.
+- [ggml-org/llama.cpp LICENSE](https://github.com/ggml-org/llama.cpp/blob/master/LICENSE) 공식 파일은 MIT(2023–2026 저작권 고지 필요). 최종 다운로드되는 Windows 바이너리/동적 라이브러리/모델별 NOTICE 및 재배포 권리는 별도 검증.
+- 고객용 3개 등급에 동일한 로컬 AI를 제공해야 하며, `desktop/local-model-controller.cjs`의 현재 `RELEASE_MANIFEST=null`는 그대로 유지. 파일 크기 639MB는 다운로드 예상 대역폭이지 다운로드 완료·실 실행 성능이나 모델 품질 증거가 아님.
+
 # ASTRA 오프라인 한국어 모델/런타임 상용 라이선스 1차 사전점검 (2026-11-14 KST)
 
 **판정: 사용 후보 존재 / 실제 모델 구동·재배포·한국어 품질·Windows 설치 검증 전.** 이 문서는 웹상 라이선스 표시와 공식 소스 확인만 담으며 다운로드·실행·판매 승인이 아니다.
