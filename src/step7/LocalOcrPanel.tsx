@@ -85,7 +85,7 @@ export default function LocalOcrPanel(){
  };
  return <section className="panel no-print" aria-label="STEP7 무료 로컬 OCR 검수" data-step7-local-ocr>
   <h2>STEP7 · 스캔 PDF 한 페이지 로컬 OCR</h2>
-  <p className="help-text">선택한 PDF 페이지를 이 기기에서 PNG로 변환하고, 검증된 Tesseract가 있을 때만 한글·영문을 인식합니다. **자동 반영·자동 저장·외부 전송은 하지 않습니다.** 숫자·표·다단·원문 일치 여부는 직접 대조해야 합니다.</p>
+  <p className="help-text">선택한 PDF 페이지를 이 기기에서 PNG로 변환하고, 검증된 Tesseract가 있을 때만 한글·영문을 인식합니다. 자동 반영·자동 저장·외부 전송은 하지 않습니다. 숫자·표·다단·원문 일치 여부는 직접 대조해야 합니다.</p>
   <p role="status" data-step7-ocr-status>{status}</p>
   <label className="field">스캔 PDF 파일
    <input type="file" accept=".pdf,application/pdf" data-step7-ocr-file disabled={busy||!available}
