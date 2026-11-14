@@ -1,11 +1,7 @@
-# G60 — NOT PASSED / BLOCKED
+# G60 — NOT PASSED
 
-**Date:** 2026-11-15 KST  
-**Task-sum at review:** 61/100 after P125 VERIFIED +2.  
-**Gate points:** 0; G60 is a threshold gate, not an additional score.
+**Current provisional task sum:** 61/100. **Gate points:** 0. Official acceptance remains UNASSESSED; release remains RELEASE HOLD.
 
-The gate requires supplier-approved Windows Tesseract sourcing and actual Windows/Electron OCR behavior, including real recognition and misrecognition/no-data-mutation evidence. P119 is BLOCKED because the candidate installer lacks a GitHub-published exact binary digest and the available evidence does not establish Authenticode, PE/DLL closure, exact model mapping, or bundle redistribution rights. P120 actual Tesseract kor+eng 12-corpus recognition and P121 Electron subprocess/cancel/cleanup tests were not run.
+A Windows GitHub-hosted runner has now executed the exact-hash Tesseract 5.5.3 asset on 12 synthetic Korean kor+eng cases (9 exact, 3 errors; one critical amount mismatch). This establishes that actual Windows OCR execution is possible in Actions. It does not satisfy the gate: P119 remains blocked because Authenticode returned UnknownError, PE/DLL closure and third-party license/NOTICE mapping remain unproven; P120 has not completed the app/UI acceptance path; P121 actual Electron IPC, cancellation, cleanup, and V2 immutability have not been tested.
 
-P125's signed SKU main-process regression and Windows installer workflow do not substitute for OCR. The verified task sum of 61/100 does **not** mean G60 passed. P119/P120/P121 remain BLOCKED +0; `OCR_MANIFEST=null`, official acceptance UNASSESSED, RELEASE HOLD.
-
-**Result:** G60 NOT PASSED. Re-evaluate only when a permitted, rights/hash-verified Windows Tesseract asset and actual Windows runner acceptance are available.
+P119/P120/P121 remain BLOCKED +0. The task sum of 61 does not pass G60. Keep OCR_MANIFEST=null and RELEASE HOLD.

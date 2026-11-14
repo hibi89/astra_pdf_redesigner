@@ -103,5 +103,27 @@
     "https://api.github.com/repos/tesseract-ocr/tesseract/releases/latest",
     "https://api.github.com/repos/tesseract-ocr/tessdata_best/git/trees/main?recursive=1",
     "https://api.github.com/repos/DanBloomberg/leptonica/contents/leptonica-license.txt?ref=master"
-  ]
+  ],
+  "follow_up_github_actions_candidate": {
+    "id": "tesseract-ocr/tesseract 5.5.3 Windows installer (exploratory, not approved)",
+    "release_url": "https://github.com/tesseract-ocr/tesseract/releases/tag/5.5.3",
+    "asset": "tesseract-ocr-w64-setup-5.5.3.20260724.exe",
+    "asset_sha256": "bee9e3434bd94fd65387d9be28cd467a41f61b1275383b55b0f59a1331270ae4",
+    "observed_windows_authenticode": "UnknownError",
+    "signer": "CN=Universität Mannheim, O=Universität Mannheim, S=Baden-Württemberg, C=DE",
+    "signer_thumbprint": "2F92CB990D57719BDCCA2D72134378614A040D9B",
+    "runtime_pe_files_observed": 73,
+    "runtime_license_files": [
+      "doc/AUTHORS",
+      "doc/LICENSE"
+    ],
+    "dependency_notice_mapping": "NOT_VERIFIED",
+    "static_import_closure": "NOT_PROVEN",
+    "language_data_commit": "e12c65a915945e4c28e237a9b52bc4a8f39a0cec",
+    "eng_sha256": "8280aed0782fe27257a68ea10fe7ef324ca0f8d85bd2fd145d1c2b560bcb66ba",
+    "kor_sha256": "f888d4038348a0c3d25151e7f452bda0d74ca275b18cab146798bcbb94084fff",
+    "windows_workflow_run": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43644765268",
+    "evidence_source_sha": "e293fcdc585792d1985cba5f31b032d050ede11c",
+    "product_ocr_enabled": false
+  }
 }

@@ -122,3 +122,8 @@ P114(PDF 읽기 순서·수동 원문 대조), P115(원본/출력 15쌍 비교),
 
 ## 후속
 다음 P126은 P121 의존성이 미충족되어 BLOCKED다. P119~P121 Windows Tesseract 실제 검증과 P123/P124 Qwen3 CPU/Electron 경로도 승인 모델·OCR 자산 및 실측 수단이 확보될 때까지 BLOCKED/0점이다. G60/G65/G70은 각 기준 점수에서 별도 증거로 판정한다. 공식 구매자 수용은 UNASSESSED, RELEASE HOLD를 유지한다.
+
+
+## P119/P120 actual Windows Actions experiment (no score)
+
+Exact Windows Tesseract 5.5.3 run #43644765268 on code SHA e293fcdc585792d1985cba5f31b032d050ede11c executed 12 synthetic kor+eng images: 9 exact, three misrecognition/omission, mean whitespace-normalized CER 0.0486, with one critical amount mismatch (2,300,000→22300,000). The pinned official release asset digest matched. Authenticode returned UnknownError; dependency import closure and bundled third-party notices remain unproven. P119/P120 remain blocked +0 under the prerequisite and full UI acceptance rules; score stays 61/100, G60 not passed.

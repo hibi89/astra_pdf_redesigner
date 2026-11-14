@@ -29,3 +29,12 @@ GitHub release metadata만으로 설치 파일의 Authenticode 서명, x64 PE �
 ## 결과
 
 P119 BLOCKED / +0. A07은 5/12, 총점은 57/100이다. 실제 Windows Tesseract 서명·hash·PE/DLL closure·candidate bundle redistribution은 미검증. P120/P121은 P119 실자산 승인 의존성이 충족되지 않아 BLOCKED. 다음 독립 작업은 P122다.
+
+
+## 2026-11-15 KST — upstream GitHub asset Windows Actions re-audit (no score)
+
+A later exploratory run found and downloaded only on the disposable GitHub-hosted Windows runner the upstream [tesseract-ocr/tesseract 5.5.3 release asset](https://github.com/tesseract-ocr/tesseract/releases/tag/5.5.3). GitHub's release metadata publishes SHA-256 `bee9e3434bd94fd65387d9be28cd467a41f61b1275383b55b0f59a1331270ae4`; the runner matched it exactly. This narrows the earlier no-digest finding for the UB-Mannheim 5.4 candidate, but it does not approve the new asset.
+
+The exact Windows run at source SHA [`e293fcdc585792d1985cba5f31b032d050ede11c`](https://github.com/hibi89/astra_pdf_redesigner/commit/e293fcdc585792d1985cba5f31b032d050ede11c), [#43644765268](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43644765268), ran the real installer in a temporary runner folder and observed 73 top-level PE files. Installer Authenticode was `UnknownError`: signer subject Universidad Mannheim, thumbprint `2F92CB990D57719BDCCA2D72134378614A040D9B`; Windows reported a certificate validity-period error. The extracted runtime includes unsigned DLLs and only `doc/AUTHORS` and `doc/LICENSE`; dependency-specific NOTICE/license mapping and static import closure remain unproven (the audit uncovered missing Windows system-DLL classifications such as `msimg32.dll`, `wldap32.dll`, `dnsapi.dll`, and `dwrite.dll`). No binary was committed, bundled, or enabled in the product. The current parser correction SHA `5a0c32c3358834557b76da739ee3d97a2c6e612b` is under exact-SHA GitHub Actions; it does not relax release policy.
+
+The release digest and a successful OCR execution are evidence of provenance/feasibility, not evidence that the installed bundle is signed-valid or license-complete. **P119 remains BLOCKED +0; `OCR_MANIFEST=null`, RELEASE HOLD.**

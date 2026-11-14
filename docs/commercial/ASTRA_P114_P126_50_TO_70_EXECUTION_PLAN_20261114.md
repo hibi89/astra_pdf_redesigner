@@ -118,7 +118,7 @@
 
 #### P119 — Windows Tesseract 공급처·해시·DLL·LICENSE 감사 재현 (A07 +1점, 누적 상한 58/100)
 
-- **선행:** 없음. **담당:** Codex 6 Luna Max. 현재 상태: **BLOCKED, +0점**. [GitHub 후보 감사](../evidence/astra/P119/VERIFICATION.md); release SHA-256/AuthentiCode/PE closure/candidate redistribution rights not evidenced. Keep OCR_MANIFEST=null.
+- **선행:** 없음. 현재 상태: **BLOCKED, +0점**. [후속 Windows Actions 실험](../evidence/astra/P119/VERIFICATION.md)에서 upstream 5.5.3 자산 release SHA-256은 확인됐으나 Authenticode가 UnknownError이고 PE/DLL closure 및 모든 NOTICE/재배포 매핑 미완료. OCR_MANIFEST=null 유지.
 - **수정 후보 경로:** desktop/ocr-supply-chain-preflight.cjs; desktop/ocr-pe-import-audit.cjs; tests/ocr-supply-chain-preflight.test.cjs; tests/ocr-windows-authenticode-evidence.test.ps1. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 별도 다운로드/동봉 없이 공식 공급처 후보의 버전·해시·Authenticode·PE import/delay-load DLL 폐쇄성·tessdata kor/eng·재배포권 증거를 정리한다. 데이터/고객 PDF 없이 증거·검증기만 유지.
 - **수용 테스트/증거:** Windows 테스트에서 정상·변조·누락·DLL 경로 오염·서명 없음·라이선스 고지 없음 케이스의 거부 동작, SBOM/NOTICE 후보별 근거 파일, 출처 날짜·버전·파일 해시 기록.
@@ -127,7 +127,7 @@
 
 #### P120 — 실 Tesseract 한국어 인식 난도별 측정·오인식 공개 (A07 +1점, 누적 상한 59/100)
 
-- **선행:** P119. **담당:** Codex 6 Luna Max. 현재 상태: **BLOCKED, +0점** (P119 승인 공급 자산 없음; [차단 기록](../evidence/astra/P120/VERIFICATION.md)).
+- **선행:** P119. 현재 상태: **BLOCKED, +0점**. Windows Actions의 실제 12개 합성 kor+eng run은 가능(9 exact/3 errors, mean CER 0.0486)했으나 P119 서명·권리 승인 및 PSM/UI/취소 acceptance 미완료; [증거](../evidence/astra/P120/VERIFICATION.md).
 - **수정 후보 경로:** tools/verify-real-korean-ocr.py; src/step7/LocalOcrPanel.tsx; tests/step7-local-ocr-browser.mjs. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 한글·숫자·부정문·표·두 단·회전·저해상·잡음 스캔을 공용/자체 합성 PDF 이미지로 재생성. OCR의 원문 대조 UI와 누락·오인식 경고, PSM 3/6 선택·취소 기능을 검수.
 - **수용 테스트/증거:** 사전에 고정한 최소 12개 합성 OCR 원본을 실제 Tesseract kor+eng으로 실행하고 페이지별 CER/중요 수치 일치·검출 실패를 CSV/JSON에 기록. 오류를 자동승인/무경고 성공 처리한 0건; 실제 OCR 성공 1건 이상과 오류 실패사례 1건 이상 재현.
