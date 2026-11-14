@@ -45,26 +45,26 @@ function stableTokens(value){
   const protectedRoots=['않','못','없','아니','불가','금지','거부','취소','미승인','불허','제외','비승인'];
   const protectedCounts=protectedRoots.map(root=>[root,v.split(root).length-1])
     .filter(([,count])=>count>0);
-  const negationPattern=/(?:않|못|없|아니|불가|금지|거부|취소|미승인|불허|제외|비승인|(?:^|\\s)안(?=\\s)|\\b(?:not|no|never|cannot|can't|without|deny|denied|prohibit\\w*)\\b)/i;
+  const negationPattern=/(?:않|못|없|아니|불가|금지|거부|취소|미승인|불허|제외|비승인|(?:^|\s)안(?=\s)|\b(?:not|no|never|cannot|can't|without|deny|denied|prohibit\w*)\b)/i;
   // Freeze any sentence that carries a negation/prohibition token. This can
   // reject harmless rewrites, but it prevents moving the same negative token
   // onto a different actor, amount or clause.
-  const negationSentences=v.split(/(?<=[.!?。])|[\\r\\n;]+/)
-    .map(part=>part.replace(/\\s+/g,' ').trim())
+  const negationSentences=v.split(/(?<=[.!?。])|[\r\n;]+/)
+    .map(part=>part.replace(/\s+/g,' ').trim())
     .filter(part=>part&&negationPattern.test(part));
-  const labelNames=[...v.matchAll(/(?:성명|이름|담당자|수신인|발신인|고객명|회사명|대표자)\\s*[:：=]\\s*([가-힣]{2,4}|[A-Z][A-Za-z0-9_.-]{1,31})/g)]
+  const labelNames=[...v.matchAll(/(?:성명|이름|담당자|수신인|발신인|고객명|회사명|대표자)\s*[:：=]\s*([가-힣]{2,4}|[A-Z][A-Za-z0-9_.-]{1,31})/g)]
     .map(match=>match[1]);
-  const titledNames=[...v.matchAll(/([가-힣]{2,4}|[A-Z][A-Za-z0-9_.-]{1,31})(?=(?:님|씨|대표|사장|회장|이사)(?:은|이|가|을|를|께서|께|으로|와|과|[,.;!?]|\\s|$))/g)]
+  const titledNames=[...v.matchAll(/([가-힣]{2,4}|[A-Z][A-Za-z0-9_.-]{1,31})(?=(?:님|씨|대표|사장|회장|이사)(?:은|이|가|을|를|께서|께|으로|와|과|[,.;!?]|\s|$))/g)]
     .map(match=>match[1]);
   // Capitalized Latin identifiers include common English names/company names.
   // This conservative rule may reject style edits to English words.
-  const capitalized=[...(v.match(/\\b[A-Z][A-Za-z0-9_.-]{1,31}\\b/g)||[])];
+  const capitalized=[...(v.match(/\b[A-Z][A-Za-z0-9_.-]{1,31}\b/g)||[])];
   const protectedNames=[...new Set([...labelNames,...titledNames,...capitalized])].sort();
   // Table rows are left untouched: free-form prose rewriting is unsafe there.
-  const tableRows=v.split(/\\r?\\n/)
-    .filter(line=>/^\\s*\\|.+\\|\\s*$/.test(line)||line.split('\\t').length>=3)
-    .map(line=>line.trim().replace(/\\s+/g,' '));
-  const spacedAnCount=(v.match(/(?:^|[\\s(])안(?=\\s)/g)||[]).length;
+  const tableRows=v.split(/\r?\n/)
+    .filter(line=>/^\s*\|.+\|\s*$/.test(line)||line.split('\t').length>=3)
+    .map(line=>line.trim().replace(/\s+/g,' '));
+  const spacedAnCount=(v.match(/(?:^|[\s(])안(?=\s)/g)||[]).length;
   return JSON.stringify([urls,numbers,quoted,protectedNames,tableRows,protectedCounts,negationSentences,spacedAnCount]);
 }
 function validateSuggestion(before,after){

@@ -22,8 +22,10 @@ try{
   const message=JSON.parse(event.data);
   if(message.method==='Network.requestWillBeSent'){
    const request=message.params?.request?.url||'';
-   if(/^https?:\\/\\//i.test(request)&&!/^https?:\\/\\/(?:127\\.0\\.0\\.1|localhost)(?::\\d+)?\\//i.test(request))
-    external.push(request.slice(0,60));
+   if(request.startsWith('http://')||request.startsWith('https://')){
+    const target=new URL(request);
+    if(target.hostname!=='127.0.0.1'&&target.hostname!=='localhost')external.push(request.slice(0,60));
+   }
   }
   if(message.id&&pending.has(message.id)){
    const item=pending.get(message.id);pending.delete(message.id);

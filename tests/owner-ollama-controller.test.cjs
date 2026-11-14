@@ -103,7 +103,7 @@ test('P122 Electron IPC keeps the trusted sender and consent argument order',()=
  const end=main.indexOf("ipcMain.handle('astra:local-model-cancel'",start);
  assert.ok(start>=0&&end>start,'proposal IPC handler is present');
  const handler=main.slice(start,end);
- assert.match(handler,/async\\(event,text,explicitConsent\\)/);
+ assert.ok(handler.includes('async(event,text,explicitConsent)'));
  assert.ok(handler.indexOf('if(!trusted(event))')<handler.indexOf('if(explicitConsent!==true)'));
  assert.ok(handler.includes("ownerOllama.propose(text,{explicitConsent:true})"));
  assert.ok(preload.includes("localModelPropose:(text,explicitConsent)=>ipcRenderer.invoke('astra:local-model-propose',text,explicitConsent)"));
