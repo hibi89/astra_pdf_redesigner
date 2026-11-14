@@ -407,8 +407,13 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
       const missing=imageRefs.filter(id=>!w.assets.some(a=>a.id===id)||!urls[id]);if(missing.length)throw new Error('일부 이미지 파일이 누락되었습니다. 인쇄 전 문서를 확인해 주세요.');
       await Promise.all([...document.querySelectorAll<HTMLImageElement>('.project-paper img')].map(image=>image.decode()));
       await document.fonts.ready;
-      await runSkuGatedAction(pdfExportCapabilities(activeAdvancedLayoutId,Boolean(activeBrandKit)),licenseReceipt,
-         ()=>savePdfFromEditor(pdfOutputTextMarkers(doc),pdfOutputImageCount(doc)));
+      const exportCapabilities=pdfExportCapabilities(activeAdvancedLayoutId,Boolean(activeBrandKit));
+      const desktopLicenseContext=hasDesktopPdfExport()?{
+        receipt:licenseReceipt,layoutId:activeAdvancedLayoutId??null,brand:Boolean(activeBrandKit),
+        requestId:window.crypto.randomUUID(),
+      }:undefined;
+      await runSkuGatedAction(exportCapabilities,licenseReceipt,
+         ()=>savePdfFromEditor(pdfOutputTextMarkers(doc),pdfOutputImageCount(doc),desktopLicenseContext));
     }catch(e){w.setError(e instanceof Error?`인쇄 준비 실패: ${e.message}`:'인쇄를 준비할 수 없습니다.');}finally{setPrintBusy(false);}
   };
   return <>

@@ -3,7 +3,7 @@ const test=require('node:test');
 const assert=require('node:assert/strict');
 const fs=require('node:fs');
 const path=require('node:path');
-const {APP_DOCUMENT,CUSTOMER_NATIVE_PDF_MODE,assertTrustedPdfSaveRequest}=
+const {APP_DOCUMENT,assertTrustedPdfSaveRequest}=
  require('../desktop/pdf-export-ipc-guard.cjs');
 function fixture(){
  const mainFrame={url:APP_DOCUMENT};
@@ -12,8 +12,7 @@ function fixture(){
  const event={sender:contents,senderFrame:mainFrame};
  return{win,event,contents,mainFrame};
 }
-test('P110 trusted main app frame retains existing unsigned preview PDF export',()=>{
- assert.equal(CUSTOMER_NATIVE_PDF_MODE,false);
+test('P110 trusted main app frame retains existing native PDF export',()=>{
  const {win,event}=fixture();
  assert.doesNotThrow(()=>assertTrustedPdfSaveRequest(event,win));
 });

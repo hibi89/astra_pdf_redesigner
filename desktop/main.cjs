@@ -8,6 +8,16 @@ const {resolveBundleAsset}=require('./bundle-path.cjs');
 const {approvedSearchTarget}=require('./approved-search-link.cjs');
 const {auditOutputPdf}=require('./pdf-output-audit.cjs');
 const {assertTrustedPdfSaveRequest}=require('./pdf-export-ipc-guard.cjs');
+const {
+  ASTRA_CUSTOMER_BUILD_ENABLED,PRODUCTION_ISSUER_JWK,PRODUCTION_ISSUER_THUMBPRINT_SHA256,
+  createCustomerSkuActionGuard,
+}=require('./customer-sku-action-guard.cjs');
+const customerSkuActionGuard=createCustomerSkuActionGuard({
+  customerBuildEnabled:ASTRA_CUSTOMER_BUILD_ENABLED,
+  issuerPublicJwk:PRODUCTION_ISSUER_JWK,
+  issuerThumbprintSha256:PRODUCTION_ISSUER_THUMBPRINT_SHA256,
+});
+
 const {acceptanceDomSource,MARKERS}=require('./pdf-acceptance-fixture.cjs');
 const {runStep2ProjectAcceptance}=require('./step2-project-acceptance.cjs');
 const {runStep3ProjectAcceptance}=require('./step3-project-acceptance.cjs');
@@ -109,8 +119,13 @@ async function renderLocalPdf(){
   return pdf;
 }
 function registerPdfSaving(){
-  ipcMain.handle('astra:save-pdf',async(event,rawExpectedTextMarkers,expectedRasterImages=0)=>{
+  ipcMain.handle('astra:save-pdf',async(event,rawExpectedTextMarkers,expectedRasterImages=0,licenseContext=null)=>{
     assertTrustedPdfSaveRequest(event,mainWindow);
+    return customerSkuActionGuard.runPdf({
+      event,mainWindow,receipt:licenseContext&&licenseContext.receipt,
+      layoutId:licenseContext&&licenseContext.layoutId,brand:licenseContext&&licenseContext.brand,
+      requestId:licenseContext&&licenseContext.requestId,
+    },async()=>{
     const expectedTextMarkers=validOutputMarkers(rawExpectedTextMarkers);
     if(!Number.isInteger(expectedRasterImages)||expectedRasterImages<0||expectedRasterImages>5000)throw Error('Invalid PDF image review count');
     // Smoke mode uses an isolated test-only directory. It never opens the
@@ -156,6 +171,7 @@ function registerPdfSaving(){
       console.error('ASTRA desktop PDF export failed:',error instanceof Error?error.name:'unknown');
       return{status:'error',message:'PDF 파일을 저장하지 못했습니다. 대상 폴더의 권한과 여유 공간을 확인하세요.'};
     }
+    });
   });
 }
 
