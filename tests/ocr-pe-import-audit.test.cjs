@@ -62,6 +62,9 @@ test('P105 x86 image and invalid section data are denied',()=>{
  const b=image();b.writeUInt32LE(0x2000,0x19c);
  assert.throws(()=>inspectPeStaticImports(b),/out-of-bounds/);
 });
+test('P105 LDAP networking import wldap32.dll is classified as Windows system library',()=>{
+ assert.equal(graph(inspectPeStaticImports(image('wldap32.dll'))).systemImportCount,1);
+});
 test('P105 API-set imports are OS-classified',()=>{
  assert.equal(graph(inspectPeStaticImports(image('api-ms-win-core-file-l1-2-0.dll'))).systemImportCount,1);
 });
