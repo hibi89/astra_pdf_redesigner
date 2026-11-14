@@ -90,6 +90,16 @@ try{
    await eventually(()=>evaluate("document.querySelector('.project-paper')?.dataset.advancedLayout"),x=>x===id);
    const values=await evaluate("(()=>{const p=document.querySelector('.project-paper'),h=p.querySelector('.document-heading'),s=p.querySelector('.document-section h2');const a=getComputedStyle(p),b=getComputedStyle(h),c=s&&getComputedStyle(s);return [a.paddingTop,a.paddingLeft,b.textAlign,b.borderLeftWidth,b.borderTopWidth,b.borderRightWidth,b.backgroundColor,c?.borderLeftWidth,c?.borderRightWidth,c?.borderBottomWidth]})()");
    geometry.push(JSON.stringify(values));
+   // Print every PRO/BUSINESS candidate, not just one representative.
+   const candidatePdf=await send('Page.printToPDF',{printBackground:true,preferCSSPageSize:true});
+   const candidateBytes=Buffer.from(candidatePdf.data,'base64');
+   assert.equal(candidateBytes.subarray(0,5).toString(),'%PDF-',id+' browser PDF signature');
+   assert.ok(candidateBytes.length>1000,id+' must produce a real PDF');
+   const candidateFile=join(profile,'all-layout-'+id+'.pdf');
+   writeFileSync(candidateFile,candidateBytes);
+   const info=execFileSync('pdfinfo',[candidateFile],{encoding:'utf8'});
+   assert.match(info,/Page size:\\s+[0-9.]+ x [0-9.]+ pts \\(A4\\)/,id+' A4 print format');
+   assert.ok(Number(/Pages:\\s+(\\d+)/.exec(info)?.[1])>=1,id+' contains at least one A4 page');
  }
  assert.equal(new Set(geometry).size,22,'Every advanced candidate must have a unique computed geometry signature');
  assert.deepEqual(await evaluate(stored),advancedPrior,'Transient advanced layouts never modify V2');
@@ -118,7 +128,7 @@ try{
   assert.deepEqual(await evaluate(stored),advancedPrior,'Portable advanced layout must not write V2 document');
   await evaluate("document.querySelector('[data-extended-layout-cancel]').click()");
 
- console.log('PASS P89 PRO/BUSINESS TEMPORARY: 22 selectable unique DOM geometries, real A4 PDF, V2 unchanged');
+ console.log('PASS P93 PRO/BUSINESS 22/22: unique DOM geometries, every A4 PDF output audited, V2 unchanged');
  console.log('PASS STEP4 PORTABLE STYLE: file export/import, transient preview/cancel, apply/undo, A4 PDF, tamper and original V2 preservation');
 }finally{
  try{ws?.close();}catch{}
