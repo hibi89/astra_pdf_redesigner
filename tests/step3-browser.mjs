@@ -754,10 +754,15 @@ try{
   assert.ok(layoutPages.length>0,'Mixed PDF must expose page-level layout review controls');
   for(const page of layoutPages){
     const selector='[data-step3-layout-review-confirm="'+page+'"]';
-    await evaluate("document.querySelector("+JSON.stringify(selector)+")?.click()");
-    await eventually(()=>evaluate("document.querySelector("+JSON.stringify(selector)+")?.checked===true"));
+    await evaluate("(()=>{const input=document.querySelector("+JSON.stringify(selector)+");if(!input)throw Error('Missing flagged-page review control '+"+JSON.stringify(page)+");const details=input.closest('details');if(details)details.open=true;if(!input.checked)input.click();})()");
+    await eventually(()=>evaluate("(()=>{const input=document.querySelector("+JSON.stringify(selector)+");const state=input?.closest('[data-step3-layout-review]')?.querySelector('[data-step3-layout-review-pending]')?.textContent;return Boolean(input?.checked&&state?.includes('원본 대조 확인됨'));})()"),x=>x===true);
   }
-  await eventually(()=>evaluate("!document.querySelector('.step3-import-panel .print-button').disabled"));
+  const mixedGate=await evaluate("(()=>{const button=document.querySelector('.step3-import-panel .print-button');const global=document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]');return {global:global?.checked,buttonDisabled:button?.disabled,layout:[...document.querySelectorAll('[data-step3-layout-review-confirm]')].map(input=>({page:input.getAttribute('data-step3-layout-review-confirm'),checked:input.checked,pending:input.closest('[data-step3-layout-review]')?.querySelector('[data-step3-layout-review-pending]')?.textContent})),included:[...document.querySelectorAll('[data-step3-block-included]')].map(input=>({included:input.checked,empty:!input.closest('.section-editor')?.querySelector('textarea')?.value?.trim()}))};})()");
+  console.log('STEP3 MIXED GATE STATE '+JSON.stringify(mixedGate));
+  assert.equal(mixedGate.global,true,'Global PDF review approval must remain checked');
+  assert.ok(mixedGate.layout.every(page=>page.checked&&page.pending?.includes('원본 대조 확인됨')),
+    'Every flagged PDF page must render its completed source comparison: '+JSON.stringify(mixedGate));
+  assert.equal(mixedGate.buttonDisabled,false,'Mixed PDF save must enable after both explicit approval levels: '+JSON.stringify(mixedGate));
   await evaluate("(()=>{const button=[...document.querySelectorAll('.step3-import-panel button')].find(b=>b.textContent.includes('검수 결과를 새 문서로 저장'));if(!button||button.disabled)throw Error('Mixed PDF confirm disabled');button.click();})()");
   await eventually(()=>evaluate("document.querySelectorAll('.doc-list-item').length"),n=>n===mixedBefore+1);
   await eventually(()=>evaluate("document.querySelector('.project-paper')?.textContent"),
