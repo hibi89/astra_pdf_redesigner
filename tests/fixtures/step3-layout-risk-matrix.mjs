@@ -34,7 +34,7 @@ export const STEP3_LAYOUT_RISK_CASES=Object.freeze([
   {id:'interleaved-columns',expectedReview:true,markers:['INT_RIGHT_A_2201','INT_LEFT_A_2202','INT_RIGHT_B_2203','INT_LEFT_B_2204'],
     commands:[textItem('INT_RIGHT_A_2201',330,720),textItem('INT_LEFT_A_2202',40,720),textItem('INT_RIGHT_B_2203',330,680),textItem('INT_LEFT_B_2204',40,680)]},
   {id:'three-columns',expectedReview:true,markers:['THREE_LEFT_A_2301','THREE_MID_A_2302','THREE_RIGHT_A_2303','THREE_LEFT_B_2304','THREE_MID_B_2305','THREE_RIGHT_B_2306'],
-    commands:[textItem('THREE_LEFT_A_2301',40,720),textItem('THREE_MID_A_2302',320,720),textItem('THREE_RIGHT_A_2303',480,720),textItem('THREE_LEFT_B_2304',40,680),textItem('THREE_MID_B_2305',320,680),textItem('THREE_RIGHT_B_2306',480,680)]},
+    commands:[textItem('THREE_LEFT_A_2301',40,720),textItem('THREE_MID_A_2302',320,720),textItem('THREE_RIGHT_A_2303',440,720),textItem('THREE_LEFT_B_2304',40,680),textItem('THREE_MID_B_2305',320,680),textItem('THREE_RIGHT_B_2306',440,680)]},
   {id:'rotated-grid',expectedReview:true,markers:['GRID_NORMAL_2401','GRID_ROTATED_2402'],
     commands:[...gridLines,textItem('GRID_NORMAL_2401',55,565),textItem('GRID_ROTATED_2402',310,510,90)]},
   {id:'sparse-wide-text',expectedReview:true,markers:['WIDE_SPARSE_A_2501','WIDE_SPARSE_B_2502'],
