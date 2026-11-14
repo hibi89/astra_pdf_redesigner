@@ -1,5 +1,7 @@
 # ASTRA 최종설계 100% 요구·증거·중단점 (2026-11-14 KST)
 
+> 최신: [P93/P94 최종완성률 12영역·미승인 배점·CI 증거](ASTRA_P100_SCOREBOARD_20261114.md). 공식 UNASSESSED/목표100%/미달, 과거 기술85% 별도. P94 Chrome/Edge Node165PASS, Win164PASS/1OS SKIP NSIS SUCCESS.
+
 > **P92 2026-11-14 최신 검증:** 기능 `b8b29bc13fe09a7220ed47b5139e5f41c3e5140f` Node163 PASS Chrome+Edge 2/2 SUCCESS, Windows Node162 PASS+desktop16/16+NSIS SUCCESS, policy SUCCESS. STEP4 임시 레이아웃 JSON 재사용·STEP6 수동 옵트인 검색링크 추가. 합성 검증은 전체 SKU 기능·실고객 수용 증명 아님. 공식 UNASSESSED/100% 미달, RELEASE HOLD. 아래 P88 기준은 역사적 원문 기록.
 
 **정본:** `docs/ASTRA_ORIGINAL_ROADMAP.txt` + `docs/BLUEPRINT.md` + `REQUIREMENTS.md` + `docs/commercial/PRODUCT_SPEC_V1.md` + 본래 가격·지원 정책. 사용자 요구 전체 100%가 분모이며, 과거 **85% 엔지니어링 추정은 최종완성률이 아니다**. 사용자 승인 가중치·정확 SHA별 통과 증거가 모두 확보될 때까지 공식 완성률 `UNASSESSED`, 100% **미달**, `RELEASE HOLD`.
@@ -11,7 +13,7 @@
 | STEP1 회고록 | `src/App.tsx`, localStorage v1, 기존 Chromium/Windows 합성 CI | 기존 저장/인쇄 비회귀 | 기존 검증 |
 | STEP2 개인 문서 | `src/step2/*`, IndexedDB V2, 섹션/이미지/복원/인쇄, 이전 CI | 실고객 Windows 문서·출력 검증과 업그레이드 비회귀 | 이전 합성 검증 |
 | STEP3 PDF 업로드·원문 대조 | `src/step3/*`, 원본 PDF 참조/원문좌표/승인·취소·위험 경고 | 사용자 승인 서로 다른 PDF 5–10개 실기기 원본/출력 수동 대조, 복잡 콘텐츠 누락 수용 | 부분·실증 필요 |
-| STEP4 디자인 조합 | BASIC 8개 + 22개 구조형 고급 임시 출력 시안, Chrome/Edge A4/22개 DOM 차별, V2불변; P92 각 고급 레이아웃 ID 휴대용 JSON 재사용, 기존 style JSON export/import | PRO20/BUSINESS30 정식 품질·저장형 라이브러리·entitlement·배치/브랜드 서식 엔진·실고객 전수 PDF 인수 | 부분·임시 시안 |
+| STEP4 디자인 조합 | BASIC8 + 고급 22 임시 시안 전종 P93 Chrome/Edge A4 PDF출력 PASS(원본 V2 불변); P92 22 ID JSON; P94 BUSINESS 로컬 로고·브랜드명·머리말/꼬리말·강조색 및 브랜드 JSON | PRO20/BUSINESS30 정식 조판·라이브러리/entitlement/PRO 다중 PDF 처리·브랜드 영구 저장·실고객 전수 PDF 인수 | 합성/브라우저 PASS·정식 SKU 미완 |
 | STEP5 레퍼런스 스타일 | `src/step5/referenceAnalysis.ts`, 로컬 이미지/PDF 분석·제안·되돌림 | 원본에 충실한 실제 레퍼런스 기반 인수, 저장형 레퍼런스·스타일 호환성, 사용자 라이선스 | 부분 |
 | STEP6 인터넷 레퍼런스 탐색 | P91 사용자 직접 키워드·옵트인 Google/Bing 외부 이미지 검색 링크, STEP5 파일 수동 다운로드→로컬 분석(Chrome/Edge 검증) | 앱 내부 검색결과 카드·출처/라이선스 검증·자동 레퍼런스 수집은 미구현; 외부 PDF 업로드 금지 유지 | 수동 링크 구현·원래 전체 STEP6 미완 |
 | STEP7 OCR·통합 안정화 | `src/step7/*`/Electron, SHA/토큰/그림/벡터/A4 검토, Windows NSIS 자동 회귀 | OCR/스캔 실제 인식과 인식 출처/수정, 표·다단 보존 범위, 실고객/보안/성능/장애/기기 수용 | 부분·OCR 승인 대기 |

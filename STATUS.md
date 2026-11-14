@@ -1,3 +1,11 @@
+## 2026-11-14 KST — P93/P94 증거·공식 최종완성률 추적표 최신화
+
+- **공식 최종완성률 `UNASSESSED` / 목표100% / 미달**. 과거 내부 엔지니어링 85% 잠정은 별도 표시. 제안 가중치 12개 영역 100점은 아직 사용자 미승인; 사용자 13:00 한 번에 요청. [REQ별 상태/정확 SHA](docs/commercial/ASTRA_P100_SCOREBOARD_20261114.md). `0%` 혹은 `85% 공식 완료`로 표현 금지.
+- 정확 기능 SHA `39acc84f48bf1edda4b2687e896dc833ab398e92`, Linux Chrome/Edge #43549158873 **2/2 SUCCESS·Node165/165 PASS+build PASS**, Windows #43549158855 **SUCCESS·Node164 PASS/1 OS SKIP/desktop16 PASS·NSIS 설치·제거·업그레이드 V2 유지**, 정책 #43549159013 SUCCESS.
+- P93 고급 22종 전체 Chrome/Edge A4 실제 PDF 출력 확인. P94 BUSINESS 브랜드 회사명/꼬리말/색상/수동 로컬 로고 이미지 및 JSON 설정 내보내기/가져오기·초기화 기술 검증(브라우저/Node 2 신규 회귀). P94 구성은 임시 메모리/파일이며 DB schema·고객원본·문서/회사 자료 영구 저장·무단 외부 전송 없음. 정식 SKU/고객 합격 아님.
+- P95 PRO 다중 PDF 큐 통합 패치 앵커 오류 2회(소스 CRLF와 문자열 불일치)로 **커밋 전 중단**, 기능 미구현. 기존 정상 STEP3 PDF 가져오기 보존. 외부 모델/실 OCR·PRO 정식 배치·고객 Windows·허가 PDF5~10·저작권/법적·판매 GO 여전히 대기.
+- 사용자 13:00 별도 예약 중복 생성 없음. 기존 [13시 사용자 목록](docs/commercial/ASTRA_OWNER_1300_CHECKLIST_20261114.md)과 공식 `UNASSESSED`/[작업중]/RELEASE HOLD/크몽 미등록 유지. 기능/테스트 원본 SHA `39acc84f`, 문서 HEAD는 새 커밋 후 확인.
+
 ## 2026-11-14 KST — P92 정확 기능 SHA 전체 CI 3/3 SUCCESS (최신 검증)
 
 - 소스/테스트 SHA **`b8b29bc13fe09a7220ed47b5139e5f41c3e5140f`**: [Linux Chrome+Edge #43547702092](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43547702092) **2/2 SUCCESS**. 실제 GitHub build/test 로그 Node22 **163/163 PASS, 0 FAIL**, TypeScript/Vite build PASS; Chrome/Edge 브라우저 STEP5·STEP6 동의 후만 검색 링크·STEP4 22시안 JSON 내보내기/가져오기·데이터 불변·실제 A4 PDF 회귀 통과.

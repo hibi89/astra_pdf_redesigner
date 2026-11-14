@@ -1,3 +1,16 @@
+## 2026-11-14 KST — P93/P94 기능 검증·최종완성률 산정 대기 (HANDOFF 필수10항)
+
+1. **목표·설계·기술:** 원본 7단계+3SKU(BASIC8/PRO20/BUSINESS30), 0원 로컬 React/TS/PDF.js/Electron, 전체 최종100%. 12영역 요구사항/배점 제안은 `docs/commercial/ASTRA_P100_SCOREBOARD_20261114.md`.
+2. **완료·차별·결정:** P93 PRO/BUSINESS 22개 전종 A4 PDF 실제 Chrome/Edge 출력 검증. P94 BUSINESS 로컬 로고·브랜드명·꼬리말·브랜드 색·JSON 불러오기/내보내기. DB 직접 migration(A)은 동의/호환성 위험이 있어 session-only + 수동 JSON(B)을 채택. 기존 STEP1/2/3 변경 없이 작동.
+3. **테스트:** 기능 SHA `39acc84f48bf1edda4b2687e896dc833ab398e92` Linux #43549158873 2/2 Chrome/Edge SUCCESS Node165/165 + TypeScript/Vite build, Win #43549158855 SUCCESS Node164PASS/1SKIP desktop16 PASS, NSIS 설치·제거·업그레이드 V2 데이터 유지, gate #43549159013 SUCCESS. 실제 Win10/11 사용자·5~10 실PDF/모델·상업권 전부 미검증.
+4. **완료/진행/대기:** 새 기능·CI 끝, 기술 병목 A04/06/07/08/09/10/11/12은 남음. **공식 최종완성률 UNASSESSED / 100% 미달**, 내부85%는 역사적 잠정. [작업중], RELEASE HOLD, 크몽 등록0.
+5. **실패 근거/대안:** P95 STEP3 다중 PDF 큐 `ImportPanel.tsx` 자동 문자열 통합 CRLF/anchor 2회 실패, 원격 GitHub 쓰기 전 중지. 부작용0. 재시도 반복 금지, 다음 작업은 독립 컴포넌트로 피벗 및 실제 브라우저 연결 검증. OCR/LLM 자료 무단 다운로드 금지.
+6. **저장소·브랜치·SHA:** `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`; P94 기능 `39acc84f`, P93 기능 `ffd7a3dd`, docs HEAD 이번 커밋 후 재조회. 핵심 `src/step4/brandKit.ts`, `src/step2/Workspace.tsx`, `tests/step4-style-preset-browser.mjs`.
+7. **배포·실행:** `npm test && npm run build`, hosted Linux Chrome/Edge·Windows NSIS. Vercel/Production 미적용, 물리 PC 미검증. 공개 사이트·크몽 상품 미출시.
+8. **원본·백업·인증:** 작업 전 Git parent `b8b29bc1`→P93 `ffd7a3dd`→P94 `39acc84f`; Git non-force revert 가능. STEP1 localStorage V1/STEP2 IndexedDB V2·main·PR10·고객 PDF/모델·비밀/구매자 자료 불변.
+9. **다음 우선순위/승인:** 13:00 기존 합동 요청에서 12개 배점 제안 승인, 허가 PDF5~10 원본 대조 및 실 Win10/11·폰트/모델 라이선스·0원 OCR/LLM 설치/보안·판매 결정 모음. 그 뒤 P95 독립 안전 큐, PRO 영구 라이브러리, BUSINESS 정식 entitlement·배치·브랜드, OCR/모델 품질. 100점/상용 GO 전 고객 수용 필요.
+10. **갱신 시점/범위:** 2026-11-14 KST, 원격 Actions 완료 verdict 및 raw 로그, 정확 기능 SHA 기준. 새 문서 HEAD는 별도 조회, 문서 커밋은 새 기능 검증 SHA가 아님. 중앙 `kmong-productization` 동일 수치/범위 동기화 필요.
+
 ## 2026-11-14 KST — P92 CI 종료 확정 인수요약 (10항)
 
 1. **목표·기술:** 원래 STEP1~7·BASIC8/PRO20/BUSINESS30 전체 100% 최종설계, 무료 로컬 React/TypeScript/Electron/PDF.js.
