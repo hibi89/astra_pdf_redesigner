@@ -9,7 +9,11 @@ function verifyOcrReleaseHold(root=path.resolve(__dirname,'..')){
  if(OCR_MANIFEST!==null)deny('manifest-active-without-human-approval');
  const config=fs.readFileSync(path.join(root,'electron-builder.yml'),'utf8');
  if(/\bextraResources\s*:|\bextraFiles\s*:/m.test(config))deny('new-electron-extra-resources-must-be-audited');
- if(!/^\s+- dist\/\*\*/m.test(config)||!/^\s+- desktop\/\*\*/m.test(config))
+ const fileList=config.match(/^files:\s*\r?\n((?:[ \t]+-[^\r\n]+\r?\n)+)/m);
+ if(!fileList)deny('packaging-files-changed-review-required');
+ const allowed=['- dist/**','- desktop/**','- package.json'];
+ const actual=fileList[1].split(/\r?\n/).map(line=>line.trim()).filter(Boolean);
+ if(actual.length!==allowed.length||actual.some((entry,i)=>entry!==allowed[i]))
   deny('packaging-files-changed-review-required');
  let scanned=0;
  function walk(dir){
