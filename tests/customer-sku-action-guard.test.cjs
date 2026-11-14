@@ -156,8 +156,8 @@ test('P125 production Electron handler passes the untrusted renderer receipt thr
  assert.ok(main.includes('issuerPublicJwk:PRODUCTION_ISSUER_JWK'));
  assert.ok(main.includes('return customerSkuActionGuard.runPdf({'));
  assert.ok(main.includes('receipt:licenseContext&&licenseContext.receipt'));
- assert.ok(main.includes('layoutId:licenseContext&&licenseContext.layoutId'));
- assert.ok(main.includes('brand:licenseContext&&licenseContext.brand'));
+ assert.ok(main.includes('layoutId:licenseContext?licenseContext.layoutId:null'));
+ assert.ok(main.includes('brand:licenseContext?licenseContext.brand:false'));
  assert.ok(main.includes('requestId:licenseContext&&licenseContext.requestId'));
  assert.ok(!main.includes('licenseContext&&licenseContext.issuerPublicJwk'));
 });
