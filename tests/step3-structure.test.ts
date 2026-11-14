@@ -129,6 +129,40 @@ test('STEP3 missing source review reveals long omission lists in bounded, comple
   assert.equal(nextSourceReviewCount(29,items.length),29);
   assert.deepEqual(visibleSourceReviewItems(items,-1),[]);
 });
+test('STEP3 ambiguous column geometry keeps PDF.js source order and routes the page to manual review',()=>{
+  const page:PdfPageInput={number:1,width:595,height:842,imageDetected:false,pieces:[
+    piece('RIGHT_FIRST_1401',1,330,100),piece('LEFT_FIRST_1402',1,40,100),
+    piece('RIGHT_NEXT_1403',1,330,60),piece('LEFT_NEXT_1404',1,40,60),
+  ]};
+  const result=reconstructLines(page);
+  assert.equal(result.multiColumn,true);
+  assert.equal(result.sourceOrderPreserved,true);
+  assert.deepEqual(result.lines.map(line=>line.text),page.pieces.map(item=>item.text),
+    'Uncertain columns must remain in PDF.js extraction order, without positional sorting or joining');
+  const draft=makePdfDraft('ambiguous-columns.pdf',[page]);
+  assert.equal(draft.pages[0].layoutReviewRequired,true);
+  assert.ok(draft.pages[0].layoutReviewReasons.some(reason=>reason.includes('다단')));
+  assert.deepEqual(draft.pages[0].blocks.map(block=>block.text),page.pieces.map(item=>item.text));
+});
+test('STEP3 vector-grid and rotated text signals require explicit review while simple single-column text remains automatic',()=>{
+  const simple:PdfPageInput={number:1,width:595,height:842,imageDetected:false,pieces:[
+    piece('SINGLE_COLUMN_1501',1,40,100),piece('SINGLE_COLUMN_1502',1,40,70),
+  ]};
+  const simpleDraft=makePdfDraft('simple.pdf',[simple]);
+  assert.equal(simpleDraft.pages[0].layoutReviewRequired,false);
+  const grid=makePdfDraft('grid.pdf',[{...simple,vectorPaintCount:6}]);
+  assert.equal(grid.pages[0].layoutReviewRequired,true);
+  assert.ok(grid.pages[0].layoutReviewReasons.some(reason=>reason.includes('벡터')));
+  assert.deepEqual(grid.pages[0].blocks.map(block=>block.text),simple.pieces.map(item=>item.text),
+    'A vector grid signal must retain PDF.js item order');
+  const rotated=makePdfDraft('rotated.pdf',[{...simple,pieces:[
+    {...simple.pieces[0],text:'ROTATED_1503',rotationDegrees:90},
+    {...simple.pieces[1],text:'NORMAL_1504'},
+  ]}]);
+  assert.equal(rotated.pages[0].layoutReviewRequired,true);
+  assert.ok(rotated.pages[0].layoutReviewReasons.some(reason=>reason.includes('회전')));
+});
+
 test('STEP3: cumulative extracted-text limit stops before later fragments are retained',()=>{
   const limit=PDF_IMPORT_LIMITS.characters;
   assert.equal(nextPdfTextCount(limit-2,'ab'),limit);
@@ -261,9 +295,10 @@ test('STEP3: extraction quality flags identify damaged glyph mappings and text o
   const draft=makePdfDraft('damaged-text.pdf',[{number:1,width:595,height:842,imageDetected:false,pieces:[
     piece('본문 � 숫자 ',1,40,80,12,120),piece('경계 밖 텍스트',1,580,840,12,80),
   ]}]);
-  assert.equal(draft.pages[0].reviewFlags.length,2);
+  assert.equal(draft.pages[0].reviewFlags.length,3);
   assert.ok(draft.warnings.some(w=>w.includes('대체 문자 또는 개인 영역')));
   assert.ok(draft.warnings.some(w=>w.includes('페이지 경계 밖')));
+  assert.equal(draft.pages[0].layoutReviewRequired,true,'Out-of-page geometry must block unattended layout approval');
   assert.ok(draft.pages[0].blocks.some(b=>b.text.includes('�')),'Suspicious source text must remain available for manual correction');
 });
 

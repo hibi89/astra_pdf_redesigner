@@ -57,7 +57,7 @@ export async function extractLocalPdf(file:File,options:PdfImportOptions={}):Pro
         if(![x,y,item.width,item.height,size].every(Number.isFinite))continue;
         totalExtractedChars=nextPdfTextCount(totalExtractedChars,item.str);
         pieces.push({text:item.str,page:pageNum,x,y,width:Math.max(0,item.width),
-          height:size,fontSize:size});
+          height:size,fontSize:size,rotationDegrees:Math.atan2(transform[1],transform[0])*180/Math.PI});
       }
       let imageDetected=false,operatorWarning='';
       let vectorPaintCount:number|undefined;

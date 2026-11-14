@@ -57,6 +57,7 @@ jobs:
           CHROME_PATH="$CHROME_BIN" STEP2_INJECT_MIGRATION_ABORT=1 node tests/step2-cold-migration.mjs
           CHROME_PATH="$CHROME_BIN" node tests/step2-cross-profile.mjs
           M02_SCREENSHOT_OUT="$RUNNER_TEMP/astra-m02-studio.png" CHROME_PATH="$CHROME_BIN" node tests/step3-browser.mjs
+          CHROME_PATH="$CHROME_BIN" node tests/step3-layout-review-browser.mjs
           CHROME_PATH="$CHROME_BIN" node tests/step3-password-browser.mjs
           CHROME_PATH="$CHROME_BIN" node tests/step3-consent-browser.mjs
           CHROME_PATH="$CHROME_BIN" node tests/step3-race-browser.mjs
@@ -109,6 +110,7 @@ jobs:
           CHROME_PATH="$EDGE_BIN" node tests/step7-local-ocr-browser.mjs
           CHROME_PATH="$EDGE_BIN" node tests/step4-style-preset-browser.mjs
           CHROME_PATH="$EDGE_BIN" node tests/step3-browser.mjs
+          CHROME_PATH="$EDGE_BIN" node tests/step3-layout-review-browser.mjs
           CHROME_PATH="$EDGE_BIN" node tests/step3-password-browser.mjs
           CHROME_PATH="$EDGE_BIN" node tests/step3-consent-browser.mjs
           CHROME_PATH="$EDGE_BIN" node tests/step3-race-browser.mjs

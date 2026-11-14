@@ -58,6 +58,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted,init
   const [busy,setBusy]=useState(false),[parsing,setParsing]=useState(false);
   const [importProgress,setImportProgress]=useState<{page:number;totalPages:number}|null>(null);
   const [error,setError]=useState(''),[confirmed,setConfirmed]=useState(false);
+  const [confirmedLayoutPages,setConfirmedLayoutPages]=useState<Set<number>>(new Set());
   const [historyRevision,setHistoryRevision]=useState(0);
   const [previewUrl,setPreviewUrl]=useState('');
   const [dragging,setDragging]=useState(false);
@@ -101,6 +102,9 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted,init
     setHistoryRevision(value=>value+1);
   };
   const closeSourceLocation=()=>{setSourceBlock(null);setSourceImage(null);setMissingSource(null);};
+  const toggleLayoutReview=(page:number,checked:boolean)=>{
+    setConfirmedLayoutPages(current=>{const next=new Set(current);if(checked)next.add(page);else next.delete(page);return next;});
+  };
   const publishDraft=(next:PdfDraft|null)=>{
     draftRef.current=next;setDraft(next);
   };
@@ -115,21 +119,21 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted,init
     if(next===current)return;
     undoStack.current=[...undoStack.current,current].slice(-DRAFT_HISTORY_LIMIT);
     redoStack.current=[];
-    publishDraft(next);setConfirmed(false);
+    publishDraft(next);setConfirmed(false);setConfirmedLayoutPages(new Set());
     setHistoryRevision(value=>value+1);
   };
   const undo=()=>{
     const current=draftRef.current,previous=undoStack.current.pop();
     if(!current||!previous)return;
     redoStack.current=[...redoStack.current,current].slice(-DRAFT_HISTORY_LIMIT);
-    publishDraft(previous);setConfirmed(false);
+    publishDraft(previous);setConfirmed(false);setConfirmedLayoutPages(new Set());
     setHistoryRevision(value=>value+1);
   };
   const redo=()=>{
     const current=draftRef.current,next=redoStack.current.pop();
     if(!current||!next)return;
     undoStack.current=[...undoStack.current,current].slice(-DRAFT_HISTORY_LIMIT);
-    publishDraft(next);setConfirmed(false);
+    publishDraft(next);setConfirmed(false);setConfirmedLayoutPages(new Set());
     setHistoryRevision(value=>value+1);
   };
   const forget=()=>{
@@ -139,7 +143,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted,init
     if(urlRef.current)URL.revokeObjectURL(urlRef.current);
     Object.values(imageUrlRef.current).forEach(u=>URL.revokeObjectURL(u));
     imageUrlRef.current={};setImageUrls({});setSourceBlock(null);setSourceImage(null);setMissingSource(null);
-    sourcePdfRef.current=null;urlRef.current='';setPreviewUrl('');publishDraft(null);setError('');setConfirmed(false);clearHistory();
+    sourcePdfRef.current=null;urlRef.current='';setPreviewUrl('');publishDraft(null);setError('');setConfirmed(false);setConfirmedLayoutPages(new Set());clearHistory();
   };
   const choose=async(file:File)=>{
     forget();
@@ -235,7 +239,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted,init
       {...p,images:p.images.map(img=>img.id===id?{...img,include}:img)}:p)}));
   };
   const commit=async()=>{
-    if(!draft||!confirmed||busy||disabled)return;
+    if(!draft||!confirmed||draft.pages.some(page=>page.layoutReviewRequired&&!confirmedLayoutPages.has(page.number))||busy||disabled)return;
     setBusy(true);
     try{
       if(!draft.pages.some(p=>p.blocks.some(b=>!b.excluded&&b.text.trim())))throw Error('확인된 본문이 비어 있습니다.');
@@ -264,6 +268,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted,init
   const vectorPaints=draft?.pages.reduce((s,p)=>s+p.vectorPaintCount,0)??0;
   const transparencySignals=draft?.pages.reduce((s,p)=>s+p.compositionRisk.transparencySignals,0)??0;
   const formScopes=draft?.pages.reduce((s,p)=>s+p.compositionRisk.formScopes,0)??0;
+  const layoutReviewPending=draft?.pages.some(page=>page.layoutReviewRequired&&!confirmedLayoutPages.has(page.number))??false;
   return <section id="astra-pdf-import" tabIndex={-1} className="panel step3-import-panel no-print" aria-labelledby="pdf-import-title">
     <div className="panel-heading"><h2 id="pdf-import-title">STEP 3 · 기존 PDF 가져오기</h2><span className="panel-caption">텍스트 선택 가능한 단일 열 PDF</span></div>
     <p className="help-text">파일은 이 브라우저에서만 분석합니다. 외부로 전송하지 않고, 검수·확정 전에는 기존 문서함을 변경하지 않습니다.</p>
@@ -330,8 +335,18 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted,init
         </details>}
         <div className="step3-block-review">
           {draft.pages.map(page=><details key={page.number} open={page.number===1}>
-            <summary>원본 {page.number}페이지 — <span data-step3-page-block-count={page.number}>{page.blocks.length}</span>개 텍스트 · <span data-step3-page-char-count={page.number}>{page.blocks.reduce((count,block)=>count+block.text.length,0).toLocaleString('ko-KR')}</span>자 · 새 문서 제외 {page.blocks.filter(b=>b.excluded).length}개 · 이미지 {page.images.length}/{page.imageCount}복원{page.omittedImages?' · 미복원 '+page.omittedImages+'건':''}{page.vectorPaintCount?' · 벡터 경로 '+page.vectorPaintCount+'회':''}{page.reviewFlags.length?' · 추출 품질 확인 '+page.reviewFlags.length+'건':''}</summary>
+            <summary>원본 {page.number}페이지 — <span data-step3-page-block-count={page.number}>{page.blocks.length}</span>개 텍스트 · <span data-step3-page-char-count={page.number}>{page.blocks.reduce((count,block)=>count+block.text.length,0).toLocaleString('ko-KR')}</span>자 · 새 문서 제외 {page.blocks.filter(b=>b.excluded).length}개 · 이미지 {page.images.length}/{page.imageCount}복원{page.omittedImages?' · 미복원 '+page.omittedImages+'건':''}{page.vectorPaintCount?' · 벡터 경로 '+page.vectorPaintCount+'회':''}{page.layoutReviewRequired?' · 읽기 순서 원본 검수 필요':''}{page.reviewFlags.length?' · 추출 품질 확인 '+page.reviewFlags.length+'건':''}</summary>
             {page.reviewFlags.map((flag,i)=><p className="warning" role="status" data-step3-page-review-flag={page.number} key={i}>{flag}</p>)}
+            {page.layoutReviewRequired&&<div data-step3-layout-review={page.number}>
+              <p className="warning" role="status" data-step3-layout-review-pending={page.number}>
+                {confirmedLayoutPages.has(page.number)?'원본 대조 확인됨':'읽기 순서 수동 확인 대기'} — PDF.js 추출 순서로 표시했으며 자동 정렬하지 않았습니다.
+              </p>
+              <label className="field step3-confirm"><input type="checkbox" data-step3-layout-review-confirm={page.number}
+                checked={confirmedLayoutPages.has(page.number)} disabled={disabled||busy}
+                onChange={e=>toggleLayoutReview(page.number,e.target.checked)}/>
+                이 페이지의 각 블록을 원본과 비교했고, 필요하면 위·아래 버튼으로 직접 순서를 조정했습니다.
+              </label>
+            </div>}
             <SourceTextMissingWarning page={page} onShow={item=>{setSourceBlock(null);setSourceImage(null);setMissingSource(item);}}
               onRecover={item=>{addManualBlock(page.number,item.text,item.origin);setSourceBlock(null);setSourceImage(null);}}/>
             {page.images.length>0&&<div className="step3-image-review">
@@ -396,7 +411,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted,init
       </label>
       <div className="toolbar">
         <button className="secondary-button" disabled={busy&&!parsing} onClick={cancel}>가져오기 취소</button>
-        <button className="print-button" disabled={disabled||busy||!confirmed||includedTextBlocks===0||includedEmptyBlocks>0} onClick={()=>void commit()}>검수 결과를 새 문서로 저장</button>
+        <button className="print-button" disabled={disabled||busy||!confirmed||layoutReviewPending||includedTextBlocks===0||includedEmptyBlocks>0} onClick={()=>void commit()}>검수 결과를 새 문서로 저장</button>
       </div>
     </>}
   </section>;
