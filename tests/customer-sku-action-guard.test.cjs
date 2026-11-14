@@ -110,8 +110,8 @@ test('P125 missing pin, wrong issuer, malformed, tampered, expired, and invalid-
   assert.equal(denied,true,name+' must fail closed');
   assert.equal(sideEffects,0,name+' must have no side effect');
  }
- const f=frameFixture();let sideEffects=0;
- await assert.rejects(guard.run({...f,receipt:valid,requestId:requestId(),requiredCapabilities:['business-layout'],issuerPublicJwk:a.issuerPublicJwk,issuerThumbprintSha256:a.issuerThumbprintSha256},()=>{sideEffects++;}),/Customer SKU action denied/);
+ const f=frameFixture(),attackerReceipt=b.sign('business');let sideEffects=0;
+ await assert.rejects(guard.run({...f,receipt:attackerReceipt,requestId:requestId(),requiredCapabilities:['business-layout'],issuerPublicJwk:b.issuerPublicJwk,issuerThumbprintSha256:b.issuerThumbprintSha256},()=>{sideEffects++;}),/Customer SKU action denied/);
  assert.equal(sideEffects,0,'IPC context cannot supply its own issuer key or thumbprint');
 });
 test('P125 wrong main window, reused frame, child frame, alternate URL, and destroyed shell are denied',async()=>{
