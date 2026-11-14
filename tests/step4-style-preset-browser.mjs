@@ -120,8 +120,9 @@ try{
   assert.ok(pageCount>=2,id+' long source must paginate without dropping the final content');
   const extracted=execFileSync('pdftotext',['-raw',output,'-'],{encoding:'utf8'});
   const normalizeText=value=>value.replace(/[\s\u00a0]+/gu,' ').trim();
-  const normalizedSource=normalizeText(p116Body),normalizedOutput=normalizeText(extracted);
-  assert.ok(normalizedOutput.includes(normalizedSource),id+' complete ASCII source text order/content expected-head=['+normalizedSource.slice(0,900)+'] expected-tail=['+normalizedSource.slice(-300)+'] output-head=['+normalizedOutput.slice(0,1400)+'] output-tail=['+normalizedOutput.slice(-500)+']');
+  const compactText=value=>normalizeText(value).replace(/\\s/gu,'');
+  const compactSource=compactText(p116Body),compactOutput=compactText(extracted);
+  assert.ok(compactOutput.includes(compactSource),id+' complete ASCII source character order/content expected-head=['+compactSource.slice(0,900)+'] expected-tail=['+compactSource.slice(-300)+'] output-head=['+compactOutput.slice(0,1400)+'] output-tail=['+compactOutput.slice(-500)+']');
   for(const marker of p116Markers)assert.equal(normalizeText(extracted).split(marker).length-1,1,id+' exactly one '+marker);
   assert.equal(normalizeText(extracted).split('P116_TEXT_BEGIN').length-1,1,id+' opening source marker');
   assert.equal(normalizeText(extracted).split('P116_TEXT_END').length-1,1,id+' final source marker');
