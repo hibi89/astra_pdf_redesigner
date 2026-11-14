@@ -121,7 +121,8 @@ function createLocalOcrController({resourcesDir,manifest=OCR_MANIFEST,spawnProce
    if(cancelled)return{status:'error',reason:'cancelled'};
    const args=[file,'stdout','--tessdata-dir',found.tessdata,'-l','kor+eng','--psm','6'];
    const output=await new Promise((resolve,reject)=>{
-    let stdout='',outBytes=0,settled=false;
+    let outBytes=0,settled=false;
+    const outputChunks=[];
     const finish=(err,value)=>{
      if(settled)return;settled=true;clearTimeout(timer);
      if(err)reject(err);else resolve(value);
@@ -135,7 +136,7 @@ function createLocalOcrController({resourcesDir,manifest=OCR_MANIFEST,spawnProce
     child.stdout.on('data',part=>{
      outBytes+=part.length;
      if(outBytes>MAX_TEXT_BYTES){child.kill('SIGKILL');finish(Error('ocr-output-limit'));return;}
-     stdout+=part.toString('utf8');
+     outputChunks.push(Buffer.from(part));
     });
     // Never echo stderr: OCR diagnostics can contain document details.
     child.stderr.on('data',()=>{});
@@ -143,7 +144,7 @@ function createLocalOcrController({resourcesDir,manifest=OCR_MANIFEST,spawnProce
     child.on('close',code=>{
      if(cancelled)finish(Error('cancelled'));
      else if(code!==0)finish(Error('ocr-exit'));
-     else finish(null,stdout);
+     else finish(null,Buffer.concat(outputChunks,outBytes).toString('utf8'));
     });
     if(cancelled)child.kill('SIGKILL');
    });
