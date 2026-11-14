@@ -1,3 +1,16 @@
+## 2026-11-14 KST — P100 수동 출처 수집·오프라인 라이브러리 후속 인수 (10항)
+
+1. **목표·기술:** 원본STEP1~7+3SKU 전체100%, React/TS/Electron 로컬 우선, 제품 공식완성률 `UNASSESSED`/100% 미달.
+2. **변경·선택:** STEP6 검색 URL 결과 직접 API/자동수집 대신 추가 0원·무전송 수동 북마크. 사용자가 직접 URL·이름·권리 메모 입력, 별도 localStorage 20건, 항상 권리 `UNVERIFIED`, V2 문서 불변.
+3. **테스트:** 정확 코드 `2213e8e50759836b8c24bfbe7b037536a8fd995a` Node unit+Chrome/Edge browser sourceRecord V2 불변 회귀 작성, [Linux #43553461990](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43553461990), [Win #43553462026](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43553462026) **실행 중/결과 미확인**. policy #43553462320 SUCCESS. 앞 P99 source `0a0dec3e` Chrome/Edge+Win CI 3/3 GREEN Node177/176 desktop19. 실 URL 사용권·고객PDF QA 미검증.
+4. **상태:** 이번 P100 기능 소스/회귀 커밋됨, CI 검증 대기. 원래 STEP6 앱 내 결과 카드/API/권리 자동검증·STEP7 OCR/진짜 로컬 LLM·정식 상품 SKU/실 고객 PC/5–10 PDF·판매 승인 HOLD. 전체100 미달.
+5. **실패/피벗:** 최초 P100 브라우저 테스트 정확 앵커 불일치 GitHub 쓰기 전 중단, 이번 작업은 독립 sourceRecords/SourceRecordsPanel 분리·브라우저 끝의 실제 존재 앵커 위치를 사용해 소스 반영. 문제가 발견되면 exact CI 로그 확인 후 최소 1회 수정; 반복 강제 패치 금지.
+6. **repo/branch/SHA/path:** `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`, 코드 `2213e8e5`, `src/step6/sourceRecords.ts`, `src/step6/SourceRecordsPanel.tsx`, `tests/source-records.test.ts`, `tests/step5-reference-browser.mjs`; 문서 HEAD 이번 커밋 후 확인.
+7. **Production/환경:** GitHub Node22 Linux Chrome/Edge, Win Electron NSIS. Vercel/Production 미적용, 출시/크몽 등록0.
+8. **원본·백업·보안:** parent `ded69d01` 및 이후 HEAD revert 가능. 원본 STEP1 V1/STEP2 IDB V2/고객 PDFs·모델키/실 브랜드 assets·main/PR10 불변, 외부 전송·유료 사용료0.
+9. **다음 작업/승인:** 정확 P100 Linux/Win CI 종료 결과 확인→오류시 재현/최소수정. 실제 Tesseract OCR/한국어 GGUF 승인·다운로드 권리/인수 및 원래 STEP6 제공처 API·검색결과 카드·실품질/상용 SKU 구현은 후속. 기존 13:00 사용자 통합에서 휴대전화 배점/권리·소프트웨어 승인과 PC 실PDF5~10/Win10·11 검증 일괄 안내; 당장 외출 중 수동 PC 작업 요구 금지.
+10. **확인 일시/범위:** 2026-11-14 KST GitHub source readback 및 Actions 현재 상태, 최종 SUCCEEDED 아직 미확정. 공식 `UNASSESSED`/목표100 미달·이전 내부85% 별도.
+
 ## 2026-11-14 KST — P99 CI 완료 readback 및 인수인계 10항 (최신)
 
 1. **목표/기술:** 원본 7단계·3SKU 전체100%, 오프라인 우선 React/TS/Electron/PDF.js·0원, 최종률 UNASSESSED.

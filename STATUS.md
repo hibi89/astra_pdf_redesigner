@@ -1,3 +1,9 @@
+## 2026-11-14 KST — STEP6 수동 출처 기록 보관 P100 기능 (제품 완성 100% 아님)
+
+- 기능 SHA `2213e8e50759836b8c24bfbe7b037536a8fd995a` 단계명 P100은 작업 번호이며 **공식 최종완성률 UNASSESSED / 목표100% 미달**. 별도 로컬 key·메모 등록 최대20건, HTTPS 출처 고정·권리 `UNVERIFIED`, 원본 PDF/그림 데이터 자동 수집·외부 API 네트워크0, 기존 IndexedDB V2 불변. UI `src/step6/SourceRecordsPanel.tsx`, 파서 `sourceRecords.ts`, Node·브라우저 회귀 추가.
+- 정확 SHA [Linux Chrome/Edge #43553461990](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43553461990), [Windows NSIS #43553462026](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43553462026) **진행 중/최종 미검증**. [policy #43553462320](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43553462320) SUCCESS는 정책만. [구현 한계·다음 작업](docs/commercial/ASTRA_STEP6_SOURCE_RECORDS_P100_20261114.md).
+- 앞선 P95–P99 정확 소스 `0a0dec3e`의 Linux Chrome/Edge #43552456521 2/2 Node177 PASS + Windows #43552456514 Node176/desktop19 SUCCESS 검증 보존. 현재 전체 상용 3SKU/STEP6 결과카드/OCR/GGUF/실 허가PDF5~10·실 Win10/11·권리/판매 인수 미완. [작업중]/RELEASE HOLD/미등록.
+
 ## 2026-11-14 KST — P99 exact test-command SHA CI 3/3 SUCCESS (latest)
 
 - 정확 기능+보안 회귀 SHA `0a0dec3edb998cc8ea94bcffc3fa781c7d1c9377`: [Linux Chrome+Edge #43552456521](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43552456521) **2/2 SUCCESS, Node177/177 PASS, 0 FAIL**, TypeScript/Vite 빌드와 기존 V2/STEP3/STEP4/STEP5 기능 회귀. [Windows NSIS #43552456514](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43552456514) **SUCCESS, Node176 PASS/0 FAIL/1 OS SKIP, desktop19/19 PASS**, 안전 외부 검색 allowlist/무단 schemes 거부/네이티브 재확인 코드 테스트, NSIS install/uninstall/0.1.0→0.1.1 V2 문서·PNG 보존. [evidence gate #43552456710](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43552456710) SUCCESS(정책 증거만).
