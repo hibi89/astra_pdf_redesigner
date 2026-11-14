@@ -98,8 +98,8 @@ try{
    const candidateFile=join(profile,'all-layout-'+id+'.pdf');
    writeFileSync(candidateFile,candidateBytes);
    const info=execFileSync('pdfinfo',[candidateFile],{encoding:'utf8'});
-   assert.match(info,/Page size:\\s+[0-9.]+ x [0-9.]+ pts \\(A4\\)/,id+' A4 print format');
-   assert.ok(Number(/Pages:\\s+(\\d+)/.exec(info)?.[1])>=1,id+' contains at least one A4 page');
+   assert.match(info,/Page size:\s+[0-9.]+ x [0-9.]+ pts \(A4\)/,id+' A4 print format');
+   assert.ok(Number(/Pages:\s+(\d+)/.exec(info)?.[1])>=1,id+' contains at least one A4 page');
  }
  assert.equal(new Set(geometry).size,22,'Every advanced candidate must have a unique computed geometry signature');
  assert.deepEqual(await evaluate(stored),advancedPrior,'Transient advanced layouts never modify V2');
