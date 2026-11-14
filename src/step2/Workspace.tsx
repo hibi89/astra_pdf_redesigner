@@ -22,6 +22,9 @@ import ProLayoutLibrary from '../step4/ProLayoutLibrary.tsx';
 import {downloadBusinessBrandKit,importBusinessBrandKit,validateBusinessBrandKit,type BusinessBrandKit} from '../step4/brandKit.ts';
 import BusinessBrandLibrary from '../step4/BusinessBrandLibrary.tsx';
 import {makeSourceReviewReceipt,downloadSourceReviewReceipt} from '../step3/reviewReceipt.ts';
+import CommercialLicensePanel from '../commercial/CommercialLicensePanel.tsx';
+import {runSkuGatedAction,layoutSkuCapability,pdfExportCapabilities} from '../commercial/skuActionGate.ts';
+import type {SkuCapability} from '../commercial/skuAccess.ts';
 
 const allThemes=[...THEMES,
   {id:'compact' as const,label:'컴팩트 리포트',description:'짧은 제목과 밀도 높은 문서'},
@@ -96,6 +99,10 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
   const [brandApplied,setBrandApplied]=useState<BusinessBrandKit|null>(null);
   const [brandLogoUrl,setBrandLogoUrl]=useState<string|null>(null);
   const [brandError,setBrandError]=useState('');
+  const [licenseReceipt,setLicenseReceipt]=useState('');
+  const guarded=(caps:readonly SkuCapability[],operation:()=>void|Promise<void>)=>{
+    void runSkuGatedAction(caps,licenseReceipt,operation).catch(e=>w.setError(e instanceof Error?e.message:'사용권 확인 실패'));
+  };
   const brandImportInput=useRef<HTMLInputElement|null>(null);
   const brandLogoInput=useRef<HTMLInputElement|null>(null);
   const advancedPresetInput=useRef<HTMLInputElement|null>(null);
@@ -246,7 +253,7 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
       const preset=await importAdvancedLayoutPreset(file);
       if(!doc||!editable)return;
       closeStyleCompare();clearReference();setPortableStyle(null);
-      setAdvancedPreview({documentId:doc.id,layoutId:preset.layoutId});
+      await runSkuGatedAction(['template-save',layoutSkuCapability(preset.layoutId)],licenseReceipt,()=>setAdvancedPreview({documentId:doc.id,layoutId:preset.layoutId}));
       setAdvancedPresetError('');
     }catch(error){setAdvancedPresetError(error instanceof Error?error.message:'레이아웃 파일을 열 수 없습니다.');}
   };
@@ -389,7 +396,8 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
       const missing=imageRefs.filter(id=>!w.assets.some(a=>a.id===id)||!urls[id]);if(missing.length)throw new Error('일부 이미지 파일이 누락되었습니다. 인쇄 전 문서를 확인해 주세요.');
       await Promise.all([...document.querySelectorAll<HTMLImageElement>('.project-paper img')].map(image=>image.decode()));
       await document.fonts.ready;
-      await savePdfFromEditor(pdfOutputTextMarkers(doc),pdfOutputImageCount(doc));
+      await runSkuGatedAction(pdfExportCapabilities(activeAdvancedLayoutId,Boolean(businessActive&&brandApplied)),licenseReceipt,
+         ()=>savePdfFromEditor(pdfOutputTextMarkers(doc),pdfOutputImageCount(doc)));
     }catch(e){w.setError(e instanceof Error?`인쇄 준비 실패: ${e.message}`:'인쇄를 준비할 수 없습니다.');}finally{setPrintBusy(false);}
   };
   return <>
@@ -419,6 +427,7 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
             <div className="document-list" role="list">{w.documents.map(item=><button role="listitem" key={item.id} disabled={!editable||item.id===doc?.id} className={`doc-list-item ${item.id===doc?.id?'active':''}`} onClick={()=>void operation(()=>w.switchTo(item.id))}><strong>{item.name||'(이름 없음)'}</strong><small>{new Date(item.updatedAt).toLocaleString('ko-KR')}</small></button>)}</div>
           </>}
         </section>
+        <CommercialLicensePanel receipt={licenseReceipt} onChange={setLicenseReceipt}/>
         <BatchImportPanel disabled={!editable} onImport={w.importPdfDraft} onSourceCommitted={onSourceCommitted}/>
         {sourceReview&&sourceReview.documentId===doc?.id&&
           <section ref={sourcePanel} tabIndex={-1} className="panel studio-source-panel no-print" aria-label="원본 PDF와 새 디자인 대조"
@@ -572,7 +581,7 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
             <div className="advanced-layout-grid" role="group" aria-label="고급 인쇄 시안">
               {SKU_LAYOUT_CANDIDATES.map(layout=><button type="button" key={layout.id} data-extended-layout-id={layout.id}
                 aria-pressed={activeAdvancedLayoutId===layout.id}
-                onClick={()=>{closeStyleCompare();clearReference();setPortableStyle(null);setAdvancedPreview({documentId:doc.id,layoutId:layout.id});}}>{layout.label}</button>)}
+                onClick={()=>guarded([layout.tier==='business'?'business-layout':'pro-layout'],()=>{closeStyleCompare();clearReference();setPortableStyle(null);setAdvancedPreview({documentId:doc.id,layoutId:layout.id});})}>{layout.label}</button>)}
             </div>
             <div className="toolbar project-toolbar">
               <button type="button" className="secondary-button" data-advanced-preset-export disabled={!editable||!activeAdvancedLayoutId}
