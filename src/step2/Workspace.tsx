@@ -19,6 +19,7 @@ import ReferenceSearchPanel from '../step6/ReferenceSearchPanel.tsx';
 import {downloadAdvancedLayoutPreset,importAdvancedLayoutPreset} from '../step4/advancedLayoutPreset.ts';
 import ProLayoutLibrary from '../step4/ProLayoutLibrary.tsx';
 import {downloadBusinessBrandKit,importBusinessBrandKit,validateBusinessBrandKit,type BusinessBrandKit} from '../step4/brandKit.ts';
+import BusinessBrandLibrary from '../step4/BusinessBrandLibrary.tsx';
 import {makeSourceReviewReceipt,downloadSourceReviewReceipt} from '../step3/reviewReceipt.ts';
 
 const allThemes=[...THEMES,
@@ -621,6 +622,8 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
               <button type="button" className="secondary-button" data-business-brand-import disabled={!editable} onClick={()=>brandImportInput.current?.click()}>브랜드 JSON 다시 열기</button>
               <input className="hidden-input" ref={brandImportInput} data-business-brand-file type="file" accept=".json,application/json" onChange={e=>{const f=e.target.files?.[0];e.target.value='';if(f)void loadBusinessBrand(f);}}/>
             </div>
+            <BusinessBrandLibrary disabled={!editable||!businessActive} kit={businessActive?brandApplied:null}
+              onRestore={kit=>{setBrandDraft(kit);setBrandApplied(kit);setBrandError('');}}/>
             {brandError&&<p role="alert" className="warning" data-business-brand-error>{brandError}</p>}
             {brandApplied&&<p role="status" className="help-text" data-business-brand-status>임시 적용 중 · 실제 문서 V2는 변경되지 않았습니다. 정식 BUSINESS 사용권/영구 저장 기능은 아직 미구현입니다.</p>}
           </section>

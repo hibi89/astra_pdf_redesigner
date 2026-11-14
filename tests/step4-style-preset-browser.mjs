@@ -165,6 +165,24 @@ try{
  await eventually(()=>evaluate("document.querySelector('.project-paper')?.dataset.advancedLayout"),v=>v==='pro-03');
  assert.deepEqual(await evaluate(stored),advancedPrior);
  console.log('PASS P97 PRO LIBRARY: local saved ID and preview restore independent of V2 document');
+ // P98 BUSINESS local saved kit, only explicit user action, V2 unchanged.
+ await evaluate("document.querySelector('[data-extended-layout-id=business-01]').click()");
+ await eventually(()=>evaluate("document.querySelector('.project-paper')?.dataset.advancedLayout"),v=>v==='business-01');
+ await evaluate("(()=>{const i=document.querySelector('[data-business-brand-name]');const setter=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set;setter.call(i,'테스트 브랜드');i.dispatchEvent(new Event('input',{bubbles:true}));})()");
+ await evaluate("document.querySelector('[data-business-brand-apply]').click()");
+ await eventually(()=>evaluate("document.querySelector('[data-business-brand-header]')?.textContent.includes('테스트 브랜드')"));
+ await evaluate("document.querySelector('[data-business-library-save]').click()");
+ await eventually(()=>evaluate("document.querySelector('[data-business-library-count]')?.textContent.includes('1/12')"));
+ const savedBusiness=await evaluate("JSON.parse(localStorage.getItem('astra.business-brand-library.v1'))");
+ assert.equal(savedBusiness.items[0].kit.name,'테스트 브랜드');
+ assert.equal(JSON.stringify(savedBusiness).includes('sourcePdf'),false);
+ await evaluate("document.querySelector('[data-business-brand-clear]').click()");
+ await eventually(()=>evaluate("!document.querySelector('[data-business-brand-header]')"));
+ await evaluate("document.querySelector('[data-business-library-restore]').click()");
+ await eventually(()=>evaluate("document.querySelector('[data-business-brand-header]')?.textContent.includes('테스트 브랜드')"));
+ assert.deepEqual(await evaluate(stored),advancedPrior,'Business saved text must preserve V2 document');
+ console.log('PASS P98 BUSINESS LIBRARY: text-only local save/restore and original V2 unchanged');
+
  console.log('PASS P93 PRO/BUSINESS 22/22: unique DOM geometries, every A4 PDF output audited, V2 unchanged');
  console.log('PASS STEP4 PORTABLE STYLE: file export/import, transient preview/cancel, apply/undo, A4 PDF, tamper and original V2 preservation');
 }finally{
