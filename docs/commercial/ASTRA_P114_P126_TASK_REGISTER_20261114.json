@@ -1,7 +1,7 @@
 {
   "schema": "astra-50-to-70-tasks-v1",
   "created_kst": "2026-11-14T21:55:00+09:00",
-  "purpose": "design-only; high plans, instant implements, high reviews after request",
+  "purpose": "P114-P126 GitHub-only execution by Codex 6 Luna Max; GPT-6 High designs/reviews",
   "repository": "hibi89/astra_pdf_redesigner",
   "branch": "feature/astra-p71-pdf-source-parity-20261112",
   "base_feature_sha": "26aff40d6de524c2430f8a6b325d906cea67f7e1",
@@ -95,7 +95,19 @@
       "evidence_feature_sha": null,
       "linux_workflow_url": null,
       "windows_workflow_url": null,
-      "blueprint_workflow_url": null
+      "blueprint_workflow_url": null,
+      "executor": "Codex 6 Luna Max",
+      "execution_medium": "GitHub-only",
+      "runner": "Ubuntu Node22+Chrome/Edge, Windows regression",
+      "evidence_path": "docs/evidence/astra/P114/VERIFICATION.md",
+      "required_ci": [
+        "Linux Node/Chrome/Edge when relevant",
+        "Windows Electron/NSIS when relevant",
+        "Final blueprint policy"
+      ],
+      "evidence_linux_run": null,
+      "evidence_windows_run": null,
+      "evidence_blueprint_run": null
     },
     {
       "id": "P115",
@@ -120,7 +132,19 @@
       "evidence_feature_sha": null,
       "linux_workflow_url": null,
       "windows_workflow_url": null,
-      "blueprint_workflow_url": null
+      "blueprint_workflow_url": null,
+      "executor": "Codex 6 Luna Max",
+      "execution_medium": "GitHub-only",
+      "runner": "Ubuntu Node22+Chrome/Edge A4, Windows",
+      "evidence_path": "docs/evidence/astra/P115/VERIFICATION.md",
+      "required_ci": [
+        "Linux Node/Chrome/Edge when relevant",
+        "Windows Electron/NSIS when relevant",
+        "Final blueprint policy"
+      ],
+      "evidence_linux_run": null,
+      "evidence_windows_run": null,
+      "evidence_blueprint_run": null
     },
     {
       "id": "P116",
@@ -144,7 +168,19 @@
       "evidence_feature_sha": null,
       "linux_workflow_url": null,
       "windows_workflow_url": null,
-      "blueprint_workflow_url": null
+      "blueprint_workflow_url": null,
+      "executor": "Codex 6 Luna Max",
+      "execution_medium": "GitHub-only",
+      "runner": "Chrome/Edge 30-layout output",
+      "evidence_path": "docs/evidence/astra/P116/VERIFICATION.md",
+      "required_ci": [
+        "Linux Node/Chrome/Edge when relevant",
+        "Windows Electron/NSIS when relevant",
+        "Final blueprint policy"
+      ],
+      "evidence_linux_run": null,
+      "evidence_windows_run": null,
+      "evidence_blueprint_run": null
     },
     {
       "id": "P117",
@@ -169,7 +205,19 @@
       "evidence_feature_sha": null,
       "linux_workflow_url": null,
       "windows_workflow_url": null,
-      "blueprint_workflow_url": null
+      "blueprint_workflow_url": null,
+      "executor": "Codex 6 Luna Max",
+      "execution_medium": "GitHub-only",
+      "runner": "Node+Chrome/Edge+Windows Electron",
+      "evidence_path": "docs/evidence/astra/P117/VERIFICATION.md",
+      "required_ci": [
+        "Linux Node/Chrome/Edge when relevant",
+        "Windows Electron/NSIS when relevant",
+        "Final blueprint policy"
+      ],
+      "evidence_linux_run": null,
+      "evidence_windows_run": null,
+      "evidence_blueprint_run": null
     },
     {
       "id": "P118",
@@ -193,7 +241,19 @@
       "evidence_feature_sha": null,
       "linux_workflow_url": null,
       "windows_workflow_url": null,
-      "blueprint_workflow_url": null
+      "blueprint_workflow_url": null,
+      "executor": "Codex 6 Luna Max",
+      "execution_medium": "GitHub-only",
+      "runner": "Chrome/Edge local references",
+      "evidence_path": "docs/evidence/astra/P118/VERIFICATION.md",
+      "required_ci": [
+        "Linux Node/Chrome/Edge when relevant",
+        "Windows Electron/NSIS when relevant",
+        "Final blueprint policy"
+      ],
+      "evidence_linux_run": null,
+      "evidence_windows_run": null,
+      "evidence_blueprint_run": null
     },
     {
       "id": "P119",
@@ -215,7 +275,19 @@
       "evidence_feature_sha": null,
       "linux_workflow_url": null,
       "windows_workflow_url": null,
-      "blueprint_workflow_url": null
+      "blueprint_workflow_url": null,
+      "executor": "Codex 6 Luna Max",
+      "execution_medium": "GitHub-only",
+      "runner": "windows-latest official artifact SHA/AuthentiCode/PE/license",
+      "evidence_path": "docs/evidence/astra/P119/VERIFICATION.md",
+      "required_ci": [
+        "Linux Node/Chrome/Edge when relevant",
+        "Windows Electron/NSIS when relevant",
+        "Final blueprint policy"
+      ],
+      "evidence_linux_run": null,
+      "evidence_windows_run": null,
+      "evidence_blueprint_run": null
     },
     {
       "id": "P120",
@@ -238,7 +310,19 @@
       "evidence_feature_sha": null,
       "linux_workflow_url": null,
       "windows_workflow_url": null,
-      "blueprint_workflow_url": null
+      "blueprint_workflow_url": null,
+      "executor": "Codex 6 Luna Max",
+      "execution_medium": "GitHub-only",
+      "runner": "GitHub-hosted real Tesseract kor+eng, min12 cases",
+      "evidence_path": "docs/evidence/astra/P120/VERIFICATION.md",
+      "required_ci": [
+        "Linux Node/Chrome/Edge when relevant",
+        "Windows Electron/NSIS when relevant",
+        "Final blueprint policy"
+      ],
+      "evidence_linux_run": null,
+      "evidence_windows_run": null,
+      "evidence_blueprint_run": null
     },
     {
       "id": "P121",
@@ -265,7 +349,19 @@
       "evidence_feature_sha": null,
       "linux_workflow_url": null,
       "windows_workflow_url": null,
-      "blueprint_workflow_url": null
+      "blueprint_workflow_url": null,
+      "executor": "Codex 6 Luna Max",
+      "execution_medium": "GitHub-only",
+      "runner": "windows-latest real Electron OCR subprocess, isolated profile",
+      "evidence_path": "docs/evidence/astra/P121/VERIFICATION.md",
+      "required_ci": [
+        "Linux Node/Chrome/Edge when relevant",
+        "Windows Electron/NSIS when relevant",
+        "Final blueprint policy"
+      ],
+      "evidence_linux_run": null,
+      "evidence_windows_run": null,
+      "evidence_blueprint_run": null
     },
     {
       "id": "P122",
@@ -289,7 +385,19 @@
       "evidence_feature_sha": null,
       "linux_workflow_url": null,
       "windows_workflow_url": null,
-      "blueprint_workflow_url": null
+      "blueprint_workflow_url": null,
+      "executor": "Codex 6 Luna Max",
+      "execution_medium": "GitHub-only",
+      "runner": "Node+Electron negative cases min30",
+      "evidence_path": "docs/evidence/astra/P122/VERIFICATION.md",
+      "required_ci": [
+        "Linux Node/Chrome/Edge when relevant",
+        "Windows Electron/NSIS when relevant",
+        "Final blueprint policy"
+      ],
+      "evidence_linux_run": null,
+      "evidence_windows_run": null,
+      "evidence_blueprint_run": null
     },
     {
       "id": "P123",
@@ -313,7 +421,19 @@
       "evidence_feature_sha": null,
       "linux_workflow_url": null,
       "windows_workflow_url": null,
-      "blueprint_workflow_url": null
+      "blueprint_workflow_url": null,
+      "executor": "Codex 6 Luna Max",
+      "execution_medium": "GitHub-only",
+      "runner": "ubuntu-latest CPU-only real Qwen3:4b-instruct model, bounded run",
+      "evidence_path": "docs/evidence/astra/P123/VERIFICATION.md",
+      "required_ci": [
+        "Linux Node/Chrome/Edge when relevant",
+        "Windows Electron/NSIS when relevant",
+        "Final blueprint policy"
+      ],
+      "evidence_linux_run": null,
+      "evidence_windows_run": null,
+      "evidence_blueprint_run": null
     },
     {
       "id": "P124",
@@ -339,7 +459,19 @@
       "evidence_feature_sha": null,
       "linux_workflow_url": null,
       "windows_workflow_url": null,
-      "blueprint_workflow_url": null
+      "blueprint_workflow_url": null,
+      "executor": "Codex 6 Luna Max",
+      "execution_medium": "GitHub-only",
+      "runner": "Windows Electron actual Qwen CPU inference, 3SKU",
+      "evidence_path": "docs/evidence/astra/P124/VERIFICATION.md",
+      "required_ci": [
+        "Linux Node/Chrome/Edge when relevant",
+        "Windows Electron/NSIS when relevant",
+        "Final blueprint policy"
+      ],
+      "evidence_linux_run": null,
+      "evidence_windows_run": null,
+      "evidence_blueprint_run": null
     },
     {
       "id": "P125",
@@ -366,7 +498,19 @@
       "evidence_feature_sha": null,
       "linux_workflow_url": null,
       "windows_workflow_url": null,
-      "blueprint_workflow_url": null
+      "blueprint_workflow_url": null,
+      "executor": "Codex 6 Luna Max",
+      "execution_medium": "GitHub-only",
+      "runner": "Node WebCrypto synthetic signer+Windows Electron main IPC adversarial",
+      "evidence_path": "docs/evidence/astra/P125/VERIFICATION.md",
+      "required_ci": [
+        "Linux Node/Chrome/Edge when relevant",
+        "Windows Electron/NSIS when relevant",
+        "Final blueprint policy"
+      ],
+      "evidence_linux_run": null,
+      "evidence_windows_run": null,
+      "evidence_blueprint_run": null
     },
     {
       "id": "P126",
@@ -392,7 +536,19 @@
       "evidence_feature_sha": null,
       "linux_workflow_url": null,
       "windows_workflow_url": null,
-      "blueprint_workflow_url": null
+      "blueprint_workflow_url": null,
+      "executor": "Codex 6 Luna Max",
+      "execution_medium": "GitHub-only",
+      "runner": "windows-latest NSIS real install/upgrade/recovery",
+      "evidence_path": "docs/evidence/astra/P126/VERIFICATION.md",
+      "required_ci": [
+        "Linux Node/Chrome/Edge when relevant",
+        "Windows Electron/NSIS when relevant",
+        "Final blueprint policy"
+      ],
+      "evidence_linux_run": null,
+      "evidence_windows_run": null,
+      "evidence_blueprint_run": null
     }
   ],
   "score_formula": "50 + sum(verified task credit_earned), each <= credit_max, no credit for plans or unverified runs",
@@ -402,5 +558,23 @@
     "preserve main and PR #10",
     "no seller key or model bundle",
     "no P114-P126 code has been implemented by this plan"
-  ]
+  ],
+  "executor_model": "Codex 6 Luna Max",
+  "scope": "50-to-70 only; P127+ executor not assigned by this user instruction",
+  "execution_medium": "GitHub repository existing feature branch and GitHub-hosted Actions only",
+  "reviewer": "GPT-6 High, independent final audit on subsequent user request",
+  "execution_runbook": "docs/commercial/ASTRA_CODEX_LUNA_MAX_GITHUB_ONLY_P114_P126_20261114.md",
+  "allowed": [
+    "Existing feature branch GitHub code commits",
+    "GitHub-hosted Actions Ubuntu/Windows test runners within free/approved limits",
+    "Synthetic test code and evidence committed to GitHub",
+    "Central GitHub kmong-productization Astra row after verified results"
+  ],
+  "forbidden": [
+    "User local PC, external CI, Vercel, paid runners, other deployment",
+    "External AI inference API, customer file/prompt upload, unknown-license binary/model redistribution",
+    "Changing release flags, seller keys, issuer JWK pin, GitHub permissions or repository visibility",
+    "Changing main, draft PR #10 or any other central ledger product"
+  ],
+  "score_policy": "Only VERIFIED with exact feature commit SHA and required GitHub Actions and real evidence may earn credit; other status earns zero. User official acceptance remains UNASSESSED"
 }
