@@ -8,7 +8,7 @@ const crypto=require('node:crypto');
 const {createLocalOcrController,OCR_MANIFEST}=require('../desktop/local-ocr-controller.cjs');
 
 function digest(bytes){return crypto.createHash('sha256').update(bytes).digest('hex');}
-function normalize(value){return value.normalize('NFC').replace(/\\s+/g,'');}
+function normalize(value){return value.normalize('NFC').replace(/\s+/g,'');}
 function charError(reference,recognized){
  const a=Array.from(reference),b=Array.from(recognized);
  let previous=Array.from({length:b.length+1},(_,i)=>i);
@@ -51,7 +51,7 @@ async function run(){
   for(let i=0;i<cases.length;i++){
    const sample=cases[i];
    if(!sample||sample.case!==i+1||typeof sample.file!=='string'||
-      !/^ocr_\\d{2}\\.png$/.test(sample.file)||typeof sample.expected!=='string'||
+      !/^ocr_\d{2}\.png$/.test(sample.file)||typeof sample.expected!=='string'||
       sample.expected.length>200||!(/^[0-9a-f]{64}$/).test(sample.sha256))
     throw Error('Invalid synthetic case');
    const input=path.join(base,sample.file);
