@@ -1,3 +1,8 @@
+## 2026-11-14 KST — 사용자 승인 확정: 무료 OCR·로컬 한국어 LLM·12영역 100점
+
+- 사용자 명시 승인: Tesseract 등 무료 OCR 검토/구현, llama.cpp+Qwen 등 무료 한국어 로컬 모델 검토, A01–A12 배점 100점 확정. 공식 기능별 증거 점수는 **산정 대기/목표100% 미달**(0%·85%·100%로 임의 표시 금지). 상세 후보·권리·제외 승인: `docs/commercial/ASTRA_OWNER_1300_CHECKLIST_20261114.md`.
+- 공식 upstream Tesseract OCR/한국어 tessdata_fast Apache-2.0, llama.cpp MIT, Qwen3-0.6B-GGUF Apache-2.0 후보 라이선스 출처 확인. 실제 바이너리/해시/모델 품질/한국어 OCR·실PC 미검증, 다운로드/상용 번들/판매/고객 PDF 업로드 미실행. 이전 P95~P100 CI 검증 사실 불변.
+
 ## 2026-11-14 KST — P100 수동 STEP6 출처 북마크 정확 SHA CI 3/3 SUCCESS (최신)
 
 - **P100은 개발 회차 번호**이고 전체 제품 **100% 완성 뜻 아님**. 원본 7단계/상용 SKU 전체의 공식 최종완성률 **`UNASSESSED` / 목표100% 미달**. 과거 내부 기술 85% 잠정 이력은 별개.
