@@ -238,3 +238,9 @@ At exact SHA [`c365ba07df29cd6228a794f0c420230d448f91ee`](https://github.com/hib
 ## 2026-11-15 — P119 UB-Mannheim 5.4.0 candidate audit
 
 On exact source SHA [`b6d7909e6897578181dbd304ff12491760422530`](https://github.com/hibi89/astra_pdf_redesigner/commit/b6d7909e6897578181dbd304ff12491760422530), Linux [#43651926094](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926094), Windows [#43651926099](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926099), and policy [#43651926332](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926332) passed. The Windows audit used the official UB-Mannheim 5.4.0 release installer, pinned its expected SHA to the signed Microsoft winget-pkgs commit `dd11564899b74d402e5fd39cb6f7b31945170286`, and observed a matching actual digest. Authenticode returned `UnknownError` for the Universität Mannheim signer because the signer/timestamp was outside its validity period; install was skipped. No score. Third candidate rejected; no GitHub-hosted newer Windows binary was found in upstream Tesseract 5.5.4 (source release has no assets) or UB-Mannheim (latest Windows release remains 5.4.0). Await a verifiable approved Windows supplier source before P119/P121.
+
+
+
+## 2026-11-15 — P123 additional GitHub model-source audit
+
+The official Qwen3 repository still exposes no GitHub-hosted 4B model asset. A third-party GitHub conversion repository was inspected at a pinned commit; it contains only source, metadata, and checksums, explicitly points to Hugging Face for model binaries, and has no repository license metadata or release assets. This does not meet P123's GitHub-only artifact/license/hash requirements. P123 remains BLOCKED +0; no model was downloaded or inferred. Resume after an approved GitHub-accessible checkpoint and artifact-specific license evidence are supplied.

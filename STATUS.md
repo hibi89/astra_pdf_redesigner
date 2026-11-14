@@ -1,3 +1,9 @@
+## 2026-11-15 KST — P123 GitHub checkpoint candidate audit · +0 · 잠정 61/100
+
+- **Product source SHA:** [`b6d7909e6897578181dbd304ff12491760422530`](https://github.com/hibi89/astra_pdf_redesigner/commit/b6d7909e6897578181dbd304ff12491760422530); source SHA Linux/Windows/policy Actions already passed. This turn made no product-code change; no new runtime CI was run.
+- **Candidate:** GitHub repo [`Dadhichi-Sarker-Shayon/model-qwen3-4b-q4-k-m-gguf`](https://github.com/Dadhichi-Sarker-Shayon/model-qwen3-4b-q4-k-m-gguf) at [`38a5c001fbdaf3485f98ba4d51d09ebd82f06547`](https://github.com/Dadhichi-Sarker-Shayon/model-qwen3-4b-q4-k-m-gguf/commit/38a5c001fbdaf3485f98ba4d51d09ebd82f06547) contains a conversion notebook/checksums but no GGUF binary, no GitHub release assets, and no repo license metadata. Its README directs GGUF downloads to Hugging Face, outside current constraints. Official QwenLM/Qwen3 also has no GitHub model release.
+- **P123:** BLOCKED +0. No weights downloaded, no external host/local PC used, no inference. Total remains 61/100; G65 NOT PASSED; official acceptance UNASSESSED; RELEASE HOLD. P119 supplier approval remains the other prerequisite blocker.
+
 ## 2026-11-15 KST — P119 UB-Mannheim 5.4.0 Windows candidate audit · +0점 · 잠정 61/100
 
 - **정확 실행 SHA:** [`b6d7909e6897578181dbd304ff12491760422530`](https://github.com/hibi89/astra_pdf_redesigner/commit/b6d7909e6897578181dbd304ff12491760422530); Linux [#43651926094](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926094) SUCCESS (290/290); Windows [#43651926099](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926099) SUCCESS (Node 289/290 pass, 1 OS skip; desktop 86/86; OCR, P120 workflow, fail-closed candidate audit, NSIS/upgrade all pass); 정본 정책 [#43651926332](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926332) SUCCESS.

@@ -498,19 +498,31 @@
       "evidence_linux_run": null,
       "evidence_windows_run": null,
       "evidence_blueprint_run": null,
-      "actual_result": "BLOCKED +0. Official QwenLM/Qwen3 GitHub main at 7a2f61ffc7a20d47efcd2bf97f6f2bf52729042e has no 4B model weights or GitHub release assets; README points to Hugging Face/ModelScope and model license files on Hugging Face. GitHub-only and no-local-PC constraints prohibit fetching the artifact. No exact 4B artifact SHA/license mapping or real CPU inference results; model and 30-paragraph tests NOT RUN.",
+      "actual_result": "BLOCKED +0. GitHub source audit at product source b6d7909e6897578181dbd304ff12491760422530 reconfirmed that official QwenLM/Qwen3 commit 7a2f61ffc7a20d47efcd2bf97f6f2bf52729042e has no model weights or release assets. A third-party GitHub conversion repo https://github.com/Dadhichi-Sarker-Shayon/model-qwen3-4b-q4-k-m-gguf at 38a5c001fbdaf3485f98ba4d51d09ebd82f06547 is only 55 KB, has no GitHub releases/assets or repository license metadata, and explicitly hosts GGUF binaries on Hugging Face. Its checksum list cannot identify a GitHub-accessible file. No model download or inference; Qwen3 4B license+artifact SHA, CPU/RAM/latency and 30-case Korean evaluation remain unavailable.",
       "blockers_observed": [
-        "Official QwenLM/Qwen3 main commit 7a2f61ffc7a20d47efcd2bf97f6f2bf52729042e has no model weight/release asset; GitHub Releases API returns an empty list.",
-        "Official README points checkpoints to Hugging Face/ModelScope and says model-specific license files are in Hugging Face repositories; these hosts are outside the GitHub-only instruction.",
-        "No user-owned Qwen3 4B model is available in the GitHub-hosted runner; user-local PC is prohibited.",
-        "Exact 4B model-file SHA-256, model-specific license proof, CPU/RAM/latency, and 30 real-inference Korean paragraph results were not obtained."
+        "Official QwenLM/Qwen3 main commit 7a2f61ffc7a20d47efcd2bf97f6f2bf52729042e has no 4B model weights; official GitHub release count is 0.",
+        "Official README directs model checkpoints to Hugging Face/ModelScope, outside the GitHub-only instruction.",
+        "Third-party GitHub source repo Dadhichi-Sarker-Shayon/model-qwen3-4b-q4-k-m-gguf at 38a5c001fbdaf3485f98ba4d51d09ebd82f06547 has no binary or GitHub release asset; README says GGUF binaries are hosted on Hugging Face. Repository license metadata is null.",
+        "Hash list in the third-party repository refers to externally hosted GGUF files; without a GitHub-accessible artifact and applicable license file, hashes do not meet the requested audit.",
+        "No user-owned model is available in GitHub-hosted Actions; local PC access is prohibited.",
+        "Actual inference acceptance, exact model-file SHA/license mapping, CPU/RAM/latency and 30-paragraph Korean results remain unrun."
       ],
       "model_source_audit": {
         "official_repository": "https://github.com/QwenLM/Qwen3",
         "official_main_sha": "7a2f61ffc7a20d47efcd2bf97f6f2bf52729042e",
-        "release_api": "https://api.github.com/repos/QwenLM/Qwen3/releases?per_page=10",
         "github_release_count": 0,
-        "result": "No weights or GitHub-hosted model release asset. External model-host retrieval intentionally not attempted."
+        "third_party_conversion_repository": "https://github.com/Dadhichi-Sarker-Shayon/model-qwen3-4b-q4-k-m-gguf",
+        "third_party_main_sha": "38a5c001fbdaf3485f98ba4d51d09ebd82f06547",
+        "third_party_repository_size_kb": 55,
+        "third_party_repository_license_metadata": null,
+        "third_party_release_count": 0,
+        "third_party_release_asset_count": 0,
+        "third_party_readme_sha256_file_present": true,
+        "third_party_readme_says_binary_host": "Hugging Face",
+        "third_party_github_tree_contains_weights": false,
+        "decision": "BLOCKED_GITHUB_ACCESSIBLE_WEIGHT_AND_EXACT_LICENSE_MISSING",
+        "external_model_hosts_accessed": false,
+        "model_downloaded": false
       }
     },
     {
@@ -729,7 +741,7 @@
   },
   "last_updated_kst": "2026-11-15",
   "last_completed_task": "P125",
-  "next_independent_task": "P123 remains blocked until a GitHub-accessible Qwen3 4B model artifact with license and exact SHA is available. P120/P121 depend on approved P119 supplier; P124 depends on P123; P126 depends on P121. No currently executable P114-P126 task remains without new supplier/model evidence.",
+  "next_independent_task": "P123 remains blocked: official QwenLM/Qwen3 GitHub has no weights/releases; the audited third-party GitHub conversion repository stores only source/checksums and points to Hugging Face binaries. P119 needs a valid-signature Windows Tesseract supplier and exact dependency license/NOTICE/redistribution proof. P120/P121 and P124/P126 remain downstream. No currently executable P114-P126 task remains without supplier/model evidence.",
   "gates": {
     "G55": "PASS",
     "G60": "NOT PASSED — P119 lacks an approved Authenticode-valid/licensed supplier; P120 app/UI and P121 Electron IPC/V2 acceptance remain incomplete.",
