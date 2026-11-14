@@ -1,3 +1,11 @@
+## 2026-11-14 사용자 명시 승인 — 3건 확정
+
+- **승인 1:** 무료 로컬 OCR 후보 검토/구현 승인. 1순위 Tesseract OCR (Apache-2.0), `tesseract-ocr/tessdata_fast` 한국어 `kor.traineddata` (Apache-2.0) + 영어 `eng.traineddata`; 실제 Windows 바이너리 배포물의 개별 제3자 라이선스, SHA-256, 모델/데이터 해시 확인 및 CPU·OCR 품질 실증 전 상용 재배포 불가. 원본 PDF 자동 전송 금지. 공식 출처 https://github.com/tesseract-ocr/tesseract , https://github.com/tesseract-ocr/tessdata_fast , https://tesseract-ocr.github.io/tessdoc/Installation.html .
+- **승인 2:** 무료 한국어 로컬 AI 모델 후보 검토 승인. llama.cpp upstream MIT, Qwen 공식 `Qwen/Qwen3-0.6B-GGUF` Apache-2.0 후보 (Q8_0 약 639MB). 공식 https://github.com/ggml-org/llama.cpp/blob/master/LICENSE , https://huggingface.co/Qwen/Qwen3-0.6B-GGUF , https://huggingface.co/Qwen/Qwen3-0.6B-GGUF/blob/main/LICENSE . 0.6B는 기능·CPU 속도 검증용 후보이며 실제 한국어 윤문 품질 충족 **미검증**; 더 큰 모델·양자화 대안과 품질/속도/메모리 비교 후 최종 채택. 모델/바이너리 다운로드 및 SHA·NOTICE·제3자 종속성 검증 완료 전 상용 번들 금지.
+- **승인 3:** `docs/commercial/ASTRA_P100_SCOREBOARD_20261114.md` A01–A12 배점 합계 100점 **승인 완료**. 배점 승인은 기능 인수/100% 합격 아님. 증거 점수 부분 산정은 후속 정확 기준 정의 필요. 현재 공식 수치 산정 대기, 목표100% 미달. 승인 재요청 금지.
+- **승인 제외:** 유료결제·외부 고객 원본 PDF 업로드·실 라이선스 개인키 발급/보안 변경·크몽 등록/판매 GO·기능 품질 축소·라이선스 위반 번들 배포. 사용자가 PC 앞에 있을 때는 실 테스트용 허가 PDF5–10개 준비 및 OS/Node 환경 확인만 요청, 원본 파일 채팅 업로드 요구하지 않음.
+- **2안 비교:** OCR A) Tesseract 별도 로컬 실행 파일(최소 변경/비용0/속도 적절/패키징 권리검토 필요) vs B) 브라우저 WASM OCR(번들 용량/CPU 부담/추가 의존성). **A 우선**. AI A) llama.cpp+Qwen 공식 GGUF(오프라인/0원/기존 controller 재사용) vs B) 클라우드 API(키·비용·고객정보 외부 전송 위험), **A 우선**. 기존 STEP7/LLM 데이터 흐름·중복 실행/타임아웃/오류복구·원본 보존 설계 후 구현.
+
 # Astra PDF Redesigner — 2026-11-14 13:00 KST 사용자 작업 일괄 요청
 
 **정책:** 0원, 사용자 실 PC에서만 할 수 있는 최소한의 검수만 부탁한다. 개인정보/고객 문서는 GitHub·웹에 올리지 않고 로컬 전용. 이미 존재하는 13시 통합 자동화 재사용(중복 예약 생성 금지). 직접 사용/외부 자료 다운로드/판매 승인 없이 릴리스·결제 없음.
