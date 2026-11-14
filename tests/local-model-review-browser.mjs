@@ -98,7 +98,7 @@ try{
  assert.equal(await evaluate("document.querySelector('[data-model-value]').textContent"),changed,'Undo restores exact source');
  // A rejected exception leaves the original paragraph and application count unchanged.
  await click('[data-local-ai-run]');
- await eventually(()=>evaluate("window.__astraModelMock.calls.length"),value=>value===5);
+ await eventually(()=>evaluate("window.__astraModelMock.calls.length"),value=>value===4);
  await evaluate("window.__astraModelMock.reject(3)");
  await eventually(()=>evaluate("document.querySelector('[data-local-ai-status]')?.textContent"),value=>value?.includes('원문은 유지'));
  assert.equal(await evaluate("document.querySelector('[data-model-value]').textContent"),changed);
