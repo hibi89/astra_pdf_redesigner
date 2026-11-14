@@ -10,6 +10,7 @@ const browser=launchBrowser(process.env.CHROME_PATH||'chromium',profile,'M09-A r
 let ws,sequence=0;const waiting=new Map();
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
 const approvalSelector='.step3-import-panel > label.step3-confirm input';
+const layoutReviewSelector='.step3-import-panel [data-step3-layout-review-confirm]';
 const saveExpression="[...document.querySelectorAll('.step3-import-panel button')].find(b=>b.textContent.includes('검수 결과를 새 문서로 저장'))";
 async function eventually(fn,check=x=>Boolean(x),ms=45000){
   const until=Date.now()+ms;let last;
@@ -52,13 +53,15 @@ try{
   const ready=async()=>eventually(()=>evaluate("(()=>({text:document.querySelector('.step3-import-panel')?.textContent,blocks:document.querySelectorAll('.step3-block-review textarea').length}))()"),
     x=>x?.text?.includes(MIXED_LAYOUT_MARKERS[0])&&x.text.includes(MIXED_LAYOUT_MARKERS.at(-1))&&x.blocks>1);
   const assertUnapproved=async label=>{
-    const x=await eventually(()=>evaluate("(()=>({checked:document.querySelector("+JSON.stringify(approvalSelector)+")?.checked,saveDisabled:("+saveExpression+")?.disabled}))()"),
-      x=>x?.checked===false&&x.saveDisabled===true);
+    const x=await eventually(()=>evaluate("(()=>({checked:document.querySelector("+JSON.stringify(approvalSelector)+")?.checked,layout:[...document.querySelectorAll("+JSON.stringify(layoutReviewSelector)+")].map(input=>input.checked),saveDisabled:("+saveExpression+")?.disabled}))()"),
+      x=>x?.checked===false&&x.layout.every(checked=>checked===false)&&x.saveDisabled===true);
     assert.equal(x.checked,false,label+' consent must be revoked');
+    assert.ok(x.layout.every(checked=>checked===false),label+' layout review must be revoked');
     assert.equal(x.saveDisabled,true,label+' save must require fresh review approval');
   };
   await upload('m09a-review-source.pdf');
   await ready();
+  await evaluate("document.querySelectorAll("+JSON.stringify(layoutReviewSelector)+").forEach(input=>input.click())");
   await evaluate("document.querySelector("+JSON.stringify(approvalSelector)+").click()");
   assert.equal(await evaluate("document.querySelector("+JSON.stringify(approvalSelector)+").checked"),true);
   assert.equal(await evaluate("("+saveExpression+").disabled"),false);
@@ -79,10 +82,12 @@ try{
   const moveCount=await evaluate("document.querySelectorAll('.step3-block-review button[aria-label$=\"아래로 이동\"]:not(:disabled)').length");
   assert.ok(moveCount>0,'M09-A source needs at least two movable blocks');
   {
+    await evaluate("document.querySelectorAll("+JSON.stringify(layoutReviewSelector)+").forEach(input=>input.click())");
     await evaluate("document.querySelector("+JSON.stringify(approvalSelector)+").click()");
     await evaluate("document.querySelector('.step3-block-review button[aria-label$=\"아래로 이동\"]:not(:disabled)').click()");
     await assertUnapproved('reading-order edit');
   }
+  await evaluate("document.querySelectorAll("+JSON.stringify(layoutReviewSelector)+").forEach(input=>input.click())");
   await evaluate("document.querySelector("+JSON.stringify(approvalSelector)+").click()");
   assert.equal(await evaluate("("+saveExpression+").disabled"),false);
   // Rejected drop must clear the previously accepted source rather than
