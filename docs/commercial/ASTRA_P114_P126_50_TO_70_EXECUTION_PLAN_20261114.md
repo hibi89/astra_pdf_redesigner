@@ -1,6 +1,9 @@
 # Astra PDF Redesigner — P114~P126 실행 설계 및 50→70점 검증 공시
 
-> 설계 승인 문맥: 2026-11-14 21:55 KST, 사용자 지시: GPT-6 High가 최종설계 기반 작업을 분해·공시하고, GPT-6 Instant가 구현과 GitHub 검증·인수인계를 직접 담당. High는 사용자 요청 시 최종 별도 검수 담당. 이 문서는 **계획 공시**이며 기능 구현·테스트 또는 70점 달성을 의미하지 않는다.
+> **[2026-11-14 최신 사용자 위임으로 실행자 변경]** 50→70(P114~P126) 구현·테스트·GitHub 커밋 담당은 **Codex 6 Luna Max**. 오직 **GitHub 기존 feature 브랜치 + GitHub-hosted Actions**만 사용한다. 이전 Instant 담당 표기는 이 범위에서 대체한다. 상세 실행 환경·실모델/실OCR blocking·한도 규정은 [Codex Github-only 런북](ASTRA_CODEX_LUNA_MAX_GITHUB_ONLY_P114_P126_20261114.md) 및 [작업 원장](ASTRA_P114_P126_TASK_REGISTER_20261114.json)을 우선한다. **기준 점수 잠정 50/100, P114~P126 PENDING, 공식 UNASSESSED, RELEASE HOLD. 이 문서 수정은 기능 개발이나 CI 통과가 아니다.** 70점 이후 P127+ 담당자는 이번 위임에서 지정하지 않았다.
+
+
+> 설계 승인 문맥: 2026-11-14 21:55 KST, 사용자 지시: GPT-6 High가 최종설계 기반 작업을 분해·공시하고, Codex 6 Luna Max가 구현과 GitHub 검증·인수인계를 직접 담당. High는 사용자 요청 시 최종 별도 검수 담당. 이 문서는 **계획 공시**이며 기능 구현·테스트 또는 70점 달성을 의미하지 않는다.
 
 **작업 브랜치:** feature/astra-p71-pdf-source-parity-20261112
 **저장소:** hibi89/astra_pdf_redesigner
@@ -68,7 +71,7 @@
 
 #### P114 — 다단·표·텍스트 순서 위험 검출 보강 (A03 +2점, 누적 상한 52/100)
 
-- **선행:** 없음. **담당:** GPT-6 Instant. 현재 상태: PENDING.
+- **선행:** 없음. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
 - **수정 후보 경로:** src/step3/structure.ts; src/step3/pdf.ts; src/step3/ImportPanel.tsx; tests/step3-*.test.ts. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 현재 재구성 로직을 보존하며 PDF.js 글자별 위치·bbox·벡터 위험 신호를 사용해 읽기 순서/표 의심/좌우열 충돌을 명시적으로 검수 대기 처리. 불확실한 블록은 자동 재정렬·저장하지 않는다.
 - **수용 테스트/증거:** 직접 생성한 합성 PDF 최소 12종(단일열/2단/표격자/회전/혼합이미지/숫자·부정문/텍스트 뒤섞임 포함). 필수 원문 토큰 누락·열순서 오류를 무경고 정상으로 처리한 0건, 선택형 원문 대비 화면과 위험 경고를 실제 Chrome·Edge에서 확인.
@@ -77,7 +80,7 @@
 
 #### P115 — 원본→추출→새 PDF 콘텐츠 대조·복구 경로 실증 (A03 +2점, 누적 상한 54/100)
 
-- **선행:** P114. **담당:** GPT-6 Instant. 현재 상태: PENDING.
+- **선행:** P114. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
 - **수정 후보 경로:** src/step3/sourceReview.ts; src/step7/OfflinePdfReview.tsx; src/step2/Workspace.tsx; tests/step3-browser.mjs; tests/step7-pdf-review-browser.mjs. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 원본 글자·수치·기호·부정문·링크의 추출/수정/출력 간 차이를 계층별로 구분하고, 수동 복구·승인·되돌림을 원본 위치와 연결. 원본 해시는 불변, 사용자 승인 전 V2 영구 저장 불가.
 - **수용 테스트/증거:** 난이도 있는 합성 PDF 최소 15건의 실제 소스/출력 A4 대조. 금액·날짜·부정 변경 0건 무승인 출력; 누락·중복 탐지가 실패한 사례는 미지원/수동대조 처리; 취소·오류 후 V1/V2 및 원본 SHA 유지.
@@ -86,7 +89,7 @@
 
 #### P116 — BASIC 8 / PRO 20 / BUSINESS 30 디자인 차별성·A4 출력 검수 (A04 +1점, 누적 상한 55/100)
 
-- **선행:** P115. **담당:** GPT-6 Instant. 현재 상태: PENDING.
+- **선행:** P115. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
 - **수정 후보 경로:** src/step4/skuLayoutCandidates.ts; src/step2/Workspace.tsx; tests/step4-*.mjs; tests/step4-*.test.ts. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 기존 기본 8개와 추가 PRO 12개, BUSINESS 10개의 조판 가족·제목·구분선·컬럼·여백을 독립 비교. 기존 기능/브랜드 스타일 변경 없이 클리핑·겹침·페이지 누락 검출과 비교 화면을 고도화.
 - **수용 테스트/증거:** 실제 Chrome·Edge 렌더링과 생성 PDF를 총 30시안 모두 점검. 서로 다른 레이아웃의 구조적 특징 목록과 PDF 페이지·최종 줄 누락 0, 원문 동일성·PNG 보존 결과를 첨부.
@@ -95,7 +98,7 @@
 
 #### P117 — BUSINESS 다중 문서 브랜드 반복 출력 및 SKU 우회 회귀 (A04 +1점, 누적 상한 56/100)
 
-- **선행:** P116. **담당:** GPT-6 Instant. 현재 상태: PENDING.
+- **선행:** P116. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
 - **수정 후보 경로:** src/step4/brandBatchPlan.ts; src/step4/BusinessBrandLibrary.tsx; src/step2/Workspace.tsx; src/commercial/skuActionGate.ts; tests/brand-batch-plan.test.ts. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 기존 2~20개 세션 브랜드 계획을 문서별 미리보기·저장·전환·계획 취소까지 연결. 각 문서마다 텍스트 브랜드·로고 미지원 고지를 정확히 표시하고 PDF 저장 직전에 BUSINESS/brand-kit 재확인.
 - **수용 테스트/증거:** 2/5/20개 합성 V2 문서 전환·개별 PDF 저장, 비대상 문서 오염 0, 계획 취소 후 원래 스타일 복원, 무효/중복 ID 및 라이선스 위조 거부, NSIS 업그레이드 기존 데이터 보존.
@@ -104,7 +107,7 @@
 
 #### P118 — 로컬 레퍼런스 분석→비파괴 적용·재현성 강화 (A05 +1점, 누적 상한 57/100)
 
-- **선행:** P116. **담당:** GPT-6 Instant. 현재 상태: PENDING.
+- **선행:** P116. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
 - **수정 후보 경로:** src/step5/referenceAnalysis.ts; src/step2/Workspace.tsx; tests/step5-reference-browser.mjs; tests/step5-*.test.ts. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 로컬 PNG/JPEG/WebP/PDF의 색상·여백·텍스트 크기 추정과 미리보기/적용/취소·Undo·프리셋 재열기 흐름을 동일 기준으로 검증. 표/폰트·권리는 추정 불가라고 고지.
 - **수용 테스트/증거:** 스캔/벡터/여백 과다/다중 페이지/한글 최소 8종 합성 레퍼런스, 2개 브라우저에서 예상 범위 및 전후 저장 복원, 프로젝트 바이트와 원본 파일 무변경, 비정상 PDF fail-closed.
@@ -113,7 +116,7 @@
 
 #### P119 — Windows Tesseract 공급처·해시·DLL·LICENSE 감사 재현 (A07 +1점, 누적 상한 58/100)
 
-- **선행:** 없음. **담당:** GPT-6 Instant. 현재 상태: PENDING.
+- **선행:** 없음. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
 - **수정 후보 경로:** desktop/ocr-supply-chain-preflight.cjs; desktop/ocr-pe-import-audit.cjs; tests/ocr-supply-chain-preflight.test.cjs; tests/ocr-windows-authenticode-evidence.test.ps1. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 별도 다운로드/동봉 없이 공식 공급처 후보의 버전·해시·Authenticode·PE import/delay-load DLL 폐쇄성·tessdata kor/eng·재배포권 증거를 정리한다. 데이터/고객 PDF 없이 증거·검증기만 유지.
 - **수용 테스트/증거:** Windows 테스트에서 정상·변조·누락·DLL 경로 오염·서명 없음·라이선스 고지 없음 케이스의 거부 동작, SBOM/NOTICE 후보별 근거 파일, 출처 날짜·버전·파일 해시 기록.
@@ -122,7 +125,7 @@
 
 #### P120 — 실 Tesseract 한국어 인식 난도별 측정·오인식 공개 (A07 +1점, 누적 상한 59/100)
 
-- **선행:** P119. **담당:** GPT-6 Instant. 현재 상태: PENDING.
+- **선행:** P119. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
 - **수정 후보 경로:** tools/verify-real-korean-ocr.py; src/step7/LocalOcrPanel.tsx; tests/step7-local-ocr-browser.mjs. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 한글·숫자·부정문·표·두 단·회전·저해상·잡음 스캔을 공용/자체 합성 PDF 이미지로 재생성. OCR의 원문 대조 UI와 누락·오인식 경고, PSM 3/6 선택·취소 기능을 검수.
 - **수용 테스트/증거:** 사전에 고정한 최소 12개 합성 OCR 원본을 실제 Tesseract kor+eng으로 실행하고 페이지별 CER/중요 수치 일치·검출 실패를 CSV/JSON에 기록. 오류를 자동승인/무경고 성공 처리한 0건; 실제 OCR 성공 1건 이상과 오류 실패사례 1건 이상 재현.
@@ -131,7 +134,7 @@
 
 #### P121 — Electron OCR IPC 실실행 및 실패 복구 (A07 +1점, 누적 상한 60/100)
 
-- **선행:** P119, P120. **담당:** GPT-6 Instant. 현재 상태: PENDING.
+- **선행:** P119, P120. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
 - **수정 후보 경로:** desktop/local-ocr-controller.cjs; desktop/main.cjs; desktop/preload.cjs; src/step7/LocalOcrPanel.tsx; tests/local-ocr-controller.test.cjs; tests/step7-local-ocr-browser.mjs. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 승인된 테스트 자산을 CI 임시 디렉터리로만 사용해 실제 native OCR subprocess 호출/취소·timeout·temp 삭제·문서 V2 미수정·원본 PNG 대조까지 연결. 릴리스 manifest와 별도 시험 주입 분리.
 - **수용 테스트/증거:** Windows Electron 격리 프로필에서 PNG→kor+eng OCR 미승인 초안 반환과 실제 취소·시간제한·깨진 입력 거부·임시 파일 삭제를 확인. 외부 네트워크/자동 반영/고객 원본 전송 0, 기존 NSIS PASS.
@@ -140,7 +143,7 @@
 
 #### P122 — Ollama 명시 동의·출처 고정·오래된 응답·의미 변경 방어 (A08 +2점, 누적 상한 62/100)
 
-- **선행:** 없음. **담당:** GPT-6 Instant. 현재 상태: PENDING.
+- **선행:** 없음. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
 - **수정 후보 경로:** desktop/owner-ollama-controller.cjs; desktop/main.cjs; desktop/preload.cjs; desktop/local-model-controller.cjs; src/humanize/LocalModelReview.tsx; tests/owner-ollama-controller.test.cjs. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 고정 127.0.0.1/기존 Qwen3 model ID만 허용, user-selected URL/프록시·redirect·cloud fallback 금지. IPC 인자·주문·모델 출력 상한·오래된 문서/블록 응답·취소/동시 요청·숫자/날짜/부정/이름/표/URL 정합 검증 후 사용자 승인 단계 유지.
 - **수용 테스트/증거:** 합성/공격 golden 최소 30문단(금액·부정·명시 거부·시간·동시 실행·문서 전환 포함), 동의 없을 때 추론 요청 0, auto-apply 0, 변경된 원문에 오래된 후보 적용 0, 예외 뒤 원문 보존 100%. 코드와 Electron 브리지 회귀 모두 PASS.
@@ -149,7 +152,7 @@
 
 #### P123 — 실 Qwen3 한국어 CPU 추론 및 데이터 무결성 시험 (A08 +3점, 누적 상한 65/100)
 
-- **선행:** P122. **담당:** GPT-6 Instant. 현재 상태: PENDING.
+- **선행:** P122. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
 - **수정 후보 경로:** desktop/owner-ollama-controller.cjs; tools/ (신규 실모델 측정 스크립트); tests/ (신규 실제 모델 golden); docs/commercial/ (실측 보고). 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 사용자가 소유한 기존 로컬 Qwen3 4B 또는 라이선스·해시가 검증된 별도 무료 CI 환경에서 실제 모델을 실행. 온디바이스 속도/메모리/중단/OOM·한글 품질을 계측. 모델은 저장소/설치파일에 동봉하지 않고, 다운로드가 필요하면 출처·권리·크기·한도를 사전 확인한다.
 - **수용 테스트/증거:** 실 모델(native/loopback HTTP mock 아님) + 사전 고정 30개 이상 합성 한국어 문단을 평가. 보호 숫자·날짜·금액·금지/부정/인용문이 변경된 후보의 자동/무검토 적용 0, 건별 성공/거부/취소/지연 및 CPU/RAM 실측, 원본·V1/V2 무변경. 최소 5건의 유효 실모델 제안이 검토 UI까지 전달되는 증거.
@@ -158,7 +161,7 @@
 
 #### P124 — 3SKU 공통 윤문 실제 GUI 회귀·문단 승인/되돌림 (A08 +2점, 누적 상한 67/100)
 
-- **선행:** P123, P117. **담당:** GPT-6 Instant. 현재 상태: PENDING.
+- **선행:** P123, P117. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
 - **수정 후보 경로:** src/humanize/LocalModelReview.tsx; src/step2/Workspace.tsx; src/commercial/skuAccess.ts; tests/step2-*.mjs; tests/ (신규 AI gui E2E). 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** BASIC/PRO/BUSINESS 동일 로컬 AI 경로를 보장하고, 다중 블록 간 선택-수정-거절-Undo 흐름과 스타일 변경·PDF 출력 시 원문 미승인 변형을 방어. UI는 모델이 없으면 규칙 검수만 제공.
 - **수용 테스트/증거:** 실 모델을 실행한 설치형 Windows Electron 또는 동등한 검증된 CPU 환경에서 3SKU × (정상/모델없음/취소/위조·오류) 시나리오. 최소 10건 실제 제안의 전후 비교·승인/거부/되돌림, 미승인 텍스트 변경 0, PDF 출력 문자 동일성 확인, 모델 미실행/오류 중에도 STEP1/2 정상.
@@ -167,7 +170,7 @@
 
 #### P125 — Electron 메인 프로세스 상용 PDF IPC·오프라인 영수증 직접 호출 게이트 (A09 +2점, 누적 상한 69/100)
 
-- **선행:** P117, P122. **담당:** GPT-6 Instant. 현재 상태: PENDING.
+- **선행:** P117, P122. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
 - **수정 후보 경로:** desktop/pdf-export-ipc-guard.cjs; desktop/main.cjs; src/commercial/skuActionGate.ts; src/commercial/skuAccess.ts; tests/pdf-export-ipc-guard.test.cjs; tests/sku-action-gate.test.ts. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 현재 고객용 플래그 false/issuer JWK null 상태 유지. 고객 경계에서 renderer 직접 호출·구독 없이 발급되지 않은 서명·만료·좌석·SKU를 main에서 거부하는 독립 테스트 가능한 정책 모듈 작성. 시험용 ephemeral JWK와 정식 판매자 키를 분리, 실제 고객 enable은 불허.
 - **수용 테스트/증거:** signed synthetic BASIC/PRO/BUSINESS 권한표, 만료·발급자 mismatch·위조·직접 IPC·프레임 재사용·이중 호출의 side effect 0 차단, 개발용 demo 기능 회귀, 무결한 signed fixture의 명시된 시험 경로만 PASS.
@@ -176,7 +179,7 @@
 
 #### P126 — Windows 설치형 실제 상태 복구·실패주입·업그레이드 회귀 (A10 +1점, 누적 상한 70/100)
 
-- **선행:** P117, P121, P125. **담당:** GPT-6 Instant. 현재 상태: PENDING.
+- **선행:** P117, P121, P125. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
 - **수정 후보 경로:** tests/windows-installer-lifecycle.ps1; tests/windows-installer-version-upgrade.ps1; tests/step2-cold-migration.mjs; .github/workflows/windows-desktop.yml. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 기존 같은 코드의 버전번호만 다른 업그레이드 검사를 넘어, 수정된 앱 코드를 포함한 실제 설치·제거·재설치·손상 저장·용량 부족·복구 흐름을 합성 문서/이미지로 검증. 새 구매자 PC 성능은 추정하지 않는다.
 - **수용 테스트/증거:** Windows GitHub runner에서 실 EXE 기동·다중 이미지 V2·Step1 V1 복구·업그레이드 후 바이트/해시 일치, 실패 시 원본 보존·새 상태 손실 0, 설치/제거 흔적 및 로그 무민감정보. Linux/Windows/정본 3개 워크플로 정확 SHA SUCCESS.
@@ -200,7 +203,7 @@
 6. STATUS.md, HANDOFF.md, docs/commercial/ASTRA_FINAL_EVIDENCE_SCORE_20261114.md를 업데이트. 중앙 kmong-productization 원장은 해당 제품 행만 동기화하되 최신 HEAD 확인·타상품 상태 보존. 등록완료는 실제 등록 증거 전까지 금지.
 7. CI 실패 시 코드/환경/라이선스/데이터 문제를 구분. 같은 실패 방법 무의미 반복 ≤ 1, 무진전 2회면 실패 근거·대안 1~3개·선택사항 보고. 도구로 가능한 독립 작업은 진행하되 목표 점수를 가짜로 채우지 않는다.
 
-## 7. Instant 실행 프로토콜 — ㄱ / ㄱㄱ
+## 7. Codex GitHub-only 실행 프로토콜 — ㄱ / ㄱㄱ
 
 - 새 대화에 이 계획 링크 또는 저장소/브랜치를 전달하면 HANDOFF.md → STATUS.md → AGENTS.md → REQUIREMENTS.md → 이 문서 → 최신 소스 → CI 순서로 읽는다. 계획은 이미 승인된 작업 순서를 분해한 것이며, 사용자에게 매번 기존 선행 질문을 반복하지 않는다.
 - ㄱ 입력 1회마다 미완료 중 가장 앞의 실행 가능한 P작업에서 실구현·검증·커밋까지 시도한다. 한 번에 여러 독립 작업이 검증 가능하면 함께 수행해도 되나 기능 SHA와 점수 근거는 구분.
@@ -209,7 +212,7 @@
 
 ## 8. 승인 없이 절대 넘지 말아야 할 경계
 
-- GPT-6 Instant는 위 범위의 무료·기존 GitHub 내 개발·합성 테스트·문서/원장 최신화까지 맡는다. 계정/권한, 유료결제, 실 사용자가 보유한 PDF와 고객 자료 외부 전송, 모델/폰트/런타임 법적 재배포, 판매자 비밀키·프로덕션 public pin 활성화, 정식 상용 배포·크몽 등록은 별도 승인 전 금지.
+- Codex 6 Luna Max는 위 범위의 무료·기존 GitHub 내 개발·합성 테스트·문서/원장 최신화까지 맡는다. 계정/권한, 유료결제, 실 사용자가 보유한 PDF와 고객 자료 외부 전송, 모델/폰트/런타임 법적 재배포, 판매자 비밀키·프로덕션 public pin 활성화, 정식 상용 배포·크몽 등록은 별도 승인 전 금지.
 - REAL OCR/AI가 공급자·모델 부재로 막히면 해당 점수는 0. 다른 작업을 진행하고 70점 목표 미달을 솔직히 기록. 실제 PC 또는 고객 PDF의 사용 승인이 필요한 작업은 마지막에 모아 목록으로 넘긴다.
 - 어떤 경우에도 ASTRA_CUSTOMER_BUILD_ENABLED=false, PRODUCTION_ISSUER_JWK=null, seller thumbprint=null, OCR_MANIFEST=null을 승인 없이 바꾸지 않는다. Windows unsigned 테스트 바이너리는 판매용 서명 설치기가 아니다.
 
