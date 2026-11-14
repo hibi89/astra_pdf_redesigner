@@ -84,7 +84,8 @@ async function checkedAsset(root,subdir,entry){
  if((await digest(real)).toLowerCase()!==entry.sha256.toLowerCase())throw Error('asset-hash');
  return real;
 }
-function createLocalOcrController({resourcesDir,manifest=OCR_MANIFEST,spawnProcess=spawn,timeoutMs=20000}={}){
+function createLocalOcrController({resourcesDir,manifest=OCR_MANIFEST,spawnProcess=spawn,timeoutMs=20000,
+ removePrivateDir=dir=>fsp.rm(dir,{recursive:true,force:true,maxRetries:5,retryDelay:150})}={}){
  if(!Number.isInteger(timeoutMs)||timeoutMs<100||timeoutMs>120000)throw Error('invalid-timeout');
  let running=null;
  const unavailable=()=>({status:'unavailable',reason:'ocr-assets-not-shipped'});
@@ -159,8 +160,14 @@ function createLocalOcrController({resourcesDir,manifest=OCR_MANIFEST,spawnProce
    return{status:'error',reason:cancelled?'cancelled':error instanceof Error?error.message:'ocr-error'};
   }finally{
    clearTimeout(timer);
-   if(dir)await fsp.rm(dir,{recursive:true,force:true}).catch(()=>{});
+   // Windows native processes can temporarily lock their input files.
+   // Never claim successful OCR if the private temporary page could not be removed.
+   let cleanupFailed=false;
+   if(dir){
+    try{await removePrivateDir(dir);}catch{cleanupFailed=true;}
+   }
    if(running===task)running=null;
+   if(cleanupFailed)return{status:'error',reason:'temporary-cleanup-failed'};
   }
  }
  async function cancel(){
