@@ -115,7 +115,7 @@ try{
   if(!(await evaluate("Boolean(document.querySelector('[data-business-brand-status]'))"))){
    await setValue('[data-business-brand-name]',brandName);
    await setValue('[data-business-brand-tagline]','synthetic batch preview');
-   await setValue('[data-business-brand-footer]','P117 CI ONLY');
+   await setValue('input[data-business-brand-footer]','P117 CI ONLY');
    await evaluate("document.querySelector('[data-business-brand-apply]').click()");
   }
   await eventually(()=>evaluate("Boolean(document.querySelector('[data-business-brand-header]')?.textContent.includes("
@@ -186,7 +186,9 @@ try{
  assert.equal(state.planned,false,'the stale prior 5-document target must be excluded from the 20-document plan');
  assert.equal(state.layout,null);
  await evaluate("document.querySelector('[data-business-batch-clear]').click()");
- await eventually(()=>evaluate("!document.querySelector('[data-business-batch-current]')"));
+ await eventually(()=>evaluate("document.querySelector('[data-business-batch-status]')?.textContent"),
+  status=>status?.includes('일괄 적용 계획 취소'));
+ await eventually(()=>evaluate("document.querySelector('[data-business-batch-clear]')?.disabled"),disabled=>disabled===true);
  for(let index=0;index<docNames.length;index++){
   const name=docNames[index];
   await switchTo(name);
