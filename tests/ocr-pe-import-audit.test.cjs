@@ -27,6 +27,11 @@ test('P105 direct vendor dependency inventory',()=>{
  assert.equal(graph(v,['liblept.dll']).bundledImportCount,1);
 });
 test('P105 missing vendor DLL is rejected',()=>assert.throws(()=>graph(inspectPeStaticImports(image('missing.dll'))),/missing-imported-dll/));
+test('P105 GDI raster import msimg32.dll is classified as a Windows system library',()=>{
+ const v=inspectPeStaticImports(image('msimg32.dll'));
+ assert.equal(graph(v).systemImportCount,1);
+ assert.throws(()=>graph(v,['msimg32.dll']),/system-dll-shadowing/);
+});
 test('P105 known Windows DLL is not vendored',()=>{
  const v=inspectPeStaticImports(image('KERNEL32.dll'));
  assert.equal(graph(v).systemImportCount,1);
