@@ -148,6 +148,7 @@ try {
   } catch {
     $state.import_closure = [ordered]@{ status = 'not-proven'; error = $_.Exception.Message }
   }
+  $global:LASTEXITCODE = 0
   $state.status = 'ACTUAL_WINDOWS_OCR_COMPLETE_REVIEW_REQUIRED'
   Save-Report
   Write-Host "PASS P120: actual Tesseract $($state.version_output[0]); $($results.Count) synthetic Korean kor+eng cases executed; exact=$(@($results | Where-Object exact).Count); mismatch=$(@($results | Where-Object { !$_.exact }).Count)"

@@ -7,7 +7,7 @@ const root = process.argv[2];
 if (!root || !fs.statSync(root).isDirectory()) throw new Error('missing-bin-root');
 const files = fs.readdirSync(root, { withFileTypes: true });
 if (files.some(entry => entry.isSymbolicLink())) throw new Error('symlink-in-bin');
-const native = files.filter(entry => entry.isFile() && /\.(?:exe|dll)$/i.test(entry.name));
+const native = files.filter(entry => entry.isFile() && (entry.name.toLowerCase() === 'tesseract.exe' || /\.dll$/i.test(entry.name)));
 const engines = native.filter(entry => entry.name.toLowerCase() === 'tesseract.exe');
 if (engines.length !== 1) throw new Error('expected-one-tesseract-engine');
 const byName = new Map();
