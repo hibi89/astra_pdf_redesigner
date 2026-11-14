@@ -1,3 +1,9 @@
+## 2026-11-14 KST — P103 정확 SHA Chrome·Edge·Windows 3/3 SUCCESS (최신 검증)
+
+- 정확 **기능/테스트 SHA f9672f12b2d40106bdcc244e2675c903b3c98888**. [Linux Chrome+Edge #43571908499](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43571908499) **2/2 JOB SUCCESS, Node189/189 PASS/0 FAIL/0 SKIP + TypeScript/Vite build**, 브라우저 각각 **PASS STEP7 OCR UI**(합성 scanned PDF→PDF.js 실제 PNG→모의 native OCR→페이지/PSM 전환 시 이전 초안 폐기, 외부 HTTPS 요청0). [Windows NSIS #43571908498](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43571908498) **SUCCESS Node188 PASS/0 FAIL/1 Windows symlink SKIP, desktop27/27 PASS**, 패키지/설치·제거/0.1.0→0.1.1 IndexedDB V2/PNG 보존. [정책 #43571908709](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43571908709) SUCCESS(공식 제품100% 검증 아님).
+- 앞선 P103 문서의 '신규 CI 진행 중'은 위 정확 SHA 실 로그로 **성공 확인**하여 정정. 해당 검증은 합성 모의 OCR 응답의 프론트엔드 검수 흐름이며, 진짜 Windows Tesseract 바이너리·DLL·언어팩/상용 권리/고객 실문서·물리 PC는 **미검증**. Linux 실 Tesseract 합성20 PSM6 15/20 exact, PSM3 5/20 exact 기록과 구분.
+- 원본 STEP1/2 V1/V2·고객 원본·main/PR10 불변, OCR_MANIFEST=null, 판매/Production 미적용. 공식 A01~A12 전체 최종완성률 **UNASSESSED / 100% 미달**, [작업중], RELEASE HOLD, 크몽 미등록. 상세 docs/commercial/ASTRA_P103_OCR_PSM_REVIEW_20261114.md.
+
 ## 2026-11-14 KST — P103 OCR PSM 실측 비교·초안 페이지/모드 귀속 보강
 
 - **P102 기능 SHA 5d87df4ef2f9f6b6cefd6f51f52d7f66de0d2d71 정확 CI 성공 확인:** [Linux Chrome+Edge #43568805209](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43568805209) 2/2 SUCCESS, Node **189/189 PASS·0FAIL**, TS/Vite build PASS, 실제 합성 브라우저 검증. [Windows NSIS #43568805220](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43568805220) SUCCESS, Node **188 PASS/0FAIL/1 Windows symlink SKIP**, desktop **27/27 PASS**, EXE/설치·제거/업그레이드 후 V2/PNG 보존. [정책 #43568805420](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43568805420) SUCCESS(100% 실상품 인증 아님). 이전 P102 'CI 미확인' 기록은 본 기록으로 정정.
