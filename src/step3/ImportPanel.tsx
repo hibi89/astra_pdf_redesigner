@@ -16,6 +16,7 @@ interface Props {
   disabled:boolean;
   onImport:(draft:PdfDraft)=>Promise<string|false>;
   onSourceCommitted:(source:ImportedPdfSource)=>void;
+  initialFile?:File; // isolated PRO review queue; no auto-approval
 }
 const ROLES:[PdfRole,string][]=[['paragraph','본문'],['heading','소제목'],['caption','캡션']];
 const DRAFT_HISTORY_LIMIT=8;
@@ -52,7 +53,7 @@ function SourceTextMissingWarning({page,onShow,onRecover}:{page:PdfDraftPage;onS
       onClick={()=>setVisibleCount(current=>nextSourceReviewCount(current,entries.length))}>다음 누락 조각 {Math.min(PDF_SOURCE_REVIEW_BATCH,entries.length-visibleCount)}개 보기</button>}
   </div>;
 }
-export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Props){
+export default function PdfImportPanel({disabled,onImport,onSourceCommitted,initialFile}:Props){
   const [draft,setDraft]=useState<PdfDraft|null>(null);
   const [busy,setBusy]=useState(false),[parsing,setParsing]=useState(false);
   const [importProgress,setImportProgress]=useState<{page:number;totalPages:number}|null>(null);
@@ -165,6 +166,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
       if(isCurrent()){parseController.current=null;setBusy(false);setParsing(false);setImportProgress(null);}
     }
   };
+  useEffect(()=>{if(initialFile)void choose(initialFile);},[initialFile]);
   const cancel=()=>{
     // Parsing is still read-only. Invalidate the outstanding request and let
     // users choose a replacement immediately; never interrupt a saving write.
@@ -173,7 +175,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
   };
   const dropFiles=(files:FileList)=>{
     setDragging(false);
-    if(disabled||busy)return;
+    if(disabled||busy||initialFile)return;
     if(files.length!==1){forget();setError('PDF 파일 하나만 놓아 주세요.');return;}
     if(!/\.pdf$/i.test(files[0].name)){forget();setError('확장자가 .pdf인 파일 하나만 놓아 주세요.');return;}
     void choose(files[0]);
@@ -272,7 +274,7 @@ export default function PdfImportPanel({disabled,onImport,onSourceCommitted}:Pro
       onDrop={e=>{e.preventDefault();dropFiles(e.dataTransfer.files);}}>
       <p>여기로 PDF 한 개를 끌어 놓거나 파일 선택으로 불러오세요.</p>
       <label className="field">원본 PDF 선택
-        <input aria-label="원본 PDF 선택" type="file" accept=".pdf,application/pdf" disabled={disabled||busy}
+        <input aria-label="원본 PDF 선택" type="file" accept=".pdf,application/pdf" disabled={disabled||busy||!!initialFile}
           onChange={e=>{const f=e.target.files?.[0];e.target.value='';if(f)void choose(f);}}/>
       </label>
     </div>

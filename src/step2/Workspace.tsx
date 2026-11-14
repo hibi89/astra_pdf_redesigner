@@ -3,7 +3,8 @@ import { PALETTE, THEMES, type DesignSettings, type ThemeId } from '../types.ts'
 import { LIMITS, documentAssetIds, moveItem, newBlock, newSection, visibleSections, type ContentBlock, type DocumentSection, type ImageAsset, type ProjectDocument } from './model.ts';
 import { downloadProject } from './projectFile.ts';
 import { useWorkspace } from './useWorkspace.ts';
-import PdfImportPanel, {type ImportedPdfSource} from '../step3/ImportPanel.tsx';
+import {type ImportedPdfSource} from '../step3/ImportPanel.tsx';
+import BatchImportPanel from '../step3/BatchImportPanel.tsx';
 import {hasDesktopPdfExport,savePdfFromEditor} from '../desktopPdf.ts';
 import RuleReview from '../humanize/RuleReview.tsx';
 import SourceAnchorPreview from '../step3/SourceAnchorPreview.tsx';
@@ -415,7 +416,7 @@ export default function Workspace({onLegacy,onOwnerReview}:Props){
             <div className="document-list" role="list">{w.documents.map(item=><button role="listitem" key={item.id} disabled={!editable||item.id===doc?.id} className={`doc-list-item ${item.id===doc?.id?'active':''}`} onClick={()=>void operation(()=>w.switchTo(item.id))}><strong>{item.name||'(이름 없음)'}</strong><small>{new Date(item.updatedAt).toLocaleString('ko-KR')}</small></button>)}</div>
           </>}
         </section>
-        <PdfImportPanel disabled={!editable} onImport={w.importPdfDraft} onSourceCommitted={onSourceCommitted}/>
+        <BatchImportPanel disabled={!editable} onImport={w.importPdfDraft} onSourceCommitted={onSourceCommitted}/>
         {sourceReview&&sourceReview.documentId===doc?.id&&
           <section ref={sourcePanel} tabIndex={-1} className="panel studio-source-panel no-print" aria-label="원본 PDF와 새 디자인 대조"
             data-source-document-id={sourceReview.documentId}>

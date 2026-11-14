@@ -919,6 +919,28 @@ try{
   await evaluate("([...document.querySelectorAll('.step3-import-panel button')].find(x=>x.textContent.includes('가져오기 취소'))).click()");
   assert.equal(await evaluate("document.querySelectorAll('.doc-list-item').length"),corruptBefore);
   console.log('PASS M08-C CHROME/EDGE CORRUPT CATALOG: actual parsed PDF failure visible, stale review/Blob cleared, original V2 project preserved, valid source retry unapproved and canceled');
+  // P95: reuse the real PDF.js import flow but require two independent human approvals.
+  const preBatchCount=await evaluate("document.querySelectorAll('.doc-list-item').length");
+  await evaluate("(()=>{const binary=Uint8Array.from(atob("+JSON.stringify(pdf.data)+"),c=>c.charCodeAt(0));const d=new DataTransfer();d.items.add(new File([binary],'p95-first.pdf',{type:'application/pdf'}));d.items.add(new File([binary],'p95-second.pdf',{type:'application/pdf'}));const i=document.querySelector('[data-pro-batch-input]');i.files=d.files;i.dispatchEvent(new Event('change',{bubbles:true}));})()");
+  await eventually(()=>evaluate("Boolean(document.querySelector('.step3-block-review')&&document.querySelector('[data-pro-batch-status]')?.textContent.includes('1/2'))"));
+  assert.equal(await evaluate("document.querySelectorAll('.doc-list-item').length"),preBatchCount);
+  assert.equal(await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input')?.checked"),false);
+  await evaluate("(()=>{document.querySelector('.step3-import-panel > label.step3-confirm input').click();[...document.querySelectorAll('.step3-import-panel button')].find(x=>x.textContent==='검수 결과를 새 문서로 저장').click();})()");
+  await eventually(()=>evaluate("document.querySelectorAll('.doc-list-item').length"),v=>v===preBatchCount+1);
+  await eventually(()=>evaluate("Boolean(document.querySelector('[data-pro-batch-next]'))"));
+  await evaluate("document.querySelector('[data-pro-batch-next]').click()");
+  await eventually(()=>evaluate("Boolean(document.querySelector('.step3-block-review'))"));
+  assert.equal(await evaluate("document.querySelectorAll('.doc-list-item').length"),preBatchCount+1);
+  assert.equal(await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input').checked"),false);
+  await evaluate("(()=>{document.querySelector('.step3-import-panel > label.step3-confirm input').click();[...document.querySelectorAll('.step3-import-panel button')].find(x=>x.textContent==='검수 결과를 새 문서로 저장').click();})()");
+  await eventually(()=>evaluate("document.querySelectorAll('.doc-list-item').length"),v=>v===preBatchCount+2);
+  await eventually(()=>evaluate("Boolean(document.querySelector('[data-pro-batch-status]')?.textContent.includes('완료:'))"));
+  assert.equal(await evaluate("Boolean(document.querySelector('[data-pro-batch-next]'))"),false);
+  await evaluate("document.querySelector('[data-pro-batch-clear]').click()");
+  assert.equal(await evaluate("Boolean(document.querySelector('[data-pro-batch-status]'))"),false);
+  assert.equal(await evaluate("document.querySelectorAll('.doc-list-item').length"),preBatchCount+2);
+  console.log('PASS P95 PRO QUEUE: two distinct manual PDF approvals and saved projects, no auto-write, clear retains documents');
+
 
 
 
