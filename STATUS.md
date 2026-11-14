@@ -1,3 +1,11 @@
+## 2026-11-14 KST — P102 OCR Windows 공급망/UTF-8/PSM/임시파일 보강
+
+- **정본 기능 SHA:** 5d87df4ef2f9f6b6cefd6f51f52d7f66de0d2d71. 원격 P102 코드: OCR stdout UTF-8 한글 파편 디코딩 문제 수정(바이트 누적 후 단일 디코딩), PSM 3/6만 허용 및 STEP7 사용자 선택, 임시 PNG 삭제 재시도·정리 실패 시 비성공 처리, OCR 페이지 Canvas 최대 4096px/8MP. 회귀 3종(한글 바이트 분할/PSM 제한·주입 차단/삭제 실패) 신규 추가.
+- **정적 원격 검증:** GitHub 파일/호출 흐름 11개 연결 기준 PASS(원격 소스 존재·단위 테스트 포함 여부 확인). 이는 npm test나 실제 앱 CI 성공 판정이 **아니다**. P102 exact SHA 전체 Node/tsc/Chrome/Edge/Windows Electron NSIS 실행 상태는 **미확인**, 따라서 신규 기능 종단 완료 주장 금지.
+- **공급망 확인:** Tesseract 공식 tessdoc에는 최신 공식 Windows 설치기 없음. UB Mannheim 5.5.3.20260724는 third-party Windows installer. Apache2.0 Tesseract/tessdata_fast, BSD계열 Leptonica 및 PNG/TIFF/JPEG/zlib/Windows DLL NOTICE 별도 검증 필요. 다운로드·실행·SHA고정·Windows 재배포 승인 아직 없음. OCR_MANIFEST=null 계속 유지.
+- **원본/상용:** STEP1 V1/STEP2 V2·고객 PDF·배포·main/PR10·등록 상태 불변. [작업중], 공식 final score UNASSESSED/100% 미달, RELEASE HOLD/크몽 미등록.
+- **세부:** docs/commercial/ASTRA_P102_WINDOWS_OCR_SUPPLY_CHAIN_20261114.md. 기존 P101 Linux 한영 합성 20건 15/20 정확/5 오류는 역사적 검증 범위만 유지, P102 품질 재검증 전 승격 금지. 다음은 exact SHA CI/Windows 공급망 SBOM·DLL 해시 및 PSM3/6 골든 비교.
+
 ## 2026-11-14 KST — P101 실제 Tesseract 한글 골든20 재현 (합성 Linux / 판매 HOLD)
 
 - **코드/재현 스크립트:** scripts/generate-ocr-golden.py와 scripts/run-ocr-golden.cjs 신규 추가. 단순 스캔·어려운 합성 조건(한글/영문/음수/금액/날짜/블러/회전/명암/글자 크기) 20 PNG를 로컬 글꼴로 생성하고, 입력 SHA 및 Tesseract 바이너리·kor+eng 언어팩을 SHA-256 고정한 뒤 실제 desktop/local-ocr-controller.cjs를 실행한다. OCR 문자열 자체를 테스트 로그에 저장하지 않고 집계/불일치 사례 번호만 출력. 사용자 고객 PDF·기존 IndexedDB·판매 자산 업로드/수정 없음.
