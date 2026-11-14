@@ -1,3 +1,16 @@
+## 2026-11-14 KST — P101 OCR 보완 검증 인수인계 (10항 최신)
+
+1. **목표·요구·기술:** Astra 원본 7단계 및 3SKU 최종 100점 가중 범위. OCR은 승인된 무료 오프라인 Tesseract/PDF.js/React/Electron, 원본·고객 자료 무전송, 결과 검수 전 미승인 초안.
+2. **구현·결정:** 기존 P101 로컬 OCR 컨트롤러/프론트엔드에 PNG 전체 CRC/청크 검증을 추가하고 PDF.js 원본 선택 텍스트가 있는 페이지의 OCR 실행을 차단. 헤더만 믿는 안보다 CRC+IEND 검사(8MiB·8MP bounded)가 품질/안전상 우위, 외부 API 비용0. 개인정보·원본 V1/V2 DB 불변.
+3. **명령·실검증:** Node22.16 격리 원격 동일 Blob 4개로 node --experimental-strip-types --test tests/local-ocr-controller.test.cjs tests/step7-ocr-eligibility.test.ts **7 PASS /0 FAIL /0 SKIP**, eligibility TypeScript strict PASS. 전체 npm test/build/Chrome·Edge/Windows NSIS 신규 소스는 **CI 미확인**. 단위 테스트의 mock spawn은 실제 Tesseract 인식 성공이 아님.
+4. **완료/진행/대기:** 저장소 소스 반영/단위 검증 완료, 실행 manifest null 및 Tesseract 바이너리·kor/eng 언어팩 미번들, 실제 OCR/실 고객 PDF/물리 Win10·11 검사 미완. 공식 UNASSESSED, 판매 RELEASE HOLD.
+5. **오류/원인·대안:** 기존 검사는 PNG 서명/IHDR만 신뢰하여 CRC 오류를 인식 전 거부하지 못함 → 1024청크 제한·CRC·IEND 검증 보완. test mock은 유효 4×4 PNG로 교체하고 손상 CRC 부정검사 추가. GitHub Actions API/웹 실행 목록 조회 불가, 확인되지 않은 CI 성공 추정 금지.
+6. **repo/branch/SHA:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112. 정확 최신 실행 소스 SHA **d6dcf80bc024c2a36ab40738cbed1d7b28e4711f**; STATUS 문서 SHA **e4538b969b53ab4e7359c875ee4705ac9a837958**. 주요 src/step7/LocalOcrPanel.tsx·ocrEligibility.ts, desktop/local-ocr-controller.cjs, tests/local-ocr-controller.test.cjs·step7-ocr-eligibility.test.ts.
+7. **Production/환경:** 로컬 Electron Windows NSIS, React Vite 브라우저, Node22. 실 서비스 배포 Vercel 미적용, 크몽 미등록, 포장/설치 사용자 검수 미적용. 빌드 및 Win CI는 차회 실제 로그 확인.
+8. **원본/백업·보안:** Git 부모 SHA 롤백 가능, main/Draft PR10/원본 설계 PNG·기존 저장 데이터·고객 실PDF·서명키/모델 파일 불변. OCR 임시PNG 자동 삭제, 로그로 사용자 텍스트 출력 금지. 라이선스/바이너리 해시 및 고객 원본의 클라우드 업로드는 별도 조건.
+9. **다음 우선순위:** (1) GitHub 정확 SHA Actions 실행 확인/최소 수정 (2) 정식 Tesseract Windows 바이너리+언어팩+DLL/NOTICE 검토 및 SHA 고정 (3) 한글·숫자·표·다단 스캔 20종 실 오프라인 결과/실 Win10·11 측정 (4) 원문-초안 대조·승인 동작 수용 (5) 마지막 별도 SKU/LLM/판매 요건 재검증. 추가 유료결제/실고객 원본 외부전송/PR 병합 금지.
+10. **갱신 시점/근거:** 2026-11-14 KST. GitHub 현재 코드 ref 원격 일치 및 컨테이너 Node22 단위7/7, TS strict 검증. 마지막 기능 SHA와 문서 SHA 구분. 이 문서 커밋은 코드 성공 증빙 아님.
+
 ## 2026-11-14 KST — P101 신규 로컬 OCR 개발 인수인계 (10항)
 
 1. **목표/기술:** 사용자 최종설계 STEP1~7 + 3SKU 100%, 무료 오프라인 Tesseract/PDF.js/React/TypeScript/Electron. 승인된 A01~A12 배점 100점, 증거점수 공식 UNASSESSED, 출시 HOLD.
