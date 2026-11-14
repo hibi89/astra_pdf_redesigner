@@ -1,3 +1,16 @@
+## 2026-11-14 KST — P106 Authenticode Evidence 10항 인수인계 (CI 전체 검증 중)
+
+1. **목표·용도·기술:** Astra STEP1~7, BASIC/PRO/BUSINESS 사용자 최종설계 12영역100점 기준, 로컬 Windows OCR 공급자 설치/EXE/DLL의 서명 및 SHA 증거 수집. Node22/React/PDF.js/Electron/PowerShell.
+2. **완료·대안:** A Windows 기본 Get-AuthenticodeSignature+Get-FileHash(무료/새 의존성0·구현), B 외부 SignTool/별도 WinTrust(실물 확보·추가 도구 필요, 후속). 명시적 installer hash pin, 바이너리 SHA 전후 재검증, manifest와 native 파일 목록 비교, reparse/경로변조 차단. 모든 상용·법적 승인 false.
+3. **테스트:** 기능 SHA 7ec1de61a750d324df7e7ae25ff30f109fc766e5. Windows synthetic Authenticode CI STEP SUCCESS 및 정책 CI [#43580696839](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43580696839) SUCCESS. 전체 Windows NSIS [#43580696709](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43580696709), Linux/Chrome/Edge [#43580696635](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43580696635) 최종 결론 IN_PROGRESS(상세 숫자 미확정). npm test, npm run desktop:test, npm run build, npm run ocr:release-gate.
+4. **완료/진행/차단:** CI 신설 기능 보안 단계 통과, 전체 CI 결과 및 실제 제3자 Windows installer/DLL/kor+eng, 인증서 신뢰·법적 재배포, 실제 Windows10/11·고객 PDF5~10·로컬 모델·PRO20/BUSINESS30 수용 미확인. 공식 UNASSESSED, RELEASE HOLD.
+5. **오류·원인·재시도 금지·대안:** 코드 CI P106 단계 실패 기록 없음. 문서 원자적 커밋 첫 시도 문자열 구문 오류로 원격변경0, 간소화해 재시도. 해시가 확인돼도 manifest 자체 공급자 신뢰·AuthentiCode 적법성/동적 DLL 폐쇄성 보증 아님; 허위 서명·법적 증거 생성 금지.
+6. **저장소·브랜치·SHA:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112. 기능 7ec1de61a750d324df7e7ae25ff30f109fc766e5, scripts/ocr-windows-authenticode-evidence.ps1, tests/ocr-windows-authenticode-evidence.test.ps1, .github/workflows/windows-desktop.yml, docs/commercial/ASTRA_P106_WINDOWS_AUTHENTICODE_EVIDENCE_20261114.md.
+7. **Production·환경:** 실제 상용 설치/배포 없음, Vercel 미적용. Windows PowerShell 오프라인 비실행 감사(외부 PDF 전송0). 미래 검증 시 pwsh -NoProfile -File scripts/ocr-windows-authenticode-evidence.ps1 -InstallerPath <installer> -AssetsRoot <assets> -ManifestPath <external-json>. P104/P105 별도 검증 필수.
+8. **원본·복구·비밀·수정금지:** 직전 HEAD 9bcbd93e82f477e47970795854ba9b3cf9ec95f8 백업 SHA, main/PR10 및 STEP1 localStorage V1, STEP2 IndexedDB V2, 고객 원본 PDF, 디자인8종, 암호·키·GitHub 권한/판매 이력 불변. OCR_MANIFEST=null.
+9. **다음 우선순위·승인:** 정확 SHA 전체 Linux/Win CI 완료/실패 로그 → 실제 공급자 exe/DLL/언어팩/라이선스 실측·서명·법무→실 로더·한국어·금액·표·다단·물리 Win10/11/허가 PDF 검수→3SKU·로컬 모델 12영역 공식100점 재산정. 무료 개발 승인 재요청 불필요, 실 다운로드/배포/판매/고객 원본 외부 전송 별도 승인.
+10. **갱신 KST/검증 범위:** 2026-11-14 KST, 실제 GitHub SHA/Windows 신규 synthetic step/정본 gate 확인, 전체 CI 종결·실 OCR 공급원/실 Windows/상업권리 미검증. docs 및 중앙 kmong HEAD 최종 조회 필요.
+
 ## 2026-11-14 17:38 KST — P105 정확 CI 검증 완료 최종 인수인계 10항
 
 1. **목표·요구·기술:** Astra PDF STEP1~7, BASIC/PRO/BUSINESS 최종설계 12영역 100점. 오프라인 Tesseract 공급망 정적 PE32+ x64 import 검증. React/PDF.js/Electron/Node22/NSIS. 원본 무손상/외부 API·과금 없음.

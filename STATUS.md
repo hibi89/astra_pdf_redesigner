@@ -1,3 +1,10 @@
+## 2026-11-14 KST — P106 Windows Authenticode 사전 감사 도구
+
+- 정확 기능 SHA: 7ec1de61a750d324df7e7ae25ff30f109fc766e5. 신규 scripts/ocr-windows-authenticode-evidence.ps1, tests/ocr-windows-authenticode-evidence.test.ps1, Windows GitHub Actions 보안 단계.
+- 설치파일 원본 SHA-256과 매 EXE/DLL 바이트·해시 전후 일치, 파일 크기·미등록 DLL·부정 경로를 검사하고 Windows Get-AuthenticodeSignature 서명 상태 및 관찰된 thumbprint를 출력. **서명은 검증 근거 수집이지 판매·법무허가가 아님.** 실제 공급자 OCR 파일·고객 원본·다운로드/설치·모델 외부 전송 없음.
+- [Windows CI #43580696709](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43580696709) P106 synthetic Authenticode evidence 단계 SUCCESS, [최종설계 정책 #43580696839](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43580696839) SUCCESS. [Linux Chrome/Edge #43580696635](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43580696635)와 Windows NSIS 전체 결론은 기록 시점 **IN_PROGRESS, 최종 PASS 미검증**; 종료 후 정확 SHA 재검증. P105 CI 3/3은 과거 증거만.
+- 실제 제조사 설치본 Authenticode/인증서 신뢰, 모든 Windows DLL과 런타임 로딩·NOTICE/SBOM·재배포 적법성/물리 Win10·11/고객 허가 PDF5~10/한글·금액 OCR/로컬 AI·3SKU 공식100점은 미검증. OCR_MANIFEST=null, RELEASE HOLD, 공식 UNASSESSED/100 미달, [작업중]/크몽 미등록/Vercel 미적용 유지. 기존 main·PR10·STEP1 V1·STEP2 V2·원본 PDF·8디자인 보존.
+
 ## 2026-11-14 17:38 KST — P105 정확 기능 SHA Linux/Windows/정본 3/3 CI SUCCESS (최종 정정)
 
 - 정확 기능 SHA **d8e765ef538e6f41fa3fc870a9257238a7c4af98**: [Linux Chrome+Edge #43576345594](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43576345594) 2/2 SUCCESS, Node **221 PASS / 0 FAIL / 0 SKIP**, 빌드 및 Chrome/Edge synthetic PDF.js OCR 검수/원문·V2 보존 회귀 PASS. [Windows NSIS #43576345628](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43576345628) SUCCESS, Node **220 PASS / 0 FAIL / 1 Windows symlink SKIP**(221 total), 데스크톱 **59 PASS / 0 FAIL / 0 SKIP**, Electron smoke/패키징/0.1.0→0.1.1 in-place 업그레이드·기존 IndexedDB V2/PNG 보존 PASS. [최종설계 정책 #43576345809](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43576345809) SUCCESS. **전체 3/3 workflow SUCCESS**.
