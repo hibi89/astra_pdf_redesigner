@@ -749,8 +749,8 @@ try{
   console.log('PASS STEP3 RUNNING HEADER/FOOTER: all four excluded, source retained, consent revoked, undo works');
   console.log('PASS STEP3 MIXED REVIEW: source markers 17/17, multi-column warning, raster recovery, unchanged persisted docs');
   const emptyReviewBlocks=await evaluate("([...document.querySelectorAll('.step3-block-review textarea')].filter(area=>!area.value.trim()).map(area=>({manual:Boolean(area.closest('.section-editor')?.querySelector('[data-step3-remove-manual]'))})))");
-  assert.ok(emptyReviewBlocks.every(block=>block.manual),
-    'Unexpected empty source block in the mixed PDF review: '+JSON.stringify(emptyReviewBlocks));
+  assert.equal(emptyReviewBlocks.filter(block=>!block.manual).length,0,
+    'Ambiguous PDF.js source order must not expose standalone whitespace as blank source blocks: '+JSON.stringify(emptyReviewBlocks));
   await evaluate("(()=>{for(let count=0;count<24;count++){const button=[...document.querySelectorAll('[data-step3-remove-manual]')].find(item=>!item.closest('.section-editor')?.querySelector('textarea')?.value?.trim());if(!button)return;const details=button.closest('details');if(details)details.open=true;button.click();}throw Error('Too many empty manual correction blocks');})()");
   await eventually(()=>evaluate("!document.querySelector('[data-step3-empty-block-warning]')"),x=>x===true);
 

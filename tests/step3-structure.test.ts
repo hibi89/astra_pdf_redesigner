@@ -302,3 +302,23 @@ test('STEP3: extraction quality flags identify damaged glyph mappings and text o
   assert.ok(draft.pages[0].blocks.some(b=>b.text.includes('�')),'Suspicious source text must remain available for manual correction');
 });
 
+test('STEP3 ambiguous source order folds standalone PDF.js whitespace into adjacent text blocks',()=>{
+  const page:PdfPageInput={number:1,width:600,height:800,imageDetected:false,vectorPaintCount:4,pieces:[
+    piece(' ',1,0,90,12,4),
+    piece('SOURCE_FIRST',1,10,90,12,100),
+    piece('  ',1,110,90,12,8),
+    piece('SOURCE_SECOND',1,300,40,12,120),
+    piece('   ',1,420,40,12,10),
+  ]};
+  const reconstructed=reconstructLines(page);
+  assert.equal(reconstructed.sourceOrderPreserved,true);
+  assert.deepEqual(reconstructed.lines.map(line=>line.text),[' SOURCE_FIRST  ','SOURCE_SECOND   ']);
+  assert.ok(reconstructed.lines.every(line=>line.text.trim().length>0),'Source-order lines must not expose whitespace-only fragments');
+  assert.equal(reconstructed.lines.map(line=>line.text).join(''),page.pieces.map(item=>item.text).join(''),
+    'Leading, interior and trailing source whitespace must remain byte-for-byte in the reviewed text');
+  const draft=makePdfDraft('ambiguous-whitespace.pdf',[page]);
+  assert.ok(draft.pages[0].layoutReviewRequired,'Ambiguous source order must still require manual review');
+  assert.ok(draft.pages[0].blocks.every(block=>block.text.trim().length>0),
+    'Whitespace-only PDF.js items must not become unsavable blank blocks');
+  assert.equal(draft.pages[0].blocks.map(block=>block.text).join(''),page.pieces.map(item=>item.text).join(''));
+});

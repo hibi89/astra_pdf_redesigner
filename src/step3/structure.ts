@@ -156,7 +156,23 @@ export function reconstructLines(page:PdfPageInput):{
     piece.x+piece.width > page.width+2||piece.y+piece.height > page.height+2);
   const sourceOrderPreserved=multiColumn||rotatedTextCount>0||vectorLayoutSuspected||
     operatorAnalysisIncomplete||geometryOutsidePage;
-  const lines=sourceOrderPreserved?sourcePieces.map(piece=>({
+  // PDF.js can expose spacing as standalone whitespace items. Keep every source
+  // character in order, but fold such items into a neighboring text fragment so
+  // they cannot become blank editable blocks that block a reviewed save.
+  const sourceOrderPieces:PdfFragment[]=[];
+  let leadingWhitespace='';
+  for(const piece of sourcePieces){
+    if(!piece.text.trim()){
+      if(sourceOrderPieces.length){
+        const last=sourceOrderPieces.length-1;
+        sourceOrderPieces[last]={...sourceOrderPieces[last],text:sourceOrderPieces[last].text+piece.text};
+      }else leadingWhitespace+=piece.text;
+      continue;
+    }
+    sourceOrderPieces.push(leadingWhitespace?{...piece,text:leadingWhitespace+piece.text}:piece);
+    leadingWhitespace='';
+  }
+  const lines=sourceOrderPreserved?sourceOrderPieces.map(piece=>({
     text:piece.text,x:piece.x,y:piece.y,width:piece.width,height:piece.height,fontSize:piece.fontSize,
   })):geometricLines;
   return{lines,multiColumn,rotatedTextCount,vectorLayoutSuspected,operatorAnalysisIncomplete,
