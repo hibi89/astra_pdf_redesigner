@@ -1,10 +1,11 @@
 'use strict';
-const {app,BrowserWindow,dialog,ipcMain,net,protocol,session}=require('electron');
+const {app,BrowserWindow,dialog,ipcMain,net,protocol,session,shell}=require('electron');
 const fs=require('node:fs/promises');
 const os=require('node:os');
 const path=require('node:path');
 const {pathToFileURL}=require('node:url');
 const {resolveBundleAsset}=require('./bundle-path.cjs');
+const {approvedSearchTarget}=require('./approved-search-link.cjs');
 const {auditOutputPdf}=require('./pdf-output-audit.cjs');
 const {acceptanceDomSource,MARKERS}=require('./pdf-acceptance-fixture.cjs');
 const {runStep2ProjectAcceptance}=require('./step2-project-acceptance.cjs');
@@ -182,7 +183,19 @@ function createWindow(){
       webviewTag:false,devTools:!app.isPackaged,webSecurity:true,
     },
   });
-  mainWindow.webContents.setWindowOpenHandler(()=>({action:'deny'}));
+  mainWindow.webContents.setWindowOpenHandler(details=>{
+    const safeUrl=approvedSearchTarget(details.url);
+    if(safeUrl&&!SMOKE){
+      // A separate native confirmation is mandatory; browser never silently sends a keyword.
+      void dialog.showMessageBox(mainWindow,{
+        type:'question',title:'외부 디자인 이미지 검색',
+        message:'입력한 검색 키워드를 시스템 웹브라우저로 전달하시겠습니까?',
+        detail:'원본 PDF·문서 내용·파일명은 전송하지 않습니다. 외부 사이트는 별도 개인정보/저작권 정책을 적용합니다.',
+        buttons:['외부 브라우저에서 열기','취소'],defaultId:1,cancelId:1,noLink:true,
+      }).then(({response})=>{if(response===0)return shell.openExternal(safeUrl);}).catch(()=>{});
+    }
+    return{action:'deny'};
+  });
   mainWindow.webContents.on('will-navigate',(event,url)=>{
     if(!isAppUrl(url))event.preventDefault();
   });
