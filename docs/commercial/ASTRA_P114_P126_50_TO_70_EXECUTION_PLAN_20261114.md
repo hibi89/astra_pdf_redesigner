@@ -1,6 +1,6 @@
 # Astra PDF Redesigner — P114~P126 실행 설계 및 50→70점 검증 공시
 
-> **[2026-11-14 최신 사용자 위임으로 실행자 변경]** 50→70(P114~P126) 구현·테스트·GitHub 커밋 담당은 **Codex 6 Luna Max**. 오직 **GitHub 기존 feature 브랜치 + GitHub-hosted Actions**만 사용한다. 이전 Instant 담당 표기는 이 범위에서 대체한다. 상세 실행 환경·실모델/실OCR blocking·한도 규정은 [Codex Github-only 런북](ASTRA_CODEX_LUNA_MAX_GITHUB_ONLY_P114_P126_20261114.md) 및 [작업 원장](ASTRA_P114_P126_TASK_REGISTER_20261114.json)을 우선한다. **기준 점수 잠정 50/100, P114~P126 PENDING, 공식 UNASSESSED, RELEASE HOLD. 이 문서 수정은 기능 개발이나 CI 통과가 아니다.** 70점 이후 P127+ 담당자는 이번 위임에서 지정하지 않았다.
+> **[2026-11-14 최신 사용자 위임으로 실행자 변경]** 50→70(P114~P126) 구현·테스트·GitHub 커밋 담당은 **Codex 6 Luna Max**. 오직 **GitHub 기존 feature 브랜치 + GitHub-hosted Actions**만 사용한다. 이전 Instant 담당 표기는 이 범위에서 대체한다. 상세 실행 환경·실모델/실OCR blocking·한도 규정은 [Codex Github-only 런북](ASTRA_CODEX_LUNA_MAX_GITHUB_ONLY_P114_P126_20261114.md) 및 [작업 원장](ASTRA_P114_P126_TASK_REGISTER_20261114.json)을 우선한다. **설계 기준 50/100; 현재 P114/P115 VERIFIED, 잠정 54/100, 다음 P116; 공식 UNASSESSED, RELEASE HOLD. 이 문서 수정은 기능 개발이나 CI 통과가 아니다.** 70점 이후 P127+ 담당자는 이번 위임에서 지정하지 않았다.
 
 
 > 설계 승인 문맥: 2026-11-14 21:55 KST, 사용자 지시: GPT-6 High가 최종설계 기반 작업을 분해·공시하고, Codex 6 Luna Max가 구현과 GitHub 검증·인수인계를 직접 담당. High는 사용자 요청 시 최종 별도 검수 담당. 이 문서는 **계획 공시**이며 기능 구현·테스트 또는 70점 달성을 의미하지 않는다.
@@ -9,7 +9,7 @@
 **저장소:** hibi89/astra_pdf_redesigner
 **설계 기준 코드 SHA:** 26aff40d6de524c2430f8a6b325d906cea67f7e1
 **설계 이전 문서 HEAD:** 7ed25d4f04ba10bad18e96c6986bb9a5e97a0b08
-**현재 총괄 잠정 검증 점수:** 50/100, **공식 사용자/구매자 최종 수용률:** UNASSESSED, **RELEASE HOLD**, 크몽 미등록.
+**현재 총괄 잠정 검증 점수:** 54/100 (P114/P115 VERIFIED), **공식 사용자/구매자 최종 수용률:** UNASSESSED, **RELEASE HOLD**, 크몽 미등록.
 
 ## 1. 변경 금지·우선순위
 
@@ -53,8 +53,8 @@
 
 | 작업 | 영역 | 증분 상한 | 누적 목표(모두 PASS 시) | 선행 작업 | 기본 상태 |
 |---|---|---:|---:|---|---|
-| P114 다단·표·텍스트 순서 위험 검출 보강 | A03 | +2 | 52/100 | 없음 | PENDING |
-| P115 원본→추출→새 PDF 콘텐츠 대조·복구 경로 실증 | A03 | +2 | 54/100 | P114 | PENDING |
+| P114 다단·표·텍스트 순서 위험 검출 보강 | A03 | +2 | 52/100 | 없음 | VERIFIED |
+| P115 원본→추출→새 PDF 콘텐츠 대조·복구 경로 실증 | A03 | +2 | 54/100 | P114 | VERIFIED |
 | P116 BASIC 8 / PRO 20 / BUSINESS 30 디자인 차별성·A4 출력 검수 | A04 | +1 | 55/100 | P115 | PENDING |
 | P117 BUSINESS 다중 문서 브랜드 반복 출력 및 SKU 우회 회귀 | A04 | +1 | 56/100 | P116 | PENDING |
 | P118 로컬 레퍼런스 분석→비파괴 적용·재현성 강화 | A05 | +1 | 57/100 | P116 | PENDING |
@@ -71,7 +71,7 @@
 
 #### P114 — 다단·표·텍스트 순서 위험 검출 보강 (A03 +2점, 누적 상한 52/100)
 
-- **선행:** 없음. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
+- **선행:** 없음. **담당:** Codex 6 Luna Max. 현재 상태: VERIFIED, +2점 (기능 SHA `9c3c506ecae49b68f207e6022c6b136da515b7e5`).
 - **수정 후보 경로:** src/step3/structure.ts; src/step3/pdf.ts; src/step3/ImportPanel.tsx; tests/step3-*.test.ts. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 현재 재구성 로직을 보존하며 PDF.js 글자별 위치·bbox·벡터 위험 신호를 사용해 읽기 순서/표 의심/좌우열 충돌을 명시적으로 검수 대기 처리. 불확실한 블록은 자동 재정렬·저장하지 않는다.
 - **수용 테스트/증거:** 직접 생성한 합성 PDF 최소 12종(단일열/2단/표격자/회전/혼합이미지/숫자·부정문/텍스트 뒤섞임 포함). 필수 원문 토큰 누락·열순서 오류를 무경고 정상으로 처리한 0건, 선택형 원문 대비 화면과 위험 경고를 실제 Chrome·Edge에서 확인.
@@ -80,7 +80,7 @@
 
 #### P115 — 원본→추출→새 PDF 콘텐츠 대조·복구 경로 실증 (A03 +2점, 누적 상한 54/100)
 
-- **선행:** P114. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
+- **선행:** P114 VERIFIED. **담당:** Codex 6 Luna Max. 현재 상태: VERIFIED, +2점 (기능 SHA `a89c7a7dfbb2e18ef1c5f328e248d2e60ec69a0d`).
 - **수정 후보 경로:** src/step3/sourceReview.ts; src/step7/OfflinePdfReview.tsx; src/step2/Workspace.tsx; tests/step3-browser.mjs; tests/step7-pdf-review-browser.mjs. 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 원본 글자·수치·기호·부정문·링크의 추출/수정/출력 간 차이를 계층별로 구분하고, 수동 복구·승인·되돌림을 원본 위치와 연결. 원본 해시는 불변, 사용자 승인 전 V2 영구 저장 불가.
 - **수용 테스트/증거:** 난이도 있는 합성 PDF 최소 15건의 실제 소스/출력 A4 대조. 금액·날짜·부정 변경 0건 무승인 출력; 누락·중복 탐지가 실패한 사례는 미지원/수동대조 처리; 취소·오류 후 V1/V2 및 원본 SHA 유지.
@@ -220,4 +220,4 @@
 
 70~100 상세 잔여 30점과 사용자가 개입해야 할 최종 승인 장벽은 docs/commercial/ASTRA_INSTANT_70_TO_100_HANDOFF_20261114.md에 따로 기록한다. 모든 항목의 사용자가 확정한 배점과 원본 설계는 동일하다.
 
-**최종 확인:** 이 문서는 계획/기준만 공시한 문서이며 P114~P126 진행 상태는 모두 PENDING, 구현 SHA=26aff40d6de524c2430f8a6b325d906cea67f7e1, 총괄 잠정 50/100 유지, 공식 UNASSESSED, RELEASE HOLD.
+**최종 확인:** 이 계획 문서는 원래 50→70 실행 기준이다. P114와 P115는 VERIFIED, P116~P126은 PENDING. 현재 기능 SHA `a89c7a7dfbb2e18ef1c5f328e248d2e60ec69a0d`, 잠정 54/100, 다음 P116. 공식 UNASSESSED, RELEASE HOLD.
