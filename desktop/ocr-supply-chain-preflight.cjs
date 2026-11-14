@@ -101,7 +101,7 @@ function verifyPeHeader(bytes){
 }
 async function assertRegular(location,expectedType){
  const st=await fsp.lstat(location);
- if(st.isSymbolicLink()||st.nlink>1||
+ if(st.isSymbolicLink()||(expectedType!=='dir'&&st.nlink>1)||
   (expectedType==='dir'?!st.isDirectory():!st.isFile()))
   fail('symlink-or-unsafe-file');
  return st;
