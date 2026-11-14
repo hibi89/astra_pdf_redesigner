@@ -98,3 +98,31 @@ test('OCR is single-flight and cancellation is fail-closed',async()=>{
   assert.equal((await ocr.cancel()).status,'idle');
  }finally{f.cleanup();}
 });
+
+
+test('OCR reassembles split UTF-8 Korean bytes without replacement characters',async()=>{
+ const f=fixture();
+ try{
+  const expected='한글 검수 2026';
+  function splitUtf8Spawn(){
+   const child=new EventEmitter();
+   child.stdout=new PassThrough();child.stderr=new PassThrough();child.killed=false;
+   child.kill=()=>{child.killed=true;process.nextTick(()=>child.emit('close',1));};
+   process.nextTick(()=>{
+    const bytes=Buffer.from(expected,'utf8');
+    // Split inside the very first three-byte Hangul syllable.
+    child.stdout.write(bytes.subarray(0,1));
+    child.stdout.write(bytes.subarray(1,2));
+    child.stdout.write(bytes.subarray(2,7));
+    child.stdout.end(bytes.subarray(7));
+    child.emit('close',0);
+   });
+   return child;
+  }
+  const c=createLocalOcrController({resourcesDir:f.root,manifest:f.manifest,spawnProcess:splitUtf8Spawn});
+  const result=await c.recognizePng(png());
+  assert.equal(result.status,'review');
+  assert.equal(result.text,expected);
+  assert.equal(result.text.includes('\ufffd'),false);
+ }finally{f.cleanup();}
+});
