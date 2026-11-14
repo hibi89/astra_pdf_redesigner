@@ -1,3 +1,11 @@
+## 2026-11-14 KST — P104 Windows OCR 사전공급망/라이선스·NSIS 출시 보류 방어
+
+- **최종 P104 코드 SHA e2fd0797990ce94e7f7a68720ece3617f9d114db**: `desktop/ocr-supply-chain-preflight.cjs` 외부 Windows x64 OCR 자산 manifest(원본 배포 URL/SHA, 파일별 SHA/크기, DLL·kor·eng 전수재고, LICENSE/NOTICE 증빙 ID·URL) 검증. 미등록 DLL·무허가 경로·중복 대소문자 이름·심볼릭 링크/하드링크·파일 내용 변조·PE32+ x64 불일치·누락된 저작권 증빙은 차단. **통과해도 review-required(법적 재배포/서명/DLL closure/실행 허가 모두 false)**.
+- `desktop/ocr-release-hold-gate.cjs`: Electron OCR_MANIFEST=null 유지, 패키지 대상 desktop/dist 네이티브 .exe/.dll/.traineddata 등 및 임의 OCR 폴더, electron-builder.yml extraResources/extraFiles와 사전 고정된 files 목록의 변경을 거부. `npm run build` prebuild와 Windows NSIS 0.1.0 및 0.1.1 각 패키징 직전에 강제. 실제 OCR 바이너리/모델·고객데이터/네트워크 전송 없음.
+- `tests/ocr-supply-chain-preflight.test.cjs` **합성 15건** + `tests/ocr-release-hold-gate.test.cjs` **합성 6건**을 npm test/desktop:test에 추가. 실제 EXE/DLL 아닌 합성 PE+모의 언어팩·LICENSE/NOTICE, 고객 원본 0. 기술 설계 및 검증 경계: docs/commercial/ASTRA_P104_WINDOWS_OCR_PREFLIGHT_20261114.md. 실제 라이선스 적법성·Authenticode/원본 설치파일 서명·DLL 의존성 전체 검사는 **여전히 미검증**.
+- Github 정확 SHA 정책 게이트 **#43574432327 SUCCESS**, Linux Chrome·Edge #43574432110 / Windows Electron·NSIS #43574432095 **최종 결론 확인 중(현재 CI 실행 중; 성공 주장 금지)**. Windows GUI Tesseract 실제 인식/물리 Win10·11 고객 실PDF·모델/3SKU 인수/판매 승인 미충족. 기존 검증된 P103 기능 f9672f12의 3/3 PASS와 구분.
+- 저장소 hibi89/astra_pdf_redesigner, 브랜치 feature/astra-p71-pdf-source-parity-20261112. STEP1 localStorage V1·STEP2 IndexedDB V2·원본 PDF/기존 정상 기능·main/PR10 불변. 공식 최종 12항 UNASSESSED/목표100 미달, [작업중], RELEASE HOLD, 크몽 미등록, Vercel 미적용.
+
 ## 2026-11-14 KST — P103 정확 SHA Chrome·Edge·Windows 3/3 SUCCESS (최신 검증)
 
 - 정확 **기능/테스트 SHA f9672f12b2d40106bdcc244e2675c903b3c98888**. [Linux Chrome+Edge #43571908499](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43571908499) **2/2 JOB SUCCESS, Node189/189 PASS/0 FAIL/0 SKIP + TypeScript/Vite build**, 브라우저 각각 **PASS STEP7 OCR UI**(합성 scanned PDF→PDF.js 실제 PNG→모의 native OCR→페이지/PSM 전환 시 이전 초안 폐기, 외부 HTTPS 요청0). [Windows NSIS #43571908498](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43571908498) **SUCCESS Node188 PASS/0 FAIL/1 Windows symlink SKIP, desktop27/27 PASS**, 패키지/설치·제거/0.1.0→0.1.1 IndexedDB V2/PNG 보존. [정책 #43571908709](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43571908709) SUCCESS(공식 제품100% 검증 아님).
