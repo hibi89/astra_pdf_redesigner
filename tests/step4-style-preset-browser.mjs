@@ -49,7 +49,8 @@ try{
  await eventually(()=>evaluate("Boolean(document.querySelector('.project-paper figure img')?.complete&&document.querySelector('.project-paper figure img')?.naturalWidth===2)"));
  await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),value=>value==='저장됨');
  const stored="(async()=>{const db=await new Promise((resolve,reject)=>{const r=indexedDB.open('astra-pdf-redesigner:v2');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});try{const id=await new Promise((resolve,reject)=>{const r=db.transaction('meta','readonly').objectStore('meta').get('activeDocumentId');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});return await new Promise((resolve,reject)=>{const r=db.transaction('documents','readonly').objectStore('documents').get(id);r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)})}finally{db.close()}})()";
- const before=await eventually(()=>evaluate(stored),x=>Boolean(x?.id&&x?.design&&x?.content));
+ const stableBefore=await eventually(async()=>{const first=await evaluate(stored);await pause(550);const second=await evaluate(stored);return{first,second}},value=>Boolean(value.first?.id&&JSON.stringify(value.first)===JSON.stringify(value.second)));
+ const before=stableBefore.second;
  const fullV2Snapshot="(async()=>{const db=await new Promise((resolve,reject)=>{const r=indexedDB.open('astra-pdf-redesigner:v2');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});try{const result={};for(const name of [...db.objectStoreNames].sort()){const rows=await new Promise((resolve,reject)=>{const r=db.transaction(name,'readonly').objectStore(name).getAll();r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});if(name==='assets'){result[name]=await Promise.all(rows.map(async asset=>{const {blob,...fields}=asset;const bytes=new Uint8Array(await blob.arrayBuffer());fields.blobType=blob.type;fields.blobSize=blob.size;fields.blobBase64=btoa(String.fromCharCode(...bytes));return fields}))}else result[name]=rows}return result}finally{db.close()}})()";
  const fullV2Before=await evaluate(fullV2Snapshot);
  assert.ok(JSON.stringify(before.content).includes(JSON.stringify(p116Body)),'V2 must persist the complete exact synthetic source text before preview checks');
@@ -112,7 +113,7 @@ try{
   assert.match(info,/Page size:\s+[0-9.]+ x [0-9.]+ pts \(A4\)/,id+' A4 page dimensions');
   const pageCount=Number(/Pages:\s+(\d+)/.exec(info)?.[1]);
   assert.ok(pageCount>=2,id+' long source must paginate without dropping the final content');
-  const extracted=execFileSync('pdftotext',[output,'-'],{encoding:'utf8'});
+  const extracted=execFileSync('pdftotext',['-raw',output,'-'],{encoding:'utf8'});
   const normalizeText=value=>value.replace(/[\s\u00a0]+/gu,' ').trim();
   const normalizedSource=normalizeText(p116Body),normalizedOutput=normalizeText(extracted);
   assert.ok(normalizedOutput.includes(normalizedSource),id+' complete ASCII source text order/content expected-head=['+normalizedSource.slice(0,900)+'] expected-tail=['+normalizedSource.slice(-300)+'] output-head=['+normalizedOutput.slice(0,1400)+'] output-tail=['+normalizedOutput.slice(-500)+']');
