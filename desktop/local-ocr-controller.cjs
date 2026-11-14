@@ -100,7 +100,10 @@ function createLocalOcrController({resourcesDir,manifest=OCR_MANIFEST,spawnProce
  async function status(){
   return (await assets())?{status:'available',engineId:manifest.id}:unavailable();
  }
- async function recognizePng(input){
+ async function recognizePng(input,layoutMode=6){
+  // PSM 6: one uniform block; PSM 3: automatic page segmentation.
+  // An allowlisted number prevents arbitrary native CLI arguments.
+  if(layoutMode!==3&&layoutMode!==6)return{status:'error',reason:'invalid-layout-mode'};
   let bytes;
   try{bytes=validatePng(input);}catch(error){
    return{status:'error',reason:error instanceof Error?error.message:'invalid-image'};
@@ -119,7 +122,7 @@ function createLocalOcrController({resourcesDir,manifest=OCR_MANIFEST,spawnProce
    const file=path.join(dir,'page.png');
    await fsp.writeFile(file,bytes,{flag:'wx',mode:0o600});
    if(cancelled)return{status:'error',reason:'cancelled'};
-   const args=[file,'stdout','--tessdata-dir',found.tessdata,'-l','kor+eng','--psm','6'];
+   const args=[file,'stdout','--tessdata-dir',found.tessdata,'-l','kor+eng','--psm',String(layoutMode)];
    const output=await new Promise((resolve,reject)=>{
     let outBytes=0,settled=false;
     const outputChunks=[];
