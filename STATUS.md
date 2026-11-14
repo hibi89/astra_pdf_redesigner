@@ -1,3 +1,9 @@
+## 2026-11-14 KST — P106 exact SHA Windows Authenticode evidence 3/3 workflow SUCCESS 확정
+
+- **기능 SHA 7ec1de61a750d324df7e7ae25ff30f109fc766e5**, 새 Windows offline Authenticode 조회·원본 installer SHA/EXE·DLL bytes 전후 SHA·미등록 DLL/위험 path 거부 도구. [Linux Chrome·Edge #43580696635](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43580696635) **2/2 SUCCESS**, Node **221PASS/0FAIL/0SKIP**·Chrome/Edge synthetic PDF.js OCR UI PASS. [Windows NSIS #43580696709](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43580696709) **SUCCESS**, Node **220PASS/0FAIL/1 OS symlink SKIP**·desktop **59PASS/0FAIL**, 신규 P106 합성 전제/변조/누락·비밀 경로 점검 **11/11 PASS**, Electron/NSIS 설치·제거/0.1.0→0.1.1 V2·PNG 보존 PASS, OCR_RELEASE_HOLD PASS. [정본 정책 #43580696839](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43580696839) SUCCESS; **전체 3/3 SUCCESS**.
+- 아래 P106 초기 '전체 CI 진행 중' 표시는 exact SHA 원시 로그로 성공 **정정**(이력 유지). P106은 합성 Windows unsigned 설치기 서명 상태 검증 기술이지 실제 제3자 설치파일 신뢰·법무 권리 확인이 아니다. 실제 Windows OCR 엔진/binary/사용자 허가 원본 0, 디바이스 Win10/11·실 DLL runtime/실 서명·NOTICE/모델/3SKU 미검증. OCR_MANIFEST=null, 공식 최종12영역 UNASSESSED/100 미달, RELEASE HOLD, [작업중], 크몽 미등록, Vercel 미적용.
+- 수정 대상 scripts/tests/Windows CI 문서만, 원래 STEP1 V1/STEP2 V2, main/PR10, 고객 원본 PDF·8디자인 변경0. 근거 docs/commercial/ASTRA_P106_WINDOWS_AUTHENTICODE_EVIDENCE_20261114.md.
+
 ## 2026-11-14 KST — P106 Windows Authenticode 사전 감사 도구
 
 - 정확 기능 SHA: 7ec1de61a750d324df7e7ae25ff30f109fc766e5. 신규 scripts/ocr-windows-authenticode-evidence.ps1, tests/ocr-windows-authenticode-evidence.test.ps1, Windows GitHub Actions 보안 단계.

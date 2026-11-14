@@ -1,3 +1,16 @@
+## 2026-11-14 KST — P106 기능 정확 SHA 3/3 CI 최종 성공 인수인계 10항
+
+1. **목표·최종 요구·기술:** Astra PDF 원래 7단계/3SKU/12영역100점, Windows 오프라인 Tesseract EXE/DLL/installer Authenticode·SHA 증거 검수. PowerShell Get-AuthenticodeSignature/Get-FileHash + Node/PDF.js/Electron; 배포·원본 변경 없음.
+2. **완료 기능/대안:** A) Windows 기본 무료 API(구현) vs B) 외부 SignTool·실 바이너리 동적 로더(보류/실 공급자 확보 후). 실제 설치파일 SHA, PE files pre/post SHA, 누락/변조/미등록 DLL/unsafe path fail-closed. 실 서명·권리 승인 자동 전환 안 함; P104/P105 독립 검증 필요.
+3. **테스트 명령/숫자/근거:** 정확 기능 SHA **7ec1de61a750d324df7e7ae25ff30f109fc766e5**. [Linux Chrome·Edge #43580696635](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43580696635) **2/2 SUCCESS**, Node **221PASS/0FAIL/0SKIP**, 실제 Chrome·Edge 합성 PDF.js/OCR 검수 UI PASS. [Windows Electron/NSIS #43580696709](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43580696709) **SUCCESS**, Node **220PASS/0FAIL/1 symlink 권한 SKIP**, desktop **59PASS/0FAIL**, P106 Windows Authenticode **11/11 합성 확인**, Electron smoke·NSIS 설치/삭제·0.1.0→0.1.1 V2/PNG 보존 PASS. [정본 정책 #43580696839](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43580696839) SUCCESS. **전체3/3 workflow SUCCESS.** 실행: npm test, npm run build, npm run desktop:test, npm run ocr:release-gate, CI pwsh tests/ocr-windows-authenticode-evidence.test.ps1.
+4. **완료/진행/대기/차단:** 보안 도구·검사·CI 완료; 실제 공급자 installer/서명/라이선스/실 PE 동적 DLL closure/실한글 OCR/물리 Win10·11/고객 PDF5~10/3SKU/로컬 모델 미검증. 공식 최종점수 UNASSESSED, 100% 미달, RELEASE HOLD.
+5. **오류/원인·재시도 금지:** 최초 문서 작성 문자열 구문 오류(원격 변경0), 간소화 재시도로 문서 HEAD 정상 반영. 실제 P106 보안 단계와 CI 모두 실패0. 합성 unsigned 서명으로 실 제조자 인증·상용 적법성 주장 금지. 독립 공급자 신뢰/서명시각/폐기/권리 자료 필요.
+6. **저장소/브랜치/SHA/경로:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112 / 기능 7ec1de61a750d324df7e7ae25ff30f109fc766e5. scripts/ocr-windows-authenticode-evidence.ps1, tests/ocr-windows-authenticode-evidence.test.ps1, .github/workflows/windows-desktop.yml, docs/commercial/ASTRA_P106_WINDOWS_AUTHENTICODE_EVIDENCE_20261114.md. 최종 문서 HEAD는 remote 확인.
+7. **Production/환경:** Windows hosted unsigned NSIS 합성 시험; 실제 구매자 설치 배포·판매·Vercel은 N/A. 미래 공급처 오프라인 감사 pwsh -NoProfile -File scripts/ocr-windows-authenticode-evidence.ps1 -InstallerPath <installer> -AssetsRoot <assets> -ManifestPath <external-manifest>. 네트워크 고객자료전송0.
+8. **원본/백업·인증·금지:** 직전 P105 HEAD 9bcbd93e82f477e47970795854ba9b3cf9ec95f8 복구 참조. main·Draft PR10·STEP1 localStorage V1·STEP2 IndexedDB V2·디자인8종·고객 PDF·GitHub 권한·Secrets/서명키·크몽등록 이력 변경0. OCR_MANIFEST=null.
+9. **다음 작업/완료기준·승인:** (1) 실제 공급자 Windows Tesseract installer/EXE/DLL/kor+eng 사용권·SHA·서명·SBOM·NOTICE (2) 윈도우 동적 DLL/runtime·한글/금액/표/다단 실 OCR (3) 물리 Win10/11, 허가 PDF5~10, 모델/3SKU 정식 인수 (4) 사용자 최종설계12영역/100점 증거 재산정. 무료 개발 기승인/모바일 PC개입 보류, 판매·권한변경·외부 전송 별도 승인.
+10. **갱신(KST)/검증 범위:** 2026-11-14 KST, GitHub 정확 SHA 3/3 workflow 및 Linux/Windows raw job logs·Windows P106 신규 테스트 11개 PASS 확인. 실제 공급자/구매자 PC/법무·판매 GO는 미검증. 중앙 kmong-productization 원장 따로 동기화.
+
 ## 2026-11-14 KST — P106 Authenticode Evidence 10항 인수인계 (CI 전체 검증 중)
 
 1. **목표·용도·기술:** Astra STEP1~7, BASIC/PRO/BUSINESS 사용자 최종설계 12영역100점 기준, 로컬 Windows OCR 공급자 설치/EXE/DLL의 서명 및 SHA 증거 수집. Node22/React/PDF.js/Electron/PowerShell.

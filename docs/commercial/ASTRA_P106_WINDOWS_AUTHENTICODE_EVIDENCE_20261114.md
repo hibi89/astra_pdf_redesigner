@@ -26,3 +26,11 @@ pwsh -NoProfile -File scripts/ocr-windows-authenticode-evidence.ps1 -InstallerPa
 No actual supplier installer downloaded or bundled; OCR_MANIFEST=null and NSIS RELEASE HOLD remain. Current score UNASSESSED/100% incomplete and no Kmong listing.
 
 Function SHA: 7ec1de61a750d324df7e7ae25ff30f109fc766e5. Policy CI #43580696839 success; Windows synthetic Authenticode step success, overall NSIS #43580696709 and Linux/Chrome/Edge #43580696635 final conclusions pending at document creation.
+
+## Exact-SHA P106 final CI verified — 2026-11-14 KST
+
+- Function commit: 7ec1de61a750d324df7e7ae25ff30f109fc766e5.
+- Linux/Chrome/Edge run #43580696635: 2/2 SUCCESS; Node 221 PASS/0 FAIL/0 SKIP, Chrome+Edge actual browser synthetic PDF.js/OCR review PASS.
+- Windows Electron/NSIS run #43580696709: SUCCESS; Node 220 PASS/0 FAIL/1 Windows symlink permission SKIP, desktop 59 PASS/0 FAIL. New offline P106 PowerShell Authenticode regression emitted 11 PASS assertions plus completion marker in raw Windows job logs; Windows NSIS install/uninstall and in-place 0.1.0 to 0.1.1 IndexedDB/PNG preserved PASS. Release HOLD PASS.
+- Final blueprint policy run #43580696839: SUCCESS. Overall EXACT feature SHA 3/3 workflows SUCCESS.
+- Scope: Windows runner used **synthetic unsigned files**, not the genuine Tesseract third-party distribution, not signed by its publisher. Genuine installer/PE verification, revocation/timestamp/source provenance, SPDX/NOTICE/legal redistribution, runtime DLL closure, physical Windows buyer testing and 12-domain user acceptance UNVERIFIED. Official score UNASSESSED and RELEASE HOLD.
