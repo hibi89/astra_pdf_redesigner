@@ -1,3 +1,7 @@
+## 2026-11-15 KST — P119 additional GitHub Windows supplier search · BLOCKED +0 · provisional 61/100
+
+GitHub repository search queries `tesseract windows installer`, `tesseract OCR Windows binaries`, and `tesseract setup Windows` surfaced no candidate meeting all requirements for an accessible Windows binary, exact hash, valid Authenticode, and exact bundle dependency NOTICE/license/redistribution evidence. No binary was downloaded/installed and no product code changed. Runtime tests were not rerun. P119 remains BLOCKED +0; total stays 61/100; G60/G65/G70 are not passed; official acceptance is UNASSESSED; `OCR_MANIFEST=null`; RELEASE HOLD. Resume when approved GitHub-accessible supplier evidence is available. P120/P121/P126 remain downstream; P123/P124 still need a GitHub-accessible licensed Qwen3 4B artifact.
+
 ## 2026-11-15 KST — P123 additional GitHub checkpoint audit · BLOCKED +0 · provisional 61/100
 
 - Official QwenLM/Qwen3 GitHub has no 4B weights/releases. Third-party source repo [`Dadhichi-Sarker-Shayon/model-qwen3-4b-q4-k-m-gguf`](https://github.com/Dadhichi-Sarker-Shayon/model-qwen3-4b-q4-k-m-gguf) at [`38a5c001fbdaf3485f98ba4d51d09ebd82f06547`](https://github.com/Dadhichi-Sarker-Shayon/model-qwen3-4b-q4-k-m-gguf/commit/38a5c001fbdaf3485f98ba4d51d09ebd82f06547) contains only recipe/checksums; README says actual GGUF files are hosted on Hugging Face; no GitHub assets or repository license metadata. The checkpoint cannot be retrieved under current GitHub-only constraints.

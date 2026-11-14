@@ -38,3 +38,10 @@ Windows Authenticode returned `UnknownError`: “A required certificate is not w
 Linux Node: 290/290 PASS. Windows Node: 289 PASS / 0 FAIL / 1 OS-specific SKIP; desktop 86/86 PASS; new audit guard 6/6 PASS; OCR smoke PASS; installer and in-place upgrade PASS. The Windows OCR report artifact [14136970048](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926099/artifacts/14136970048) SHA-256 `36413a867222dc714455dd9ca81f1804fb8a42b796fa3a4f49fe2241aced8268` repeats 9 exact / 3 errors across 12 synthetic cases, mean normalized CER 0.0486, including `2,300,000원→22300,000원`.
 
 P119/P120 remain BLOCKED +0. Three installer candidates (5.5.3, 5.5.0 and UB-Mannheim 5.4.0) have now returned Authenticode `UnknownError`; no candidate is approved. Keep `OCR_MANIFEST=null` and `RELEASE HOLD`.
+
+
+## 2026-11-15 — 추가 GitHub Windows Tesseract 공급처 검색 (no score)
+
+Read-only GitHub repository searches used the queries `tesseract windows installer`, `tesseract OCR Windows binaries`, and `tesseract setup Windows`. Results surfaced tutorials, source mirrors, and application repositories, but no candidate with a GitHub-accessible Windows binary, exact asset hash, valid Authenticode signature, and artifact-specific dependency NOTICE/license plus redistribution evidence. This search is discovery evidence only; it does not establish that no supplier exists outside these queries.
+
+No binary was downloaded or installed, and no product code or runtime behavior changed. P119 remains BLOCKED +0; total remains 61/100; `OCR_MANIFEST=null`; RELEASE HOLD. Product source SHA remains `b6d7909e6897578181dbd304ff12491760422530`; docs at the start of this audit were `a85dbd5e21edeaf72d4d631666183731d6dce148`. Runtime tests were not rerun because no code changed.

@@ -326,9 +326,23 @@
         "Windows Authenticode UnknownError: required signer/timestamp certificate outside validity period; signer Universität Mannheim thumbprint 2F92CB990D57719BDCCA2D72134378614A040D9B.",
         "Fail-closed Windows audit did not install 5.4.0; PE/import/license inventory not run.",
         "5.5.0 and 5.5.3 also returned Authenticode UnknownError; no supplier candidate approved.",
-        "Exact 5.5.3 runtime dependency NOTICE/license and redistribution rights are unverified."
+        "Exact 5.5.3 runtime dependency NOTICE/license and redistribution rights are unverified.",
+        "Additional read-only GitHub repository searches for tesseract Windows installer/binaries/setup surfaced no candidate with all required binary hash, valid Authenticode, exact bundle license/NOTICE, and redistribution evidence; no binary was downloaded."
       ],
-      "supplier_audit_path": "docs/evidence/astra/P119/SUPPLIER_CANDIDATE_AUDIT.json"
+      "supplier_audit_path": "docs/evidence/astra/P119/SUPPLIER_CANDIDATE_AUDIT.json",
+      "supplier_repository_search": {
+        "provider": "GitHub repository search",
+        "queries": [
+          "tesseract windows installer",
+          "tesseract OCR Windows binaries",
+          "tesseract setup Windows"
+        ],
+        "eligible_candidate_found": false,
+        "binary_downloaded": false,
+        "product_code_changed": false,
+        "runtime_tests_rerun": false,
+        "decision": "BLOCKED_NO_NEW_GITHUB_CANDIDATE_MEETING_SIGNATURE_AND_LICENSE_REQUIREMENTS"
+      }
     },
     {
       "id": "P120",

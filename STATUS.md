@@ -1,3 +1,10 @@
+## 2026-11-15 KST — P119 additional GitHub Windows supplier search · BLOCKED +0 · provisional 61/100
+
+- Read-only GitHub repository searches (`tesseract windows installer`, `tesseract OCR Windows binaries`, `tesseract setup Windows`) did not surface an eligible candidate with exact binary hash, valid Authenticode, and bundle-specific NOTICE/license/redistribution evidence.
+- No binary was downloaded or installed. Product source remains `b6d7909e6897578181dbd304ff12491760422530`; no runtime tests rerun because code did not change.
+- P119 remains BLOCKED +0; total 61/100; G60/G65/G70 NOT PASSED; official acceptance UNASSESSED; `OCR_MANIFEST=null`; RELEASE HOLD.
+- Next: await GitHub-accessible approved supplier evidence. P120/P121 and P126 remain dependent on P119; P123/P124 require a licensed GitHub-accessible Qwen3 4B artifact.
+
 ## 2026-11-15 KST — P123 GitHub checkpoint candidate audit · +0 · 잠정 61/100
 
 - **Product source SHA:** [`b6d7909e6897578181dbd304ff12491760422530`](https://github.com/hibi89/astra_pdf_redesigner/commit/b6d7909e6897578181dbd304ff12491760422530); source SHA Linux/Windows/policy Actions already passed. This turn made no product-code change; no new runtime CI was run.
