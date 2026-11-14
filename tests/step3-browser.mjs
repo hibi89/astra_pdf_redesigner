@@ -749,8 +749,15 @@ try{
   console.log('PASS STEP3 RUNNING HEADER/FOOTER: all four excluded, source retained, consent revoked, undo works');
   console.log('PASS STEP3 MIXED REVIEW: source markers 17/17, multi-column warning, raster recovery, unchanged persisted docs');
 
-  await evaluate("(()=>{const reviews=[...document.querySelectorAll('[data-step3-layout-review-confirm]')];if(!reviews.length)throw Error('Mixed PDF missing page-level layout review control');for(const input of reviews)if(!input.checked)input.click();})()");
   await evaluate("document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]').click()");
+  const layoutPages=await evaluate("([...document.querySelectorAll('[data-step3-layout-review-confirm]')].map(input=>input.getAttribute('data-step3-layout-review-confirm')))");
+  assert.ok(layoutPages.length>0,'Mixed PDF must expose page-level layout review controls');
+  for(const page of layoutPages){
+    const selector='[data-step3-layout-review-confirm="'+page+'"]';
+    await evaluate("document.querySelector("+JSON.stringify(selector)+")?.click()");
+    await eventually(()=>evaluate("document.querySelector("+JSON.stringify(selector)+")?.checked===true"));
+  }
+  await eventually(()=>evaluate("!document.querySelector('.step3-import-panel .print-button').disabled"));
   await evaluate("(()=>{const button=[...document.querySelectorAll('.step3-import-panel button')].find(b=>b.textContent.includes('검수 결과를 새 문서로 저장'));if(!button||button.disabled)throw Error('Mixed PDF confirm disabled');button.click();})()");
   await eventually(()=>evaluate("document.querySelectorAll('.doc-list-item').length"),n=>n===mixedBefore+1);
   await eventually(()=>evaluate("document.querySelector('.project-paper')?.textContent"),
