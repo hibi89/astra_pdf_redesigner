@@ -4,6 +4,9 @@
 
 **갱신:** 2026-11-14 KST. **12영역 100점 가중치 사용자 승인 완료. 현재 공식 증거 점수: `산정 대기` (0% 아님), 목표: 100%.** 과거 내부 기술 지표 `85% (잠정·구 범위)`를 별도 보존. 실제 제품/고객 수용/판매 진척률과 혼동 금지. 기준 정본: `REQUIREMENTS.md`, `docs/ASTRA_ORIGINAL_ROADMAP.txt`, `docs/BLUEPRINT.md`, `docs/commercial/PRODUCT_SPEC_V1.md`.
 
+> **P108 (2026-11-14) A09 코드 추적 업데이트:** 기능 SHA 0bf9c7bb125b25b3441117a6e54ba53ac05cba67; 기존 P96/P107에 더해 src/commercial/offlineLicenseIssuer.ts 신규 오프라인 서명 발급·연장 정책과 tests/offline-license-issuer.test.ts 합성8건. 정식 판매자 개인키·public JWK pin=없음, 발급 GUI·상용 license 유통·기기 인증·취소/환불 및 UI/수출 기능 잠금 미완. **A09 11점 최종 수용 아님, 공식 12영역 UNASSESSED/100% 미달.** 정확 SHA CI 3개 run의 전체 판정은 STATUS 최상단을 따름.
+
+
 ## 정확 SHA 증거
 - **P94 기능 SHA:** `39acc84f48bf1edda4b2687e896dc833ab398e92`. Linux [#43549158873](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43549158873) **Chrome/Edge 2/2 SUCCESS**, Node **165/165 PASS**, TS/Vite build PASS, 고급 22/22 A4 출력 및 P94 브랜드 키트 브라우저 회귀 PASS.
 - **Windows [#43549158855](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43549158855) SUCCESS**: Node **164 PASS/0 FAIL/1 SKIP**, desktop **16 PASS**, NSIS 설치·제거·업그레이드 후 기존 V2 유지. [최종설계 정책 #43549159013](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43549159013) SUCCESS(증빙 준수 정책만).

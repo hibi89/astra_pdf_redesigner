@@ -1,3 +1,16 @@
+## 2026-11-14 KST — P108 오프라인 서명 라이선스 발급·연장 개발 인수인계 10항 (정확 CI 전체 확인 중)
+
+1. **목표·요구·기술:** Astra PDF 사용자 최종 STEP1~7 및 BASIC/PRO/BUSINESS A09 11/100 영역. P96 ECDSA P256 오프라인 receipt 검증 + P107 발급자 공개키 pin 체계 위에 서명 발급·안전 연장을 구현. TypeScript/WebCrypto/Node22, 외부 API·과금·고객 자료 전송 없음.
+2. **완료 기능·설계 비교:** 대안 A 기존 서명형 v1 영수증을 소유자 비추출 CryptoKey로 발급하고 기존 서명 영수증을 확인한 뒤 동일 ID/SKU/seat 조건으로 만료일만 단조 증가 연장(채택, 비용0/형식 호환). 대안 B 온라인 활성화·복제/취소 서버(운영비·고객기기 추적·오프라인 약속 불일치, 보류). 새 src/commercial/offlineLicenseIssuer.ts + tests/offline-license-issuer.test.ts 합성8개. BASIC/PRO 1석 기술안, BUSINESS 1/2석 기술 초안(법적·상용 확정 아님), 서명 실패·미래/기한초과·tier/seat 조작/기간축소 거부.
+3. **명령·테스트·숫자:** 정확 기능 SHA 0bf9c7bb125b25b3441117a6e54ba53ac05cba67. 신규 WebCrypto 합성8검증, 기존 npm test의 tests/*.test.ts 자동 포함. [Linux Chrome/Edge #43586747520](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43586747520), [Windows NSIS #43586747579](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43586747579), [정본 정책 #43586747799](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43586747799). 정책 SUCCESS, Linux npm test/build PASS 및 Windows npm test/P106 step PASS, 전체 Linux/Windows run은 아직 IN_PROGRESS·결론 미확인. 이전 P107 3/3 PASS는 별도 코드 SHA.
+4. **완료/진행/대기/차단:** 서명된 발급·연장 라이브러리와 합성 테스트 반영. 진짜 판매자 개인키와 신원·키 pin·오프라인 운영 발급 CLI/GUI·영수증 전달/재발급·refund 철회 목록·최신버전 강제·좌석/장치 인증·고객 상품 실행/법무 조건 미구현. P108 함수는 구매자 앱 화면에 연결되지 않았고 테스트키만 메모리에 생성. A07 실 OCR/A08 로컬 한글 AI/허가 PDF5~10 미검증. 공식 전체 UNASSESSED/100 미달, RELEASE HOLD.
+5. **오류·근거·재시도·대안:** GitHub 코드 업로드 첫 다중요청이 RemoteProtocolError로 중단되어 실제 브랜치 변경0을 HEAD readback으로 확인, 동일 코드를 blob 단위 분리 저장하여 정상 일반 fast-forward commit. 기능/CI 에러 아직 확인되지 않음. 이전 영수증 재사용 차단은 서명만으로 불가능하므로 사후 취소/철회나 환불 효력을 주장하지 않음. 임의 판매자키 배포 금지.
+6. **저장소·브랜치·SHA·경로:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112. 신규 code 0bf9c7bb125b25b3441117a6e54ba53ac05cba67; src/commercial/offlineLicenseIssuer.ts, tests/offline-license-issuer.test.ts, docs/commercial/ASTRA_P108_OFFLINE_LICENSE_ISSUANCE_20261114.md. 기존 P96/107 소스 불변. docs HEAD commit 이후 정확 조회.
+7. **Production·Vercel·실행환경:** 고객 실제 판매·배포 없음, Vercel 미적용. Node22 test/npm run build/npm run desktop:test/npm run ocr:release-gate. 발급 모듈은 소유자 테스트용 API로만 존재, 실제 고객 발급 프로그램 아님.
+8. **원본·백업·비밀·금지:** 수정 전 HEAD fbff14090caf5cead6973e6a47d503e76248696b. main/PR10/원본 PDF, STEP1 localStorage V1, STEP2 IndexedDB V2, 8+22 레이아웃, 등록이력, 앱 권한/서명키·토큰·환경변수 무변경. 테스트 키 ephemeral memory only; production issuer key/pin null. OCR_MANIFEST=null, RELEASE HOLD.
+9. **다음 작업·절차·완료기준·승인:** 정확 코드 SHA 3/3 최종 CI/원시 로그 확인 → 사용자 승인된 서명키 생성·안전 소유자 발급 인터페이스·출력 atomic write/비밀 비유출 설계 및 운영 QA → 유효 서명 갱신·키교체·취소목록 로컬 전달/rollback 탐지(오프라인 철회 한계 명시) → 실제 GUI 액션·PDF export entitlement 진입점 통합 및 물리 Win10/11/구매자 인수. A07/08 실제 공급처·모델 및 12영역 재산정 별도. 무료 코드 개발 기승인, 실제 비밀/배포/권한 변경/실고객 자료 전송 별도 승인.
+10. **갱신시점(KST)/검증범위:** 2026-11-14 KST. 기능 SHA code GitHub readback + 일부 Actions steps/정본정책 확인, Linux/Windows 최종 PASS/FAIL/SKIP 대기. 공식 점수 UNASSESSED, 개발 진행 [작업중], 판매/배포 HOLD. 중앙 원장 별도 commit 검증 예정.
+
 ## 2026-11-14 KST — P107 exact-source 3/3 CI 검증 성공 최종 인수인계 10항
 
 1. 목표·용도·요구·기술: Astra 최종 7단계 3SKU 사용자12영역100점. A09 오프라인 SKU 사용권 기능별 검증 로직, P96 ECDSA P256 signed receipt+RFC7638 JWK thumbprint. Vite/React/Node22/Windows NSIS, 외부 전송·비용0.

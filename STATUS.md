@@ -1,3 +1,10 @@
+## 2026-11-14 KST — P108 오프라인 라이선스 서명 발급·단조 연장 (정확 CI 전체 진행 중)
+
+- 새 **기능 SHA 0bf9c7bb125b25b3441117a6e54ba53ac05cba67**: src/commercial/offlineLicenseIssuer.ts 신설. 소유자 제공 비추출 ECDSA P256 키로 기존 P96 canonical v1 영수증 발급, 사전 발급자 public JWK thumbprint/키 쌍 일치 확인, 발급 직후 P96 검사 재확인. 서명된 이전 영수증만 같은 licenseId/productMajor/tier/seats에 연장 발급, 발행시각과 만료시각 단조 증가 강제. BASIC·PRO 1석/BUSINESS 최대2석은 **기술 초안이며 고객·법적 승인 아님**. 기존 화면/엔진·테스트 외 비밀/원본 변경 없음.
+- 신규 tests/offline-license-issuer.test.ts 합성8건: 실제 ephemeral WebCrypto, 잘못된 signer/key pin, tier/기간/자리수 위조, 기존 영수증 재검증, 연장 안전성, production issuer null일 때 상용 SKU unlock DENY. CI [정본 #43586747799](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43586747799) SUCCESS, [Linux/Chrome/Edge #43586747520](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43586747520) npm test/build step PASS, [Windows NSIS #43586747579](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43586747579) npm test/P106 Authenticode step PASS. 전체 run 최종은 IN_PROGRESS; 정확 숫자/성공은 종료 후 확정.
+- P108은 **실제품 라이선스 발급 시스템 아님**. 판매자 개인키 생성·보관·실 발급 경로, 환불·회수, 서명목록의 철회 갱신·장치 시트 검사, GUI 기능 락/실 구매자검증은 미완. 과거 영수증은 다른 영수증 발급만으로 자동 취소되지 않음. 전체 공식 12영역 UNASSESSED/100 미달, A09 11점 완수 아님, [작업중], RELEASE HOLD, 크몽 미등록/Vercel 미적용, 원본 및 main/PR10/V1/V2/8+22 시안 그대로.
+- 근거 docs/commercial/ASTRA_P108_OFFLINE_LICENSE_ISSUANCE_20261114.md. 기술 변경 파일2개, 판매자 개인키·토큰·원본PDF 업로드0.
+
 ## 2026-11-14 KST — P107 exact source signed 3SKU policy 3/3 GitHub CI 성공
 
 - 최종 검증 코드 SHA **0d3501d0cf51f3b5e87370f6a973fbb01d72e697**, 신규 src/commercial/skuAccess.ts+tests/sku-access.test.ts (WebCrypto 합성 서명 SKU권한/위조/발급자/pin/만료 대응7회귀). 상용 issuer JWK/thumbprint null, production SKU access=DENY. BASIC/PRO/BUSINESS 기능 허용정책 엔진만 완성, GUI/실 라이선스/판매 허가는 아직 없음.
