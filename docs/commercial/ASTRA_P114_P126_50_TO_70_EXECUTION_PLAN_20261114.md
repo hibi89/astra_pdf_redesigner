@@ -1,6 +1,6 @@
 # Astra PDF Redesigner — P114~P126 실행 설계 및 50→70점 검증 공시
 
-> **[2026-11-14 최신 사용자 위임으로 실행자 변경]** 50→70(P114~P126) 구현·테스트·GitHub 커밋 담당은 **Codex 6 Luna Max**. 오직 **GitHub 기존 feature 브랜치 + GitHub-hosted Actions**만 사용한다. 이전 Instant 담당 표기는 이 범위에서 대체한다. 상세 실행 환경·실모델/실OCR blocking·한도 규정은 [Codex Github-only 런북](ASTRA_CODEX_LUNA_MAX_GITHUB_ONLY_P114_P126_20261114.md) 및 [작업 원장](ASTRA_P114_P126_TASK_REGISTER_20261114.json)을 우선한다. **설계 기준 50/100; P114/P115/P116/P117/P118 VERIFIED, G55 PASS, P119/P120/P121 BLOCKED +0, P122 VERIFIED +2, 잠정 59/100, 다음 P123; 공식 UNASSESSED, RELEASE HOLD. 이 문서 수정은 기능 개발이나 CI 통과가 아니다.** 70점 이후 P127+ 담당자는 이번 위임에서 지정하지 않았다.
+> **[2026-11-14 최신 사용자 위임으로 실행자 변경]** 50→70(P114~P126) 구현·테스트·GitHub 커밋 담당은 **Codex 6 Luna Max**. 오직 **GitHub 기존 feature 브랜치 + GitHub-hosted Actions**만 사용한다. 이전 Instant 담당 표기는 이 범위에서 대체한다. 상세 실행 환경·실모델/실OCR blocking·한도 규정은 [Codex Github-only 런북](ASTRA_CODEX_LUNA_MAX_GITHUB_ONLY_P114_P126_20261114.md) 및 [작업 원장](ASTRA_P114_P126_TASK_REGISTER_20261114.json)을 우선한다. **설계 기준 50/100; P114/P115/P116/P117/P118 VERIFIED, G55 PASS, P119/P120/P121 BLOCKED +0, P122 VERIFIED +2, P123/P124 BLOCKED +0, 잠정 59/100, 다음 P125; 공식 UNASSESSED, RELEASE HOLD. 이 문서 수정은 기능 개발이나 CI 통과가 아니다.** 70점 이후 P127+ 담당자는 이번 위임에서 지정하지 않았다.
 
 
 > 설계 승인 문맥: 2026-11-14 21:55 KST, 사용자 지시: GPT-6 High가 최종설계 기반 작업을 분해·공시하고, Codex 6 Luna Max가 구현과 GitHub 검증·인수인계를 직접 담당. High는 사용자 요청 시 최종 별도 검수 담당. 이 문서는 **계획 공시**이며 기능 구현·테스트 또는 70점 달성을 의미하지 않는다.
@@ -62,8 +62,8 @@
 | P120 실 Tesseract 한국어 인식 난도별 측정·오인식 공개 | A07 | +1 | 59/100 | P119 | BLOCKED (+0) |
 | P121 Electron OCR IPC 실실행 및 실패 복구 | A07 | +1 | 60/100 | P119, P120 | BLOCKED (+0) |
 | P122 Ollama 명시 동의·출처 고정·오래된 응답·의미 변경 방어 | A08 | +2 | 62/100 | 없음 | VERIFIED (+2) |
-| P123 실 Qwen3 한국어 CPU 추론 및 데이터 무결성 시험 | A08 | +3 | 65/100 | P122 | PENDING |
-| P124 3SKU 공통 윤문 실제 GUI 회귀·문단 승인/되돌림 | A08 | +2 | 67/100 | P123, P117 | PENDING |
+| P123 실 Qwen3 한국어 CPU 추론 및 데이터 무결성 시험 | A08 | +3 | 65/100 | P122 | BLOCKED +0 |
+| P124 3SKU 공통 윤문 실제 GUI 회귀·문단 승인/되돌림 | A08 | +2 | 67/100 | P123, P117 | BLOCKED +0 |
 | P125 Electron 메인 프로세스 상용 PDF IPC·오프라인 영수증 직접 호출 게이트 | A09 | +2 | 69/100 | P117, P122 | PENDING |
 | P126 Windows 설치형 실제 상태 복구·실패주입·업그레이드 회귀 | A10 | +1 | 70/100 | P117, P121, P125 | PENDING |
 
@@ -154,7 +154,7 @@
 
 #### P123 — 실 Qwen3 한국어 CPU 추론 및 데이터 무결성 시험 (A08 +3점, 누적 상한 65/100)
 
-- **선행:** P122. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
+- **선행:** P122. **담당:** Codex 6 Luna Max. 현재 상태: BLOCKED +0; official GitHub에는 Qwen3 4B weight/release asset이 없고 외부 model host/local PC 사용은 이 위임에서 금지.
 - **수정 후보 경로:** desktop/owner-ollama-controller.cjs; tools/ (신규 실모델 측정 스크립트); tests/ (신규 실제 모델 golden); docs/commercial/ (실측 보고). 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 사용자가 소유한 기존 로컬 Qwen3 4B 또는 라이선스·해시가 검증된 별도 무료 CI 환경에서 실제 모델을 실행. 온디바이스 속도/메모리/중단/OOM·한글 품질을 계측. 모델은 저장소/설치파일에 동봉하지 않고, 다운로드가 필요하면 출처·권리·크기·한도를 사전 확인한다.
 - **수용 테스트/증거:** 실 모델(native/loopback HTTP mock 아님) + 사전 고정 30개 이상 합성 한국어 문단을 평가. 보호 숫자·날짜·금액·금지/부정/인용문이 변경된 후보의 자동/무검토 적용 0, 건별 성공/거부/취소/지연 및 CPU/RAM 실측, 원본·V1/V2 무변경. 최소 5건의 유효 실모델 제안이 검토 UI까지 전달되는 증거.
@@ -163,7 +163,7 @@
 
 #### P124 — 3SKU 공통 윤문 실제 GUI 회귀·문단 승인/되돌림 (A08 +2점, 누적 상한 67/100)
 
-- **선행:** P123, P117. **담당:** Codex 6 Luna Max. 현재 상태: PENDING.
+- **선행:** P123, P117. **담당:** Codex 6 Luna Max. 현재 상태: BLOCKED +0; P117 VERIFIED, P123 actual-model prerequisite BLOCKED.
 - **수정 후보 경로:** src/humanize/LocalModelReview.tsx; src/step2/Workspace.tsx; src/commercial/skuAccess.ts; tests/step2-*.mjs; tests/ (신규 AI gui E2E). 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** BASIC/PRO/BUSINESS 동일 로컬 AI 경로를 보장하고, 다중 블록 간 선택-수정-거절-Undo 흐름과 스타일 변경·PDF 출력 시 원문 미승인 변형을 방어. UI는 모델이 없으면 규칙 검수만 제공.
 - **수용 테스트/증거:** 실 모델을 실행한 설치형 Windows Electron 또는 동등한 검증된 CPU 환경에서 3SKU × (정상/모델없음/취소/위조·오류) 시나리오. 최소 10건 실제 제안의 전후 비교·승인/거부/되돌림, 미승인 텍스트 변경 0, PDF 출력 문자 동일성 확인, 모델 미실행/오류 중에도 STEP1/2 정상.
@@ -222,4 +222,4 @@
 
 70~100 상세 잔여 30점과 사용자가 개입해야 할 최종 승인 장벽은 docs/commercial/ASTRA_INSTANT_70_TO_100_HANDOFF_20261114.md에 따로 기록한다. 모든 항목의 사용자가 확정한 배점과 원본 설계는 동일하다.
 
-**최종 확인:** P114–P118 VERIFIED, G55 PASS; P119–P121 BLOCKED +0; P122 VERIFIED +2; current provisional 59/100. Latest verified code SHA `d2a84d03ac8c791e74470e756cb6417a356776c3`. Next P123 (actual Qwen3 CPU inference). G60 not reached. Official acceptance UNASSESSED, RELEASE HOLD.
+**최종 확인:** P114–P118 VERIFIED, G55 PASS; P119–P121 BLOCKED +0; P122 VERIFIED +2; P123/P124 BLOCKED +0; current evidence score 59/100. Latest fully verified task SHA remains `d2a84d03ac8c791e74470e756cb6417a356776c3`; P125 code SHA `440cae43022314684bb5d291107521853c10b3be` GitHub CI in progress, no score yet. G60/G65 not passed. Official acceptance UNASSESSED, RELEASE HOLD.

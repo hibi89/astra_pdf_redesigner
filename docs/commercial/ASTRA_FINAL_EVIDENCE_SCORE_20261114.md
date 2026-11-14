@@ -7,7 +7,7 @@
 
 사용자가 확정한 A01~A12 12개 영역의 100점 배점 **그대로** 사용한다. 아래 1점 단위 부분 수용 분해는 사용자 승인된 배점의 변경이 아니라 **총괄이 제안하는 잠정 검증 체크포인트**다. 각 항목은 코드 실행 및 CI·합성 브라우저 검증 증거가 있는 기능에만 부분 점수를 부여한다. 정식 판매·원본 내용 품질·실 물리 PC·구매자 최종 승인은 CI로 대신하지 않는다.
 
-이 표의 **잠정 56%는 공식 확정 수용률과 다르며, 내부 기술 85%/95%나 출시 준비도에 전용할 수 없다.** 사용자가 부분 배점·수용기준을 확정하고 미확인 사항을 직접 검수할 때 공식 값을 산정한다.
+이 표의 **잠정 59%는 공식 확정 수용률과 다르며, 내부 기술 85%/95%나 출시 준비도에 전용할 수 없다.** 사용자가 부분 배점·수용기준을 확정하고 미확인 사항을 직접 검수할 때 공식 값을 산정한다.
 
 | 영역 | 사용자 확정 배점 | 이번 회차까지 잠정 인정 | 남은 점수 | 인정한 합성/코드·출력 증거 | 반드시 남은 수용 |
 |---|---:|---:|---:|---|---|
@@ -18,12 +18,17 @@
 | A05 로컬 디자인 참고·적용 | 5 | **4** | 1 | PNG/JPEG/WebP/PDF 로컬 분석·미리보기·적용/Undo; Chrome/Edge 8종 합성 metric, source SHA·V2 전체 저장소 불변 및 손상 PDF fail-closed | 실구매자 레퍼런스 품질·폰트/권리·고객 PDF 수용
 | A06 온라인 레퍼런스 | 5 | **4** | 1 | 안전한 브라우저 검색 링크·URL/권리메모 로컬 기록  P112 저장된 HTTPS 출처→사용자 파일 선택→STEP5 로컬 분석 직접 연결, 권리·파일 동일성 인증/내장 검색 카드 없음. | 내장 검색 결과·출처 검증·STEP5 직접 연결 |
 | A07 OCR·콘텐츠 안전·STEP7 | 12 | **5** | 7 | STEP7 PDF 대조·수동 검토·출시 OCR 차단 정책/검사, P113 PNG/OCR 수동 대조. P119 UB-Mannheim 공급처 후보 audit BLOCKED +0: GitHub installer digest null, Authenticode/PE·DLL closure 및 bundle 재배포권 미확인. OCR_MANIFEST=null. | 승인 공급처의 Windows Tesseract 실제 한국어 OCR·표/스캔 정확도 |
-| A08 한국어 로컬 AI 윤문 | 14 | **4** | 10 | P111 로컬 Ollama 동의 UI/controller; P122 mock/static E2E +2: Chrome/Edge explicit-consent/stale-scope/manual review/Undo, 30 synthetic golden critical-token guard, Electron IPC regression. No real Qwen3 CPU inference; semantic preservation/quality not certified. | 상업 재배포 가능한 model license/hash, real Qwen3 CPU execution/quality, buyer review |
+| A08 한국어 로컬 AI 윤문 | 14 | **4** | 10 | P111 로컬 Ollama 동의 UI/controller; P122 mock/static E2E +2. P123/P124 BLOCKED +0: official GitHub has no 4B weights/release asset; no model SHA/actual CPU/3-SKU test. | 상업 재배포 가능한 model license/hash, real Qwen3 CPU execution/quality, buyer review |
 | A09 라이선스·SKU·지원 | 11 | **5** | 6 | P96 서명 검증, P107 기능 매트릭스, P108 발급/연장, P109 GUI 실행 게이트, **P110 Electron PDF IPC main-frame/URL 검사** | 판매자 실제 공개키 pin·안전 발급/재발급/환불/철회·기기 수/오프라인 운영·same-frame IPC 우회·지원 약관 |
 | A10 Windows 설치·복구 | 5 | 3 | 2 | CI Windows unsigned NSIS 설치·제거·업그레이드, A4/IndexedDB·PNG 보존 | 실 Win10/11 물리 설치·서명/SmartScreen |
 | A11 허가 PDF 5~10건 검수 | 7 | 0 | 7 | 합성 도구는 존재하나 실제 사용자 승인 문서 0건 | 실제 허가 PDF 5~10건 독립 대조/육안 수용 |
 | A12 판매·법적·최종 승인 | 2 | 0 | 2 | 상품 등록 초안만 존재 | 저작권·재배포권·크몽 등록·최종 구매자 승인 |
 | **합계** | **100** | **57** | **43** | **잠정 증거 기반 구현·검증 점수** | **공식 수용 미완** |
+
+## P123/P124 +0점 — 실제 Qwen3 미실행, dependent GUI 검증 차단 (A08)
+- **P123 BLOCKED 0/3:** 공식 [QwenLM/Qwen3 GitHub main](https://github.com/QwenLM/Qwen3/tree/7a2f61ffc7a20d47efcd2bf97f6f2bf52729042e) 및 [release API](https://api.github.com/repos/QwenLM/Qwen3/releases?per_page=10) 조사 결과 main commit `7a2f61ffc7a20d47efcd2bf97f6f2bf52729042e`, GitHub Releases 0개, 저장소는 source/docs/report이며 4B weights/release asset을 제공하지 않는다. 공식 README는 checkpoint를 Hugging Face/ModelScope에서 받도록 안내하고 model별 license files도 Hugging Face repo에 있다고 설명한다. 이 실행은 GitHub-only이므로 모델을 외부 host에서 가져오지 않았고 사용자 PC의 로컬 Qwen도 접근하지 않았다. 모델 파일 exact SHA/license mapping, 설치·추론, CPU/RAM/latency 및 30개 real-inference 결과는 전부 **NOT RUN**. [P123 차단 검증서](../evidence/astra/P123/VERIFICATION.md).
+- **P124 BLOCKED 0/2:** P117 dependency는 충족됐으나 P123 실제 모델이 없어 Windows Electron 3-SKU 실모델 제안·승인/거절/Undo·출력 원문 동일성 acceptance 미실행. P122 mock 결과를 재사용하지 않는다. [P124 차단 검증서](../evidence/astra/P124/VERIFICATION.md).
+- A08 4/14, 잠정 총 59/100 유지; 공식 수용 UNASSESSED, RELEASE HOLD. G60은 P119–P121 실제 Tesseract/OCR 증거 미달, G65는 실모델 미측정으로 PASS하지 않았다.
 
 ## P122 +2점 — 로컬 동의·stale response·원문 보호 (A08)
 
@@ -107,4 +112,4 @@ P114(PDF 읽기 순서·수동 원문 대조), P115(원본/출력 15쌍 비교),
 - 같은 권한을 가진 정상 최상위 렌더러의 JS/직접 IPC 호출이나 재포장된 앱을 강력 DRM으로 막는 기술이 아니다. **고객용 상용 보안 완료를 주장하지 않는다.**
 
 ## 후속
-다음 실행은 **P118 로컬 레퍼런스 분석→비파괴 적용·재현성 강화**다. 이후 P119~P121 Windows Tesseract 실공급처·실한국어 인식·Electron OCR은 hosted 환경에서 실측이 불가능하면 BLOCKED/0점으로 기록하고 독립 작업을 진행한다. P122~P123은 실 Ollama/Qwen3 CPU 추론을 mock으로 대체하지 않는다. G60/G65/G70은 각 기준 점수에서 별도 증거로 판정한다. 공식 구매자 수용은 UNASSESSED, RELEASE HOLD를 유지한다.
+다음 실행은 **P125 main-process signed SKU boundary**다. P119~P121 Windows Tesseract 실제 검증 및 P123/P124 Qwen3 CPU/Electron 경로는 각 공급 자산·실측이 가능해질 때까지 BLOCKED/0점으로 유지한다. G60/G65/G70은 각 기준 점수에서 별도 증거로 판정한다. 공식 구매자 수용은 UNASSESSED, RELEASE HOLD를 유지한다.

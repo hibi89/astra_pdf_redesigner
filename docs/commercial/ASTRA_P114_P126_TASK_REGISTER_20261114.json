@@ -470,7 +470,7 @@
       "depends_on": [
         "P122"
       ],
-      "status": "PENDING",
+      "status": "BLOCKED",
       "credit_earned": 0,
       "expected_paths": [
         "desktop/owner-ollama-controller.cjs",
@@ -496,7 +496,21 @@
       ],
       "evidence_linux_run": null,
       "evidence_windows_run": null,
-      "evidence_blueprint_run": null
+      "evidence_blueprint_run": null,
+      "actual_result": "BLOCKED +0. Official QwenLM/Qwen3 GitHub main at 7a2f61ffc7a20d47efcd2bf97f6f2bf52729042e has no 4B model weights or GitHub release assets; README points to Hugging Face/ModelScope and model license files on Hugging Face. GitHub-only and no-local-PC constraints prohibit fetching the artifact. No exact 4B artifact SHA/license mapping or real CPU inference results; model and 30-paragraph tests NOT RUN.",
+      "blockers_observed": [
+        "Official QwenLM/Qwen3 main commit 7a2f61ffc7a20d47efcd2bf97f6f2bf52729042e has no model weight/release asset; GitHub Releases API returns an empty list.",
+        "Official README points checkpoints to Hugging Face/ModelScope and says model-specific license files are in Hugging Face repositories; these hosts are outside the GitHub-only instruction.",
+        "No user-owned Qwen3 4B model is available in the GitHub-hosted runner; user-local PC is prohibited.",
+        "Exact 4B model-file SHA-256, model-specific license proof, CPU/RAM/latency, and 30 real-inference Korean paragraph results were not obtained."
+      ],
+      "model_source_audit": {
+        "official_repository": "https://github.com/QwenLM/Qwen3",
+        "official_main_sha": "7a2f61ffc7a20d47efcd2bf97f6f2bf52729042e",
+        "release_api": "https://api.github.com/repos/QwenLM/Qwen3/releases?per_page=10",
+        "github_release_count": 0,
+        "result": "No weights or GitHub-hosted model release asset. External model-host retrieval intentionally not attempted."
+      }
     },
     {
       "id": "P124",
@@ -507,7 +521,7 @@
         "P123",
         "P117"
       ],
-      "status": "PENDING",
+      "status": "BLOCKED",
       "credit_earned": 0,
       "expected_paths": [
         "src/humanize/LocalModelReview.tsx",
@@ -534,7 +548,13 @@
       ],
       "evidence_linux_run": null,
       "evidence_windows_run": null,
-      "evidence_blueprint_run": null
+      "evidence_blueprint_run": null,
+      "actual_result": "BLOCKED +0. P117 is VERIFIED, but P123 real Qwen3 4B inference and model/license/hash proof are unavailable. No Windows Electron 3-SKU real-model flow, approved/rejected/undo proposal set, PDF equality, or model-missing real GUI acceptance run was performed. P122 mock evidence is not substituted.",
+      "blockers_observed": [
+        "P123 real Qwen3 model and CPU inference prerequisite BLOCKED.",
+        "No model-specific exact SHA/license proof under GitHub-only permitted sources.",
+        "No real model 3-SKU Windows Electron proposals, user approval/rejection/Undo, output PDF equality, or model-missing path evidence."
+      ]
     },
     {
       "id": "P125",
@@ -656,5 +676,13 @@
       "release": "RELEASE HOLD"
     }
   },
-  "last_updated_kst": "2026-11-15"
+  "last_updated_kst": "2026-11-15",
+  "last_completed_task": "P122",
+  "next_independent_task": "P125",
+  "gates": {
+    "G55": "PASS",
+    "G60": "NOT PASSED — P119/P120/P121 actual Windows Tesseract OCR evidence BLOCKED",
+    "G65": "NOT PASSED — P123 actual Qwen3 inference BLOCKED",
+    "G70": "NOT PASSED — P124/P126 acceptance not complete"
+  }
 }

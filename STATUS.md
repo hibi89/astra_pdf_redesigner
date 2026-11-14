@@ -1,3 +1,9 @@
+## 2026-11-15 KST — P123/P124 BLOCKED +0 · 잠정 59/100
+- **P123:** actual Qwen3 4B CPU inference cannot be performed under the GitHub-only constraint. Official [QwenLM/Qwen3](https://github.com/QwenLM/Qwen3) main snapshot `7a2f61ffc7a20d47efcd2bf97f6f2bf52729042e` has no GitHub Releases or model-weight assets; its README directs users to Hugging Face/ModelScope for checkpoints and says model-specific license files are in Hugging Face repositories. Those external model hosts and this PC's local model are outside this run's permitted sources. Therefore no exact 4B artifact SHA-256, license-file mapping, runner model installation, CPU/RAM/latency measurement, or 30-paragraph real-model result exists. **P123 0/3 BLOCKED**; no mock substituted. [P123 evidence](docs/evidence/astra/P123/VERIFICATION.md).
+- **P124:** P117 is VERIFIED, but its other dependency P123 is blocked. No real-model 3-SKU Windows/Electron proposal, approval/reject/Undo, PDF equality, or model-missing path acceptance was performed. **P124 0/2 BLOCKED**; P122 mock evidence is not reused. [P124 evidence](docs/evidence/astra/P124/VERIFICATION.md).
+- **Score/gates:** A08 remains 4/14; total 59/100. G55 PASS; G60 not passed because P119–P121 lack approved Tesseract asset and actual Windows OCR/Electron evidence; G65 cannot pass without real Qwen3. Official buyer acceptance UNASSESSED, RELEASE HOLD, OCR_MANIFEST=null.
+- **Next independent work:** P125 main-process signed SKU policy; exact-SHA GitHub Actions are in progress. No P123/P124 credit claimed.
+
 ## 2026-11-15 KST — P122 VERIFIED · 잠정 59/100
 
 - **완료 작업:** P122(A08) +2점. 고정 loopback/model, 명시 동의, 오래된 문서·블록 응답 폐기, 원문 안전검사를 실제 Chrome/Edge mock UI와 Electron bridge 회귀로 확인했다. [P122 검증서](docs/evidence/astra/P122/VERIFICATION.md).
