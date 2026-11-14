@@ -1,3 +1,10 @@
+## 2026-11-14 KST — P101 로컬 OCR 백엔드·STEP7 화면 연결 (신규 검증 대기)
+
+- 사용자 승인된 0원 OCR 개발 범위에서 독립 Tesseract 실행 컨트롤러, PNG 8MiB/8MP 가드, kor/eng 및 바이너리 SHA256 검증, 단일 실행/취소/20초 타임아웃, 임시파일 비공개·삭제, Electron 신뢰 IPC, 스캔 PDF 한 페이지 미승인 OCR 초안 UI를 추가했다. GitHub 최신 작성 코드 커밋 **deeb1ed94a00cb25cfc1efafcf8e33fab1f9847b**(문서 전 마지막 소스 SHA). 
+- npm test, desktop:test/Chrome·Edge 웹 비활성·Windows Electron smoke 신규 회귀를 등록했다. **정확한 최신 소스 전체 CI PASS/FAIL 결과는 아직 미확인**. 테스트 코드 추가를 테스트 통과로 간주하지 않는다.
+- OCR_MANIFEST=null, 실제 바이너리·kor/eng 언어팩 **미포함**, 제품 실제 OCR 인식 **NOT RUN**. 모델/고객자료 다운로드/외부 전송0, 원본 V1/V2·main·PR10·배포·상품 등록 불변. 실 스캔/한국어 골든/물리 Win10/11 및 LICENSE·NOTICE 미검증, **RELEASE HOLD**.
+- 문서: docs/commercial/ASTRA_P101_LOCAL_OCR_DEVELOPMENT_20261114.md. 공식 최종 12영역 가중치 승인·점수 UNASSESSED/100% 미달, 과거 기술85%와 구분. 다음에는 정확 SHA CI 결과부터 확인하고 오류 최소 수정 후 Tesseract 바이너리 권리/해시·실인식 구현 진행.
+
 ## 2026-11-14 KST — 사용자 승인 확정: 무료 OCR·로컬 한국어 LLM·12영역 100점
 
 - 사용자 명시 승인: Tesseract 등 무료 OCR 검토/구현, llama.cpp+Qwen 등 무료 한국어 로컬 모델 검토, A01–A12 배점 100점 확정. 공식 기능별 증거 점수는 **산정 대기/목표100% 미달**(0%·85%·100%로 임의 표시 금지). 상세 후보·권리·제외 승인: `docs/commercial/ASTRA_OWNER_1300_CHECKLIST_20261114.md`.
