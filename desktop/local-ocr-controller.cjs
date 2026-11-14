@@ -63,7 +63,7 @@ function validatePng(input){
   pos+=12+length;
   if(seenEnd){if(pos!==bytes.length)throw Error('invalid-image');break;}
  }
- if(!seenEnd||!seenIdat)return (()=>{throw Error('invalid-image')})();
+ if(!seenEnd||!seenIdat)throw Error('invalid-image');
  return Buffer.from(bytes);
 }
 async function digest(file){
