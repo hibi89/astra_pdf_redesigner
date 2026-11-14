@@ -37,12 +37,27 @@ jobs:
         shell: pwsh
         run: ./tests/windows-tesseract-alternate-candidate-audit.ps1
         timeout-minutes: 5
+      - name: P119 UB-Mannheim 5.4.0 candidate audit guard regressions
+        shell: pwsh
+        run: ./tests/windows-tesseract-5.4-candidate-audit.test.ps1
+      - name: P119 UB-Mannheim 5.4.0 Windows candidate audit (exploratory, fail closed)
+        shell: pwsh
+        run: ./tests/windows-tesseract-5.4-candidate-audit.ps1
+        timeout-minutes: 5
       - name: Upload alternate Windows supplier audit report
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: astra-p119-tesseract-5.5.0-candidate-audit
           path: ${{ runner.temp }}/astra-p119-tesseract-5.5.0-audit.json
+          if-no-files-found: warn
+          retention-days: 7
+      - name: Upload UB-Mannheim 5.4.0 candidate audit report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: astra-p119-tesseract-5.4.0-candidate-audit
+          path: ${{ runner.temp }}/astra-p119-tesseract-5.4.0-audit.json
           if-no-files-found: warn
           retention-days: 7
       - name: Upload synthetic OCR audit report
