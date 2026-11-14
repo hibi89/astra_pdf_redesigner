@@ -1,3 +1,11 @@
+## 2026-11-14 KST — Codex 6 Luna Max GitHub-only P114~P126(50→70) 설계·담당자 공시 (기능 미수정)
+
+- **최신 책임:** Codex 6 Luna Max는 GitHub feature 브랜치의 코드 작성·수정·테스트·검증, GitHub-hosted Ubuntu Chrome/Edge·Windows Electron/NSIS Actions, 원장·인수인계를 담당. 이전 GPT-6 Instant 구현 담당은 P114~P126에 한해 교체. GPT-6 High는 설계 및 사용자가 요청할 때 독립 최종감사.
+- **이번 공시:** [Github-only 실행 지휘서](docs/commercial/ASTRA_CODEX_LUNA_MAX_GITHUB_ONLY_P114_P126_20261114.md), [P114~P126 상세 설계](docs/commercial/ASTRA_P114_P126_50_TO_70_EXECUTION_PLAN_20261114.md), [작업·runner·증거 경로·차단 조건 JSON](docs/commercial/ASTRA_P114_P126_TASK_REGISTER_20261114.json). 13개 작업, 가산 상한 합계 +20점, 55/60/65/70 게이트 고정. 모든 작업 PENDING·earned_points 0. P127 이후 실행자는 새 승인 필요.
+- **완성률 불변:** 기존 실제 검증 기능 SHA `26aff40d6de524c2430f8a6b325d906cea67f7e1`; Linux Chrome/Edge [#43595956953](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43595956953), Windows Electron/NSIS [#43595956932](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43595956932), 최종설계 정책 [#43595957159](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43595957159) **3/3 SUCCESS는 이전 기능 SHA의 증거**. 이번은 설계문서·실행자 변경만 했으므로 새 코드/기능 테스트 없음, **잠정 50/100 +0, 공식 UNASSESSED, RELEASE HOLD, 크몽 미등록, Production/Vercel 미적용**.
+- **실행 제약:** 실제 Tesseract Windows 서명/권리·Qwen3:4b-instruct CPU 실추론을 GitHub-hosted 무료 runner에서 검증할 수 없다면 P119~P121/P123~P124 BLOCKED/0점; mock을 실모델로 둔갑 금지. 무단 유료결제·외부 모델 API·고객 원본 업로드·비밀키·배포/보안 변경 금지. 기존 main/PR#10·STEP1 V1/STEP2 V2·8+22 후보·판매 플래그/issuer pin null/OCR manifest null 보존.
+- **다음 실행점 P114:** 실제 기존 소스/branch HEAD 확인 → 회귀 테스트 구현 → GitHub commit → 정확 SHA 3 workflow Linux/Windows/policy 결론+원시 log 확인 → P114 `docs/evidence/astra/P114/VERIFICATION.md`·JSON status/점수·STATUS/HANDOFF 최신화 → 필요시 중앙 원장의 **Astra 행만** 변경. 진척 없으면 점수 50 고정.
+
 ## 2026-11-14 21:55 KST — Astra High 설계 공시, Instant 개발 담당 전환 (기능 변경 없음)
 
 - **이번 회차 완료:** 사용자 최종설계 가중치 A01~A12 합계100을 보존한 [P114~P126 50→70 상세 실행계획](docs/commercial/ASTRA_P114_P126_50_TO_70_EXECUTION_PLAN_20261114.md), [13개 JSON 작업 원장](docs/commercial/ASTRA_P114_P126_TASK_REGISTER_20261114.json), [70→100 Instant 인수인계·High 최종감사 기준](docs/commercial/ASTRA_INSTANT_70_TO_100_HANDOFF_20261114.md)을 `feature/astra-p71-pdf-source-parity-20261112` 브랜치에 GitHub 문서로 공시. 설계 담당 **GPT-6 High** / 실제 구현·테스트·GitHub 최신화 담당 **GPT-6 Instant** / 완료 후 사용자 요청 시 High 별도 감사.
