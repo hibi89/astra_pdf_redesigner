@@ -51,8 +51,9 @@ try{
  const before=await eventually(()=>evaluate(snapshot),x=>Boolean(x?.id&&x?.content));
  const fullV2Snapshot="(async()=>{const db=await new Promise((resolve,reject)=>{const r=indexedDB.open('astra-pdf-redesigner:v2');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});try{const result={};for(const name of [...db.objectStoreNames].sort())result[name]=await new Promise((resolve,reject)=>{const r=db.transaction(name,'readonly').objectStore(name).getAll();r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});return result}finally{db.close()}})()";
  const v2FullBefore=await evaluate(fullV2Snapshot);
+ await evaluate("(()=>{const key='astra-pdf-redesigner:current:v1';localStorage.setItem(key,JSON.stringify({schemaVersion:1,document:{title:'P115 synthetic V1 baseline',author:'Synthetic',date:'2026-11-15',learned:'V1 sentinel',difficult:'',solved:'',reflection:''},design:{theme:'report',accent:'#285a73',textSize:'medium',font:'sans'}}));return true})()");
  const v1Before=await evaluate("localStorage.getItem('astra-pdf-redesigner:current:v1')");
- assert.equal(typeof v1Before,'string','STEP1 V1 baseline must be present for the no-write regression');
+ assert.equal(JSON.parse(v1Before).schemaVersion,1,'STEP1 V1 synthetic baseline must be valid for the no-write regression');
  await evaluate("document.querySelector('[data-step7-open-pdf-review]').click()");
  await eventually(()=>evaluate("Boolean(document.querySelector('[data-step7-pdf-review]'))"));
  // The web/Chrome/Edge version must not pretend that unbundled native OCR is ready.
