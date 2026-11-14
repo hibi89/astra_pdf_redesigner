@@ -99,12 +99,16 @@ test('P125 missing pin, wrong issuer, malformed, tampered, expired, and invalid-
  const badSeat=a.sign('business',{seats:3});
  const other= createGuard(b);
  const noPin=createCustomerSkuActionGuard({customerBuildEnabled:true,issuerPublicJwk:null,issuerThumbprintSha256:null,nowSeconds:()=>NOW});
- for(const [candidate,policy] of [
-  [valid,other],['not-json',guard],[tampered,guard],[expired,guard],[badSeat,guard],[valid,noPin],
- ]){
-  const f=frameFixture();let sideEffects=0;
-  await assert.rejects(policy.run({...f,receipt:candidate,requestId:requestId(),requiredCapabilities:['business-layout']},()=>{sideEffects++;}),/Customer SKU action denied/);
-  assert.equal(sideEffects,0);
+ const rejectedCases=[
+  ['wrong issuer',valid,other],['malformed','not-json',guard],['tampered',tampered,guard],
+  ['expired',expired,guard],['invalid seats',badSeat,guard],['missing pin',valid,noPin],
+ ];
+ for(const [name,candidate,policy] of rejectedCases){
+  const f=frameFixture();let sideEffects=0,denied=false;
+  try{await policy.run({...f,receipt:candidate,requestId:requestId(),requiredCapabilities:['business-layout']},()=>{sideEffects++;});}
+  catch(error){denied=error instanceof Error&&error.message==='Customer SKU action denied';}
+  assert.equal(denied,true,name+' must fail closed');
+  assert.equal(sideEffects,0,name+' must have no side effect');
  }
  const f=frameFixture();let sideEffects=0;
  await assert.rejects(guard.run({...f,receipt:valid,requestId:requestId(),requiredCapabilities:['business-layout'],issuerPublicJwk:a.issuerPublicJwk,issuerThumbprintSha256:a.issuerThumbprintSha256},()=>{sideEffects++;}),/Customer SKU action denied/);
