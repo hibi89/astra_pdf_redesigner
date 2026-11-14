@@ -33,6 +33,8 @@ jobs:
           npm run desktop:verify
       - name: Native Electron renderer smoke (isolated temp profile)
         run: npm run desktop:smoke
+      - name: Reject unapproved native OCR assets before packaging
+        run: npm run ocr:release-gate
       - name: Build unsigned Windows x64 NSIS installer
         run: npx electron-builder --win nsis --x64 --publish never
         env:
@@ -58,6 +60,8 @@ jobs:
           Move-Item -LiteralPath $base[0].FullName -Destination $dest
           node tests/prepare-upgrade-candidate.cjs
           if ($LASTEXITCODE -ne 0) { throw 'Failed to prepare ephemeral upgrade version' }
+      - name: Reject unapproved native OCR assets before packaging
+        run: npm run ocr:release-gate
       - name: Build version 0.1.1 NSIS candidate with same application code
         run: npx electron-builder --win nsis --x64 --publish never
         env:
