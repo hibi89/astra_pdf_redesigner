@@ -129,7 +129,7 @@ try{
    const height=Number(/height="([\d.]+)"/u.exec(attributes)?.[1]);
    assert.ok(Math.abs(width-595.28)<1&&Math.abs(height-841.89)<1,id+' page '+(pageIndex+1)+' A4 media box');
    const words=[...body.matchAll(/<word\b([^>]*)>([\s\S]*?)<\/word>/gu)].map(match=>{
-    const attrs=match[1];return{xMin:Number(/xMin="([\d.]+)"/u.exec(attrs)?.[1]),yMin:Number(/yMin="([\d.]+)"/u.exec(attrs)?.[1]),xMax:Number(/xMax="([\d.]+)"/u.exec(attrs)?.[1]),yMax:Number(/yMax="([\d.]+)"/u.exec(attrs)?.[1])};
+    const attrs=match[1];return{text:match[2].replace(/<[^>]*>/gu,'').trim(),xMin:Number(/xMin="([\d.]+)"/u.exec(attrs)?.[1]),yMin:Number(/yMin="([\d.]+)"/u.exec(attrs)?.[1]),xMax:Number(/xMax="([\d.]+)"/u.exec(attrs)?.[1]),yMax:Number(/yMax="([\d.]+)"/u.exec(attrs)?.[1])};
    }).sort((a,b)=>a.yMin-b.yMin||a.xMin-b.xMin);
    pdfGeometry.push(words.map(word=>[word.xMin,word.yMin,word.xMax,word.yMax].map(value=>Math.round(value*10)/10)));
    assert.ok(words.length>0,id+' page '+(pageIndex+1)+' has readable text');
