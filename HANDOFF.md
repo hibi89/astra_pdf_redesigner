@@ -1,3 +1,16 @@
+## 2026-11-14 KST — P105 다음 채팅 인수인계 10항 (CI 진행 중 잠정)
+
+1. **목표·용도·확정 요구·기술:** ASTRA PDF 원래 7단계, BASIC/PRO/BUSINESS, 사용자 최종설계 12영역 100점, 오프라인 OCR 공급망 신뢰 강화. Node22/PE32+ x64/React+PDF.js/Electron; 실제 고객 자료·판매·유료결제 없음.
+2. **완료 기능·결정 근거:** 대안 A 기존 P104 스트리밍 SHA-256로 확인한 동일 파일 바이트에서 PE 정적 import/지연 DLL 검사(채택; 부수 비용 0, 즉시 CI 검증), 대안 B 외부 Windows 설치 공급자·서명 검수 단독(실제 자산 없어 보류). P105 경로 누락/공급망 DLL 탈락/OS DLL 이름 오염/변조된 RVA 차단; 기존 P104 정확 SHA·패키징 차단 유지.
+3. **테스트 명령/진행·성공/실패·미검증:** P105 기능 SHA d8e765ef538e6f41fa3fc870a9257238a7c4af98; 추가 parser 합성 11건. npm test / npm run desktop:test / npm run build / npm run ocr:release-gate. GitHub Actions Linux+Chrome/Edge #43576345594, Windows+NSIS #43576345628, 최종설계 #43576345809. 코드 push 직후 Node Linux/Windows·build/desktop smoke/RELEASE HOLD CI step 성공, 정책 workflow 성공; 전체 2개 workflow **IN_PROGRESS / 최종 PASS 아직 미검증**. P104 이전 3/3 성공과 혼동 금지.
+4. **완료/진행/대기/차단:** P105 코드 커밋 반영/일부 CI 단계 PASS. 전체 browser/NSIS 결과·원시 로그 확인 진행, 공급자 EXE/DLL/installer 실물 서명·실측 SHA·전체 runtime 종속성·NOTICE/SBOM/법적 재배포·실 OS/고객 PDF/LLM/3SKU 수용 대기. 전체 최종률 UNASSESSED, 100% 미달, RELEASE HOLD.
+5. **오류·근거·시도·재시도 금지·대안:** 최초 원자적 커밋 스크립트 문자열 구문오류(원격 코드 변경 0), 단순화 후 GitHub fast-forward 성공. PE import table만으로 LoadLibrary를 검증했다는 오인 금지; 파일 검증 한계를 우회하기 위한 false PASS 금지. 서명과 재배포 적법성은 공급자 원본 필요.
+6. **저장소·브랜치·SHA·핵심 경로:** hibi89/astra_pdf_redesigner / feature/astra-p71-pdf-source-parity-20261112 / 기능 d8e765ef538e6f41fa3fc870a9257238a7c4af98. 변경 desktop/ocr-pe-import-audit.cjs, desktop/ocr-supply-chain-preflight.cjs, tests/ocr-pe-import-audit.test.cjs, tests/ocr-supply-chain-preflight.test.cjs, package.json, P105 상세 문서. 본 문서 SHA는 최종 커밋 후 확인.
+7. **Production·배포·환경:** Windows NSIS 합성 설치기 CI는 배포/실 제품 승인 아님. Vercel 미적용. Node22 npm test/build/desktop:test/ocr:release-gate, 외부 manifest 검수는 npm run ocr:preflight -- <assets> <manifest>. 현재 실제 자산 0/OCR_MANIFEST=null.
+8. **원본·백업·비밀·수정 금지:** 이전 Git HEAD 074b240244aad23631466894fd633efc86558f12로 정상 Git revert 가능한 기준. main·Draft PR10·STEP1 localStorage V1·STEP2 IndexedDB V2·고객 PDF·디자인8종·등록이력·인증 비밀 모두 유지. force push·외부 업로드·서명키·승인 없는 OCR 자산 다운로드·번들 금지.
+9. **다음 작업·완료 기준·승인:** ①정확 기능 SHA의 Linux+Windows 전체 job/raw log 완료 확인 ②실제 신뢰할 Windows Tesseract installer+개별 DLL/kor+eng 및 라이선스/Authenticode 증거 확보(무단 설치/재배포 금지) ③Windows static+dynamic loader 회귀와 실 한글/금액/표 PDF ④3SKU/AI/실 고객 PDF 5~10·물리 PC·12영역100점 검수. 사용자 모바일; PC 요청 최후 합산, 무료 코드 범위 이미 승인.
+10. **갱신 시점(KST)·검증 범위:** 2026-11-14 KST, GitHub commit/branch + Actions step 단위 실증; 전체 Actions 최종 결과 및 공급자/구매자 Windows는 아직 미확인. 중앙 kmong-productization 동기화는 별도 exact-SHA 검증 후.
+
 ## 2026-11-14 KST — P104 정확 SHA 3/3 CI 검증 최종 인수인계 10항
 
 1. **목표·확정 요구·기술:** Astra STEP1~7/3SKU/최종12항100점, 로컬 Windows x64 OCR 바이너리 안전 감사·가드. React/TS/PDF.js/Electron/NSIS + Node22 SHA-256/PE32+ 사전검사, 유료/외부 전송0.

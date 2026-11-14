@@ -1,3 +1,10 @@
+## 2026-11-14 KST — P105 x64 PE static import + delay dependency fail-closed audit (정확 CI 최종 대기)
+
+- **실제 기능 커밋 SHA d8e765ef538e6f41fa3fc870a9257238a7c4af98** (기존 P104 HEAD 074b2402에서 일반 fast-forward). desktop/ocr-pe-import-audit.cjs 신규, 기존 P104 offline manifest/hash 검사와 결합: PE32+ optional header/section RVA, direct/delay imports, 안전 DLL 파일명, 시스템 DLL shadowing, 신고되지 않은 제3자 DLL 차단. 단일 PE 버퍼 64 MiB 초과는 자동 승인 없이 차단. 기존 원문/PDF/IndexedDB/NSIS HOLD/주 브랜치 불변.
+- 신규 tests/ocr-pe-import-audit.test.cjs 11개를 npm test와 desktop:test에 추가; 기존 합성 fake PE optional header를 정상 구조로 보강. **CI run #43576345594 Linux/Chrome/Edge, #43576345628 Windows NSIS, #43576345809 정책**이 기능 SHA에서 실행됨. 최초 step 단위 npm test/Windows Node/React build/desktop smoke/ocr release gate SUCCESS, 정책 workflow SUCCESS. 전체 Linux/Windows installer conclusion은 이 기록 작성 시 **IN_PROGRESS/미확정**. 정확 SHA별 최종 PASS/FAIL/SKIP은 별도 확인하고 갱신할 것.
+- P105의 검사는 import descriptor에 **정적으로 기록된** DLL만 다룬다. Windows LoadLibrary 동적 로딩, forwarded exports, 실행 중 DLL 검색·API-set OS 차이, 실제 Authenticode/인증서 유효성, 법적 재배포권·SBOM, 실제 Windows10/11 Tesseract·한국어/숫자/표 OCR/허가 PDF 5~10개와 3SKU/AI 수용은 **미검증**. 실제 release hold와 OCR_MANIFEST=null 유지.
+- **공식 12영역 최종완성률 UNASSESSED**, 최종100% 미달, Astra [작업중], RELEASE HOLD/크몽 미등록/Vercel 미적용. 증거 상세 docs/commercial/ASTRA_P105_PE_STATIC_IMPORT_REVIEW_20261114.md.
+
 ## 2026-11-14 KST — P104 정확 SHA OCR 공급망·Windows 패키징 3/3 CI 최종 성공
 
 - **최종 기능/회귀 SHA:** e2fd0797990ce94e7f7a68720ece3617f9d114db. [Linux Chrome+Edge #43574432110](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43574432110) **2/2 JOB SUCCESS**, Node 210/210 PASS/0 FAIL/0 SKIP, Vite/TypeScript build 및 Chrome/Edge 각각 실제 PDF.js synthetic scan review E2E PASS(네트워크 외부 요청0).
