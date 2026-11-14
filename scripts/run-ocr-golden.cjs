@@ -22,9 +22,11 @@ function charError(reference,recognized){
 }
 async function run(){
  if(process.platform!=='linux')throw Error('Golden harness verified on Linux only');
- if(process.argv.length!==6)throw Error('Usage: node scripts/run-ocr-golden.cjs samplesDir tesseractBin kor.traineddata eng.traineddata');
+ if(process.argv.length!==6&&process.argv.length!==7)throw Error('Usage: node scripts/run-ocr-golden.cjs samplesDir tesseractBin kor.traineddata eng.traineddata [3|6]');
  if(OCR_MANIFEST!==null)throw Error('Test must not activate a release OCR manifest');
  const [, ,samplesDir,binaryPath,korPath,engPath]=process.argv;
+ const pageSegmentationMode=process.argv.length===7?Number(process.argv[6]):6;
+ if(pageSegmentationMode!==3&&pageSegmentationMode!==6)throw Error('Only OCR segmentation mode 3 or 6 is allowed');
  const base=fs.realpathSync(samplesDir);
  const cases=JSON.parse(fs.readFileSync(path.join(base,'manifest.json'),'utf8'));
  if(!Array.isArray(cases)||cases.length!==20)throw Error('Expected 20 synthetic cases');
@@ -60,7 +62,7 @@ async function run(){
    const png=fs.readFileSync(input);
    if(png.length>8*1024*1024||digest(png)!==sample.sha256)throw Error('Synthetic PNG hash mismatch');
    const started=Date.now();
-   const reply=await engine.recognizePng(png);
+   const reply=await engine.recognizePng(png,pageSegmentationMode);
    const reference=normalize(sample.expected);
    const recognized=normalize(reply.status==='review'&&typeof reply.text==='string'?reply.text:'');
    outcomes.push({case:sample.case,status:reply.status,exact:reference===recognized,
@@ -70,7 +72,7 @@ async function run(){
   const average=outcomes.reduce((total,x)=>total+x.cer,0)/outcomes.length;
   const summary={
    format:'astra-ocr-synthetic-golden-v1',synthetic:true,
-   engine:'tesseract-kor-eng-local-pinned',tested:outcomes.length,reviewed:outcomes.filter(x=>x.status==='review').length,
+   engine:'tesseract-kor-eng-local-pinned',pageSegmentationMode,tested:outcomes.length,reviewed:outcomes.filter(x=>x.status==='review').length,
    exact,nonExact:outcomes.length-exact,meanCharacterErrorRate:Number(average.toFixed(4)),
    mismatchedCaseIds:outcomes.filter(x=>!x.exact).map(x=>x.case),
    totalDurationMs:outcomes.reduce((total,x)=>total+x.ms,0),
