@@ -34,7 +34,10 @@
           "created_at_utc": "2024-06-18T08:57:38Z",
           "github_release_digest": null,
           "sha256": null,
-          "sha256_status": "NOT_PUBLISHED_IN_GITHUB_RELEASE_METADATA"
+          "sha256_status": "MATCHED_PINNED_MICROSOFT_WINGET_MANIFEST; GITHUB_RELEASE_METADATA_DIGEST_NULL",
+          "independent_sha256_reference": "https://github.com/microsoft/winget-pkgs/blob/dd11564899b74d402e5fd39cb6f7b31945170286/manifests/u/UB-Mannheim/TesseractOCR/5.4.0.20240606/UB-Mannheim.TesseractOCR.installer.yaml",
+          "independent_sha256_reference_commit": "dd11564899b74d402e5fd39cb6f7b31945170286",
+          "sha256_expected_and_observed": "c885fff6998e0608ba4bb8ab51436e1c6775c2bafc2559a19b423e18678b60c9"
         }
       },
       "upstream_context": {
@@ -46,12 +49,19 @@
         "note": "The upstream source release has no Windows binary asset; UB-Mannheim is a separate Windows packaging candidate."
       },
       "windows_binary_evidence": {
-        "authenticode": "NOT_VERIFIED",
-        "pe_architecture": "NOT_VERIFIED",
-        "direct_imports": "NOT_VERIFIED",
-        "delay_load_imports": "NOT_VERIFIED",
-        "complete_runtime_dll_closure": "NOT_VERIFIED",
-        "reason": "P119 requires source evidence without a separate binary download or bundling. GitHub release metadata exposes no asset SHA-256 or signature evidence; the binary was not downloaded."
+        "authenticode": "UnknownError",
+        "signer": "CN=Universität Mannheim, O=Universität Mannheim, S=Baden-Württemberg, C=DE",
+        "signer_thumbprint": "2F92CB990D57719BDCCA2D72134378614A040D9B",
+        "timestamp_signer": "CN=\"Sectigo RSA Time Stamping Signer #4\", O=Sectigo Limited, S=Manchester, C=GB",
+        "pe_architecture": "NOT_CHECKED_FAIL_CLOSED",
+        "direct_imports": "NOT_CHECKED_FAIL_CLOSED",
+        "delay_load_imports": "NOT_CHECKED_FAIL_CLOSED",
+        "complete_runtime_dll_closure": "NOT_CHECKED_FAIL_CLOSED",
+        "license_files": "NOT_CHECKED_FAIL_CLOSED",
+        "installer_attempted": false,
+        "artifact_id": 14136681467,
+        "artifact_sha256": "426e2c00a342e651d9414cd2f43a1597a3c4dd2825a0ed0ad59f6fb4b895eb2f",
+        "reason": "Installer SHA matched pinned Microsoft winget-pkgs manifest at signed commit dd11564899b74d402e5fd39cb6f7b31945170286, but Authenticode UnknownError caused the fail-closed audit to skip installation."
       },
       "language_data": {
         "repository": "https://github.com/tesseract-ocr/tessdata_best",
@@ -90,10 +100,10 @@
     }
   ],
   "blockers": [
-    "The UB-Mannheim v5.4.0.20240606 candidate has no GitHub Release digest; candidate signature, import closure and exact-bundle notices still require an isolated audit.",
-    "The upstream Tesseract 5.5.3 asset SHA-256 is pinned and matched; Authenticode returned UnknownError due a certificate validity-period error.",
-    "The upstream Tesseract 5.5.0 asset SHA-256 matched the pinned Scoop manifest, but Authenticode also returned UnknownError for the same publisher. It was not installed; no import or license inventory was performed.",
-    "For the 5.5.3 install, static imports closed but installer showed only doc/AUTHORS and doc/LICENSE; dependency-specific notice/license mapping and exact-bundle redistribution rights remain unconfirmed.",
+    "The UB-Mannheim v5.4.0.20240606 GitHub Release digest is null; its downloaded installer matched the SHA in a pinned Microsoft winget-pkgs manifest, but Authenticode returned UnknownError, so PE/import/license inventory was not performed.",
+    "The upstream Tesseract 5.5.3 and 5.5.0 installer SHA values matched their pins but Authenticode returned UnknownError for the same Universität Mannheim signer.",
+    "The 5.5.3 installed runtime static import closure was closed, but dependency-specific NOTICE/license mapping and exact-bundle redistribution rights remain unconfirmed.",
+    "All three Windows candidates fail the Valid Authenticode prerequisite; no accepted supplier, exact-bundle rights, or product OCR approval is established.",
     "P119 remains BLOCKED +0. Keep OCR_MANIFEST=null and RELEASE HOLD; no vendor binary is committed or bundled."
   ],
   "github_sources": [
@@ -102,39 +112,26 @@
     "https://api.github.com/repos/UB-Mannheim/tesseract/git/tags/55c4af18dd92ac7551ca1a62357bbbc0baa8db74",
     "https://api.github.com/repos/tesseract-ocr/tesseract/releases/latest",
     "https://api.github.com/repos/tesseract-ocr/tessdata_best/git/trees/main?recursive=1",
-    "https://api.github.com/repos/DanBloomberg/leptonica/contents/leptonica-license.txt?ref=master"
+    "https://api.github.com/repos/DanBloomberg/leptonica/contents/leptonica-license.txt?ref=master",
+    "https://github.com/microsoft/winget-pkgs/blob/dd11564899b74d402e5fd39cb6f7b31945170286/manifests/u/UB-Mannheim/TesseractOCR/5.4.0.20240606/UB-Mannheim.TesseractOCR.installer.yaml",
+    "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926099",
+    "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926099/artifacts/14136681467",
+    "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926099/artifacts/14136970048"
   ],
   "follow_up_github_actions_candidate": {
-    "id": "tesseract-ocr/tesseract 5.5.3 Windows installer (exploratory, not approved)",
-    "release_url": "https://github.com/tesseract-ocr/tesseract/releases/tag/5.5.3",
-    "asset": "tesseract-ocr-w64-setup-5.5.3.20260724.exe",
-    "asset_sha256": "bee9e3434bd94fd65387d9be28cd467a41f61b1275383b55b0f59a1331270ae4",
-    "observed_windows_authenticode": "UnknownError",
-    "signer": "CN=Universität Mannheim, O=Universität Mannheim, S=Baden-Württemberg, C=DE",
-    "signer_thumbprint": "2F92CB990D57719BDCCA2D72134378614A040D9B",
-    "runtime_pe_files_observed": 73,
-    "runtime_license_files": [
-      "doc/AUTHORS",
-      "doc/LICENSE"
-    ],
-    "dependency_notice_mapping": "NOT_VERIFIED",
-    "static_import_closure": "NOT_PROVEN",
-    "language_data_commit": "e12c65a915945e4c28e237a9b52bc4a8f39a0cec",
-    "eng_sha256": "8280aed0782fe27257a68ea10fe7ef324ca0f8d85bd2fd145d1c2b560bcb66ba",
-    "kor_sha256": "f888d4038348a0c3d25151e7f452bda0d74ca275b18cab146798bcbb94084fff",
-    "windows_workflow_run": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43646062862",
-    "evidence_source_sha": "5a0c32c3358834557b76da739ee3d97a2c6e612b",
-    "product_ocr_enabled": false,
-    "linux_workflow_run": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43646062853",
-    "blueprint_workflow_run": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43646063260",
-    "report_artifact": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43646062862/artifacts/14134331658"
+    "id": "No verified Windows installer candidate currently available in audited GitHub releases",
+    "latest_upstream_source_release": "tesseract-ocr/tesseract 5.5.4",
+    "latest_upstream_release_url": "https://github.com/tesseract-ocr/tesseract/releases/tag/5.5.4",
+    "latest_upstream_release_assets": [],
+    "latest_ub_mannheim_windows_release": "v5.4.0.20240606",
+    "status": "AWAIT_APPROVED_SUPPLIER_HASH_SIGNATURE_AND_EXACT_BUNDLE_LICENSE_NOTICE_EVIDENCE"
   },
   "latest_github_hosted_windows_audit": {
-    "code_sha": "c365ba07df29cd6228a794f0c420230d448f91ee",
+    "code_sha": "b6d7909e6897578181dbd304ff12491760422530",
     "actions": {
-      "linux": 43650366545,
-      "windows": 43650366554,
-      "blueprint": 43650366939,
+      "linux": 43651926094,
+      "windows": 43651926099,
+      "blueprint": 43651926332,
       "all": "SUCCESS"
     },
     "installer": {
@@ -178,7 +175,12 @@
       "exact": 9,
       "errors": 3,
       "mean_whitespace_normalized_cer": 0.0486,
-      "critical_number_mismatch": "2,300,000원→22300,000원"
+      "critical_number_mismatch": "2,300,000원→22300,000원",
+      "report_artifact": {
+        "id": 14136970048,
+        "url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926099/artifacts/14136970048",
+        "sha256": "36413a867222dc714455dd9ca81f1804fb8a42b796fa3a4f49fe2241aced8268"
+      }
     },
     "report_artifact": {
       "id": 14135218120,
@@ -188,10 +190,11 @@
     "decision": "BLOCKED",
     "credit_earned": 0,
     "blockers": [
-      "Authenticode UnknownError/certificate validity-period error",
-      "dependency-specific license/NOTICE mapping not established",
-      "redistribution rights for the exact installed bundle not confirmed",
-      "Keep OCR_MANIFEST=null and RELEASE HOLD"
+      "The UB-Mannheim v5.4.0.20240606 GitHub Release digest is null; its downloaded installer matched the SHA in a pinned Microsoft winget-pkgs manifest, but Authenticode returned UnknownError, so PE/import/license inventory was not performed.",
+      "The upstream Tesseract 5.5.3 and 5.5.0 installer SHA values matched their pins but Authenticode returned UnknownError for the same Universität Mannheim signer.",
+      "The 5.5.3 installed runtime static import closure was closed, but dependency-specific NOTICE/license mapping and exact-bundle redistribution rights remain unconfirmed.",
+      "All three Windows candidates fail the Valid Authenticode prerequisite; no accepted supplier, exact-bundle rights, or product OCR approval is established.",
+      "P119 remains BLOCKED +0. Keep OCR_MANIFEST=null and RELEASE HOLD; no vendor binary is committed or bundled."
     ],
     "alternate_candidate_5_5_0": {
       "repository": "https://github.com/tesseract-ocr/tesseract",
@@ -217,6 +220,47 @@
         "id": 14135377855,
         "url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366554/artifacts/14135377855",
         "sha256": "068625dc9be4c29db76b7b8fd8f29c20dda3d4a4c06954ee87d202e2c1abe472"
+      },
+      "decision": "NOT_APPROVED"
+    },
+    "windows_test_summary": {
+      "node_tests": 290,
+      "node_pass": 289,
+      "node_fail": 0,
+      "node_skipped": 1,
+      "desktop_tests": 86,
+      "desktop_pass": 86,
+      "fail_closed_guard_tests": 6,
+      "guard_pass": 6
+    },
+    "alternate_candidate_5_4_0": {
+      "repository": "https://github.com/UB-Mannheim/tesseract",
+      "release": "v5.4.0.20240606",
+      "asset": "tesseract-ocr-w64-setup-5.4.0.20240606.exe",
+      "url": "https://github.com/UB-Mannheim/tesseract/releases/download/v5.4.0.20240606/tesseract-ocr-w64-setup-5.4.0.20240606.exe",
+      "github_release_digest": null,
+      "sha256_expected_and_observed": "c885fff6998e0608ba4bb8ab51436e1c6775c2bafc2559a19b423e18678b60c9",
+      "sha256_reference": "https://github.com/microsoft/winget-pkgs/blob/dd11564899b74d402e5fd39cb6f7b31945170286/manifests/u/UB-Mannheim/TesseractOCR/5.4.0.20240606/UB-Mannheim.TesseractOCR.installer.yaml",
+      "sha256_reference_commit": "dd11564899b74d402e5fd39cb6f7b31945170286",
+      "reference_commit_github_signature": "VERIFIED",
+      "authenticode": {
+        "status": "UnknownError",
+        "status_message": "A required certificate is not within its validity period when verifying against the current system clock or the timestamp in the signed file.",
+        "signer_subject": "CN=Universität Mannheim, O=Universität Mannheim, S=Baden-Württemberg, C=DE",
+        "signer_thumbprint": "2F92CB990D57719BDCCA2D72134378614A040D9B",
+        "timestamp_subject": "CN=\"Sectigo RSA Time Stamping Signer #4\", O=Sectigo Limited, S=Manchester, C=GB"
+      },
+      "install_attempted": false,
+      "install_reason": "fail-closed because Authenticode status was not Valid",
+      "version_output": null,
+      "observed_pe_files": 0,
+      "import_closure": "NOT_RUN",
+      "license_inventory": "NOT_RUN",
+      "windows_workflow_run": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926099",
+      "report_artifact": {
+        "id": 14136681467,
+        "url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926099/artifacts/14136681467",
+        "sha256": "426e2c00a342e651d9414cd2f43a1597a3c4dd2825a0ed0ad59f6fb4b895eb2f"
       },
       "decision": "NOT_APPROVED"
     }

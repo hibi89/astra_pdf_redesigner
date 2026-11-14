@@ -1,8 +1,8 @@
 # P120 — 실제 Windows Tesseract kor+eng 평가
 
 **상태:** BLOCKED · 인정 0/1점 · 잠정 총점 61/100  
-**정확 코드 SHA:** [`c365ba07df29cd6228a794f0c420230d448f91ee`](https://github.com/hibi89/astra_pdf_redesigner/commit/0f82c8f0764cd00460abe3b27f97b497ce61ceb5)  
-**Actions:** Linux [#43650366545](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106432) PASS · Windows [#43650366554](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106409) PASS · 정본 정책 [#43650366939](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106804) PASS
+**정확 코드 SHA:** [`b6d7909e6897578181dbd304ff12491760422530`](https://github.com/hibi89/astra_pdf_redesigner/commit/b6d7909e6897578181dbd304ff12491760422530)  
+**Actions:** Linux [#43651926094](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926094) PASS · Windows [#43651926099](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926099) PASS · 정본 정책 [#43651926332](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926332) PASS
 
 ## 실제 Windows 실행
 
@@ -22,3 +22,8 @@ GitHub-hosted Windows Server 2025 runner에서 upstream Tesseract 5.5.3.20260724
 ## 2026-11-15 re-run on latest audit SHA
 
 The real Windows Tesseract 5.5.3 kor+eng smoke ran again on exact SHA [`c365ba07df29cd6228a794f0c420230d448f91ee`](https://github.com/hibi89/astra_pdf_redesigner/commit/c365ba07df29cd6228a794f0c420230d448f91ee), with Linux [#43650366545](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366545), Windows [#43650366554](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366554), and policy [#43650366939](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366939) all SUCCESS. Results remain 9 exact / 3 errors across 12 synthetic samples, mean whitespace-normalized CER 0.0486; the critical amount mismatch is unchanged. Updated OCR report [artifact 14135218120](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366554/artifacts/14135218120) SHA-256 `9427dd87df4dcb09e2a8082123742968911e115bde7940bab12a69b5dca46565`. P120 remains BLOCKED +0 because P119 approval and full app/UI PSM 3/6 and cancellation acceptance are incomplete.
+
+
+## 2026-11-15 re-run on latest audit SHA
+
+The real Windows Tesseract 5.5.3 kor+eng smoke ran on exact SHA [`b6d7909e6897578181dbd304ff12491760422530`](https://github.com/hibi89/astra_pdf_redesigner/commit/b6d7909e6897578181dbd304ff12491760422530) with Linux [#43651926094](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926094), Windows [#43651926099](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926099), and policy [#43651926332](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926332) all SUCCESS. Results remain 9 exact / 3 errors across 12 synthetic samples, mean whitespace-normalized CER 0.0486; the critical amount mismatch is unchanged. Updated OCR report [artifact 14136970048](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926099/artifacts/14136970048) SHA-256 `36413a867222dc714455dd9ca81f1804fb8a42b796fa3a4f49fe2241aced8268`. P120 remains BLOCKED +0: P119 has no approved asset, and full app/UI PSM 3/6 and cancellation acceptance remain incomplete.

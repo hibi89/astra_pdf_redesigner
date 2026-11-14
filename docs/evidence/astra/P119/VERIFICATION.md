@@ -1,8 +1,8 @@
 # P119 — Windows Tesseract 공급처 후보 감사
 
 **판정:** BLOCKED · 인정 0/1점 · 잠정 완성률 61/100  
-**최신 감사 코드 SHA:** [`c365ba07df29cd6228a794f0c420230d448f91ee`](https://github.com/hibi89/astra_pdf_redesigner/commit/0f82c8f0764cd00460abe3b27f97b497ce61ceb5)  
-**정확 SHA Actions:** Linux [#43650366545](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106432) PASS · Windows [#43650366554](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106409) PASS · 정본 정책 [#43650366939](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43647106804) PASS  
+**최신 감사 코드 SHA:** [`b6d7909e6897578181dbd304ff12491760422530`](https://github.com/hibi89/astra_pdf_redesigner/commit/b6d7909e6897578181dbd304ff12491760422530)  
+**정확 SHA Actions:** Linux [#43651926094](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926094) PASS · Windows [#43651926099](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926099) PASS · 정본 정책 [#43651926332](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926332) PASS
 **공식 수용:** UNASSESSED · **출시:** RELEASE HOLD · **OCR_MANIFEST:** null
 
 ## 공급 후보 감사 결과
@@ -27,3 +27,14 @@
 정확 SHA [`c365ba07df29cd6228a794f0c420230d448f91ee`](https://github.com/hibi89/astra_pdf_redesigner/commit/c365ba07df29cd6228a794f0c420230d448f91ee)의 Linux [#43650366545](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366545), Windows [#43650366554](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366554), 정본 정책 [#43650366939](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366939)가 모두 SUCCESS했다. Windows Actions에서 official upstream release `tesseract-ocr-w64-setup-5.5.0.20241111.exe`를 검사했다. Scoop manifest [08f0339](https://github.com/anderlli0053/DEV-tools/blob/08f0339f698c7b0dab04f1b69f74deaa42dde98a/bucket/tesseract.json)의 pin `f3fc4236425b690c8be756f35793f77394ee004be0a6460a440c754d892f68bc`와 다운로드 asset SHA-256이 일치했다. Windows Authenticode는 이 후보에서도 `UnknownError`를 반환했고 동일한 Universität Mannheim signer/thumbprint `2F92CB990D57719BDCCA2D72134378614A040D9B`를 관찰했다. Timestamp signer는 Sectigo Public Time Stamping Signer R35였고 Windows는 인증서 유효기간 오류를 보고했다. 감사는 서명이 `Valid`가 아니어서 설치 전에 fail-closed 중단했으므로 이 후보의 PE closure·license inventory는 실행하지 않았다. [후보 감사 report artifact 14135377855](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366554/artifacts/14135377855) SHA-256 `068625dc9be4c29db76b7b8fd8f29c20dda3d4a4c06954ee87d202e2c1abe472`에 결과를 보존했다.
 
 따라서 5.5.0도 승인 후보가 아니다. 5.5.3의 import closure 및 실제 OCR 증거는 유지되지만 서명·bundle NOTICE/license·재배포 근거가 없어 P119/P120은 각각 BLOCKED +0이다. 제품 OCR_MANIFEST=null, RELEASE HOLD.
+
+
+## 2026-11-15 — UB-Mannheim 5.4.0 Windows 후보 감사 (P119, no score)
+
+Exact audit SHA [`b6d7909e6897578181dbd304ff12491760422530`](https://github.com/hibi89/astra_pdf_redesigner/commit/b6d7909e6897578181dbd304ff12491760422530) passed Linux [#43651926094](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926094), Windows [#43651926099](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926099), and final blueprint [#43651926332](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926332). The GitHub-hosted Windows audit downloaded the official UB-Mannheim 5.4.0.20240606 release asset on an isolated runner and matched SHA-256 `c885fff6998e0608ba4bb8ab51436e1c6775c2bafc2559a19b423e18678b60c9` against the pinned Microsoft winget-pkgs manifest at signed commit `dd11564899b74d402e5fd39cb6f7b31945170286` ([manifest](https://github.com/microsoft/winget-pkgs/blob/dd11564899b74d402e5fd39cb6f7b31945170286/manifests/u/UB-Mannheim/TesseractOCR/5.4.0.20240606/UB-Mannheim.TesseractOCR.installer.yaml)).
+
+Windows Authenticode returned `UnknownError`: “A required certificate is not within its validity period when verifying against the current system clock or the timestamp in the signed file.” Signer: Universität Mannheim, thumbprint `2F92CB990D57719BDCCA2D72134378614A040D9B`; timestamp signer: Sectigo RSA Time Stamping Signer #4. The fail-closed audit did not install the candidate; version, PE, import and license inventory are therefore unavailable. [Report artifact 14136681467](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926099/artifacts/14136681467) SHA-256 `426e2c00a342e651d9414cd2f43a1597a3c4dd2825a0ed0ad59f6fb4b895eb2f`.
+
+Linux Node: 290/290 PASS. Windows Node: 289 PASS / 0 FAIL / 1 OS-specific SKIP; desktop 86/86 PASS; new audit guard 6/6 PASS; OCR smoke PASS; installer and in-place upgrade PASS. The Windows OCR report artifact [14136970048](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926099/artifacts/14136970048) SHA-256 `36413a867222dc714455dd9ca81f1804fb8a42b796fa3a4f49fe2241aced8268` repeats 9 exact / 3 errors across 12 synthetic cases, mean normalized CER 0.0486, including `2,300,000원→22300,000원`.
+
+P119/P120 remain BLOCKED +0. Three installer candidates (5.5.3, 5.5.0 and UB-Mannheim 5.4.0) have now returned Authenticode `UnknownError`; no candidate is approved. Keep `OCR_MANIFEST=null` and `RELEASE HOLD`.

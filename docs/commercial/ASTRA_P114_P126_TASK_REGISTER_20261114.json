@@ -303,11 +303,11 @@
       ],
       "implementation": "별도 다운로드/동봉 없이 공식 공급처 후보의 버전·해시·Authenticode·PE import/delay-load DLL 폐쇄성·tessdata kor/eng·재배포권 증거를 정리한다. 데이터/고객 PDF 없이 증거·검증기만 유지.",
       "acceptance": "Windows 테스트에서 정상·변조·누락·DLL 경로 오염·서명 없음·라이선스 고지 없음 케이스의 거부 동작, SBOM/NOTICE 후보별 근거 파일, 출처 날짜·버전·파일 해시 기록.",
-      "blockers": "Upstream 5.5.3 static imports are closed and SHA pinned, but Authenticode is UnknownError and dependency license/NOTICE plus exact-bundle redistribution remain unproven. A second upstream 5.5.0 asset's hash also matched a pinned GitHub manifest but its Authenticode is UnknownError. Keep OCR_MANIFEST=null and RELEASE HOLD.",
-      "evidence_feature_sha": "c365ba07df29cd6228a794f0c420230d448f91ee",
-      "linux_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366545",
-      "windows_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366554",
-      "blueprint_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366939",
+      "blockers": "All three available Windows installers have Authenticode UnknownError for the Universität Mannheim signer; exact dependency NOTICE/license and redistribution evidence for the 5.5.3 bundle remain incomplete. User must identify/provide a GitHub-accessible approved Windows asset with verifiable signature/hash and bundle licensing evidence. Keep OCR_MANIFEST=null and RELEASE HOLD.",
+      "evidence_feature_sha": "b6d7909e6897578181dbd304ff12491760422530",
+      "linux_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926094",
+      "windows_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926099",
+      "blueprint_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926332",
       "executor": "Codex 6 Luna Max",
       "execution_medium": "GitHub-only",
       "runner": "windows-latest official artifact SHA/AuthentiCode/PE/license",
@@ -317,15 +317,16 @@
         "Windows Electron/NSIS when relevant",
         "Final blueprint policy"
       ],
-      "evidence_linux_run": 43650366545,
-      "evidence_windows_run": 43650366554,
-      "evidence_blueprint_run": 43650366939,
-      "actual_result": "BLOCKED +0. On latest exact SHA c365ba07df29cd6228a794f0c420230d448f91ee, Linux/Windows/policy Actions passed. 5.5.3 static imports remain closed (56 PE files, 286 direct, 0 delay imports). Alternate upstream 5.5.0 SHA-256 f3fc4236425b690c8be756f35793f77394ee004be0a6460a440c754d892f68bc matched a pinned Scoop manifest but Authenticode returned UnknownError, so it was not installed and has no PE/license inventory. 5.5.3 dependency license/NOTICE and exact-bundle redistribution rights remain unverified.",
+      "evidence_linux_run": 43651926094,
+      "evidence_windows_run": 43651926099,
+      "evidence_blueprint_run": 43651926332,
+      "actual_result": "BLOCKED +0. Exact SHA b6d7909e6897578181dbd304ff12491760422530 passed Linux/Windows/policy Actions. The official UB-Mannheim 5.4.0.20240606 installer SHA-256 matched https://github.com/microsoft/winget-pkgs/blob/dd11564899b74d402e5fd39cb6f7b31945170286/manifests/u/UB-Mannheim/TesseractOCR/5.4.0.20240606/UB-Mannheim.TesseractOCR.installer.yaml (signed manifest commit dd11564899b74d402e5fd39cb6f7b31945170286), but Authenticode returned UnknownError for the Universität Mannheim signer due a validity-period error. Fail-closed audit skipped install; no PE/import/license inventory. Previously tested 5.5.3 and 5.5.0 returned the same Authenticode status. No supplier approved.",
       "blockers_observed": [
-        "Authenticode UnknownError with certificate validity-period error; signer Universität Mannheim, thumbprint 2F92CB990D57719BDCCA2D72134378614A040D9B.",
-        "Exact installer dependency license/NOTICE inventory and redistribution rights remain unverified.",
-        "UB-Mannheim v5.4 candidate metadata digest remains null; upstream 5.5.3 asset is separately hash-pinned but not approved.",
-        "Upstream 5.5.0 candidate hash matched a GitHub Scoop manifest but Authenticode returned UnknownError; fail-closed audit skipped installation."
+        "5.4.0 installer actual SHA c885fff6998e0608ba4bb8ab51436e1c6775c2bafc2559a19b423e18678b60c9 matched pinned Microsoft winget-pkgs manifest commit dd11564899b74d402e5fd39cb6f7b31945170286.",
+        "Windows Authenticode UnknownError: required signer/timestamp certificate outside validity period; signer Universität Mannheim thumbprint 2F92CB990D57719BDCCA2D72134378614A040D9B.",
+        "Fail-closed Windows audit did not install 5.4.0; PE/import/license inventory not run.",
+        "5.5.0 and 5.5.3 also returned Authenticode UnknownError; no supplier candidate approved.",
+        "Exact 5.5.3 runtime dependency NOTICE/license and redistribution rights are unverified."
       ],
       "supplier_audit_path": "docs/evidence/astra/P119/SUPPLIER_CANDIDATE_AUDIT.json"
     },
@@ -347,10 +348,10 @@
       "implementation": "한글·숫자·부정문·표·두 단·회전·저해상·잡음 스캔을 공용/자체 합성 PDF 이미지로 재생성. OCR의 원문 대조 UI와 누락·오인식 경고, PSM 3/6 선택·취소 기능을 검수.",
       "acceptance": "사전에 고정한 최소 12개 합성 OCR 원본을 실제 Tesseract kor+eng으로 실행하고 페이지별 CER/중요 수치 일치·검출 실패를 CSV/JSON에 기록. 오류를 자동승인/무경고 성공 처리한 0건; 실제 OCR 성공 1건 이상과 오류 실패사례 1건 이상 재현.",
       "blockers": "Actual Windows Tesseract 5.5.3 kor+eng 12-case execution is feasible (9 exact, 3 errors, CER 0.0486), but P119 remains unapproved; PSM3/6 UI, cancel and full app review acceptance remain incomplete. No point until dependencies and acceptance pass.",
-      "evidence_feature_sha": "c365ba07df29cd6228a794f0c420230d448f91ee",
-      "linux_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366545",
-      "windows_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366554",
-      "blueprint_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43650366939",
+      "evidence_feature_sha": "b6d7909e6897578181dbd304ff12491760422530",
+      "linux_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926094",
+      "windows_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926099",
+      "blueprint_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926332",
       "executor": "Codex 6 Luna Max",
       "execution_medium": "GitHub-only",
       "runner": "GitHub-hosted real Tesseract kor+eng, min12 cases",
@@ -360,10 +361,10 @@
         "Windows Electron/NSIS when relevant",
         "Final blueprint policy"
       ],
-      "evidence_linux_run": 43650366545,
-      "evidence_windows_run": 43650366554,
-      "evidence_blueprint_run": 43650366939,
-      "actual_result": "Actual Windows Tesseract 5.5.3 kor+eng ran on 12 synthetic cases at exact SHA c365ba07df29cd6228a794f0c420230d448f91ee: 9 exact, 3 errors, mean normalized CER 0.0486; critical amount mismatch 2,300,000원→22300,000원. OCR report artifact 14135218120 SHA-256 9427dd87df4dcb09e2a8082123742968911e115bde7940bab12a69b5dca46565. P119 approval and full app source review, PSM3/6 UI, cancel and cleanup acceptance remain incomplete. +0.",
+      "evidence_linux_run": 43651926094,
+      "evidence_windows_run": 43651926099,
+      "evidence_blueprint_run": 43651926332,
+      "actual_result": "Actual Windows Tesseract 5.5.3 kor+eng ran on 12 synthetic cases at exact SHA b6d7909e6897578181dbd304ff12491760422530: 9 exact, 3 errors, mean whitespace-normalized CER 0.0486; critical amount mismatch 2,300,000원→22300,000원. Report artifact 14136970048 SHA-256 36413a867222dc714455dd9ca81f1804fb8a42b796fa3a4f49fe2241aced8268. P119 remains unapproved and full app source review, PSM3/6 UI, cancellation/cleanup acceptance remain incomplete. +0.",
       "blockers_observed": [
         "P119 Authenticode, dependency NOTICE/license, and exact-bundle redistribution approval incomplete.",
         "App-level OCR review UI, PSM3/6 selection, cancellation and failure cleanup acceptance not run."
@@ -685,7 +686,7 @@
     }
   ],
   "score_formula": "50 + sum(verified task credit_earned), each <= credit_max, no credit for plans or unverified runs",
-  "next_task": "P119 continue supplier audit: next evaluate the UB-Mannheim 5.4.0.20240606 candidate using an independently pinned GitHub manifest hash, then record signature/license findings; no point unless all acceptance criteria pass.",
+  "next_task": "P119 BLOCKED pending user-provided GitHub-accessible approved Windows OCR asset with verifiable signature/hash and exact dependency NOTICE/license/redistribution evidence. All 5.5.3, 5.5.0, and 5.4.0 candidates failed Authenticode Valid gate.",
   "notes": [
     "immutable original blueprint and user-approved A01-A12 weights preserved",
     "preserve main and Draft PR #10; no seller key or model bundle",
@@ -728,10 +729,10 @@
   },
   "last_updated_kst": "2026-11-15",
   "last_completed_task": "P125",
-  "next_independent_task": "P119 supplier audit remains executable; 5.5.0 candidate rejected on Authenticode. If 5.4.0 also fails, gather exact approved supplier/signature/redistribution evidence. P123 remains blocked pending GitHub-accessible licensed Qwen3 4B weights.",
+  "next_independent_task": "P123 remains blocked until a GitHub-accessible Qwen3 4B model artifact with license and exact SHA is available. P120/P121 depend on approved P119 supplier; P124 depends on P123; P126 depends on P121. No currently executable P114-P126 task remains without new supplier/model evidence.",
   "gates": {
     "G55": "PASS",
-    "G60": "NOT PASSED — actual OCR is feasible, but P119 supplier signature/license/redistribution, P120 app/UI, and P121 Electron IPC/V2 acceptance remain incomplete.",
+    "G60": "NOT PASSED — P119 lacks an approved Authenticode-valid/licensed supplier; P120 app/UI and P121 Electron IPC/V2 acceptance remain incomplete.",
     "G65": "NOT PASSED — P123 actual Qwen3 inference BLOCKED",
     "G70": "NOT PASSED — P124 and P126 acceptance incomplete"
   }
