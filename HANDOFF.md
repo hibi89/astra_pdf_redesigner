@@ -1,3 +1,16 @@
+## 2026-11-14 KST — 사용자 승인 최신 인수인계 (10항)
+
+1. 목표: 원본 STEP1~7+3SKU 전체 100%, 최종 12영역 가중치 승인.
+2. 결정: 무료 로컬 OCR Tesseract 우선, 무료 llama.cpp+Qwen GGUF 후보 우선, 배점 A01–A12 확정.
+3. 검증: 공식 라이선스 원문 Tesseract/tessdata_fast Apache-2.0, llama.cpp MIT, Qwen3-0.6B GGUF Apache-2.0 확인. 기능 실바이너리/CPU/OCR 품질·재배포 해시 미검증; 이전 P95~P100 exact SHA CI 기록 유지.
+4. 상태: 사용자 승인 3건 완료, 구현/실증 대기, 최종 증거 점수 산정 대기/100% 미달, RELEASE HOLD.
+5. 실패/대안: 별도 OCR 실행파일 vs WASM(전자는 기존 구조 최소수정), 로컬 llama.cpp vs 유료 클라우드(전자는 0원·개인정보 유출 차단). 무검증 번들 금지.
+6. repo/branch: hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112, 최신 기능 SHA 2213e8e5, 본 승인 문서 SHA 이후 재조회.
+7. 배포: Vercel 미적용, 크몽 미등록, Windows NSIS CI 기술 PASS/실 사용자 Win10·11 미검증.
+8. 원본·보안: main/PR10·V1/V2/고객 PDF·개인키·모델파일 불변, 다운로드/외부 원본 업로드/유료결제0.
+9. 다음: 정확한 무료 바이너리/모델 버전·해시·권리 확보→STEP7 OCR/로컬 모델 안전 통합→CPU/한글 품질 회귀→실 PDF5~10·Windows 설치 수용→정식 SKU 및 판매 별도 GO. 동일 승인 재요청 금지.
+10. 확인: 2026-11-14 KST, 사용자 채팅의 명시 승인 및 upstream 공식 라이선스 근거. 상세 `docs/commercial/ASTRA_OWNER_1300_CHECKLIST_20261114.md`.
+
 ## 2026-11-14 KST — P100 STEP6 출처 보관 검증 성공 / 전체 제품 100% 미달 (10항)
 
 1. **목표·정본·기술:** 원본 STEP1~7+크몽 3SKU 100% 기준 React/TS/Electron/PDF.js, 공식률 UNASSESSED, 과거85% 내부 별도.
