@@ -6,7 +6,7 @@
   "branch": "feature/astra-p71-pdf-source-parity-20261112",
   "base_feature_sha": "26aff40d6de524c2430f8a6b325d906cea67f7e1",
   "base_docs_sha": "7ed25d4f04ba10bad18e96c6986bb9a5e97a0b08",
-  "current_verified_provisional": 50,
+  "current_verified_provisional": 52,
   "target_provisional": 70,
   "official_acceptance": "UNASSESSED",
   "release": "RELEASE HOLD",
@@ -81,8 +81,8 @@
       "credit_max": 2,
       "provisional_ceiling_if_all_pass": 52,
       "depends_on": [],
-      "status": "PENDING",
-      "credit_earned": 0,
+      "status": "VERIFIED",
+      "credit_earned": 2,
       "expected_paths": [
         "src/step3/structure.ts",
         "src/step3/pdf.ts",
@@ -92,10 +92,10 @@
       "implementation": "현재 재구성 로직을 보존하며 PDF.js 글자별 위치·bbox·벡터 위험 신호를 사용해 읽기 순서/표 의심/좌우열 충돌을 명시적으로 검수 대기 처리. 불확실한 블록은 자동 재정렬·저장하지 않는다.",
       "acceptance": "직접 생성한 합성 PDF 최소 12종(단일열/2단/표격자/회전/혼합이미지/숫자·부정문/텍스트 뒤섞임 포함). 필수 원문 토큰 누락·열순서 오류를 무경고 정상으로 처리한 0건, 선택형 원문 대비 화면과 위험 경고를 실제 Chrome·Edge에서 확인.",
       "blockers": "자료 형식별 판정이 불완전하면 위험·미지원 상태로 남기고 점수 0. 경고 추가만 하고 실제 수동 대조 경로가 끊기면 불합격.",
-      "evidence_feature_sha": null,
-      "linux_workflow_url": null,
-      "windows_workflow_url": null,
-      "blueprint_workflow_url": null,
+      "evidence_feature_sha": "9c3c506ecae49b68f207e6022c6b136da515b7e5",
+      "linux_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43607945345",
+      "windows_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43607945351",
+      "blueprint_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43607945617",
       "executor": "Codex 6 Luna Max",
       "execution_medium": "GitHub-only",
       "runner": "Ubuntu Node22+Chrome/Edge, Windows regression",
@@ -105,9 +105,9 @@
         "Windows Electron/NSIS when relevant",
         "Final blueprint policy"
       ],
-      "evidence_linux_run": null,
-      "evidence_windows_run": null,
-      "evidence_blueprint_run": null
+      "evidence_linux_run": 43607945345,
+      "evidence_windows_run": 43607945351,
+      "evidence_blueprint_run": 43607945617
     },
     {
       "id": "P115",
@@ -552,7 +552,7 @@
     }
   ],
   "score_formula": "50 + sum(verified task credit_earned), each <= credit_max, no credit for plans or unverified runs",
-  "next_task": "P114",
+  "next_task": "P115",
   "notes": [
     "immutable original blueprint",
     "preserve main and PR #10",

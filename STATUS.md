@@ -1,10 +1,13 @@
-## 2026-11-14 KST — Codex 6 Luna Max GitHub-only P114~P126(50→70) 설계·담당자 공시 (기능 미수정)
+## 2026-11-15 KST — Astra P114 검증 완료, 잠정 52/100
 
-- **최신 책임:** Codex 6 Luna Max는 GitHub feature 브랜치의 코드 작성·수정·테스트·검증, GitHub-hosted Ubuntu Chrome/Edge·Windows Electron/NSIS Actions, 원장·인수인계를 담당. 이전 GPT-6 Instant 구현 담당은 P114~P126에 한해 교체. GPT-6 High는 설계 및 사용자가 요청할 때 독립 최종감사.
-- **이번 공시:** [Github-only 실행 지휘서](docs/commercial/ASTRA_CODEX_LUNA_MAX_GITHUB_ONLY_P114_P126_20261114.md), [P114~P126 상세 설계](docs/commercial/ASTRA_P114_P126_50_TO_70_EXECUTION_PLAN_20261114.md), [작업·runner·증거 경로·차단 조건 JSON](docs/commercial/ASTRA_P114_P126_TASK_REGISTER_20261114.json). 13개 작업, 가산 상한 합계 +20점, 55/60/65/70 게이트 고정. 모든 작업 PENDING·earned_points 0. P127 이후 실행자는 새 승인 필요.
-- **완성률 불변:** 기존 실제 검증 기능 SHA `26aff40d6de524c2430f8a6b325d906cea67f7e1`; Linux Chrome/Edge [#43595956953](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43595956953), Windows Electron/NSIS [#43595956932](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43595956932), 최종설계 정책 [#43595957159](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43595957159) **3/3 SUCCESS는 이전 기능 SHA의 증거**. 이번은 설계문서·실행자 변경만 했으므로 새 코드/기능 테스트 없음, **잠정 50/100 +0, 공식 UNASSESSED, RELEASE HOLD, 크몽 미등록, Production/Vercel 미적용**.
-- **실행 제약:** 실제 Tesseract Windows 서명/권리·Qwen3:4b-instruct CPU 실추론을 GitHub-hosted 무료 runner에서 검증할 수 없다면 P119~P121/P123~P124 BLOCKED/0점; mock을 실모델로 둔갑 금지. 무단 유료결제·외부 모델 API·고객 원본 업로드·비밀키·배포/보안 변경 금지. 기존 main/PR#10·STEP1 V1/STEP2 V2·8+22 후보·판매 플래그/issuer pin null/OCR manifest null 보존.
-- **다음 실행점 P114:** 실제 기존 소스/branch HEAD 확인 → 회귀 테스트 구현 → GitHub commit → 정확 SHA 3 workflow Linux/Windows/policy 결론+원시 log 확인 → P114 `docs/evidence/astra/P114/VERIFICATION.md`·JSON status/점수·STATUS/HANDOFF 최신화 → 필요시 중앙 원장의 **Astra 행만** 변경. 진척 없으면 점수 50 고정.
+- **완료 작업:** P114 (A03 PDF 읽기 순서·위험 레이아웃 수동 대조). 불확실한 소스 순서를 자동 재정렬하지 않고 원문 추출 순서로 보여주며, 위험 페이지별 확인과 전체 확인을 모두 거쳐야 V2에 저장된다. 수정 시 두 확인을 해제한다.
+- **정확 기능 SHA:** `9c3c506ecae49b68f207e6022c6b136da515b7e5`. 구현/회귀 변경: `.github/workflows/ci.yml`, `desktop/step3-project-acceptance.cjs`, `src/step3/ImportPanel.tsx`, `src/step3/pdf.ts`, `src/step3/structure.ts`, `tests/fixtures/step3-layout-risk-matrix.mjs`, `tests/step3-browser.mjs`, `tests/step3-consent-browser.mjs`, `tests/step3-layout-review-browser.mjs`, `tests/step3-structure.test.ts`.
+- **검증 PASS:** [Linux Chrome/Edge #43607945345](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43607945345) exact SHA — 266/266 Node tests, build PASS, Chrome/Edge 각 12/12 PDF 위험 매트릭스 및 A4/IndexedDB 회귀 PASS. [Windows Electron/NSIS #43607945351](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43607945351) — 265/266 Node tests PASS(1 OS 전용 SKIP), desktop 73/73, NSIS 설치·실행·제거 및 업그레이드 후 STEP2 문서/PNG 보존 PASS. [최종 정책 #43607945617](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43607945617) PASS(구조 증거 검사이며 독립 기능 승인 아님).
+- **중간 실패와 수정:** 이전 `9afe0b0ec1f8a4fe321328f42d8f8065cb41dedd` Linux 실행은 M09-A 테스트가 페이지별 승인 없이 저장 활성화를 기대해 실패했다. 테스트를 페이지별 동의까지 수행하도록 고치고, 본문/역할/순서 수정이 모든 승인을 해제하는 회귀를 추가했다. 최종 SHA에서 Chrome·Edge 각각 12/12 PASS.
+- **점수·상태:** P114 +2점, A03 8→10/14, 총 잠정 **50→52/100**. 공식 구매자 수용 **UNASSESSED**, 출시 **RELEASE HOLD**. 확정 배점, STEP1 V1, STEP2 V2, BASIC8/PRO20/BUSINESS30, 서명키와 출시 차단 정책은 유지.
+- **제한:** generated synthetic PDFs/hosted runners만 검증. 고객 원본, 물리 고객 PC, 실제 Windows Tesseract OCR 및 Qwen3 CPU 추론은 미검증. 자동 표 셀·벡터 구조 복원/의미 완전성은 약속하지 않음.
+- **다음 작업:** P115 (A03 원본 글자·수치·기호·부정문 차이 계층 및 수동 복구·원본 위치 대조). 55% 게이트는 아직 미도달; P116에서 잠정 55점에 도달하면 별도 검증한다.
+
 
 ## 2026-11-14 21:55 KST — Astra High 설계 공시, Instant 개발 담당 전환 (기능 변경 없음)
 

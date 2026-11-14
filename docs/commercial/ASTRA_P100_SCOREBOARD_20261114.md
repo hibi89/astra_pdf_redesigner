@@ -1,4 +1,4 @@
-> **[2026-11-14 최신 P114~P126 실행자 변경]** **Codex 6 Luna Max / GitHub-only** (기존 feature 브랜치 + GitHub-hosted Actions) 담당, GPT-6 High는 설계/사용자 요청 시 독립 감사. [실행 런북](ASTRA_CODEX_LUNA_MAX_GITHUB_ONLY_P114_P126_20261114.md) · [13개 작업 JSON](ASTRA_P114_P126_TASK_REGISTER_20261114.json) 참조. 계획 50→70 (+20)만 공시했으며 현재 증거 기반 잠정 점수 50/100 유지, 공식 **UNASSESSED**, 상용 **RELEASE HOLD**. 70 이후 담당자 지정 안 됨.
+> **[2026-11-15 KST P114 VERIFIED]** Codex 6 Luna Max는 GitHub-only로 P114를 구현·검증했다. 정확 기능 SHA `9c3c506ecae49b68f207e6022c6b136da515b7e5`; A03 잠정 인정 8→10/14, 총점 **50→52/100 (+2)**. [Linux Chrome/Edge #43607945345](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43607945345) · [Windows Electron/NSIS #43607945351](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43607945351) · [정본 정책 #43607945617](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43607945617) 모두 SUCCESS. 다음 P115. 공식 구매자 최종 수용 **UNASSESSED**, 출시 **RELEASE HOLD**. 70% 이후 실행은 이 범위 밖.
 
 # Astra PDF Redesigner — 최종완성률 추적표 / 100% 전체 설계
 
