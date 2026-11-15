@@ -2,11 +2,20 @@
 
 - Date: 2026-11-15
 - Branch: `codex/astra-final-ai-sku-20261115`
-- Exact feature/test SHA: `a9d7ba4f1fb6b5d7b0e2e09309ebbe634b2db031`
-- PR merge SHA exercised by the passing workflow: `9444e8e` (merge of feature SHA into integration base `02f9481e441d20927d9f54a275717c7db33efa20`)
+- Latest exact feature/test SHA: `2384a8287a7d5a196596acb4cf351ff61d7a7f34` (C009 product sources unchanged; this revision adds C010 package-byte comparison tests)
+- Earlier passing PR merge SHA: `9444e8e` (merge of feature SHA `a9d7ba4f1fb6b5d7b0e2e09309ebbe634b2db031` into integration base `02f9481e441d20927d9f54a275717c7db33efa20`)
 - Result: hosted Chrome and Edge technical regressions PASS; score change +0
 
 ## Exact-SHA hosted evidence
+
+## Latest exact-SHA rerun
+
+- [C009 run 43718318286](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43718318286), attempt 2, passed at feature/test SHA `2384a8287a7d5a196596acb4cf351ff61d7a7f34`. `npm test` reported 307 passed and 0 failed; production build passed.
+- Chrome and Edge each passed the accessibility tree/keyboard check, all 8 base themes and 22 advanced layouts with 30 unique first-page rasters, 28-page synthetic PDF printing, and close/reopen recovery with IndexedDB V2 restored and localStorage preserved.
+- Chrome print: 1,052 ms; 7,195,344-byte JS heap / 1,371 DOM nodes. Recovery print: 1,057 ms; 5,943,520-byte heap / 1,368 nodes. Edge print: 1,152 ms; 7,246,604-byte heap / 1,361 nodes. Recovery print: 1,247 ms; 5,939,164-byte heap / 1,358 nodes.
+- [Retry artifact 14163129064](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43718318286/artifacts/14163129064): 4,026,774 bytes, ZIP SHA-256 `5a3cf17c888b4c04d03ec049f8661e83809f749a3e7b936d53b6adfbb7669318`.
+- Attempt 1 at the same SHA failed when keyboard navigation observed only the import control; attempt 2 passed in both browsers without product-source changes. The retry is recorded because this check has shown a focus-timing race.
+
 
 - [C009 accessibility, print, resource, and recovery run 43715685926](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43715685926) — PASS. Actions checked out PR merge SHA `9444e8e`, which contains feature/test SHA `a9d7ba4f1fb6b5d7b0e2e09309ebbe634b2db031`.
 - `npm test` and `npm run build` — PASS.
