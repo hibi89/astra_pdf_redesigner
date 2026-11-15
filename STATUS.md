@@ -1,3 +1,11 @@
+## 2026-11-15 KST — G005 exact integration QA PASS 및 Codex 신규 수정 독립 위험 (추가)
+
+- **통합 CI SHA `83bd72ca93db201013e62c54e94d6df39f1a0180`**: [G001–G004 independent QA #43684301712](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43684301712) **52 PASS/0 FAIL/0 SKIP**, pinned Codex read-only static-review job SUCCESS, OCR release gate PASS; [final policy #43684301960](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43684301960) SUCCESS. 이후 본 문서 기록은 검증된 실행 코드 변화가 아니다.
+- **Codex 신규 SHA `a2ca668c9578b68e760b922c026a5f2f8f941c8d`**: P124 테스트는 첫 성공 문단 `replaySource.text`를 반복 사용해 서로 다른 `case_id`를 부여한다. C001의 서로 다른 문단 10건 검수 요구를 충족하지 못할 위험이 확인되어 [PR #13](https://github.com/hibi89/astra_pdf_redesigner/pull/13)에 distinct input SHA ≥10 요구를 전달했다. 신규 [Windows #43684225170](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43684225170)은 확인 시 **IN_PROGRESS**, 성공/실 3SKU 수용 미확인. +0점, 64/100, RELEASE HOLD.
+- 다음 `ㄱ`: Codex SHA 변경/Windows Actions 결론 확인 → distinct 10문단·실 SKU entitlement·패키지 시험 모듈 제거 실증 독립 검수; 별도 G002 실제 PDF.js 출력 대조 QA 이어가기. Codex 담당 소스 직접 수정 금지.
+
+---
+
 ## 2026-11-15 KST — G001–G004 독립 QA 통합 · P124 Windows FAIL · 잠정 64/100 불변
 
 - **통합:** GPT 독립 QA [PR #12](https://github.com/hibi89/astra_pdf_redesigner/pull/12) **MERGED** → `integration/astra-final-blueprint-100-20261115`; 통합 merge SHA `4b486b5c9039e97a468483eafe4a1d7146193b0c`. Codex [PR #13](https://github.com/hibi89/astra_pdf_redesigner/pull/13) **Draft·미병합**, GPT 개발 브랜치는 독립 유지. 기존 `main`, 원본 PDF/PNG, STEP1 V1/STEP2 V2, Electron 제품 UI 로직 미변경.
