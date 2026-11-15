@@ -5,6 +5,7 @@ on:
     paths:
       - '.github/workflows/c010-package-audit.yml'
       - 'desktop/**'
+      - 'electron-builder.yml'
       - 'src/**'
       - 'package*.json'
       - 'tests/**'
