@@ -104,7 +104,8 @@ jobs:
       - name: G002 synthetic Poppler vs PDF.js cross-parser regressions
         run: |
           node --check tools/gpt-final-qa-pdf-cross-parser.mjs
-          node --test tests/gpt-final-qa-pdf-cross-parser.test.mjs
+          node --check tools/gpt-final-qa-pdfjs-nul-attribution.mjs
+          node --test tests/gpt-final-qa-pdf-cross-parser.test.mjs tests/gpt-final-qa-pdfjs-nul-attribution.test.mjs
       - name: G002 actual PDF bytes source-output independent regression
         run: |
           node --check tools/gpt-final-qa-real-pdfjs-parity.mjs
@@ -149,3 +150,7 @@ jobs:
           curl -fsS http://127.0.0.1:4173 >/dev/null
           node --check tests/gpt-final-qa-live-v2-checked-browser.mjs
           CHROME_PATH="$CHROME_BIN" node tests/gpt-final-qa-live-v2-checked-browser.mjs
+          # Separate fresh process/profile makes font controls independent of
+          # the product V2 print run and helps isolate browser-state failures.
+          node --check tests/gpt-final-qa-font-nul-browser.mjs
+          CHROME_PATH="$CHROME_BIN" node tests/gpt-final-qa-font-nul-browser.mjs
