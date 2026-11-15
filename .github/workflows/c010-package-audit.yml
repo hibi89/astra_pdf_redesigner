@@ -165,7 +165,7 @@ jobs:
             $nsisSystemLine,
             '  SetDateSave off',
             '!endif',
-            '!endmacro'
+            '!macroend'
           )
           $nsisInclude = ($nsisIncludeLines -join "`r`n") + "`r`n"
           [System.IO.File]::WriteAllText($auditIncludePath, $nsisInclude, [System.Text.UTF8Encoding]::new($false))
