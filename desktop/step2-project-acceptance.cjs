@@ -173,8 +173,8 @@ async function waitForStep2Title(title){
   }
   throw Error('STEP2 editor preview did not reflect recovery title');
 }
-async function injectStep2QuotaFailure(){
-  const before=await snapshotStep2Storage();
+async function injectStep2QuotaFailure(snapshotStorage,waitForSaveState,waitForStep2Title){
+  const before=await snapshotStorage();
   const prototype=IDBObjectStore.prototype;
   const originalPut=prototype.put;
   let injected=false;
@@ -205,7 +205,7 @@ async function injectStep2QuotaFailure(){
   const after=await snapshotStep2Storage();
   return {injected,before,after,status:document.querySelector('.save-chip')?.textContent||''};
 }
-async function setStep2TitleAndSave(title){
+async function setStep2TitleAndSave(title,snapshotStorage,waitForSaveState,waitForStep2Title){
   const fields=document.querySelectorAll('.project-layout .form-grid input');
   if(fields.length<2)throw Error('Missing STEP2 title input for retry');
   const setter=Object.getOwnPropertyDescriptor(HTMLInputElement.prototype,'value').set;
@@ -217,10 +217,10 @@ async function setStep2TitleAndSave(title){
   if(!save||save.disabled)throw Error('STEP2 recovery retry button unavailable');
   save.click();
   await waitForSaveState('저장됨');
-  return await snapshotStep2Storage();
+  return await snapshotStorage();
 }
-async function abortStep2MultiStoreTransaction(){
-  const before=await snapshotStep2Storage();
+async function abortStep2MultiStoreTransaction(snapshotStorage){
+  const before=await snapshotStorage();
   const db=await new Promise((resolve,reject)=>{
     const open=indexedDB.open('astra-pdf-redesigner:v2');
     open.onsuccess=()=>resolve(open.result);
@@ -306,7 +306,10 @@ async function runStep2ProjectAcceptance(win,renderLocalPdf){
        !/^astra-step2-recovery-[A-Za-z0-9-]+\.json$/i.test(path.basename(reportPath)))
       throw Error('STEP2 recovery report must be directly under isolated RUNNER_TEMP');
     const baseline=await evaluate('('+snapshotStep2Storage.toString()+')()','baseline recovery snapshot');
-    const quota=await evaluate('('+injectStep2QuotaFailure.toString()+')()','synthetic quota failure');
+    const snapshotSource='('+snapshotStep2Storage.toString()+')';
+    const saveWaitSource='('+waitForSaveState.toString()+')';
+    const titleWaitSource='('+waitForStep2Title.toString()+')';
+    const quota=await evaluate('('+injectStep2QuotaFailure.toString()+')('+snapshotSource+','+saveWaitSource+','+titleWaitSource+')','synthetic quota failure');
     if(!quota?.injected||quota.status!=='저장 실패'||quota.before!==baseline||quota.after!==baseline)
       throw Error('STEP2 quota failure changed persisted V2 data or was not visible');
     await win.loadURL(APP_URL);
@@ -314,13 +317,13 @@ async function runStep2ProjectAcceptance(win,renderLocalPdf){
     const afterQuotaReload=await evaluate('('+verifyReloadedProject.toString()+')()','quota reload verification');
     if(!afterQuotaReload?.saved||afterQuotaReload.assets!==1)
       throw Error('STEP2 persisted document/PNG did not survive quota failure reload');
-    const retry=await evaluate('('+setStep2TitleAndSave.toString()+')('+JSON.stringify('C007_QUOTA_RECOVERY_RETRY')+')','quota recovery retry');
+    const retry=await evaluate('('+setStep2TitleAndSave.toString()+')('+JSON.stringify('C007_QUOTA_RECOVERY_RETRY')+','+snapshotSource+','+saveWaitSource+','+titleWaitSource+')','quota recovery retry');
     const retryState=JSON.parse(retry);
     const baselineState=JSON.parse(baseline);
     const retryDocument=retryState.documents.find(doc=>doc.content?.title==='C007_QUOTA_RECOVERY_RETRY');
     if(!retryDocument||JSON.stringify(retryState.assets.map(asset=>asset.blobBase64))!==JSON.stringify(baselineState.assets.map(asset=>asset.blobBase64)))
       throw Error('STEP2 save retry did not persist or changed the existing PNG bytes');
-    const restored=await evaluate('('+setStep2TitleAndSave.toString()+')('+JSON.stringify('ASTRA_STEP2_PRINT_8307')+')','restored title after retry');
+    const restored=await evaluate('('+setStep2TitleAndSave.toString()+')('+JSON.stringify('ASTRA_STEP2_PRINT_8307')+','+snapshotSource+','+saveWaitSource+','+titleWaitSource+')','restored title after retry');
     const restoredState=JSON.parse(restored);
     if(!restoredState.documents.some(doc=>doc.content?.title==='ASTRA_STEP2_PRINT_8307')||
        JSON.stringify(restoredState.assets.map(asset=>asset.blobBase64))!==JSON.stringify(baselineState.assets.map(asset=>asset.blobBase64)))
@@ -330,7 +333,7 @@ async function runStep2ProjectAcceptance(win,renderLocalPdf){
     const afterRetryReload=await evaluate('('+verifyReloadedProject.toString()+')()','retry reload verification');
     if(!afterRetryReload?.saved||afterRetryReload.assets!==1)
       throw Error('STEP2 retry data did not survive renderer reload');
-    const aborted=await evaluate('('+abortStep2MultiStoreTransaction.toString()+')()','multi-store transaction abort');
+    const aborted=await evaluate('('+abortStep2MultiStoreTransaction.toString()+')('+snapshotSource+')','multi-store transaction abort');
     if(!aborted?.before||aborted.before!==aborted.after)
       throw Error('STEP2 aborted multi-store transaction changed persisted data');
     await win.loadURL(APP_URL);
