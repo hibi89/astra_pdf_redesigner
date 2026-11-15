@@ -56,6 +56,14 @@ jobs:
       - name: Install, launch, verify PDFs and V2 data, then uninstall
         run: ./tests/windows-installer-lifecycle.ps1
         shell: pwsh
+      - name: Upload sanitized STEP2 recovery evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c007-step2-recovery-${{ github.sha }}
+          path: ${{ runner.temp }}/astra-step2-recovery-*.json
+          if-no-files-found: ignore
+          retention-days: 14
       - name: Checkout previously verified P123 app for upgrade baseline
         uses: actions/checkout@v4
         with:
