@@ -1,4 +1,4 @@
-name: C009 keyboard and accessibility-tree browser smoke
+name: C009 accessibility and 30-layout PDF print regression
 on:
   push:
     branches: ['codex/astra-final-ai-sku-20261115']
@@ -6,6 +6,7 @@ on:
       - '.github/workflows/c009-accessibility.yml'
       - 'src/**'
       - 'tests/c009-accessibility-browser.mjs'
+      - 'tests/c009-layout-print-browser.mjs'
       - 'tests/browser-process.mjs'
       - 'index.html'
       - 'package*.json'
@@ -30,7 +31,12 @@ jobs:
         run: |
           npm test
           npm run build
-      - name: Verify named controls and keyboard focus in Chrome and Edge
+      - name: Install Korean fonts and Poppler PDF tools
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y fonts-noto-cjk poppler-utils
+          fc-cache -f
+      - name: Verify named controls, keyboard focus, and 30-layout print in Chrome and Edge
         shell: bash
         run: |
           set -euo pipefail
@@ -49,4 +55,14 @@ jobs:
           done
           curl -fsS http://127.0.0.1:4173 >/dev/null
           CHROME_PATH="$CHROME_BIN" node tests/c009-accessibility-browser.mjs
+          C009_OUTPUT_DIR="$RUNNER_TEMP/astra-c009-layouts/chrome" CHROME_PATH="$CHROME_BIN" node tests/c009-layout-print-browser.mjs
           CHROME_PATH="$EDGE_BIN" node tests/c009-accessibility-browser.mjs
+          C009_OUTPUT_DIR="$RUNNER_TEMP/astra-c009-layouts/edge" CHROME_PATH="$EDGE_BIN" node tests/c009-layout-print-browser.mjs
+      - name: Upload synthetic 30-layout print evidence
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: c009-layout-print-matrix-${{ github.run_id }}
+          path: ${{ runner.temp }}/astra-c009-layouts/
+          if-no-files-found: ignore
+          retention-days: 14
