@@ -118,16 +118,26 @@ async function runP124ElectronAcceptance(win,renderPdf){
   if(screenshotRoot!==path.resolve(process.env.RUNNER_TEMP))
     throw Error('P124 screenshots must stay in the isolated runner temp directory');
   const report=createReport(scenario),started=Date.now();
+  let currentStep='initializing actual Workspace';
+  const markStep=step=>{currentStep=step;console.log('P124 step: '+step);};
   const evaluate=async expression=>{
-    const value=await win.webContents.executeJavaScript(`(async()=>(${expression}))()`,true);
-    return value;
+    let result;
+    try{
+      result=await win.webContents.executeJavaScript(
+        `(async()=>{try{return {__p124Ok:true,value:await (${expression})}}
+          catch(error){return {__p124Ok:false,error:String(error?.message||error)}}})()`,true);
+    }catch(error){
+      throw Error('P124 renderer evaluation failed: '+String(error?.message||error));
+    }
+    if(!result?.__p124Ok)throw Error('P124 renderer script failed: '+String(result?.error||'unknown renderer error'));
+    return result.value;
   };
   const waitFor=async(fn,predicate=x=>Boolean(x),timeout=120000,label='condition')=>{
     const deadline=Date.now()+timeout;
     while(Date.now()<deadline){const value=await fn();if(predicate(value))return value;await sleep(120);}
     throw Error('P124 timed out: '+label);
   };
-  const click=selector=>evaluate(`(()=>{const e=document.querySelector(${JSON.stringify(selector)});if(!e||e.disabled)throw Error('Missing/disabled acceptance control');e.click();return true})()`);
+  const click=selector=>evaluate(`(()=>{const selector=${JSON.stringify(selector)},e=document.querySelector(selector);if(!e||e.disabled)throw Error('Missing/disabled acceptance control: '+selector);e.click();return true})()`);
   const currentSource=()=>evaluate('document.querySelector(".section-editor textarea")?.value||null');
   const setSource=async text=>{
     await evaluate('(()=>{const e=document.querySelector(".section-editor textarea");if(!e)throw Error("Missing real Workspace paragraph editor");const set=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,"value").set;set.call(e,'+JSON.stringify(text)+');e.dispatchEvent(new Event("input",{bubbles:true}));e.dispatchEvent(new Event("change",{bubbles:true}));return true})()');
@@ -193,16 +203,19 @@ async function runP124ElectronAcceptance(win,renderPdf){
   try{
     for(const plan of SKU_PLANS){
       const receipt=entitlementConfig.receipts[plan.tier];
+      markStep(plan.sku+': verify signed receipt');
       const licenseResult=await verifyEntitlement(plan,receipt);
       let deniedLayout=null;
       if(plan.deniedLayout){
         deniedLayout=plan.deniedLayout;
+        markStep(plan.sku+': deny '+plan.deniedLayout+' layout');
         await denyLayout(plan.deniedLayout,plan.sku);
       }
-      if(plan.layoutId)await selectLayout(plan.layoutId);
+      if(plan.layoutId){markStep(plan.sku+': allow '+plan.layoutId+' layout');await selectLayout(plan.layoutId);}
       const selected=plan.layoutId||'basic-default';
       const beforeProbe=await currentSource();
       assert.equal(beforeProbe,BASELINE,'SKU setup must not change the actual STEP2 paragraph');
+      markStep(plan.sku+': probe actual local model');
       await click('[data-local-ai-probe]');
       const modelStatus=await waitFor(()=>evaluate('document.querySelector("[data-local-ai-status]")?.textContent||""'),
         value=>scenario==='missing'?value.includes('찾지 못했습니다'):value.includes('로컬 모델을 찾았습니다'),
@@ -320,7 +333,8 @@ async function runP124ElectronAcceptance(win,renderPdf){
     report.status='PASS';report.elapsed_ms=Date.now()-started;
   }catch(error){
     report.sku_contexts=uiResults;report.status='FAIL';report.elapsed_ms=Date.now()-started;
-    report.failure_code=String(error?.message||'P124 acceptance failed').slice(0,160);
+    report.failure_code=(currentStep+': '+String(error?.message||'P124 acceptance failed')).slice(0,320);
+    console.log('P124 failure detail: '+report.failure_code);
     throw error;
   }finally{
     await fs.writeFile(reportFile,JSON.stringify(report,null,2)+'\n',{flag:'wx',mode:0o600});
