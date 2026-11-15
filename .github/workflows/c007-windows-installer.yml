@@ -1,0 +1,88 @@
+name: C007 Windows NSIS install, upgrade, and data preservation
+
+on:
+  push:
+    branches: ['codex/astra-final-ai-sku-20261115']
+    paths:
+      - '.github/workflows/c007-windows-installer.yml'
+      - 'desktop/**'
+      - 'src/**'
+      - 'tests/windows-installer-*.ps1'
+      - 'tests/prepare-upgrade-candidate.cjs'
+      - 'tests/verify-desktop-pdf.mjs'
+      - 'tests/verify-eight-desktop-layouts.mjs'
+      - 'tests/step2-project-acceptance.cjs'
+      - 'tests/step3-project-acceptance.cjs'
+      - 'package*.json'
+      - 'vite.config.ts'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-installer-lifecycle:
+    name: Windows NSIS install, V2 preservation, upgrade, and uninstall
+    runs-on: windows-latest
+    timeout-minutes: 180
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install current feature dependencies
+        run: npm install --no-audit --no-fund
+      - name: Existing unit and static regressions
+        run: npm test
+      - name: Verify current production bundle and release hold
+        run: |
+          npm run build
+          npm run desktop:verify
+        shell: pwsh
+      - name: Build current 0.1.0 production-only NSIS candidate
+        run: |
+          npm run build
+          npx electron-builder --win nsis --x64 --publish never
+          if ($LASTEXITCODE -ne 0) { throw 'Current 0.1.0 NSIS candidate build failed.' }
+          $setups = @(Get-ChildItem -LiteralPath 'release' -Filter 'ASTRA-PDF-Redesigner-Setup-0.1.0-x64.exe' -File)
+          if ($setups.Count -ne 1) { throw "Expected one current 0.1.0 setup, found $($setups.Count)." }
+          Get-FileHash -LiteralPath $setups[0].FullName -Algorithm SHA256 | Format-List
+        shell: pwsh
+      - name: Install, launch, verify PDFs and V2 data, then uninstall
+        run: ./tests/windows-installer-lifecycle.ps1
+        shell: pwsh
+      - name: Checkout previously verified P123 app for upgrade baseline
+        uses: actions/checkout@v4
+        with:
+          ref: f5751bbb559f268706f2e7bc15438d0a8f590ed9
+          path: p123-baseline
+      - name: Build old 0.1.0 baseline installer
+        working-directory: p123-baseline
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+          npx electron-builder --win nsis --x64 --publish never
+          if ($LASTEXITCODE -ne 0) { throw 'P123 0.1.0 baseline installer build failed.' }
+          $setups = @(Get-ChildItem -LiteralPath 'release' -Filter 'ASTRA-PDF-Redesigner-Setup-0.1.0-x64.exe' -File)
+          if ($setups.Count -ne 1) { throw "Expected one P123 baseline setup, found $($setups.Count)." }
+          $baseline = Join-Path $env:RUNNER_TEMP 'astra-baseline-0.1.0.exe'
+          if (Test-Path -LiteralPath $baseline) { throw 'Refusing to overwrite an existing baseline installer.' }
+          Copy-Item -LiteralPath $setups[0].FullName -Destination $baseline
+          Get-FileHash -LiteralPath $baseline -Algorithm SHA256 | Format-List
+        shell: pwsh
+      - name: Build current 0.1.1 candidate with feature changes
+        run: |
+          node tests/prepare-upgrade-candidate.cjs
+          if ($LASTEXITCODE -ne 0) { throw 'Could not prepare the ephemeral 0.1.1 version candidate.' }
+          npm run build
+          npx electron-builder --win nsis --x64 --publish never
+          if ($LASTEXITCODE -ne 0) { throw 'Current 0.1.1 upgrade candidate build failed.' }
+          $setups = @(Get-ChildItem -LiteralPath 'release' -Filter 'ASTRA-PDF-Redesigner-Setup-0.1.1-x64.exe' -File)
+          if ($setups.Count -ne 1) { throw "Expected one current 0.1.1 setup, found $($setups.Count)." }
+          Get-FileHash -LiteralPath $setups[0].FullName -Algorithm SHA256 | Format-List
+        shell: pwsh
+      - name: Upgrade real installed P123 version and preserve STEP2 project and PNG
+        run: ./tests/windows-installer-version-upgrade.ps1
+        shell: pwsh
