@@ -98,3 +98,8 @@ jobs:
           if (Test-Path -LiteralPath $env:GITHUB_STEP_SUMMARY) {
             "Unsigned same-source rebuild reproducibility: $reproStatus ($reproDetail)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
           }
+          if ($rebuildExitCode -eq 0 -and $repeatSetups.Count -eq 1) {
+            node tests/c010-binary-diff-summary.cjs $firstCandidatePath $repeatSetups[0].FullName
+            if ($LASTEXITCODE -ne 0) { throw 'Binary reproducibility diagnostic failed.' }
+          }
+          if ($reproStatus -ne 'PASS') { throw 'Unsigned same-source Windows candidate is not bit-for-bit reproducible.' }
