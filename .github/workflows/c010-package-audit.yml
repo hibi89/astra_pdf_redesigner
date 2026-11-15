@@ -196,17 +196,11 @@ jobs:
             throw 'The first deterministic package stage differs from the canonical source tree.'
           }
 
-          $firstElevatePath = Join-Path $packageStagePath 'resources/elevate.exe'
-          $firstElevateBeforeHash = (Get-FileHash -LiteralPath $firstElevatePath -Algorithm SHA256).Hash
-          $firstElevateBeforeSignature = (Get-AuthenticodeSignature -LiteralPath $firstElevatePath).Status
           $env:ASTRA_C010_AUDIT_LABEL = 'first'
           npx electron-builder --config $auditBuilderConfigPath --win nsis --x64 --prepackaged $packageStagePath --publish never
           $firstBuildExitCode = $LASTEXITCODE
           Remove-Item Env:ASTRA_C010_AUDIT_LABEL -ErrorAction SilentlyContinue
           if ($firstBuildExitCode -ne 0) { throw "First prepackaged NSIS build failed with exit code $firstBuildExitCode." }
-          $firstElevateAfterHash = (Get-FileHash -LiteralPath $firstElevatePath -Algorithm SHA256).Hash
-          $firstElevateAfterSignature = (Get-AuthenticodeSignature -LiteralPath $firstElevatePath).Status
-          Write-Output "C010 elevate first: before=$firstElevateBeforeHash/$firstElevateBeforeSignature after=$firstElevateAfterHash/$firstElevateAfterSignature"
           $setups = @(Get-ChildItem -LiteralPath 'release' -Filter 'ASTRA-PDF-Redesigner-Setup-*-x64.exe' -File)
           if ($setups.Count -ne 1) { throw "Expected one first unsigned candidate, found $($setups.Count)." }
           $firstSignature = Get-AuthenticodeSignature -LiteralPath $setups[0].FullName
@@ -240,17 +234,11 @@ jobs:
             throw 'The second deterministic package stage differs from the canonical source tree.'
           }
 
-          $secondElevatePath = Join-Path $packageStagePath 'resources/elevate.exe'
-          $secondElevateBeforeHash = (Get-FileHash -LiteralPath $secondElevatePath -Algorithm SHA256).Hash
-          $secondElevateBeforeSignature = (Get-AuthenticodeSignature -LiteralPath $secondElevatePath).Status
           $env:ASTRA_C010_AUDIT_LABEL = 'second'
           npx electron-builder --config $auditBuilderConfigPath --win nsis --x64 --prepackaged $packageStagePath --publish never
           $secondBuildExitCode = $LASTEXITCODE
           Remove-Item Env:ASTRA_C010_AUDIT_LABEL -ErrorAction SilentlyContinue
           if ($secondBuildExitCode -ne 0) { throw "Second prepackaged NSIS build failed with exit code $secondBuildExitCode." }
-          $secondElevateAfterHash = (Get-FileHash -LiteralPath $secondElevatePath -Algorithm SHA256).Hash
-          $secondElevateAfterSignature = (Get-AuthenticodeSignature -LiteralPath $secondElevatePath).Status
-          Write-Output "C010 elevate second: before=$secondElevateBeforeHash/$secondElevateBeforeSignature after=$secondElevateAfterHash/$secondElevateAfterSignature"
           $secondStageAfterOutput = node tests/c010-package-tree-summary.cjs compare $packageStagePath $treeSnapshot
           if ($LASTEXITCODE -ne 0) { throw 'Could not verify the second staged tree after NSIS packaging.' }
           $secondStageAfter = $secondStageAfterOutput | ConvertFrom-Json
