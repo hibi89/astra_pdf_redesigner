@@ -50,3 +50,10 @@ The hosted matrix establishes synthetic React rendering, browser PDF output, a 4
 ## Next
 
 The remaining C009 acceptance requires assistive-technology and buyer visual review on an owner-controlled device. Continue with other C tasks only when their OCR-supply, source-rights, low-memory Windows, or operational-owner prerequisites become available; do not increase score from this hosted synthetic run.
+
+
+## Latest exact-SHA hosted run — 2026-11-16
+
+At code/test SHA `d7bb6078aff3e2261b4bb75343601ffefc9e7f85`, [C009 run 43734557339](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43734557339) **PASS**: 312/312 Node tests; Chrome and Edge each rendered 30 unique first-page layout rasters, printed the 28-page synthetic document, and restored IndexedDB V2/localStorage after close/reopen. Edge print/recovery took 1,095/1,124 ms with 7,393,556/5,927,900-byte JS heaps and 1,361/1,358 DOM nodes. [Artifact 14169437456](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43734557339/artifacts/14169437456) is 4,026,785 bytes with ZIP SHA-256 `7a0e2b2076212b1f2904cd9c9fc767244f065946beae8f91cbdbb00875b25564`.
+
+This run verifies the code at `d7bb607`; the later `9ae65db` change only updated the C010 audit workflow. C009 remains +0; physical buyer visual and assistive-technology acceptance remain unverified. Buyer acceptance is UNASSESSED and RELEASE HOLD remains.
