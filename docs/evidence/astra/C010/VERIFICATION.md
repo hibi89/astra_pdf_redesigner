@@ -2,12 +2,12 @@
 
 - Date: 2026-11-15
 - Branch: `codex/astra-final-ai-sku-20261115`
-- Latest C010 code/test SHA: `d0701f007c58bf53a452297a45cb81574a6ae039`; earlier package/ASAR evidence at `965fb977c9983b5cf2103ee267f57676a676cde8` and `fa57116544217c6122b1cd9643fee91002f45edc` is retained below
+- Latest C010 code/test SHA: `304b4a59a4bb37007a0796133cb7bfcb1e18ab22`; earlier package/ASAR evidence at `965fb977c9983b5cf2103ee267f57676a676cde8` and `fa57116544217c6122b1cd9643fee91002f45edc` is retained below
 - Result: unsigned package content/SBOM checks PASS; same-source NSIS installer reproducibility FAIL; C010 BLOCKED, score change +0
 
 ## Exact-SHA hosted evidence
 
-## Latest exact-SHA attempt — reproducibility gate FAIL
+## Earlier exact-SHA attempt — reproducibility gate FAIL (historical)
 
 - [Windows C010 run 43720322521](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43720322521) ran at exact code/test SHA `d0701f007c58bf53a452297a45cb81574a6ae039`. The overall run is **FAIL** only at the same-source NSIS installer reproducibility assertion; regression, build, scan, SBOM, ASAR exclusion, and desktop verification passed.
 - `npm test`: 306 passed, 0 failed, 1 skipped of 307; production build PASS; `npm run desktop:verify`: 88 passed, 0 failed, 0 skipped.
@@ -40,6 +40,17 @@
 ## Post-review package-content qualification
 
 G003-F02 is resolved for the unsigned Windows package at exact SHA `965fb977c9983b5cf2103ee267f57676a676cde8`. The Electron main process now loads the P124 acceptance module only for the hosted acceptance invocation, the builder explicitly excludes that module, and Windows run 43693084203 enumerated the built `app.asar` (552 entries) and confirmed the P124 module/fixture paths are absent. OCR remains disabled and the release HOLD remains active. This targeted ASAR assertion is not a broad secret/customer-data scan or legal release approval. See the [independent G003 review](https://github.com/hibi89/astra_pdf_redesigner/blob/gpt/astra-final-qa-ocr-20261115/docs/evidence/astra/G003/VERIFICATION.md).
+
+
+
+## Latest exact-SHA attempt — reproducibility gate FAIL — 2026-11-16 KST
+
+- [Windows candidate/SBOM/content audit run 43726659739](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43726659739), exact feature/test SHA `304b4a59a4bb37007a0796133cb7bfcb1e18ab22`: **FAIL** only at same-source unsigned NSIS reproducibility. Regression (306 passed, 0 failed, 1 skipped of 307), build, desktop verification (88/88), SBOM, ASAR exclusion, and package scan passed.
+- CycloneDX SBOM: 6 components, 0 missing license metadata. Built `app.asar`: 552 entries; P124 acceptance harness/fixture excluded. Content scan: 525 files / 84,108,747 bytes; 13 text files; 0 findings. License metadata is not legal license/NOTICE approval.
+- Same-source unsigned build 1: 129,203,178 bytes, SHA-256 `FA925C44EA4DF49BBC5596C6A179883C55354E89DC9EF0391BA013614B043F34`. Build 2: 129,203,183 bytes, SHA-256 `2300E1AD9378BAD3341557ECAC8BDA8149358AADCCBA9FD031DCCA374F8426B8`. Both were NotSigned; both `app.asar` hashes matched at `2532275C8AA2DFEC3E7ECC5626A0AB5996CA64080B6B93D43A8091FA5098E86D`.
+- The byte comparator found 128,622,904 differing bytes across 510,019 ranges while PE timestamps matched. Root cause remains unresolved; reproducibility gate correctly failed closed. The unsigned candidate was not uploaded or released.
+- [Linux/Chrome/Edge regression run 43726659775](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43726659775) and [blueprint evidence-policy run 43726659959](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43726659959) passed at the same SHA.
+- C010 remains **BLOCKED**, score +0. Worker evidence ceiling remains conditional 67/100; central ledger 64/100; buyer acceptance UNASSESSED; RELEASE HOLD. Physical buyer Windows install/signature/SmartScreen and legal review remain unverified.
 
 ## Limits and score
 
