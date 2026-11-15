@@ -2,7 +2,7 @@
 
 Branch: `codex/astra-final-ai-sku-20261115`  
 Integration target: `integration/astra-final-blueprint-100-20261115`  
-Latest feature/test SHA: `8c4c1b7e535c041b74487be69e851b5a8fce00ad`  
+Latest feature/test SHA: `bd83ac2619a80f940dd628d513a760aee06f0ecb`  
 Open draft PR: [#13](https://github.com/hibi89/astra_pdf_redesigner/pull/13)
 
 ## Completed and assessed
@@ -13,6 +13,7 @@ Open draft PR: [#13](https://github.com/hibi89/astra_pdf_redesigner/pull/13)
 | C003 STEP6 rights acknowledgement and STEP5 local handoff | `20ae5fcab5b069bcd269ca0506721db5c180925e` | npm test/build, Chrome and Edge browser suites, blueprint policy PASS | +0; actual source-rights acceptance NOT VERIFIED |
 | C005 additional local-AI quality and 8-GiB CPU acceptance | Prior evidence reviewed; no new feature SHA | P123/P124 evidence does not establish an 8-GiB Windows/CPU profile | BLOCKED; +0 |
 | C006 offline license lifecycle prototype | `4e4bfc01aa2543ea03b0674a8fcc8f6f33f50a25` | Linux/Chrome/Edge PASS; Windows Electron/NSIS PASS; blueprint policy PASS | Operational gates BLOCKED; +0 |
+| C002 responsive viewport acceptance | `bd83ac2619a80f940dd628d513a760aee06f0ecb` | 298 unit tests/build, Chrome and Edge at 390/360/320px, blueprint policy PASS | Buyer visual acceptance pending; +0 |
 
 Detailed reports: [C001](C001/VERIFICATION.md), [C003](C003/VERIFICATION.md), [C005](C005/VERIFICATION.md). The earlier P124 BLOCKED note was superseded with hosted evidence: [P124/VERIFICATION.md](P124/VERIFICATION.md).
 
@@ -38,4 +39,9 @@ At tested tree SHA `4e4bfc01aa2543ea03b0674a8fcc8f6f33f50a25`, the owner-side si
 
 ## Next work
 
-C002 responsive viewport acceptance was added at test SHA `67ca09ae675e4603f5a2da8d301c3427206d6502`, with Chrome/Edge workflow wiring at `8c4c1b7e535c041b74487be69e851b5a8fce00ad`; verify its exact Actions result next. Then proceed to C008/C009/C010. P119/P120/P121 remain outside this Codex track until the GPT-owned OCR supply-chain prerequisite is cleared.
+C002 responsive viewport acceptance is recorded in [C002/VERIFICATION.md](C002/VERIFICATION.md). At exact test SHA `bd83ac2619a80f940dd628d513a760aee06f0ecb`, [Chrome/Edge workflow 43689843233](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43689843233) and [blueprint policy 43689843486](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43689843486) passed. The 390/360/320px checks showed no horizontal overflow and kept stage controls, PDF action, editor, preview and style panel visible. C002 adds +0 pending buyer visual acceptance. Next: C008, then C009/C010 where independent. P119/P120/P121 remain outside this Codex track until the GPT-owned OCR supply-chain prerequisite is cleared.
+
+
+## C002 — hosted responsive viewport PASS, buyer acceptance pending
+
+Feature/test SHA `bd83ac2619a80f940dd628d513a760aee06f0ecb`: [C002/VERIFICATION.md](C002/VERIFICATION.md). The dedicated workflow passed npm test (298/298), build, Chrome, Edge, three mobile widths, and the blueprint policy gate. Browser cleanup was corrected after earlier test-harness-only CDP/cleanup failures. C002 remains +0 until buyer visual acceptance; overall candidate remains 67/100, official acceptance UNASSESSED, RELEASE HOLD.
