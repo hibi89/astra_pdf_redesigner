@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>P124 isolated Electron local AI acceptance</title>
+    <style>
+      body { margin: 0; padding: 24px; color: #171923; background: #f5f3fa; font: 16px/1.65 system-ui, sans-serif; }
+      main { max-width: 940px; margin: 0 auto; }
+      label { display: grid; gap: 8px; margin: 16px 0; }
+      select, textarea { width: 100%; padding: 10px; font: inherit; }
+      textarea { min-height: 92px; }
+      [data-p124-print-region] { padding: 18px; margin-top: 20px; background: white; }
+      @page { size: A4; margin: 20mm; }
+      @media print {
+        body { padding: 0; background: white; }
+        [data-p124-controls], [data-local-ai-review] { display: none !important; }
+        [data-p124-print-region] { margin: 0; padding: 0; }
+      }
+    </style>
+  </head>
+  <body>
+    <main data-p124-electron-acceptance>
+      <h1>Astra local AI review · isolated synthetic acceptance</h1>
+      <p>This GitHub Actions-only page uses the production LocalModelReview component and Electron preload IPC.</p>
+      <div id="root"></div>
+    </main>
+    <script type="module" src="./p124-electron-qwen3.jsx"></script>
+  </body>
+</html>

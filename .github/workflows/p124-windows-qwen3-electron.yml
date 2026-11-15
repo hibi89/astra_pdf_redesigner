@@ -1,0 +1,84 @@
+name: P124 Windows Electron real Qwen3 acceptance
+
+on:
+  push:
+    branches: ['codex/astra-final-ai-sku-20261115']
+    paths:
+      - '.github/workflows/p124-windows-qwen3-electron.yml'
+      - 'desktop/main.cjs'
+      - 'desktop/p124-electron-qwen3-acceptance.cjs'
+      - 'desktop/owner-ollama-controller.cjs'
+      - 'desktop/preload.cjs'
+      - 'desktop/pdf-output-audit.cjs'
+      - 'tests/p124-*'
+      - 'tests/fixtures/p124-electron-qwen3.*'
+      - 'src/humanize/LocalModelReview.tsx'
+      - 'vite.config.ts'
+      - 'package*.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  windows-electron-qwen3:
+    name: Windows Electron · Qwen3 CPU · BASIC/PRO/BUSINESS
+    runs-on: windows-latest
+    timeout-minutes: 300
+    env:
+      P124_MODEL_SHA256: eed67be2a8eed4320ff71f3d5b350db10653549281e09b8967b97aeb1f1554ee
+      P124_OLLAMA_SHA256: 50fcf5ad54277f2fa5d173ebfc93bcb017adbc0c9ef2314daabc96ca9e6aa64e
+      OLLAMA_HOST: 127.0.0.1:11434
+      OLLAMA_NO_CLOUD: '1'
+      CUDA_VISIBLE_DEVICES: '-1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - name: Install pinned application dependencies
+        run: npm ci --no-audit --no-fund
+      - name: Existing application regressions
+        run: npm test
+      - name: Standard production bundle and local-model release hold
+        run: |
+          npm run build
+          if (Test-Path 'dist/tests/fixtures/p124-electron-qwen3.html') { throw 'Test-only P124 fixture leaked into the production bundle.' }
+          npm run desktop:verify
+        shell: pwsh
+      - name: Native Windows Electron smoke before model install
+        run: npm run desktop:smoke
+      - name: P124 real model, isolated three-SKU Electron scenarios, and unsigned NSIS candidate
+        shell: pwsh
+        run: ./tests/p124-windows-qwen3-acceptance.ps1
+      - name: Rebuild a production-only bundle and unsigned NSIS candidate
+        shell: pwsh
+        env:
+          CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+        run: |
+          Remove-Item Env:ASTRA_P124_ELECTRON_ACCEPTANCE -ErrorAction SilentlyContinue
+          npm run build
+          if (Test-Path 'dist/tests/fixtures/p124-electron-qwen3.html') { throw 'Test-only P124 fixture leaked into the production installer bundle.' }
+          npx electron-builder --win nsis --x64 --publish never
+          if ($LASTEXITCODE -ne 0) { throw 'Unsigned NSIS candidate build failed.' }
+          $apps = @(Get-ChildItem -LiteralPath 'release/win-unpacked' -Filter '*.exe' -File | Where-Object { $_.Name -like 'ASTRA*' })
+          if ($apps.Count -ne 1) { throw "Expected exactly one packaged ASTRA executable; found $($apps.Count)." }
+          $proc = Start-Process -FilePath $apps[0].FullName -ArgumentList '--astra-desktop-smoke' -Wait -PassThru -NoNewWindow
+          if ($proc.ExitCode -ne 0) { throw "Packaged production EXE smoke failed: $($proc.ExitCode)." }
+          Get-FileHash (Get-ChildItem -LiteralPath release -Filter 'ASTRA-PDF-Redesigner-Setup-*-x64.exe' -File | Select-Object -First 1).FullName -Algorithm SHA256 | Format-List
+          'PASS P124 production-only unsigned NSIS build and packaged EXE smoke; commercial release remains held.'
+      - name: Upload synthetic P124 Electron report and screenshots
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p124-windows-electron-qwen3-${{ github.sha }}
+          path: |
+            ${{ runner.temp }}/astra-p124-healthy.json
+            ${{ runner.temp }}/astra-p124-missing.json
+            ${{ runner.temp }}/astra-p124-tampered.json
+            ${{ runner.temp }}/astra-p124-basic.png
+            ${{ runner.temp }}/astra-p124-pro.png
+            ${{ runner.temp }}/astra-p124-business.png
+          if-no-files-found: warn
+          retention-days: 14
