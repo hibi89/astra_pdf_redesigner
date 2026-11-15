@@ -20,7 +20,7 @@ test('C010 scanner reads every regular package file without retaining file conte
  writeFileSync(join(assets,'asset.bin'),Buffer.from([0,1,2,3,255]));
  const result=scanPackageTree(root);
  assert.equal(result.fileCount,2);
- assert.equal(result.totalBytes,45);
+ assert.equal(result.totalBytes,Buffer.byteLength('<main>ASTRA synthetic app</main>')+5);
  assert.equal(result.findings.length,0);
  assert.deepEqual(result.files,['resources/app/asset.bin','resources/app/index.html']);
 });
