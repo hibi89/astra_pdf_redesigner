@@ -177,3 +177,18 @@ The current Windows run [43711160507](https://github.com/hibi89/astra_pdf_redesi
 | Evidence policy | [run 43738686649](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686649) | PASS; no score ledger update. |
 
 Worker evidence only: central score stays 64/100, conditional candidate ceiling 67/100, official buyer acceptance UNASSESSED, RELEASE HOLD. Integration-owned `STATUS.md`, `HANDOFF.md`, and the official score ledger were not changed. The PR remains draft and unmerged.
+
+
+## C008 30-MiB synthetic PDF verification — 2026-11-16
+
+**Canonical code/test SHA:** d9f6f1778eaea365b8180f43f1f545e98a8ca4a2  
+**Changed files:** .github/workflows/ci.yml, tests/fixtures/c008-large-pdf.mjs, tests/c008-large-pdf-stress-browser.mjs.  
+**C008 result:** PASS in actual GitHub-hosted Chrome and Edge on run [43742609879](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43742609879); npm test 315/315 and production build PASS. Both browser runs imported a 31,457,280-byte one-page synthetic PDF, confirmed the manual consent gate, committed/re-read V2 document and PNG asset, verified the original session Blob SHA, printed a PDF with source markers and raster content, and reloaded to verify V2 recovery. Chrome artifact [14172878382](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43742609879/artifacts/14172878382), 676 bytes, digest 98bc6e6258486e6e4f9c7dcd7cf6fa8f53ca3070fd0f96e7851841346e63b094; Edge artifact [14173506608](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43742609879/artifacts/14173506608), 672 bytes, digest 0c243a3ee95ea67622f92f129e43aade8328e5364c35fd1f2b1df1053a43ae42. Only sanitized JSON metrics were uploaded; PDF source/output were not. This tests byte-size ingest with comment padding and does not certify peak memory, large raster decoding, many pages, customer accuracy, or buyer acceptance. Score +0.
+
+The initial C008 run at f8ae9bbe856104ea1b1a0367b5433f1ffe59638b failed at fixture generation because the xref lookup matched startxref; the xref parser was corrected. Final canonical run and additional C009/layout and policy runs passed at d9f6f1778eaea365b8180f43f1f545e98a8ca4a2: [C009 43742614941](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43742614941), [policy 43742610186](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43742610186).
+
+### C010 automatic audit result at the same SHA
+
+The required branch-push workflow automatically ran [Windows C010 43742609908](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43742609908) and failed the final unsigned installer reproducibility gate. The NSIS app archive and uninstaller now matched, but final installers differed by one byte in size (129,203,109 vs 129,203,110). No candidate artifact was uploaded/released. C010 remains BLOCKED, +0, and no further retry is planned under the retry limit.
+
+C008 earns +0. Official score remains 64/100, conditional candidate ceiling 67/100, buyer acceptance UNASSESSED, RELEASE HOLD. Central STATUS.md, HANDOFF.md, and the score ledger remain integration-owner files and were not edited.
