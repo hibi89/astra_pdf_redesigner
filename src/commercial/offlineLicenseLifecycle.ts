@@ -83,7 +83,7 @@ async function importPinnedPublicKey(jwk:JsonWebKey|null,pin:string|null):Promis
 function encodeSignature(bytes:Uint8Array):string{
  if(bytes.length!==64)deny();
  return btoa(Array.from(bytes,value=>String.fromCharCode(value)).join(''))
-  .replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/,'');
+  .replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/,'');
 }
 function decodeSignature(raw:unknown):Uint8Array<ArrayBuffer>{
  if(typeof raw!=='string'||!/^[A-Za-z0-9_-]{86}$/.test(raw))return deny();
@@ -166,6 +166,9 @@ function effectiveStatus(snapshot:LicenseLifecycleSnapshot,now:number):LicenseEf
  return snapshot.status;
 }
 function validateSnapshot(snapshot:LicenseLifecycleSnapshot):void{
+ if(!snapshot||typeof snapshot!=='object')return deny();
+ const checkedLicense=validateLicenseClaims(snapshot.license);
+ if(checkedLicense.tier!=='business'&&checkedLicense.seats!==1)return deny();
  if(!exactKeys(snapshot,['format','version','license','status','installationRefs',
   'supportStatus','supportCaseRef','sequence','lastEventHash','lastEventAt'])||
    snapshot.format!==ASTRA_LICENSE_LIFECYCLE_FORMAT||
@@ -183,7 +186,11 @@ function validateSnapshot(snapshot:LicenseLifecycleSnapshot):void{
    !validEpoch(snapshot.lastEventAt))deny();
  if((snapshot.supportStatus==='none')!==(snapshot.supportCaseRef===null))deny();
  if(snapshot.status==='issued'&&snapshot.installationRefs.length!==0)deny();
+ if(snapshot.status==='active'&&snapshot.installationRefs.length===0)deny();
  if((snapshot.status==='revoked'||snapshot.status==='refunded')&&snapshot.installationRefs.length!==0)deny();
+ if(snapshot.lastEventAt<snapshot.license.issuedAt||
+   (snapshot.sequence===0&&
+    (snapshot.lastEventHash!==ZERO_HASH||snapshot.lastEventAt!==snapshot.license.issuedAt)))deny();
 }
 function commandEvent(snapshot:LicenseLifecycleSnapshot,command:unknown):LicenseLifecycleEvent{
  if(!command||typeof command!=='object'||Array.isArray(command))return deny();
