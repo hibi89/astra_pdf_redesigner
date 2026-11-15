@@ -2,7 +2,7 @@
 
 Branch: `codex/astra-final-ai-sku-20261115`  
 Integration target: `integration/astra-final-blueprint-100-20261115`  
-Latest feature tip: `4aa4f533ea652f2f391a9b2deca15f6d7f804130` (unit tests/build PASS; Chrome/Edge smoke pending); latest fully tested feature SHA: `09b2d9c8f60631bb2f623f840bdde03450ed9e17`  
+Latest feature tip: `4aa4f533ea652f2f391a9b2deca15f6d7f804130` (npm tests/build, Chrome and Edge regression PASS); latest full real-Qwen quality run remains pending at `8136c6b070eceb97e4e26fbdebae7632ab6f2ed3`  
 Open draft PR: [#13](https://github.com/hibi89/astra_pdf_redesigner/pull/13)
 
 ## Completed and assessed
@@ -11,7 +11,7 @@ Open draft PR: [#13](https://github.com/hibi89/astra_pdf_redesigner/pull/13)
 |---|---|---|---|
 | C001 / P124 Windows Electron real Qwen3 3-SKU product flow | `09b2d9c8f60631bb2f623f840bdde03450ed9e17` | Real Root→Workspace→CommercialLicensePanel→SKU gate→LocalModelReview; all three Windows scenarios PASS; per-SKU PDF parity PASS | +2 A08 candidate supported; independent GPT/owner review pending |
 | C003 STEP6 rights acknowledgement and STEP5 local handoff | `20ae5fcab5b069bcd269ca0506721db5c180925e` | npm test/build, Chrome and Edge browser suites, blueprint policy PASS | +0; actual source-rights acceptance NOT VERIFIED |
-| C005 additional local-AI quality and 8-GiB CPU acceptance | `4aa4f533ea652f2f391a9b2deca15f6d7f804130` | Run 43711870155: npm test/build PASS; Chrome/Edge still in progress. Windows NSIS/SBOM run 43711870072 PASS; policy 43711870456 PASS. Real-Qwen runs 43711160507 and 43702880160 still in progress | 8-GiB gate BLOCKED; +0 |
+| C005 additional local-AI quality and 8-GiB CPU acceptance | `4aa4f533ea652f2f391a9b2deca15f6d7f804130` | Run 43711870155: npm test/build + Chrome/Edge smoke PASS. Windows NSIS/SBOM 43711870072 and policy 43711870456 PASS. Real-Qwen runs 43711160507 and 43702880160 still in progress | 8-GiB gate BLOCKED; +0 |
 | C006 offline license lifecycle prototype | `4e4bfc01aa2543ea03b0674a8fcc8f6f33f50a25` | Linux/Chrome/Edge PASS; Windows Electron/NSIS PASS; blueprint policy PASS | Operational gates BLOCKED; +0 |
 | C002 responsive viewport acceptance | `bd83ac2619a80f940dd628d513a760aee06f0ecb` | 298 unit tests/build, Chrome and Edge at 390/360/320px, blueprint policy PASS | Buyer visual acceptance pending; +0 |
 | C008 synthetic PDF accuracy regression | `bd83ac2619a80f940dd628d513a760aee06f0ecb` | Linux/Chrome, Edge; 15-pair corpus, 12-layout PDF risk matrix, V1/V2 no-write, policy PASS | Synthetic-only; owner acceptance pending; +0 |
@@ -106,11 +106,11 @@ At feature SHA `5b323fd47d0c2cd2efb20a136102ee65b3bb7af2`, Windows Electron/Qwen
 
 At code/test SHA `4aa4f533ea652f2f391a9b2deca15f6d7f804130`, the controller timeout/cancel regression tests use a synthetic stalled child process; they are not a real-Qwen timeout measurement.
 
-- [GitHub general regression run 43711870155](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43711870155): `npm test` PASS and production build PASS. Chrome print/persistence and Microsoft Edge A4/IndexedDB steps remain in progress; no full workflow conclusion yet.
+- [GitHub regression run 43711870155](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43711870155): `npm test`, production build, Chrome print/persistence smoke and Microsoft Edge A4 PDF/IndexedDB smoke all PASS.
 - [Windows NSIS/SBOM/release-hold run 43711870072](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43711870072): PASS.
-- [Blueprint policy run 43711870456](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43711870456): PASS at the same SHA.
+- [Blueprint policy run 43711870456](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43711870456): PASS at the same code/test SHA.
 - [Optimized 31-distinct-input Windows Electron/Qwen3 run 43711160507](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43711160507), feature SHA `8136c6b070eceb97e4e26fbdebae7632ab6f2ed3`: still in progress.
 - [Earlier 93-call Windows Electron/Qwen3 run 43702880160](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43702880160), feature SHA `5b323fd47d0c2cd2efb20a136102ee65b3bb7af2`: still in progress.
 - The Actions host reports `17,174,360,064` bytes of RAM (about 16 GiB). This does not satisfy the 8-GiB-class CPU acceptance.
 
-C005 stays +0/BLOCKED for completion. The runs above do not establish the low-memory requirement and no terminal result is claimed for the real-Qwen corpus. Central score remains 64/100; the worker candidate ceiling remains conditional 67/100; buyer acceptance UNASSESSED; RELEASE HOLD.
+C005 stays +0/BLOCKED for completion. The real-Qwen corpus has no terminal result, and the low-memory acceptance is not met. Central score remains 64/100; the worker candidate ceiling remains conditional 67/100; buyer acceptance UNASSESSED; RELEASE HOLD.
