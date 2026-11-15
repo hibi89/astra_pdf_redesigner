@@ -80,43 +80,69 @@ async function editStep2InBrowser(encoded) {
 }
 async function verifyReloadedProject(){
   const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
-  for(let i=0;i<140;i++){
-    const paper=document.querySelector('.project-paper');
-    const picture=paper?.querySelector('figure img');
-    if(paper?.textContent.includes('ASTRA_STEP2_BODY_8308')&&
-       paper?.textContent.includes('ASTRA_STEP2_CAPTION_8309')&&
-       picture?.complete&&picture.naturalWidth===2)break;
-    if(i===139)throw Error('STEP2 text or image did not survive reload');
-    await sleep(150);
-  }
-  const db=await new Promise((resolve,reject)=>{
-    const req=indexedDB.open('astra-pdf-redesigner:v2');
-    req.onsuccess=()=>resolve(req.result);
-    req.onerror=()=>reject(req.error||Error('IndexedDB open failed'));
-  });
   const request=req=>new Promise((resolve,reject)=>{
     req.onsuccess=()=>resolve(req.result);
     req.onerror=()=>reject(req.error||Error('IndexedDB read failed'));
   });
-  try{
-    const metaTx=db.transaction('meta','readonly');
-    const active=await request(metaTx.objectStore('meta').get('activeDocumentId'));
-    const tx=db.transaction(['documents','assets'],'readonly');
-    const doc=await request(tx.objectStore('documents').get(active));
-    const assets=await request(tx.objectStore('assets').index('documentId').getAll(active));
-    const blocks=doc?.content?.sections?.flatMap(s=>s.blocks)||[];
-    const body=blocks.filter(b=>b.kind==='paragraph').map(b=>b.text).join('\n');
-    const images=blocks.filter(b=>b.kind==='image');
-    if(doc?.content?.title!=='ASTRA_STEP2_PRINT_8307'||
-       doc?.name!=='ASTRA_LIBRARY_ONLY_8310'||
-       !body.includes('ASTRA_STEP2_BODY_8308')||!body.includes('24680')||
-       images.length!==1||assets.length!==1||assets[0].mimeType!=='image/png'||
-       assets[0].width!==2||assets[0].height!==2||
-       images[0].assetId!==assets[0].id||
-       images[0].caption!=='ASTRA_STEP2_CAPTION_8309')
-      throw Error('Persisted STEP2 IndexedDB document/asset differs from editor');
-    return {saved:true,assets:assets.length,imageWidth:assets[0].width};
-  }finally{db.close();}
+  let lastReason='renderer has not reloaded the STEP2 document';
+  for(let attempt=0;attempt<140;attempt++){
+    const paper=document.querySelector('.project-paper');
+    const picture=paper?.querySelector('figure img');
+    const previewReady=paper?.textContent.includes('ASTRA_STEP2_BODY_8308')&&
+      paper?.textContent.includes('ASTRA_STEP2_CAPTION_8309')&&
+      picture?.complete&&picture.naturalWidth===2;
+    if(previewReady){
+      let db;
+      try{
+        db=await new Promise((resolve,reject)=>{
+          const open=indexedDB.open('astra-pdf-redesigner:v2');
+          open.onsuccess=()=>resolve(open.result);
+          open.onerror=()=>reject(open.error||Error('IndexedDB open failed'));
+        });
+        const metaTx=db.transaction('meta','readonly');
+        const metaDone=new Promise((resolve,reject)=>{
+          metaTx.oncomplete=resolve;
+          metaTx.onerror=()=>reject(metaTx.error||Error('IndexedDB meta read failed'));
+          metaTx.onabort=()=>reject(metaTx.error||Error('IndexedDB meta read aborted'));
+        });
+        const active=await request(metaTx.objectStore('meta').get('activeDocumentId'));
+        await metaDone;
+        if(typeof active!=='string'||!active){
+          lastReason='activeDocumentId is not present in IndexedDB meta';
+        }else{
+          const tx=db.transaction(['documents','assets'],'readonly');
+          const done=new Promise((resolve,reject)=>{
+            tx.oncomplete=resolve;
+            tx.onerror=()=>reject(tx.error||Error('IndexedDB document read failed'));
+            tx.onabort=()=>reject(tx.error||Error('IndexedDB document read aborted'));
+          });
+          const docRequest=tx.objectStore('documents').get(active);
+          const assetsRequest=tx.objectStore('assets').index('documentId').getAll(active);
+          const [doc,assets]=await Promise.all([request(docRequest),request(assetsRequest)]);
+          await done;
+          const blocks=doc?.content?.sections?.flatMap(s=>s.blocks)||[];
+          const body=blocks.filter(b=>b.kind==='paragraph').map(b=>b.text).join('\\n');
+          const images=blocks.filter(b=>b.kind==='image');
+          if(doc?.content?.title==='ASTRA_STEP2_PRINT_8307'&&
+             doc?.name==='ASTRA_LIBRARY_ONLY_8310'&&
+             body.includes('ASTRA_STEP2_BODY_8308')&&body.includes('24680')&&
+             images.length===1&&assets.length===1&&assets[0].mimeType==='image/png'&&
+             assets[0].width===2&&assets[0].height===2&&
+             images[0].assetId===assets[0].id&&
+             images[0].caption==='ASTRA_STEP2_CAPTION_8309')
+            return {saved:true,assets:assets.length,imageWidth:assets[0].width};
+          lastReason='active STEP2 document or PNG differs from the synthetic fixture';
+        }
+      }catch(error){
+        if(error?.name!=='DataError')throw error;
+        lastReason='IndexedDB key was not ready during reload';
+      }finally{db?.close();}
+    }else{
+      lastReason='STEP2 text or image preview is still loading';
+    }
+    await sleep(150);
+  }
+  throw Error('STEP2 reload verification timed out: '+lastReason);
 }
 
 async function snapshotStep2Storage(){
