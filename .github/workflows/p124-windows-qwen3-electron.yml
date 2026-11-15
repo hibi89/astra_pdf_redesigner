@@ -16,6 +16,12 @@ on:
       - 'tests/p124-*'
       - 'tests/fixtures/p124-electron-qwen3.*'
       - 'src/humanize/LocalModelReview.tsx'
+      - 'src/commercial/**'
+      - 'src/step2/Workspace.tsx'
+      - 'src/Root.tsx'
+      - 'src/styles.css'
+      - 'src/vite-env.d.ts'
+      - 'tests/p124-generate-test-entitlements.cjs'
       - 'vite.config.ts'
       - 'package*.json'
   workflow_dispatch:

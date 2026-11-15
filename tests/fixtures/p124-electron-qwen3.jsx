@@ -1,12 +1,19 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { createRoot } from 'react-dom/client';
-import LocalModelReview from '../../src/humanize/LocalModelReview.tsx';
+import Root from '../../src/Root.tsx';
+import '../../src/styles.css';
 
 const sentinelKey = 'astra-p124-synthetic-v1-sentinel';
 const databaseName = 'astra-p124-synthetic-v2-sentinel';
+const productV1Key = 'astra-pdf-redesigner:current:v1';
+const baseline = 'ASTRA_P124_PDF_SOURCE_7401 · 최종 결제 금액은 230,000원이며, 승인 전에는 외부에 전달하지 않습니다.';
 
 async function seedSyntheticV1V2() {
-  localStorage.setItem(sentinelKey, JSON.stringify({ kind: 'synthetic-only', version: 1, value: 'unchanged' }));
+  const v1 = {schemaVersion:1,document:{title:'P124 합성 문서',author:'P124 합성 사용자',
+    date:'2026-11-15',learned:baseline,difficult:'',solved:'',reflection:''},
+    design:{theme:'report',accent:'#285a73',textSize:'medium',font:'sans'}};
+  localStorage.setItem(productV1Key,JSON.stringify(v1));
+  localStorage.setItem(sentinelKey,JSON.stringify({kind:'synthetic-only',version:1,value:'unchanged'}));
   await new Promise((resolve, reject) => {
     const open = indexedDB.open(databaseName, 1);
     open.onupgradeneeded = () => open.result.createObjectStore('state');
@@ -42,44 +49,28 @@ async function stableValue(value) {
   }
   return value;
 }
-window.__p124SnapshotProductStorage = async () => {
-  const local = Array.from({ length: localStorage.length }, (_, index) => localStorage.key(index)).sort()
-    .map(key => [key, localStorage.getItem(key)]);
-  const database = await new Promise((resolve, reject) => {
-    const open = indexedDB.open('astra-pdf-redesigner:v2');
-    open.onerror = () => reject(open.error);
-    open.onsuccess = () => {
-      const db = open.result, names = Array.from(db.objectStoreNames).sort();
-      if (!names.length) { db.close(); resolve({ version: db.version, stores: [] }); return; }
-      const transaction = db.transaction(names, 'readonly'), raw = new Map();
-      transaction.oncomplete = async () => {
-        try {
-          const stores = await Promise.all(names.map(async name => {
-            const record = raw.get(name);
-            return [name, { keys: await stableValue(record.keys), records: await stableValue(record.records) }];
-          }));
-          db.close(); resolve({ version: db.version, stores });
-        } catch (error) { db.close(); reject(error); }
-      };
-      transaction.onerror = () => { db.close(); reject(transaction.error); };
-      for (const name of names) {
-        const store = transaction.objectStore(name), keys = store.getAllKeys(), records = store.getAll();
-        raw.set(name, {});
-        keys.onsuccess = () => { raw.get(name).keys = keys.result; };
-        records.onsuccess = () => { raw.get(name).records = records.result; };
-      }
-    };
+function openProductDatabase(){
+  return new Promise((resolve,reject)=>{
+    const open=indexedDB.open('astra-pdf-redesigner:v2');
+    open.onerror=()=>reject(open.error);
+    open.onsuccess=()=>resolve(open.result);
   });
-  return JSON.stringify({ local, database });
-};
+}
+async function readStore(db,name){
+  return new Promise((resolve,reject)=>{
+    const tx=db.transaction(name,'readonly'),store=tx.objectStore(name);
+    const keys=store.getAllKeys(),records=store.getAll();
+    tx.oncomplete=()=>resolve({keys:keys.result,records:records.result});
+    tx.onerror=()=>reject(tx.error);
+  });
+}
 window.__p124SnapshotStorage = async () => {
   const local = localStorage.getItem(sentinelKey);
   const value = await new Promise((resolve, reject) => {
     const open = indexedDB.open(databaseName);
     open.onerror = () => reject(open.error);
     open.onsuccess = () => {
-      const db = open.result;
-      const tx = db.transaction('state', 'readonly');
+      const db = open.result,tx = db.transaction('state','readonly');
       const read = tx.objectStore('state').get('sentinel');
       read.onsuccess = () => resolve(read.result || null);
       read.onerror = () => reject(read.error);
@@ -88,33 +79,35 @@ window.__p124SnapshotStorage = async () => {
   });
   return JSON.stringify({ local, indexeddb: value });
 };
-
-function AcceptanceUi() {
-  const [sku, setSku] = useState('BASIC');
-  const [text, setText] = useState('ASTRA_P124_PDF_SOURCE_7401 · 최종 결제 금액은 230,000원이며, 승인 전에는 외부에 전달하지 않습니다.');
-  const [applyCount, setApplyCount] = useState(0);
-  const original = next => { setText(next); setApplyCount(value => value + 1); };
-  return <>
-    <div data-p124-controls>
-      <label>Test-only SKU context
-        <select data-p124-sku value={sku} onChange={event => setSku(event.target.value)}>
-          <option value="BASIC">BASIC · 8개</option>
-          <option value="PRO">PRO · 20개</option>
-          <option value="BUSINESS">BUSINESS · 30개</option>
-        </select>
-      </label>
-      <label>합성 문단
-        <textarea data-model-source value={text} onChange={event => setText(event.target.value)} />
-      </label>
-      <output data-p124-active-sku={sku}>{sku}</output>
-      <output data-model-apply-count>{String(applyCount)}</output>
-    </div>
-    <LocalModelReview key={sku} text={text} sourceScope={`synthetic-p124-${sku.toLowerCase()}:section-1:block-1`}
-      disabled={false} onApply={original} />
-    <section data-p124-print-region aria-label="PDF에 출력될 원문">
-      <h2>합성 STEP2 문서</h2><p data-p124-print-source>{text}</p>
-    </section>
-  </>;
-}
-
-createRoot(document.getElementById('root')).render(<AcceptanceUi />);
+window.__p124SnapshotProductStorage = async () => {
+  const local = Array.from({length:localStorage.length},(_,index)=>localStorage.key(index)).sort()
+    .map(key=>[key,localStorage.getItem(key)]);
+  const db=await openProductDatabase(),names=Array.from(db.objectStoreNames).sort();
+  const stores=[];
+  for(const name of names){
+    const raw=await readStore(db,name);
+    const records=name==='documents'?raw.records.map(record=>{
+      const copy={...record};delete copy.updatedAt;return copy;
+    }):raw.records;
+    stores.push([name,{keys:await stableValue(raw.keys),records:await stableValue(records)}]);
+  }
+  const version=db.version;db.close();
+  return JSON.stringify({local,version,stores});
+};
+window.__p124ReadPersistedSource = async () => {
+  const db=await openProductDatabase();
+  const [docs,meta]=await Promise.all([readStore(db,'documents'),readStore(db,'meta')]);
+  db.close();
+  const active=meta.records[meta.keys.indexOf('activeDocumentId')];
+  const doc=docs.records.find(item=>item.id===active);
+  const block=doc?.content?.sections?.flatMap(section=>section.blocks)
+    .find(item=>item.kind==='paragraph');
+  return block?.text??null;
+};
+window.__p124ReadProductTimestamps = async () => {
+  const db=await openProductDatabase(),docs=await readStore(db,'documents');
+  db.close();
+  return JSON.stringify(docs.records.map(record=>[record.id,record.updatedAt]).sort((a,b)=>a[0].localeCompare(b[0])));
+};
+window.__p124P124TestMode = true;
+window.__p124StorageReady.then(()=>createRoot(document.getElementById('root')).render(<Root />));

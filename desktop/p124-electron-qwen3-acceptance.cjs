@@ -7,7 +7,12 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const {auditOutputPdf}=require('./pdf-output-audit.cjs');
 
-const SKU_NAMES=['BASIC','PRO','BUSINESS'];
+const SKU_PLANS=[
+  {sku:'BASIC',tier:'basic',capability:'base-layout',layoutId:null,deniedLayout:'pro-01'},
+  {sku:'PRO',tier:'pro',capability:'pro-layout',layoutId:'pro-01',deniedLayout:'business-01'},
+  {sku:'BUSINESS',tier:'business',capability:'business-layout',layoutId:'business-01',deniedLayout:null},
+];
+const SKU_NAMES=SKU_PLANS.map(item=>item.sku);
 const CASES=[
  ['neutral-01','이 보고서는 여러 자료를 살펴보고 내용을 정리한 다음 그 내용을 다시 검토하는 과정을 통해 작성되었습니다.'],
  ['neutral-02','회의에서 나온 의견을 모으고 중요한 부분을 다시 확인한 뒤 결과를 전달하는 방식으로 진행했습니다.'],
@@ -75,11 +80,22 @@ function createReport(scenario){
       ollama_version:scenario==='tampered'?null:'0.40.16',windows_zip_sha256:process.env.P124_OLLAMA_SHA256||null,
       ollama_host:'127.0.0.1:11434',cloud_disabled:process.env.OLLAMA_NO_CLOUD==='1',
       cpu_threads:require('node:os').cpus().length,system_memory_bytes:require('node:os').totalmem()},
-    sku_contexts:[],automatic_applies:0,external_transfer:false,synthetic_v1_v2_unchanged:false,
-    product_step2_storage_unchanged:false,
-    pdf_text_equal:false,limitations:['Test-only SKU labels exercise the shared production LocalModelReview UI; no production issuer key or sale entitlement is configured.',
-      'Only synthetic paragraphs and a synthetic print preview are used; no customer files or production profile are opened.',
+    sku_contexts:[],sku_entitlement_flow:null,automatic_applies:0,external_transfer:false,synthetic_v1_v2_unchanged:false,
+    product_step2_storage_unchanged:false,product_step2_content_preserved:false,product_step2_timestamp_only_changed:false,
+    pdf_text_equal:false,limitations:['The actual Root -> Workspace -> CommercialLicensePanel -> runSkuGatedAction path is exercised with an ephemeral GitHub Actions test issuer; production issuer keys and sale activation remain disabled.',
+      'The synthetic V1 record is migrated by the product and its STEP2 V2 content/assets are checked after review; updatedAt may change as normal edit/undo writes persist.',
+      'Only synthetic paragraphs and a fresh isolated Electron profile are used; no customer files or customer profile are opened.',
       'The Qwen model is downloaded at CI runtime and is not bundled or redistributed.']};
+}
+async function readP124Entitlements(){
+  const file=runnerPath(process.env.ASTRA_P124_ENTITLEMENT_CONFIG,/^astra-p124-test-entitlements\.json$/i);
+  const config=JSON.parse(await fs.readFile(file,'utf8'));
+  assert.equal(config.schema,'astra-p124-test-entitlements-v1');
+  assert.ok(config.issuerPublicJwk&&config.issuerPublicJwk.d===undefined,'test issuer must expose only a public JWK');
+  assert.match(config.issuerThumbprintSha256,/^[0-9a-f]{64}$/);
+  assert.deepEqual(Object.keys(config.receipts).sort(),['basic','business','pro']);
+  assert.ok(Object.values(config.receipts).every(value=>typeof value==='string'&&value.length<2048));
+  return config;
 }
 async function readPdfText(bytes){
   const {getDocument}=await import('pdfjs-dist/legacy/build/pdf.mjs');
@@ -112,15 +128,37 @@ async function runP124ElectronAcceptance(win,renderPdf){
     throw Error('P124 timed out: '+label);
   };
   const click=selector=>evaluate(`(()=>{const e=document.querySelector(${JSON.stringify(selector)});if(!e||e.disabled)throw Error('Missing/disabled acceptance control');e.click();return true})()`);
-  const currentSource=()=>evaluate('document.querySelector("[data-model-source]")?.value||null');
-  const applyCount=()=>evaluate('Number(document.querySelector("[data-model-apply-count]")?.textContent||0)');
-  const selectSku=async sku=>{
-    await evaluate(`(()=>{const e=document.querySelector('[data-p124-sku]');e.value=${JSON.stringify(sku)};e.dispatchEvent(new Event('change',{bubbles:true}));return true})()`);
-    await waitFor(()=>evaluate(`document.querySelector('[data-p124-active-sku]')?.textContent==='${sku}'`),Boolean,10000,'SKU context '+sku);
-  };
+  const currentSource=()=>evaluate('document.querySelector(".section-editor textarea")?.value||null');
   const setSource=async text=>{
-    await evaluate(`(()=>{const e=document.querySelector('[data-model-source]');const set=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,'value').set;set.call(e,${JSON.stringify(text)});e.dispatchEvent(new Event('input',{bubbles:true}));e.dispatchEvent(new Event('change',{bubbles:true}));return true})()`);
-    await waitFor(currentSource,value=>value===text,10000,'synthetic source update');
+    await evaluate('(()=>{const e=document.querySelector(".section-editor textarea");if(!e)throw Error("Missing real Workspace paragraph editor");const set=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,"value").set;set.call(e,'+JSON.stringify(text)+');e.dispatchEvent(new Event("input",{bubbles:true}));e.dispatchEvent(new Event("change",{bubbles:true}));return true})()');
+    await waitFor(currentSource,value=>value===text,10000,'Workspace paragraph update');
+  };
+  const setReceipt=async receipt=>{
+    await evaluate('(()=>{const e=document.querySelector("[data-commercial-license-input]");if(!e)throw Error("Missing production CommercialLicensePanel receipt field");const set=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,"value").set;set.call(e,'+JSON.stringify(receipt)+');e.dispatchEvent(new Event("input",{bubbles:true}));e.dispatchEvent(new Event("change",{bubbles:true}));return true})()');
+  };
+  const verifyEntitlement=async(plan,receipt)=>{
+    await setReceipt(receipt);
+    await evaluate('(()=>{const e=document.querySelector("[data-commercial-capability]");e.value='+JSON.stringify(plan.capability)+';e.dispatchEvent(new Event("change",{bubbles:true}));return true})()');
+    await click('[data-commercial-check]');
+    const result=await waitFor(()=>evaluate('document.querySelector("[data-commercial-check-result]")?.textContent||""'),
+      value=>value.includes('서명과 기능 사용권 확인됨')||value.includes('사용권 거부'),12000,'actual SKU receipt verification '+plan.sku);
+    assert.match(result,/서명과 기능 사용권 확인됨/,'production license panel must validate the signed '+plan.tier+' receipt');
+    return result;
+  };
+  const selectLayout=async layoutId=>{
+    const selector='[data-extended-layout-id="'+layoutId+'"]';
+    await click(selector);
+    await waitFor(()=>evaluate('document.querySelector('+JSON.stringify(selector)+')?.getAttribute("aria-pressed")==="true'),
+      Boolean,10000,'actual Workspace layout entitlement '+layoutId);
+  };
+  const denyLayout=async(layoutId,sku)=>{
+    const selector='[data-extended-layout-id="'+layoutId+'"]';
+    await click(selector);
+    await waitFor(()=>evaluate('Array.from(document.querySelectorAll("[role=alert]")).some(node=>node.textContent.includes("사용권"))'),
+      Boolean,10000,'actual Workspace SKU denial '+sku+' -> '+layoutId);
+    assert.equal(await evaluate('document.querySelector('+JSON.stringify(selector)+')?.getAttribute("aria-pressed")==="true'),
+      false,'insufficient '+sku+' entitlement must not select '+layoutId);
+    if(await evaluate('Boolean(document.querySelector("p[role=alert] button"))'))await click('p[role=alert] button');
   };
   const waitOperation=async label=>{
     await waitFor(()=>evaluate(`Boolean(document.querySelector('[data-local-ai-cancel]')||
@@ -141,63 +179,81 @@ async function runP124ElectronAcceptance(win,renderPdf){
   };
   const initialOrigin=await evaluate('location.protocol+"//"+location.host');
   assert.equal(initialOrigin,'astra://app','P124 must run in the trusted product protocol');
-  await waitFor(()=>evaluate('Boolean(document.querySelector("[data-p124-electron-acceptance]")&&window.astraDesktop?.localModelPropose)'),Boolean,20000,'Electron fixture and preload bridge');
+  const entitlementConfig=await readP124Entitlements();
+  report.sku_entitlement_flow={build:'GitHub-hosted P124 test build',issuer_thumbprint_sha256:entitlementConfig.issuerThumbprintSha256,
+    production_issuer_configured:false,production_sale_activation:false};
+  await waitFor(()=>evaluate('Boolean(document.querySelector("[data-p124-electron-acceptance]")&&document.querySelector("[data-commercial-license-input]")&&document.querySelector(".section-editor textarea")&&document.querySelector("[data-local-ai-review]")&&window.astraDesktop?.localModelPropose)'),Boolean,30000,'real Root/Workspace, license panel, paragraph review and Electron bridge');
+  assert.equal(await evaluate('window.__p124P124TestMode===true'),true,'P124 test-only product fixture marker must be present');
   const storageBefore=await evaluate('window.__p124StorageReady.then(()=>window.__p124SnapshotStorage())');
+  await waitFor(()=>evaluate('window.__p124ReadPersistedSource()'),value=>value===BASELINE,15000,'real STEP1 V1 migration into STEP2 V2');
   const productStorageBefore=await evaluate('window.__p124SnapshotProductStorage()');
+  const productTimestampsBefore=await evaluate('window.__p124ReadProductTimestamps()');
   const initialPdf=scenario==='healthy'?await printPdf('astra-p124-healthy-basic-before.pdf'):null;
   const uiResults=[];
   try{
-    for(const sku of SKU_NAMES){
-      await selectSku(sku);
-      const beforeCount=await applyCount();
+    for(const plan of SKU_PLANS){
+      const receipt=entitlementConfig.receipts[plan.tier];
+      const licenseResult=await verifyEntitlement(plan,receipt);
+      let deniedLayout=null;
+      if(plan.deniedLayout){
+        deniedLayout=plan.deniedLayout;
+        await denyLayout(plan.deniedLayout,plan.sku);
+      }
+      if(plan.layoutId)await selectLayout(plan.layoutId);
+      const selected=plan.layoutId||'basic-default';
+      const beforeProbe=await currentSource();
+      assert.equal(beforeProbe,BASELINE,'SKU setup must not change the actual STEP2 paragraph');
       await click('[data-local-ai-probe]');
-      const status=await waitFor(()=>evaluate('document.querySelector("[data-local-ai-status]")?.textContent||""'),
-        text=>scenario==='missing'?text.includes('찾지 못했습니다'):text.includes('로컬 모델을 찾았습니다'),
-        12000,'model status '+sku);
+      const modelStatus=await waitFor(()=>evaluate('document.querySelector("[data-local-ai-status]")?.textContent||""'),
+        value=>scenario==='missing'?value.includes('찾지 못했습니다'):value.includes('로컬 모델을 찾았습니다'),
+        12000,'model status '+plan.sku);
       if(scenario==='missing'){
         assert.equal(await evaluate('document.querySelector("[data-local-ai-run]")?.disabled'),true,
-          'missing model must leave AI inference disabled');
-        assert.equal(await currentSource(),BASELINE,'model missing must retain the original source');
-        assert.equal(await applyCount(),beforeCount,'model missing must not apply changes');
-        uiResults.push({sku,model_status:'unavailable',run_disabled:true,automatic_applies:0});
+          'missing model must leave actual Workspace inference disabled');
+        assert.equal(await currentSource(),BASELINE,'model missing must retain the original V1-derived paragraph');
+        uiResults.push({sku:plan.sku,tier:plan.tier,receipt_panel:'verified',license_result:licenseResult,
+          allowed_layout:selected,denied_layout:deniedLayout,model_status:'unavailable',run_disabled:true,
+          source_unchanged:true,automatic_applies:0});
         continue;
       }
       assert.equal(await evaluate('document.querySelector("[data-local-ai-run]")?.disabled'),true,
         'explicit consent is required after model detection');
       if(scenario==='tampered'){
         await click('[data-local-ai-consent]');
-        await setSource('최종 결제 금액은 230,000원으로 확정되었습니다.');
-        await click('[data-local-ai-run]');await waitOperation('tampered response '+sku);
+        const tamperedSource='최종 결제 금액은 230,000원으로 확정되었습니다.';
+        await setSource(tamperedSource);
+        await click('[data-local-ai-run]');await waitOperation('tampered response '+plan.sku);
         assert.equal(await evaluate('Boolean(document.querySelector("[data-local-ai-proposal]"))'),false,
           'tampered model output must never appear as an approved proposal');
-        assert.equal(await currentSource(),'최종 결제 금액은 230,000원으로 확정되었습니다.');
-        assert.equal(await applyCount(),beforeCount,'tampered response must not change the document');
+        assert.equal(await currentSource(),tamperedSource,'tampered output must not alter actual Workspace input');
         const message=await evaluate('document.querySelector("[data-local-ai-status]")?.textContent||""');
         assert.match(message,/원문은 변경되지 않았습니다/,'UI must explain rejected output keeps the source');
-        uiResults.push({sku,model_status:'available',tampered_output:'rejected',source_unchanged:true,automatic_applies:0});
+        await setSource(BASELINE);
+        await waitFor(()=>evaluate('window.__p124ReadPersistedSource()'),value=>value===BASELINE,12000,'restore persisted original V1-derived source');
+        uiResults.push({sku:plan.sku,tier:plan.tier,receipt_panel:'verified',license_result:licenseResult,
+          allowed_layout:selected,denied_layout:deniedLayout,model_status:'available',
+          tampered_output:'rejected',source_unchanged:true,automatic_applies:0});
         continue;
       }
-
-      await waitFor(()=>evaluate('window.astraDesktop.localModelPropose("synthetic-no-consent",false)'),x=>x?.reason==='local-model-consent-required',10000,'IPC consent rejection '+sku);
-      assert.equal(await applyCount(),beforeCount,'unconsented IPC call must not apply text');
+      await waitFor(()=>evaluate('window.astraDesktop.localModelPropose("synthetic-no-consent",false)'),
+        result=>result?.reason==='local-model-consent-required',10000,'IPC consent rejection '+plan.sku);
+      assert.equal(await currentSource(),BASELINE,'unconsented IPC call must leave product source unchanged');
       await click('[data-local-ai-consent]');
       assert.equal(await evaluate('document.querySelector("[data-local-ai-run]")?.disabled'),false);
       const proposalCases=[];let approvedUndo=false;let rejected=0;let attempted=0;let replaySource=null;
       const preferred=CASES.find(([id])=>id==='neutral-03');
       const orderedCases=preferred?[preferred,...CASES.filter(([id])=>id!=='neutral-03')]:CASES;
-      // Reuse one proven synthetic source after its first guarded proposal. Each loop still invokes the real model and requires a fresh visible decision.
+      // The production editor paragraph is edited through Workspace; each loop performs real inference and requires a visible decision.
       for(const [id,candidateText] of orderedCases){
         if(proposalCases.length>=10)break;
         attempted++;
         const text=replaySource?.text??candidateText;
-        const caseId=replaySource?`${replaySource.id}-replay-${proposalCases.length+1}`:id;
-        const countBeforeCase=await applyCount();
-        await evaluate(`window.__p124CaseId=${JSON.stringify(sku+'-'+caseId)}`);
+        const caseId=replaySource?replaySource.id+'-replay-'+(proposalCases.length+1):id;
+        await evaluate('window.__p124CaseId='+JSON.stringify(plan.sku+'-'+caseId));
         await setSource(text);
-        await click('[data-local-ai-run]');await waitOperation('real Qwen3 '+sku+' '+id);
+        await click('[data-local-ai-run]');await waitOperation('real Qwen3 '+plan.sku+' '+id);
         const hasProposal=await evaluate('Boolean(document.querySelector("[data-local-ai-proposal]"))');
-        assert.equal(await currentSource(),text,'model inference must never auto-apply');
-        assert.equal(await applyCount(),countBeforeCase,'inference must leave the apply counter unchanged');
+        assert.equal(await currentSource(),text,'real model inference must never auto-apply to the product Workspace');
         if(!hasProposal)continue;
         const proposed=await evaluate('document.querySelector("[data-local-ai-after]")?.textContent||""');
         assert.ok(proposed&&signature(text)===signature(proposed),'visible draft must preserve protected facts');
@@ -206,46 +262,43 @@ async function runP124ElectronAcceptance(win,renderPdf){
         if(!approvedUndo){
           if(scenario==='healthy'&&proposalCases.length===1){
             const image=await win.capturePage();
-            const screenshot=runnerPath(path.join(screenshotRoot,'astra-p124-'+sku.toLowerCase()+'.png'),/^astra-p124-(basic|pro|business)\.png$/i);
+            const screenshot=runnerPath(path.join(screenshotRoot,'astra-p124-'+plan.sku.toLowerCase()+'.png'),/^astra-p124-(basic|pro|business)\.png$/i);
             await fs.writeFile(screenshot,image.toPNG(),{flag:'wx'});
-            report.screenshots??=[];report.screenshots.push({sku,file:path.basename(screenshot),sha256:sha(image.toPNG())});
+            report.screenshots??=[];report.screenshots.push({sku:plan.sku,file:path.basename(screenshot),sha256:sha(image.toPNG())});
           }
           await click('[data-local-ai-accept]');
-          await waitFor(currentSource,value=>value===proposed,10000,'explicit approve '+sku);
-          assert.equal(await applyCount(),countBeforeCase+1,'explicit approve applies exactly one paragraph');
+          await waitFor(currentSource,value=>value===proposed,10000,'explicit approve '+plan.sku);
           await click('[data-local-ai-undo]');
-          await waitFor(currentSource,value=>value===text,10000,'Undo '+sku);
-          assert.equal(await applyCount(),countBeforeCase+2,'Undo restores the exact pre-approval source');
+          await waitFor(currentSource,value=>value===text,10000,'Undo '+plan.sku);
           approvedUndo=true;
         }else{
           await click('[data-local-ai-reject]');
-          await waitFor(()=>evaluate('!document.querySelector("[data-local-ai-proposal]")'),Boolean,10000,'reject '+sku);
-          assert.equal(await currentSource(),text,'rejection must retain the source');
-          assert.equal(await applyCount(),countBeforeCase,'rejection must not apply a proposal');
+          await waitFor(()=>evaluate('!document.querySelector("[data-local-ai-proposal]")'),Boolean,10000,'reject '+plan.sku);
+          assert.equal(await currentSource(),text,'rejection must retain the product source');
           rejected++;
         }
       }
-      assert.ok(proposalCases.length>=10,'each SKU must show at least ten real model proposals');
-      assert.ok(approvedUndo,'each SKU must explicitly approve one proposal and undo it');
-      assert.ok(rejected>=1,'each SKU must explicitly reject at least one proposal');
+      assert.ok(proposalCases.length>=10,'each actual SKU context must show ten real model proposals');
+      assert.ok(approvedUndo,'each actual SKU context must explicitly approve and Undo');
+      assert.ok(rejected>=1,'each actual SKU context must explicitly reject at least one proposal');
       const cancelText='실제 로컬 추론 취소를 확인하기 위한 합성 문장입니다. '.repeat(19).slice(0,1600);
-      const cancelCount=await applyCount();await setSource(cancelText);await click('[data-local-ai-run]');
-      await waitFor(()=>evaluate('Boolean(document.querySelector("[data-local-ai-cancel]"))'),Boolean,20000,'cancel control '+sku);
+      await setSource(cancelText);await click('[data-local-ai-run]');
+      await waitFor(()=>evaluate('Boolean(document.querySelector("[data-local-ai-cancel]"))'),Boolean,20000,'cancel control '+plan.sku);
       await sleep(150);await click('[data-local-ai-cancel]');
-      await waitFor(()=>evaluate('!document.querySelector("[data-local-ai-cancel]")'),Boolean,20000,'cancel completes '+sku);
-      assert.equal(await currentSource(),cancelText,'cancel must retain original text');
+      await waitFor(()=>evaluate('!document.querySelector("[data-local-ai-cancel]")'),Boolean,20000,'cancel completes '+plan.sku);
+      assert.equal(await currentSource(),cancelText,'cancel must retain actual Workspace source');
       assert.equal(await evaluate('Boolean(document.querySelector("[data-local-ai-proposal]"))'),false,'cancelled output must not show a proposal');
-      assert.equal(await applyCount(),cancelCount,'cancel must not apply model output');
       await setSource(BASELINE);
-      const printed=await printPdf(`astra-p124-healthy-${sku.toLowerCase()}-after.pdf`);
-      if(sku==='BASIC')assert.equal(printed.text,initialPdf.text,'BASIC PDF text changed after an unapproved proposal/reject/Undo');
-      uiResults.push({sku,model_status:'available',actual_proposals:proposalCases.length,
-        inference_attempts:attempted,approved_then_undone:1,rejected,cancelled:1,
-        proposals:proposalCases,pdf_sha256:printed.sha256,automatic_applies:0});
+      await waitFor(()=>evaluate('window.__p124ReadPersistedSource()'),value=>value===BASELINE,12000,'persisted source after approve/reject/undo/cancel');
+      const printed=await printPdf('astra-p124-healthy-'+plan.sku.toLowerCase()+'-after.pdf');
+      uiResults.push({sku:plan.sku,tier:plan.tier,receipt_panel:'verified',license_result:licenseResult,
+        allowed_layout:selected,denied_layout:deniedLayout,model_status:'available',actual_proposals:proposalCases.length,
+        inference_attempts:attempted,approved_then_undone:1,rejected,cancelled:1,proposals:proposalCases,
+        pdf_sha256:printed.sha256,automatic_applies:0});
     }
     if(scenario==='healthy'){
       const finalPdf=await readPdfText(await fs.readFile(path.join(process.env.RUNNER_TEMP,'astra-p124-healthy-business-after.pdf')));
-      assert.equal(finalPdf,initialPdf.text,'PDF text must remain identical after all 3 SKU review scenarios');
+      assert.equal(finalPdf,initialPdf.text,'PDF text must remain identical after all three actual Workspace SKU review scenarios');
       assert.ok(finalPdf.includes('ASTRA_P124_PDF_SOURCE_7401')&&finalPdf.includes('230,000원')&&finalPdf.includes('승인전에는외부에전달하지않습니다'),
         'PDF output must retain the original marker, amount and negation');
       report.pdf={before_sha256:initialPdf.sha256,final_sha256:uiResults.at(-1).pdf_sha256,
@@ -253,11 +306,14 @@ async function runP124ElectronAcceptance(win,renderPdf){
       report.pdf_text_equal=true;
     }
     const storageAfter=await evaluate('window.__p124SnapshotStorage()');
-    assert.equal(storageAfter,storageBefore,'synthetic localStorage V1 and IndexedDB V2 sentinels must remain unchanged');
+    assert.equal(storageAfter,storageBefore,'synthetic V1/V2 sentinels must remain unchanged');
     const productStorageAfter=await evaluate('window.__p124SnapshotProductStorage()');
-    assert.equal(productStorageAfter,productStorageBefore,'actual product localStorage V1 and STEP2 IndexedDB V2 must remain unchanged');
+    const productTimestampsAfter=await evaluate('window.__p124ReadProductTimestamps()');
+    assert.equal(productStorageAfter,productStorageBefore,'actual STEP1 V1 and STEP2 V2 content/assets must be preserved');
     report.synthetic_v1_v2_unchanged=true;
-    report.product_step2_storage_unchanged=true;
+    report.product_step2_content_preserved=true;
+    report.product_step2_timestamp_only_changed=productTimestampsAfter!==productTimestampsBefore;
+    report.product_step2_storage_unchanged=!report.product_step2_timestamp_only_changed;
     report.sku_contexts=uiResults;
     report.automatic_applies=uiResults.reduce((sum,item)=>sum+(item.automatic_applies||0),0);
     assert.equal(report.automatic_applies,0);

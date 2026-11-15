@@ -110,12 +110,12 @@ function Invoke-ElectronScenario([string]$Scenario) {
     throw "P124 $Scenario report did not PASS for the exact GitHub SHA."
   }
   if (@($report.sku_contexts).Count -ne 3) { throw "P124 $Scenario did not cover all three SKU contexts." }
-  if (-not $report.synthetic_v1_v2_unchanged -or -not $report.product_step2_storage_unchanged -or $report.automatic_applies -ne 0) {
-    throw "P124 $Scenario changed local storage or automatically applied text."
+  if (-not $report.synthetic_v1_v2_unchanged -or -not $report.product_step2_content_preserved -or $report.automatic_applies -ne 0) {
+    throw "P124 $Scenario changed stored V1/V2 content or automatically applied text."
   }
   if ($Scenario -eq 'healthy') {
-    if (-not $report.pdf_text_equal -or -not $report.synthetic_v1_v2_unchanged -or -not $report.product_step2_storage_unchanged -or $report.automatic_applies -ne 0) {
-      throw 'P124 healthy scenario missed PDF parity, storage preservation, or no-auto-apply acceptance.'
+    if (-not $report.pdf_text_equal -or -not $report.synthetic_v1_v2_unchanged -or -not $report.product_step2_content_preserved -or $report.automatic_applies -ne 0) {
+      throw 'P124 healthy scenario missed PDF parity, V1/V2 content preservation, or no-auto-apply acceptance.'
     }
     foreach ($sku in $report.sku_contexts) {
       if ($sku.actual_proposals -lt 10 -or -not $sku.cancelled -or $sku.approved_then_undone -ne 1 -or $sku.rejected -lt 1) {
@@ -144,10 +144,13 @@ try {
     throw 'P124 CPU-only acceptance refused because NVIDIA tooling is present on the hosted runner.'
   }
 
+  $entitlementsPath = Join-Path $runnerRoot 'astra-p124-test-entitlements.json'
+  node (Join-Path $repoRoot 'tests/p124-generate-test-entitlements.cjs') $entitlementsPath
+  Assert-ExitCode 'P124 ephemeral signed SKU receipt generation'
+  $env:ASTRA_P124_ENTITLEMENT_CONFIG = $entitlementsPath
   $env:ASTRA_P124_ELECTRON_ACCEPTANCE = '1'
   npm run build
-  Assert-ExitCode 'P124 isolated Electron fixture build'
-  Remove-Item Env:ASTRA_P124_ELECTRON_ACCEPTANCE
+  Assert-ExitCode 'P124 isolated product Workspace entitlement fixture build'
   $fixture = Join-Path $repoRoot 'dist/tests/fixtures/p124-electron-qwen3.html'
   if (-not (Test-Path -LiteralPath $fixture -PathType Leaf)) { throw 'Vite did not produce the P124 Electron acceptance fixture.' }
 
@@ -224,4 +227,6 @@ try {
   Remove-Item Env:ASTRA_P124_PROFILE_DIR -ErrorAction SilentlyContinue
   Remove-Item Env:ASTRA_STEP2_ACCEPTANCE_OUT -ErrorAction SilentlyContinue
   Remove-Item Env:ASTRA_P124_ELECTRON_ACCEPTANCE -ErrorAction SilentlyContinue
+  Remove-Item Env:ASTRA_P124_ENTITLEMENT_CONFIG -ErrorAction SilentlyContinue
+  if (Test-Path -LiteralPath $entitlementsPath) { Remove-Item -LiteralPath $entitlementsPath -Force }
 }
