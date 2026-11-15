@@ -75,6 +75,9 @@ jobs:
           }
           $firstCandidateHash = $hash.Hash
           $firstAsarHash = (Get-FileHash -LiteralPath $asarPath -Algorithm SHA256).Hash
+          $treeSnapshot = Join-Path $env:RUNNER_TEMP 'astra-c010-win-unpacked-first.json'
+          node tests/c010-package-tree-summary.cjs capture 'release/win-unpacked' $treeSnapshot
+          if ($LASTEXITCODE -ne 0) { throw 'Could not capture first package tree metadata.' }
           $firstCandidatePath = Join-Path $env:RUNNER_TEMP 'astra-c010-first-unsigned-candidate.exe'
           Copy-Item -LiteralPath $setups[0].FullName -Destination $firstCandidatePath
           Write-Output "C010 reproducibility build 1: installer=$firstCandidateHash app.asar=$firstAsarHash"
@@ -83,6 +86,8 @@ jobs:
           $reproStatus = 'FAIL'
           $reproDetail = "second build command exited $rebuildExitCode"
           if ($rebuildExitCode -eq 0) {
+            node tests/c010-package-tree-summary.cjs compare 'release/win-unpacked' $treeSnapshot
+            if ($LASTEXITCODE -ne 0) { throw 'Could not compare rebuilt package tree metadata.' }
             $repeatSetups = @(Get-ChildItem -LiteralPath 'release' -Filter 'ASTRA-PDF-Redesigner-Setup-*-x64.exe' -File)
             if ($repeatSetups.Count -eq 1) {
               $repeatHash = (Get-FileHash -LiteralPath $repeatSetups[0].FullName -Algorithm SHA256).Hash
