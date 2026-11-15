@@ -1,3 +1,20 @@
+# Astra 최종설계 64/100 — G001–G004 통합 완료, Codex P124 실패 인수인계 (2026-11-15 KST)
+
+> **이 블록은 최신 인수인계.** 아래 이전 단계별 내용은 당시 상태를 설명한 역사적 기록이다. `ㄱ` 시 최신 GitHub SHA를 조회하고 미완료를 실제 실행한다. GPT와 Codex는 별도 브랜치 유지.
+
+1. **목표·용도·확정 요구·기술:** A01~A12 100점 최종설계 기준 ASTRA 로컬 PDF 리디자인 Windows Electron/React/PDF.js/Ollama/OCR. 실제 문서 보존, 사용자 명시 승인 후 적용. GPT 독립 G001–G005, Codex C001–C010 병렬; GitHub only.
+2. **완료 기능·변경·근거:** GPT [PR #12](https://github.com/hibi89/astra_pdf_redesigner/pull/12) MERGED, G001 후보 서명/라이선스 차단 분류·G002 원문/출력 합성 QA·G003 Codex pinned SHA 독립 코드 감사·G004 실제 고객 PDF 5~10건 및 물리 Windows 비공개 수용 프로토콜·익명 검증기. 제품 UI/데이터 변경 없음. Codex PR #13 시험용 SKU/패키징 증거 부족 및 Windows P124 실패로 미병합.
+3. **테스트 명령/수/검증과 미검증:** `node --test tests/gpt-final-qa-p119-gate.test.cjs tests/gpt-final-qa-text-fidelity.test.cjs tests/gpt-final-qa-p124-review.test.cjs tests/gpt-final-qa-owner-acceptance.test.cjs tests/ocr-supply-chain-preflight.test.cjs tests/ocr-release-hold-gate.test.cjs`. 정확 테스트 코드 SHA `24939be58c6fcd3396697bd93aa58a082b4d7a48`, [Actions 43683920991](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43683920991) **52 PASS/0 FAIL/0 SKIP**, 정적 Codex SHA 검수 PASS, release-gate PASS, [policy 43683921084](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43683921084) SUCCESS. 이후 문서만 변경한 커밋과 통합 HEAD의 전체 회귀는 미검증 구분. Codex 정확 SHA `6e8b2eeb...` [P124 Windows 43683050524](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43683050524) FAIL.
+4. **완료/진행/대기/차단·중단점:** G001–G004 별도 독립코드·절차 완료/통합, G005 상태 최신화 중. P119/P120/P121/P126 BLOCKED; C001/P124 FAIL, 수정 대기. 실제 수용 0건, 생산용 설치 파일 미승인, A11=0/7, A12=0/2. 최종설계 잠정 **64/100 +0**, G55 PASS, G60/G65/G70 NOT PASSED, 공식 UNASSESSED, RELEASE HOLD.
+5. **오류 증거·원인·시도·재시도 금지·대안:** Mannheim/Tesseract 5.5.3/5.5.0/5.4.0 Windows 서명 `UnknownError`, 종속 DLL별 NOTICE/재배포권 부족으로 P119 미승인. 공급 대안: 새 서명 공급자, pinned 소스 재현 빌드, 사용자가 직접 설치한 로컬 OCR 안전 탐지. P124 `healthy` 첫 SKU 10개 제안 기준 미달(`sku contexts=0`) 및 NSIS SKIPPED. 동일 SHA/동일 CPU 테스트 반복 금지, 원문 없는 제안 거절 건수·원인 파악 후 수정. C001 실제 entitlement/Workspace GUI 시나리오 및 test-only desktop JS 패키지 제외 필요.
+6. **저장소·브랜치·SHA·경로:** `hibi89/astra_pdf_redesigner`. 통합 `integration/astra-final-blueprint-100-20261115`, QA merge SHA `4b486b5c9039e97a468483eafe4a1d7146193b0c`, 직전 STATUS 업데이트 `3d3a66bb1dc7aab225510865592aecd069076b13`. GPT `gpt/astra-final-qa-ocr-20261115`, Codex `codex/astra-final-ai-sku-20261115@6e8b2eeb...`. `docs/evidence/astra/GPT_FINAL_WORKLOG.md`와 `G001`~`G004`, `tools/tests/gpt-final-qa-*`, `.github/workflows/gpt-final-qa.yml`.
+7. **Production URL·Vercel·실행·환경:** 별도 Vercel/Production 출시 **미적용**. Actions Ubuntu 22 Node 22, Codex Windows GitHub-hosted runner 테스트는 고객 물리 Windows가 아님. 제품 현행 소스/빌드는 원본 feature 분기 및 기존 release hold 유지. 공식 설치·배포 권한 별도 승인 필요.
+8. **원본·백업·인증·수정금지:** 사용자 PDF/PNG·설계 원본·STEP1 localStorage V1·STEP2 IndexedDB V2·기존 main/기능 브랜치 및 PR 이력 보존. `OCR_MANIFEST=null`, production issuer/JWK/pin null, customer-build flag false. 실제 허가 문서·고객 원문·파일명·비밀키/민감 해시를 공개 CI/PR에 업로드 금지. 익명 템플릿은 실행 증거 아님.
+9. **다음 우선순위·절차·완료기준·승인:** Codex #13 신규 수정 SHA/원문 없는 실패 원인 결과 확인 → 독립 C001 실 CPU·실 판매 SKU UI/권한·실 PDF/Windows/패키지 누출 검수 → G002 PDF.js 실출력 QA 보완 → 오너만 허가 PDF 5~10건/물리 Win10/11/라이선스·판매 수용. 실고객 원본 외부 전송·권한/보안/결제 변경·최종 출시·크몽 등록은 오너 별도 승인.
+10. **갱신 일시·확인 시점·검증 범위·문서기준 커밋:** 2026-11-15 KST, GitHub Actions exact QA 52/52/0, P124 fail 실제 로그·PR 상태 확인. 본 인수인계 직전 코드 통합 SHA `4b486b5c...`, 상태 문서 커밋 `3d3a66bb...`; 본 HANDOFF 자체 새 SHA는 커밋 후 조회한다. 신규 CI/실제 Windows 구매자/사용자 수용 없는 항목은 **미검증**.
+
+---
+
 # Astra P114–P126 실행 재개 — 2026-11-15 KST
 
 ## 최신 완료 checkpoint
