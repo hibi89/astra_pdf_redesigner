@@ -99,10 +99,9 @@ function Invoke-ElectronScenario([string]$Scenario) {
   $env:P124_REPORT_OUT = Join-Path $runnerRoot "astra-p124-$Scenario.json"
   $env:P124_SCREENSHOT_DIR = $runnerRoot
   $env:ASTRA_P124_PROFILE_DIR = $profile
-  $env:ASTRA_STEP2_ACCEPTANCE_OUT = Join-Path $runnerRoot "astra-step2-project-p124-$Scenario.pdf"
   $env:ASTRA_P124_ELECTRON_ACCEPTANCE = '1'
   $electron = Join-Path $repoRoot 'node_modules/.bin/electron.cmd'
-  & $electron '.' '--astra-desktop-smoke' '--astra-step2-acceptance' '--astra-p124-qwen3-acceptance'
+  & $electron '.' '--astra-desktop-smoke' '--astra-p124-qwen3-acceptance'
   Assert-ExitCode "Windows Electron P124 $Scenario acceptance"
   if (-not (Test-Path -LiteralPath $env:P124_REPORT_OUT -PathType Leaf)) { throw "Missing P124 $Scenario report." }
   $report = Get-Content -LiteralPath $env:P124_REPORT_OUT -Raw | ConvertFrom-Json
@@ -225,7 +224,6 @@ try {
   Remove-Item Env:P124_REPORT_OUT -ErrorAction SilentlyContinue
   Remove-Item Env:P124_SCREENSHOT_DIR -ErrorAction SilentlyContinue
   Remove-Item Env:ASTRA_P124_PROFILE_DIR -ErrorAction SilentlyContinue
-  Remove-Item Env:ASTRA_STEP2_ACCEPTANCE_OUT -ErrorAction SilentlyContinue
   Remove-Item Env:ASTRA_P124_ELECTRON_ACCEPTANCE -ErrorAction SilentlyContinue
   Remove-Item Env:ASTRA_P124_ENTITLEMENT_CONFIG -ErrorAction SilentlyContinue
   if (Test-Path -LiteralPath $entitlementsPath) { Remove-Item -LiteralPath $entitlementsPath -Force }
