@@ -18,3 +18,8 @@
 ## 최신 단계 상태 보충 (2026-10-19)
 - 위의 “현재 승인 단계 STEP 2 / STEP 3 범위 밖”은 초기 main 안정화 규칙이다. 이후 사용자의 순차 `ㄱ` 승인에 따른 **독립** STEP3 PDF 가져오기 [Draft PR #3](https://github.com/hibi89/astra_pdf_redesigner/pull/3)와 STEP1/2 Windows 설치형 [Draft PR #4](https://github.com/hibi89/astra_pdf_redesigner/pull/4)가 존재한다. 두 PR은 현재 **main 미병합**이며 승인 없이 병합·STEP4 착수 금지.
 - 최신 검증 사실/남은 수동 인수 조건은 `STATUS.md`와 `HANDOFF.md`의 마지막 시점 기록을 따른다. 이전 시점의 “미착수” 표현으로 최근 feature 진행을 덮어쓰지 않는다. main의 사용자 기존 데이터 보존·원본 변경/외부 전송 금지 원칙은 유지한다.
+
+
+## 2026-11-15 — 사용자 선택 Astra 디자인 레퍼런스 (문서 전용)
+- [Astra PDF 최종 시각화 레퍼런스·검수 경계](docs/design/ASTRA_PDF_VISUAL_REFERENCE_20261115.md)를 향후 프론트엔드/문서 디자인 고도화 전에 참고한다. 어두운 보라색 브랜드, 굵은 타이포, 5개 핵심 카드, 원본 PDF↔리디자인 결과 비교, KPI 문서 시각화를 미감의 기준으로 삼는다.
+- 이 등록은 **시안**이며 원본 7단계 기능 요구·콘텐츠 보존·단계별 승인·테스트·출시 게이트를 변경하지 않는다. 디자인 작업 전 반드시 현재 기능·실제 검증을 확인한다. 첨부 원본 PNG는 이 커밋에 포함되지 않았고 저장된 SVG는 개념 재구성이다.
