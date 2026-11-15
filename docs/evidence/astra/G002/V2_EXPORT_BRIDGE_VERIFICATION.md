@@ -1,5 +1,8 @@
 # G002 — STEP2 V2 project export + review receipt + actual PDF.js independent test
 
+**LATEST SUPERSEDING EVIDENCE (2026-11-15 KST):** [CHROME_LIVE_V2_E2E_20261115.md](CHROME_LIVE_V2_E2E_20261115.md) — exact functionality SHA `0432f1513cce957524f2d5e69a35c993a90cfa3b`, GitHub Actions `43688818553` **real Chromium STEP3→actual IndexedDB V2→real product JSON export hash→actual PDF.js output SUCCESS**, independent Node **84/84 PASS**, policy SUCCESS. Prior experimental browser STOP/PIVOT below is **historical**, resolved by checking each flagged page's manual reading-order checkbox before global confirmation. Actual Chrome printed PDF has **10 PDF.js NUL glyphs** flagged for mandatory manual review, so content/output fidelity remains **NOT CERTIFIED**. Still buyer UNASSESSED, 64/100, RELEASE HOLD.
+
+
 **Date:** 2026-11-15 KST. **Owner acceptance:** UNASSESSED. **Provisional score:** 64/100 (+0). **Release:** HOLD.
 
 ## Completed, tested scope

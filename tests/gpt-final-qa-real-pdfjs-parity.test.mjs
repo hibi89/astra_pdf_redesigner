@@ -117,3 +117,19 @@ test('G002 actual PDF.js detects clipped output glyphs before a human visually a
   assert.ok(r.issues.includes('OUTPUT_TEXT_OVERFLOW'));
   assert.equal(r.humanApproval,'UNASSESSED');
 });
+
+
+test('G002 reports PDF.js unmapped U+0000 glyph as critical manual risk, not a passing comparison',async()=>{
+  const source=makeMixedLayoutPdf(1);
+  const original=await sourceText(source);
+  const report=await inspectRealPdfPair({
+    sourcePdfBefore:source,sourcePdfAfter:Buffer.from(source),
+    outputPdf:makeMixedLayoutPdf(2),importedText:original+'\u0000',
+  });
+  assert.ok(report.issues.includes('PDFJS_IMPORTED_NUL_GLYPH_REVIEW_REQUIRED'));
+  assert.ok(report.issues.includes('SOURCE_IMPORT_TEXT_DIFFERENCE'));
+  assert.equal(report.status,'POTENTIAL_DIFFERENCES_REQUIRE_MANUAL_REVIEW');
+  assert.equal(report.scoreDelta,0);
+  assert.equal(report.release,'RELEASE HOLD');
+  assert.ok(!JSON.stringify(report).includes('STEP3_SOURCE_P1_BEGIN_901'));
+});

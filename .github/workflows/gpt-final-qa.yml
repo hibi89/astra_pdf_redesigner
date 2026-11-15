@@ -100,3 +100,36 @@ jobs:
           node --check tools/gpt-final-qa-real-pdfjs-parity.mjs
           node --check tools/gpt-final-qa-v2-pdfjs-bridge.mjs
           node --test tests/gpt-final-qa-v2-pdfjs-bridge.test.mjs tests/gpt-final-qa-real-pdfjs-parity.test.mjs tests/pdf-integrity-audit.test.cjs tests/pdf-output-audit.test.cjs
+
+  g002-live-v2-reviewed-browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install exact project dependencies and compile product UI
+        run: |
+          npm install --no-audit --no-fund
+          npm run build
+      - name: Synthetic source PDF, explicit page review, real Chromium V2 persistence and output
+        run: |
+          set -euo pipefail
+          CHROME_BIN=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)
+          if [ -z "$CHROME_BIN" ]; then
+            echo "::error::Real Chromium required"
+            exit 1
+          fi
+          npm run dev -- --port 4173 >/tmp/astra-g002-review-vite.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          for i in $(seq 1 50); do
+            if curl -fsS http://127.0.0.1:4173 >/dev/null; then break; fi
+            sleep 0.5
+          done
+          curl -fsS http://127.0.0.1:4173 >/dev/null
+          node --check tests/gpt-final-qa-live-v2-checked-browser.mjs
+          CHROME_PATH="$CHROME_BIN" node tests/gpt-final-qa-live-v2-checked-browser.mjs
