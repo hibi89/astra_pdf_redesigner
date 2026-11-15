@@ -157,5 +157,8 @@ try {
 }finally{
   try{ws?.close();}catch{}
   await browser.close();
-  rmSync(profile,{recursive:true,force:true,maxRetries:2});
+  // Chrome may leave a helper process flushing the ephemeral profile; do not
+  // replace the real test result with an ENOTEMPTY cleanup exception.
+  try{rmSync(profile,{recursive:true,force:true,maxRetries:5,retryDelay:200});}
+  catch{ /* GitHub-hosted runner destroys this dedicated synthetic profile on exit. */ }
 }
