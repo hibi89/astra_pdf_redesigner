@@ -75,17 +75,26 @@ export async function inspectRealPdfPair({
   catch{throw Error('G002_PDF_PARSING_OR_LIMIT_FAILED');}
   const sourceText=source.map(x=>x.text).join(' ');
   const outputText=output.map(x=>x.text).join(' ');
-  // Fail closed with field-only diagnostics, never raw document text.
-  // This is useful for genuine Chrome PDFs whose PDF.js text items differ
-  // from the deterministic hand-built PDF fixture.
-  for(const [label,value] of [['SOURCE',sourceText],['IMPORTED',importedText],['OUTPUT',outputText]]){
-    if(typeof value!=='string'||value.length>2_000_000||value.includes('\u0000'))
+  // PDF.js may yield U+0000 for an unmapped Chrome print glyph. Never silently
+  // treat that as faithful text: retain a critical risk code on the immutable
+  // report, while using U+FFFD only in the comparison's ephemeral strings.
+  // No source/output/project PDF bytes are mutated or written.
+  const controlIssues=[];
+  function controlAwareText(label,value){
+    if(typeof value!=='string'||value.length>2_000_000)
       throw Error('G002_'+label+'_INVALID_TEXT_SNAPSHOT');
+    if(!value.includes('\u0000'))return value;
+    controlIssues.push('PDFJS_'+label+'_NUL_GLYPH_REVIEW_REQUIRED');
+    return value.replace(/\u0000/gu,'\uFFFD');
   }
   const snapshot=checkSnapshots({
-    sourcePdfBefore,sourcePdfAfter,sourceText,importedText,outputText,expectedTableRows,
+    sourcePdfBefore,sourcePdfAfter,
+    sourceText:controlAwareText('SOURCE',sourceText),
+    importedText:controlAwareText('IMPORTED',importedText),
+    outputText:controlAwareText('OUTPUT',outputText),
+    expectedTableRows,
   });
-  const issues=[...snapshot.issues];
+  const issues=[...snapshot.issues,...controlIssues];
   if(hash(sourcePdfBefore)===hash(outputPdf))issues.push('OUTPUT_IDENTICAL_TO_ORIGINAL_BYTES');
   if(source.length!==output.length)issues.push('PAGE_COUNT_CHANGED_MANUAL_REVIEW');
   if(!output.every(p=>p.isA4))issues.push('OUTPUT_NOT_A4');
