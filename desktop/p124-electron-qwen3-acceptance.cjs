@@ -161,19 +161,18 @@ async function runP124ElectronAcceptance(win,renderPdf){
     assert.match(result,/서명과 기능 사용권 확인됨/,'production license panel must validate the signed '+plan.tier+' receipt');
     return result;
   };
+  const layoutSelected=layoutId=>evaluate(`(()=>{const e=Array.from(document.querySelectorAll('[data-extended-layout-id]')).find(node=>node.getAttribute('data-extended-layout-id')==='${layoutId}');return Boolean(e&&e.getAttribute('aria-pressed')==='true')})()`);
   const selectLayout=async layoutId=>{
     const selector='[data-extended-layout-id="'+layoutId+'"]';
     await click(selector);
-    await waitFor(()=>evaluate(`document.querySelector('[data-extended-layout-id="${layoutId}"]')?.getAttribute("aria-pressed")==="true`),
-      Boolean,10000,'actual Workspace layout entitlement '+layoutId);
+    await waitFor(()=>layoutSelected(layoutId),Boolean,10000,'actual Workspace layout entitlement '+layoutId);
   };
   const denyLayout=async(layoutId,sku)=>{
     const selector='[data-extended-layout-id="'+layoutId+'"]';
     await click(selector);
     await waitFor(()=>evaluate('Array.from(document.querySelectorAll("[role=alert]")).some(node=>node.textContent.includes("사용권"))'),
       Boolean,10000,'actual Workspace SKU denial '+sku+' -> '+layoutId);
-    assert.equal(await evaluate(`document.querySelector('[data-extended-layout-id="${layoutId}"]')?.getAttribute("aria-pressed")==="true`),
-      false,'insufficient '+sku+' entitlement must not select '+layoutId);
+    assert.equal(await layoutSelected(layoutId),false,'insufficient '+sku+' entitlement must not select '+layoutId);
     if(await evaluate('Boolean(document.querySelector("p[role=alert] button"))'))await click('p[role=alert] button');
   };
   const waitOperation=async label=>{
