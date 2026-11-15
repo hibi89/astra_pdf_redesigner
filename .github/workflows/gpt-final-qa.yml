@@ -1,4 +1,4 @@
-name: ASTRA GPT independent G001-G004 QA
+name: ASTRA GPT independent G001-G004 and PDF.js QA
 on:
   push:
     branches:
@@ -81,3 +81,20 @@ jobs:
             throw Error('G003_PINNED_CODE_REVIEW_ASSERTION_CHANGED');
           console.log('PASS G003: classified non-scoring C001 real-SKU and package-isolation gaps at pinned SHA');
           NODE
+
+  g002-real-pdfjs-parity:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install exact app dependencies for actual PDF.js parser
+        run: npm install --no-audit --no-fund
+      - name: G002 actual PDF bytes source-output independent regression
+        run: |
+          node --check tools/gpt-final-qa-real-pdfjs-parity.mjs
+          node --test tests/gpt-final-qa-real-pdfjs-parity.test.mjs tests/pdf-integrity-audit.test.cjs tests/pdf-output-audit.test.cjs
