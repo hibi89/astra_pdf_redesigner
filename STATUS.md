@@ -1,3 +1,13 @@
+## 2026-11-15 KST — G002 실제 PDF.js QA 73/73 PASS · P124 Windows hosted PASS(검수 범위 제한) · 64/100 유지
+
+- **G002 + G003 통합:** [PR #14](https://github.com/hibi89/astra_pdf_redesigner/pull/14) MERGED → integration commit `6ebef90de9157f681eeb77d14c49209f0f1b35b2`. GPT 전용 브랜치 변경분만 통합. 기존 `main`, Codex PR #13 및 생산 UI/Electron 코드 미변경.
+- **실제 PDF.js 추출 증거:** 고정 GitHub SHA `5f6a430b1e17920267c6d49ee4998b158a03d6c8`에서 [QA #43685514835](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43685514835) **신규 실제 합성 PDF 파일 파서+기존 PDF.js 검사 21 PASS, 독립 G001–G004 QA 52 PASS, 실패 0, SKIP 0; Codex 고정 SHA 정적 검수 성공**. [정책 #43685514899](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43685514899) SUCCESS. 이전 3개 실패 후보는 PDF.js 벡터 경로 집계 및 코드 문법 오류를 수정했으며 무가점. 실제 고객 PDF가 아닌 합성 바이트이고 텍스트/표/레이아웃 의미 동일성은 사람 최종 검수 필요. `docs/evidence/astra/G002/REAL_PDFJS_VERIFICATION_20261115.md`.
+- **Codex C001/P124:** `a2ca668c9578b68e760b922c026a5f2f8f941c8d` Windows [#43684225170](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43684225170) **SUCCESS**: pinned Qwen3 Windows Electron, 3개 시험용 SKU context, healthy/missing/tampered, unsigned NSIS 및 패키지 스모크 PASS. 단, 독립 [artifact #14149509892](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43684225170/artifacts/14149509892) ZIP SHA `4bdc85bb367c2165beaefdfeaa187c79607e98eb52267b073a0187044cb7e91b` 검수 결과 **각 SKU 실제 호출 10회 = 서로 다른 입력 SHA 1개/출력 SHA 1개 반복**. 10개 서로 다른 선택 문단, 실제 `Workspace`의 SKU 권한 승인, production ASAR 테스트 전용 JS 제외를 증명한 것은 아님. 이전 P124 FAIL 기록은 역사적 실패 사례이며 현재 고정 실모델 feature SHA의 runner 결과는 SUCCESS이나 **최종 3SKU 인수는 REVIEW REQUIRED**. [G003 독립 검수](docs/evidence/astra/G003/P124_ARTIFACT_INDEPENDENT_AUDIT.md), [Codex PR #13](https://github.com/hibi89/astra_pdf_redesigner/pull/13) 수정 요구 유지.
+- **점수·릴리스:** G002/G003는 독립 QA/증거 강화(점수 +0). Codex 작업자 문서의 A08 +2/총점 66/100은 **후보**, 통합 검수 미승인. 사용자 확정 12영역 중앙 잠정 **64/100**, 공식 구매자 수용 **UNASSESSED**, `OCR_MANIFEST=null`, P119 공급망 BLOCKED, G60/G65/G70 NOT PASSED, `RELEASE HOLD`. 실제 구매자 허가 PDF 5–10건/물리 Windows 10·11 미검증, 크몽 미등록.
+- **다음:** Codex PR #13에서 서로 다른 문단 품질·실 SKU 권한 E2E·ASAR 테스트 코드 제외 증거 확인 → 통합/가점은 코드와 최신 SHA 검증 후 결정. GPT는 실제 PDF.js 감사 결과를 비공개 실제 수용 절차에 연결하되 원본 업로드 금지. 통합 HEAD 신규 QA 결과는 이 문서 수정 후 독립 재확인 필요.
+
+---
+
 ## 2026-11-15 KST — G005 exact integration QA PASS 및 Codex 신규 수정 독립 위험 (추가)
 
 - **통합 CI SHA `83bd72ca93db201013e62c54e94d6df39f1a0180`**: [G001–G004 independent QA #43684301712](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43684301712) **52 PASS/0 FAIL/0 SKIP**, pinned Codex read-only static-review job SUCCESS, OCR release gate PASS; [final policy #43684301960](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43684301960) SUCCESS. 이후 본 문서 기록은 검증된 실행 코드 변화가 아니다.
