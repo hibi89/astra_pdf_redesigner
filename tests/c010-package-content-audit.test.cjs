@@ -31,7 +31,8 @@ test('C010 scanner reports secret, personal-data signatures, and blocked package
  const fakeGithubToken='ghp_'+('A'.repeat(32));
  const fakeEmail='buyer.synthetic@example.com';
  const fakePhone='010-1234-5678';
- const fakeResidentId='900101-1234567';\n const invalidDateId='991332-1234567';
+ const fakeResidentId='900101-1234567';
+ const invalidDateId='991332-1234567';
  writeFileSync(join(assets,'leak.js'),[
   'const github='+JSON.stringify(fakeGithubToken)+';',
   '-----BEGIN PRIVATE KEY-----'
@@ -47,5 +48,6 @@ test('C010 scanner reports secret, personal-data signatures, and blocked package
   'private-key-material','test-fixture-path','environment-file-path'])assert.ok(rules.has(rule),'missing rule '+rule);
  const serialized=JSON.stringify(result.findings);
  for(const value of [fakeGithubToken,fakeEmail,fakePhone,fakeResidentId])assert.ok(!serialized.includes(value),'scanner report must not print matched content');
- assert.equal(result.findings.filter(finding=>finding.rule==='korean-resident-id-pattern').length,1,'invalid calendar dates must not be flagged as resident IDs');\n assert.ok(result.findings.every(finding=>Object.keys(finding).every(key=>['rule','file','offset'].includes(key))));
+ assert.equal(result.findings.filter(finding=>finding.rule==='korean-resident-id-pattern').length,1,'invalid calendar dates must not be flagged as resident IDs');
+ assert.ok(result.findings.every(finding=>Object.keys(finding).every(key=>['rule','file','offset'].includes(key))));
 });
