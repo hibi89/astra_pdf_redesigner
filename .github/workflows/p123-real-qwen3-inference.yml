@@ -51,7 +51,7 @@ jobs:
           curl --fail --show-error --location --retry 5 --retry-all-errors \
             https://github.com/ollama/ollama/releases/download/v0.40.16/ollama-linux-amd64.tar.zst -o "$asset"
           echo "87bfafb2acbc89b2e6a1be0a9043de6aa75fb450696f86bc426e65fc448f788d  $asset" | sha256sum --check -
-          tar --zstd -xf "$asset" -C /usr/local
+          sudo tar --zstd -xf "$asset" -C /usr/local
           rm -f "$asset"
           ollama --version
       - name: Download exact model release assets from GitHub and verify hashes
