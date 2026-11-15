@@ -57,8 +57,8 @@ test('C010 binary comparator reports bounded byte offsets and PE timestamps with
     assert.equal(result.sameBytes, false);
     assert.equal(result.differingByteCount, 2);
     assert.equal(result.differingRangeCount, 2);
-    assert.deepEqual(result.firstDifferingOffsets, [0x8b, 0xaa]);
-    assert.deepEqual(result.firstDifferingRanges, [{ start: 0x8b, end: 0x8b }, { start: 0xaa, end: 0xaa }]);
+    assert.deepEqual(result.firstDifferingOffsets, [0x88, 0xaa]);
+    assert.deepEqual(result.firstDifferingRanges, [{ start: 0x88, end: 0x88 }, { start: 0xaa, end: 0xaa }]);
     assert.deepEqual(result.peTimestamp, { first: 0x12345678, second: 0x12345679, equal: false });
     assert.equal(JSON.stringify(result).includes('fixture'), false);
   });
