@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="724" height="746" viewBox="0 0 724 746" role="img" aria-labelledby="title desc">
+<title id="title">Astra PDF Redesigner visual target — conceptual redraw, 2026-11-15</title>
+<desc id="desc">Dark purple promotional hero with five capability cards and a before/after document transformation. Visual guidance, not actual UI or tested feature evidence.</desc>
+<defs>
+ <linearGradient id="bg" x1="0" x2=".9" y1="0" y2="1"><stop stop-color="#1c0c37"/><stop offset=".53" stop-color="#140c29"/><stop offset="1" stop-color="#542290"/></linearGradient>
+ <linearGradient id="purple" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#a85afa"/><stop offset="1" stop-color="#6223d9"/></linearGradient>
+ <linearGradient id="after" x1="0" x2="1" y1="0" y2="1"><stop stop-color="#ffffff"/><stop offset="1" stop-color="#eee9ff"/></linearGradient>
+ <linearGradient id="glass" x1="0" x2="0" y1="0" y2="1"><stop stop-color="#71568c" stop-opacity=".55"/><stop offset="1" stop-color="#3c2756" stop-opacity=".62"/></linearGradient>
+ <filter id="sh"><feDropShadow dx="0" dy="5" stdDeviation="9" flood-color="#020013" flood-opacity=".45"/></filter>
+ <filter id="glow"><feGaussianBlur stdDeviation="11"/></filter>
+</defs>
+<rect width="724" height="746" fill="#0b0714"/>
+<rect x="12" y="26" width="700" height="711" fill="url(#bg)"/>
+<path d="M13 210 C80 28 115 11 205 27" fill="none" stroke="#8737e9" opacity=".28" stroke-width="2"/>
+<path d="M12 680 C196 620 410 744 713 651" fill="none" stroke="#ad4bf3" opacity=".18" stroke-width="2"/>
+<!-- Header -->
+<path d="M74 87 L105 37 L134 88 L117 88 L105 64 L91 87 Z" fill="url(#purple)"/>
+<text x="154" y="76" font-family="Arial,sans-serif" font-weight="800" font-size="35" fill="#f5efff">Astra <tspan fill="#b264ff">PDF Redesigner</tspan></text>
+<rect x="575" y="47" width="119" height="35" rx="18" fill="url(#glass)" stroke="#bd92df"/>
+<text x="635" y="70" text-anchor="middle" font-family="Arial,sans-serif" font-weight="700" font-size="15" fill="#fff">최종 완성 예시</text>
+<text x="360" y="115" text-anchor="middle" font-family="Arial,sans-serif" font-size="21" font-weight="700" fill="#ffffff">AI로 PDF를 더 보기 좋고, 더 전문적으로 리디자인</text>
+<!-- capability cards -->
+<rect x="68" y="139" width="119" height="78" rx="13" fill="url(#glass)" stroke="#8a68ac" stroke-opacity=".6"/><text x="127" y="175" text-anchor="middle" font-size="27" font-family="Arial,sans-serif" font-weight="700" fill="#d1a5ff">✦</text><text x="127" y="200" text-anchor="middle" font-size="13" font-family="Arial,sans-serif" font-weight="600" fill="#fff">디자인 개선</text><rect x="195" y="139" width="119" height="78" rx="13" fill="url(#glass)" stroke="#8a68ac" stroke-opacity=".6"/><text x="254" y="175" text-anchor="middle" font-size="27" font-family="Arial,sans-serif" font-weight="700" fill="#d1a5ff">▣</text><text x="254" y="200" text-anchor="middle" font-size="13" font-family="Arial,sans-serif" font-weight="600" fill="#fff">레이아웃 재구성</text><rect x="322" y="139" width="119" height="78" rx="13" fill="url(#glass)" stroke="#8a68ac" stroke-opacity=".6"/><text x="381" y="175" text-anchor="middle" font-size="27" font-family="Arial,sans-serif" font-weight="700" fill="#d1a5ff">Aa</text><text x="381" y="200" text-anchor="middle" font-size="13" font-family="Arial,sans-serif" font-weight="600" fill="#fff">가독성 향상</text><rect x="449" y="139" width="119" height="78" rx="13" fill="url(#glass)" stroke="#8a68ac" stroke-opacity=".6"/><text x="508" y="175" text-anchor="middle" font-size="27" font-family="Arial,sans-serif" font-weight="700" fill="#d1a5ff">◫</text><text x="508" y="200" text-anchor="middle" font-size="13" font-family="Arial,sans-serif" font-weight="600" fill="#fff">OCR(문자인식)</text><rect x="576" y="139" width="119" height="78" rx="13" fill="url(#glass)" stroke="#8a68ac" stroke-opacity=".6"/><text x="635" y="175" text-anchor="middle" font-size="27" font-family="Arial,sans-serif" font-weight="700" fill="#d1a5ff">✎</text><text x="635" y="200" text-anchor="middle" font-size="13" font-family="Arial,sans-serif" font-weight="600" fill="#fff">내용 수정·보완</text>
+<!-- paper headers -->
+<rect x="89" y="228" width="221" height="36" rx="18" fill="#535467" stroke="#86859c"/>
+<text x="199" y="251" fill="white" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="700">리디자인 전 (원본 PDF)</text>
+<rect x="420" y="227" width="222" height="36" rx="18" fill="url(#purple)"/>
+<text x="531" y="251" fill="#fff" text-anchor="middle" font-family="Arial,sans-serif" font-size="15" font-weight="700">리디자인 후 (Astra 결과물)</text>
+<!-- original paper -->
+<rect x="44" y="247" width="273" height="385" rx="15" fill="#fff" filter="url(#sh)"/>
+<g font-family="Arial,sans-serif" fill="#202020">
+<text x="66" y="311" font-size="19" font-weight="800">2025년 사업 운영 보고서</text>
+<path d="M65 325 H293" stroke="#ddd"/>
+<text x="67" y="359" font-size="15" font-weight="700">1. 개요</text>
+<text x="71" y="383" font-size="11">본 보고서는 2025년 사업 운영 성과를 정리한 것으로,</text>
+<text x="71" y="401" font-size="11">주요 성과와 향후 계획을 포함합니다.</text>
+<text x="67" y="439" font-size="15" font-weight="700">2. 주요 성과</text>
+<text x="72" y="462" font-size="12">- 매출: 전년 대비 18% 증가</text>
+<text x="72" y="481" font-size="12">- 신규 고객: 1,240명</text>
+<text x="72" y="500" font-size="12">- 운영 효율: 15% 개선</text>
+<text x="67" y="543" font-size="15" font-weight="700">3. 향후 계획</text>
+<text x="72" y="565" font-size="12">- 서비스 고도화</text>
+<text x="72" y="584" font-size="12">- 마케팅 확대</text>
+<text x="72" y="603" font-size="12">- 운영 자동화 추진</text>
+</g>
+<!-- arrow -->
+<path d="M321 431 L343 431 L343 419 L369 450 L343 481 L343 469 L321 469 Z" fill="#d4a4ff" filter="url(#sh)"/>
+<!-- redesigned paper -->
+<rect x="372" y="247" width="316" height="385" rx="16" fill="url(#after)" filter="url(#sh)"/>
+<path d="M371 247 H414 L371 295 Z" fill="#cbb1ff" opacity=".8"/>
+<path d="M564 248 L688 248 L688 358 Q608 340 564 315 Z" fill="#d7e8fb"/>
+<path d="M583 255 L668 255 L677 323 L591 306 Z" fill="#7eaddd" opacity=".4"/>
+<text x="397" y="306" fill="#10152d" font-family="Arial,sans-serif" font-weight="800" font-size="24">2025년</text>
+<text x="397" y="338" fill="#6c29e2" font-family="Arial,sans-serif" font-weight="800" font-size="26">사업 운영 보고서</text>
+<text x="398" y="357" fill="#5a5671" font-family="Arial,sans-serif" font-size="10">2025 Business Operations Report</text>
+<rect x="398" y="391" width="27" height="21" rx="10" fill="#6f32d8"/><text x="411" y="406" fill="#fff" text-anchor="middle" font-size="13" font-family="Arial,sans-serif" font-weight="700">01</text><text x="436" y="407" font-size="16" fill="#24203b" font-weight="800" font-family="Arial,sans-serif">개요</text><rect x="398" y="452" width="27" height="21" rx="10" fill="#6f32d8"/><text x="411" y="467" fill="#fff" text-anchor="middle" font-size="13" font-family="Arial,sans-serif" font-weight="700">02</text><text x="436" y="468" font-size="16" fill="#24203b" font-weight="800" font-family="Arial,sans-serif">주요 성과</text><rect x="398" y="559" width="27" height="21" rx="10" fill="#6f32d8"/><text x="411" y="574" fill="#fff" text-anchor="middle" font-size="13" font-family="Arial,sans-serif" font-weight="700">03</text><text x="436" y="575" font-size="16" fill="#24203b" font-weight="800" font-family="Arial,sans-serif">향후 계획</text>
+<text x="400" y="428" font-size="11" font-family="Arial,sans-serif" fill="#393248">본 보고서는 2025년 사업 운영 성과를 정리한 것으로,</text>
+<text x="400" y="443" font-size="11" font-family="Arial,sans-serif" fill="#393248">주요 성과와 향후 계획을 포함합니다.</text>
+<rect x="398" y="480" width="86" height="67" rx="10" fill="#f4f1fb" stroke="#e1d8f3"/><text x="441" y="503" text-anchor="middle" fill="#51456f" font-size="11" font-family="Arial,sans-serif">전년 대비</text><text x="441" y="531" text-anchor="middle" fill="#7428df" font-size="20" font-weight="800" font-family="Arial,sans-serif">+18%</text><rect x="492" y="480" width="86" height="67" rx="10" fill="#f4f1fb" stroke="#e1d8f3"/><text x="535" y="503" text-anchor="middle" fill="#51456f" font-size="11" font-family="Arial,sans-serif">신규 고객</text><text x="535" y="531" text-anchor="middle" fill="#7428df" font-size="20" font-weight="800" font-family="Arial,sans-serif">1,240명</text><rect x="586" y="480" width="86" height="67" rx="10" fill="#f4f1fb" stroke="#e1d8f3"/><text x="629" y="503" text-anchor="middle" fill="#51456f" font-size="11" font-family="Arial,sans-serif">운영 효율</text><text x="629" y="531" text-anchor="middle" fill="#7428df" font-size="20" font-weight="800" font-family="Arial,sans-serif">+15%</text>
+<rect x="397" y="591" width="87" height="30" rx="7" fill="#efebfa"/><text x="440" y="610" text-anchor="middle" fill="#493461" font-size="10" font-family="Arial,sans-serif">서비스 고도화</text><rect x="491" y="591" width="87" height="30" rx="7" fill="#efebfa"/><text x="534" y="610" text-anchor="middle" fill="#493461" font-size="10" font-family="Arial,sans-serif">마케팅 확대</text><rect x="585" y="591" width="87" height="30" rx="7" fill="#efebfa"/><text x="628" y="610" text-anchor="middle" fill="#493461" font-size="10" font-family="Arial,sans-serif">운영 자동화 추진</text>
+<!-- Footer strip -->
+<rect x="40" y="678" width="152" height="38" rx="19" fill="url(#purple)"/>
+<text x="116" y="704" fill="#fff" text-anchor="middle" font-size="16" font-family="Arial,sans-serif" font-weight="800">주요 제공 결과물</text>
+<text x="212" y="704" fill="#eee5ff" font-size="14" font-family="Arial,sans-serif">✓ 리디자인 PDF</text>
+<text x="360" y="704" fill="#eee5ff" font-size="14" font-family="Arial,sans-serif">✓ 수정 가능한 문서</text>
+<text x="528" y="704" fill="#eee5ff" font-size="14" font-family="Arial,sans-serif">✓ 맞춤 레이아웃</text>
+</svg>
