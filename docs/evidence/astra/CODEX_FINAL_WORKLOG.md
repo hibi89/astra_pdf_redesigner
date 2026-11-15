@@ -15,36 +15,22 @@ Open draft PR: [#13](https://github.com/hibi89/astra_pdf_redesigner/pull/13)
 
 Detailed reports: [C001](C001/VERIFICATION.md), [C003](C003/VERIFICATION.md), [C005](C005/VERIFICATION.md). The earlier P124 BLOCKED note was superseded with hosted evidence: [P124/VERIFICATION.md](P124/VERIFICATION.md).
 
-## C007 currently running
+## C007 — PASS with stated limits
 
-Added `.github/workflows/c007-windows-installer.yml` at feature SHA `653c3483daefa4bfbe9c082ba4b1d24bbb4a43d5`. It builds the current NSIS candidate, runs the isolated install/uninstall/data-preservation acceptance, then builds the prior P123 version and current 0.1.1 candidate to verify in-place upgrade preservation. GitHub Actions:
+Feature/test SHA `653c3483daefa4bfbe9c082ba4b1d24bbb4a43d5`. The Windows hosted run passed the current NSIS lifecycle, the P123 0.1.0 baseline install, and in-place upgrade to an ephemeral 0.1.1 candidate with STEP2 document and PNG persistence: [Windows run 43686779251](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43686779251). The run also passed PDF generation/audit and uninstall.
 
-- [Windows NSIS lifecycle and upgrade — run 43686779251](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43686779251)
-- [Linux/Chrome + Edge regression — run 43686779245](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43686779245)
-- [Blueprint evidence policy — run 43686779318](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43686779318)
+- Linux/Chrome + Edge regression: [run 43686779245](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43686779245); Edge is PASS and the Linux/Chrome job is finishing.
+- Blueprint evidence policy: [run 43686779318](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43686779318) — PASS.
+- Detailed report: [C007/VERIFICATION.md](C007/VERIFICATION.md).
 
-C007 score remains +0 until these checks complete and their logs are reviewed.
-
-## Exact-SHA prior Actions evidence
-
-### C001/P124 — SHA `a2ca668c9578b68e760b922c026a5f2f8f941c8d`
-
-- Windows real model, regression, production-only NSIS packaging and packaged EXE smoke: [run 43684225170](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43684225170) — PASS.
-- Linux/Chrome build/test and Edge PDF/IndexedDB: [run 43684225214](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43684225214) — PASS.
-- Final blueprint policy: [run 43684225409](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43684225409) — PASS.
-- Artifact: `p124-windows-electron-qwen3-a2ca668c9578b68e760b922c026a5f2f8f941c8d`, ID `14149509892`, SHA-256 `4bdc85bb367c2165beaefdfeaa187c79607e98eb52267b073a0187044cb7e91b`.
-
-### C003 — SHA `20ae5fcab5b069bcd269ca0506721db5c180925e`
-
-- npm test/build, Chrome and Edge regression: [run 43685671737](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43685671737) — PASS.
-- Final blueprint evidence policy: [run 43685671876](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43685671876) — PASS.
+C007 supports +1 A10 candidate for hosted Windows upgrade and data persistence; the physical Windows, trusted-signature/SmartScreen, interruption/quota and buyer acceptance points remain unverified. C007 score candidate is +1. C001/P124 +2 plus C007 +1 gives 67/100 technical candidate from the 64 baseline; central score ledger remains for integration-owner review. Official buyer acceptance remains UNASSESSED and RELEASE HOLD remains.
 
 ## Score and release state
 
-C001 supports an A08 +2 candidate, making the cumulative technical candidate 66/100 relative to the plan's 64/100 start. C003 and C005 add no score. The central score ledger remains for integration-owner review. Official buyer acceptance remains UNASSESSED and RELEASE HOLD remains.
+Current technical score candidate: **67/100** (64 baseline + C001/P124 +2 + C007 +1). C003, C005 add +0. This is evidence for integration-owner review, not a central-ledger update. Official buyer acceptance remains UNASSESSED and RELEASE HOLD remains.
 
-C001 uses synthetic documents and test-only SKU contexts; it does not verify production entitlements, production signing, SmartScreen, physical buyer PCs, legal readiness, or unique-paragraph quality breadth. C003 keeps source rights `UNVERIFIED` unless the user inspects the source; the checkbox is a session-only handoff acknowledgement, not certification. C005's 8-GiB requirement is not inferred from 16-GiB runners.
+C001 uses synthetic documents and test-only SKU contexts; it does not verify production entitlements, production signing, SmartScreen, physical buyer PCs, legal readiness, or unique-paragraph quality breadth. C003 source rights remain UNVERIFIED unless the source is separately inspected. C005's 8-GiB requirement is not inferred from hosted runners. C007 verifies hosted-runner upgrade/preservation only; it does not prove a trusted signature, physical Win10/11 buyer acceptance, SmartScreen or interruption/quota recovery.
 
 ## Next work
 
-Finish and inspect C007. Then proceed to the next independent READY item (C006 or another task whose prerequisites are met). P119/P120/P121 remain outside this Codex track until the GPT-owned OCR supply-chain prerequisite is cleared.
+Proceed to the next independent READY task, C006 (A09 license/maintenance behavior), without touching production issuer keys or credentials. P119/P120/P121 remain outside this Codex track until the GPT-owned OCR supply-chain prerequisite is cleared.
