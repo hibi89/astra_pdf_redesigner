@@ -1,4 +1,4 @@
-name: ASTRA GPT independent G001 OCR supply-chain QA
+name: ASTRA GPT G001 OCR and G002 content-preservation QA
 on:
   push:
     branches:
@@ -22,10 +22,11 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
-      - name: G001 fail-closed evidence and existing OCR regressions
+      - name: G001/G002 independent fail-closed regressions
         run: |
           node --check tools/gpt-final-qa-p119-gate.cjs
-          node --test tests/gpt-final-qa-p119-gate.test.cjs tests/ocr-supply-chain-preflight.test.cjs tests/ocr-release-hold-gate.test.cjs
+          node --check tools/gpt-final-qa-text-fidelity.cjs
+          node --test tests/gpt-final-qa-p119-gate.test.cjs tests/gpt-final-qa-text-fidelity.test.cjs tests/ocr-supply-chain-preflight.test.cjs tests/ocr-release-hold-gate.test.cjs
       - name: Historical unapproved suppliers must be classified BLOCKED
         run: |
           node - <<'NODE'
