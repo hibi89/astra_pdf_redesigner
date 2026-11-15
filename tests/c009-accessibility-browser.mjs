@@ -39,8 +39,8 @@ try{
   if(result.exceptionDetails)throw Error(JSON.stringify(result.exceptionDetails));
   return result.result.value;
  };
- await eventually(()=>evaluate("Boolean(document.querySelector('.studio-layout .studio-steps button')&&document.querySelector('.studio-layout .print-button'))"));
- const nav=await evaluate("(()=>{const n=document.querySelector('.studio-layout .studio-steps');return {label:n?.getAttribute('aria-label'),stages:[...n.querySelectorAll('button')].map(b=>b.querySelector('span')?.textContent?.trim()),print:document.querySelector('.studio-layout .print-button')?.textContent?.trim()}})()");
+ await eventually(()=>evaluate("Boolean(document.querySelector('.studio-layout .studio-steps button')&&document.querySelector('.app-header .print-button'))"));
+ const nav=await evaluate("(()=>{const n=document.querySelector('.studio-layout .studio-steps');return {label:n?.getAttribute('aria-label'),stages:[...n.querySelectorAll('button')].map(b=>b.querySelector('span')?.textContent?.trim()),print:document.querySelector('.app-header .print-button')?.textContent?.trim()}})()");
  assert.equal(nav.label,'PDF 리디자인 작업 순서','stage navigation has a programmatic label');
  assert.deepEqual(nav.stages,['PDF 불러오기','원본 대조','디자인 선택','새 PDF 저장']);
  assert.ok(nav.print,'primary PDF action has visible text');
