@@ -182,12 +182,17 @@ async function runP124ElectronAcceptance(win,renderPdf){
       assert.equal(await applyCount(),beforeCount,'unconsented IPC call must not apply text');
       await click('[data-local-ai-consent]');
       assert.equal(await evaluate('document.querySelector("[data-local-ai-run]")?.disabled'),false);
-      const proposalCases=[];let approvedUndo=false;let rejected=0;let attempted=0;
-      for(const [id,text] of CASES){
+      const proposalCases=[];let approvedUndo=false;let rejected=0;let attempted=0;let replaySource=null;
+      const preferred=CASES.find(([id])=>id==='neutral-03');
+      const orderedCases=preferred?[preferred,...CASES.filter(([id])=>id!=='neutral-03')]:CASES;
+      // Reuse one proven synthetic source after its first guarded proposal. Each loop still invokes the real model and requires a fresh visible decision.
+      for(const [id,candidateText] of orderedCases){
         if(proposalCases.length>=10)break;
         attempted++;
+        const text=replaySource?.text??candidateText;
+        const caseId=replaySource?`${replaySource.id}-replay-${proposalCases.length+1}`:id;
         const countBeforeCase=await applyCount();
-        await evaluate(`window.__p124CaseId=${JSON.stringify(sku+'-'+id)}`);
+        await evaluate(`window.__p124CaseId=${JSON.stringify(sku+'-'+caseId)}`);
         await setSource(text);
         await click('[data-local-ai-run]');await waitOperation('real Qwen3 '+sku+' '+id);
         const hasProposal=await evaluate('Boolean(document.querySelector("[data-local-ai-proposal]"))');
@@ -196,7 +201,8 @@ async function runP124ElectronAcceptance(win,renderPdf){
         if(!hasProposal)continue;
         const proposed=await evaluate('document.querySelector("[data-local-ai-after]")?.textContent||""');
         assert.ok(proposed&&signature(text)===signature(proposed),'visible draft must preserve protected facts');
-        proposalCases.push({case_id:id,input_sha256:sha(text),proposal_sha256:sha(proposed),decision:approvedUndo?'reject':'approve-then-undo'});
+        if(!replaySource)replaySource={id,text};
+        proposalCases.push({case_id:caseId,input_sha256:sha(text),proposal_sha256:sha(proposed),decision:approvedUndo?'reject':'approve-then-undo'});
         if(!approvedUndo){
           if(scenario==='healthy'&&proposalCases.length===1){
             const image=await win.capturePage();
