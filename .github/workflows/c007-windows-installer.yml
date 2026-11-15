@@ -6,6 +6,8 @@ on:
     paths:
       - '.github/workflows/c007-windows-installer.yml'
       - 'desktop/**'
+      - 'electron-builder.yml'
+      - 'tests/ocr-release-hold-gate.test.cjs'
       - 'src/**'
       - 'tests/windows-installer-*.ps1'
       - 'tests/prepare-upgrade-candidate.cjs'
