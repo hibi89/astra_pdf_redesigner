@@ -2,11 +2,11 @@
 
 Status: **PASS for hosted Windows install, launch, upgrade, PDF and STEP2 persistence scenarios.** Physical buyer acceptance, signing trust, SmartScreen and release remain unverified.
 
-- Feature/test SHA: `653c3483daefa4bfbe9c082ba4b1d24bbb4a43d5`
+- Latest feature/test SHA: `304b4a59a4bb37007a0796133cb7bfcb1e18ab22` (recovery extension; prior install/upgrade evidence below remains at its recorded SHA)
 - Branch: `codex/astra-final-ai-sku-20261115`
-- Windows hosted run: [43686779251](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43686779251)
-- Linux/Chrome + Edge regression run: [43686779245](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43686779245)
-- Blueprint evidence-policy run: [43686779318](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43686779318)
+- Latest Windows hosted run: [43726659709](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43726659709)
+- Latest Linux/Chrome + Edge regression run: [43726659775](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43726659775)
+- Latest blueprint evidence-policy run: [43726659959](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43726659959)
 
 ## Windows results
 
@@ -30,3 +30,14 @@ The upgrade/persistence evidence supports **+1 A10 candidate** (baseline 64 + C0
 - Windows NSIS lifecycle and upgrade — SHA `653c3483daefa4bfbe9c082ba4b1d24bbb4a43d5`: **PASS**, run 43686779251.
 - Linux/Chrome build/test and Microsoft Edge regression — SHA `653c3483daefa4bfbe9c082ba4b1d24bbb4a43d5`: **PASS**, run 43686779245.
 - Blueprint evidence policy — SHA `653c3483daefa4bfbe9c082ba4b1d24bbb4a43d5`: **PASS**, run 43686779318.
+
+
+## Latest exact-SHA recovery verification — 2026-11-16 KST
+
+- Feature/test SHA: `304b4a59a4bb37007a0796133cb7bfcb1e18ab22`.
+- Windows NSIS install, STEP2 preservation, upgrade, and uninstall: [run 43726659709](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43726659709) — **PASS**. The installed STEP2 PDF audit reported A4 pages=3, Korean/numeric markers 5/5, and one raster draw. The actual installed renderer and IndexedDB document were used.
+- Injected a synthetic `QuotaExceededError` into an IndexedDB document write, compared sanitized full `documents/assets/meta` storage snapshots and PNG bytes, retried successfully, and then verified renderer reload and a separate installed EXE launch. A second multi-store transaction was explicitly aborted before commit and matched the pre-abort storage digests. **This is synthetic quota/transaction recovery, not physical power-loss evidence.**
+- The log-leak check passed; the uploaded report contains sanitized digests and booleans rather than document text. [Artifact 14166357202](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43726659709/artifacts/14166357202), ZIP SHA-256 `ef3361ec1bb77a2020125509bba6bd72530e95a97a7cacfc10ed0acb81a6c46a`.
+- Linux Chrome/Edge regression: [run 43726659775](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43726659775) — **PASS**, 307 tests passed, 0 failed, 0 skipped, production build and browser smoke passed.
+- Blueprint evidence policy: [run 43726659959](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43726659959) — **PASS** at the same SHA.
+- This is an evidence extension, so incremental score is **+0**. Existing C007 evidence continues to support **+1 A10 candidate** pending integration-owner review. Conditional worker ceiling remains 67/100; central ledger 64/100; buyer acceptance UNASSESSED; RELEASE HOLD. Physical Windows buyer acceptance, trusted signing, SmartScreen, and actual interruption/power-loss remain unverified.
