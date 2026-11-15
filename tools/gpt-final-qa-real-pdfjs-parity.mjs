@@ -14,7 +14,7 @@ const PICTURE_OPS=new Set([
   OPS.paintInlineImageXObjectGroup,OPS.paintImageMaskXObject,
   OPS.paintImageMaskXObjectGroup,OPS.paintImageMaskXObjectRepeat,
 ]);
-const VECTOR_OPS=new Set([OPS.stroke,OPS.closeStroke,OPS.fillStroke,OPS.eoFillStroke,
+// PDF.js batches PDF m/l/re commands as OPS.constructPath; do not equate with rendered strokes.\nconst VECTOR_OPS=new Set([OPS.constructPath,OPS.stroke,OPS.closeStroke,OPS.fillStroke,OPS.eoFillStroke,
   OPS.closeFillStroke,OPS.closeEOFillStroke]);
 const hash=b=>createHash('sha256').update(b).digest('hex');
 const norm=s=>s.normalize('NFC').replace(/\s+/gu,' ').trim();
@@ -87,7 +87,7 @@ export async function inspectRealPdfPair({
   if(source.reduce((a,p)=>a+p.raster,0)!==output.reduce((a,p)=>a+p.raster,0))
     issues.push('RASTER_DRAW_COUNT_CHANGED');
   if(source.reduce((a,p)=>a+p.vector,0)!==output.reduce((a,p)=>a+p.vector,0))
-    issues.push('VECTOR_STROKE_COUNT_CHANGED');
+    issues.push('VECTOR_PATH_OPERATOR_COUNT_CHANGED');
   const pageOverlap=Math.min(source.length,output.length);
   for(let i=0;i<pageOverlap;i++){
     if(source[i].text!==output[i].text){issues.push('PAGE_LEVEL_TEXT_REVIEW_REQUIRED');break;}
