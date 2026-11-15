@@ -1,7 +1,7 @@
 # C001 / P124 — Windows Electron real Qwen3 3-SKU verification
 
 **Status:** PASS for the synthetic Windows-hosted real-model product-path acceptance on the exact SHA below. Independent GPT review of this latest SHA and buyer acceptance remain pending.  
-**Feature/test SHA:** `09b2d9c8f60631bb2f623f840bdde03450ed9e17`  
+**Latest verified feature/test SHA:** `83acd1ddd02f55eb4c81d6154646d4a8f7db399b` (earlier P124 evidence remains recorded below)  
 **Branch:** `codex/astra-final-ai-sku-20261115`  
 **Integration PR:** [#13](https://github.com/hibi89/astra_pdf_redesigner/pull/13) → `integration/astra-final-blueprint-100-20261115`  
 **Score:** A08 +2 candidate is supported by this technical evidence; the central score ledger remains 64/100 until integration-owner review. Official buyer acceptance is UNASSESSED; RELEASE HOLD remains.
@@ -61,3 +61,15 @@ C001 does not establish 30 unique-input quality breadth; the same guarded synthe
 C002, C003, C007, C008, C009 and C010 already have separate hosted implementation evidence; no duplicate work is needed. C003's actual selected-source rights remain UNVERIFIED until a user-selected source and rights evidence are supplied. C004 is BLOCKED on GPT-owned P119 supplier evidence. C005 is BLOCKED for completion because no 8-GiB-class GitHub Windows runner is available. C006's technical lifecycle prototype passes, while production issuer/pin, buyer activation, and refund/revocation/support operations remain owner-controlled gates. Physical Windows signing/acceptance remains open under C007.
 
 The next C001–C010 work requires one of those prerequisites to change. Keep the central ledger at 64/100, buyer acceptance UNASSESSED, and RELEASE HOLD active.
+
+## Latest exact-SHA rerun — 2026-11-16
+
+At feature/test SHA `83acd1ddd02f55eb4c81d6154646d4a8f7db399b`, [Windows Electron/Qwen3 run 43738686321](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686321) completed **SUCCESS**.
+
+- Real Qwen3 healthy BASIC/PRO/BUSINESS GUI scenarios: **PASS**.
+- Missing-model and tampered-output BASIC/PRO/BUSINESS scenarios: **PASS**.
+- Local synthetic V1/V2 preservation checks and production-only unsigned NSIS rebuild/packaged smoke: **PASS**.
+- The run uploaded seven synthetic reports/screenshots as artifact [14171433059](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686321/artifacts/14171433059), 167,987 bytes, ZIP SHA-256 `c75476c86097c06307286f00679c335ae25c749b5a70aa4df182b7605a7485c9`.
+- Same-SHA general Linux/Chrome/Edge run [43738686327](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686327) and C007 [43738686349](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686349), C009 [43738692068](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738692068), and blueprint policy [43738686649](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686649) completed **PASS**. C010 [43738686360](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686360) failed only its unsigned NSIS reproducibility gate; details are in [C010/VERIFICATION.md](../C010/VERIFICATION.md).
+
+This is hosted synthetic product-path evidence. It does not establish buyer acceptance or production issuer activation. The A08 +2 remains a candidate for integration-owner review; official buyer acceptance is UNASSESSED and RELEASE HOLD remains.

@@ -25,3 +25,9 @@ This verifies the automated responsive viewport conditions only. The existing P1
 ## Next
 
 Proceed to independent task C008. Keep the technical candidate at 67/100 until a separate scoring gate has sufficient acceptance evidence.
+
+## Latest exact-SHA hosted rerun — 2026-11-16
+
+At SHA `83acd1ddd02f55eb4c81d6154646d4a8f7db399b`, C002 run [43738686522](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686522) completed **PASS**. The workflow ran `npm test` (315 passed, 0 failed), then checked Chrome and Microsoft Edge at 390, 360, and 320 CSS-pixel widths. Both browsers reported no horizontal overflow, four visible stage controls, and A4 preview widths of 346, 316, and 276 pixels. The same-SHA full regression [43738686327](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686327) and policy gate [43738686649](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686649) also passed.
+
+This is a technical rerun only: incremental score +0, official buyer acceptance UNASSESSED, RELEASE HOLD.

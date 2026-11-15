@@ -2,7 +2,7 @@
 
 Branch: `codex/astra-final-ai-sku-20261115`  
 Integration target: `integration/astra-final-blueprint-100-20261115`  
-Latest code/test SHA: `304b4a59a4bb37007a0796133cb7bfcb1e18ab22` (Windows C007 run 43726659709 PASS; Linux/Chrome/Edge regression 43726659775 PASS; C009 43726663515 PASS; C010 43726659739 fails reproducibility; blueprint policy 43726659959 PASS). Real-Qwen quality runs `8136c6b070eceb97e4e26fbdebae7632ab6f2ed3` and `5b323fd47d0c2cd2efb20a136102ee65b3bb7af2` remain pending
+Latest code/test SHA: `83acd1ddd02f55eb4c81d6154646d4a8f7db399b` (P124/C005 real Qwen3 + C005 quality workflow completed; Linux/Chrome/Edge, C002, C007, C009 and policy PASS; C010 reproducibility FAIL).
 Open draft PR: [#13](https://github.com/hibi89/astra_pdf_redesigner/pull/13)
 
 ## Completed and assessed
@@ -157,3 +157,23 @@ Evidence files updated: [C005](C005/VERIFICATION.md), [C009](C009/VERIFICATION.m
 ### C005 live-run workload audit — 2026-11-16 16:36 UTC
 
 The current Windows run [43711160507](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43711160507), source SHA `8136c6b070eceb97e4e26fbdebae7632ab6f2ed3`, performs at least 30 real inference calls for C001 healthy 10-proposal-per-SKU acceptance, then 31 unique C005 calls once total, plus cancellation requests. It was still in progress about 282/300 minutes after start. The prior report's “31 inputs once” referred only to the C005 quality phase, not total run calls. No terminal result/artifact is available, so quality remains unassessed and +0. The 16-GiB host cannot satisfy the 8-GiB requirement.
+
+## Latest exact-SHA implementation and hosted evidence — 2026-11-16
+
+**Code/test commit:** `83acd1ddd02f55eb4c81d6154646d4a8f7db399b`  
+**Purpose:** fix the C005 `quality` Electron profile allowlist and fail fast on P124 profile validation errors; add isolated-profile path regression tests.  
+**Changed files:** `desktop/main.cjs`, `desktop/p124-electron-qwen3-acceptance.cjs`, `tests/p124-profile-path.test.cjs`, `package.json`.  
+**Incremental score:** +0. C005 remains +0 because the hosted machine was 15.99 GiB; no 8-GiB acceptance is available.
+
+| Task | Exact-SHA GitHub evidence | Result |
+|---|---|---|
+| C001 / P124 Windows Electron real Qwen3 | [run 43738686321](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686321); artifact [14171433059](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686321/artifacts/14171433059), ZIP SHA-256 `c75476c86097c06307286f00679c335ae25c749b5a70aa4df182b7605a7485c9` | Healthy/missing/tampered GUI PASS in all three SKUs; production-only unsigned NSIS build and packaged smoke PASS. |
+| C005 unique-input quality | [run 43738686321](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686321); physical host memory 15.99 GiB | 31 distinct real-Qwen inputs once total; three SKU contexts; quality gate PASS; 8-GiB requirement BLOCKED, +0. |
+| General regression | [run 43738686327](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686327) | PASS; `npm test` 315/315; build, Chrome print/persistence and Edge A4/IndexedDB PASS. |
+| C002 responsive SKU studio | [run 43738686522](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686522) | PASS in Chrome and Edge at 390/360/320 CSS px; no horizontal overflow; 4 stage controls and A4 preview. |
+| C007 NSIS install/upgrade/preservation | [run 43738686349](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686349); artifact [14171082942](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686349/artifacts/14171082942), ZIP SHA-256 `5b4170db85ef2822f73d6393efaadf6cae6740b992adaeaf0446bd6acd242c8d` | PASS; 314/315 tests, 1 Windows-only skip, 88/88 desktop tests; install, launch, STEP2 preservation, upgrade, uninstall. |
+| C009 layout/print/recovery | [run 43738692068](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738692068); artifact [14171706136](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738692068/artifacts/14171706136), ZIP SHA-256 `c3fbd035df399c16db6d16c25cdecc881cea4ad0c4916d3d663debed3b5e61d1` | PASS; 30 layout rasters per browser, 28-page synthetic print and V2/localStorage recovery. |
+| C010 unsigned package reproducibility | [run 43738686360](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686360) | FAIL / BLOCKED; identical app archive and ASAR, but generated uninstaller and final installer bytes differ; +0, no artifact or release. |
+| Evidence policy | [run 43738686649](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686649) | PASS; no score ledger update. |
+
+Worker evidence only: central score stays 64/100, conditional candidate ceiling 67/100, official buyer acceptance UNASSESSED, RELEASE HOLD. Integration-owned `STATUS.md`, `HANDOFF.md`, and the official score ledger were not changed. The PR remains draft and unmerged.

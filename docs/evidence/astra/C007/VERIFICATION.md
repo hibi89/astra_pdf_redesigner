@@ -41,3 +41,9 @@ The upgrade/persistence evidence supports **+1 A10 candidate** (baseline 64 + C0
 - Linux Chrome/Edge regression: [run 43726659775](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43726659775) — **PASS**, 307 tests passed, 0 failed, 0 skipped, production build and browser smoke passed.
 - Blueprint evidence policy: [run 43726659959](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43726659959) — **PASS** at the same SHA.
 - This is an evidence extension, so incremental score is **+0**. Existing C007 evidence continues to support **+1 A10 candidate** pending integration-owner review. Conditional worker ceiling remains 67/100; central ledger 64/100; buyer acceptance UNASSESSED; RELEASE HOLD. Physical Windows buyer acceptance, trusted signing, SmartScreen, and actual interruption/power-loss remain unverified.
+
+## Latest exact-SHA hosted rerun — 2026-11-16
+
+At code/test SHA `83acd1ddd02f55eb4c81d6154646d4a8f7db399b`, Windows NSIS lifecycle run [43738686349](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686349) completed **PASS**. The workflow reports 314/315 unit tests passed with 0 failures and one platform-specific skip, 88/88 desktop tests passed, production-only unsigned package build, install/launch/PDF verification, STEP2 data preservation, upgrade from the P123 baseline, and uninstall. Sanitized recovery artifact [14171082942](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686349/artifacts/14171082942) is 656 bytes, ZIP SHA-256 `5b4170db85ef2822f73d6393efaadf6cae6740b992adaeaf0446bd6acd242c8d`.
+
+Same-SHA regression [43738686327](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686327) and policy [43738686649](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686649) passed. Incremental score +0; existing A10 +1 remains a technical candidate only. Physical buyer acceptance, signing trust, SmartScreen, and real power-loss behavior remain unverified.

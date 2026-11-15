@@ -70,3 +70,9 @@ The next attempt removed that non-production date setting and corrected the tree
 - Exact-SHA Linux/Chrome/Edge regression [run 43735068659](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43735068659) and blueprint policy [run 43735068997](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43735068997) both **PASS**.
 
 The cause of the generated uninstaller byte differences is still unknown. C010 remains **BLOCKED**, +0; no reproducibility claim or score is made. Central score remains 64/100, buyer acceptance UNASSESSED, RELEASE HOLD.
+
+## Latest exact-SHA hosted rerun — reproducibility still FAILS
+
+At code/test SHA `83acd1ddd02f55eb4c81d6154646d4a8f7db399b`, [Windows C010 run 43738686360](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686360) completed **FAIL** at the unsigned same-source NSIS reproducibility gate. Other same-SHA evidence passed: `npm test`, package content/SBOM checks, and blueprint policy [43738686649](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43738686649).
+
+The two unsigned builds contained byte-identical `app.asar` files and identical NSIS 7z app archives (128,634,723 bytes, SHA-256 `0aabc1d3c15cb52840199f7899ac52cabcb7e10986a7091ec27d88270dd66a1f`). Generated `elevate.exe` matched; expected packaging-stage mutations were verified. The generated uninstallers differed: 171,423 versus 171,365 bytes, with 115,069 differing bytes across 1,530 ranges despite equal PE timestamps. Final unsigned installer hashes differed (`0AD5397DE9074E6F28494AA0E09F0B93D7A00E0F63227EA0F4486C693879C686` vs `36820579C13043DF0CC024C7716512E8871B2326739CCCDCF09B1E4C0B0AB903`). No artifact was uploaded or released. Root cause remains unknown; C010 is BLOCKED, +0.
