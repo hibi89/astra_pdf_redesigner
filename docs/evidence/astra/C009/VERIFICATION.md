@@ -1,24 +1,28 @@
-# C009 Verification — Keyboard navigation and accessibility tree
+# C009 Verification — Accessibility, keyboard, and 30-layout print regression
 
 - Date: 2026-11-15
 - Branch: `codex/astra-final-ai-sku-20261115`
-- Exact code/test SHA: `fa57116544217c6122b1cd9643fee91002f45edc`
-- Result: hosted browser accessibility smoke PASS; score change +0
+- Exact feature/test SHA: `6c4c2a806aa2010c6d07f1a7aaaf999e8883caf3`
+- PR workflow merge SHA exercised: `2f414fc027f6b533c73458fd22f7935e4f1906ee` (contains the feature SHA and integration base)
+- Result: hosted Chrome and Edge regression PASS; score change +0
 
-## Exact-SHA hosted evidence
+## What the hosted run verified
 
-- [Chrome and Edge AX-tree/keyboard workflow, run 43690873135](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873135) — PASS at the exact SHA.
-  - `npm test`: 298 passed, 0 failed; `npm run build`: PASS.
-  - Chrome and Edge accessibility trees each exposed the named navigation and all four stage-control names plus the primary PDF action (14 button nodes observed).
-  - Keyboard-only Tab navigation reached the enabled PDF import/design stage controls and primary PDF action; the stage focus indicator was visible.
-- [Blueprint evidence policy, run 43690873420](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873420) — PASS.
+- [C009 accessibility and 30-layout PDF print workflow, run 43714391627](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43714391627) — PASS. GitHub executed the PR merge ref above for feature head `6c4c2a806aa2010c6d07f1a7aaaf999e8883caf3`.
+- The run passed `npm test`, `npm run build`, the existing Chrome/Edge accessibility-tree and keyboard smoke, and a synthetic-only print matrix in both browsers.
+- React rendered all eight base themes and 22 PRO/BUSINESS advanced layouts. Each layout printed a one-page A4 PDF; the test checked synthetic title/body/amount/negation text, absence of studio UI text, and that previewing did not change the saved design.
+- Chrome produced 30 unique first-page raster hashes across 30 layouts; Edge independently produced 30 unique first-page raster hashes. Each browser's artifact contains its PDF, raster preview, and machine-readable report.
+- The job uploaded 122 synthetic files in artifact [14161831651](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43714391627/artifacts/14161831651), ZIP SHA-256 `19c6901c406243036788a8bb1195e6acb3d29fd19ae3cefe773aff373faf429e`.
+- Accessibility smoke: Chrome and Edge each exposed the named navigation, four stage controls and PDF action (14 button nodes); keyboard Tab reached the enabled stage controls and PDF action, and visible focus was confirmed.
 
-## Scope limits and score
+## Failure and correction
 
-The first attempt at `f469d0c9e031151851d803eee0db7e438b144cb0` failed because the test looked for the header PDF action inside the main studio node. The selector was corrected; the passing run above checks the actual header location. This was test-only; no product code changed.
+The first 30-layout attempt at feature SHA `c21c898e5eb4aa0a2a384fb20b93603f45276785` failed at the Editorial title marker because PDF text extraction inserted whitespace. The test normalized extracted text and punctuation before marker checks. The corrected run above passed all layouts in both browsers. The change was limited to test assertions; it did not modify product behavior.
 
-This smoke is a narrow Chromium accessibility-tree and keyboard-focus check. It is not a screen-reader certification or a complete WCAG audit. The hosted run does not establish physical assistive-technology acceptance, low-memory/slow-CPU performance, large-document resource limits, or owner visual acceptance. C009 adds **+0**; technical candidate remains **67/100**, buyer acceptance **UNASSESSED**, RELEASE HOLD.
+## Scope, score, and remaining acceptance
+
+This is a synthetic hosted browser regression, not buyer visual approval or a complete accessibility audit. It does not establish screen-reader/assistive-technology acceptance, WCAG conformance, large-document resource limits, slow-CPU or low-memory performance, recovery under interruption, or physical-device acceptance. C009 adds **+0**; the worker evidence ceiling stays conditional **67/100**, the central ledger stays **64/100**, buyer acceptance stays **UNASSESSED**, and RELEASE HOLD remains.
 
 ## Next
 
-C010 unsigned package candidate and SBOM audit is running on GitHub Actions; retain unsigned/no-publish settings and report all package and license limitations.
+Continue with any C009 large-document, constrained-runtime, and recovery checks that can be measured on standard GitHub-hosted runners. Keep physical assistive-technology and buyer visual acceptance unverified. Do not increase score without the complete acceptance evidence.
