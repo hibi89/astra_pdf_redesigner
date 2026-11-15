@@ -64,15 +64,22 @@ try {
   assert.ok(await evaluate("document.querySelectorAll('.step3-block-review details').length")>=2);
   assert.equal(await evaluate("document.querySelectorAll('.doc-list-item').length"),beforeDocs,
     'Review-only import must not mutate persisted V2 project list');
-  const importConfirmed=await evaluate(`(()=>{
+  // Click is a React state event; the confirm button rerenders in a later
+  // task. Reading disabled in this same synchronous evaluation is a false fail.
+  await evaluate(`(()=>{
     const approve=document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]');
     if(!approve||approve.disabled)throw Error('No explicit owner confirmation checkbox');
-    approve.click();
+    approve.click();return true;})()`);
+  await eventually(()=>evaluate(`(()=>{
+    const confirm=[...document.querySelectorAll('.step3-import-panel button')]
+      .find(x=>x.textContent.includes('검수 결과를 새 문서로 저장'));
+    return confirm?{exists:true,enabled:!confirm.disabled}:null;})()`),
+    state=>state?.enabled===true,10000);
+  const importConfirmed=await evaluate(`(()=>{
     const confirm=[...document.querySelectorAll('.step3-import-panel button')]
       .find(x=>x.textContent.includes('검수 결과를 새 문서로 저장'));
     if(!confirm||confirm.disabled)throw Error('V2 save requires explicit confirmation');
-    confirm.click();
-    return true;})()`);
+    confirm.click();return true;})()`);
   assert.equal(importConfirmed,true);
   await eventually(()=>evaluate("document.querySelectorAll('.doc-list-item').length"),n=>n===beforeDocs+1);
   await eventually(()=>evaluate("document.querySelector('.save-chip')?.textContent"),s=>s==='저장됨');
