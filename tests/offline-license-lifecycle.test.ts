@@ -31,12 +31,12 @@ async function fixture(tier:LicenseClaims['tier']='pro',patch:Partial<LicenseCla
  return {signer,license,receipt,snapshot};
 }
 async function command(f:Awaited<ReturnType<typeof fixture>>,snapshot:Awaited<ReturnType<typeof createLicenseLifecycleSnapshot>>,
- action:string,fields:Record<string,unknown>={},at=NOW){
+ action:string,fields:Record<string,unknown>={},at=NOW,signingNow=at){
  eventCounter++;
  return signLicenseLifecycleCommand(snapshot,{
   action,eventId:'lifecycle-event-'+String(eventCounter).padStart(8,'0'),
   occurredAt:at,...fields,
- },f.signer.privateKey,f.signer.jwk,f.signer.pin,at);
+ },f.signer.privateKey,f.signer.jwk,f.signer.pin,signingNow);
 }
 const install=(n:number)=>n.toString(16).padStart(32,'0');
 test('C006 seeds a ledger only from valid pinned signed receipts and preserves all three SKU periods',async()=>{
@@ -154,7 +154,7 @@ test('C006 rejects event tampering, wrong issuer/pin, cross-license, replay, bro
 });
 test('C006 future events, out-of-order time, excessive event logs and product defaults fail closed',async()=>{
  const f=await fixture('pro');
- await assert.rejects(command(f,f.snapshot,'refund',{},NOW+301));
+ await assert.rejects(command(f,f.snapshot,'refund',{},NOW+301,NOW));
  const first=await command(f,f.snapshot,'support-open',{supportCaseRef:'CASE_C006_0003'},NOW+10);
  const opened=await replayLicenseLifecycle(f.receipt,[first],f.signer.jwk,f.signer.pin,NOW+10);
  await assert.rejects(command(f,opened,'support-awaiting-owner',
