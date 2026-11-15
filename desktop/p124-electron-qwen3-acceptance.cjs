@@ -327,7 +327,7 @@ async function runP124ElectronAcceptance(win,renderPdf){
       assert.equal(await evaluate('Boolean(document.querySelector("[data-local-ai-proposal]"))'),false,'cancelled output must not show a proposal');
       await setSource(BASELINE);
       await waitFor(()=>evaluate('window.__p124ReadPersistedSource()'),value=>value===BASELINE,12000,'persisted source after approve/reject/undo/cancel');
-      const printed=await printPdf('astra-p124-healthy-'+plan.sku.toLowerCase()+'-after.pdf');
+      const printed=scenario==='healthy'?await printPdf('astra-p124-healthy-'+plan.sku.toLowerCase()+'-after.pdf'):null;
       if(skuPdfBefore)assert.equal(printed.text,skuPdfBefore.text,
         plan.sku+' PDF text must remain identical before and after actual Workspace reviews');
       uiResults.push({sku:plan.sku,tier:plan.tier,receipt_panel:'verified',license_result:licenseResult,
