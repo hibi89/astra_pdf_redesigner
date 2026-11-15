@@ -343,6 +343,16 @@ if(lock){
       registerLocalOcr();
       await createWindow();
       if(P124_ACCEPTANCE){
+        mainWindow.webContents.on('console-message',(_event,...details)=>{
+          const message=details.map(value=>{
+            if(typeof value==='string')return value;
+            try{return JSON.stringify(value);}catch{return String(value);}
+          }).join(' ').slice(0,1200);
+          console.log('P124 renderer console: '+message);
+        });
+        mainWindow.webContents.on('render-process-gone',(_event,details)=>{
+          console.log('P124 renderer process gone: '+JSON.stringify(details));
+        });
         if(STEP2_ACCEPTANCE)await runStep2ProjectAcceptance(mainWindow,renderLocalPdf);
         await mainWindow.loadURL('astra://app/tests/fixtures/p124-electron-qwen3.html');
         await runP124ElectronAcceptance(mainWindow,renderLocalPdf);
