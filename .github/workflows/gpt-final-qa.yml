@@ -1,4 +1,4 @@
-name: ASTRA GPT G001 OCR and G002 content-preservation QA
+name: ASTRA GPT independent G001-G003 QA
 on:
   push:
     branches:
@@ -7,6 +7,8 @@ on:
       - 'tools/gpt-final-qa-*'
       - 'tests/gpt-final-qa-*'
       - 'docs/evidence/astra/G001/**'
+      - 'docs/evidence/astra/G002/**'
+      - 'docs/evidence/astra/G003/**'
       - '.github/workflows/gpt-final-qa.yml'
   workflow_dispatch:
 
@@ -26,7 +28,8 @@ jobs:
         run: |
           node --check tools/gpt-final-qa-p119-gate.cjs
           node --check tools/gpt-final-qa-text-fidelity.cjs
-          node --test tests/gpt-final-qa-p119-gate.test.cjs tests/gpt-final-qa-text-fidelity.test.cjs tests/ocr-supply-chain-preflight.test.cjs tests/ocr-release-hold-gate.test.cjs
+          node --check tools/gpt-final-qa-p124-review.cjs
+          node --test tests/gpt-final-qa-p119-gate.test.cjs tests/gpt-final-qa-text-fidelity.test.cjs tests/gpt-final-qa-p124-review.test.cjs tests/ocr-supply-chain-preflight.test.cjs tests/ocr-release-hold-gate.test.cjs
       - name: Historical unapproved suppliers must be classified BLOCKED
         run: |
           node - <<'NODE'
@@ -42,3 +45,37 @@ jobs:
           NODE
       - name: Existing product OCR release gate stays active
         run: node desktop/ocr-release-hold-gate.cjs
+
+  g003-codex-readonly-evidence:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+    steps:
+      - name: Checkout GPT independent reviewer
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+          path: independent-reviewer
+      - name: Checkout exact Codex source (read-only)
+        uses: actions/checkout@v4
+        with:
+          ref: '6e8b2eeb381874a12be041fa080fb545b5e1fb82'
+          persist-credentials: false
+          path: codex-readonly
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Independent static review at exact Codex feature SHA
+        run: |
+          node independent-reviewer/tools/gpt-final-qa-p124-review.cjs codex-readonly 6e8b2eeb381874a12be041fa080fb545b5e1fb82
+          node - <<'NODE'
+          const {reviewP124Source}=require('./independent-reviewer/tools/gpt-final-qa-p124-review.cjs');
+          const report=reviewP124Source('codex-readonly','6e8b2eeb381874a12be041fa080fb545b5e1fb82');
+          if(report.scoreDelta!==0 || report.release!=='RELEASE HOLD' || !report.assertions.productionReviewComponentImportedByFixture ||
+             !report.assertions.productionWorkspaceHasModelReview ||
+             !report.risks.includes('C001_TEST_SKU_LABELS_DO_NOT_EXERCISE_PRODUCT_ENTITLEMENTS') ||
+             !report.risks.includes('P124_TEST_HARNESS_IN_PRODUCTION_DESKTOP_BUNDLE'))
+            throw Error('G003_PINNED_CODE_REVIEW_ASSERTION_CHANGED');
+          console.log('PASS G003: classified non-scoring C001 real-SKU and package-isolation gaps at pinned SHA');
+          NODE
