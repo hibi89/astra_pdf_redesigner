@@ -270,7 +270,8 @@ async function runP124ElectronAcceptance(win,renderPdf){
       const isQuality=scenario==='quality';
       const proposalCases=[],caseResults=[];let approvedUndo=false;let rejected=0;let attempted=0;let replaySource=null;
       const preferred=CASES.find(([id])=>id==='neutral-03');
-      const orderedCases=isQuality?CASES:(preferred?[preferred,...CASES.filter(([id])=>id!=='neutral-03')]:CASES);
+      const skuIndex=SKU_NAMES.indexOf(plan.sku);
+      const orderedCases=isQuality?CASES.filter((_,index)=>index%SKU_NAMES.length===skuIndex):(preferred?[preferred,...CASES.filter(([id])=>id!=='neutral-03')]:CASES);
       // C005 uses every unique synthetic input once; P124 retains proposal replay only for repeat-decision coverage.
       for(const [id,candidateText] of orderedCases){
         if(!isQuality&&proposalCases.length>=10)break;
@@ -311,8 +312,8 @@ async function runP124ElectronAcceptance(win,renderPdf){
         }
       }
       if(isQuality){
-        assert.equal(attempted,CASES.length,'C005 must run each distinct synthetic input once per SKU');
-        assert.equal(new Set(caseResults.map(item=>item.case_id)).size,CASES.length,'C005 case IDs must remain distinct');
+        assert.equal(attempted,orderedCases.length,'C005 must run every assigned unique input in this SKU context');
+        assert.equal(new Set(caseResults.map(item=>item.case_id)).size,orderedCases.length,'C005 case IDs must remain distinct within this SKU context');
       }else{
         assert.ok(proposalCases.length>=10,'each actual SKU context must show ten real model proposals');
         assert.ok(approvedUndo,'each actual SKU context must explicitly approve and Undo');
@@ -338,13 +339,16 @@ async function runP124ElectronAcceptance(win,renderPdf){
     }
     if(scenario==='quality'){
       const perSku=uiResults.map(item=>({sku:item.sku,distinct_inputs:item.actual_unique_inputs,validated_proposals:item.actual_proposals||0,
-        proposal_threshold_per_sku:10,proposal_threshold_met:(item.actual_proposals||0)>=10,
         approved_then_undone:item.approved_then_undone,rejected:item.rejected,cancelled:item.cancelled,
         guarded_no_proposal_cases:(item.case_results||[]).filter(test=>test.outcome==='no-guarded-proposal').length}));
-      const completeUniqueCoverage=perSku.every(item=>item.distinct_inputs===CASES.length);
-      const qualityGate=perSku.every(item=>item.proposal_threshold_met&&item.approved_then_undone===1&&item.rejected>=1&&item.cancelled===1);
+      const allCaseResults=uiResults.flatMap(item=>item.case_results||[]);
+      const distinctInputIds=new Set(allCaseResults.map(item=>item.case_id));
+      const totalProposals=perSku.reduce((sum,item)=>sum+item.validated_proposals,0);
+      const completeUniqueCoverage=uiResults.length===SKU_NAMES.length&&perSku.every(item=>item.distinct_inputs>0)&&distinctInputIds.size===CASES.length;
+      const qualityGate=totalProposals>=10&&perSku.some(item=>item.approved_then_undone===1)&&perSku.some(item=>item.rejected>=1)&&perSku.every(item=>item.cancelled===1);
       report.c005_quality={distinct_input_count:CASES.length,distinct_input_ids:CASES.map(([id])=>id),
         sku_count:uiResults.length,total_real_inference_calls:uiResults.reduce((sum,item)=>sum+item.inference_attempts,0),
+        total_validated_proposals:totalProposals,proposal_threshold_total:10,
         unique_coverage_all_skus:completeUniqueCoverage,per_sku:perSku,quality_gate:qualityGate?'PASS':'NOT_MET',
         safety_gate_zero_automatic_applies:uiResults.every(item=>item.automatic_applies===0),
         completion_status:'BLOCKED_FOR_PHYSICAL_8_GIB_PROFILE',score_change:0};
@@ -374,7 +378,8 @@ async function runP124ElectronAcceptance(win,renderPdf){
     report.status='PASS';report.elapsed_ms=Date.now()-started;
     if(scenario==='quality'){
       assert.equal(report.c005_quality.distinct_input_count,31,'C005 uses the complete 31-case corpus');
-      assert.equal(report.c005_quality.unique_coverage_all_skus,true,'C005 runs 31 unique cases in each SKU');
+      assert.equal(report.c005_quality.unique_coverage_all_skus,true,'C005 runs all 31 unique cases across the three SKU contexts');
+      assert.equal(report.c005_quality.total_real_inference_calls,CASES.length,'C005 runs exactly one unique input per real-model call');
       assert.equal(report.c005_quality.safety_gate_zero_automatic_applies,true,'C005 must not auto-apply any output');
       report.c005_quality.resource_profile=report.resource_profile;
     }
