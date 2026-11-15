@@ -158,14 +158,16 @@ jobs:
           $auditBuilderConfigPath = Join-Path $workspacePath '.c010-electron-builder.yml'
           $auditHelperForNsis = $auditHelperPath.Replace('\', '/')
           if ($auditHelperForNsis.Contains("'")) { throw 'The NSIS helper path cannot contain a single quote.' }
-          $nsisInclude = @"
-!macro customHeader
-!ifndef BUILD_UNINSTALLER
-  !system 'node.exe "$auditHelperForNsis" "`${APP_64}" "`${UNINSTALLER_OUT_FILE}"' = 0
-  SetDateSave off
-!endif
-!endmacro
-"@
+          $nsisSystemLine = "  !system 'node.exe `"$auditHelperForNsis`" `"`${APP_64}`" `"`${UNINSTALLER_OUT_FILE}`"' = 0"
+          $nsisIncludeLines = @(
+            '!macro customHeader',
+            '!ifndef BUILD_UNINSTALLER',
+            $nsisSystemLine,
+            '  SetDateSave off',
+            '!endif',
+            '!endmacro'
+          )
+          $nsisInclude = ($nsisIncludeLines -join "`r`n") + "`r`n"
           [System.IO.File]::WriteAllText($auditIncludePath, $nsisInclude, [System.Text.UTF8Encoding]::new($false))
 
           $builderConfig = Get-Content -LiteralPath (Join-Path $workspacePath 'electron-builder.yml') -Raw
