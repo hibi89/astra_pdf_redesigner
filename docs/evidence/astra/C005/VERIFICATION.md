@@ -30,3 +30,10 @@ At source/test SHA `4aa4f533ea652f2f391a9b2deca15f6d7f804130`, `tests/local-mode
 - The available Windows host profile is about 16 GiB (`17,174,360,064` bytes), so it cannot establish the required 8-GiB-class acceptance.
 
 C005 remains +0 and BLOCKED for completion: the 8-GiB gate is unmet, and the real-Qwen distinct-input run has no terminal result. No score is inferred from the controller/browser regression, build, or package checks.
+
+
+## Latest GitHub Actions status check — 2026-11-16 KST (15:03 UTC)
+
+- Optimized Windows Electron/Qwen3 run [43711160507](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43711160507), feature SHA `8136c6b070eceb97e4e26fbdebae7632ab6f2ed3`, was still `in_progress` in the GitHub Actions API. The real-model/unique-input step remained active; later package and artifact steps were pending. No terminal result or artifact was available.
+- Earlier 93-call run [43702880160](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43702880160), feature SHA `5b323fd47d0c2cd2efb20a136102ee65b3bb7af2`, was also still `in_progress`; no artifact was available. Its job-log endpoint returned 404 at this check.
+- The previously measured runner RAM is 17,174,360,064 bytes (about 16 GiB), above the required 8-GiB-class profile. C005 remains **BLOCKED**, +0; do not infer unique-input quality or 8-GiB acceptance without terminal run artifacts and a qualifying runner.
