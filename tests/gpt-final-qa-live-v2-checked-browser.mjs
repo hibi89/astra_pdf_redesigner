@@ -7,7 +7,8 @@ import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {createHash} from 'node:crypto';
 import {launchBrowser} from './browser-process.mjs';
-import {makeMixedLayoutPdf} from './fixtures/step3-mixed-layout-pdf.mjs';
+import {makeMixedLayoutPdf,MIXED_LAYOUT_MARKERS} from './fixtures/step3-mixed-layout-pdf.mjs';
+import {compareSyntheticPdfCrossEngine} from '../tools/gpt-final-qa-pdf-cross-parser.mjs';
 import {inspectStep2V2ExportPdfParity} from '../tools/gpt-final-qa-v2-pdfjs-bridge.mjs';
 
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -201,6 +202,32 @@ try {
     outputPdf:output,projectExportBytes:Buffer.from(projectJSON,'utf8'),
     reviewReceiptBytes:Buffer.from(JSON.stringify(receipt),'utf8'),
   });
+  const cross=await compareSyntheticPdfCrossEngine({
+    sourcePdf:source,outputPdf:output,
+    expectedMarkers:[...MIXED_LAYOUT_MARKERS],
+  });
+  assert.equal(cross.sourceMarkersPresentBoth,MIXED_LAYOUT_MARKERS.length,
+    'Both parsers must find every deterministic marker in the untouched source');
+  assert.equal(cross.sourceMissingBothParsers,0);
+  assert.equal(cross.sourcePdfjsNul,0);
+  assert.equal(cross.sourcePopplerNul,0);
+  assert.equal(cross.outputSha256,report.outputPdfSha256);
+  assert.equal(cross.sourceSha256,sourceBrowserHash);
+  assert.equal(cross.actualVisualLoss,'UNASSESSED');
+  assert.equal(cross.numericSemanticFidelity,'NOT_CERTIFIED');
+  assert.equal(cross.release,'RELEASE HOLD');
+  assert.equal(cross.scoreDelta,0);
+  console.log('G002 synthetic PDF cross-engine metrics:',JSON.stringify({
+    expected:cross.markersExpected,
+    sourceMarkersBoth:cross.sourceMarkersPresentBoth,
+    outputMarkersBoth:cross.outputMarkersPresentBoth,
+    outputOnlyPdfjs:cross.outputOnlyPdfjs,
+    outputOnlyPoppler:cross.outputOnlyPoppler,
+    outputMissingBoth:cross.outputMissingBothParsers,
+    outputPdfjsNul:cross.outputPdfjsNul,
+    outputPopplerNul:cross.outputPopplerNul,
+    issueCodes:cross.issues,
+  }));
   assert.equal(report.projectContentSha256,liveDoc.sha);
   assert.equal(report.sourcePdfSha256,sourceBrowserHash);
   assert.equal(report.ownerApproval,'NOT_GRANTED');
