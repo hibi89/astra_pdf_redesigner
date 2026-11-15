@@ -220,6 +220,11 @@ async function runP124ElectronAcceptance(win,renderPdf){
       const selected=plan.layoutId||'basic-default';
       const beforeProbe=await currentSource();
       assert.equal(beforeProbe,BASELINE,'SKU setup must not change the actual STEP2 paragraph');
+      const priorConsent=await evaluate('Boolean(document.querySelector("[data-local-ai-consent]")?.checked)');
+      if(priorConsent){
+        markStep(plan.sku+': clear previous SKU-context consent');
+        await click('[data-local-ai-consent]');
+      }
       markStep(plan.sku+': probe actual local model');
       await click('[data-local-ai-probe]');
       const modelStatus=await waitFor(()=>evaluate('document.querySelector("[data-local-ai-status]")?.textContent||""'),
