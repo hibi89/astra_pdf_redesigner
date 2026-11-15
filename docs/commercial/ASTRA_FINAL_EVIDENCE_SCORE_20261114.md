@@ -1,6 +1,6 @@
 # Astra PDF Redesigner — 12영역 최종설계 증거 기반 잠정 완성률
 
-**기준일: 2026-11-15 KST · 마지막 검증 기능 SHA `88c56e4188754f960ae94281b6d68e37b5081b62` · P125 VERIFIED +2 · 잠정 61/100점 (61%); P119/P120/P121/P123/P124/P126 BLOCKED +0. G60 NOT PASSED.**
+**기준일: 2026-11-15 KST · 마지막 검증 기능 SHA `f5751bbb559f268706f2e7bc15438d0a8f590ed9` · P123 VERIFIED +3 · 잠정 64/100점 (64%); P124 READY +0, P119/P120/P121/P126 BLOCKED +0. G55 PASS; G60/G65/G70 NOT PASSED.**
 **공식 구매자 최종 수용률: UNASSESSED. 출시: RELEASE HOLD.**
 
 ## 산정 원칙
@@ -18,12 +18,12 @@
 | A05 로컬 디자인 참고·적용 | 5 | **4** | 1 | PNG/JPEG/WebP/PDF 로컬 분석·미리보기·적용/Undo; Chrome/Edge 8종 합성 metric, source SHA·V2 전체 저장소 불변 및 손상 PDF fail-closed | 실구매자 레퍼런스 품질·폰트/권리·고객 PDF 수용
 | A06 온라인 레퍼런스 | 5 | **4** | 1 | 안전한 브라우저 검색 링크·URL/권리메모 로컬 기록  P112 저장된 HTTPS 출처→사용자 파일 선택→STEP5 로컬 분석 직접 연결, 권리·파일 동일성 인증/내장 검색 카드 없음. | 내장 검색 결과·출처 검증·STEP5 직접 연결 |
 | A07 OCR·콘텐츠 안전·STEP7 | 12 | **5** | 7 | STEP7 PDF 대조·수동 검토·출시 OCR 차단 정책/검사, P113 PNG/OCR 수동 대조. P119 UB-Mannheim 공급처 후보 audit BLOCKED +0: GitHub installer digest null, Authenticode/PE·DLL closure 및 bundle 재배포권 미확인. OCR_MANIFEST=null. | 승인 공급처의 Windows Tesseract 실제 한국어 OCR·표/스캔 정확도 |
-| A08 한국어 로컬 AI 윤문 | 14 | **4** | 10 | P111 로컬 Ollama 동의 UI/controller; P122 mock/static E2E +2. P123/P124 BLOCKED +0: official GitHub has no 4B weights/release asset; no model SHA/actual CPU/3-SKU test. | 상업 재배포 가능한 model license/hash, real Qwen3 CPU execution/quality, buyer review |
+| A08 한국어 로컬 AI 윤문 | 14 | **7** | 7 | P111 로컬 Ollama 동의 UI/controller; P122 mock/static E2E +2; P123 actual Qwen3-4B CPU loopback inference +3 (31 synthetic cases, 10 review-visible proposals, protected facts unchanged, auto-apply 0). | P124 3-SKU Windows Electron acceptance, buyer review; production model distribution not verified |
 | A09 라이선스·SKU·지원 | 11 | **7** | 4 | P96 서명 검증, P107 기능 매트릭스, P108 발급/연장, P109 GUI gate, P110 main-frame guard, P125 main-process signed receipt/SKU boundary +2 (ephemeral synthetic keys; production issuer remains null) | 실판매자 pin·발급/환불/철회/기기 seat lifecycle·고객지원 약관·실제 customer build |
 | A10 Windows 설치·복구 | 5 | 3 | 2 | CI Windows unsigned NSIS 설치·제거·업그레이드, A4/IndexedDB·PNG 보존 | 실 Win10/11 물리 설치·서명/SmartScreen |
 | A11 허가 PDF 5~10건 검수 | 7 | 0 | 7 | 합성 도구는 존재하나 실제 사용자 승인 문서 0건 | 실제 허가 PDF 5~10건 독립 대조/육안 수용 |
 | A12 판매·법적·최종 승인 | 2 | 0 | 2 | 상품 등록 초안만 존재 | 저작권·재배포권·크몽 등록·최종 구매자 승인 |
-| **합계** | **100** | **57** | **43** | **잠정 증거 기반 구현·검증 점수** | **공식 수용 미완** |
+| **합계** | **100** | **64** | **36** | **잠정 증거 기반 구현·검증 점수** | **공식 수용 미완** |
 
 ## P125 +2점 — Electron main-process 서명·SKU side-effect 경계 (A09)
 - **판정:** 59→61/100, A09 5→7/11. A01~A12 확정 최대배점은 불변. P125가 작업 점수 합계를 60 초과했어도 **G60은 NOT PASSED**: P119–P121에서 승인 Tesseract 공급자/실 Windows OCR/IPC 증거가 아직 없다. Gate score는 61점과 별도로 적용된다.
@@ -34,10 +34,18 @@
 - Matrix/attack tests verify all six capabilities for signed synthetic BASIC/PRO/BUSINESS entitlements; invalid/missing issuer, wrong issuer, tampering, expiry, invalid seat, attacker-supplied JWK, wrong/cross frame, reused frame and duplicate request ID never run their protected side effect. Default internal preview succeeds. **Production issuer and pin stay null; customer build stays false; no seller key created.** This is a main boundary prototype, not a shipped customer entitlement system/DRM.
 - Failed candidate notes: Windows run `#43640998165` at `440cae43022314684bb5d291107521853c10b3be` rejected a valid same-pinned-key receipt in the test; corrected fixture uses attacker-signed receipt/key. Earlier failed Windows test candidates received 0; final exact SHA only is scored. [P125 verification](../evidence/astra/P125/VERIFICATION.md).
 
-## P123/P124 +0점 — 실제 Qwen3 미실행, dependent GUI 검증 차단 (A08)
-- **P123 BLOCKED 0/3:** 공식 [QwenLM/Qwen3 GitHub main](https://github.com/QwenLM/Qwen3/tree/7a2f61ffc7a20d47efcd2bf97f6f2bf52729042e) 및 [release API](https://api.github.com/repos/QwenLM/Qwen3/releases?per_page=10) 조사 결과 main commit `7a2f61ffc7a20d47efcd2bf97f6f2bf52729042e`, GitHub Releases 0개, 저장소는 source/docs/report이며 4B weights/release asset을 제공하지 않는다. 공식 README는 checkpoint를 Hugging Face/ModelScope에서 받도록 안내하고 model별 license files도 Hugging Face repo에 있다고 설명한다. 이 실행은 GitHub-only이므로 모델을 외부 host에서 가져오지 않았고 사용자 PC의 로컬 Qwen도 접근하지 않았다. 모델 파일 exact SHA/license mapping, 설치·추론, CPU/RAM/latency 및 30개 real-inference 결과는 전부 **NOT RUN**. [P123 차단 검증서](../evidence/astra/P123/VERIFICATION.md).
-- **P124 BLOCKED 0/2:** P117 dependency는 충족됐으나 P123 실제 모델이 없어 Windows Electron 3-SKU 실모델 제안·승인/거절/Undo·출력 원문 동일성 acceptance 미실행. P122 mock 결과를 재사용하지 않는다. [P124 차단 검증서](../evidence/astra/P124/VERIFICATION.md).
-- P123/P124는 A08 4/14와 각 0점 유지; P125 이후 현재 잠정 총 61/100. 공식 수용 UNASSESSED, RELEASE HOLD. G60은 P119–P121 실제 Tesseract/OCR 증거 미달, G65는 실모델 미측정으로 PASS하지 않았다.
+## P123 VERIFIED +3점 — 실제 Qwen3-4B CPU 추론 (A08)
+
+- **판정:** A08 4→7/14, 총점 61→64/100. P123은 +3/3 VERIFIED. G65는 아직 65점에 도달하지 않아 NOT PASSED; P123 실모델 조건은 충족했다.
+- **정확 기능 SHA:** [`f5751bbb559f268706f2e7bc15438d0a8f590ed9`](https://github.com/hibi89/astra_pdf_redesigner/commit/f5751bbb559f268706f2e7bc15438d0a8f590ed9). 실제 `Qwen3-4B-Instruct-2507 Q8_0`를 GitHub-hosted Ubuntu CPU runner에서 Ollama loopback으로 실행하고 production `LocalModelReview.tsx`를 Chrome 검수 harness에서 확인했다.
+- **고정 데이터와 결과:** 31개 합성 한국어 사례에서 실제 모델 출력 10건이 검수 UI에 보였고 21건은 안전하게 거부/오류 처리됐다. 숫자·날짜·금액·이름·표 행·부정문·인용·URL 보호 signature가 모든 proposal에서 동일했고 auto-apply는 0. Cancel 응답 114ms, proposal latency 7.56–9.03s, Ollama process-tree peak RSS 약 4.71GB. synthetic localStorage V1/IndexedDB V2 sentinels는 전후 동일했다.
+- **모델 provenance:** GitHub release repo `locomotive-works/npu-local-model-running`, release `v1.0`, pinned commit `6bbfd43a548c506734fb8899ed5adee5878a5e4a`; LICENSE Apache-2.0, Git blob `6634c8cc3133b3848ec74b9f275acaaa1ea618ab`. 3개 GGUF part SHA와 결합 SHA는 [P123 검증서](../evidence/astra/P123/VERIFICATION.md)에 수록. 모델은 설치파일/제품에 재배포하지 않는다.
+- **정확-SHA Actions:** [실모델 #43678897970](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897970), [Linux #43678897941](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897941), [Windows #43678897933](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897933), [정본 정책 #43678898126](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678898126) 모두 SUCCESS, feature SHA `f5751bbb559f268706f2e7bc15438d0a8f590ed9`. [측정 artifact](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897970/artifacts/14147513507), ZIP digest `d30312476d75175ef24847cbc35672b0b398f13dded94e0b77e8fb31c245b811`.
+- **범위와 게이트:** 격리 runner/synthetic only; 고객 원본·구매자 PC·판매 빌드 미검증. G55 PASS; G60 NOT PASSED (실 OCR 공급/Windows acceptance 미완), G65 NOT PASSED (64/100), G70 NOT PASSED. 공식 수용 UNASSESSED, RELEASE HOLD.
+
+## P124 READY +0 — 3SKU 실모델 GUI 수용 (A08)
+
+P123 model dependency and P117 SKU-flow dependency are now satisfied. P124 remains unscored and awaits separate Windows Electron acceptance: BASIC/PRO/BUSINESS scenarios, at least 10 actual proposals, approve/reject/Undo, no unapproved text changes, PDF text equality, missing-model/cancel/forged-error behavior. Mock-only evidence does not count.
 
 ## P122 +2점 — 로컬 동의·stale response·원문 보호 (A08)
 
@@ -144,7 +152,7 @@ At exact audit SHA [`c365ba07df29cd6228a794f0c420230d448f91ee`](https://github.c
 Exact audit SHA [`b6d7909e6897578181dbd304ff12491760422530`](https://github.com/hibi89/astra_pdf_redesigner/commit/b6d7909e6897578181dbd304ff12491760422530) passed Linux [#43651926094](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926094), Windows [#43651926099](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926099), and policy [#43651926332](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926332). The UB-Mannheim 5.4.0.20240606 installer hash matched the pinned Microsoft manifest at commit `dd11564899b74d402e5fd39cb6f7b31945170286`, but Windows Authenticode was `UnknownError` due to the signer/timestamp validity period; the candidate was not installed. Report [artifact 14136681467](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926099/artifacts/14136681467) digest `426e2c00a342e651d9414cd2f43a1597a3c4dd2825a0ed0ad59f6fb4b895eb2f`. The exact-SHA Windows OCR rerun remained 9/12 exact, CER 0.0486 with the critical amount error; report [artifact 14136970048](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43651926099/artifacts/14136970048) digest `36413a867222dc714455dd9ca81f1804fb8a42b796fa3a4f49fe2241aced8268`. P119/P120/P121 remain BLOCKED +0, provisional score remains 61/100, G60 NOT PASSED, official acceptance UNASSESSED, RELEASE HOLD, `OCR_MANIFEST=null`.
 
 
-## 2026-11-15 — P123 additional GitHub candidate audit (+0)
+## Historical — P123 GitHub candidate audit before actual-model execution (+0; superseded)
 
 Exact product source [`b6d7909e6897578181dbd304ff12491760422530`](https://github.com/hibi89/astra_pdf_redesigner/commit/b6d7909e6897578181dbd304ff12491760422530); latest branch/doc head at the audit [`511161c9c2f7f35c484915b9f137f875e88a8890`](https://github.com/hibi89/astra_pdf_redesigner/commit/511161c9c2f7f35c484915b9f137f875e88a8890). Official QwenLM/Qwen3 still has no GitHub model weights or release assets. A third-party source/conversion repo, [`Dadhichi-Sarker-Shayon/model-qwen3-4b-q4-k-m-gguf`](https://github.com/Dadhichi-Sarker-Shayon/model-qwen3-4b-q4-k-m-gguf) at [`38a5c001fbdaf3485f98ba4d51d09ebd82f06547`](https://github.com/Dadhichi-Sarker-Shayon/model-qwen3-4b-q4-k-m-gguf/commit/38a5c001fbdaf3485f98ba4d51d09ebd82f06547), contains no model binary, has no GitHub release assets or repository license metadata, and its README says the GGUF files are hosted on Hugging Face. Its checksums alone cannot establish an artifact accessible under the GitHub-only constraint. No external host or local PC was used, and no model was downloaded or run. P123 remains BLOCKED +0; total 61/100, A08 4/14; G65 NOT PASSED.
 

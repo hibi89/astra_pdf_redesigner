@@ -1,19 +1,37 @@
-# P123 — actual Qwen3 4B CPU inference — BLOCKED, 0/3
+# P123 — actual Qwen3 4B CPU inference — VERIFIED +3/3
 
 **Date:** 2026-11-15 KST  
 **Product branch:** `hibi89/astra_pdf_redesigner@feature/astra-p71-pdf-source-parity-20261112`  
-**Product source SHA:** [`b6d7909e6897578181dbd304ff12491760422530`](https://github.com/hibi89/astra_pdf_redesigner/commit/b6d7909e6897578181dbd304ff12491760422530); branch/doc head during this source audit: [`511161c9c2f7f35c484915b9f137f875e88a8890`](https://github.com/hibi89/astra_pdf_redesigner/commit/511161c9c2f7f35c484915b9f137f875e88a8890)  
-**Score:** 0/3; provisional total remains 61/100; A08 remains 4/14. Official acceptance UNASSESSED; RELEASE HOLD.
+**Exact feature SHA:** [`f5751bbb559f268706f2e7bc15438d0a8f590ed9`](https://github.com/hibi89/astra_pdf_redesigner/commit/f5751bbb559f268706f2e7bc15438d0a8f590ed9)  
+**Result:** VERIFIED +3/3; provisional total 61→64/100; A08 4→7/14. Official acceptance remains UNASSESSED; RELEASE HOLD.
 
-## Official GitHub source audit
+## Model provenance and integrity
 
-- The official [QwenLM/Qwen3 repository](https://github.com/QwenLM/Qwen3), main snapshot [`7a2f61ffc7a20d47efcd2bf97f6f2bf52729042e`](https://github.com/QwenLM/Qwen3/commit/7a2f61ffc7a20d47efcd2bf97f6f2bf52729042e), contains source, documentation, and a technical report; its root has no model-weight files.
-- The official [GitHub Releases API](https://api.github.com/repos/QwenLM/Qwen3/releases?per_page=10) returned zero releases. The commit-pinned [README](https://github.com/QwenLM/Qwen3/blob/7a2f61ffc7a20d47efcd2bf97f6f2bf52729042e/README.md) directs checkpoint retrieval to Hugging Face or ModelScope, outside the GitHub-only rule.
-- A GitHub repository search found [`Dadhichi-Sarker-Shayon/model-qwen3-4b-q4-k-m-gguf`](https://github.com/Dadhichi-Sarker-Shayon/model-qwen3-4b-q4-k-m-gguf) at pinned main commit [`38a5c001fbdaf3485f98ba4d51d09ebd82f06547`](https://github.com/Dadhichi-Sarker-Shayon/model-qwen3-4b-q4-k-m-gguf/commit/38a5c001fbdaf3485f98ba4d51d09ebd82f06547). It is 55 KB, has no repository license metadata, no GitHub releases/assets, and contains only a README, conversion notebook, Modelfile, reproduction metadata, checksums, and images. Its README explicitly states the GGUF binaries are hosted on Hugging Face and the GitHub repository contains the conversion pipeline and checksums. The listed SHA-256 values identify binaries that are not available from this GitHub repo. They cannot satisfy the present GitHub-only requirement.
-- Repository search also found code/docs for Qwen3 but no exact Qwen3 4B checkpoint in a GitHub release or file tree. Adjacent Qwen3.5 or Qwen3-VL repositories are different models and are not substitutes.
+- Model: `Qwen3-4B-Instruct-2507 Q8_0`, installed as exact Ollama tag `qwen3:4b-instruct`.
+- GitHub release source: [`locomotive-works/npu-local-model-running`](https://github.com/locomotive-works/npu-local-model-running), release `v1.0`, pinned source commit [`6bbfd43a548c506734fb8899ed5adee5878a5e4a`](https://github.com/locomotive-works/npu-local-model-running/commit/6bbfd43a548c506734fb8899ed5adee5878a5e4a).
+- License file at the pinned revision is Apache-2.0; Git blob SHA `6634c8cc3133b3848ec74b9f275acaaa1ea618ab`. This evidence covers the test artifact's stated license only; no model redistribution or customer build was performed.
+- Combined model SHA-256: `eed67be2a8eed4320ff71f3d5b350db10653549281e09b8967b97aeb1f1554ee`.
+- Three GGUF parts: `2,013,265,920` bytes / `611f555849d7360ac5157df694b2ca7327a9d69a40612cf86807e765cbfdb75c`; `2,013,265,920` bytes / `4d329adca10c17ab73a64d47a22ffc8163f0f89567459ccb149ef685cf33e87a`; `253,871,776` bytes / `8aa6a472d08a4ba1922eff00e2833cbb36f30ae7b13d98620ff84d8b81862e21`.
+- Ollama runtime `v0.40.16` release asset SHA-256: `87bfafb2acbc89b2e6a1be0a9043de6aa75fb450696f86bc426e65fc448f788d`.
+- Runner served the model only on `127.0.0.1:11434`, with `OLLAMA_NO_CLOUD=1`. No external inference API or non-GitHub model host was used. Model weights were downloaded only during the hosted workflow and were not added to the repository or product installer.
 
-## Acceptance not performed
+## Hosted acceptance results
 
-No model binary was downloaded. No external model host, local PC, or inference API was used. There is no GitHub-accessible exact 4B artifact/license mapping, so no native or loopback inference, CPU/RAM/latency/OOM measurement, fixed 30-plus Korean paragraph evaluation, five valid review proposals, or actual-inference V1/V2 immutability evidence exists. P122 mock/static evidence is not counted again.
+The P123 workflow executed the real model on a GitHub-hosted Ubuntu CPU runner (4 CPU threads, `system_total_ram_bytes=16759439360`, approximately 15.62 GiB) and exercised the production `LocalModelReview.tsx` component in an isolated Chrome harness.
 
-**Result:** P123 BLOCKED, +0. No smaller model, mock API, Qwen3.5, or Qwen3-VL was substituted. Resume only when an approved GitHub-accessible Qwen3 4B artifact with exact hash/license evidence and an allowed free CPU runner is available.
+- 31 fixed synthetic Korean cases ran through actual local Qwen3 inference.
+- 10 valid proposals were displayed in the review UI; 21 cases were safely rejected or returned errors.
+- For all 10 displayed proposals, protected-fact signatures matched for numbers, dates, amounts, names, table rows, negations, quotations, and URLs. Automatic apply count: 0; original text remained unchanged until review.
+- Cancellation returned `local-inference-timeout-or-cancelled` in 114 ms, with 0.12 CPU seconds and no automatic apply.
+- Valid proposal latency ranged approximately 7.56–9.03 seconds. Error/rejection latency ranged approximately 6.7–10.6 seconds. Sampled Ollama process-tree peak RSS was approximately 4.71 GB. Per-case input/proposal hashes, status, reason, latency, CPU, RSS, and sample counts are in the report artifact.
+- Synthetic localStorage V1 and IndexedDB V2 sentinels were unchanged. No customer PDF, real user database, or production browser profile was opened.
+- All exact-SHA required Actions were SUCCESS: [actual Qwen3 #43678897970](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897970); [Linux #43678897941](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897941); [Windows #43678897933](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897933); [final policy #43678898126](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678898126).
+
+## Evidence artifact
+
+[Redacted P123 report artifact 14147513507](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897970/artifacts/14147513507)  
+Artifact ZIP SHA-256: `d30312476d75175ef24847cbc35672b0b398f13dded94e0b77e8fb31c245b811`.
+
+## Limits and next work
+
+This verifies only the synthetic GitHub-runner P123 conditions. It does not establish Windows buyer-PC performance, customer-data acceptance, 3-SKU production Electron flow, product packaging, or model redistribution rights. P124 is now READY but remains 0 points until its separate actual-model 3-SKU GUI acceptance passes. G55 PASS; G60 remains NOT PASSED because P119–P121 Windows OCR acceptance is blocked; G65 is NOT PASSED at 64/100; G70 is NOT PASSED. Official buyer acceptance UNASSESSED; RELEASE HOLD.

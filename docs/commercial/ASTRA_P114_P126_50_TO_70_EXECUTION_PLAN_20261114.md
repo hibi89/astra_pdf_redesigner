@@ -1,6 +1,6 @@
 # Astra PDF Redesigner — P114~P126 실행 설계 및 50→70점 검증 공시
 
-> **[2026-11-14 최신 사용자 위임으로 실행자 변경]** 50→70(P114~P126) 구현·테스트·GitHub 커밋 담당은 **Codex 6 Luna Max**. 오직 **GitHub 기존 feature 브랜치 + GitHub-hosted Actions**만 사용한다. 이전 Instant 담당 표기는 이 범위에서 대체한다. 상세 실행 환경·실모델/실OCR blocking·한도 규정은 [Codex Github-only 런북](ASTRA_CODEX_LUNA_MAX_GITHUB_ONLY_P114_P126_20261114.md) 및 [작업 원장](ASTRA_P114_P126_TASK_REGISTER_20261114.json)을 우선한다. **설계 기준 50/100; P114/P115/P116/P117/P118 VERIFIED, G55 PASS, P119/P120/P121 BLOCKED +0, P122 VERIFIED +2, P123/P124 BLOCKED +0, P125 VERIFIED +2, 잠정 61/100, G60 NOT PASSED, P126 BLOCKED; 공식 UNASSESSED, RELEASE HOLD. 이 문서 수정은 기능 개발이나 CI 통과가 아니다.** 70점 이후 P127+ 담당자는 이번 위임에서 지정하지 않았다.
+> **[2026-11-14 최신 사용자 위임으로 실행자 변경]** 50→70(P114~P126) 구현·테스트·GitHub 커밋 담당은 **Codex 6 Luna Max**. 오직 **GitHub 기존 feature 브랜치 + GitHub-hosted Actions**만 사용한다. 이전 Instant 담당 표기는 이 범위에서 대체한다. 상세 실행 환경·실모델/실OCR blocking·한도 규정은 [Codex Github-only 런북](ASTRA_CODEX_LUNA_MAX_GITHUB_ONLY_P114_P126_20261114.md) 및 [작업 원장](ASTRA_P114_P126_TASK_REGISTER_20261114.json)을 우선한다. **설계 기준 50/100; P114/P115/P116/P117/P118 VERIFIED, G55 PASS, P119/P120/P121 BLOCKED +0, P122 VERIFIED +2, P123 VERIFIED +3, P124 READY +0, P125 VERIFIED +2, 잠정 64/100, G60/G65/G70 NOT PASSED, P126 BLOCKED; 공식 UNASSESSED, RELEASE HOLD. P123 exact feature SHA `f5751bbb559f268706f2e7bc15438d0a8f590ed9`의 실제 Qwen3 CPU 및 Linux/Windows/정본 Actions는 모두 SUCCESS. 이 문서 수정 자체는 기능 개발이나 CI 통과가 아니다.** 70점 이후 P127+ 담당자는 이번 위임에서 지정하지 않았다.
 
 
 > 설계 승인 문맥: 2026-11-14 21:55 KST, 사용자 지시: GPT-6 High가 최종설계 기반 작업을 분해·공시하고, Codex 6 Luna Max가 구현과 GitHub 검증·인수인계를 직접 담당. High는 사용자 요청 시 최종 별도 검수 담당. 이 문서는 **계획 공시**이며 기능 구현·테스트 또는 70점 달성을 의미하지 않는다.
@@ -9,7 +9,7 @@
 **저장소:** hibi89/astra_pdf_redesigner
 **설계 기준 코드 SHA:** 26aff40d6de524c2430f8a6b325d906cea67f7e1
 **설계 이전 문서 HEAD:** 7ed25d4f04ba10bad18e96c6986bb9a5e97a0b08
-**현재 총괄 잠정 검증 점수:** 61/100 (P114/P115/P116/P117/P118/P122/P125 VERIFIED; G55 PASS; P119/P120/P121/P123/P124/P126 BLOCKED +0; G60/G65/G70 NOT PASSED), **공식 사용자/구매자 최종 수용률:** UNASSESSED, **RELEASE HOLD**, 크몽 미등록.
+**현재 총괄 잠정 검증 점수:** 64/100 (P114/P115/P116/P117/P118/P122/P123/P125 VERIFIED; P124 READY +0; P119/P120/P121/P126 BLOCKED +0; G55 PASS, G60/G65/G70 NOT PASSED), **공식 사용자/구매자 최종 수용률:** UNASSESSED, **RELEASE HOLD**, 크몽 미등록.
 
 ## 1. 변경 금지·우선순위
 
@@ -154,7 +154,7 @@
 
 #### P123 — 실 Qwen3 한국어 CPU 추론 및 데이터 무결성 시험 (A08 +3점, 누적 상한 65/100)
 
-- **선행:** P122. **담당:** Codex 6 Luna Max. 현재 상태: BLOCKED +0; official GitHub에는 Qwen3 4B weight/release asset이 없고 외부 model host/local PC 사용은 이 위임에서 금지.
+- **선행:** P122. **담당:** Codex 6 Luna Max. 현재 상태: VERIFIED +3; 실제 exact-hash Qwen3-4B CPU 추론을 GitHub-hosted Ubuntu에서 완료했고, synthetic 31건·검수 UI proposal 10건·원문 보호·V1/V2 sentinel·cancel·resource evidence를 확보했다. 모델은 test-time only, 제품 번들 없음.
 - **수정 후보 경로:** desktop/owner-ollama-controller.cjs; tools/ (신규 실모델 측정 스크립트); tests/ (신규 실제 모델 golden); docs/commercial/ (실측 보고). 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** 사용자가 소유한 기존 로컬 Qwen3 4B 또는 라이선스·해시가 검증된 별도 무료 CI 환경에서 실제 모델을 실행. 온디바이스 속도/메모리/중단/OOM·한글 품질을 계측. 모델은 저장소/설치파일에 동봉하지 않고, 다운로드가 필요하면 출처·권리·크기·한도를 사전 확인한다.
 - **수용 테스트/증거:** 실 모델(native/loopback HTTP mock 아님) + 사전 고정 30개 이상 합성 한국어 문단을 평가. 보호 숫자·날짜·금액·금지/부정/인용문이 변경된 후보의 자동/무검토 적용 0, 건별 성공/거부/취소/지연 및 CPU/RAM 실측, 원본·V1/V2 무변경. 최소 5건의 유효 실모델 제안이 검토 UI까지 전달되는 증거.
@@ -163,7 +163,7 @@
 
 #### P124 — 3SKU 공통 윤문 실제 GUI 회귀·문단 승인/되돌림 (A08 +2점, 누적 상한 67/100)
 
-- **선행:** P123, P117. **담당:** Codex 6 Luna Max. 현재 상태: BLOCKED +0; P117 VERIFIED, P123 actual-model prerequisite BLOCKED.
+- **선행:** P123, P117. **담당:** Codex 6 Luna Max. 현재 상태: READY +0; P117 및 P123 선행 조건 VERIFIED. 실제 Windows Electron 3-SKU acceptance 전까지 점수는 0.
 - **수정 후보 경로:** src/humanize/LocalModelReview.tsx; src/step2/Workspace.tsx; src/commercial/skuAccess.ts; tests/step2-*.mjs; tests/ (신규 AI gui E2E). 정확 파일 경로는 최신 브랜치를 다시 검사해 결정.
 - **구현 지시:** BASIC/PRO/BUSINESS 동일 로컬 AI 경로를 보장하고, 다중 블록 간 선택-수정-거절-Undo 흐름과 스타일 변경·PDF 출력 시 원문 미승인 변형을 방어. UI는 모델이 없으면 규칙 검수만 제공.
 - **수용 테스트/증거:** 실 모델을 실행한 설치형 Windows Electron 또는 동등한 검증된 CPU 환경에서 3SKU × (정상/모델없음/취소/위조·오류) 시나리오. 최소 10건 실제 제안의 전후 비교·승인/거부/되돌림, 미승인 텍스트 변경 0, PDF 출력 문자 동일성 확인, 모델 미실행/오류 중에도 STEP1/2 정상.
@@ -222,7 +222,7 @@
 
 70~100 상세 잔여 30점과 사용자가 개입해야 할 최종 승인 장벽은 docs/commercial/ASTRA_INSTANT_70_TO_100_HANDOFF_20261114.md에 따로 기록한다. 모든 항목의 사용자가 확정한 배점과 원본 설계는 동일하다.
 
-**최종 확인:** P114–P118 VERIFIED, G55 PASS; P119–P121 BLOCKED +0; P122 VERIFIED +2; P123/P124 BLOCKED +0; P125 VERIFIED +2; P126 BLOCKED +0; current provisional task sum 61/100. Latest verified feature SHA `88c56e4188754f960ae94281b6d68e37b5081b62`, exact-SHA Linux #43641402429, Windows #43641402454, and blueprint #43641402742 all SUCCESS. G60 NOT PASSED because actual Windows Tesseract/OCR evidence is missing; G65/G70 not passed. Official acceptance UNASSESSED, RELEASE HOLD.
+**최신 실행 확인 (2026-11-15 KST):** P123 VERIFIED +3, 잠정 64/100; P124 READY +0; P119–P121/P126 BLOCKED +0. Exact feature SHA `f5751bbb559f268706f2e7bc15438d0a8f590ed9`: real Qwen3 #43678897970, Linux #43678897941, Windows #43678897933, and final blueprint #43678898126 all SUCCESS. G55 PASS; G60 NOT PASSED (OCR supplier/Windows evidence missing); G65 NOT PASSED at 64; G70 NOT PASSED. Official acceptance UNASSESSED, RELEASE HOLD. See P123 verification evidence for artifact digest and limitations.
 
 
 ## 2026-11-15 latest P119/P120 runner re-audit (no score)
@@ -244,3 +244,10 @@ On exact source SHA [`b6d7909e6897578181dbd304ff12491760422530`](https://github.
 ## 2026-11-15 — P123 additional GitHub model-source audit
 
 The official Qwen3 repository still exposes no GitHub-hosted 4B model asset. A third-party GitHub conversion repository was inspected at a pinned commit; it contains only source, metadata, and checksums, explicitly points to Hugging Face for model binaries, and has no repository license metadata or release assets. This does not meet P123's GitHub-only artifact/license/hash requirements. P123 remains BLOCKED +0; no model was downloaded or inferred. Resume after an approved GitHub-accessible checkpoint and artifact-specific license evidence are supplied.
+
+
+## 2026-11-15 KST — P123 VERIFIED +3; P124 READY
+
+Exact feature SHA [`f5751bbb559f268706f2e7bc15438d0a8f590ed9`](https://github.com/hibi89/astra_pdf_redesigner/commit/f5751bbb559f268706f2e7bc15438d0a8f590ed9) passed actual Qwen3 CPU [#43678897970](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897970), Linux [#43678897941](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897941), Windows [#43678897933](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897933), and final policy [#43678898126](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678898126). P123 tested 31 synthetic Korean cases, 10 review-visible proposals and 21 safe rejects/errors; all protected facts matched, auto-apply was 0, cancellation and synthetic V1/V2 sentinels passed. The redacted report is artifact 14147513507 with ZIP SHA-256 `d30312476d75175ef24847cbc35672b0b398f13dded94e0b77e8fb31c245b811`.
+
+P123 is VERIFIED +3 (A08 4→7; total 61→64). P124 is now READY but remains 0 until separate Windows Electron 3-SKU acceptance. G55 PASS; G60/G65/G70 NOT PASSED. Official acceptance UNASSESSED; RELEASE HOLD.

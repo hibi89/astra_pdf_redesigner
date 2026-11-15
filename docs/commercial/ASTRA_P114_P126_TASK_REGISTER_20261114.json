@@ -6,7 +6,7 @@
   "branch": "feature/astra-p71-pdf-source-parity-20261112",
   "base_feature_sha": "26aff40d6de524c2430f8a6b325d906cea67f7e1",
   "base_docs_sha": "7ed25d4f04ba10bad18e96c6986bb9a5e97a0b08",
-  "current_verified_provisional": 61,
+  "current_verified_provisional": 64,
   "target_provisional": 70,
   "official_acceptance": "UNASSESSED",
   "release": "RELEASE HOLD",
@@ -485,21 +485,23 @@
       "depends_on": [
         "P122"
       ],
-      "status": "BLOCKED",
-      "credit_earned": 0,
+      "status": "VERIFIED",
+      "credit_earned": 3,
       "expected_paths": [
         "desktop/owner-ollama-controller.cjs",
-        "tools/ (신규 실모델 측정 스크립트)",
-        "tests/ (신규 실제 모델 golden)",
-        "docs/commercial/ (실측 보고)"
+        "tests/local-model-review-real-qwen3.mjs",
+        "tests/fixtures/local-model-review-real-qwen3.jsx",
+        "tests/fixtures/local-model-review-real-qwen3.html",
+        ".github/workflows/real-qwen3-cpu.yml",
+        "docs/evidence/astra/P123/VERIFICATION.md"
       ],
-      "implementation": "사용자가 소유한 기존 로컬 Qwen3 4B 또는 라이선스·해시가 검증된 별도 무료 CI 환경에서 실제 모델을 실행. 온디바이스 속도/메모리/중단/OOM·한글 품질을 계측. 모델은 저장소/설치파일에 동봉하지 않고, 다운로드가 필요하면 출처·권리·크기·한도를 사전 확인한다.",
+      "implementation": "GitHub-hosted Ubuntu CPU runner에서 exact Ollama Qwen3-4B-Instruct-2507 Q8_0를 loopback으로 실행; 실제 production LocalModelReview UI 검수 harness, 31개 synthetic Korean 사례, latency/RAM/CPU/cancel/protected-fact/V1·V2 sentinels를 기록. 모델은 제품·설치파일에 포함하지 않는다.",
       "acceptance": "실 모델(native/loopback HTTP mock 아님) + 사전 고정 30개 이상 합성 한국어 문단을 평가. 보호 숫자·날짜·금액·금지/부정/인용문이 변경된 후보의 자동/무검토 적용 0, 건별 성공/거부/취소/지연 및 CPU/RAM 실측, 원본·V1/V2 무변경. 최소 5건의 유효 실모델 제안이 검토 UI까지 전달되는 증거.",
-      "blockers": "실 4B 추론 환경이 없거나 라이선스·모델 SHA가 불명확하면 P123=0점. 테스트용 작은 모델/모의 API의 성공을 4B 제품 실제 구동 성공으로 둔갑 금지. 모델/고객 문단 업로드·유료 러너 무단 사용 금지.",
-      "evidence_feature_sha": null,
-      "linux_workflow_url": null,
-      "windows_workflow_url": null,
-      "blueprint_workflow_url": null,
+      "blockers": "P123 acceptance is VERIFIED only for synthetic GitHub-hosted Ubuntu execution. Windows buyer-PC, customer data, commercial redistribution, and product bundle are not verified and are not claimed.",
+      "evidence_feature_sha": "f5751bbb559f268706f2e7bc15438d0a8f590ed9",
+      "linux_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897941",
+      "windows_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897933",
+      "blueprint_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678898126",
       "executor": "Codex 6 Luna Max",
       "execution_medium": "GitHub-only",
       "runner": "ubuntu-latest CPU-only real Qwen3:4b-instruct model, bounded run",
@@ -509,19 +511,11 @@
         "Windows Electron/NSIS when relevant",
         "Final blueprint policy"
       ],
-      "evidence_linux_run": null,
-      "evidence_windows_run": null,
-      "evidence_blueprint_run": null,
-      "actual_result": "BLOCKED +0. GitHub source audit at product source b6d7909e6897578181dbd304ff12491760422530 reconfirmed that official QwenLM/Qwen3 commit 7a2f61ffc7a20d47efcd2bf97f6f2bf52729042e has no model weights or release assets. A third-party GitHub conversion repo https://github.com/Dadhichi-Sarker-Shayon/model-qwen3-4b-q4-k-m-gguf at 38a5c001fbdaf3485f98ba4d51d09ebd82f06547 is only 55 KB, has no GitHub releases/assets or repository license metadata, and explicitly hosts GGUF binaries on Hugging Face. Its checksum list cannot identify a GitHub-accessible file. No model download or inference; Qwen3 4B license+artifact SHA, CPU/RAM/latency and 30-case Korean evaluation remain unavailable.",
-      "blockers_observed": [
-        "Official QwenLM/Qwen3 main commit 7a2f61ffc7a20d47efcd2bf97f6f2bf52729042e has no 4B model weights; official GitHub release count is 0.",
-        "Official README directs model checkpoints to Hugging Face/ModelScope, outside the GitHub-only instruction.",
-        "Third-party GitHub source repo Dadhichi-Sarker-Shayon/model-qwen3-4b-q4-k-m-gguf at 38a5c001fbdaf3485f98ba4d51d09ebd82f06547 has no binary or GitHub release asset; README says GGUF binaries are hosted on Hugging Face. Repository license metadata is null.",
-        "Hash list in the third-party repository refers to externally hosted GGUF files; without a GitHub-accessible artifact and applicable license file, hashes do not meet the requested audit.",
-        "No user-owned model is available in GitHub-hosted Actions; local PC access is prohibited.",
-        "Actual inference acceptance, exact model-file SHA/license mapping, CPU/RAM/latency and 30-paragraph Korean results remain unrun."
-      ],
-      "model_source_audit": {
+      "evidence_linux_run": 43678897941,
+      "evidence_windows_run": 43678897933,
+      "evidence_blueprint_run": 43678898126,
+      "actual_result": "VERIFIED +3/3. Exact source SHA f5751bbb559f268706f2e7bc15438d0a8f590ed9; actual Qwen3-4B-Instruct-2507 Q8_0 CPU inference on free GitHub-hosted Ubuntu runner; 31 synthetic Korean cases, 10 valid proposals in production review UI, 21 safe rejects/errors, protected signatures identical, auto-apply 0, cancel 114ms, proposal latency ~7.56–9.03s, sampled process-tree peak RSS ~4.71GB, synthetic V1/V2 sentinels unchanged. Model and Ollama assets hash-pinned; no external inference API/host or customer data. Artifact 14147513507 SHA-256 d30312476d75175ef24847cbc35672b0b398f13dded94e0b77e8fb31c245b811.",
+      "previous_model_source_audit": {
         "official_repository": "https://github.com/QwenLM/Qwen3",
         "official_main_sha": "7a2f61ffc7a20d47efcd2bf97f6f2bf52729042e",
         "github_release_count": 0,
@@ -537,6 +531,54 @@
         "decision": "BLOCKED_GITHUB_ACCESSIBLE_WEIGHT_AND_EXACT_LICENSE_MISSING",
         "external_model_hosts_accessed": false,
         "model_downloaded": false
+      },
+      "actual_execution": {
+        "model": "Qwen3-4B-Instruct-2507 Q8_0",
+        "ollama_tag": "qwen3:4b-instruct",
+        "source_repository": "locomotive-works/npu-local-model-running",
+        "source_release": "v1.0",
+        "source_commit": "6bbfd43a548c506734fb8899ed5adee5878a5e4a",
+        "license": "Apache-2.0",
+        "license_blob": "6634c8cc3133b3848ec74b9f275acaaa1ea618ab",
+        "combined_model_sha256": "eed67be2a8eed4320ff71f3d5b350db10653549281e09b8967b97aeb1f1554ee",
+        "model_part_sha256": [
+          "611f555849d7360ac5157df694b2ca7327a9d69a40612cf86807e765cbfdb75c",
+          "4d329adca10c17ab73a64d47a22ffc8163f0f89567459ccb149ef685cf33e87a",
+          "8aa6a472d08a4ba1922eff00e2833cbb36f30ae7b13d98620ff84d8b81862e21"
+        ],
+        "ollama_version": "0.40.16",
+        "ollama_asset_sha256": "87bfafb2acbc89b2e6a1be0a9043de6aa75fb450696f86bc426e65fc448f788d",
+        "runner": {
+          "kind": "GitHub-hosted ubuntu CPU",
+          "cpu_threads": 4,
+          "system_total_ram_bytes": 16759439360
+        },
+        "endpoint": "127.0.0.1:11434",
+        "ollama_no_cloud": true,
+        "test_report": {
+          "artifact_id": 14147513507,
+          "url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897970/artifacts/14147513507",
+          "zip_sha256": "d30312476d75175ef24847cbc35672b0b398f13dded94e0b77e8fb31c245b811"
+        },
+        "summary": {
+          "synthetic_korean_cases": 31,
+          "review_visible_valid_proposals": 10,
+          "rejected_or_error": 21,
+          "automatic_applies": 0,
+          "cancel_latency_ms": 114,
+          "proposal_latency_ms_approx": [
+            7560,
+            9030
+          ],
+          "peak_rss_bytes_approx": 4710000000,
+          "synthetic_localstorage_v1_unchanged": true,
+          "synthetic_indexeddb_v2_unchanged": true
+        },
+        "real_model_workflow_url": "https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897970",
+        "external_model_host_used": false,
+        "external_inference_api_used": false,
+        "customer_data_used": false,
+        "model_redistributed": false
       }
     },
     {
@@ -548,7 +590,7 @@
         "P123",
         "P117"
       ],
-      "status": "BLOCKED",
+      "status": "READY",
       "credit_earned": 0,
       "expected_paths": [
         "src/humanize/LocalModelReview.tsx",
@@ -576,11 +618,10 @@
       "evidence_linux_run": null,
       "evidence_windows_run": null,
       "evidence_blueprint_run": null,
-      "actual_result": "BLOCKED +0. P117 is VERIFIED, but P123 real Qwen3 4B inference and model/license/hash proof are unavailable. No Windows Electron 3-SKU real-model flow, approved/rejected/undo proposal set, PDF equality, or model-missing real GUI acceptance run was performed. P122 mock evidence is not substituted.",
+      "actual_result": "READY, +0 so far. Dependencies P117 and P123 are VERIFIED. Windows Electron 3-SKU actual-model acceptance is not yet run; no credit until 10+ real proposals, approve/reject/Undo, model-missing/cancel/forged-error, PDF text equality, and V1/V2 regression pass.",
       "blockers_observed": [
-        "P123 real Qwen3 model and CPU inference prerequisite BLOCKED.",
-        "No model-specific exact SHA/license proof under GitHub-only permitted sources.",
-        "No real model 3-SKU Windows Electron proposals, user approval/rejection/Undo, output PDF equality, or model-missing path evidence."
+        "Windows Electron actual-Qwen3 3-SKU workflow not yet executed.",
+        "No proposal approval/rejection/Undo or PDF text-equality evidence yet."
       ]
     },
     {
@@ -712,7 +753,7 @@
     }
   ],
   "score_formula": "50 + sum(verified task credit_earned), each <= credit_max, no credit for plans or unverified runs",
-  "next_task": "P119 BLOCKED pending user-provided GitHub-accessible approved Windows OCR asset with verifiable signature/hash and exact dependency NOTICE/license/redistribution evidence. All 5.5.3, 5.5.0, and 5.4.0 candidates failed Authenticode Valid gate.",
+  "next_task": "P124 READY: perform actual-Qwen3 3-SKU Windows Electron GUI acceptance; P119–P121 remain BLOCKED pending approved Windows OCR supplier evidence, and P126 remains dependent on P121.",
   "notes": [
     "immutable original blueprint and user-approved A01-A12 weights preserved",
     "preserve main and Draft PR #10; no seller key or model bundle",
@@ -754,12 +795,12 @@
     }
   },
   "last_updated_kst": "2026-11-15",
-  "last_completed_task": "P125",
-  "next_independent_task": "P123 remains blocked: official QwenLM/Qwen3 GitHub has no weights/releases; the audited third-party GitHub conversion repository stores only source/checksums and points to Hugging Face binaries. P119 needs a valid-signature Windows Tesseract supplier and exact dependency license/NOTICE/redistribution proof. P120/P121 and P124/P126 remain downstream. No currently executable P114-P126 task remains without supplier/model evidence.",
+  "last_completed_task": "P123",
+  "next_independent_task": "P124 is now executable because P123 and P117 are VERIFIED. Run actual Qwen3 CPU proposals in Windows Electron for BASIC/PRO/BUSINESS, including model-missing, cancel, forged/error, approve/reject/Undo, PDF text equality, and V1/V2 regression. P119–P121 remain blocked on signed, licensed Windows Tesseract evidence; no OCR scoring until real acceptance. P126 waits on P121.",
   "gates": {
     "G55": "PASS",
     "G60": "NOT PASSED — P119 lacks an approved Authenticode-valid/licensed supplier; P120 app/UI and P121 Electron IPC/V2 acceptance remain incomplete.",
-    "G65": "NOT PASSED — P123 actual Qwen3 inference BLOCKED",
+    "G65": "NOT PASSED — P123 actual Qwen3 CPU inference is VERIFIED, but current provisional score is 64/100; the 65-point gate has not been reached.",
     "G70": "NOT PASSED — P124 and P126 acceptance incomplete"
   }
 }

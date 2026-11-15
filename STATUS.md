@@ -1,3 +1,15 @@
+## 2026-11-15 KST — P123 VERIFIED +3 · 잠정 64/100
+
+- **완료 작업 ID:** P123 (A08) VERIFIED, +3점. A08 4/14→7/14, 총점 61→64/100. 사용자 확정 A01~A12 배점은 변경하지 않았다.
+- **정확 기능 SHA:** [`f5751bbb559f268706f2e7bc15438d0a8f590ed9`](https://github.com/hibi89/astra_pdf_redesigner/commit/f5751bbb559f268706f2e7bc15438d0a8f590ed9). GitHub Actions에서 실제 Qwen3-4B-Instruct-2507 Q8_0 CPU 추론과 production `LocalModelReview.tsx` 검수 UI를 확인했다.
+- **실행 결과:** 사전 고정 synthetic 한국어 31건; 유효 제안 10건이 검수 UI에 표시되고 21건은 안전 거부/오류. 보호 숫자·날짜·금액·인명·표 행·부정문·인용·URL 서명은 모든 표시 제안에서 동일, 자동 적용 0. 취소는 114ms에 종료했고 synthetic localStorage V1/IndexedDB V2 sentinels가 유지됐다. 제안 지연 약 7.56–9.03초, sampled Ollama process-tree peak RSS 약 4.71GB; 정확 건별 수치는 보고서에 기록했다.
+- **모델 출처/무결성:** GitHub release `locomotive-works/npu-local-model-running@v1.0`, pinned commit `6bbfd43a548c506734fb8899ed5adee5878a5e4a`; pinned LICENSE는 Apache-2.0 (blob `6634c8cc3133b3848ec74b9f275acaaa1ea618ab`). 결합 모델 SHA-256 `eed67be2a8eed4320ff71f3d5b350db10653549281e09b8967b97aeb1f1554ee`. 가중치는 Actions 실행 중에만 내려받았고 저장소·고객 빌드에 포함하지 않았다.
+- **정확 SHA Actions:** [실 Qwen3 #43678897970](`https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897970`) SUCCESS; [Linux #43678897941](`https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897941`) SUCCESS; [Windows #43678897933](`https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897933`) SUCCESS; [정본 정책 #43678898126](`https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678898126`) SUCCESS. 네 실행 모두 feature SHA `f5751bbb559f268706f2e7bc15438d0a8f590ed9` 기준.
+- **검증 보고서:** [Actions artifact 14147513507](`https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897970/artifacts/14147513507`), ZIP SHA-256 `d30312476d75175ef24847cbc35672b0b398f13dded94e0b77e8fb31c245b811`.
+- **범위 제한:** 격리 GitHub runner와 합성 문단/sentinels만 사용했다. 고객 PDF·실제 사용자 V1/V2 저장소, Windows 구매자 PC, 판매 제품 번들/재배포는 검증하지 않았다. 모델은 localhost `127.0.0.1:11434`, `OLLAMA_NO_CLOUD=1`; 외부 추론 API·외부 모델 호스트는 사용하지 않았다.
+- **게이트/출시:** G55 PASS. G60 NOT PASSED (P119–P121의 승인 OCR 공급자·실 Windows OCR/Electron 증거 미완), G65 NOT PASSED (현재 64점), G70 NOT PASSED. 공식 구매자 수용 UNASSESSED, RELEASE HOLD 유지.
+- **다음:** P124 실제 모델 기반 3-SKU Windows Electron GUI acceptance. P119/P120/P121 및 P126은 OCR 공급처/의존성 증거에 계속 종속.
+
 ## 2026-11-15 KST — P119 additional GitHub Windows supplier search · BLOCKED +0 · provisional 61/100
 
 - Read-only GitHub repository searches (`tesseract windows installer`, `tesseract OCR Windows binaries`, `tesseract setup Windows`) did not surface an eligible candidate with exact binary hash, valid Authenticode, and bundle-specific NOTICE/license/redistribution evidence.
