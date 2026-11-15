@@ -95,6 +95,17 @@ jobs:
           node-version: '22'
       - name: Install exact app dependencies for actual PDF.js parser
         run: npm install --no-audit --no-fund
+      - name: Require independent Poppler text extractor for G002 cross-parser evidence
+        run: |
+          if ! command -v pdftotext >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y poppler-utils
+          fi
+          pdftotext -v 2>&1 | head -n 2
+      - name: G002 synthetic Poppler vs PDF.js cross-parser regressions
+        run: |
+          node --check tools/gpt-final-qa-pdf-cross-parser.mjs
+          node --test tests/gpt-final-qa-pdf-cross-parser.test.mjs
       - name: G002 actual PDF bytes source-output independent regression
         run: |
           node --check tools/gpt-final-qa-real-pdfjs-parity.mjs
@@ -115,6 +126,12 @@ jobs:
         run: |
           npm install --no-audit --no-fund
           npm run build
+      - name: Require local Poppler binary for cross-parser Chrome output audit
+        run: |
+          if ! command -v pdftotext >/dev/null; then
+            sudo apt-get update -qq
+            sudo apt-get install -y poppler-utils
+          fi
       - name: Synthetic source PDF, explicit page review, real Chromium V2 persistence and output
         run: |
           set -euo pipefail
