@@ -2,7 +2,7 @@
 
 Branch: `codex/astra-final-ai-sku-20261115`  
 Integration target: `integration/astra-final-blueprint-100-20261115`  
-Latest feature/test SHA: `bd83ac2619a80f940dd628d513a760aee06f0ecb`  
+Latest feature/test SHA: `fa57116544217c6122b1cd9643fee91002f45edc`  
 Open draft PR: [#13](https://github.com/hibi89/astra_pdf_redesigner/pull/13)
 
 ## Completed and assessed
@@ -16,6 +16,7 @@ Open draft PR: [#13](https://github.com/hibi89/astra_pdf_redesigner/pull/13)
 | C002 responsive viewport acceptance | `bd83ac2619a80f940dd628d513a760aee06f0ecb` | 298 unit tests/build, Chrome and Edge at 390/360/320px, blueprint policy PASS | Buyer visual acceptance pending; +0 |
 | C008 synthetic PDF accuracy regression | `bd83ac2619a80f940dd628d513a760aee06f0ecb` | Linux/Chrome, Edge; 15-pair corpus, 12-layout PDF risk matrix, V1/V2 no-write, policy PASS | Synthetic-only; owner acceptance pending; +0 |
 | C009 keyboard/accessibility-tree smoke | `fa57116544217c6122b1cd9643fee91002f45edc` | 298 tests/build, Chrome and Edge AX tree + keyboard Tab, policy PASS | Narrow hosted smoke only; +0 |
+| C010 unsigned Windows package/SBOM audit | `fa57116544217c6122b1cd9643fee91002f45edc` | Windows build, desktop verify 87/87, CycloneDX SBOM, unsigned NSIS hash, policy PASS | Release/legal/data scan acceptance pending; +0 |
 
 Detailed reports: [C001](C001/VERIFICATION.md), [C003](C003/VERIFICATION.md), [C005](C005/VERIFICATION.md). The earlier P124 BLOCKED note was superseded with hosted evidence: [P124/VERIFICATION.md](P124/VERIFICATION.md).
 
@@ -41,7 +42,7 @@ At tested tree SHA `4e4bfc01aa2543ea03b0674a8fcc8f6f33f50a25`, the owner-side si
 
 ## Next work
 
-C002, C008 and C009 hosted evidence is recorded in their task reports. C009 at exact SHA `fa57116544217c6122b1cd9643fee91002f45edc` passed [Chrome/Edge run 43690873135](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873135) and [policy run 43690873420](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873420). Current next task C010 is running as an unsigned Windows NSIS/SBOM candidate audit; no production signing, artifact upload or release is authorized. P119/P120/P121 remain outside this Codex track pending GPT-owned OCR supply-chain evidence.
+C002, C008 and C009 reports document hosted PASS evidence; C010's Windows unsigned package/SBOM audit passed at exact code/test SHA `fa57116544217c6122b1cd9643fee91002f45edc` ([run 43690873098](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873098), [policy 43690873420](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873420)). The full cross-platform run 43690873096 remains in progress. C010 is not a release and remains +0; signing, legal/data scan and buyer acceptance remain open. The next dependent OCR task C004 is BLOCKED on GPT-owned P119 evidence; P120/P121 remain gated.
 
 ## C002 — hosted responsive viewport PASS, buyer acceptance pending
 
@@ -56,3 +57,8 @@ At exact code/test SHA `bd83ac2619a80f940dd628d513a760aee06f0ecb`, [full CI run 
 ## C009 — hosted keyboard/accessibility-tree smoke PASS; narrow scope
 
 At exact code/test SHA `fa57116544217c6122b1cd9643fee91002f45edc`, [Chrome/Edge workflow 43690873135](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873135) passed 298 tests, build, accessibility-tree checks, keyboard Tab navigation and visible focus. [Policy run 43690873420](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873420) passed. This is not a screen-reader/WCAG certification or low-resource performance measurement; score +0.
+
+
+## C010 — unsigned package candidate and SBOM PASS; release gates open
+
+At exact SHA `fa57116544217c6122b1cd9643fee91002f45edc`, [Windows run 43690873098](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873098) passed regression/build/desktop verification, produced a CycloneDX SBOM with 6 production components and no missing license metadata, and built an unsigned NSIS setup (SHA-256 `AA04F9E8C7705087F035ADAF6E34AAA7E81F95B8A77812C1597ACCC8E1CC6144`). No signing, artifact upload, or release occurred. See [C010/VERIFICATION.md](C010/VERIFICATION.md). Manual legal review, reproducibility, package data/secret scanning, physical buyer Windows acceptance and launch of this exact candidate remain unverified; +0.
