@@ -98,3 +98,22 @@ test('G002 missing imported text cannot be silently treated as independently ver
     outputPdf:makeMixedLayoutPdf(2),
   }),/G002_IMPORTED_TEXT_REQUIRED/);
 });
+
+
+test('G002 real PDF.js flags reordered vector-table cells even when every cell value exists',async()=>{
+  const raw=makeMixedLayoutPdf(1).toString('binary');
+  assert.ok(raw.includes('TABLE_A_906')&&raw.includes('TABLE_C_908'));
+  const swapped=Buffer.from(raw.replace('TABLE_A_906','__TABLE_TMP')
+    .replace('TABLE_C_908','TABLE_A_906').replace('__TABLE_TMP','TABLE_C_908'),'binary');
+  const r=await run(swapped);
+  assert.ok(r.issues.includes('TABLE_ROW_ORDER_OR_MULTIPLICITY_RISK'));
+  assert.ok(r.issues.includes('SOURCE_OUTPUT_TEXT_DIFFERENCE'));
+});
+test('G002 actual PDF.js detects clipped output glyphs before a human visually accepts A4',async()=>{
+  const raw=makeMixedLayoutPdf(1).toString('binary');
+  assert.ok(raw.includes('333 713 Td'));
+  const moved=Buffer.from(raw.replace('333 713 Td','550 713 Td'),'binary');
+  const r=await run(moved);
+  assert.ok(r.issues.includes('OUTPUT_TEXT_OVERFLOW'));
+  assert.equal(r.humanApproval,'UNASSESSED');
+});
