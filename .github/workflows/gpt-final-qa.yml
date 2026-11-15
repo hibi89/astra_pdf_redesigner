@@ -1,4 +1,4 @@
-name: ASTRA GPT independent G001-G004 and PDF.js QA
+name: ASTRA GPT G001-G004 PDF.js V2 export QA
 on:
   push:
     branches:
@@ -97,4 +97,5 @@ jobs:
       - name: G002 actual PDF bytes source-output independent regression
         run: |
           node --check tools/gpt-final-qa-real-pdfjs-parity.mjs
-          node --test tests/gpt-final-qa-real-pdfjs-parity.test.mjs tests/pdf-integrity-audit.test.cjs tests/pdf-output-audit.test.cjs
+          node --check tools/gpt-final-qa-v2-pdfjs-bridge.mjs
+          node --test tests/gpt-final-qa-v2-pdfjs-bridge.test.mjs tests/gpt-final-qa-real-pdfjs-parity.test.mjs tests/pdf-integrity-audit.test.cjs tests/pdf-output-audit.test.cjs
