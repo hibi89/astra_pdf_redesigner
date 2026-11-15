@@ -1,3 +1,14 @@
+## 2026-11-15 KST — G001–G004 독립 QA 통합 · P124 Windows FAIL · 잠정 64/100 불변
+
+- **통합:** GPT 독립 QA [PR #12](https://github.com/hibi89/astra_pdf_redesigner/pull/12) **MERGED** → `integration/astra-final-blueprint-100-20261115`; 통합 merge SHA `4b486b5c9039e97a468483eafe4a1d7146193b0c`. Codex [PR #13](https://github.com/hibi89/astra_pdf_redesigner/pull/13) **Draft·미병합**, GPT 개발 브랜치는 독립 유지. 기존 `main`, 원본 PDF/PNG, STEP1 V1/STEP2 V2, Electron 제품 UI 로직 미변경.
+- **신규 QA:** G001 공급처·Authenticode·DLL·NOTICE/재배포 검수(실공급자 P119 BLOCKED), G002 한국어 숫자/부정·표/원본 PDF SHA 합성 검사, G003 고정 Codex SHA 읽기전용 코드 감사, G004 익명화된 5~10 허가 PDF/물리 Windows 수용 프로토콜·검증기. `tools/gpt-final-qa-*`, `tests/gpt-final-qa-*`, `docs/evidence/astra/G001–G004`, `docs/evidence/astra/GPT_FINAL_WORKLOG.md`.
+- **검증:** 마지막 독립 실행 코드 SHA `24939be58c6fcd3396697bd93aa58a082b4d7a48`에서 [G001–G004 #43683920991](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43683920991) **52 PASS / 0 FAIL / 0 SKIP** (Codex `6e8b2eeb...` 고정 SHA 읽기전용 정적 감사 job PASS, OCR release gate PASS); [policy #43683921084](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43683921084) SUCCESS. 이후 QA 브랜치 커밋은 설명 문서만 변경; 통합 HEAD 자체의 전체 제품 회귀는 별도 검증 대기.
+- **Codex P124 실제 Windows 실행:** 정확 SHA `6e8b2eeb381874a12be041fa080fb545b5e1fb82` [#43683050524](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43683050524) **FAIL**: BASIC healthy 시나리오 10개 유효 제안 문턱 미달(`P124 FAIL scenario=healthy; sku contexts=0`); 이후 PRO/BUSINESS 및 missing/tampered 수용 **미실행**, 최종 unsigned NSIS 검증 **SKIPPED**. Codex PR에 실모델 제안 실패 이유 집계·실 SKU 권한 UI E2E·테스트용 Electron 모듈 배포 제외 확인을 요청. 동일 SHA의 시간 소모 큰 테스트 무변경 재실행 금지.
+- **점수·게이트:** G001–G004는 독립 검증 인프라/수용 프로토콜 개선이며 수용 점수 자동 상승 없음. **잠정 64/100(+0), G55 PASS; G60/G65/G70 NOT PASSED; P119/P120/P121/P126 BLOCKED, P124 NOT VERIFIED / FAIL. 공식 UNASSESSED, `OCR_MANIFEST=null`, `RELEASE HOLD`**, 크몽 미등록, 실제 고객 문서 0건/물리 Win10/11 수용 0건.
+- **다음:** Codex P124 수정 SHA 후 별도 독립 코드/Actions/실 UI 검수 → G002 실제 PDF.js 추출·페이지/표 시각 회귀 → G004 사용자 비공개 실문서·물리 PC 수용(오너 승인) → 최종 출시/상용 법적 승인. 세부 10항 인계 `HANDOFF.md`, 독립 로그 `docs/evidence/astra/GPT_FINAL_WORKLOG.md` 참조.
+
+---
+
 ## 2026-11-15 KST — P123 VERIFIED +3 · 잠정 64/100
 
 - **완료 작업 ID:** P123 (A08) VERIFIED, +3점. A08 4/14→7/14, 총점 61→64/100. 사용자 확정 A01~A12 배점은 변경하지 않았다.
