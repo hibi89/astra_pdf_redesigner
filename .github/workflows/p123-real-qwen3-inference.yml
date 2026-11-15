@@ -23,9 +23,8 @@ jobs:
     env:
       OLLAMA_HOST: 127.0.0.1:11434
       OLLAMA_NO_CLOUD: '1'
-      OLLAMA_MODELS: ${{ runner.temp }}/ollama-models
+      OLLAMA_MODELS: /home/runner/.ollama/models
       CUDA_VISIBLE_DEVICES: '-1'
-      P123_REPORT_OUT: ${{ runner.temp }}/p123-qwen3-report.json
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -109,7 +108,7 @@ jobs:
             sleep 1
           done
           curl --fail --silent http://127.0.0.1:4173/tests/fixtures/local-model-review-real-qwen3.html >/dev/null
-          CHROME_PATH="$chromium" P123_OLLAMA_PID="$(cat "$RUNNER_TEMP/ollama-server.pid")" node tests/local-model-review-real-qwen3.mjs
+          CHROME_PATH="$chromium" P123_OLLAMA_PID="$(cat "$RUNNER_TEMP/ollama-server.pid")" P123_REPORT_OUT="$RUNNER_TEMP/p123-qwen3-report.json" node tests/local-model-review-real-qwen3.mjs
       - name: Upload redacted real-model report
         if: always()
         uses: actions/upload-artifact@v4
