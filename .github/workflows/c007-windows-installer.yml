@@ -13,6 +13,7 @@ on:
       - 'tests/verify-eight-desktop-layouts.mjs'
       - 'tests/step2-project-acceptance.cjs'
       - 'tests/step3-project-acceptance.cjs'
+      - 'tests/offline-license-lifecycle.test.ts'
       - 'package*.json'
       - 'vite.config.ts'
   workflow_dispatch:
