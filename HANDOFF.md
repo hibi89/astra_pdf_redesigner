@@ -1,3 +1,5 @@
+> **최신 G005 사후 검증 추가 — 2026-11-15 KST.** 통합 독립 QA 정확 SHA `83bd72ca93db201013e62c54e94d6df39f1a0180`: [Actions 43684301712](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43684301712) **52/52 PASS**, Codex 구 SHA 읽기 전용 감사 PASS, OCR release gate PASS, [정책 43684301960](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43684301960) SUCCESS. 현재 통합 작업만 반영, main 미변경. Codex #13 새 SHA `a2ca668c9578b68e760b922c026a5f2f8f941c8d`: 실제 모델 통과를 위해 첫 유효 문단을 반복 호출해 케이스 ID만 바꾸는 변경 확인. **서로 다른 선택 문단 10건 수용과 동일하지 않으므로 G003-F04로 PR에 수정 요청**, 신규 [Windows #43684225170](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43684225170) 확인 당시 IN_PROGRESS. 기존 C001 PASS/가점 **없음**, 최종설계 잠정 **64/100(+0)**, 공식 UNASSESSED, RELEASE HOLD. 다음 `ㄱ`: Codex 신규 수정/CI 독립 검수→실 SKU entitlement/앱 패키징 보안 근거 확인; G002 실제 PDF.js QA 추가. 본 보충은 직전 10항 HANDOFF의 경계·개발/검증/승인 규칙을 유지하며 세부사항은 바로 아래 10항을 따른다. 기준 문서 직전 커밋 `6cdaed38e8efd09d39f7946a42414225a185b805`.
+
 # Astra 최종설계 64/100 — G001–G004 통합 완료, Codex P124 실패 인수인계 (2026-11-15 KST)
 
 > **이 블록은 최신 인수인계.** 아래 이전 단계별 내용은 당시 상태를 설명한 역사적 기록이다. `ㄱ` 시 최신 GitHub SHA를 조회하고 미완료를 실제 실행한다. GPT와 Codex는 별도 브랜치 유지.
