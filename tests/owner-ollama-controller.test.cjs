@@ -112,3 +112,20 @@ test('P122 Electron IPC keeps the trusted sender and consent argument order',()=
  assert.ok(controller.includes("redirect:'error'"));
  assert.ok(!handler.includes('url')&&!handler.includes('modelId'));
 });
+
+test('P123 accepts only Ollama implicit latest tag for the pinned model',async()=>{
+ const calls=[];
+ const request=async(url,options)=>{
+  calls.push({url,options});
+  if(url===BASE+'/api/tags')return json({models:[{name:MODEL+':latest'}]});
+  if(url===BASE+'/api/generate')return json({done:true,model:MODEL+':latest',response:'문서를 확인했습니다.'});
+  return json({},404);
+ };
+ const c=createOwnerOllamaController({request});
+ assert.deepEqual(await c.status(),{status:'available',modelId:MODEL,engine:'owner-installed-ollama'});
+ assert.equal((await c.propose('문서를 확인하였습니다.',{explicitConsent:true})).status,'proposal');
+ assert.equal(calls.length,2);
+ assert.equal(calls[1].url,BASE+'/api/generate');
+ const other= createOwnerOllamaController({request:async()=>json({models:[{name:MODEL+':alternate'}]})});
+ assert.equal((await other.status()).reason,'local-ollama-model-not-installed');
+});
