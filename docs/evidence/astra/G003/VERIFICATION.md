@@ -34,3 +34,14 @@
 ### 다음
 1. Codex가 F01/F02 수정 후 새 SHA 제출하면 독립 CODE/Windows CI 비교 및 G003 재검증. 체크아웃 SHA pin을 최신 검증된 SHA로 재조정하며 전체 시험 녹색 전 가점 없음.
 2. Codex가 실행 중일 동안 G004의 비공개 원본 PDF 5~10건/물리 Windows 10/11 수용 프로토콜·익명 요약 도구를 별도 개발.
+
+
+## 최신 실제 Windows P124 결과 — 실패 확정
+
+Codex 고정 SHA `6e8b2eeb381874a12be041fa080fb545b5e1fb82`, [Windows run #43683050524](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43683050524), job `132717610985` = **FAIL**. 기본 Node/프론트 빌드/데스크톱 smoke는 성공했으나 `P124 real model, isolated three-SKU Electron scenarios` 단계가 실패했다.
+
+실제 로그(2026-11-15T06:04:47Z): `P124 FAIL scenario=healthy; sku contexts=0`, `AssertionError: each SKU must show at least ten real model proposals` at `desktop/p124-electron-qwen3-acceptance.cjs:222`. **첫 BASIC SKU 요구치조차 충족하지 못한 상태**이므로 이후 PRO/BUSINESS, missing/tampered 전체 성공을 주장할 수 없다. 유효 제안 개수·거부 사유의 분포는 보고서 `astra-p124-healthy.json` 원문 추가 감사 전 **미확인**.
+
+`Rebuild a production-only bundle and unsigned NSIS candidate`는 **SKIPPED**. 업로드된 synthetic 보고서: [artifact 14148823469](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43683050524/artifacts/14148823469), ZIP digest `fcb2c158a7e554bea08187add46fb07238bf9f33e5f00b1c307ee29c29929512`. 본 검수에서는 보고서 내부 내용을 아직 확인하지 않았으며 고객 원본·개인정보가 아닌 합성 테스트만 사용됐음.
+
+[PR #13 추가 검수 의견](https://github.com/hibi89/astra_pdf_redesigner/pull/13)에 동일 실행 무의미 재시도 금지·원본 텍스트 없는 거부 사유/건수 집계·모델 검증 개선→짧은 목표 테스트→필수 정확-SHA 전체 재실행 순서로 수정 요청함. 이전 F01/F02도 미해결. **P124 +0, 총 64/100 유지, G65 NOT PASSED, official UNASSESSED, RELEASE HOLD.**
