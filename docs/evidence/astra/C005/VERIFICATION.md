@@ -19,14 +19,14 @@
 No C005 score is claimed while the optimized run is pending or for any result on a 16-GiB-class host. No user PC was accessed, and no memory/performance result is extrapolated to an 8-GiB buyer device. The 8-GiB acceptance remains BLOCKED.
 
 
-## C005 timeout and cancellation recovery regression — unit tests PASS; browser checks pending
+## C005 timeout/cancellation and browser regression — PASS; quality run pending
 
 At source/test SHA `4aa4f533ea652f2f391a9b2deca15f6d7f804130`, `tests/local-model-controller.test.cjs` exercises fail-closed timeout and cancellation recovery using a synthetic stalled child process. Timeout must kill the process, delete the transient prompt, and release the controller's single-flight slot; cancellation must kill the stalled process and permit a later validated synthetic proposal. This is controller regression evidence, not a real-Qwen timeout measurement.
 
-- Exact-SHA GitHub run [43711870155](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43711870155): `npm test` PASS and `npm run build` PASS. Chrome print/persistence smoke and Microsoft Edge A4/IndexedDB smoke are still in progress; overall workflow is not yet PASS.
-- Exact-SHA Windows package audit [43711870072](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43711870072): PASS (NSIS candidate, SBOM, release-hold audit).
-- Exact-SHA blueprint policy [43711870456](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43711870456): PASS.
-- Real-Qwen 31-distinct-input Windows run [43711160507](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43711160507) at code SHA `8136c6b070eceb97e4e26fbdebae7632ab6f2ed3` remains in progress; earlier 93-call run [43702880160](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43702880160) is also still in progress. Neither has a terminal result or artifact available.
+- Exact-SHA GitHub regression [run 43711870155](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43711870155): `npm test`, production build, Chrome print/persistence smoke, and Microsoft Edge A4 PDF/IndexedDB smoke all PASS.
+- Exact-SHA Windows package audit [run 43711870072](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43711870072): PASS (NSIS candidate, SBOM, release-hold audit).
+- Exact-SHA blueprint policy [run 43711870456](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43711870456): PASS.
+- Real-Qwen 31-distinct-input Windows run [43711160507](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43711160507) at code SHA `8136c6b070eceb97e4e26fbdebae7632ab6f2ed3` remains in progress; earlier 93-call run [43702880160](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43702880160) is also still in progress. Neither has a terminal result or artifact.
 - The available Windows host profile is about 16 GiB (`17,174,360,064` bytes), so it cannot establish the required 8-GiB-class acceptance.
 
-C005 remains +0 and BLOCKED for completion: the 8-GiB gate is unmet, and the real-Qwen distinct-input run has no terminal result. No score is inferred from unit tests, build, or package checks.
+C005 remains +0 and BLOCKED for completion: the 8-GiB gate is unmet, and the real-Qwen distinct-input run has no terminal result. No score is inferred from the controller/browser regression, build, or package checks.
