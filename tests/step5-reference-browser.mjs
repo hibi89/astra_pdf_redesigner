@@ -163,9 +163,20 @@ try{
   assert.equal(sources.length,1);
   assert.equal(sources[0].rights,'UNVERIFIED');
   assert.equal(sources[0].sourceUrl,'https://example.org/gallery');
-  assert.deepEqual((await evaluate(stored)).content,before.content);
+  const sourceId=sources[0].id;
+  const sourceButtonSelector=`[data-step6-source-to-step5="${sourceId}"]`;
+  const rightsSelector=`[data-step6-rights-confirm="${sourceId}"]`;
+  assert.equal(await evaluate(`document.querySelector(${JSON.stringify(sourceButtonSelector)})?.disabled`),true,
+    'STEP6 source must not enter STEP5 before an explicit usage-rights acknowledgement');
+  assert.equal(await evaluate(`document.querySelector(${JSON.stringify(rightsSelector)})?.checked`),false);
+  await evaluate(`document.querySelector(${JSON.stringify(rightsSelector)}).click()`);
+  await eventually(()=>evaluate(`document.querySelector(${JSON.stringify(sourceButtonSelector)})?.disabled`),disabled=>disabled===false);
+  assert.deepEqual(await evaluate(`JSON.parse(localStorage.getItem('astra.step6.sources.v1')).items`),sources,
+    'Rights acknowledgement is session-only; stored source rights remain UNVERIFIED');
+  assert.equal((await evaluate(stored)).content,before.content);
   assert.deepEqual((await evaluate(stored)).design,before.design);
-  console.log('PASS P100 STEP6 SOURCE: local-only manually entered source record, rights UNVERIFIED, V2 unchanged');
+  assert.equal(await projectFingerprint(true),projectBeforePdf,'STEP6 rights acknowledgement must not write the STEP2 V2 project store');
+  console.log('PASS C003 STEP6 RIGHTS GATE: HTTPS source record stays UNVERIFIED; local STEP5 use requires explicit session acknowledgement; IndexedDB V2 unchanged');
   console.log('PASS STEP5: local image and selectable PDF-page analysis, A4 PDF output, transient preview, cancel, apply/undo and content preservation');
 }finally{
   try{ws?.close();}catch{}
