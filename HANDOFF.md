@@ -1,3 +1,5 @@
+> **[2026-11-15 KST · G002 최우선 통합 브랜치·PR 정정]** 새 안전 통합 후보는 `gpt/astra-g002-nul-integration-20261115`, 최신 통합 `02f9481...` 기준 단일 QA 변경 SHA `3777dfec5e3e66f78e48fc708dbb5e2b07129a11`, [PR #19](https://github.com/hibi89/astra_pdf_redesigner/pull/19) DRAFT/MERGEABLE이다. 아래 G002 코드 내용과 위험 판단은 유효하나 과거 GPT 브랜치 `gpt/astra-final-qa-ocr-20261115` 및 PR #18은 통합 대상이 아니다. **새 코드 CI의 정확 SHA 결과가 확인되기 전 병합·점수 상승 금지**. `main`·Codex PR #13·제품 코드 보존. 64/100, UNASSESSED, RELEASE HOLD. 본 문서 갱신도 제품 기능 검증으로 계산 금지.
+
 # GPT G002 최신 인수인계 — 2026-11-15 KST · NUL 글꼴 진단 코드 구현·CI 대기
 
 이 최상단 10항은 과거 하단 시점 스냅샷보다 최신이다. `ㄱ` 시 실 작업을 재개한다. **현재 제품 최종설계 잠정 64/100 (+0), 공식 구매자 UNASSESSED, RELEASE HOLD.**

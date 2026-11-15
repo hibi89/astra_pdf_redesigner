@@ -1,3 +1,10 @@
+## 2026-11-15 KST — G002 통합 준비 PR #19 (실행 CI 검증 대기)
+
+- **충돌 회피:** 기존 GPT QA 브랜치와 이전 PR #18의 통합 문서 충돌을 방치·강제 푸시하지 않고, 최신 통합 SHA `02f9481e441d20927d9f54a275717c7db33efa20`에서 `gpt/astra-g002-nul-integration-20261115` 별도 생성. 정확 코드 병합준비 SHA `3777dfec5e3e66f78e48fc708dbb5e2b07129a11`; 통합과 1커밋 차이, 8개 QA/문서 파일만 변경. [GPT PR #19](https://github.com/hibi89/astra_pdf_redesigner/pull/19) DRAFT/MERGEABLE, **실제 병합 전 CI 검증 필요**. 이전 PR #18은 대체 대상.
+- **점수:** 신규 QA 테스트의 GitHub 실행 결과는 미확인으로 유지한다. 64/100 (+0), 구매자 UNASSESSED, RELEASE HOLD. 제품 로직/V1/V2/main 변경 없음.
+
+---
+
 ## 2026-11-15 KST — G002 NUL 글꼴/페이지 독립 진단 구현 (CI 검증 대기)
 
 - **코드·GitHub 실반영:** GPT 독립 QA 브랜치 `gpt/astra-final-qa-ocr-20261115`; 기능/CI 정확 커밋 `5a9ff8a6343db43cb76c823ce5fae8fee874ff47`, 증거 문서 `a044a1cfdbddea28b9e9a1607ac96f4eb346c8e4`. 신규 `tools/gpt-final-qa-pdfjs-nul-attribution.mjs`, 회귀 `tests/gpt-final-qa-pdfjs-nul-attribution.test.mjs`, 실제 Chrome font matrix `tests/gpt-final-qa-font-nul-browser.mjs`; 기존 G002 실제 V2 Chrome 출력 시험에 NUL 페이지별·익명 글꼴별 감사를 연결하고 워크플로를 확장. 원문·파일명·PDF 바이트·좌표·실제 원문 글꼴명 출력 금지.
