@@ -1,0 +1,59 @@
+name: C010 unsigned Windows package candidate audit
+on:
+  push:
+    branches: ['codex/astra-final-ai-sku-20261115']
+    paths:
+      - '.github/workflows/c010-package-audit.yml'
+      - 'desktop/**'
+      - 'src/**'
+      - 'package*.json'
+      - 'tests/**'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  unsigned-package-audit:
+    name: Windows NSIS candidate, SBOM, and release-hold audit
+    runs-on: windows-latest
+    timeout-minutes: 180
+    env:
+      CSC_IDENTITY_AUTO_DISCOVERY: 'false'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install locked application dependencies
+        run: npm install --no-audit --no-fund
+      - name: Run full regression and release-hold verification
+        run: |
+          npm test
+          npm run build
+          npm run desktop:verify
+      - name: Produce local-only SBOM and report license metadata coverage
+        shell: pwsh
+        run: |
+          $sbomPath = Join-Path $env:RUNNER_TEMP 'astra-c010-sbom.json'
+          npm sbom --sbom-format cyclonedx --omit=dev | Out-File -LiteralPath $sbomPath -Encoding utf8
+          if ($LASTEXITCODE -ne 0) { throw 'npm SBOM generation failed.' }
+          $summary = node -e "const fs=require('node:fs'); const s=JSON.parse(fs.readFileSync(process.argv[1],'utf8')); const c=s.components||[]; const missing=c.filter(x=>!Array.isArray(x.licenses)||x.licenses.length===0); console.log(JSON.stringify({format:s.bomFormat,components:c.length,licenseMetadataMissing:missing.length}));" $sbomPath
+          if ($LASTEXITCODE -ne 0) { throw 'SBOM JSON validation failed.' }
+          "SBOM $summary" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          Write-Output $summary
+      - name: Build unsigned NSIS candidate without publishing
+        shell: pwsh
+        run: |
+          npx electron-builder --win nsis --x64 --publish never
+          if ($LASTEXITCODE -ne 0) { throw 'Unsigned NSIS candidate build failed.' }
+          $setups = @(Get-ChildItem -LiteralPath 'release' -Filter 'ASTRA-PDF-Redesigner-Setup-*-x64.exe' -File)
+          if ($setups.Count -ne 1) { throw "Expected one unsigned NSIS candidate, found $($setups.Count)." }
+          $signature = Get-AuthenticodeSignature -LiteralPath $setups[0].FullName
+          if ($signature.Status -ne 'NotSigned') { throw "Expected an unsigned pre-release candidate, got Authenticode status $($signature.Status)." }
+          $hash = Get-FileHash -LiteralPath $setups[0].FullName -Algorithm SHA256
+          Write-Output "UNSIGNED CANDIDATE ONLY; NOT A RELEASE"
+          Write-Output "File=$($setups[0].Name) Bytes=$($setups[0].Length) SHA256=$($hash.Hash)"
+          if (Test-Path -LiteralPath $env:GITHUB_STEP_SUMMARY) {
+            "Unsigned NSIS candidate built with --publish never. No signing, artifact upload, or release. SHA-256: $($hash.Hash)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          }
