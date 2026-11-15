@@ -1,0 +1,23 @@
+# C010 Verification — Unsigned Windows package candidate audit
+
+- Date: 2026-11-15
+- Branch: `codex/astra-final-ai-sku-20261115`
+- Exact tested code/workflow SHA: `fa57116544217c6122b1cd9643fee91002f45edc`
+- Result: unsigned package-candidate build and SBOM audit PASS; score change +0
+
+## Exact-SHA hosted evidence
+
+- [Windows NSIS candidate/SBOM workflow, run 43690873098](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873098) — PASS at the exact SHA.
+  - Windows `npm test`: 297 passed, 0 failed, 1 skipped of 298; build and `npm run desktop:verify` passed, with 87/87 desktop tests.
+  - A local-runner CycloneDX SBOM was generated and JSON-validated: 6 production components, 0 with missing license metadata. The SBOM itself stayed in the ephemeral runner and was not published. Metadata presence is not a legal license/NOTICE approval.
+  - Windows NSIS produced `ASTRA-PDF-Redesigner-Setup-0.1.0-x64.exe`, 129,206,014 bytes, Authenticode status `NotSigned`, SHA-256 `AA04F9E8C7705087F035ADAF6E34AAA7E81F95B8A77812C1597ACCC8E1CC6144`.
+  - Build used `--publish never`; the workflow did not sign, upload an artifact, or release the candidate.
+- [C009 Chrome/Edge accessibility smoke, run 43690873135](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873135) — PASS at the same code/test SHA.
+- [Blueprint evidence policy, run 43690873420](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873420) — PASS.
+- The full cross-platform regression at this SHA, run 43690873096, was still in progress at the time this report was written.
+
+## Limits and score
+
+This is an ephemeral unsigned build candidate, not a release. The workflow did not install and launch this exact candidate, compare two reproducible builds, perform a package-content customer-data/secret scan, or obtain manual dependency-license/NOTICE review. Production signing/SmartScreen, physical buyer Windows acceptance, customer PDF validation and legal/sales approval remain unverified. The release gate stays **HOLD**.
+
+C010 adds **+0**. Technical candidate remains **67/100**, official buyer acceptance **UNASSESSED**, and commercial status **RELEASE HOLD**.
