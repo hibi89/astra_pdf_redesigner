@@ -7,6 +7,14 @@ const fs=require('node:fs/promises');
 const path=require('node:path');
 const {auditOutputPdf}=require('./pdf-output-audit.cjs');
 
+function resolveP124ProfilePath({enabled,githubActions,runnerTemp,profile}={}){
+  if(!enabled||githubActions!=='true'||!runnerTemp||!profile)return null;
+  const root=path.resolve(runnerTemp),candidate=path.resolve(profile);
+  if(path.dirname(candidate)!==root||!/^astra-p124-profile-(healthy|missing|tampered|quality)$/i.test(path.basename(candidate)))
+    throw Error('P124 profile must be isolated under RUNNER_TEMP');
+  return candidate;
+}
+
 const SKU_PLANS=[
   {sku:'BASIC',tier:'basic',capability:'base-layout',layoutId:null,deniedLayout:'pro-01'},
   {sku:'PRO',tier:'pro',capability:'pro-layout',layoutId:'pro-01',deniedLayout:'business-01'},
@@ -393,4 +401,4 @@ async function runP124ElectronAcceptance(win,renderPdf){
     console.log(`${scenario==='quality'?'C005':'P124'} ${report.status} scenario=${scenario}; sku contexts=${uiResults.length}; report=${path.basename(reportFile)}`);
   }
 }
-module.exports={runP124ElectronAcceptance};
+module.exports={runP124ElectronAcceptance,resolveP124ProfilePath};

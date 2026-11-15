@@ -35,15 +35,22 @@ const STEP2_ACCEPTANCE=SMOKE&&(process.argv.includes('--astra-step2-acceptance')
 const STEP3_ACCEPTANCE=SMOKE&&process.argv.includes('--astra-step3-acceptance');
 const P124_ACCEPTANCE=SMOKE&&process.env.GITHUB_ACTIONS==='true'&&
   process.env.ASTRA_P124_ELECTRON_ACCEPTANCE==='1'&&process.argv.includes('--astra-p124-qwen3-acceptance');
-const runP124ElectronAcceptance=P124_ACCEPTANCE
-  ?require('./p124-electron-qwen3-acceptance.cjs').runP124ElectronAcceptance:null;
+const p124Acceptance=P124_ACCEPTANCE?require('./p124-electron-qwen3-acceptance.cjs'):null;
+const runP124ElectronAcceptance=p124Acceptance?.runP124ElectronAcceptance||null;
 let step3NativeCaptureArmed=false;
 function p124ProfilePath(){
-  if(!P124_ACCEPTANCE||process.env.GITHUB_ACTIONS!=='true'||!process.env.RUNNER_TEMP||!process.env.ASTRA_P124_PROFILE_DIR)return null;
-  const root=path.resolve(process.env.RUNNER_TEMP),candidate=path.resolve(process.env.ASTRA_P124_PROFILE_DIR);
-  if(path.dirname(candidate)!==root||!/^astra-p124-profile-(healthy|missing|tampered)$/i.test(path.basename(candidate)))
-    throw Error('P124 profile must be isolated under RUNNER_TEMP');
-  return candidate;
+  try{
+    return p124Acceptance?.resolveP124ProfilePath({
+      enabled:P124_ACCEPTANCE,
+      githubActions:process.env.GITHUB_ACTIONS,
+      runnerTemp:process.env.RUNNER_TEMP,
+      profile:process.env.ASTRA_P124_PROFILE_DIR,
+    })||null;
+  }catch{
+    console.error('P124 acceptance profile validation failed; exiting before Electron startup.');
+    app.exit(1);
+    process.exit(1);
+  }
 }
 const P124_PROFILE_DIR=p124ProfilePath();
 const STEP2_PROFILE_DIR=process.env.GITHUB_ACTIONS==='true'&&process.env.RUNNER_TEMP&&process.env.ASTRA_STEP2_PROFILE_DIR&&
