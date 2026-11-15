@@ -11,10 +11,11 @@ export const C008_SOURCE_MARKERS = Object.freeze([
 // path without adding a 30 MiB image or any customer content.
 export function makeC008LargePdf() {
   const source = Buffer.from(makeClippedImagePdf());
-  const xrefAt = source.lastIndexOf(Buffer.from('xref\n', 'ascii'));
-  if (xrefAt < 0) throw new Error('Synthetic source PDF has no xref');
   const startxref = source.toString('ascii').match(/startxref\n(\d+)\n%%EOF/);
-  if (!startxref || Number(startxref[1]) !== xrefAt) {
+  if (!startxref) throw new Error('Synthetic source PDF has no startxref');
+  const xrefAt = Number(startxref[1]);
+  if (!Number.isSafeInteger(xrefAt) ||
+      source.subarray(xrefAt, xrefAt + 5).toString('ascii') !== 'xref\n') {
     throw new Error('Synthetic source PDF xref offset is invalid');
   }
 
