@@ -7,6 +7,7 @@ export default function SourceRecordsPanel({onAnalyzeLocalFile}:{onAnalyzeLocalF
  const [items,setItems]=useState<SourceRecord[]>([]);
  const [error,setError]=useState('');
  const [corrupt,setCorrupt]=useState(false);
+ const [rightsAcknowledged,setRightsAcknowledged]=useState<Set<string>>(()=>new Set());
  useEffect(()=>{try{setItems(readSources(localStorage));}
    catch{setCorrupt(true);setError('저장된 출처 기록이 손상되어 자동 덮어쓰기를 막았습니다.');}},[]);
  const add=()=>{
@@ -18,7 +19,7 @@ export default function SourceRecordsPanel({onAnalyzeLocalFile}:{onAnalyzeLocalF
  };
  const remove=(id:string)=>{
   if(corrupt||!window.confirm('이 참고자료 출처 기록을 삭제하시겠습니까? 원본 PDF는 그대로 둡니다.'))return;
-  try{const next=items.filter(x=>x.id!==id);writeSources(localStorage,next);setItems(next);setError('');}
+  try{const next=items.filter(x=>x.id!==id);writeSources(localStorage,next);setItems(next);setRightsAcknowledged(current=>{const copy=new Set(current);copy.delete(id);return copy;});setError('');}
   catch(e){setError(e instanceof Error?e.message:'출처를 삭제하지 못했습니다.');}
  };
  return <section className="panel no-print" aria-label="STEP6 참고자료 출처 보관" data-step6-source-library>
@@ -32,7 +33,10 @@ export default function SourceRecordsPanel({onAnalyzeLocalFile}:{onAnalyzeLocalF
   <p role="status" data-step6-source-count>보관된 출처 {items.length}/{MAX_SOURCES} · 모두 사용권 미검증</p>
   {items.map(item=><div className="mini-actions" key={item.id} data-step6-source-entry={item.id}>
    <strong>{item.title}</strong><code>{item.sourceUrl}</code><small>사용권 미검증 · {item.note}</small>
-   {onAnalyzeLocalFile&&<button type="button" className="secondary-button" data-step6-source-to-step5={item.id} disabled={corrupt}
+   <label className="field" data-step6-rights-gate={item.id}><span><input type="checkbox" data-step6-rights-confirm={item.id} checked={rightsAcknowledged.has(item.id)} disabled={corrupt}
+      onChange={event=>setRightsAcknowledged(current=>{const copy=new Set(current);if(event.target.checked)copy.add(item.id);else copy.delete(item.id);return copy;})}/>
+      원본 출처와 적용할 로컬 파일의 관계 및 이용 조건을 직접 확인했고, 참고 분석에 사용할 권리가 있다고 판단했습니다. Astra는 저작권이나 라이선스를 인증하지 않습니다.</span></label>
+   {onAnalyzeLocalFile&&<button type="button" className="secondary-button" data-step6-source-to-step5={item.id} disabled={corrupt||!rightsAcknowledged.has(item.id)}
       onClick={()=>onAnalyzeLocalFile(item)}>로컬 파일로 STEP5 디자인 분석</button>}
    <button type="button" className="text-button" data-step6-source-remove={item.id} disabled={corrupt} onClick={()=>remove(item.id)}>기록 삭제</button>
   </div>)}
