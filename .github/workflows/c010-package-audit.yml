@@ -46,8 +46,8 @@ jobs:
       - name: Build unsigned NSIS candidate without publishing
         shell: pwsh
         run: |
-          npx electron-builder --win nsis --x64 --publish never
-          if ($LASTEXITCODE -ne 0) { throw 'Unsigned NSIS candidate build failed.' }
+          npx electron-builder --win nsis --x64 --dir --publish never
+          if ($LASTEXITCODE -ne 0) { throw 'Unpacked Windows application build failed.' }
           $asarPath = Join-Path $env:GITHUB_WORKSPACE 'release/win-unpacked/resources/app.asar'
           $asarCli = Join-Path $env:GITHUB_WORKSPACE 'node_modules/.bin/asar.cmd'
           if (-not (Test-Path -LiteralPath $asarPath -PathType Leaf)) { throw 'Built app.asar is missing.' }
@@ -63,45 +63,96 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Could not extract the unsigned app.asar into the isolated runner temp directory.' }
           node tests/c010-package-content-audit.cjs $extractPath
           if ($LASTEXITCODE -ne 0) { throw 'Unsigned app.asar content audit found a blocked path, secret signature, PII pattern, or unscanned item.' }
-          $setups = @(Get-ChildItem -LiteralPath 'release' -Filter 'ASTRA-PDF-Redesigner-Setup-*-x64.exe' -File)
-          if ($setups.Count -ne 1) { throw "Expected one unsigned NSIS candidate, found $($setups.Count)." }
-          $signature = Get-AuthenticodeSignature -LiteralPath $setups[0].FullName
-          if ($signature.Status -ne 'NotSigned') { throw "Expected an unsigned pre-release candidate, got Authenticode status $($signature.Status)." }
-          $hash = Get-FileHash -LiteralPath $setups[0].FullName -Algorithm SHA256
-          Write-Output "UNSIGNED CANDIDATE ONLY; NOT A RELEASE"
-          Write-Output "File=$($setups[0].Name) Bytes=$($setups[0].Length) SHA256=$($hash.Hash)"
-          if (Test-Path -LiteralPath $env:GITHUB_STEP_SUMMARY) {
-            "Unsigned NSIS candidate built with --publish never. No signing, artifact upload, or release. SHA-256: $($hash.Hash)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          $workspacePath = [System.IO.Path]::GetFullPath($env:GITHUB_WORKSPACE)
+          $workspacePrefix = $workspacePath.TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar) + [System.IO.Path]::DirectorySeparatorChar
+          $appDir = [System.IO.Path]::GetFullPath((Join-Path $workspacePath 'release/win-unpacked'))
+          if (-not $appDir.StartsWith($workspacePrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+            throw 'Refusing to clear a generated app directory outside the GitHub workspace.'
           }
-          $firstCandidateHash = $hash.Hash
-          $firstAsarHash = (Get-FileHash -LiteralPath $asarPath -Algorithm SHA256).Hash
-          $treeSnapshot = Join-Path $env:RUNNER_TEMP 'astra-c010-win-unpacked-first.json'
-          node tests/c010-package-tree-summary.cjs capture 'release/win-unpacked' $treeSnapshot
-          if ($LASTEXITCODE -ne 0) { throw 'Could not capture first package tree metadata.' }
+          if (-not (Test-Path -LiteralPath $appDir -PathType Container)) { throw 'First unpacked application directory is missing.' }
+
+          function Normalize-AstraPackageTree([string]$root) {
+            $resolved = [System.IO.Path]::GetFullPath($root)
+            if (-not (Test-Path -LiteralPath $resolved -PathType Container)) { throw "Package tree is missing: $resolved" }
+            $fixedUtc = [System.DateTime]::new(2020, 1, 1, 0, 0, 0, [System.DateTimeKind]::Utc)
+            $items = @(Get-ChildItem -LiteralPath $resolved -Force -Recurse | Sort-Object { $_.FullName.Length } -Descending)
+            foreach ($item in $items) {
+              $item.CreationTimeUtc = $fixedUtc
+              $item.LastWriteTimeUtc = $fixedUtc
+              $item.LastAccessTimeUtc = $fixedUtc
+            }
+            $rootItem = Get-Item -LiteralPath $resolved -Force
+            $rootItem.CreationTimeUtc = $fixedUtc
+            $rootItem.LastWriteTimeUtc = $fixedUtc
+            $rootItem.LastAccessTimeUtc = $fixedUtc
+          }
+
+          $firstAppPath = Join-Path $env:RUNNER_TEMP 'astra-c010-prepackaged-first'
+          $secondAppPath = Join-Path $env:RUNNER_TEMP 'astra-c010-prepackaged-second'
+          if ((Test-Path -LiteralPath $firstAppPath) -or (Test-Path -LiteralPath $secondAppPath)) {
+            throw 'C010 prepackaged output path already exists.'
+          }
+          Copy-Item -LiteralPath $appDir -Destination $firstAppPath -Recurse
+          Normalize-AstraPackageTree $firstAppPath
+          $treeSnapshot = Join-Path $env:RUNNER_TEMP 'astra-c010-prepackaged-first.json'
+          node tests/c010-package-tree-summary.cjs capture $firstAppPath $treeSnapshot
+          if ($LASTEXITCODE -ne 0) { throw 'Could not capture first normalized package tree.' }
+
+          Remove-Item -LiteralPath $appDir -Recurse -Force
+          npx electron-builder --win nsis --x64 --dir --publish never
+          if ($LASTEXITCODE -ne 0) { throw 'Second unpacked Windows application build failed.' }
+          if (-not (Test-Path -LiteralPath $appDir -PathType Container)) { throw 'Second unpacked application directory is missing.' }
+          Copy-Item -LiteralPath $appDir -Destination $secondAppPath -Recurse
+          Normalize-AstraPackageTree $secondAppPath
+
+          $treeComparisonOutput = node tests/c010-package-tree-summary.cjs compare $secondAppPath $treeSnapshot
+          if ($LASTEXITCODE -ne 0) { throw 'Could not compare independent package trees.' }
+          $treeComparison = $treeComparisonOutput | ConvertFrom-Json
+          Write-Output $treeComparisonOutput
+          if (-not $treeComparison.samePayloadTree -or $treeComparison.counts.metadataChangedEntries -ne 0) {
+            throw 'Independent source builds did not produce matching canonical package trees.'
+          }
+
+          $firstAsarPath = Join-Path $firstAppPath 'resources/app.asar'
+          $secondAsarPath = Join-Path $secondAppPath 'resources/app.asar'
+          $firstAsarHash = (Get-FileHash -LiteralPath $firstAsarPath -Algorithm SHA256).Hash
+          $secondAsarHash = (Get-FileHash -LiteralPath $secondAsarPath -Algorithm SHA256).Hash
+          if ($firstAsarHash -ne $secondAsarHash) { throw 'Independent source build app.asar hashes differ.' }
+
+          npx electron-builder --win nsis --x64 --prepackaged $firstAppPath --publish never
+          if ($LASTEXITCODE -ne 0) { throw 'First prepackaged unsigned NSIS build failed.' }
+          $setups = @(Get-ChildItem -LiteralPath 'release' -Filter 'ASTRA-PDF-Redesigner-Setup-*-x64.exe' -File)
+          if ($setups.Count -ne 1) { throw "Expected one first unsigned candidate, found $($setups.Count)." }
+          $firstSignature = Get-AuthenticodeSignature -LiteralPath $setups[0].FullName
+          if ($firstSignature.Status -ne 'NotSigned') { throw "Expected an unsigned first candidate, got $($firstSignature.Status)." }
           $firstCandidatePath = Join-Path $env:RUNNER_TEMP 'astra-c010-first-unsigned-candidate.exe'
           Copy-Item -LiteralPath $setups[0].FullName -Destination $firstCandidatePath
+          $firstCandidateHash = (Get-FileHash -LiteralPath $firstCandidatePath -Algorithm SHA256).Hash
+          $firstCandidateBytes = (Get-Item -LiteralPath $firstCandidatePath).Length
           Write-Output "C010 reproducibility build 1: installer=$firstCandidateHash app.asar=$firstAsarHash"
-          npx electron-builder --win nsis --x64 --publish never
+          Remove-Item -LiteralPath $setups[0].FullName -Force
+
+          npx electron-builder --win nsis --x64 --prepackaged $secondAppPath --publish never
           $rebuildExitCode = $LASTEXITCODE
           $reproStatus = 'FAIL'
-          $reproDetail = "second build command exited $rebuildExitCode"
+          $reproDetail = "second prepackaged NSIS build command exited $rebuildExitCode"
+          $repeatSetups = @()
           if ($rebuildExitCode -eq 0) {
-            node tests/c010-package-tree-summary.cjs compare 'release/win-unpacked' $treeSnapshot
-            if ($LASTEXITCODE -ne 0) { throw 'Could not compare rebuilt package tree metadata.' }
             $repeatSetups = @(Get-ChildItem -LiteralPath 'release' -Filter 'ASTRA-PDF-Redesigner-Setup-*-x64.exe' -File)
             if ($repeatSetups.Count -eq 1) {
-              $repeatHash = (Get-FileHash -LiteralPath $repeatSetups[0].FullName -Algorithm SHA256).Hash
-              $repeatAsarHash = (Get-FileHash -LiteralPath $asarPath -Algorithm SHA256).Hash
               $repeatSignature = Get-AuthenticodeSignature -LiteralPath $repeatSetups[0].FullName
-              $reproStatus = if ($repeatHash -eq $firstCandidateHash -and $repeatAsarHash -eq $firstAsarHash -and $repeatSignature.Status -eq 'NotSigned') { 'PASS' } else { 'FAIL' }
-              $reproDetail = "installer1=$firstCandidateHash installer2=$repeatHash asar1=$firstAsarHash asar2=$repeatAsarHash signature=$($repeatSignature.Status)"
+              $repeatHash = (Get-FileHash -LiteralPath $repeatSetups[0].FullName -Algorithm SHA256).Hash
+              $repeatBytes = (Get-Item -LiteralPath $repeatSetups[0].FullName).Length
+              $reproStatus = if ($repeatHash -eq $firstCandidateHash -and $firstAsarHash -eq $secondAsarHash -and
+                $firstSignature.Status -eq 'NotSigned' -and $repeatSignature.Status -eq 'NotSigned') { 'PASS' } else { 'FAIL' }
+              $reproDetail = "installer1=$firstCandidateHash installer2=$repeatHash bytes1=$firstCandidateBytes bytes2=$repeatBytes app.asar1=$firstAsarHash app.asar2=$secondAsarHash signatures=$($firstSignature.Status)/$($repeatSignature.Status)"
             } else {
-              $reproDetail = "second build left $($repeatSetups.Count) candidate installers"
+              $reproDetail = "second prepackaged build left $($repeatSetups.Count) candidate installers"
             }
           }
           Write-Output "C010 reproducibility $reproStatus $reproDetail"
           if (Test-Path -LiteralPath $env:GITHUB_STEP_SUMMARY) {
-            "Unsigned same-source rebuild reproducibility: $reproStatus ($reproDetail)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            "Independent source builds with canonical timestamps and unsigned NSIS package reproducibility: $reproStatus ($reproDetail)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
           }
           if ($rebuildExitCode -eq 0 -and $repeatSetups.Count -eq 1) {
             node tests/c010-binary-diff-summary.cjs $firstCandidatePath $repeatSetups[0].FullName
