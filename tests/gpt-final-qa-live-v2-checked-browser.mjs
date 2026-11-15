@@ -184,14 +184,14 @@ try {
         const page=await pdf.getPage(n);
         for(const item of (await page.getTextContent()).items){
           if(typeof item.str!=='string')continue;
-          charCount+=item.str.length;nullCount+=item.str.split('\\u0000').length-1;itemCount++;
+          charCount+=item.str.length;nullCount+=item.str.split('\u0000').length-1;itemCount++;
         }
       }
       return {pages:pdf.numPages,itemCount,charCount,nullCount};
     }finally{await task.destroy();}
   };
   const allAnchors=project.document.content.sections.flatMap(s=>s.blocks).filter(b=>b.origin&&b.kind!=='image');
-  const importedNull=allAnchors.reduce((n,b)=>n+b.text.split('\\u0000').length-1,0);
+  const importedNull=allAnchors.reduce((n,b)=>n+b.text.split('\u0000').length-1,0);
   console.log('G002 synthetic PDF.js counts:',JSON.stringify({
     source:await textStats(source),output:await textStats(output),
     anchoredItems:allAnchors.length,anchoredNullCount:importedNull,
