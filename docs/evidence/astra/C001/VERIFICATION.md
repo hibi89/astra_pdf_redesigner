@@ -58,4 +58,6 @@ C001 does not establish 30 unique-input quality breadth; the same guarded synthe
 
 ## Next
 
-C003 is the next independent Codex workstream after P124. Preserve the no-customer-data/no-external-inference boundaries and leave the central STATUS, HANDOFF, and score ledger to the integration owner.
+C002, C003, C007, C008, C009 and C010 already have separate hosted implementation evidence; no duplicate work is needed. C003's actual selected-source rights remain UNVERIFIED until a user-selected source and rights evidence are supplied. C004 is BLOCKED on GPT-owned P119 supplier evidence. C005 is BLOCKED for completion because no 8-GiB-class GitHub Windows runner is available. C006's technical lifecycle prototype passes, while production issuer/pin, buyer activation, and refund/revocation/support operations remain owner-controlled gates. Physical Windows signing/acceptance remains open under C007.
+
+The next C001–C010 work requires one of those prerequisites to change. Keep the central ledger at 64/100, buyer acceptance UNASSESSED, and RELEASE HOLD active.

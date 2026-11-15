@@ -42,8 +42,16 @@ At tested tree SHA `4e4bfc01aa2543ea03b0674a8fcc8f6f33f50a25`, the owner-side si
 
 ## Next work
 
-C002, C008 and C009 reports document hosted PASS evidence; C010's Windows unsigned package/SBOM audit passed at exact code/test SHA `fa57116544217c6122b1cd9643fee91002f45edc` ([run 43690873098](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873098), [policy 43690873420](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873420)). The full exact-SHA run 43690873096 had a transient Chrome STEP3 `Printing failed` on attempt 1; the single failed-job retry passed. Attempt 2 passed the full Linux Chrome/Edge suite (298/298 tests, build, 15/15 PDF corpus, C002 viewport and STEP3 end-to-end/layout matrix). C010 is not a release and remains +0; signing, legal/data scan and buyer acceptance remain open. The next dependent OCR task C004 is BLOCKED on GPT-owned P119 evidence; P120/P121 remain gated.
+P124/C001 is PASS at code/test SHA `09b2d9c8f60631bb2f623f840bdde03450ed9e17`. C002, C003, C007, C008, C009 and C010 already have hosted technical evidence; do not repeat them. Their buyer/source/legal/physical-device qualifications remain as stated in their reports.
 
+Remaining prerequisites:
+- **C003/A06:** the code path records a user-selected HTTPS source and requires session rights acknowledgement before STEP5 local-file analysis; persisted rights remain UNVERIFIED. Real source-rights acceptance needs a user-selected source and its actual rights evidence, which this synthetic-only task does not have.
+- **C004/A07:** BLOCKED on GPT-owned P119 approved OCR supplier evidence; do not build P120/P121 against an unapproved OCR asset.
+- **C005/A08:** BLOCKED for completion because the hosted Windows runner has about 16 GiB total memory and no 8-GiB-class runner is available. User-local execution is outside scope. Existing P123/P124 do not satisfy the joint distinct-input/8-GiB acceptance.
+- **C006/A09:** the owner-side lifecycle prototype and hostile-input tests pass, but production issuer/pin, real-user activation, refund/support policy and delivered revocation remain owner-controlled operational gates. Do not create production keys or enable sales.
+- **C007/A10:** hosted Windows upgrade/data preservation passes; physical buyer Windows, trusted signing/SmartScreen and interruption/quota acceptance remain owner-only.
+
+No other C001–C010 item is currently READY for credited completion without one of those prerequisites. The worker candidate remains 67/100 conditional (C001 +2 and C007 +1), the central ledger remains 64/100, buyer acceptance is UNASSESSED and RELEASE HOLD remains.
 ## C002 — hosted responsive viewport PASS, buyer acceptance pending
 
 Feature/test SHA `bd83ac2619a80f940dd628d513a760aee06f0ecb`: [C002/VERIFICATION.md](C002/VERIFICATION.md). The dedicated workflow passed npm test (298/298), build, Chrome, Edge, three mobile widths, and the blueprint policy gate. Browser cleanup was corrected after earlier test-harness-only CDP/cleanup failures. C002 remains +0 until buyer visual acceptance; overall candidate remains 67/100, official acceptance UNASSESSED, RELEASE HOLD.
