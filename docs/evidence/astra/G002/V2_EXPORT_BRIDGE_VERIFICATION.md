@@ -12,14 +12,14 @@
 
 ## Experimental live browser investigation — STOP / PIVOT
 
-The separate `tests/gpt-final-qa-live-v2-pdfjs-browser.mjs` is **EXPERIMENTAL, NOT VERIFIED, NOT A REQUIRED CI STEP**. It attempted real Chrome PDF import → approval → IndexedDB V2 → product export → printed PDF byte stream.
+The experimental `tests/gpt-final-qa-live-v2-pdfjs-browser.mjs` was **NOT VERIFIED and was deleted from the current tree** after STOP/PIVOT; the failed source and logs remain in GitHub commit history only. It attempted real Chrome PDF import → approval → IndexedDB V2 → product export → printed PDF byte stream.
 
 Three changed attempts were executed:
 1. [Workflow 43687234735](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43687234735) failed during Chrome ephemeral profile cleanup (`ENOTEMPTY`), which masked the initial test failure. The cleanup path was hardened to avoid replacing the actual error.
 2. [Workflow 43687324164](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43687324164) revealed the browser evaluator rejected an immediate read of the confirmation button in the same synchronous task as clicking the consent checkbox (`G002_BROWSER_EVALUATION_FAILED`). The code was changed to await a React re-render.
 3. [Workflow 43687445890](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43687445890) failed at `tests/gpt-final-qa-live-v2-pdfjs-browser.mjs:73` after the `10s` enabled-button wait (`G002_BROWSER_TIMEOUT:target not reached`). The test reached actual Chromium and source PDF extraction but did not prove the prerequisite UI review state; it did not write a V2 document or produce a passing source/output/browser proof.
 
-**Reason not yet proved:** the STEP3 UI might require additional manual-review actions on certain PDF layout warnings or a different state transition; it is unsafe to force-enable the save button or bypass human review. After two material failures, the experimental live E2E was **removed from required QA workflow** (not declared successful), leaving the source for offline diagnostic reference. Do not rerun it unchanged, disable product safeguards, or inflate the 83 passing test count.
+**Reason not yet proved:** the STEP3 UI might require additional manual-review actions on certain PDF layout warnings or a different state transition; it is unsafe to force-enable the save button or bypass human review. After two material failures, the experimental live E2E was **removed from required QA workflow and its unverified test file was deleted from the active tree** (not declared successful); GitHub Actions logs and commits preserve diagnostic evidence. Do not rerun it unchanged, disable product safeguards, or inflate the 83 passing test count.
 
 **Pivot:** use the pre-existing, independently successful `tests/step3-browser.mjs` explicit source-review/confirm/IDB flow as a reviewed test pattern, or a small isolated browser-assisted export test with legitimate UI prerequisites. First identify the precise disabled-state precondition in `ImportPanel.tsx` and produce a deterministic synthetic fixture. Only then reintroduce a separate browser gate in a fresh reviewed change.
 
