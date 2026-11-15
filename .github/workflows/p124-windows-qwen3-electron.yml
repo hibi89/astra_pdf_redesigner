@@ -85,6 +85,7 @@ jobs:
             ${{ runner.temp }}/astra-p124-healthy.json
             ${{ runner.temp }}/astra-p124-missing.json
             ${{ runner.temp }}/astra-p124-tampered.json
+            ${{ runner.temp }}/astra-c005-quality.json
             ${{ runner.temp }}/astra-p124-basic.png
             ${{ runner.temp }}/astra-p124-pro.png
             ${{ runner.temp }}/astra-p124-business.png

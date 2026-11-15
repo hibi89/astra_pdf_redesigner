@@ -72,7 +72,7 @@ function signature(value){
   return JSON.stringify([urls,numbers,quotes,[...new Set([...names,...titled,...capitals])].sort(),table,counts,negativeSentences,spacedAn]);
 }
 function createReport(scenario){
-  return {schema:'astra-p124-electron-qwen3-report-v1',scenario,platform:process.platform,
+  return {schema:scenario==='quality'?'astra-c005-qwen3-unique-quality-report-v1':'astra-p124-electron-qwen3-report-v1',scenario,platform:process.platform,
     github_sha:process.env.GITHUB_SHA||null,model:{id:'Qwen3-4B-Instruct-2507',tag:'qwen3:4b-instruct',quantization:'Q8_0',
       combined_sha256:process.env.P124_MODEL_SHA256||null,source:'GitHub release locomotive-works/npu-local-model-running@v1.0',
       license:'Apache-2.0; test-only download; not redistributed'},
@@ -80,6 +80,7 @@ function createReport(scenario){
       ollama_version:scenario==='tampered'?null:'0.40.16',windows_zip_sha256:process.env.P124_OLLAMA_SHA256||null,
       ollama_host:'127.0.0.1:11434',cloud_disabled:process.env.OLLAMA_NO_CLOUD==='1',
       cpu_threads:require('node:os').cpus().length,system_memory_bytes:require('node:os').totalmem()},
+    resource_profile:scenario==='quality'?{host_memory_bytes:require('node:os').totalmem(),cpu_threads:require('node:os').cpus().length}:null,
     sku_contexts:[],sku_entitlement_flow:null,automatic_applies:0,external_transfer:false,synthetic_v1_v2_unchanged:false,
     product_step2_storage_unchanged:false,product_step2_content_preserved:false,product_step2_timestamp_only_changed:false,
     pdf_text_equal:false,limitations:['The actual Root -> Workspace -> CommercialLicensePanel -> runSkuGatedAction path is exercised with an ephemeral GitHub Actions test issuer; production issuer keys and sale activation remain disabled.',
@@ -112,8 +113,8 @@ async function readPdfText(bytes){
 }
 async function runP124ElectronAcceptance(win,renderPdf){
   const scenario=process.env.P124_SCENARIO;
-  assert.ok(['healthy','missing','tampered'].includes(scenario),'Unknown P124 scenario');
-  const reportFile=runnerPath(process.env.P124_REPORT_OUT,/^astra-p124-(healthy|missing|tampered)\.json$/i);
+  assert.ok(['healthy','missing','tampered','quality'].includes(scenario),'Unknown P124/C005 scenario');
+  const reportFile=runnerPath(process.env.P124_REPORT_OUT,/^(astra-p124-(healthy|missing|tampered)|astra-c005-quality)\.json$/i);
   const screenshotRoot=path.resolve(process.env.P124_SCREENSHOT_DIR||'');
   if(screenshotRoot!==path.resolve(process.env.RUNNER_TEMP))
     throw Error('P124 screenshots must stay in the isolated runner temp directory');
@@ -266,25 +267,30 @@ async function runP124ElectronAcceptance(win,renderPdf){
       assert.equal(await currentSource(),BASELINE,'unconsented IPC call must leave product source unchanged');
       await click('[data-local-ai-consent]');
       assert.equal(await evaluate('document.querySelector("[data-local-ai-run]")?.disabled'),false);
-      const proposalCases=[];let approvedUndo=false;let rejected=0;let attempted=0;let replaySource=null;
+      const isQuality=scenario==='quality';
+      const proposalCases=[],caseResults=[];let approvedUndo=false;let rejected=0;let attempted=0;let replaySource=null;
       const preferred=CASES.find(([id])=>id==='neutral-03');
-      const orderedCases=preferred?[preferred,...CASES.filter(([id])=>id!=='neutral-03')]:CASES;
-      // The production editor paragraph is edited through Workspace; each loop performs real inference and requires a visible decision.
+      const orderedCases=isQuality?CASES:(preferred?[preferred,...CASES.filter(([id])=>id!=='neutral-03')]:CASES);
+      // C005 uses every unique synthetic input once; P124 retains proposal replay only for repeat-decision coverage.
       for(const [id,candidateText] of orderedCases){
-        if(proposalCases.length>=10)break;
+        if(!isQuality&&proposalCases.length>=10)break;
         attempted++;
-        const text=replaySource?.text??candidateText;
-        const caseId=replaySource?replaySource.id+'-replay-'+(proposalCases.length+1):id;
+        const text=isQuality?candidateText:(replaySource?.text??candidateText);
+        const caseId=isQuality?id:(replaySource?replaySource.id+'-replay-'+(proposalCases.length+1):id);
         await evaluate('window.__p124CaseId='+JSON.stringify(plan.sku+'-'+caseId));
         await setSource(text);
         await click('[data-local-ai-run]');await waitOperation('real Qwen3 '+plan.sku+' '+id);
         const hasProposal=await evaluate('Boolean(document.querySelector("[data-local-ai-proposal]"))');
         assert.equal(await currentSource(),text,'real model inference must never auto-apply to the product Workspace');
-        if(!hasProposal)continue;
+        if(!hasProposal){
+          if(isQuality)caseResults.push({case_id:id,input_sha256:sha(text),outcome:'no-guarded-proposal'});
+          continue;
+        }
         const proposed=await evaluate('document.querySelector("[data-local-ai-after]")?.textContent||""');
         assert.ok(proposed&&signature(text)===signature(proposed),'visible draft must preserve protected facts');
-        if(!replaySource)replaySource={id,text};
+        if(!isQuality&&!replaySource)replaySource={id,text};
         proposalCases.push({case_id:caseId,input_sha256:sha(text),proposal_sha256:sha(proposed),decision:approvedUndo?'reject':'approve-then-undo'});
+        if(isQuality)caseResults.push({case_id:id,input_sha256:sha(text),proposal_sha256:sha(proposed),outcome:'guarded-proposal'});
         if(!approvedUndo){
           if(scenario==='healthy'&&proposalCases.length===1){
             const image=await win.capturePage();
@@ -304,9 +310,14 @@ async function runP124ElectronAcceptance(win,renderPdf){
           rejected++;
         }
       }
-      assert.ok(proposalCases.length>=10,'each actual SKU context must show ten real model proposals');
-      assert.ok(approvedUndo,'each actual SKU context must explicitly approve and Undo');
-      assert.ok(rejected>=1,'each actual SKU context must explicitly reject at least one proposal');
+      if(isQuality){
+        assert.equal(attempted,CASES.length,'C005 must run each distinct synthetic input once per SKU');
+        assert.equal(new Set(caseResults.map(item=>item.case_id)).size,CASES.length,'C005 case IDs must remain distinct');
+      }else{
+        assert.ok(proposalCases.length>=10,'each actual SKU context must show ten real model proposals');
+        assert.ok(approvedUndo,'each actual SKU context must explicitly approve and Undo');
+        assert.ok(rejected>=1,'each actual SKU context must explicitly reject at least one proposal');
+      }
       const cancelText='실제 로컬 추론 취소를 확인하기 위한 합성 문장입니다. '.repeat(19).slice(0,1600);
       await setSource(cancelText);await click('[data-local-ai-run]');
       await waitFor(()=>evaluate('Boolean(document.querySelector("[data-local-ai-cancel]"))'),Boolean,20000,'cancel control '+plan.sku);
@@ -321,8 +332,22 @@ async function runP124ElectronAcceptance(win,renderPdf){
         plan.sku+' PDF text must remain identical before and after actual Workspace reviews');
       uiResults.push({sku:plan.sku,tier:plan.tier,receipt_panel:'verified',license_result:licenseResult,
         allowed_layout:selected,denied_layout:deniedLayout,model_status:'available',actual_proposals:proposalCases.length,
-        inference_attempts:attempted,approved_then_undone:1,rejected,cancelled:1,proposals:proposalCases,
-        pdf_sha256:printed.sha256,pdf_text_equal_before_after:Boolean(skuPdfBefore),automatic_applies:0});
+        inference_attempts:attempted,actual_unique_inputs:isQuality?caseResults.length:0,case_results:isQuality?caseResults:undefined,
+        approved_then_undone:approvedUndo?1:0,rejected,cancelled:1,proposals:proposalCases,
+        pdf_sha256:printed?.sha256||null,pdf_text_equal_before_after:Boolean(skuPdfBefore),automatic_applies:0});
+    }
+    if(scenario==='quality'){
+      const perSku=uiResults.map(item=>({sku:item.sku,distinct_inputs:item.actual_unique_inputs,validated_proposals:item.actual_proposals||0,
+        proposal_threshold_per_sku:10,proposal_threshold_met:(item.actual_proposals||0)>=10,
+        approved_then_undone:item.approved_then_undone,rejected:item.rejected,cancelled:item.cancelled,
+        guarded_no_proposal_cases:(item.case_results||[]).filter(test=>test.outcome==='no-guarded-proposal').length}));
+      const completeUniqueCoverage=perSku.every(item=>item.distinct_inputs===CASES.length);
+      const qualityGate=perSku.every(item=>item.proposal_threshold_met&&item.approved_then_undone===1&&item.rejected>=1&&item.cancelled===1);
+      report.c005_quality={distinct_input_count:CASES.length,distinct_input_ids:CASES.map(([id])=>id),
+        sku_count:uiResults.length,total_real_inference_calls:uiResults.reduce((sum,item)=>sum+item.inference_attempts,0),
+        unique_coverage_all_skus:completeUniqueCoverage,per_sku:perSku,quality_gate:qualityGate?'PASS':'NOT_MET',
+        safety_gate_zero_automatic_applies:uiResults.every(item=>item.automatic_applies===0),
+        completion_status:'BLOCKED_FOR_PHYSICAL_8_GIB_PROFILE',score_change:0};
     }
     if(scenario==='healthy'){
       const finalPdf=await readPdfText(await fs.readFile(path.join(process.env.RUNNER_TEMP,'astra-p124-healthy-business-after.pdf')));
@@ -347,6 +372,12 @@ async function runP124ElectronAcceptance(win,renderPdf){
     report.automatic_applies=uiResults.reduce((sum,item)=>sum+(item.automatic_applies||0),0);
     assert.equal(report.automatic_applies,0);
     report.status='PASS';report.elapsed_ms=Date.now()-started;
+    if(scenario==='quality'){
+      assert.equal(report.c005_quality.distinct_input_count,31,'C005 uses the complete 31-case corpus');
+      assert.equal(report.c005_quality.unique_coverage_all_skus,true,'C005 runs 31 unique cases in each SKU');
+      assert.equal(report.c005_quality.safety_gate_zero_automatic_applies,true,'C005 must not auto-apply any output');
+      report.c005_quality.resource_profile=report.resource_profile;
+    }
   }catch(error){
     report.sku_contexts=uiResults;report.status='FAIL';report.elapsed_ms=Date.now()-started;
     report.failure_code=(currentStep+': '+String(error?.message||'P124 acceptance failed')).slice(0,320);

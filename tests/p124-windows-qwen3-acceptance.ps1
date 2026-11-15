@@ -96,7 +96,7 @@ function Invoke-ElectronScenario([string]$Scenario) {
   if (Test-Path -LiteralPath $profile) { throw "Refusing to reuse P124 profile: $profile" }
   New-Item -ItemType Directory -Path $profile | Out-Null
   $env:P124_SCENARIO = $Scenario
-  $env:P124_REPORT_OUT = Join-Path $runnerRoot "astra-p124-$Scenario.json"
+  $env:P124_REPORT_OUT = if ($Scenario -eq 'quality') { Join-Path $runnerRoot 'astra-c005-quality.json' } else { Join-Path $runnerRoot "astra-p124-$Scenario.json" }
   $env:P124_SCREENSHOT_DIR = $runnerRoot
   $env:ASTRA_P124_PROFILE_DIR = $profile
   $env:ASTRA_P124_ELECTRON_ACCEPTANCE = '1'
@@ -111,6 +111,12 @@ function Invoke-ElectronScenario([string]$Scenario) {
   if (@($report.sku_contexts).Count -ne 3) { throw "P124 $Scenario did not cover all three SKU contexts." }
   if (-not $report.synthetic_v1_v2_unchanged -or -not $report.product_step2_content_preserved -or $report.automatic_applies -ne 0) {
     throw "P124 $Scenario changed stored V1/V2 content or automatically applied text."
+  }
+  if ($Scenario -eq 'quality') {
+    if ($report.c005_quality.distinct_input_count -ne 31 -or -not $report.c005_quality.unique_coverage_all_skus -or -not $report.c005_quality.safety_gate_zero_automatic_applies) {
+      throw 'C005 did not complete the unique 31-input-per-SKU safety measurement.'
+    }
+    Write-Host ("C005 unique-input measurement PASS; qualityGate={0}; physicalHostMemoryGiB={1:N2}" -f $report.c005_quality.quality_gate, ($report.resource_profile.host_memory_bytes/1GB))
   }
   if ($Scenario -eq 'healthy') {
     if (-not $report.pdf_text_equal_by_sku -or -not $report.synthetic_v1_v2_unchanged -or -not $report.product_step2_content_preserved -or $report.automatic_applies -ne 0) {
@@ -128,7 +134,11 @@ function Invoke-ElectronScenario([string]$Scenario) {
   if ($Scenario -eq 'tampered' -and @($report.sku_contexts | Where-Object { $_.tampered_output -ne 'rejected' -or -not $_.source_unchanged }).Count -ne 0) {
     throw 'P124 tampered-output scenario was not rejected for each SKU.'
   }
-  Write-Host "PASS P124 Electron scenario=$Scenario sha=$env:GITHUB_SHA skuContexts=$(@($report.sku_contexts).Count)"
+  if ($Scenario -eq 'quality') {
+    Write-Host "C005 unique-input scenario completed sha=$env:GITHUB_SHA skuContexts=$(@($report.sku_contexts).Count)"
+  } else {
+    Write-Host "PASS P124 Electron scenario=$Scenario sha=$env:GITHUB_SHA skuContexts=$(@($report.sku_contexts).Count)"
+  }
 }
 
 try {
@@ -217,7 +227,11 @@ try {
   Invoke-ElectronScenario 'tampered'
   Stop-OwnedServer
 
-  Write-Host "PASS P124 Windows Electron Qwen3 acceptance; model sha256=$modelSha runtime sha256=$runtimeZipSha"
+  Start-OllamaServer $modelStore 'quality'
+  Invoke-ElectronScenario 'quality'
+  Stop-OwnedServer
+
+  Write-Host "PASS P124 Windows Electron Qwen3 acceptance and C005 unique-input measurement; model sha256=$modelSha runtime sha256=$runtimeZipSha"
 } finally {
   Stop-OwnedServer
   Remove-Item Env:P124_SCENARIO -ErrorAction SilentlyContinue
