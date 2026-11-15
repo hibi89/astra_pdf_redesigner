@@ -163,7 +163,6 @@ jobs:
             '!macro customHeader',
             '!ifndef BUILD_UNINSTALLER',
             $nsisSystemLine,
-            '  SetDateSave off',
             '!endif',
             '!macroend'
           )
@@ -218,6 +217,15 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Could not verify the first staged tree after NSIS packaging.' }
           $firstStageAfter = $firstStageAfterOutput | ConvertFrom-Json
           Write-Output $firstStageAfterOutput
+          $firstStageMutationPaths = @($firstStageAfter.sampleDifferences | ForEach-Object { $_.path })
+          $firstExpectedNsisStageMutation = ($firstStageAfter.counts.added -eq 1 -and
+            $firstStageAfter.counts.removed -eq 0 -and $firstStageAfter.counts.kindChanged -eq 0 -and
+            $firstStageAfter.counts.contentChangedFiles -eq 0 -and
+            $firstStageAfter.counts.metadataChangedEntries -eq 1 -and
+            ($firstStageMutationPaths -join ',') -eq 'resources,resources/elevate.exe')
+          $firstGeneratedElevatePath = Join-Path $packageStagePath 'resources/elevate.exe'
+          if (-not (Test-Path -LiteralPath $firstGeneratedElevatePath -PathType Leaf)) { throw 'NSIS did not leave the expected first generated elevate.exe in the stage.' }
+          $firstGeneratedElevateHash = (Get-FileHash -LiteralPath $firstGeneratedElevatePath -Algorithm SHA256).Hash
           Remove-Item -LiteralPath $setups[0].FullName -Force
 
           if (-not $packageStageFullPath.StartsWith($workspacePrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
@@ -243,6 +251,15 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Could not verify the second staged tree after NSIS packaging.' }
           $secondStageAfter = $secondStageAfterOutput | ConvertFrom-Json
           Write-Output $secondStageAfterOutput
+          $secondStageMutationPaths = @($secondStageAfter.sampleDifferences | ForEach-Object { $_.path })
+          $secondExpectedNsisStageMutation = ($secondStageAfter.counts.added -eq 1 -and
+            $secondStageAfter.counts.removed -eq 0 -and $secondStageAfter.counts.kindChanged -eq 0 -and
+            $secondStageAfter.counts.contentChangedFiles -eq 0 -and
+            $secondStageAfter.counts.metadataChangedEntries -eq 1 -and
+            ($secondStageMutationPaths -join ',') -eq 'resources,resources/elevate.exe')
+          $secondGeneratedElevatePath = Join-Path $packageStagePath 'resources/elevate.exe'
+          if (-not (Test-Path -LiteralPath $secondGeneratedElevatePath -PathType Leaf)) { throw 'NSIS did not leave the expected second generated elevate.exe in the stage.' }
+          $secondGeneratedElevateHash = (Get-FileHash -LiteralPath $secondGeneratedElevatePath -Algorithm SHA256).Hash
 
           $secondSetups = @(Get-ChildItem -LiteralPath 'release' -Filter 'ASTRA-PDF-Redesigner-Setup-*-x64.exe' -File)
           if ($secondSetups.Count -ne 1) { throw "Expected one second unsigned candidate, found $($secondSetups.Count)." }
@@ -260,20 +277,27 @@ jobs:
           $intermediateArchiveSame = $firstIntermediateReport.appArchive.sha256 -eq $secondIntermediateReport.appArchive.sha256
           $intermediateUninstallerSame = $firstIntermediateReport.uninstaller.sha256 -eq $secondIntermediateReport.uninstaller.sha256
           Write-Output "C010 intermediate compare: appArchiveSame=$intermediateArchiveSame appArchiveMtime1=$($firstIntermediateReport.appArchive.lastWriteTimeUtc) appArchiveMtime2=$($secondIntermediateReport.appArchive.lastWriteTimeUtc) uninstallerSame=$intermediateUninstallerSame uninstallerMtime1=$($firstIntermediateReport.uninstaller.lastWriteTimeUtc) uninstallerMtime2=$($secondIntermediateReport.uninstaller.lastWriteTimeUtc)"
+          $firstUninstallerPath = Join-Path (Split-Path -Parent $firstIntermediateReportPath) $firstIntermediateReport.uninstaller.copy
+          $secondUninstallerPath = Join-Path (Split-Path -Parent $secondIntermediateReportPath) $secondIntermediateReport.uninstaller.copy
+          $uninstallerDiffOutput = node tests/c010-binary-diff-summary.cjs $firstUninstallerPath $secondUninstallerPath
+          if ($LASTEXITCODE -ne 0) { throw 'Could not compare generated NSIS uninstaller binaries.' }
+          $uninstallerDiff = $uninstallerDiffOutput | ConvertFrom-Json
+          Write-Output "C010 generated uninstaller binary diff $uninstallerDiffOutput"
+          $generatedElevateSame = $firstGeneratedElevateHash -eq $secondGeneratedElevateHash
+          Write-Output "C010 NSIS generated elevate.exe compare: first=$firstGeneratedElevateHash second=$secondGeneratedElevateHash same=$generatedElevateSame"
 
           $reproStatus = if ($firstBuildExitCode -eq 0 -and $secondBuildExitCode -eq 0 -and
             $setups.Count -eq 1 -and $secondSetups.Count -eq 1 -and
             $firstStage.samePayloadTree -and $firstStage.counts.metadataChangedEntries -eq 0 -and
             $secondStage.samePayloadTree -and $secondStage.counts.metadataChangedEntries -eq 0 -and
-            $firstStageAfter.samePayloadTree -and $firstStageAfter.counts.metadataChangedEntries -eq 0 -and
-            $secondStageAfter.samePayloadTree -and $secondStageAfter.counts.metadataChangedEntries -eq 0 -and
+            $firstExpectedNsisStageMutation -and $secondExpectedNsisStageMutation -and $generatedElevateSame -and
             $firstCandidateHash -eq $secondHash -and $firstCandidateBytes -eq $secondBytes -and
             $appArchiveHash1 -eq $appArchiveHash2 -and
             $firstSignature.Status -eq 'NotSigned' -and $secondSignature.Status -eq 'NotSigned') { 'PASS' } else { 'FAIL' }
-          $reproDetail = "installer1=$firstCandidateHash installer2=$secondHash bytes1=$firstCandidateBytes bytes2=$secondBytes app.asar1=$appArchiveHash1 app.asar2=$appArchiveHash2 intermediateArchiveSame=$intermediateArchiveSame intermediateUninstallerSame=$intermediateUninstallerSame installerSignatures=$($firstSignature.Status)/$($secondSignature.Status)"
+          $reproDetail = "installer1=$firstCandidateHash installer2=$secondHash bytes1=$firstCandidateBytes bytes2=$secondBytes app.asar1=$appArchiveHash1 app.asar2=$appArchiveHash2 intermediateArchiveSame=$intermediateArchiveSame intermediateUninstallerSame=$intermediateUninstallerSame uninstallerDiffBytes=$($uninstallerDiff.differingByteCount) uninstallerDiffRanges=$($uninstallerDiff.differingRangeCount) uninstallerPeTimestampEqual=$($uninstallerDiff.peTimestamp.equal) generatedElevateSame=$generatedElevateSame expectedStageMutations=$firstExpectedNsisStageMutation/$secondExpectedNsisStageMutation installerSignatures=$($firstSignature.Status)/$($secondSignature.Status)"
           Write-Output "C010 reproducibility $reproStatus $reproDetail"
           if (Test-Path -LiteralPath $env:GITHUB_STEP_SUMMARY) {
-            "Two independent Windows app trees, staged at one stable path, with test-only NSIS SetDateSave off and unsigned package reproducibility: $reproStatus ($reproDetail)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            "Two independent Windows app trees, staged at one stable path, with production NSIS behavior and unsigned package reproducibility: $reproStatus ($reproDetail)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
           }
           node tests/c010-binary-diff-summary.cjs $firstCandidatePath $secondCandidatePath
           if ($LASTEXITCODE -ne 0) { throw 'C010 package binary diagnostic failed.' }
