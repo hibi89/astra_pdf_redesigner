@@ -1,3 +1,12 @@
+## 2026-11-15 KST — C006 최신 독립검증 보충: 초기 FAIL 수정 후 Windows·Chrome·Edge PASS, A09 +0
+
+- **정확 C006 테스트 SHA:** `4e4bfc01aa2543ea03b0674a8fcc8f6f33f50a25`. Codex [Windows #43688579509](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43688579509) **SUCCESS**: npm test 297 PASS / 0 FAIL / 1 Windows-only SKIP; desktop verify 87/87 PASS; NSIS 설치·기존 V2 문서/PNG 보존·0.1.0→0.1.1 upgrade·제거 PASS. [Linux/Chrome+Edge #43688579463](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43688579463) SUCCESS npm test 298/298 PASS+build/Chrome/Edge, [policy #43688579785](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43688579785) SUCCESS.
+- **판정:** `C006_PARTIAL_OWNER_LEDGER_TECHNICAL_PASS`, 운영상 미수용. `src/commercial/offlineLicenseLifecycle.ts`는 판매자 전용 P-256 서명/순번/해시체인·좌석/기간·환불/철회/지원 이벤트 **프로토타입**. 구매자 오프라인 영수증으로 철회 이벤트가 전파되지 않아 실제 구매자 앱은 유효한 기존 라이선스를 계속 허용한다. production issuer/JWK/thumbprint는 false/null, 정식 activation·실판매자 지원/환불·키 보관/복구·기기 바인딩 없음. **C006 +0, A09 +0, RELEASE HOLD**.
+- **실패 이력 구별:** 초기 `b4009de...` [#43688131242](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43688131242) 292/298 PASS(6 FAIL) 서명 Base64URL 정규식, 초기 Windows `tsc` 실패; Codex 수정으로 **새 `4e4...` 정확 SHA에서 해결**. 초기 실패를 현재 문제로 보고하지 않는다.
+- **병렬 상태:** Codex [PR #13](https://github.com/hibi89/astra_pdf_redesigner/pull/13) 여전히 DRAFT/미병합. 이후 C002 모바일 뷰포트 변경은 별도 최신 SHA Chrome/Edge 실행 확인 후 검수. C001 시험용 SKU별 Qwen3 호출 10회/서로 다른 입력 1개, 실제 production SKU/ASAR 증거 미충족. GPT 새 통합 QA [#43689082416](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43689082416) G002 실제 Chromium 성공, **84/84 PASS**, NUL glyph/숫자 차이 수동 검수 위험, central **64/100 유지**.
+
+---
+
 ## 2026-11-15 KST — 실제 Chromium STEP3→IndexedDB V2→PDF 출력 G002 84/84 PASS · 통합 PR #16 · 64/100 유지
 
 - **본 회차 구현·통합:** GPT 전용 [PR #16](https://github.com/hibi89/astra_pdf_redesigner/pull/16) **MERGED**, integration merge commit `22bb3ddad71529da11d87ee9dfe4db92c04e992f`. 변경은 reviewer-only `.github/workflows/gpt-final-qa.yml`, `tests/gpt-final-qa-live-v2-checked-browser.mjs`, `tests/gpt-final-qa-real-pdfjs-parity.test.mjs`, `tools/gpt-final-qa-real-pdfjs-parity.mjs`, 독립 증거문서. 제품 React/Electron 코드·STEP1 localStorage V1·STEP2 IndexedDB V2 스키마·출시/OCR 키/모델 자산·main 미변경.
