@@ -24,7 +24,7 @@ test('OCR release gate keeps the current source explicitly disabled',()=>{
 
 test('customer package excludes the test-only P124 Electron harness while OCR stays held',()=>{
  const config=fs.readFileSync(path.join(realRoot,'electron-builder.yml'),'utf8');
- assert.ok(config.split(/\\r?\\n/).includes("  - '!desktop/p124-electron-qwen3-acceptance.cjs'"));
+ assert.ok(config.split(/\r?\n/).includes("  - '!desktop/p124-electron-qwen3-acceptance.cjs'"));
  const result=verifyOcrReleaseHold(realRoot);
  assert.equal(result.status,'RELEASE_HOLD');
  assert.equal(result.productOcrEnabled,false);
