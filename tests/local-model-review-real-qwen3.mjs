@@ -46,7 +46,7 @@ const cases=[
  {id:'negation-01',text:'승인 전에는 문서를 외부에 전달하지 않습니다.'},
  {id:'negation-02',text:'해당 변경은 아직 완료되지 않았으며 추가 검토가 필요합니다.'},
  {id:'url-01',text:'참고 주소는 https://example.invalid/guide 이며 열람 전에 출처를 확인합니다.'},
- {id:'table-01',text:'항목 | 수량 | 금액\n연필 | 12 | 3,600원'},
+ {id:'table-01',text:'| 항목 | 수량 | 금액 |\n| 연필 | 12 | 3,600원 |'},
  {id:'name-01',text:'담당자 이름: 김하늘. 연락 전에 수신인 정보를 확인합니다.'},
  {id:'mixed-01',text:'보증 기간은 24개월이고 환불은 승인되지 않습니다. “최종 금액은 80,000원”이라는 기록을 유지합니다.'},
  {id:'negative-03',text:'고객 정보는 동의 없이 수집하거나 저장하지 않으며, 문의는 https://example.invalid/privacy 에서 확인합니다.'},
@@ -187,6 +187,8 @@ const signature=value=>{
  return JSON.stringify([urls,numbers,quotes,protectedNames,tableRows,protectedCounts,negativeSentences,spacedAnCount]);
 };
 const caseResults=[];
+const caseFailures=[];
+let activeCaseId='setup',activePhase='bootstrap';
 try{
  serverInfo=await new Promise((resolve,reject)=>{server.once('error',reject);server.listen(4174,'127.0.0.1',()=>resolve(server.address()));});
  ws=await browser.connect();
@@ -234,32 +236,40 @@ try{
  assert.equal(records.length,0,'consent alone does not start inference');
  assert.equal(await evaluate('document.querySelector("[data-local-ai-run]").disabled'),false);
  for(const item of cases){
+  activeCaseId=item.id;activePhase='select-source';
   await evaluate('window.__astraCurrentCase='+JSON.stringify(item.id));
   await setSource(item.text);
   await browserEventually(()=>evaluate('document.querySelector("[data-model-source]").value==='+JSON.stringify(item.text)));
+  activePhase='actual-inference';
   await click('[data-local-ai-run]');
   await browserEventually(()=>evaluate('document.querySelector("[data-local-ai-cancel]")===null&&'+
    '(Boolean(document.querySelector("[data-local-ai-proposal]"))||document.querySelector("[data-local-ai-status]")?.textContent.includes("원문은 변경되지 않았습니다"))'));
   await waitFor(()=>records.find(record=>record.case_id===item.id));
   const metric=records.find(record=>record.case_id===item.id);
+  activePhase='inspect-review-ui';
   const proposalVisible=await evaluate('Boolean(document.querySelector("[data-local-ai-proposal]"))');
   const sourceValue=await evaluate('document.querySelector("[data-model-source]").value');
+  activePhase='check-no-auto-apply';
   assert.equal(sourceValue,item.text,'the model never auto-applies a draft');
   assert.equal(await evaluate('Number(document.querySelector("[data-model-apply-count]").textContent)'),0);
   let protectedFactsEqual=null,visibleProposalSha=null;
   if(proposalVisible){
-   const proposal=await evaluate('document.querySelector("[data-local-ai-after]").innerText');
+   activePhase='check-protected-facts';
+   const proposal=await evaluate('document.querySelector("[data-local-ai-after]").textContent');
    protectedFactsEqual=signature(item.text)===signature(proposal);
    assert.equal(protectedFactsEqual,true,'protected factual tokens stay unchanged in every displayed draft');
    visibleProposalSha=sha(proposal);
    assert.equal(metric.status,'proposal');
+   activePhase='check-visible-proposal-hash';
    assert.equal(visibleProposalSha,metric.proposal_sha256);
   }
+  activePhase='record-case';
   caseResults.push({case_id:item.id,input_sha256:sha(item.text),status:metric.status,reason:metric.reason,
    latency_ms:metric.latency_ms,ollama_cpu_seconds:metric.ollama_cpu_seconds,
    ollama_process_tree_peak_rss_bytes:metric.ollama_process_tree_peak_rss_bytes,
    resource_samples:metric.resource_samples,proposal_visible_in_review_ui:proposalVisible,
    proposal_sha256:visibleProposalSha,protected_facts_equal:protectedFactsEqual,auto_applied:false});
+  activePhase='case-complete';activeCaseId=null;
  }
  assert.ok(caseResults.filter(item=>item.proposal_visible_in_review_ui).length>=5,'at least five real proposals must be shown in the review UI');
  const cancelCase='cancel-real-01';
@@ -295,12 +305,19 @@ try{
  console.log('PASS P123: actual local Qwen3-4B inference, '+cases.length+' synthetic Korean cases, >=5 reviewed proposals, cancellation, protected facts, CPU/RAM/latency, loopback-only, storage unchanged');
 }catch(error){
  failed=error;
+ runReport.failure={case_id:activeCaseId,phase:activePhase,error_name:error?.name||'Error',
+  observed:activeCaseId?records.find(record=>record.case_id===activeCaseId)?{
+   status:records.find(record=>record.case_id===activeCaseId).status,
+   reason:records.find(record=>record.case_id===activeCaseId).reason,
+   latency_ms:records.find(record=>record.case_id===activeCaseId).latency_ms,
+   proposal_sha256:records.find(record=>record.case_id===activeCaseId).proposal_sha256}:null:null};
+ runReport.case_failures=caseFailures;
  runReport.cases=caseResults;
  runReport.summary={...runReport.summary,status:'FAIL',case_count:caseResults.length,
   visible_valid_proposals:caseResults.filter(item=>item.proposal_visible_in_review_ui).length,
   rejected_or_error:caseResults.filter(item=>item.status!=='proposal').length,
   automatic_applies:caseResults.filter(item=>item.auto_applied).length,
-  external_browser_requests:external.length,error_code:'P123_REAL_MODEL_ACCEPTANCE_FAILED'};
+  external_browser_requests:external.length,error_code:'P123_REAL_MODEL_ACCEPTANCE_FAILED',failure_phase:activePhase};
  console.log('FAIL P123 real Qwen3 acceptance; redacted report written for diagnosis');
 }finally{
  if(server.listening)await new Promise(resolve=>server.close(()=>resolve()));
