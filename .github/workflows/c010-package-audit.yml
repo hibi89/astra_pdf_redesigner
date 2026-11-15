@@ -29,10 +29,14 @@ jobs:
       - name: Install locked application dependencies
         run: npm install --no-audit --no-fund
       - name: Run full regression and release-hold verification
+        shell: pwsh
         run: |
           npm test
+          if ($LASTEXITCODE -ne 0) { throw 'npm test failed.' }
           npm run build
+          if ($LASTEXITCODE -ne 0) { throw 'npm run build failed.' }
           npm run desktop:verify
+          if ($LASTEXITCODE -ne 0) { throw 'npm run desktop:verify failed.' }
       - name: Produce local-only SBOM and report license metadata coverage
         shell: pwsh
         run: |
@@ -46,7 +50,7 @@ jobs:
       - name: Build unsigned NSIS candidate without publishing
         shell: pwsh
         run: |
-          npx electron-builder --win nsis --x64 --dir --publish never
+          npx electron-builder --win dir --x64 --publish never
           if ($LASTEXITCODE -ne 0) { throw 'Unpacked Windows application build failed.' }
           $asarPath = Join-Path $env:GITHUB_WORKSPACE 'release/win-unpacked/resources/app.asar'
           $asarCli = Join-Path $env:GITHUB_WORKSPACE 'node_modules/.bin/asar.cmd'
@@ -121,7 +125,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw 'Could not capture first normalized package tree.' }
 
           Remove-Item -LiteralPath $appDir -Recurse -Force
-          npx electron-builder --win nsis --x64 --dir --publish never
+          npx electron-builder --win dir --x64 --publish never
           if ($LASTEXITCODE -ne 0) { throw 'Second unpacked Windows application build failed.' }
           if (-not (Test-Path -LiteralPath $appDir -PathType Container)) { throw 'Second unpacked application directory is missing.' }
           Copy-Item -LiteralPath $appDir -Destination $secondAppPath -Recurse
@@ -141,34 +145,63 @@ jobs:
           $secondAsarHash = (Get-FileHash -LiteralPath $secondAsarPath -Algorithm SHA256).Hash
           if ($firstAsarHash -ne $secondAsarHash) { throw 'Independent source build app.asar hashes differ.' }
 
-          $canonicalAppPath = Join-Path $env:RUNNER_TEMP 'astra-c010-canonical-prepackaged'
-          Copy-Item -LiteralPath $firstAppPath -Destination $canonicalAppPath -Recurse
-          Normalize-AstraPackageTree $canonicalAppPath
-
-          $firstPackageAppPath = Join-Path $env:RUNNER_TEMP 'astra-c010-first-deterministic-tree'
-          $thirdAppPath = Join-Path $env:RUNNER_TEMP 'astra-c010-repeat-canonical'
-          Copy-AstraPackageTreeDeterministic $firstAppPath $firstPackageAppPath
-          Copy-AstraPackageTreeDeterministic $canonicalAppPath $thirdAppPath
-          Normalize-AstraPackageTree $firstPackageAppPath
-          Normalize-AstraPackageTree $thirdAppPath
-          $firstStageCompare = node tests/c010-package-tree-summary.cjs compare $firstPackageAppPath $treeSnapshot
-          if ($LASTEXITCODE -ne 0) { throw 'Could not verify the first deterministic package tree.' }
-          $firstStage = $firstStageCompare | ConvertFrom-Json
-          Write-Output $firstStageCompare
-          $thirdTreeOutput = node tests/c010-package-tree-summary.cjs compare $thirdAppPath $treeSnapshot
-          if ($LASTEXITCODE -ne 0) { throw 'Could not verify the repeat deterministic package tree.' }
-          $thirdTree = $thirdTreeOutput | ConvertFrom-Json
-          Write-Output $thirdTreeOutput
-          if (-not $firstStage.samePayloadTree -or $firstStage.counts.metadataChangedEntries -ne 0 -or
-            -not $thirdTree.samePayloadTree -or $thirdTree.counts.metadataChangedEntries -ne 0) {
-            throw 'Deterministic staging changed package content or metadata.'
+          $packageStagePath = Join-Path $workspacePath '.c010-package-stage'
+          $packageStageFullPath = [System.IO.Path]::GetFullPath($packageStagePath)
+          if (-not $packageStageFullPath.StartsWith($workspacePrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+            throw 'Refusing to create a deterministic package stage outside the GitHub workspace.'
           }
-          $firstElevatePath = Join-Path $firstPackageAppPath 'resources/elevate.exe'
+          if (Test-Path -LiteralPath $packageStageFullPath) { throw 'C010 deterministic package stage already exists.' }
+
+          $auditHelperPath = Join-Path $workspacePath 'tests/c010-nsis-intermediate-audit.cjs'
+          if (-not (Test-Path -LiteralPath $auditHelperPath -PathType Leaf)) { throw 'NSIS intermediate audit helper is missing.' }
+          $auditIncludePath = Join-Path $workspacePath '.c010-nsis-audit.nsh'
+          $auditBuilderConfigPath = Join-Path $workspacePath '.c010-electron-builder.yml'
+          $auditHelperForNsis = $auditHelperPath.Replace('\', '/')
+          if ($auditHelperForNsis.Contains("'")) { throw 'The NSIS helper path cannot contain a single quote.' }
+          $nsisInclude = @"
+!macro customHeader
+!ifndef BUILD_UNINSTALLER
+  !system 'node.exe "$auditHelperForNsis" "`${APP_64}" "`${UNINSTALLER_OUT_FILE}"' = 0
+  SetDateSave off
+!endif
+!endmacro
+"@
+          [System.IO.File]::WriteAllText($auditIncludePath, $nsisInclude, [System.Text.UTF8Encoding]::new($false))
+
+          $builderConfig = Get-Content -LiteralPath (Join-Path $workspacePath 'electron-builder.yml') -Raw
+          if ($builderConfig -notmatch '(?m)^nsis:$') { throw 'Could not locate the nsis config block for the audit include.' }
+          $auditIncludeForYaml = $auditIncludePath.Replace('\', '/')
+          if ($auditIncludeForYaml.Contains("'")) { throw 'The NSIS include path cannot contain a single quote.' }
+          $builderConfig = [System.Text.RegularExpressions.Regex]::Replace(
+            $builderConfig,
+            '(?m)^nsis:$',
+            "nsis:`r`n  include: '$auditIncludeForYaml'",
+            1
+          )
+          [System.IO.File]::WriteAllText($auditBuilderConfigPath, $builderConfig, [System.Text.UTF8Encoding]::new($false))
+
+          $appArchiveHash1 = (Get-FileHash -LiteralPath (Join-Path $firstAppPath 'resources/app.asar') -Algorithm SHA256).Hash
+          $appArchiveHash2 = (Get-FileHash -LiteralPath (Join-Path $secondAppPath 'resources/app.asar') -Algorithm SHA256).Hash
+          if ($appArchiveHash1 -ne $appArchiveHash2) { throw 'Independent source builds produced different app.asar files.' }
+
+          Copy-AstraPackageTreeDeterministic $firstAppPath $packageStagePath
+          Normalize-AstraPackageTree $packageStagePath
+          $firstStageOutput = node tests/c010-package-tree-summary.cjs compare $packageStagePath $treeSnapshot
+          if ($LASTEXITCODE -ne 0) { throw 'Could not validate the first deterministic stage.' }
+          $firstStage = $firstStageOutput | ConvertFrom-Json
+          Write-Output $firstStageOutput
+          if (-not $firstStage.samePayloadTree -or $firstStage.counts.metadataChangedEntries -ne 0) {
+            throw 'The first deterministic package stage differs from the canonical source tree.'
+          }
+
+          $firstElevatePath = Join-Path $packageStagePath 'resources/elevate.exe'
           $firstElevateBeforeHash = (Get-FileHash -LiteralPath $firstElevatePath -Algorithm SHA256).Hash
           $firstElevateBeforeSignature = (Get-AuthenticodeSignature -LiteralPath $firstElevatePath).Status
-
-          npx electron-builder --win nsis --x64 --prepackaged $firstPackageAppPath --publish never
-          if ($LASTEXITCODE -ne 0) { throw 'First prepackaged unsigned NSIS build failed.' }
+          $env:ASTRA_C010_AUDIT_LABEL = 'first'
+          npx electron-builder --config $auditBuilderConfigPath --win nsis --x64 --prepackaged $packageStagePath --publish never
+          $firstBuildExitCode = $LASTEXITCODE
+          Remove-Item Env:ASTRA_C010_AUDIT_LABEL -ErrorAction SilentlyContinue
+          if ($firstBuildExitCode -ne 0) { throw "First prepackaged NSIS build failed with exit code $firstBuildExitCode." }
           $firstElevateAfterHash = (Get-FileHash -LiteralPath $firstElevatePath -Algorithm SHA256).Hash
           $firstElevateAfterSignature = (Get-AuthenticodeSignature -LiteralPath $firstElevatePath).Status
           Write-Output "C010 elevate first: before=$firstElevateBeforeHash/$firstElevateBeforeSignature after=$firstElevateAfterHash/$firstElevateAfterSignature"
@@ -180,69 +213,78 @@ jobs:
           Copy-Item -LiteralPath $setups[0].FullName -Destination $firstCandidatePath
           $firstCandidateHash = (Get-FileHash -LiteralPath $firstCandidatePath -Algorithm SHA256).Hash
           $firstCandidateBytes = (Get-Item -LiteralPath $firstCandidatePath).Length
-          Write-Output "C010 reproducibility build 1: installer=$firstCandidateHash app.asar=$firstAsarHash"
+          Write-Output "C010 reproducibility build 1: installer=$firstCandidateHash app.asar=$appArchiveHash1"
+          $firstIntermediateReportPath = Join-Path $env:RUNNER_TEMP 'astra-c010-nsis-intermediates/first/summary.json'
+          if (-not (Test-Path -LiteralPath $firstIntermediateReportPath -PathType Leaf)) { throw 'First NSIS intermediate report was not captured.' }
+          $firstIntermediateReport = Get-Content -LiteralPath $firstIntermediateReportPath -Raw | ConvertFrom-Json
+          Write-Output ($firstIntermediateReport | ConvertTo-Json -Compress)
+          $firstStageAfterOutput = node tests/c010-package-tree-summary.cjs compare $packageStagePath $treeSnapshot
+          if ($LASTEXITCODE -ne 0) { throw 'Could not verify the first staged tree after NSIS packaging.' }
+          $firstStageAfter = $firstStageAfterOutput | ConvertFrom-Json
+          Write-Output $firstStageAfterOutput
           Remove-Item -LiteralPath $setups[0].FullName -Force
 
-          $secondElevatePath = Join-Path $secondAppPath 'resources/elevate.exe'
+          if (-not $packageStageFullPath.StartsWith($workspacePrefix, [System.StringComparison]::OrdinalIgnoreCase)) {
+            throw 'Refusing to replace a package stage outside the GitHub workspace.'
+          }
+          Remove-Item -LiteralPath $packageStageFullPath -Recurse -Force
+          Copy-AstraPackageTreeDeterministic $secondAppPath $packageStagePath
+          Normalize-AstraPackageTree $packageStagePath
+          $secondStageOutput = node tests/c010-package-tree-summary.cjs compare $packageStagePath $treeSnapshot
+          if ($LASTEXITCODE -ne 0) { throw 'Could not validate the second deterministic stage.' }
+          $secondStage = $secondStageOutput | ConvertFrom-Json
+          Write-Output $secondStageOutput
+          if (-not $secondStage.samePayloadTree -or $secondStage.counts.metadataChangedEntries -ne 0) {
+            throw 'The second deterministic package stage differs from the canonical source tree.'
+          }
+
+          $secondElevatePath = Join-Path $packageStagePath 'resources/elevate.exe'
           $secondElevateBeforeHash = (Get-FileHash -LiteralPath $secondElevatePath -Algorithm SHA256).Hash
           $secondElevateBeforeSignature = (Get-AuthenticodeSignature -LiteralPath $secondElevatePath).Status
-          npx electron-builder --win nsis --x64 --prepackaged $secondAppPath --publish never
+          $env:ASTRA_C010_AUDIT_LABEL = 'second'
+          npx electron-builder --config $auditBuilderConfigPath --win nsis --x64 --prepackaged $packageStagePath --publish never
           $secondBuildExitCode = $LASTEXITCODE
+          Remove-Item Env:ASTRA_C010_AUDIT_LABEL -ErrorAction SilentlyContinue
+          if ($secondBuildExitCode -ne 0) { throw "Second prepackaged NSIS build failed with exit code $secondBuildExitCode." }
           $secondElevateAfterHash = (Get-FileHash -LiteralPath $secondElevatePath -Algorithm SHA256).Hash
           $secondElevateAfterSignature = (Get-AuthenticodeSignature -LiteralPath $secondElevatePath).Status
-          Write-Output "C010 elevate independent tree: before=$secondElevateBeforeHash/$secondElevateBeforeSignature after=$secondElevateAfterHash/$secondElevateAfterSignature"
-          $secondSetups = @()
-          $secondHash = 'unavailable'
-          $secondBytes = 0
-          $secondSignatureStatus = 'unavailable'
-          if ($secondBuildExitCode -eq 0) {
-            $secondSetups = @(Get-ChildItem -LiteralPath 'release' -Filter 'ASTRA-PDF-Redesigner-Setup-*-x64.exe' -File)
-            if ($secondSetups.Count -eq 1) {
-              $secondSignatureStatus = (Get-AuthenticodeSignature -LiteralPath $secondSetups[0].FullName).Status
-              $secondHash = (Get-FileHash -LiteralPath $secondSetups[0].FullName -Algorithm SHA256).Hash
-              $secondBytes = (Get-Item -LiteralPath $secondSetups[0].FullName).Length
-              $secondCandidatePath = Join-Path $env:RUNNER_TEMP 'astra-c010-second-unsigned-candidate.exe'
-              Copy-Item -LiteralPath $secondSetups[0].FullName -Destination $secondCandidatePath
-              Write-Output "C010 independent-tree installer: hash=$secondHash bytes=$secondBytes signature=$secondSignatureStatus"
-              Remove-Item -LiteralPath $secondSetups[0].FullName -Force
-            }
-          }
+          Write-Output "C010 elevate second: before=$secondElevateBeforeHash/$secondElevateBeforeSignature after=$secondElevateAfterHash/$secondElevateAfterSignature"
+          $secondStageAfterOutput = node tests/c010-package-tree-summary.cjs compare $packageStagePath $treeSnapshot
+          if ($LASTEXITCODE -ne 0) { throw 'Could not verify the second staged tree after NSIS packaging.' }
+          $secondStageAfter = $secondStageAfterOutput | ConvertFrom-Json
+          Write-Output $secondStageAfterOutput
 
+          $secondSetups = @(Get-ChildItem -LiteralPath 'release' -Filter 'ASTRA-PDF-Redesigner-Setup-*-x64.exe' -File)
+          if ($secondSetups.Count -ne 1) { throw "Expected one second unsigned candidate, found $($secondSetups.Count)." }
+          $secondSignature = Get-AuthenticodeSignature -LiteralPath $secondSetups[0].FullName
+          if ($secondSignature.Status -ne 'NotSigned') { throw "Expected an unsigned second candidate, got $($secondSignature.Status)." }
+          $secondCandidatePath = Join-Path $env:RUNNER_TEMP 'astra-c010-second-unsigned-candidate.exe'
+          Copy-Item -LiteralPath $secondSetups[0].FullName -Destination $secondCandidatePath
+          $secondHash = (Get-FileHash -LiteralPath $secondCandidatePath -Algorithm SHA256).Hash
+          $secondBytes = (Get-Item -LiteralPath $secondCandidatePath).Length
+          $secondIntermediateReportPath = Join-Path $env:RUNNER_TEMP 'astra-c010-nsis-intermediates/second/summary.json'
+          if (-not (Test-Path -LiteralPath $secondIntermediateReportPath -PathType Leaf)) { throw 'Second NSIS intermediate report was not captured.' }
+          $secondIntermediateReport = Get-Content -LiteralPath $secondIntermediateReportPath -Raw | ConvertFrom-Json
+          Write-Output ($secondIntermediateReport | ConvertTo-Json -Compress)
 
-          $thirdElevatePath = Join-Path $thirdAppPath 'resources/elevate.exe'
-          $thirdElevateBeforeHash = (Get-FileHash -LiteralPath $thirdElevatePath -Algorithm SHA256).Hash
-          $thirdElevateBeforeSignature = (Get-AuthenticodeSignature -LiteralPath $thirdElevatePath).Status
-          npx electron-builder --win nsis --x64 --prepackaged $thirdAppPath --publish never
-          $repeatExitCode = $LASTEXITCODE
-          $reproStatus = 'FAIL'
-          $reproDetail = "repeat canonical prepackaged NSIS build command exited $repeatExitCode"
-          $repeatSetups = @()
-          if ($repeatExitCode -eq 0) {
-            $thirdElevateAfterHash = (Get-FileHash -LiteralPath $thirdElevatePath -Algorithm SHA256).Hash
-            $thirdElevateAfterSignature = (Get-AuthenticodeSignature -LiteralPath $thirdElevatePath).Status
-            Write-Output "C010 elevate same-tree repeat: before=$thirdElevateBeforeHash/$thirdElevateBeforeSignature after=$thirdElevateAfterHash/$thirdElevateAfterSignature"
-            $repeatSetups = @(Get-ChildItem -LiteralPath 'release' -Filter 'ASTRA-PDF-Redesigner-Setup-*-x64.exe' -File)
-            if ($repeatSetups.Count -eq 1) {
-              $repeatSignature = Get-AuthenticodeSignature -LiteralPath $repeatSetups[0].FullName
-              $repeatHash = (Get-FileHash -LiteralPath $repeatSetups[0].FullName -Algorithm SHA256).Hash
-              $repeatBytes = (Get-Item -LiteralPath $repeatSetups[0].FullName).Length
-              $reproStatus = if ($repeatHash -eq $firstCandidateHash -and $firstAsarHash -eq $secondAsarHash -and
-                $firstSignature.Status -eq 'NotSigned' -and $repeatSignature.Status -eq 'NotSigned') { 'PASS' } else { 'FAIL' }
-              $reproDetail = "sameTreeInstaller1=$firstCandidateHash sameTreeInstaller2=$repeatHash bytes1=$firstCandidateBytes bytes2=$repeatBytes independentTreeInstaller=$secondHash independentBytes=$secondBytes app.asar1=$firstAsarHash app.asar2=$secondAsarHash installerSignatures=$($firstSignature.Status)/$($repeatSignature.Status) independentSignature=$secondSignatureStatus"
-            } else {
-              $reproDetail = "repeat canonical build left $($repeatSetups.Count) candidate installers"
-            }
-          }
+          $intermediateArchiveSame = $firstIntermediateReport.appArchive.sha256 -eq $secondIntermediateReport.appArchive.sha256
+          $intermediateUninstallerSame = $firstIntermediateReport.uninstaller.sha256 -eq $secondIntermediateReport.uninstaller.sha256
+          Write-Output "C010 intermediate compare: appArchiveSame=$intermediateArchiveSame appArchiveMtime1=$($firstIntermediateReport.appArchive.lastWriteTimeUtc) appArchiveMtime2=$($secondIntermediateReport.appArchive.lastWriteTimeUtc) uninstallerSame=$intermediateUninstallerSame uninstallerMtime1=$($firstIntermediateReport.uninstaller.lastWriteTimeUtc) uninstallerMtime2=$($secondIntermediateReport.uninstaller.lastWriteTimeUtc)"
+
+          $reproStatus = if ($firstBuildExitCode -eq 0 -and $secondBuildExitCode -eq 0 -and
+            $setups.Count -eq 1 -and $secondSetups.Count -eq 1 -and
+            $firstStage.samePayloadTree -and $firstStage.counts.metadataChangedEntries -eq 0 -and
+            $secondStage.samePayloadTree -and $secondStage.counts.metadataChangedEntries -eq 0 -and
+            $firstStageAfter.samePayloadTree -and $firstStageAfter.counts.metadataChangedEntries -eq 0 -and
+            $secondStageAfter.samePayloadTree -and $secondStageAfter.counts.metadataChangedEntries -eq 0 -and
+            $firstCandidateHash -eq $secondHash -and $firstCandidateBytes -eq $secondBytes -and
+            $appArchiveHash1 -eq $appArchiveHash2 -and
+            $firstSignature.Status -eq 'NotSigned' -and $secondSignature.Status -eq 'NotSigned') { 'PASS' } else { 'FAIL' }
+          $reproDetail = "installer1=$firstCandidateHash installer2=$secondHash bytes1=$firstCandidateBytes bytes2=$secondBytes app.asar1=$appArchiveHash1 app.asar2=$appArchiveHash2 intermediateArchiveSame=$intermediateArchiveSame intermediateUninstallerSame=$intermediateUninstallerSame installerSignatures=$($firstSignature.Status)/$($secondSignature.Status)"
           Write-Output "C010 reproducibility $reproStatus $reproDetail"
           if (Test-Path -LiteralPath $env:GITHUB_STEP_SUMMARY) {
-            "Canonical package tree and same-tree unsigned NSIS package reproducibility: $reproStatus ($reproDetail)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            "Two independent Windows app trees, staged at one stable path, with test-only NSIS SetDateSave off and unsigned package reproducibility: $reproStatus ($reproDetail)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
           }
-          if ($secondBuildExitCode -eq 0 -and $secondSetups.Count -eq 1) {
-            node tests/c010-binary-diff-summary.cjs $firstCandidatePath $secondCandidatePath
-            if ($LASTEXITCODE -ne 0) { throw 'Independent-tree binary diagnostic failed.' }
-          }
-          if ($repeatExitCode -eq 0 -and $repeatSetups.Count -eq 1) {
-            node tests/c010-binary-diff-summary.cjs $firstCandidatePath $repeatSetups[0].FullName
-            if ($LASTEXITCODE -ne 0) { throw 'Same-tree binary diagnostic failed.' }
-          }
+          node tests/c010-binary-diff-summary.cjs $firstCandidatePath $secondCandidatePath
+          if ($LASTEXITCODE -ne 0) { throw 'C010 package binary diagnostic failed.' }
           if ($reproStatus -ne 'PASS') { throw 'Unsigned same-source Windows candidate is not bit-for-bit reproducible.' }
