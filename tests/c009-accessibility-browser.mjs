@@ -40,6 +40,7 @@ try{
   return result.result.value;
  };
  await eventually(()=>evaluate("Boolean(document.querySelector('.studio-layout .studio-steps button')&&document.querySelector('.app-header .print-button'))"));
+ await send('Page.bringToFront');
  const nav=await evaluate("(()=>{const n=document.querySelector('.studio-layout .studio-steps');return {label:n?.getAttribute('aria-label'),stages:[...n.querySelectorAll('button')].map(b=>b.querySelector('span')?.textContent?.trim()),print:document.querySelector('.app-header .print-button')?.textContent?.trim()}})()");
  assert.equal(nav.label,'PDF 리디자인 작업 순서','stage navigation has a programmatic label');
  assert.deepEqual(nav.stages,['PDF 불러오기','원본 대조','디자인 선택','새 PDF 저장']);
@@ -67,7 +68,7 @@ try{
   if(state.print)sawPrint=true;
   if(sawPrint&&seenStages.has('PDF 불러오기')&&seenStages.has('디자인 선택'))break;
  }
- assert.ok(sawPrint,'keyboard Tab reaches the primary PDF action');
+ assert.ok(sawPrint,'keyboard Tab reaches the primary PDF action; observed stages='+JSON.stringify([...seenStages]));
  assert.ok(seenStages.has('PDF 불러오기'),'keyboard Tab reaches the first enabled stage control');
  assert.ok(seenStages.has('디자인 선택'),'keyboard Tab reaches the design stage control');
  assert.ok(sawVisibleFocus,'keyboard focus on stage navigation has a visible focus indicator');
