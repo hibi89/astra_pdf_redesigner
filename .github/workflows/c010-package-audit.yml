@@ -47,6 +47,15 @@ jobs:
         run: |
           npx electron-builder --win nsis --x64 --publish never
           if ($LASTEXITCODE -ne 0) { throw 'Unsigned NSIS candidate build failed.' }
+          $asarPath = Join-Path $env:GITHUB_WORKSPACE 'release/win-unpacked/resources/app.asar'
+          $asarCli = Join-Path $env:GITHUB_WORKSPACE 'node_modules/.bin/asar.cmd'
+          if (-not (Test-Path -LiteralPath $asarPath -PathType Leaf)) { throw 'Built app.asar is missing.' }
+          if (-not (Test-Path -LiteralPath $asarCli -PathType Leaf)) { throw 'Electron ASAR listing tool is missing.' }
+          $asarEntries = @(& $asarCli list $asarPath)
+          if ($LASTEXITCODE -ne 0) { throw 'Could not enumerate built app.asar.' }
+          $testOnlyEntries = @($asarEntries | Where-Object { $_ -match '(?i)p124-electron-qwen3-acceptance|tests[/\\]fixtures[/\\]p124-electron-qwen3' })
+          if ($testOnlyEntries.Count -ne 0) { throw "Test-only P124 content leaked into app.asar: $($testOnlyEntries -join ', ')" }
+          Write-Output "PASS app.asar excludes P124 test harness; enumerated entries=$($asarEntries.Count)"
           $setups = @(Get-ChildItem -LiteralPath 'release' -Filter 'ASTRA-PDF-Redesigner-Setup-*-x64.exe' -File)
           if ($setups.Count -ne 1) { throw "Expected one unsigned NSIS candidate, found $($setups.Count)." }
           $signature = Get-AuthenticodeSignature -LiteralPath $setups[0].FullName
