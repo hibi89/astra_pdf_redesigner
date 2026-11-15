@@ -57,7 +57,7 @@ jobs:
         shell: pwsh
       - name: Native Windows Electron smoke before model install
         run: npm run desktop:smoke
-      - name: P124 real model, isolated three-SKU Electron scenarios, and unsigned NSIS candidate
+      - name: P124 real-model SKU GUI and C005 unique-input quality scenarios
         shell: pwsh
         run: ./tests/p124-windows-qwen3-acceptance.ps1
       - name: Rebuild a production-only bundle and unsigned NSIS candidate

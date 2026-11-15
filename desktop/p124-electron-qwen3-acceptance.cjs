@@ -385,7 +385,7 @@ async function runP124ElectronAcceptance(win,renderPdf){
     throw error;
   }finally{
     await fs.writeFile(reportFile,JSON.stringify(report,null,2)+'\n',{flag:'wx',mode:0o600});
-    console.log(`P124 ${report.status} scenario=${scenario}; sku contexts=${uiResults.length}; report=${path.basename(reportFile)}`);
+    console.log(`${scenario==='quality'?'C005':'P124'} ${report.status} scenario=${scenario}; sku contexts=${uiResults.length}; report=${path.basename(reportFile)}`);
   }
 }
 module.exports={runP124ElectronAcceptance};
