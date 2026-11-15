@@ -108,7 +108,15 @@ try {
   }
   try {
     $projectProcess = Start-Process -FilePath $installedExe -ArgumentList @('--astra-desktop-smoke','--astra-step2-acceptance') -PassThru -Wait -NoNewWindow -RedirectStandardOutput $step2Stdout -RedirectStandardError $step2Stderr
-    if ($projectProcess.ExitCode -ne 0) { throw "Installed STEP2 project acceptance failed: $($projectProcess.ExitCode)" }
+    if ($projectProcess.ExitCode -ne 0) {
+      $failedOutput = (Get-Content -LiteralPath $step2Stdout -Raw -ErrorAction SilentlyContinue) + (Get-Content -LiteralPath $step2Stderr -Raw -ErrorAction SilentlyContinue)
+      $failureLines = @($failedOutput -split '[\r\n]+' | Where-Object { $_ -match '(?i)(error|exception|step2|quota|abort|c007)' -and $_ -notmatch '^\s*at\s' } | Select-Object -Last 12)
+      foreach ($failureLine in $failureLines) {
+        $safeLine = $failureLine -replace 'ASTRA_STEP2_[A-Z0-9_]+|C007_[A-Z0-9_]+','[synthetic-marker]'
+        Write-Host "Sanitized STEP2 diagnostic: $safeLine"
+      }
+      throw "Installed STEP2 project acceptance failed: $($projectProcess.ExitCode)"
+    }
     & node tests/verify-desktop-pdf.mjs $projectPdf --step2-project
     if ($LASTEXITCODE -ne 0) { throw "Installed STEP2 project PDF verification failed: $LASTEXITCODE" }
     Write-Host 'PASS ASTRA INSTALLED STEP2 PROJECT PDF: actual editor, IDB, reload, A4 text/image PDF'
