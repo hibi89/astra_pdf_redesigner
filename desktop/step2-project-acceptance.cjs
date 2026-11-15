@@ -290,6 +290,15 @@ async function abortStep2MultiStoreTransaction(snapshotStorage){
   return {before,after};
 }
 
+async function reloadStep2Preview(win,label){
+  try{
+    await win.loadURL(APP_URL);
+    await waitForProjectPreview(win);
+  }catch(error){
+    throw Error('STEP2 '+label+' reload failed: '+(error?.name||'')+' '+(error?.message||String(error)));
+  }
+}
+
 async function runStep2ProjectAcceptance(win,renderLocalPdf){
   const verifyOnly=process.argv.includes('--astra-step2-preservation-verify');
   if(process.env.GITHUB_ACTIONS!=='true'||!process.env.RUNNER_TEMP)
@@ -322,8 +331,7 @@ async function runStep2ProjectAcceptance(win,renderLocalPdf){
       '('+editStep2InBrowser.toString()+')('+JSON.stringify(PNG64)+')','document edit and save');
     if(!before?.editorSaved||!before?.image)throw Error('STEP2 UI edit did not complete');
   }
-  await win.loadURL(APP_URL);
-  await waitForProjectPreview(win);
+  await reloadStep2Preview(win,"initial save");
   const persisted=await evaluate('('+verifyReloadedProject.toString()+')()','reload verification');
   if(!persisted?.saved||persisted.assets!==1)throw Error('STEP2 IndexedDB reload failed');
   if(!verifyOnly&&process.env.ASTRA_STEP2_FAILURE_INJECTION==='1'){
@@ -338,8 +346,7 @@ async function runStep2ProjectAcceptance(win,renderLocalPdf){
     const quota=await evaluate('('+injectStep2QuotaFailure.toString()+')('+snapshotSource+','+saveWaitSource+','+titleWaitSource+')','synthetic quota failure');
     if(!quota?.injected||quota.status!=='저장 실패'||quota.before!==baseline||quota.after!==baseline)
       throw Error('STEP2 quota failure changed persisted V2 data or was not visible');
-    await win.loadURL(APP_URL);
-    await waitForProjectPreview(win);
+    await reloadStep2Preview(win,"quota failure");
     const afterQuotaReload=await evaluate('('+verifyReloadedProject.toString()+')()','quota reload verification');
     if(!afterQuotaReload?.saved||afterQuotaReload.assets!==1)
       throw Error('STEP2 persisted document/PNG did not survive quota failure reload');
@@ -354,16 +361,14 @@ async function runStep2ProjectAcceptance(win,renderLocalPdf){
     if(!restoredState.documents.some(doc=>doc.content?.title==='ASTRA_STEP2_PRINT_8307')||
        JSON.stringify(restoredState.assets.map(asset=>asset.blobBase64))!==JSON.stringify(baselineState.assets.map(asset=>asset.blobBase64)))
       throw Error('STEP2 recovery cleanup changed original synthetic document or PNG bytes');
-    await win.loadURL(APP_URL);
-    await waitForProjectPreview(win);
+    await reloadStep2Preview(win,"retry save");
     const afterRetryReload=await evaluate('('+verifyReloadedProject.toString()+')()','retry reload verification');
     if(!afterRetryReload?.saved||afterRetryReload.assets!==1)
       throw Error('STEP2 retry data did not survive renderer reload');
     const aborted=await evaluate('('+abortStep2MultiStoreTransaction.toString()+')('+snapshotSource+')','multi-store transaction abort');
     if(!aborted?.before||aborted.before!==aborted.after)
       throw Error('STEP2 aborted multi-store transaction changed persisted data');
-    await win.loadURL(APP_URL);
-    await waitForProjectPreview(win);
+    await reloadStep2Preview(win,"transaction abort");
     const afterAbortReload=await evaluate('('+verifyReloadedProject.toString()+')()','transaction abort reload verification');
     if(!afterAbortReload?.saved||afterAbortReload.assets!==1)
       throw Error('STEP2 document/PNG did not survive transaction abort reload');
