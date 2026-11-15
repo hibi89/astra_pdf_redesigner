@@ -55,11 +55,14 @@ try{
   'accessibility tree exposes stage button name: '+label);
  assert.ok(accessibleNames.some(name=>name.includes(nav.print)),
   'accessibility tree exposes primary PDF action name');
+ await send('Page.bringToFront');
  await evaluate("(()=>{document.activeElement?.blur();window.focus();return true})()");
+ await new Promise(resolve=>setTimeout(resolve,100));
  const seenStages=new Set();let sawPrint=false,sawVisibleFocus=false;
  for(let index=0;index<100;index++){
   await send('Input.dispatchKeyEvent',{type:'keyDown',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});
   await send('Input.dispatchKeyEvent',{type:'keyUp',key:'Tab',code:'Tab',windowsVirtualKeyCode:9});
+  await new Promise(resolve=>setTimeout(resolve,20));
   const state=await evaluate("(()=>{const e=document.activeElement;return {stage:e?.closest?.('.studio-steps')?e.querySelector('span')?.textContent?.trim():null,print:e?.classList?.contains('print-button')||false,outline:getComputedStyle(e).outlineWidth,outlineStyle:getComputedStyle(e).outlineStyle}})()");
   if(state.stage){
    seenStages.add(state.stage);
