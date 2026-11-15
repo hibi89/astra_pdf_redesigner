@@ -64,8 +64,10 @@ test('C006 signed seat assignments enforce SKU seat count, reject duplicates, an
  const second=await command(f,state1,'activate-installation',{installationRef:install(2)});
  const state2=await replayLicenseLifecycle(f.receipt,[first,second],f.signer.jwk,f.signer.pin,NOW);
  assert.deepEqual(state2.installationRefs,[install(1),install(2)]);
- await assert.rejects(command(f,state2,'activate-installation',{installationRef:install(3)}));
- await assert.rejects(command(f,state2,'activate-installation',{installationRef:install(1)}));
+ const over=await command(f,state2,'activate-installation',{installationRef:install(3)});
+ await assert.rejects(replayLicenseLifecycle(f.receipt,[first,second,over],f.signer.jwk,f.signer.pin,NOW));
+ const duplicate=await command(f,state2,'activate-installation',{installationRef:install(1)});
+ await assert.rejects(replayLicenseLifecycle(f.receipt,[first,second,duplicate],f.signer.jwk,f.signer.pin,NOW));
  const release=await command(f,state2,'release-installation',{installationRef:install(1)});
  const state3=await replayLicenseLifecycle(f.receipt,[first,second,release],f.signer.jwk,f.signer.pin,NOW);
  const third=await command(f,state3,'activate-installation',{installationRef:install(3)});
@@ -78,7 +80,8 @@ test('C006 expiration is time-derived and signed renewal advances SKU identity/p
  const active=await replayLicenseLifecycle(f.receipt,[activate],f.signer.jwk,f.signer.pin,NOW+1);
  assert.equal(effectiveLicenseLifecycleStatus(active,NOW+99),'active');
  assert.equal(effectiveLicenseLifecycleStatus(active,NOW+100),'expired');
- await assert.rejects(command(f,active,'activate-installation',{installationRef:install(5)},NOW+101));
+ const afterExpiry=await command(f,active,'activate-installation',{installationRef:install(5)},NOW+101);
+ await assert.rejects(replayLicenseLifecycle(f.receipt,[activate,afterExpiry],f.signer.jwk,f.signer.pin,NOW+101));
  const nextClaims=claims('pro',{issuedAt:NOW+101,expiresAt:NOW+1000});
  const renewed=await extendOfflineLicenseReceipt(f.receipt,nextClaims,
   f.signer.privateKey,f.signer.jwk,f.signer.pin,NOW+101);
@@ -100,7 +103,8 @@ test('C006 refund and revocation are terminal in the signed owner ledger, while 
   const terminal=await replayLicenseLifecycle(f.receipt,[activate,close],f.signer.jwk,f.signer.pin,NOW);
   assert.equal(terminal.status,action==='refund'?'refunded':'revoked');
   assert.deepEqual(terminal.installationRefs,[]);
-  await assert.rejects(command(f,terminal,'activate-installation',{installationRef:install(7)}));
+  const afterClose=await command(f,terminal,'activate-installation',{installationRef:install(7)});
+  await assert.rejects(replayLicenseLifecycle(f.receipt,[activate,close,afterClose],f.signer.jwk,f.signer.pin,NOW));
   const key=await importOfflineLicensePublicKey(f.signer.jwk);
   assert.equal((await verifyOfflineEntitlement(f.receipt,key,NOW)).tier,'pro',
    'ledger events are not delivered to the buyer app and do not revoke its offline receipt');
@@ -124,8 +128,10 @@ test('C006 support lifecycle is monotone per opaque case reference and stores no
  const reopened=await replayLicenseLifecycle(f.receipt,[...log,reopen],f.signer.jwk,f.signer.pin,NOW);
  assert.equal(reopened.supportStatus,'open');
  assert.equal(reopened.supportCaseRef,'CASE_C006_0002');
- await assert.rejects(command(f,state,'support-resolve',{supportCaseRef:'CASE_WRONG_0001'}));
- await assert.rejects(command(f,state,'support-awaiting-owner',{supportCaseRef:'CASE_C006_0001'}));
+ const wrongCase=await command(f,state,'support-resolve',{supportCaseRef:'CASE_WRONG_0001'});
+ await assert.rejects(replayLicenseLifecycle(f.receipt,[...log,wrongCase],f.signer.jwk,f.signer.pin,NOW));
+ const invalidTransition=await command(f,state,'support-awaiting-owner',{supportCaseRef:'CASE_C006_0001'});
+ await assert.rejects(replayLicenseLifecycle(f.receipt,[...log,invalidTransition],f.signer.jwk,f.signer.pin,NOW));
 });
 test('C006 rejects event tampering, wrong issuer/pin, cross-license, replay, broken chain and stale sequence',async()=>{
  const f=await fixture('business'),other=await fixture('business');
@@ -137,12 +143,12 @@ test('C006 rejects event tampering, wrong issuer/pin, cross-license, replay, bro
  await assert.rejects(replayLicenseLifecycle(f.receipt,[event],f.signer.jwk,'1'.repeat(64),NOW));
  await assert.rejects(replayLicenseLifecycle(other.receipt,[event],f.signer.jwk,f.signer.pin,NOW));
  await assert.rejects(replayLicenseLifecycle(f.receipt,[event,event],f.signer.jwk,f.signer.pin,NOW));
- const badAnchor=await command(f,{...f.snapshot,lastEventHash:'1'.repeat(64)},
-  'activate-installation',{installationRef:install(9)});
+ const forked={...f.snapshot,sequence:1,lastEventHash:'1'.repeat(64),lastEventAt:NOW-100};
+ const badAnchor=await command(f,forked,'activate-installation',{installationRef:install(9)});
  await assert.rejects(replayLicenseLifecycle(f.receipt,[badAnchor],f.signer.jwk,f.signer.pin,NOW));
- const stale=await command(f,{...f.snapshot,sequence:4},
-  'activate-installation',{installationRef:install(10)});
- await assert.rejects(replayLicenseLifecycle(f.receipt,[stale],f.signer.jwk,f.signer.pin,NOW));
+ const stale={...f.snapshot,sequence:4,lastEventHash:'2'.repeat(64),lastEventAt:NOW-100};
+ const staleEvent=await command(f,stale,'activate-installation',{installationRef:install(10)});
+ await assert.rejects(replayLicenseLifecycle(f.receipt,[staleEvent],f.signer.jwk,f.signer.pin,NOW));
  await assert.rejects(command(f,f.snapshot,'activate-installation',{installationRef:'not-a-random-ref'}));
  await assert.rejects(command(f,f.snapshot,'refund',{unexpected:'ignored'}));
 });
@@ -150,8 +156,9 @@ test('C006 future events, out-of-order time, excessive event logs and product de
  const f=await fixture('pro');
  await assert.rejects(command(f,f.snapshot,'refund',{},NOW+301));
  const first=await command(f,f.snapshot,'support-open',{supportCaseRef:'CASE_C006_0003'},NOW+10);
- const backwards=await command(f,f.snapshot,'support-open',{supportCaseRef:'CASE_C006_0004'},NOW);
- await assert.rejects(replayLicenseLifecycle(f.receipt,[first,backwards],f.signer.jwk,f.signer.pin,NOW+10));
+ const opened=await replayLicenseLifecycle(f.receipt,[first],f.signer.jwk,f.signer.pin,NOW+10);
+ await assert.rejects(command(f,opened,'support-awaiting-owner',
+  {supportCaseRef:'CASE_C006_0003'},NOW+9));
  await assert.rejects(replayLicenseLifecycle(f.receipt,
   Array.from({length:4097},()=>first),f.signer.jwk,f.signer.pin,NOW+10));
  assert.equal(productionSkuAccessConfigured(),false);
