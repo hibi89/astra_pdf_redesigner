@@ -51,7 +51,7 @@ const cases=[
  {id:'mixed-01',text:'보증 기간은 24개월이고 환불은 승인되지 않습니다. “최종 금액은 80,000원”이라는 기록을 유지합니다.'},
  {id:'negative-03',text:'고객 정보는 동의 없이 수집하거나 저장하지 않으며, 문의는 https://example.invalid/privacy 에서 확인합니다.'},
 ];
-assert.equal(cases.length,30);
+assert.ok(cases.length>=30,'at least 30 fixed synthetic Korean cases are required');
 const sha=value=>createHash('sha256').update(value,'utf8').digest('hex');
 const sleep=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 const waitFor=async(fn,predicate=x=>Boolean(x),timeout=120000)=>{
@@ -292,7 +292,7 @@ try{
   automatic_applies:caseResults.filter(item=>item.auto_applied).length,
   external_browser_requests:external.length,
   synthetic_v1_v2_storage_unchanged:true};
- console.log('PASS P123: actual local Qwen3-4B inference, 30 synthetic Korean cases, >=5 reviewed proposals, cancellation, protected facts, CPU/RAM/latency, loopback-only, storage unchanged');
+ console.log('PASS P123: actual local Qwen3-4B inference, '+cases.length+' synthetic Korean cases, >=5 reviewed proposals, cancellation, protected facts, CPU/RAM/latency, loopback-only, storage unchanged');
 }catch(error){
  failed=error;
  runReport.cases=caseResults;
