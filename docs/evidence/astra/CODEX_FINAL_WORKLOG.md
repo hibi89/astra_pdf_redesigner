@@ -2,7 +2,7 @@
 
 Branch: `codex/astra-final-ai-sku-20261115`  
 Integration target: `integration/astra-final-blueprint-100-20261115`  
-Latest code/test SHA: `2384a8287a7d5a196596acb4cf351ff61d7a7f34` (Linux/Chrome/Edge regression PASS in run 43718313685; C009 Chrome/Edge 30-layout, large-document and V2 recovery PASS on retry 2 of run 43718318286; C010 Windows package audit fails the explicit repeatability gate in run 43718313656). Real-Qwen quality runs `8136c6b070eceb97e4e26fbdebae7632ab6f2ed3` and `5b323fd47d0c2cd2efb20a136102ee65b3bb7af2` remain pending
+Latest code/test SHA: `d0701f007c58bf53a452297a45cb81574a6ae039` (Linux/Chrome/Edge regression PASS run 43720322561; C009 push and PR runs 43720322613/43720328240 PASS; C010 Windows run 43720322521 fails the reproducibility gate. Policy 43720322704 PASS). Real-Qwen quality runs `8136c6b070eceb97e4e26fbdebae7632ab6f2ed3` and `5b323fd47d0c2cd2efb20a136102ee65b3bb7af2` remain pending
 Open draft PR: [#13](https://github.com/hibi89/astra_pdf_redesigner/pull/13)
 
 ## Completed and assessed
@@ -15,8 +15,8 @@ Open draft PR: [#13](https://github.com/hibi89/astra_pdf_redesigner/pull/13)
 | C006 offline license lifecycle prototype | `4e4bfc01aa2543ea03b0674a8fcc8f6f33f50a25` | Linux/Chrome/Edge PASS; Windows Electron/NSIS PASS; blueprint policy PASS | Operational gates BLOCKED; +0 |
 | C002 responsive viewport acceptance | `bd83ac2619a80f940dd628d513a760aee06f0ecb` | 298 unit tests/build, Chrome and Edge at 390/360/320px, blueprint policy PASS | Buyer visual acceptance pending; +0 |
 | C008 synthetic PDF accuracy regression | `bd83ac2619a80f940dd628d513a760aee06f0ecb` | Linux/Chrome, Edge; 15-pair corpus, 12-layout PDF risk matrix, V1/V2 no-write, policy PASS | Synthetic-only; owner acceptance pending; +0 |
-| C009 accessibility, 30-layout print, large-document resource and recovery | `2384a8287a7d5a196596acb4cf351ff61d7a7f34` | Run 43718318286 attempt 2 PASS: npm test 307/0; Chrome/Edge accessibility, 30 unique layouts, 28-page 4× CPU print and V2/localStorage recovery; artifact 14163129064 | Hosted synthetic only; buyer screen-reader/visual acceptance pending; +0 |
-| C010 Windows package/SBOM/content/reproducibility audit | `2384a8287a7d5a196596acb4cf351ff61d7a7f34` | Run 43718313656: npm test 306 passed/0 failed/1 skipped of 307, build, desktop 88/88, SBOM 6/0, ASAR 552 entries, content scan 525 files/84,095,509 bytes/0 findings PASS; repeated unsigned NSIS hashes differ, explicit gate FAIL; policy 43718314059 PASS | Reproducible installer BLOCKED; +0 |
+| C009 accessibility, 30-layout print, large-document resource and recovery | `d0701f007c58bf53a452297a45cb81574a6ae039` | Push 43720322613 + PR 43720328240 PASS: npm test 307/0/0 skipped; Chrome/Edge keyboard print, 30 unique layouts, 28-page throttled print, V2/localStorage recovery; artifact 14163937633 | Hosted synthetic only; buyer screen-reader/visual acceptance pending; +0 |
+| C010 Windows package/SBOM/content/reproducibility audit | `d0701f007c58bf53a452297a45cb81574a6ae039` | Run 43720322521: npm test 306 pass/0 fail/1 skip of 307, build, desktop 88/88, SBOM 6/0, ASAR 552, scan 525 files/84,095,509 bytes/0 findings PASS; repeat NSIS build hashes differ, gate FAIL; policy 43720322704 PASS | Reproducible installer BLOCKED; +0 |
 
 Detailed reports: [C001](C001/VERIFICATION.md), [C003](C003/VERIFICATION.md), [C005](C005/VERIFICATION.md). The earlier P124 BLOCKED note was superseded with hosted evidence: [P124/VERIFICATION.md](P124/VERIFICATION.md).
 
@@ -42,7 +42,7 @@ At tested tree SHA `4e4bfc01aa2543ea03b0674a8fcc8f6f33f50a25`, the owner-side si
 
 ## Next work
 
-P124/C001 is PASS at code/test SHA `09b2d9c8f60631bb2f623f840bdde03450ed9e17`. C002, C003, C007, C008 and C009 have hosted technical evidence; C010's SBOM, ASAR, and content scan pass, but exact same-source NSIS installer reproducibility fails at SHA `2384a8287a7d5a196596acb4cf351ff61d7a7f34`. Do not claim C010 complete or award score until a repeatable candidate is demonstrated.
+P124/C001 is PASS at code/test SHA `09b2d9c8f60631bb2f623f840bdde03450ed9e17`. C002, C003, C007, C008 and C009 have hosted technical evidence; C010's SBOM, ASAR, and content scan pass, but two exact-SHA Windows builds (`2384a828` and `d0701f00`) failed the same-source NSIS installer reproducibility gate. Do not claim C010 complete or award score until a repeatable candidate is demonstrated.
 
 Remaining prerequisites:
 - **C003/A06:** the code path records a user-selected HTTPS source and requires session rights acknowledgement before STEP5 local-file analysis; persisted rights remain UNVERIFIED. Real source-rights acceptance needs a user-selected source and its actual rights evidence, which this synthetic-only task does not have.
@@ -50,7 +50,7 @@ Remaining prerequisites:
 - **C005/A08:** BLOCKED for completion because the hosted Windows runner has about 16 GiB total memory and no 8-GiB-class runner is available. User-local execution is outside scope. Existing P123/P124 do not satisfy the joint distinct-input/8-GiB acceptance.
 - **C006/A09:** the owner-side lifecycle prototype and hostile-input tests pass, but production issuer/pin, real-user activation, refund/support policy and delivered revocation remain owner-controlled operational gates. Do not create production keys or enable sales.
 - **C007/A10:** hosted Windows upgrade/data preservation passes; physical buyer Windows, trusted signing/SmartScreen and interruption/quota acceptance remain owner-only.
-- **C010/A10:** the unsigned package content scan, SBOM metadata, and ASAR exclusion checks passed, but two same-source Windows builds generated different installer hashes and 128,634,409 differing bytes. The root cause is unresolved; C010 remains +0/BLOCKED and the release gate stays HOLD.
+- **C010/A10:** the unsigned package content scan, SBOM metadata, and ASAR exclusion checks passed, but repeated same-source Windows builds generated different installer hashes, including 128,635,692 differing bytes at the latest code/test SHA. The root cause is unresolved; C010 remains +0/BLOCKED and the release gate stays HOLD.
 
 C009 hosted browser automation is complete for 30 layouts, synthetic large-document printing under 4× CPU throttling, JS heap/DOM observations, and close/reopen V2 recovery. Remaining C009 screen-reader/WCAG and buyer visual acceptance require an owner-controlled device. C003/C004/C005/C006/C007/C008/C010 still have source, OCR, 8-GiB, operational, physical-device, or legal/owner gates listed above. No score changes: worker candidate remains 67/100 conditional, central ledger 64/100, buyer acceptance UNASSESSED, RELEASE HOLD.
 ## C002 — hosted responsive viewport PASS, buyer acceptance pending
@@ -65,37 +65,32 @@ At exact code/test SHA `bd83ac2619a80f940dd628d513a760aee06f0ecb`, [full CI run 
 
 ## C009 — hosted accessibility, 30-layout print, resource, and recovery PASS
 
-Feature/test SHA `a9d7ba4f1fb6b5d7b0e2e09309ebbe634b2db031`; PR workflow [43715685926](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43715685926) checked out merge SHA `9444e8e`, containing this feature head. `npm test` and `npm run build` passed. Chrome and Edge passed the accessibility-tree/keyboard check and printed all 8 base themes plus 22 advanced PRO/BUSINESS layouts to A4, with 30 unique first-page raster hashes per browser. The 180-paragraph synthetic document printed to 28 pages with 4× CDP CPU throttling; after closing and reopening the tab, V2 restored the exact content and legacy localStorage bytes and printed 28 pages again.
+At exact test SHA `d0701f007c58bf53a452297a45cb81574a6ae039`, both [push run 43720322613](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43720322613) and [PR run 43720328240](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43720328240) passed. The keyboard check now brings the page to front and pauses briefly between Tab transitions; both runs reached the print action and showed visible focus.
 
-- Chrome: print 1,296 ms; after print JS heap 7,169,016 bytes / 1,371 DOM nodes; reopen print 1,256 ms; after recovery 5,935,564 bytes / 1,368 nodes.
-- Edge: print 1,379 ms; after print JS heap 7,167,604 bytes / 1,361 DOM nodes; reopen print 1,451 ms; after recovery 5,908,572 bytes / 1,358 nodes.
-- [Artifact 14162766746](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43715685926/artifacts/14162766746): 128 synthetic files, ZIP SHA-256 `ba85b4cd2c82ab4c67ec4548a5e59d2b7da429355315fcfe781022d3dae98673`.
-- First combined run [43715431237](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43715431237) failed because a keyboard test tab was not explicitly foregrounded; adding CDP `Page.bringToFront` fixed it, and the full rerun passed. Earlier text-extraction marker failure and whitespace normalization are recorded in [C009/VERIFICATION.md](C009/VERIFICATION.md).
+- `npm test` 307 passed / 0 failed / 0 skipped; build PASS.
+- Chrome and Edge each printed 8 base themes + 22 advanced layouts with 30 unique first-page rasters, and a 28-page synthetic document under 4× CPU throttling. Closing/reopening restored IndexedDB V2 and legacy localStorage, then printed again.
+- Chrome print/recovery: 777/839 ms; heap 7,426,764/5,938,768 bytes; DOM 1,371/1,368. Edge print/recovery: 824/834 ms; heap 7,217,892/5,881,016 bytes; DOM 1,361/1,358.
+- [Artifact 14163937633](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43720322613/artifacts/14163937633): 4,026,775 bytes, ZIP SHA-256 `76cf1e90f776c0e1e6c73d7a868e3d52260e75cb63d87466d247c7db0e44039c`.
 
-Measurements are Linux hosted-browser JS heap/DOM observations with CPU emulation; they do not represent total OS memory or physical 8-GiB Windows performance. C009 remains +0. Real assistive-technology/WCAG and buyer visual acceptance remain owner-held; score remains 67/100 conditional, central ledger 64/100, buyer acceptance UNASSESSED, RELEASE HOLD.
-
-
-
-Follow-up at exact code/test SHA `2384a8287a7d5a196596acb4cf351ff61d7a7f34`: [run 43718318286](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43718318286) attempt 2 PASS after an intermittent keyboard-focus failure on attempt 1. Both browsers again passed 30 layouts and 28-page V2 close/reopen recovery; retry artifact 14163129064, ZIP SHA-256 `5a3cf17c888b4c04d03ec049f8661e83809f749a3e7b936d53b6adfbb7669318`. Details and metrics are in [C009/VERIFICATION.md](C009/VERIFICATION.md).
+Hosted synthetic browser evidence only; no screen-reader/WCAG or buyer visual acceptance. C009 +0.
 
 ## C010 — package-content audit PASS; reproducible NSIS candidate BLOCKED
 
-At exact code/test SHA `2384a8287a7d5a196596acb4cf351ff61d7a7f34`, [Windows run 43718313656](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43718313656) passed `npm test` (306 passed, 0 failed, 1 skipped of 307), production build, desktop verification (88/88), SBOM generation (6 components/0 missing license metadata), P124 test-harness exclusion (552 ASAR entries), and package-content audit (525 files/84,095,509 bytes/0 findings). The final job failed on the bit-for-bit reproducibility assertion.
+At exact code/test SHA `d0701f007c58bf53a452297a45cb81574a6ae039`, [Windows run 43720322521](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43720322521) passed `npm test` (306 passed, 0 failed, 1 skipped of 307), build, desktop verification (88/88), SBOM generation (6 components/0 missing license metadata), 552-entry ASAR harness exclusion, and package-content scan (525 files/84,095,509 bytes/0 findings). The overall run failed at the installer reproducibility gate.
 
-- First unsigned candidate: 129,200,848 bytes, SHA-256 `2EA9FACF91F04D609F88368A25282075A1D4A55AC26F4826E6A8DCEBF96D0AF9`.
-- Same-source rebuild: 129,200,956 bytes, SHA-256 `84AA17DBEA5BF89CADF38A81FBC84D0C6848F5CA62BA81F7BA773AA64613930C`.
-- `app.asar` was byte-identical in both builds (`9BFCC661F51B7A4A779780F45F2250162F1D83FA2921C169B3408EE63524A353`); Authenticode status was `NotSigned` and both builds used `--publish never`.
-- The binary comparator found 128,634,409 differing bytes across 507,828 ranges; PE timestamp values matched. The installer packaging difference is confirmed, but its cause is unresolved. No installer was uploaded, signed, or released.
-- [Policy gate run 43718314059](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43718314059) — PASS. [Exact-SHA Linux/Chrome/Edge regression run 43718313685](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43718313685) — PASS.
-- The earlier same-source probe [run 43717541113](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43717541113) printed a reproducibility FAIL but did not fail its job. The workflow now fails closed. An intermediate diagnostic unit test at SHA `af3de99c0f8f1b2d0655f9ca1b1cf92fb52c1422` failed on an incorrect fixture offset; the expected offset was fixed before the passing test suite at the latest SHA.
-- Earlier PII false positives in [run 43716421105](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43716421105) were caused by scanning minified/binary dependency bytes as text. The current scanner applies PII patterns only to static text/data files, while scanning all package bytes for secret signatures and checking package paths.
+- Build 1: 129,200,848 bytes, SHA-256 `E556F5C39AE4B85B8E1BCB7A6154162C0C899BEE4EA81B7F4D1F277854D38DAC`.
+- Same-source build 2: 129,200,961 bytes, SHA-256 `C437370AC577818350E2B6BE73ABB18833B542205A763F92BCA5FD39AF5833C3`.
+- Both unsigned builds used `--publish never`; `app.asar` was byte-identical (`9BFCC661F51B7A4A779780F45F2250162F1D83FA2921C169B3408EE63524A353`). PE timestamps matched. The comparator found 128,635,692 differing bytes across 506,889 ranges; package cause remains unresolved.
+- This is a repeated failure: [run 43718313656](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43718313656) at SHA `2384a828` also failed, with 128,634,409 differing bytes across 507,828 ranges. Exact candidate hashes and both runs are in [C010/VERIFICATION.md](C010/VERIFICATION.md).
+- [Linux/Chrome/Edge run 43720322561](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43720322561) and [blueprint policy 43720322704](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43720322704) — PASS at the same SHA.
+- The content scan's earlier PII false positives and intermediate comparator-test offset error were corrected; see C010/VERIFICATION.md for attempt history.
 
-C010 remains **BLOCKED**, adds **+0**, and does not satisfy reproducible package readiness. Legal/NOTICE review, signed/SmartScreen installation, physical buyer Windows launch, and buyer PDF acceptance also remain open.
+C010 remains **BLOCKED**, +0. No installer was signed, uploaded, or released. Legal/NOTICE, physical buyer Windows, SmartScreen, customer-PDF and final sales acceptance remain open.
 
 ## Independent review qualifications
 
 - C001/P124's actual production Workspace/SKU-gated Qwen3 flow passed on `09b2d9c8f60631bb2f623f840bdde03450ed9e17`; test-only receipts were issued ephemerally and no production issuer was configured. The +2 candidate awaits independent GPT review and central owner scoring; no central score change is made here.
-- C010's unsigned package/SBOM/ASAR and broad package-content checks passed at SHA `2384a8287a7d5a196596acb4cf351ff61d7a7f34`, with 552 ASAR entries, 525 scanned files and 0 findings. Same-source NSIS reproducibility failed at that SHA; C010 remains +0/BLOCKED.
+- C010's unsigned package/SBOM/ASAR and broad package-content checks passed at SHA `d0701f007c58bf53a452297a45cb81574a6ae039`, with 552 ASAR entries, 525 scanned files and 0 findings. Same-source NSIS reproducibility failed at this and the previous SHA; C010 remains +0/BLOCKED.
 - Overall buyer acceptance stays UNASSESSED; RELEASE HOLD stays active. See [C001](C001/VERIFICATION.md), [C010](C010/VERIFICATION.md), and [independent G003](https://github.com/hibi89/astra_pdf_redesigner/blob/gpt/astra-final-qa-ocr-20261115/docs/evidence/astra/G003/VERIFICATION.md).
 
 

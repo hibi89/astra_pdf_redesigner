@@ -2,26 +2,25 @@
 
 - Date: 2026-11-15
 - Branch: `codex/astra-final-ai-sku-20261115`
-- Latest C010 code/test SHA: `2384a8287a7d5a196596acb4cf351ff61d7a7f34`; earlier package/ASAR evidence at `965fb977c9983b5cf2103ee267f57676a676cde8` and `fa57116544217c6122b1cd9643fee91002f45edc` is retained below
+- Latest C010 code/test SHA: `d0701f007c58bf53a452297a45cb81574a6ae039`; earlier package/ASAR evidence at `965fb977c9983b5cf2103ee267f57676a676cde8` and `fa57116544217c6122b1cd9643fee91002f45edc` is retained below
 - Result: unsigned package content/SBOM checks PASS; same-source NSIS installer reproducibility FAIL; C010 BLOCKED, score change +0
 
 ## Exact-SHA hosted evidence
 
 ## Latest exact-SHA attempt — reproducibility gate FAIL
 
-- [Windows C010 run 43718313656](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43718313656) ran at exact code/test SHA `2384a8287a7d5a196596acb4cf351ff61d7a7f34`. The run is **FAIL** only at the same-source installer reproducibility assertion; its regression, build, package-content scan, SBOM, ASAR exclusion, and desktop verification steps passed.
-- `npm test`: 306 passed, 0 failed, 1 skipped of 307; production build PASS; `npm run desktop:verify`: 88/88 PASS.
-- CycloneDX SBOM: 6 production components, 0 with missing license metadata. The SBOM stayed in the ephemeral runner; metadata coverage is not legal/NOTICE approval.
-- `app.asar`: 552 entries; the P124 acceptance harness/fixture paths are absent. Content audit: 525 files / 84,095,509 bytes scanned, including 13 static text files, 8 secret-signature rules, 3 PII text rules, and 3 path rules; findings 0.
-- The candidate remained unsigned (`NotSigned`) and built with `--publish never`. Build 1: 129,200,848 bytes, SHA-256 `2EA9FACF91F04D609F88368A25282075A1D4A55AC26F4826E6A8DCEBF96D0AF9`. Build 2: 129,200,956 bytes, SHA-256 `84AA17DBEA5BF89CADF38A81FBC84D0C6848F5CA62BA81F7BA773AA64613930C`.
-- Both builds had the same `app.asar` SHA-256 `9BFCC661F51B7A4A779780F45F2250162F1D83FA2921C169B3408EE63524A353`; the PE timestamp fields also matched. The byte comparator found 128,634,409 differing bytes across 507,828 ranges. This establishes that the final installer is not bit-for-bit reproducible; the source of the package-level differences is unresolved.
-- [Blueprint evidence policy run 43718314059](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43718314059) — PASS at the same SHA. The policy result does not override the C010 package failure.
+- [Windows C010 run 43720322521](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43720322521) ran at exact code/test SHA `d0701f007c58bf53a452297a45cb81574a6ae039`. The overall run is **FAIL** only at the same-source NSIS installer reproducibility assertion; regression, build, scan, SBOM, ASAR exclusion, and desktop verification passed.
+- `npm test`: 306 passed, 0 failed, 1 skipped of 307; production build PASS; `npm run desktop:verify`: 88 passed, 0 failed, 0 skipped.
+- CycloneDX SBOM: 6 production components, 0 with missing license metadata. `app.asar`: 552 entries, P124 acceptance harness/fixture absent. Content audit: 525 files / 84,095,509 bytes scanned; 13 static text files; 8 secret-signature rules, 3 PII text rules, 3 path rules; 0 findings.
+- Unsigned build 1: 129,200,848 bytes, SHA-256 `E556F5C39AE4B85B8E1BCB7A6154162C0C899BEE4EA81B7F4D1F277854D38DAC`. Same-source build 2: 129,200,961 bytes, SHA-256 `C437370AC577818350E2B6BE73ABB18833B542205A763F92BCA5FD39AF5833C3`. Both were `NotSigned` and used `--publish never`.
+- Both runs had the same `app.asar` SHA-256 `9BFCC661F51B7A4A779780F45F2250162F1D83FA2921C169B3408EE63524A353`, and PE timestamp fields matched. The comparator found 128,635,692 differing bytes across 506,889 ranges. The installer output is not bit-for-bit reproducible; the cause is unresolved.
+- [Blueprint evidence policy 43720322704](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43720322704) and [Linux/Chrome/Edge regression 43720322561](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43720322561) — PASS at the same SHA.
 
 ### Corrected attempts
 
 - The earlier content scan at SHA `73c775391b3c9d814acc96284967b20b0c623d1e`, [run 43716421105](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43716421105), flagged PII-shaped byte sequences in minified/binary dependency data. The scanner was narrowed to static text/data extensions for PII checks while retaining secret-signature scanning across package bytes and path checks. Current scan reports zero findings.
-- A first diagnostic-test commit at SHA `af3de99c0f8f1b2d0655f9ca1b1cf92fb52c1422`, [run 43718283581](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43718283581), failed a PE timestamp byte-offset assertion in the new test helper. The fixture offset was corrected; the final SHA passed all unit tests.
-- Probe run [43717541113](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43717541113) at SHA `8cbb5fb4f55c1699712b2a81b08dcbdf682c7cd9` printed `C010 reproducibility FAIL` but did not fail the job. The current workflow throws on any mismatch, so the latest run fails closed.
+- A first diagnostic-test commit at SHA `af3de99c0f8f1b2d0655f9ca1b1cf92fb52c1422`, [run 43718283581](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43718283581), failed a PE timestamp byte-offset assertion in the new test helper. The fixture offset was corrected; the subsequent unit suite passed.
+- Probe run [43717541113](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43717541113) at SHA `8cbb5fb4f55c1699712b2a81b08dcbdf682c7cd9` printed `C010 reproducibility FAIL` but did not fail the job. The current workflow throws on any mismatch. The explicit failure gate then failed reproducibility at SHA `2384a8287a7d5a196596acb4cf351ff61d7a7f34` in [run 43718313656](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43718313656) and again at the latest SHA in run 43720322521.
 
 
 - [Windows NSIS candidate/SBOM workflow, run 43690873098](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873098) — PASS at the exact SHA.
