@@ -2,7 +2,7 @@
 
 Branch: `codex/astra-final-ai-sku-20261115`  
 Integration target: `integration/astra-final-blueprint-100-20261115`  
-Latest feature tip: `4aa4f533ea652f2f391a9b2deca15f6d7f804130` (npm tests/build, Chrome and Edge regression PASS); latest full real-Qwen quality run remains pending at `8136c6b070eceb97e4e26fbdebae7632ab6f2ed3`  
+Latest code/test SHA: `6c4c2a806aa2010c6d07f1a7aaaf999e8883caf3` (npm test/build and Chrome/Edge C009 accessibility + 30-layout print regression PASS); separate real-Qwen quality runs `8136c6b070eceb97e4e26fbdebae7632ab6f2ed3` and `5b323fd47d0c2cd2efb20a136102ee65b3bb7af2` remain in progress  
 Open draft PR: [#13](https://github.com/hibi89/astra_pdf_redesigner/pull/13)
 
 ## Completed and assessed
@@ -15,7 +15,7 @@ Open draft PR: [#13](https://github.com/hibi89/astra_pdf_redesigner/pull/13)
 | C006 offline license lifecycle prototype | `4e4bfc01aa2543ea03b0674a8fcc8f6f33f50a25` | Linux/Chrome/Edge PASS; Windows Electron/NSIS PASS; blueprint policy PASS | Operational gates BLOCKED; +0 |
 | C002 responsive viewport acceptance | `bd83ac2619a80f940dd628d513a760aee06f0ecb` | 298 unit tests/build, Chrome and Edge at 390/360/320px, blueprint policy PASS | Buyer visual acceptance pending; +0 |
 | C008 synthetic PDF accuracy regression | `bd83ac2619a80f940dd628d513a760aee06f0ecb` | Linux/Chrome, Edge; 15-pair corpus, 12-layout PDF risk matrix, V1/V2 no-write, policy PASS | Synthetic-only; owner acceptance pending; +0 |
-| C009 keyboard/accessibility-tree smoke | `fa57116544217c6122b1cd9643fee91002f45edc` | 298 tests/build, Chrome and Edge AX tree + keyboard Tab, policy PASS | Narrow hosted smoke only; +0 |
+| C009 keyboard/accessibility + 30-layout React/PDF print regression | `6c4c2a806aa2010c6d07f1a7aaaf999e8883caf3` (PR merge `2f414fc027f6b533c73458fd22f7935e4f1906ee`) | npm test/build, Chrome/Edge AX+keyboard and 30 A4 layouts per browser PASS; artifact 14161831651 | Hosted synthetic matrix only; +0 |
 | C010 Windows package/SBOM/ASAR re-audit | `965fb977c9983b5cf2103ee267f57676a676cde8` | Windows 298 PASS / 1 SKIP, desktop 88/88, SBOM 6/0, ASAR 552 entries excludes P124 harness, policy PASS | +0; broad data/legal/release gates remain |
 
 Detailed reports: [C001](C001/VERIFICATION.md), [C003](C003/VERIFICATION.md), [C005](C005/VERIFICATION.md). The earlier P124 BLOCKED note was superseded with hosted evidence: [P124/VERIFICATION.md](P124/VERIFICATION.md).
@@ -51,7 +51,7 @@ Remaining prerequisites:
 - **C006/A09:** the owner-side lifecycle prototype and hostile-input tests pass, but production issuer/pin, real-user activation, refund/support policy and delivered revocation remain owner-controlled operational gates. Do not create production keys or enable sales.
 - **C007/A10:** hosted Windows upgrade/data preservation passes; physical buyer Windows, trusted signing/SmartScreen and interruption/quota acceptance remain owner-only.
 
-No other C001–C010 item is currently READY for credited completion without one of those prerequisites. The worker candidate remains 67/100 conditional (C001 +2 and C007 +1), the central ledger remains 64/100, buyer acceptance is UNASSESSED and RELEASE HOLD remains.
+The C009 synthetic 30-layout print matrix is complete, but large-document, constrained-runtime, and interruption-recovery evidence remains testable on standard hosted runners; pursue that next. Remaining source/legal/owner gates above still prevent credit for C003/C004/C005/C006/C007. No score changes: worker candidate remains 67/100 conditional, central ledger 64/100, buyer acceptance UNASSESSED, RELEASE HOLD.
 ## C002 — hosted responsive viewport PASS, buyer acceptance pending
 
 Feature/test SHA `bd83ac2619a80f940dd628d513a760aee06f0ecb`: [C002/VERIFICATION.md](C002/VERIFICATION.md). The dedicated workflow passed npm test (298/298), build, Chrome, Edge, three mobile widths, and the blueprint policy gate. Browser cleanup was corrected after earlier test-harness-only CDP/cleanup failures. C002 remains +0 until buyer visual acceptance; overall candidate remains 67/100, official acceptance UNASSESSED, RELEASE HOLD.
@@ -62,9 +62,10 @@ Feature/test SHA `bd83ac2619a80f940dd628d513a760aee06f0ecb`: [C002/VERIFICATION.
 At exact code/test SHA `bd83ac2619a80f940dd628d513a760aee06f0ecb`, [full CI run 43689843103](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43689843103) passed on Linux Chrome and Edge. The run covered the 15-pair A4 parity corpus, invalid-output recovery with V1/V2 preservation, P118 synthetic images/multipage fail-closed checks, 12 PDF layout-risk fixtures, and M04 structural audits. See [C008/VERIFICATION.md](C008/VERIFICATION.md). Customer documents, real OCR/CER, full visual fidelity, and large-document performance remain unverified; score +0.
 
 
-## C009 — hosted keyboard/accessibility-tree smoke PASS; narrow scope
+## C009 — hosted 30-layout React/print regression and keyboard smoke PASS
 
-At exact code/test SHA `fa57116544217c6122b1cd9643fee91002f45edc`, [Chrome/Edge workflow 43690873135](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873135) passed 298 tests, build, accessibility-tree checks, keyboard Tab navigation and visible focus. [Policy run 43690873420](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873420) passed. This is not a screen-reader/WCAG certification or low-resource performance measurement; score +0.
+Feature/test SHA `6c4c2a806aa2010c6d07f1a7aaaf999e8883caf3`; the PR workflow executed merge SHA `2f414fc027f6b533c73458fd22f7935e4f1906ee`, containing the feature head. [Run 43714391627](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43714391627) passed `npm test`, `npm run build`, and Chrome/Edge browser checks. The accessibility smoke confirmed 14 button nodes, named navigation/stage controls, keyboard reachability, and visible focus. The print matrix rendered and printed all 8 base themes plus 22 PRO/BUSINESS layouts as one-page A4 PDFs; it checked synthetic title/body/amount/negation text, no UI text in output, no saved design mutation, and 30 unique first-page rasters in each browser. [Artifact 14161831651](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43714391627/artifacts/14161831651) contains 122 PDFs, raster previews and reports (ZIP SHA-256 `19c6901c406243036788a8bb1195e6acb3d29fd19ae3cefe773aff373faf429e`). The initial attempt at `c21c898e5eb4aa0a2a384fb20b93603f45276785` failed a PDF text-marker assertion; whitespace normalization in the test fixed it and the corrected matrix passed. This is synthetic automation, not screen-reader/WCAG or buyer visual acceptance; large-document, constrained-runtime and interruption recovery checks remain open. C009 +0.
+
 
 
 ## C010 — unsigned package candidate and SBOM PASS; release gates open
