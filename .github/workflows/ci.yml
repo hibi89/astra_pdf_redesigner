@@ -65,6 +65,7 @@ jobs:
           CHROME_PATH="$CHROME_BIN" node tests/step3-consent-browser.mjs
           CHROME_PATH="$CHROME_BIN" node tests/step3-race-browser.mjs
           CHROME_PATH="$CHROME_BIN" node tests/step3-cancel-browser.mjs
+          ASTRA_C008_STRESS_REPORT="$RUNNER_TEMP/astra-c008-stress-chrome.json" CHROME_PATH="$CHROME_BIN" node tests/c008-large-pdf-stress-browser.mjs
       - name: Upload actual M02 studio screenshot (synthetic-only CI content)
         uses: actions/upload-artifact@v4
         with:
@@ -72,6 +73,14 @@ jobs:
           path: ${{ runner.temp }}/astra-m02-studio.png
           if-no-files-found: error
           retention-days: 7
+      - name: Upload sanitized C008 stress metrics (Chrome; no PDF content)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: astra-c008-stress-chrome-synthetic
+          path: ${{ runner.temp }}/astra-c008-stress-chrome.json
+          if-no-files-found: ignore
+          retention-days: 14
   # A new GitHub-hosted VM prevents leftover Chrome helpers and long-running
   # profile cleanup from exhausting Edge browser resources.
   edge-validation:
@@ -121,5 +130,14 @@ jobs:
           CHROME_PATH="$EDGE_BIN" node tests/step3-consent-browser.mjs
           CHROME_PATH="$EDGE_BIN" node tests/step3-race-browser.mjs
           CHROME_PATH="$EDGE_BIN" node tests/step3-cancel-browser.mjs
+          ASTRA_C008_STRESS_REPORT="$RUNNER_TEMP/astra-c008-stress-edge.json" CHROME_PATH="$EDGE_BIN" node tests/c008-large-pdf-stress-browser.mjs
           echo "PASS EDGE: STEP1 A4 PDF and STEP2 print, persistence, images, import/export and pagination checks"
+      - name: Upload sanitized C008 stress metrics (Edge; no PDF content)
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: astra-c008-stress-edge-synthetic
+          path: ${{ runner.temp }}/astra-c008-stress-edge.json
+          if-no-files-found: ignore
+          retention-days: 14
 
