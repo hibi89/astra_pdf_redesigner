@@ -33,7 +33,7 @@ try{
  const {targetId}=await request('Target.createTarget',{url});
  const {sessionId}=await request('Target.attachToTarget',{targetId,flatten:true});
  const send=(method,params={})=>request(method,params,sessionId);
- await send('Page.enable');await send('Runtime.enable');await send('Emulation.enable');
+ await send('Page.enable');await send('Runtime.enable');
  const evaluate=async expression=>{
   const result=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});
   if(result.exceptionDetails)throw Error(JSON.stringify(result.exceptionDetails));
