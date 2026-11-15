@@ -1,0 +1,52 @@
+name: C009 keyboard and accessibility-tree browser smoke
+on:
+  push:
+    branches: ['codex/astra-final-ai-sku-20261115']
+    paths:
+      - '.github/workflows/c009-accessibility.yml'
+      - 'src/**'
+      - 'tests/c009-accessibility-browser.mjs'
+      - 'tests/browser-process.mjs'
+      - 'index.html'
+      - 'package*.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  browser-accessibility:
+    name: Chrome and Edge AX tree and keyboard navigation
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Existing regression and production build
+        run: |
+          npm test
+          npm run build
+      - name: Verify named controls and keyboard focus in Chrome and Edge
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME_BIN=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)
+          EDGE_BIN=$(command -v microsoft-edge || command -v microsoft-edge-stable || command -v microsoft-edge-beta || true)
+          if [ -z "$CHROME_BIN" ] || [ -z "$EDGE_BIN" ]; then
+            echo "::error::Both Chrome and Edge are required for C009 accessibility acceptance"
+            exit 1
+          fi
+          npm run dev -- --port 4173 >/tmp/astra-c009-a11y.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:4173 >/dev/null; then break; fi
+            sleep 0.5
+          done
+          curl -fsS http://127.0.0.1:4173 >/dev/null
+          CHROME_PATH="$CHROME_BIN" node tests/c009-accessibility-browser.mjs
+          CHROME_PATH="$EDGE_BIN" node tests/c009-accessibility-browser.mjs
