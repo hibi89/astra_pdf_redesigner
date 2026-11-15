@@ -79,7 +79,7 @@ export async function inspectRealPdfPair({
   // This is useful for genuine Chrome PDFs whose PDF.js text items differ
   // from the deterministic hand-built PDF fixture.
   for(const [label,value] of [['SOURCE',sourceText],['IMPORTED',importedText],['OUTPUT',outputText]]){
-    if(typeof value!=='string'||value.length>2_000_000||value.includes('\\u0000'))
+    if(typeof value!=='string'||value.length>2_000_000||value.includes('\u0000'))
       throw Error('G002_'+label+'_INVALID_TEXT_SNAPSHOT');
   }
   const snapshot=checkSnapshots({
