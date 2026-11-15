@@ -119,8 +119,18 @@ jobs:
           $secondAsarHash = (Get-FileHash -LiteralPath $secondAsarPath -Algorithm SHA256).Hash
           if ($firstAsarHash -ne $secondAsarHash) { throw 'Independent source build app.asar hashes differ.' }
 
+          $canonicalAppPath = Join-Path $env:RUNNER_TEMP 'astra-c010-canonical-prepackaged'
+          Copy-Item -LiteralPath $firstAppPath -Destination $canonicalAppPath -Recurse
+          Normalize-AstraPackageTree $canonicalAppPath
+          $firstElevatePath = Join-Path $firstAppPath 'resources/elevate.exe'
+          $firstElevateBeforeHash = (Get-FileHash -LiteralPath $firstElevatePath -Algorithm SHA256).Hash
+          $firstElevateBeforeSignature = (Get-AuthenticodeSignature -LiteralPath $firstElevatePath).Status
+
           npx electron-builder --win nsis --x64 --prepackaged $firstAppPath --publish never
           if ($LASTEXITCODE -ne 0) { throw 'First prepackaged unsigned NSIS build failed.' }
+          $firstElevateAfterHash = (Get-FileHash -LiteralPath $firstElevatePath -Algorithm SHA256).Hash
+          $firstElevateAfterSignature = (Get-AuthenticodeSignature -LiteralPath $firstElevatePath).Status
+          Write-Output "C010 elevate first: before=$firstElevateBeforeHash/$firstElevateBeforeSignature after=$firstElevateAfterHash/$firstElevateAfterSignature"
           $setups = @(Get-ChildItem -LiteralPath 'release' -Filter 'ASTRA-PDF-Redesigner-Setup-*-x64.exe' -File)
           if ($setups.Count -ne 1) { throw "Expected one first unsigned candidate, found $($setups.Count)." }
           $firstSignature = Get-AuthenticodeSignature -LiteralPath $setups[0].FullName
@@ -132,12 +142,51 @@ jobs:
           Write-Output "C010 reproducibility build 1: installer=$firstCandidateHash app.asar=$firstAsarHash"
           Remove-Item -LiteralPath $setups[0].FullName -Force
 
+          $secondElevatePath = Join-Path $secondAppPath 'resources/elevate.exe'
+          $secondElevateBeforeHash = (Get-FileHash -LiteralPath $secondElevatePath -Algorithm SHA256).Hash
+          $secondElevateBeforeSignature = (Get-AuthenticodeSignature -LiteralPath $secondElevatePath).Status
           npx electron-builder --win nsis --x64 --prepackaged $secondAppPath --publish never
-          $rebuildExitCode = $LASTEXITCODE
+          $secondBuildExitCode = $LASTEXITCODE
+          $secondElevateAfterHash = (Get-FileHash -LiteralPath $secondElevatePath -Algorithm SHA256).Hash
+          $secondElevateAfterSignature = (Get-AuthenticodeSignature -LiteralPath $secondElevatePath).Status
+          Write-Output "C010 elevate independent tree: before=$secondElevateBeforeHash/$secondElevateBeforeSignature after=$secondElevateAfterHash/$secondElevateAfterSignature"
+          $secondSetups = @()
+          $secondHash = 'unavailable'
+          $secondBytes = 0
+          $secondSignatureStatus = 'unavailable'
+          if ($secondBuildExitCode -eq 0) {
+            $secondSetups = @(Get-ChildItem -LiteralPath 'release' -Filter 'ASTRA-PDF-Redesigner-Setup-*-x64.exe' -File)
+            if ($secondSetups.Count -eq 1) {
+              $secondSignatureStatus = (Get-AuthenticodeSignature -LiteralPath $secondSetups[0].FullName).Status
+              $secondHash = (Get-FileHash -LiteralPath $secondSetups[0].FullName -Algorithm SHA256).Hash
+              $secondBytes = (Get-Item -LiteralPath $secondSetups[0].FullName).Length
+              Write-Output "C010 independent-tree installer: hash=$secondHash bytes=$secondBytes signature=$secondSignatureStatus"
+              Remove-Item -LiteralPath $secondSetups[0].FullName -Force
+            }
+          }
+
+          $thirdAppPath = Join-Path $env:RUNNER_TEMP 'astra-c010-repeat-canonical'
+          Copy-Item -LiteralPath $canonicalAppPath -Destination $thirdAppPath -Recurse
+          Normalize-AstraPackageTree $thirdAppPath
+          $thirdTreeOutput = node tests/c010-package-tree-summary.cjs compare $thirdAppPath $treeSnapshot
+          if ($LASTEXITCODE -ne 0) { throw 'Could not verify the repeat canonical package tree.' }
+          $thirdTree = $thirdTreeOutput | ConvertFrom-Json
+          Write-Output $thirdTreeOutput
+          if (-not $thirdTree.samePayloadTree -or $thirdTree.counts.metadataChangedEntries -ne 0) {
+            throw 'Repeat packaging input differs from the canonical package tree.'
+          }
+          $thirdElevatePath = Join-Path $thirdAppPath 'resources/elevate.exe'
+          $thirdElevateBeforeHash = (Get-FileHash -LiteralPath $thirdElevatePath -Algorithm SHA256).Hash
+          $thirdElevateBeforeSignature = (Get-AuthenticodeSignature -LiteralPath $thirdElevatePath).Status
+          npx electron-builder --win nsis --x64 --prepackaged $thirdAppPath --publish never
+          $repeatExitCode = $LASTEXITCODE
           $reproStatus = 'FAIL'
-          $reproDetail = "second prepackaged NSIS build command exited $rebuildExitCode"
+          $reproDetail = "repeat canonical prepackaged NSIS build command exited $repeatExitCode"
           $repeatSetups = @()
-          if ($rebuildExitCode -eq 0) {
+          if ($repeatExitCode -eq 0) {
+            $thirdElevateAfterHash = (Get-FileHash -LiteralPath $thirdElevatePath -Algorithm SHA256).Hash
+            $thirdElevateAfterSignature = (Get-AuthenticodeSignature -LiteralPath $thirdElevatePath).Status
+            Write-Output "C010 elevate same-tree repeat: before=$thirdElevateBeforeHash/$thirdElevateBeforeSignature after=$thirdElevateAfterHash/$thirdElevateAfterSignature"
             $repeatSetups = @(Get-ChildItem -LiteralPath 'release' -Filter 'ASTRA-PDF-Redesigner-Setup-*-x64.exe' -File)
             if ($repeatSetups.Count -eq 1) {
               $repeatSignature = Get-AuthenticodeSignature -LiteralPath $repeatSetups[0].FullName
@@ -145,17 +194,21 @@ jobs:
               $repeatBytes = (Get-Item -LiteralPath $repeatSetups[0].FullName).Length
               $reproStatus = if ($repeatHash -eq $firstCandidateHash -and $firstAsarHash -eq $secondAsarHash -and
                 $firstSignature.Status -eq 'NotSigned' -and $repeatSignature.Status -eq 'NotSigned') { 'PASS' } else { 'FAIL' }
-              $reproDetail = "installer1=$firstCandidateHash installer2=$repeatHash bytes1=$firstCandidateBytes bytes2=$repeatBytes app.asar1=$firstAsarHash app.asar2=$secondAsarHash signatures=$($firstSignature.Status)/$($repeatSignature.Status)"
+              $reproDetail = "sameTreeInstaller1=$firstCandidateHash sameTreeInstaller2=$repeatHash bytes1=$firstCandidateBytes bytes2=$repeatBytes independentTreeInstaller=$secondHash independentBytes=$secondBytes app.asar1=$firstAsarHash app.asar2=$secondAsarHash installerSignatures=$($firstSignature.Status)/$repeatSignature.Status independentSignature=$secondSignatureStatus"
             } else {
-              $reproDetail = "second prepackaged build left $($repeatSetups.Count) candidate installers"
+              $reproDetail = "repeat canonical build left $($repeatSetups.Count) candidate installers"
             }
           }
           Write-Output "C010 reproducibility $reproStatus $reproDetail"
           if (Test-Path -LiteralPath $env:GITHUB_STEP_SUMMARY) {
-            "Independent source builds with canonical timestamps and unsigned NSIS package reproducibility: $reproStatus ($reproDetail)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+            "Canonical package tree and same-tree unsigned NSIS package reproducibility: $reproStatus ($reproDetail)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
           }
-          if ($rebuildExitCode -eq 0 -and $repeatSetups.Count -eq 1) {
+          if ($secondBuildExitCode -eq 0 -and $secondSetups.Count -eq 1) {
+            node tests/c010-binary-diff-summary.cjs $firstCandidatePath $secondSetups[0].FullName
+            if ($LASTEXITCODE -ne 0) { throw 'Independent-tree binary diagnostic failed.' }
+          }
+          if ($repeatExitCode -eq 0 -and $repeatSetups.Count -eq 1) {
             node tests/c010-binary-diff-summary.cjs $firstCandidatePath $repeatSetups[0].FullName
-            if ($LASTEXITCODE -ne 0) { throw 'Binary reproducibility diagnostic failed.' }
+            if ($LASTEXITCODE -ne 0) { throw 'Same-tree binary diagnostic failed.' }
           }
           if ($reproStatus -ne 'PASS') { throw 'Unsigned same-source Windows candidate is not bit-for-bit reproducible.' }
