@@ -1,10 +1,12 @@
 # Astra PDF Redesigner — 12영역 최종설계 증거 기반 잠정 완성률
 
-**기준일: 2026-11-15 KST · 마지막 검증 기능 SHA `f5751bbb559f268706f2e7bc15438d0a8f590ed9` · P123 VERIFIED +3 · 잠정 64/100점 (64%); P124 READY +0, P119/P120/P121/P126 BLOCKED +0. G55 PASS; G60/G65/G70 NOT PASSED.**
+**기준일: 2026-11-15 KST · 마지막 검증 기능 SHA `f5751bbb559f268706f2e7bc15438d0a8f590ed9` · P123 VERIFIED +3 · 잠정 64/100점 (64%); P124 Windows hosted synthetic PASS / 최종 인수 보류 +0, P119/P120/P121/P126 BLOCKED +0. G55 PASS; G60/G65/G70 NOT PASSED.**
 **공식 구매자 최종 수용률: UNASSESSED. 출시: RELEASE HOLD.**
 
 
 **G005 통합 보충 (2026-11-15 KST):** GPT 독립 G001–G004 QA [PR #12](https://github.com/hibi89/astra_pdf_redesigner/pull/12)는 통합 브랜치에만 병합했다. 정확 코드 SHA `24939be58c6fcd3396697bd93aa58a082b4d7a48`의 52/52 PASS, 통합 merge `4b486b5c9039e97a468483eafe4a1d7146193b0c`. 추가 수용 점수 **+0**. Codex P124 Windows [#43683050524](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43683050524) FAIL (첫 BASIC 10개 제안 기준 미달, 이후 SKU/NSIS 미검증). **최종 64/100 잠정, G60/G65/G70 NOT PASSED, 공식 UNASSESSED, RELEASE HOLD**. G004 익명 템플릿은 실제 허가 PDF 검사·물리 PC 수용으로 계산하지 않는다.
+
+**최신 G005 증거 정정 (2026-11-15 KST):** [GPT PR #14](https://github.com/hibi89/astra_pdf_redesigner/pull/14) 통합으로 실제 PDF.js 합성 원본/출력 위험 QA 21 PASS + 기존 독립 QA 52 PASS = [#43685514835](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43685514835) 73/73 PASS, [정책 #43685514899](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43685514899) SUCCESS. **새 가점 +0**. Codex P124의 이전 Windows FAIL은 **역사적 실패**이며 새 정확 SHA `a2ca668c9578b68e760b922c026a5f2f8f941c8d` [Windows #43684225170](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43684225170)은 **SUCCESS**. 단, [독립 artifact audit](../evidence/astra/G003/P124_ARTIFACT_INDEPENDENT_AUDIT.md)에 따르면 각 시험용 SKU 실제 모델 10회 호출에서 **서로 다른 입력/제안 SHA 각 1개**이므로 10개 서로 다른 선택 문단의 사용자 흐름·정확성 수용과 실제 판매용 SKU 권한·ASAR 테스트코드 제외는 **미검증**이다. 따라서 Codex의 +2/총 66은 후보일 뿐, 본 중앙 정본은 **64/100**, official **UNASSESSED**, `RELEASE HOLD` 유지. 이 최신 보충이 바로 아래 오래된 P124/FAIL 내용보다 우선한다.
 
 ## 산정 원칙
 
@@ -46,9 +48,9 @@
 - **정확-SHA Actions:** [실모델 #43678897970](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897970), [Linux #43678897941](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897941), [Windows #43678897933](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897933), [정본 정책 #43678898126](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678898126) 모두 SUCCESS, feature SHA `f5751bbb559f268706f2e7bc15438d0a8f590ed9`. [측정 artifact](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43678897970/artifacts/14147513507), ZIP digest `d30312476d75175ef24847cbc35672b0b398f13dded94e0b77e8fb31c245b811`.
 - **범위와 게이트:** 격리 runner/synthetic only; 고객 원본·구매자 PC·판매 빌드 미검증. G55 PASS; G60 NOT PASSED (실 OCR 공급/Windows acceptance 미완), G65 NOT PASSED (64/100), G70 NOT PASSED. 공식 수용 UNASSESSED, RELEASE HOLD.
 
-## P124 READY +0 — 3SKU 실모델 GUI 수용 (A08)
+## P124 Windows hosted synthetic PASS / 최종 3SKU 인수 보류 +0 — A08
 
-P123 model dependency and P117 SKU-flow dependency are now satisfied. P124 remains unscored and awaits separate Windows Electron acceptance: BASIC/PRO/BUSINESS scenarios, at least 10 actual proposals, approve/reject/Undo, no unapproved text changes, PDF text equality, missing-model/cancel/forged-error behavior. Mock-only evidence does not count.
+P123 model dependency and P117 SKU-flow dependency satisfied. Real Qwen3 CPU Windows/Electron hosted workflow PASSED on exact `a2ca668c9578b68e760b922c026a5f2f8f941c8d`, with BASIC/PRO/BUSINESS **test-only contexts**, missing/tampered safeguards, explicit approval/reject/Undo and production-only unsigned NSIS smoke. Independent synthetic JSON artifact proved **10 real calls per test SKU but exactly one distinct input and one distinct proposal SHA per SKU**. Production `Workspace` entitlement UX, 10 distinct selected paragraphs per SKU and installed ASAR test-harness omission were not proven. **P124 +2 candidate NOT accepted**; central A08 7/14 unchanged, 64/100 provisional, RELEASE HOLD.
 
 ## P122 +2점 — 로컬 동의·stale response·원문 보호 (A08)
 
