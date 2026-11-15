@@ -82,6 +82,6 @@ try{
  console.log('PASS C002 responsive 3-SKU studio: 390/360/320 CSS-pixel viewports, no horizontal overflow, visible stage navigation and A4 preview');
 }finally{
  try{ws?.close();}catch{}
- try{await browser.kill();}catch{}
+ try{await browser.close();}catch{}
  try{rmSync(profile,{recursive:true,force:true});}catch{}
 }
