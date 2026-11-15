@@ -57,6 +57,12 @@ jobs:
           $testOnlyEntries = @($asarEntries | Where-Object { $_ -match '(?i)p124-electron-qwen3-acceptance|tests[/\\]fixtures[/\\]p124-electron-qwen3' })
           if ($testOnlyEntries.Count -ne 0) { throw "Test-only P124 content leaked into app.asar: $($testOnlyEntries -join ', ')" }
           Write-Output "PASS app.asar excludes P124 test harness; enumerated entries=$($asarEntries.Count)"
+          $extractPath = Join-Path $env:RUNNER_TEMP 'astra-c010-app-asar-content'
+          if (Test-Path -LiteralPath $extractPath) { throw 'Package audit extraction path already exists.' }
+          & $asarCli extract $asarPath $extractPath
+          if ($LASTEXITCODE -ne 0) { throw 'Could not extract the unsigned app.asar into the isolated runner temp directory.' }
+          node tests/c010-package-content-audit.cjs $extractPath
+          if ($LASTEXITCODE -ne 0) { throw 'Unsigned app.asar content audit found a blocked path, secret signature, PII pattern, or unscanned item.' }
           $setups = @(Get-ChildItem -LiteralPath 'release' -Filter 'ASTRA-PDF-Redesigner-Setup-*-x64.exe' -File)
           if ($setups.Count -ne 1) { throw "Expected one unsigned NSIS candidate, found $($setups.Count)." }
           $signature = Get-AuthenticodeSignature -LiteralPath $setups[0].FullName
