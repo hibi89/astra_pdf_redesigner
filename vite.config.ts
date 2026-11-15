@@ -24,15 +24,16 @@ if (p124ElectronAcceptance) {
       !/^astra-p124-test-entitlements\.json$/i.test(entitlementPath.split(/[\\/]/).at(-1) || '')) {
     throw new Error('P124 entitlement config must be a named file directly under RUNNER_TEMP.');
   }
-  p124TestEntitlements = JSON.parse(readFileSync(entitlementPath, 'utf8'));
-  if (!p124TestEntitlements || p124TestEntitlements.schema !== 'astra-p124-test-entitlements-v1' ||
-      !p124TestEntitlements.issuerPublicJwk || Object.hasOwn(p124TestEntitlements.issuerPublicJwk, 'd') ||
-      !/^[0-9a-f]{64}$/.test(p124TestEntitlements.issuerThumbprintSha256 || '') ||
-      !p124TestEntitlements.receipts || ['basic', 'pro', 'business'].some(tier =>
-        typeof p124TestEntitlements.receipts[tier] !== 'string') ||
-      Object.hasOwn(p124TestEntitlements, 'privateKey') || Object.hasOwn(p124TestEntitlements, 'privateJwk')) {
+  const configuredEntitlements = JSON.parse(readFileSync(entitlementPath, 'utf8')) as P124TestEntitlements | null;
+  if (!configuredEntitlements || configuredEntitlements.schema !== 'astra-p124-test-entitlements-v1' ||
+      !configuredEntitlements.issuerPublicJwk || Object.hasOwn(configuredEntitlements.issuerPublicJwk, 'd') ||
+      !/^[0-9a-f]{64}$/.test(configuredEntitlements.issuerThumbprintSha256 || '') ||
+      !configuredEntitlements.receipts || ['basic', 'pro', 'business'].some(tier =>
+        typeof configuredEntitlements.receipts[tier] !== 'string') ||
+      Object.hasOwn(configuredEntitlements, 'privateKey') || Object.hasOwn(configuredEntitlements, 'privateJwk')) {
     throw new Error('P124 entitlement config is incomplete or contains private-key material.');
   }
+  p124TestEntitlements = configuredEntitlements;
 }
 
 export default defineConfig({
