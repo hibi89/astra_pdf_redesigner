@@ -347,10 +347,8 @@ async function runStep2ProjectAcceptance(win,renderLocalPdf){
     const quota=await evaluate('('+injectStep2QuotaFailure.toString()+')('+snapshotSource+','+saveWaitSource+','+titleWaitSource+')','synthetic quota failure');
     if(!quota?.injected||quota.status!=='저장 실패'||quota.before!==baseline||quota.after!==baseline)
       throw Error('STEP2 quota failure changed persisted V2 data or was not visible');
-    await reloadStep2Preview(win,"quota failure");
-    const afterQuotaReload=await evaluate('('+verifyReloadedProject.toString()+')()','quota reload verification');
-    if(!afterQuotaReload?.saved||afterQuotaReload.assets!==1)
-      throw Error('STEP2 persisted document/PNG did not survive quota failure reload');
+    // Keep the unsaved React draft in place: the product's beforeunload guard
+    // correctly blocks reload until the user retries or discards that draft.
     const retry=await evaluate('('+setStep2TitleAndSave.toString()+')('+JSON.stringify('C007_QUOTA_RECOVERY_RETRY')+','+snapshotSource+','+saveWaitSource+','+titleWaitSource+')','quota recovery retry');
     const retryState=JSON.parse(retry);
     const baselineState=JSON.parse(baseline);
@@ -389,7 +387,7 @@ async function runStep2ProjectAcceptance(win,renderLocalPdf){
       after_quota_snapshot_sha256:createHash('sha256').update(quota.after).digest('hex'),
       abort_before_snapshot_sha256:createHash('sha256').update(aborted.before).digest('hex'),
       abort_after_snapshot_sha256:createHash('sha256').update(aborted.after).digest('hex'),
-      evidence_scope:'synthetic QuotaExceededError and IndexedDB transaction abort; not physical power-loss'
+      evidence_scope:'synthetic quota failure and IndexedDB transaction abort; retry occurs before reload because the unsaved-draft guard blocks navigation; not physical power-loss'
     };
     if(!report.github_sha)throw Error('STEP2 recovery report requires exact GitHub Actions SHA');
     await fs.writeFile(reportPath,JSON.stringify(report,null,2)+'\n',{flag:'wx'});
