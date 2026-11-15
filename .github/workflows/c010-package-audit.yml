@@ -73,3 +73,28 @@ jobs:
           if (Test-Path -LiteralPath $env:GITHUB_STEP_SUMMARY) {
             "Unsigned NSIS candidate built with --publish never. No signing, artifact upload, or release. SHA-256: $($hash.Hash)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
           }
+          $firstCandidateHash = $hash.Hash
+          $firstAsarHash = (Get-FileHash -LiteralPath $asarPath -Algorithm SHA256).Hash
+          $firstCandidatePath = Join-Path $env:RUNNER_TEMP 'astra-c010-first-unsigned-candidate.exe'
+          Copy-Item -LiteralPath $setups[0].FullName -Destination $firstCandidatePath
+          Write-Output "C010 reproducibility build 1: installer=$firstCandidateHash app.asar=$firstAsarHash"
+          npx electron-builder --win nsis --x64 --publish never
+          $rebuildExitCode = $LASTEXITCODE
+          $reproStatus = 'FAIL'
+          $reproDetail = "second build command exited $rebuildExitCode"
+          if ($rebuildExitCode -eq 0) {
+            $repeatSetups = @(Get-ChildItem -LiteralPath 'release' -Filter 'ASTRA-PDF-Redesigner-Setup-*-x64.exe' -File)
+            if ($repeatSetups.Count -eq 1) {
+              $repeatHash = (Get-FileHash -LiteralPath $repeatSetups[0].FullName -Algorithm SHA256).Hash
+              $repeatAsarHash = (Get-FileHash -LiteralPath $asarPath -Algorithm SHA256).Hash
+              $repeatSignature = Get-AuthenticodeSignature -LiteralPath $repeatSetups[0].FullName
+              $reproStatus = if ($repeatHash -eq $firstCandidateHash -and $repeatAsarHash -eq $firstAsarHash -and $repeatSignature.Status -eq 'NotSigned') { 'PASS' } else { 'FAIL' }
+              $reproDetail = "installer1=$firstCandidateHash installer2=$repeatHash asar1=$firstAsarHash asar2=$repeatAsarHash signature=$($repeatSignature.Status)"
+            } else {
+              $reproDetail = "second build left $($repeatSetups.Count) candidate installers"
+            }
+          }
+          Write-Output "C010 reproducibility $reproStatus $reproDetail"
+          if (Test-Path -LiteralPath $env:GITHUB_STEP_SUMMARY) {
+            "Unsigned same-source rebuild reproducibility: $reproStatus ($reproDetail)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
+          }
