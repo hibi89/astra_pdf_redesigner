@@ -173,7 +173,7 @@ try{
   await eventually(()=>evaluate(`document.querySelector(${JSON.stringify(sourceButtonSelector)})?.disabled`),disabled=>disabled===false);
   assert.deepEqual(await evaluate(`JSON.parse(localStorage.getItem('astra.step6.sources.v1')).items`),sources,
     'Rights acknowledgement is session-only; stored source rights remain UNVERIFIED');
-  assert.equal((await evaluate(stored)).content,before.content);
+  assert.deepEqual((await evaluate(stored)).content,before.content);
   assert.deepEqual((await evaluate(stored)).design,before.design);
   assert.equal(await projectFingerprint(true),projectBeforePdf,'STEP6 rights acknowledgement must not write the STEP2 V2 project store');
   console.log('PASS C003 STEP6 RIGHTS GATE: HTTPS source record stays UNVERIFIED; local STEP5 use requires explicit session acknowledgement; IndexedDB V2 unchanged');
