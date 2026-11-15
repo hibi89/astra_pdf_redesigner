@@ -1,6 +1,6 @@
 # C005 — additional local-AI quality and 8-GiB CPU acceptance
 
-**Status:** BLOCKED for completion and score credit  
+**Status:** PARTIAL evidence run pending; blocked for completion and score credit  
 **Score:** +0  
 **Reason:** The available GitHub-hosted Windows runner reports 17,174,360,064 bytes of total memory (about 16 GiB), so it cannot establish an 8-GiB-class CPU profile; user-local PC tests are outside the permitted environment. A new Windows run is measuring distinct-input behavior separately while this resource-profile gate remains unmet.
 
@@ -12,8 +12,8 @@
 
 ## Current exact-SHA run — in progress
 
-- Windows Electron/Qwen3 run [43702880160](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43702880160) targets code/test SHA `5b323fd47d0c2cd2efb20a136102ee65b3bb7af2`.
-- At 2026-11-15 11:42 UTC (about 90 minutes after the job began), GitHub still reports the P124/C005 real-model step `in_progress`; no artifacts or terminal result are available. The GitHub job-log endpoint returned 404 while the job is active, so per-input progress is unavailable.
-- The run exercises all 31 distinct synthetic inputs in each of BASIC, PRO, and BUSINESS (93 unique-input real inference calls), through the product Electron Workspace. Its evidence may address unique-input coverage, but cannot establish an 8-GiB-class runner profile.
+- The requirement is 30+ distinct synthetic inputs across the quality run. The earlier Windows run [43702880160](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43702880160) at SHA `5b323fd47d0c2cd2efb20a136102ee65b3bb7af2` is still active after roughly 100 minutes; it was exercising 31 inputs in each SKU context. Its logs and artifacts are unavailable until the job ends.
+- A follow-up test at optimized feature SHA `8136c6b070eceb97e4e26fbdebae7632ab6f2ed3`, [Windows Electron/Qwen3 run 43711160507](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43711160507), runs the 31-input corpus once total, distributed across BASIC, PRO, and BUSINESS. All three actual product SKU contexts still run; each case is only sent once. This run is currently `in_progress`, with no artifact or terminal result yet.
+- At the last completed resource audit the hosted Windows runner reported 17,174,360,064 bytes of memory (about 16 GiB), so neither run can establish the required 8-GiB-class profile.
 
-No C005 score is claimed while this run is pending or for any result on a 16-GiB-class host. No user PC was accessed, and no memory/performance result is extrapolated to an 8-GiB buyer device. The 8-GiB acceptance remains BLOCKED.
+No C005 score is claimed while the optimized run is pending or for any result on a 16-GiB-class host. No user PC was accessed, and no memory/performance result is extrapolated to an 8-GiB buyer device. The 8-GiB acceptance remains BLOCKED.
