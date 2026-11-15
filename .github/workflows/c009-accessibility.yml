@@ -10,6 +10,16 @@ on:
       - 'tests/browser-process.mjs'
       - 'index.html'
       - 'package*.json'
+  pull_request:
+    branches: ['integration/astra-final-blueprint-100-20261115']
+    paths:
+      - '.github/workflows/c009-accessibility.yml'
+      - 'src/**'
+      - 'tests/c009-accessibility-browser.mjs'
+      - 'tests/c009-layout-print-browser.mjs'
+      - 'tests/browser-process.mjs'
+      - 'index.html'
+      - 'package*.json'
   workflow_dispatch:
 
 permissions:
