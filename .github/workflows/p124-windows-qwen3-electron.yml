@@ -6,6 +6,8 @@ on:
     paths:
       - '.github/workflows/p124-windows-qwen3-electron.yml'
       - 'desktop/main.cjs'
+      - 'desktop/ocr-release-hold-gate.cjs'
+      - 'tests/ocr-release-hold-gate.test.cjs'
       - 'electron-builder.yml'
       - 'desktop/p124-electron-qwen3-acceptance.cjs'
       - 'desktop/owner-ollama-controller.cjs'
