@@ -9,6 +9,7 @@ import {createHash} from 'node:crypto';
 import {launchBrowser} from './browser-process.mjs';
 import {makeMixedLayoutPdf,MIXED_LAYOUT_MARKERS} from './fixtures/step3-mixed-layout-pdf.mjs';
 import {compareSyntheticPdfCrossEngine} from '../tools/gpt-final-qa-pdf-cross-parser.mjs';
+import {inspectSyntheticPdfNulAttribution,compareSyntheticNulModes} from '../tools/gpt-final-qa-pdfjs-nul-attribution.mjs';
 import {inspectStep2V2ExportPdfParity} from '../tools/gpt-final-qa-v2-pdfjs-bridge.mjs';
 
 const sha=bytes=>createHash('sha256').update(bytes).digest('hex');
@@ -206,6 +207,32 @@ try {
     sourcePdf:source,outputPdf:output,
     expectedMarkers:[...MIXED_LAYOUT_MARKERS],
   });
+  // Independent PDF.js attribution uses only synthetic source and print
+  // bytes, never logs text, PDF content, coordinates, or raw font metadata.
+  const nulSource=await inspectSyntheticPdfNulAttribution(source,{useSystemFonts:true});
+  const nulPrintDefault=await inspectSyntheticPdfNulAttribution(output,{useSystemFonts:true});
+  const nulPrintNoSystem=await inspectSyntheticPdfNulAttribution(output,{useSystemFonts:false});
+  const nulModes=compareSyntheticNulModes(nulPrintDefault,nulPrintNoSystem);
+  assert.equal(nulSource.nulGlyphs,cross.sourcePdfjsNul,
+    'Source NUL attribution must agree with independent PDF.js count');
+  assert.equal(nulPrintDefault.nulGlyphs,cross.outputPdfjsNul,
+    'Printed PDF NUL attribution must agree with existing cross-engine report');
+  assert.equal(nulModes.numericSemanticFidelity,'NOT_CERTIFIED');
+  assert.equal(nulModes.release,'RELEASE HOLD');
+  assert.equal(nulPrintDefault.pages.reduce((n,p)=>n+p.nulGlyphs,0),nulPrintDefault.nulGlyphs);
+  console.log('G002 synthetic printed font NUL attribution:',JSON.stringify({
+    sourceNuls:nulSource.nulGlyphs,
+    outputNuls:nulPrintDefault.nulGlyphs,
+    noSystemFontModeNuls:nulPrintNoSystem.nulGlyphs,
+    classification:nulModes.classification,
+    pages:nulPrintDefault.pages.map(page=>({
+      page:page.page,nulGlyphs:page.nulGlyphs,
+      fonts:page.fonts.filter(font=>font.nulGlyphs>0).map(font=>({
+        fontKey:font.fontKey,familyBucket:font.familyBucket,
+        nulItems:font.nulItems,nulGlyphs:font.nulGlyphs,
+      })),
+    })),
+  }));
   assert.equal(cross.sourceMarkersPresentBoth,MIXED_LAYOUT_MARKERS.length,
     'Both parsers must find every deterministic marker in the untouched source');
   assert.equal(cross.sourceMissingBothParsers,0);
