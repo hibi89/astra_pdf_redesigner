@@ -448,3 +448,16 @@
 - 0.1.1은 **CI에서만 패키지 버전 번호를 바꾼 동일 앱 코드·동일 저장 스키마 빌드**. 따라서 **버전만 다른 설치 패키지 업그레이드 시 데이터 보존**을 검증한 것이며 **기능 코드/스키마 변경에 따른 마이그레이션은 미검증**. 고객 PC 수동 인수, 서명·SmartScreen, 실문서 시각 품질도 미검증.
 - 근거 [PR4 보고서](https://github.com/hibi89/astra_pdf_redesigner/blob/feature/windows-electron-package-20261019/docs/WINDOWS_NSIS_VERSION_UPGRADE_STEP2_PERSISTENCE_2026-10-19.md), feature docs 커밋 `057ccef81b97dd741c46002c28292bfdf544362f`; unsigned CI 전용 0.1.1 EXE SHA256 `EBDD0945CCF242CA126A109DA20772D3854DB0A292E5A39BBE28977F83F559FA`, [Artifact #12169723064](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39216361190/artifacts/12169723064), 2026-10-26 만료.
 - 다음 `ㄱ`: 기존 앱 코드 또는 IndexedDB 스키마 **실제 변경**을 재현한 호환성 검사 가능성 확인 및 작은 단위 실행. PR3·PR4 Draft/open/unmerged, main 기능 병합/STEP4 별도 승인 전 금지; 전체 7단계 추정 약38% 유지.
+
+
+## 2026-11-15 KST — 사용자 선택 디자인 레퍼런스 공시 인수인계 (10항)
+1. **목표/기술:** Astra PDF 웹·문서 시각화의 미래 디자인 방향 보존. 코드 변경 없는 GitHub Markdown+SVG 참조.
+2. **완료·결정:** docs/design/ASTRA_PDF_VISUAL_REFERENCE_20261115.md 및 `docs/design/astra-pdf-visual-reference-20261115.svg` 추가, `AGENTS.md` 참조 링크. 어두운 보라 배경/굵은 제목/5기능 카드/원본↔결과 비교/A4 KPI를 시각 기준으로 기록.
+3. **검증:** GitHub main에서 2개 신규 파일·AGENTS 링크 경로 직접 조회 PASS(3/3), 원본 PNG 724×746 크기/해시 확인. npm/Chrome/Edge/Windows/실물 PDF 테스트 NOT RUN — 문서 전용.
+4. **상태:** 참조 공시 완료. 앱 UI 반영·제품 수용·상용 판매는 진행하지 않았으며 RELEASE HOLD 유지.
+5. **장애·대안:** 첨부 PNG 원본 파일을 GitHub에 직접 업로드하지 못해 레이아웃을 SVG로 재구성했다. 픽셀 동일성·원본 레이어 복제 주장 금지. 추후 원본 이미지 공개 저장이 필요하면 승인된 파일 업로드 경로 이용.
+6. **경로·SHA:** `hibi89/astra_pdf_redesigner`/`main`; 디자인 문서/그림/AGENTS 중간 HEAD `2430f5ef7528d8874d63c5ad22ff00332dc5ea8b`; 공시 Issue https://github.com/hibi89/astra_pdf_redesigner/issues/11.
+7. **Production/실행환경:** 배포·Vercel 없음(미적용), 기존 로컬 실행·검증 명령 변경 없음.
+8. **원본·보안:** 사용자 제공 이미지 대화 내 보유, SHA-256 `06441f6258716f43d20f5ba10b2937a1cf0d2156e803ea9c5375dbf9f1a441c3`; 고객 PDF·브라우저 저장소·토큰·기존 소스/설계 원본 미수정.
+9. **다음:** 디자인 고도화 승인 시 현행 기능 검증 후 반응형 컴포넌트와 문서 출력 각각 별도 적용·회귀. 기능 미구현인 OCR/AI 표현은 실제 동작 확인 전 광고 금지.
+10. **시점·검증 경계:** 2026-11-15 KST; GitHub 문서 존재·AGENTS 연결만 확인, 실행·상용 수용 미검증. 이후 문서 커밋으로 HEAD가 달라질 수 있으니 최신 GitHub SHA 재확인.
