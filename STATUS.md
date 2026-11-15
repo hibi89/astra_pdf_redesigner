@@ -1,3 +1,16 @@
+## 2026-11-15 KST — G002 V2 export-to-PDF.js 83/83 PASS 통합 · C003 독립검수 · 점수 64/100 유지
+
+- **통합:** [GPT PR #15](https://github.com/hibi89/astra_pdf_redesigner/pull/15) **MERGED** `integration/astra-final-blueprint-100-20261115` merge SHA `e02228de6b24df0ede0742d7774de438e81ae657`. 기존 `main`, Codex PR #13, production STEP1/V1 및 STEP2/V2 코드/원본/시크릿 변경 없음.
+- **검증 기능:** `tools/gpt-final-qa-v2-pdfjs-bridge.mjs`에 실제 `astra-local-document` V2 내보내기 구조와 별도 STEP7 자기신고 검수 영수증의 PDF/project SHA/블록/페이지 좌표를 결합, 기존 실제 PDF.js 원본/출력 대조에 연동. 수치·표/페이지 순서·OCR 유사 변경·원본 해시·가짜 자산·중복 블록·영수증 유실은 **검토 필요 위험** 또는 거부로 처리; 원본/출력 원문·파일명 출력/전송 없음. 독립 보고서 `docs/evidence/astra/G002/V2_EXPORT_BRIDGE_VERIFICATION.md`.
+- **정확 SHA CI:** GPT HEAD `f86ac6784166e265ead617bf7deadd2107110ff1` [QA #43687640438](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43687640438): G001–G004 52 PASS + G002 실제 PDF.js/V2 31 PASS = **83 PASS / 0 FAIL / 0 SKIP**, Codex 기존 pinned static review PASS, OCR release gate PASS; [final blueprint policy #43687640632](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43687640632) SUCCESS.
+- **실제 Chromium V2 수용 미완/Stop & Pivot:** 신규 라이브 E2E는 `ENOTEMPTY` 예외 마스킹→즉시 React 저장 버튼 검사 실패→정상 React 대기 이후에도 확인/저장 버튼 활성화되지 않는 로그 [#43687234735](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43687234735), [#43687324164](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43687324164), [#43687445890](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43687445890)로 구분. 합성 PDF 업로드/인식까지 확인, **실제 새로운 V2 저장/출력까지 증명 안 됨**. 안전 검수 조건을 우회하지 않고 실험용 소스와 실패 job을 활성 트리/CI에서 제외; GitHub 커밋/Actions에 실패 기록 보존. 제품 원인/기능 장애로 단정하지 않음. 다음에는 기존 `tests/step3-browser.mjs`에서 실제 통과한 수동 검수·확인 흐름을 재사용.
+- **C003 독립 감사:** 정확 Codex feature SHA `20ae5fcab5b069bcd269ca0506721db5c180925e` [Chrome+Edge #43685671737](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43685671737) SUCCESS, Node 291/291 PASS, `PASS C003 STEP6 RIGHTS GATE` 양 브라우저 기록. `SourceRecordsPanel` 사용자 권리 확인 전 STEP6→STEP5 선택 차단, 저장 권리 값 `UNVERIFIED`, V2 보존. **실제 저작권/사용권은 사용자가 제출한 원본 근거 미확인으로 A06 +0**. GPT 문서 `docs/evidence/astra/G003/C003_INDEPENDENT_REVIEW.md`.
+- **P124 한계:** 이전 실제 Qwen3 Windows [#43684225170](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43684225170) hosted PASS이나 **SKU당 10번 호출·1종 원문 반복**, 실 판매 SKU 권한/구매자 PC/ASAR test code 유입 여부 미확인, Codex PR #13 **미병합**. 점수 가점 불허, 실제 C001 인수 보류.
+- **원장·릴리스:** 사용자 확정 A01–A12 배점 불변, **잠정 64/100 (+0)**. A11 실제 허가 PDF 0건, 공식 구매자 `UNASSESSED`, G60/G65/G70 NOT PASSED, OCR/P119 공급망 BLOCKED, `RELEASE HOLD`; 크몽·배포 없음.
+- **다음 작업:** Codex C003/C005/C007 신규 PR SHA·기능 CI 독립검수 후 선택적 수용 여부 판정; G002 V2 라이브 경로는 수동 위험확인 조건을 별도 확정한 뒤 새로운 시험으로만 접근. 오너 허가 PDF·물리 Win10/11·실판매 승인 별도.
+
+---
+
 ## 2026-11-15 KST — G002 실제 PDF.js QA 73/73 PASS · P124 Windows hosted PASS(검수 범위 제한) · 64/100 유지
 
 - **G002 + G003 통합:** [PR #14](https://github.com/hibi89/astra_pdf_redesigner/pull/14) MERGED → integration commit `6ebef90de9157f681eeb77d14c49209f0f1b35b2`. GPT 전용 브랜치 변경분만 통합. 기존 `main`, Codex PR #13 및 생산 UI/Electron 코드 미변경.
