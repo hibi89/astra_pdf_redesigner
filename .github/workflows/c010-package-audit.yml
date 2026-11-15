@@ -160,6 +160,8 @@ jobs:
               $secondSignatureStatus = (Get-AuthenticodeSignature -LiteralPath $secondSetups[0].FullName).Status
               $secondHash = (Get-FileHash -LiteralPath $secondSetups[0].FullName -Algorithm SHA256).Hash
               $secondBytes = (Get-Item -LiteralPath $secondSetups[0].FullName).Length
+              $secondCandidatePath = Join-Path $env:RUNNER_TEMP 'astra-c010-second-unsigned-candidate.exe'
+              Copy-Item -LiteralPath $secondSetups[0].FullName -Destination $secondCandidatePath
               Write-Output "C010 independent-tree installer: hash=$secondHash bytes=$secondBytes signature=$secondSignatureStatus"
               Remove-Item -LiteralPath $secondSetups[0].FullName -Force
             }
@@ -194,7 +196,7 @@ jobs:
               $repeatBytes = (Get-Item -LiteralPath $repeatSetups[0].FullName).Length
               $reproStatus = if ($repeatHash -eq $firstCandidateHash -and $firstAsarHash -eq $secondAsarHash -and
                 $firstSignature.Status -eq 'NotSigned' -and $repeatSignature.Status -eq 'NotSigned') { 'PASS' } else { 'FAIL' }
-              $reproDetail = "sameTreeInstaller1=$firstCandidateHash sameTreeInstaller2=$repeatHash bytes1=$firstCandidateBytes bytes2=$repeatBytes independentTreeInstaller=$secondHash independentBytes=$secondBytes app.asar1=$firstAsarHash app.asar2=$secondAsarHash installerSignatures=$($firstSignature.Status)/$repeatSignature.Status independentSignature=$secondSignatureStatus"
+              $reproDetail = "sameTreeInstaller1=$firstCandidateHash sameTreeInstaller2=$repeatHash bytes1=$firstCandidateBytes bytes2=$repeatBytes independentTreeInstaller=$secondHash independentBytes=$secondBytes app.asar1=$firstAsarHash app.asar2=$secondAsarHash installerSignatures=$($firstSignature.Status)/$($repeatSignature.Status) independentSignature=$secondSignatureStatus"
             } else {
               $reproDetail = "repeat canonical build left $($repeatSetups.Count) candidate installers"
             }
@@ -204,7 +206,7 @@ jobs:
             "Canonical package tree and same-tree unsigned NSIS package reproducibility: $reproStatus ($reproDetail)" | Out-File -FilePath $env:GITHUB_STEP_SUMMARY -Append -Encoding utf8
           }
           if ($secondBuildExitCode -eq 0 -and $secondSetups.Count -eq 1) {
-            node tests/c010-binary-diff-summary.cjs $firstCandidatePath $secondSetups[0].FullName
+            node tests/c010-binary-diff-summary.cjs $firstCandidatePath $secondCandidatePath
             if ($LASTEXITCODE -ne 0) { throw 'Independent-tree binary diagnostic failed.' }
           }
           if ($repeatExitCode -eq 0 -and $repeatSetups.Count -eq 1) {
