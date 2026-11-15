@@ -202,7 +202,7 @@ async function injectStep2QuotaFailure(snapshotStorage,waitForSaveState,waitForS
   }finally{
     prototype.put=originalPut;
   }
-  const after=await snapshotStep2Storage();
+  const after=await snapshotStorage();
   return {injected,before,after,status:document.querySelector('.save-chip')?.textContent||''};
 }
 async function setStep2TitleAndSave(title,snapshotStorage,waitForSaveState,waitForStep2Title){
@@ -260,7 +260,7 @@ async function abortStep2MultiStoreTransaction(snapshotStorage){
     tx.abort();
     await aborted;
   }finally{db.close();}
-  const after=await snapshotStep2Storage();
+  const after=await snapshotStorage();
   return {before,after};
 }
 
