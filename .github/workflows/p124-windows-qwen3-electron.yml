@@ -6,6 +6,7 @@ on:
     paths:
       - '.github/workflows/p124-windows-qwen3-electron.yml'
       - 'desktop/main.cjs'
+      - 'electron-builder.yml'
       - 'desktop/p124-electron-qwen3-acceptance.cjs'
       - 'desktop/owner-ollama-controller.cjs'
       - 'desktop/preload.cjs'
