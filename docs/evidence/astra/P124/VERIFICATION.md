@@ -1,12 +1,7 @@
-# P124 — real-model 3-SKU Electron flow — BLOCKED, 0/2
+# P124 verification status
 
-**Date:** 2026-11-15 KST  
-**Depends on:** P123 and P117  
-**P117:** VERIFIED. **P123:** BLOCKED, +0.  
-**Score:** 0/2; A08 remains 4/14; current score at this audit is 59/100.
+This file's earlier BLOCKED note is superseded by the C001 hosted Windows acceptance recorded at [C001/VERIFICATION.md](../C001/VERIFICATION.md).
 
-The acceptance requires an actual Qwen3 model inside an installed Windows Electron (or equivalent verified CPU) environment for BASIC/PRO/BUSINESS × normal/model-missing/cancel/forged-or-error cases; at least 10 real proposals; user approve/reject/Undo; no unapproved text mutation; output PDF text equality; and STEP1/STEP2 operation while model execution is missing or fails.
+**Current status:** VERIFIED for the synthetic GitHub-hosted Windows Electron scope on feature SHA `a2ca668c9578b68e760b922c026a5f2f8f941c8d`. GitHub Actions ran real Qwen3 CPU inference through the production review UI in BASIC, PRO, and BUSINESS test contexts, plus model-missing and forged-response cases. Exact run links, test counts, storage/PDF evidence, package smoke, previous failure history, and unverified limits are recorded in the C001 report.
 
-P123's permitted-source audit found no Qwen3 4B weights or model release asset on official GitHub. The checkpoints and model-specific license files are hosted outside GitHub. This run did not use the owner PC, external model host, mock service, or smaller substitute to claim P124.
-
-**Result:** P124 BLOCKED, +0. No Windows Electron real-model acceptance was run. P122 mock/static checks remain solely P122 evidence.
+The historical 2026-11-15 blocked assessment below no longer describes the current branch. No central score ledger or buyer acceptance status is changed by this worker report.
