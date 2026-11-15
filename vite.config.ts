@@ -6,7 +6,13 @@ import { fileURLToPath } from 'node:url';
 
 const root = dirname(fileURLToPath(import.meta.url));
 const p124ElectronAcceptance = process.env.ASTRA_P124_ELECTRON_ACCEPTANCE === '1';
-let p124TestEntitlements = null;
+type P124TestEntitlements = {
+  schema: string;
+  issuerPublicJwk: Record<string, unknown>;
+  issuerThumbprintSha256: string;
+  receipts: Record<string, unknown>;
+};
+let p124TestEntitlements: P124TestEntitlements | null = null;
 if (p124ElectronAcceptance) {
   if (process.env.GITHUB_ACTIONS !== 'true' || !process.env.RUNNER_TEMP ||
       !process.env.ASTRA_P124_ENTITLEMENT_CONFIG) {
@@ -20,7 +26,7 @@ if (p124ElectronAcceptance) {
   }
   p124TestEntitlements = JSON.parse(readFileSync(entitlementPath, 'utf8'));
   if (!p124TestEntitlements || p124TestEntitlements.schema !== 'astra-p124-test-entitlements-v1' ||
-      !p124TestEntitlements.issuerPublicJwk || p124TestEntitlements.issuerPublicJwk.d !== undefined ||
+      !p124TestEntitlements.issuerPublicJwk || Object.hasOwn(p124TestEntitlements.issuerPublicJwk, 'd') ||
       !/^[0-9a-f]{64}$/.test(p124TestEntitlements.issuerThumbprintSha256 || '') ||
       !p124TestEntitlements.receipts || ['basic', 'pro', 'business'].some(tier =>
         typeof p124TestEntitlements.receipts[tier] !== 'string') ||
