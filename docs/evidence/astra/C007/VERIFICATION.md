@@ -28,5 +28,5 @@ The upgrade/persistence evidence supports **+1 A10 candidate** (baseline 64 + C0
 ## Exact-SHA checks
 
 - Windows NSIS lifecycle and upgrade — SHA `653c3483daefa4bfbe9c082ba4b1d24bbb4a43d5`: **PASS**, run 43686779251.
-- Linux/Chrome and Microsoft Edge regression — SHA `653c3483daefa4bfbe9c082ba4b1d24bbb4a43d5`: Edge job **PASS**; Linux/Chrome job result is recorded by run 43686779245 and must finish before the PR is considered fully green.
+- Linux/Chrome build/test and Microsoft Edge regression — SHA `653c3483daefa4bfbe9c082ba4b1d24bbb4a43d5`: **PASS**, run 43686779245.
 - Blueprint evidence policy — SHA `653c3483daefa4bfbe9c082ba4b1d24bbb4a43d5`: **PASS**, run 43686779318.
