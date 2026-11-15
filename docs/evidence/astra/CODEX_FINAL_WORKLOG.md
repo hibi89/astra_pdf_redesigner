@@ -2,7 +2,7 @@
 
 Branch: `codex/astra-final-ai-sku-20261115`  
 Integration target: `integration/astra-final-blueprint-100-20261115`  
-Latest tested feature SHA: `09b2d9c8f60631bb2f623f840bdde03450ed9e17`  
+Latest feature tip: `5b323fd47d0c2cd2efb20a136102ee65b3bb7af2` (C005 run pending); latest fully tested feature SHA: `09b2d9c8f60631bb2f623f840bdde03450ed9e17`  
 Open draft PR: [#13](https://github.com/hibi89/astra_pdf_redesigner/pull/13)
 
 ## Completed and assessed
@@ -11,7 +11,7 @@ Open draft PR: [#13](https://github.com/hibi89/astra_pdf_redesigner/pull/13)
 |---|---|---|---|
 | C001 / P124 Windows Electron real Qwen3 3-SKU product flow | `09b2d9c8f60631bb2f623f840bdde03450ed9e17` | Real Root→Workspace→CommercialLicensePanel→SKU gate→LocalModelReview; all three Windows scenarios PASS; per-SKU PDF parity PASS | +2 A08 candidate supported; independent GPT/owner review pending |
 | C003 STEP6 rights acknowledgement and STEP5 local handoff | `20ae5fcab5b069bcd269ca0506721db5c180925e` | npm test/build, Chrome and Edge browser suites, blueprint policy PASS | +0; actual source-rights acceptance NOT VERIFIED |
-| C005 additional local-AI quality and 8-GiB CPU acceptance | Prior evidence reviewed; no new feature SHA | P123/P124 evidence does not establish an 8-GiB Windows/CPU profile | BLOCKED; +0 |
+| C005 additional local-AI quality and 8-GiB CPU acceptance | `5b323fd47d0c2cd2efb20a136102ee65b3bb7af2` (run pending) | Windows run 43702880160 is measuring 31 unique inputs × 3 SKUs; terminal result pending; host is about 16 GiB | 8-GiB gate BLOCKED; +0 |
 | C006 offline license lifecycle prototype | `4e4bfc01aa2543ea03b0674a8fcc8f6f33f50a25` | Linux/Chrome/Edge PASS; Windows Electron/NSIS PASS; blueprint policy PASS | Operational gates BLOCKED; +0 |
 | C002 responsive viewport acceptance | `bd83ac2619a80f940dd628d513a760aee06f0ecb` | 298 unit tests/build, Chrome and Edge at 390/360/320px, blueprint policy PASS | Buyer visual acceptance pending; +0 |
 | C008 synthetic PDF accuracy regression | `bd83ac2619a80f940dd628d513a760aee06f0ecb` | Linux/Chrome, Edge; 15-pair corpus, 12-layout PDF risk matrix, V1/V2 no-write, policy PASS | Synthetic-only; owner acceptance pending; +0 |
@@ -95,3 +95,8 @@ The healthy Windows run used Qwen3-4B-Instruct-2507 Q8_0 (model SHA-256 `eed67be
 Each selected layout's A4 PDF extracted text matched before/after review. The three output PDF SHA-256 values are recorded in [C001/VERIFICATION.md](C001/VERIFICATION.md); the marker, 230,000원 amount, and negation were preserved. Synthetic V1/V2 sentinels stayed unchanged; product V1/V2 content/assets were preserved, with the V2 updatedAt timestamp changing through normal edit/Undo persistence. No customer data or external inference was used.
 
 C001's A08 +2 is now supported as a technical candidate. It remains subject to the independent GPT review and integration-owner score decision; official buyer acceptance stays UNASSESSED and RELEASE HOLD stays. The integration-owned score ledger remains 64/100. With the conditional C001 +2 and C007 +1, the worker evidence ceiling is 67/100 pending acceptance.
+
+
+## C005 / P124 — unique-input run pending
+
+At feature SHA `5b323fd47d0c2cd2efb20a136102ee65b3bb7af2`, Windows Electron/Qwen3 run [43702880160](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43702880160) is still running its real-model step. It traverses 31 distinct synthetic cases in each BASIC/PRO/BUSINESS product SKU context (93 unique-input calls). At the latest check, GitHub reported `in_progress`; no artifact or terminal PASS/FAIL is available, so no outcome is claimed. The runner reports 17,174,360,064 total-memory bytes, so this cannot satisfy the required 8-GiB-class profile and C005 remains +0/BLOCKED for completion. Existing policy gate, Linux/Chrome/Edge, C007, and C010 at the same code SHA passed: [policy 43702880440](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43702880440), [Linux/Chrome/Edge 43702880167](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43702880167), [C007 43702880123](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43702880123), [C010 43702880147](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43702880147). A final terminal result will be added when available.
