@@ -24,7 +24,6 @@ const {runStep3ProjectAcceptance}=require('./step3-project-acceptance.cjs');
 const {createLocalModelController}=require('./local-model-controller.cjs');
 const {createOwnerOllamaController}=require('./owner-ollama-controller.cjs');
 const {createLocalOcrController}=require('./local-ocr-controller.cjs');
-const {runP124ElectronAcceptance}=require('./p124-electron-qwen3-acceptance.cjs');
 const localModel=createLocalModelController({resourcesDir:process.resourcesPath});
 const ownerOllama=createOwnerOllamaController();
 const localOcr=createLocalOcrController({resourcesDir:process.resourcesPath});
