@@ -209,6 +209,12 @@ try {
   assert.equal(cross.sourceMarkersPresentBoth,MIXED_LAYOUT_MARKERS.length,
     'Both parsers must find every deterministic marker in the untouched source');
   assert.equal(cross.sourceMissingBothParsers,0);
+  assert.equal(cross.outputMarkersPresentBoth,MIXED_LAYOUT_MARKERS.length,
+    'All 17 protected synthetic numeric/text markers must survive the printed PDF in BOTH independent parsers');
+  assert.equal(cross.outputMissingBothParsers,0,
+    'Missing PDF markers are never accepted even if the browser generated valid PDF bytes');
+  assert.equal(cross.outputOnlyPdfjs,0,'Different parser coverage of protected markers demands manual audit');
+  assert.equal(cross.outputOnlyPoppler,0,'Different parser coverage of protected markers demands manual audit');
   assert.equal(cross.sourcePdfjsNul,0);
   assert.equal(cross.sourcePopplerNul,0);
   assert.equal(cross.outputSha256,report.outputPdfSha256);
