@@ -1,10 +1,10 @@
 # C001 / P124 — Windows Electron real Qwen3 3-SKU verification
 
-**Status:** VERIFIED for the synthetic hosted-runner acceptance scope  
+**Status:** VERIFIED only for the synthetic hosted-runner inference/review scope; production SKU entitlement E2E remains REVIEW REQUIRED  
 **Feature SHA:** `a2ca668c9578b68e760b922c026a5f2f8f941c8d`  
 **Branch:** `codex/astra-final-ai-sku-20261115`  
 **Integration PR:** [#13](https://github.com/hibi89/astra_pdf_redesigner/pull/13) → `integration/astra-final-blueprint-100-20261115`  
-**Score:** A08 +2 candidate based on this evidence; cumulative technical score candidate 66/100. The central score ledger remains unchanged pending integration-owner review. Official buyer acceptance is UNASSESSED; RELEASE HOLD remains.
+**Score:** A08 +2 candidate remains contested and is held from acceptance pending the production-SKU qualification below. The central score ledger remains unchanged pending integration-owner review. Official buyer acceptance is UNASSESSED; RELEASE HOLD remains.
 
 ## Changes
 
@@ -52,5 +52,14 @@ The Windows run exported the synthetic report/screenshots as artifact `p124-wind
 - The first run at `8a02e3c0d78bfe0e227677899c9ff1202cab1910` failed before testing because npm caching expected a lockfile absent from this repository; the workflow now follows the repository's `npm install` convention.
 - SKU names are test-only contexts for the shared production review UI; this does not verify production SKU entitlements, issuer keys, or sale activation.
 - Inputs are synthetic. No customer documents or customer data were used. Physical buyer-machine behavior, production signing, legal/model redistribution review, and buyer acceptance remain unverified.
+
+## Independent QA qualification — current branch review
+
+The independent G003 report on the GPT branch, pinned to the earlier Codex SHA `6e8b2eeb381874a12be041fa080fb545b5e1fb82`, identified two scope risks. I rechecked the relevant source on the current worker branch; the findings still apply to the C001/C010 evidence:
+
+- **F01 — production SKU entitlement flow not exercised.** The P124 fixture selects BASIC/PRO/BUSINESS in test-local state and calls the shared `LocalModelReview` directly with `disabled={false}`. It does not traverse production `Workspace` / `CommercialLicensePanel` / `runSkuGatedAction` or verify SKU entitlements. Therefore the hosted runs demonstrate the real model and review component under three test labels, not the complete production three-SKU GUI/permission flow. Treat the +2 as **pending / not accepted** until that flow is exercised; production keys and customer-build activation remain prohibited.
+- **F02 — installer ASAR contents not verified.** `electron-builder.yml` selects `desktop/**`, while `desktop/main.cjs` statically imports `p124-electron-qwen3-acceptance.cjs`. The Windows acceptance workflow checks that the P124 fixture HTML is absent from `dist`, but does not inspect the built `app.asar`. This establishes a packaging-inclusion risk; whether the exact installer ASAR contains the test module remains unverified. C010 did not perform that ASAR audit, so no clean-bundle claim is made.
+
+G003 report: [read-only independent review](https://github.com/hibi89/astra_pdf_redesigner/blob/gpt/astra-final-qa-ocr-20261115/docs/evidence/astra/G003/VERIFICATION.md). Its tested/pinned source SHA predates the final P124 success run; the above qualification is based on rechecking the fixture, main process and builder rules, not treating its earlier failed run as the final run result.
 
 **Next READY work:** C003 (A06 user-selected online reference path), subject to the existing policy and browser/data isolation constraints.
