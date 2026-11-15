@@ -15,6 +15,7 @@ Open draft PR: [#13](https://github.com/hibi89/astra_pdf_redesigner/pull/13)
 | C006 offline license lifecycle prototype | `4e4bfc01aa2543ea03b0674a8fcc8f6f33f50a25` | Linux/Chrome/Edge PASS; Windows Electron/NSIS PASS; blueprint policy PASS | Operational gates BLOCKED; +0 |
 | C002 responsive viewport acceptance | `bd83ac2619a80f940dd628d513a760aee06f0ecb` | 298 unit tests/build, Chrome and Edge at 390/360/320px, blueprint policy PASS | Buyer visual acceptance pending; +0 |
 | C008 synthetic PDF accuracy regression | `bd83ac2619a80f940dd628d513a760aee06f0ecb` | Linux/Chrome, Edge; 15-pair corpus, 12-layout PDF risk matrix, V1/V2 no-write, policy PASS | Synthetic-only; owner acceptance pending; +0 |
+| C009 keyboard/accessibility-tree smoke | `fa57116544217c6122b1cd9643fee91002f45edc` | 298 tests/build, Chrome and Edge AX tree + keyboard Tab, policy PASS | Narrow hosted smoke only; +0 |
 
 Detailed reports: [C001](C001/VERIFICATION.md), [C003](C003/VERIFICATION.md), [C005](C005/VERIFICATION.md). The earlier P124 BLOCKED note was superseded with hosted evidence: [P124/VERIFICATION.md](P124/VERIFICATION.md).
 
@@ -40,7 +41,7 @@ At tested tree SHA `4e4bfc01aa2543ea03b0674a8fcc8f6f33f50a25`, the owner-side si
 
 ## Next work
 
-C002 viewport checks and C008 synthetic PDF regression are recorded at exact tested code/test SHA `bd83ac2619a80f940dd628d513a760aee06f0ecb`. The [full Linux/Chrome + Edge run 43689843103](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43689843103), [C002 Chrome/Edge viewport run 43689843233](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43689843233), and [blueprint policy 43689843486](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43689843486) passed. Both C002 and C008 add +0; buyer visual/PDF acceptance remains unverified. Next: C009 accessibility/performance evidence, then C010 packaging. P119/P120/P121 remain outside this Codex track until the GPT-owned OCR supply-chain prerequisite is cleared.
+C002, C008 and C009 hosted evidence is recorded in their task reports. C009 at exact SHA `fa57116544217c6122b1cd9643fee91002f45edc` passed [Chrome/Edge run 43690873135](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873135) and [policy run 43690873420](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873420). Current next task C010 is running as an unsigned Windows NSIS/SBOM candidate audit; no production signing, artifact upload or release is authorized. P119/P120/P121 remain outside this Codex track pending GPT-owned OCR supply-chain evidence.
 
 ## C002 — hosted responsive viewport PASS, buyer acceptance pending
 
@@ -50,3 +51,8 @@ Feature/test SHA `bd83ac2619a80f940dd628d513a760aee06f0ecb`: [C002/VERIFICATION.
 ## C008 — synthetic PDF accuracy regression PASS; owner acceptance pending
 
 At exact code/test SHA `bd83ac2619a80f940dd628d513a760aee06f0ecb`, [full CI run 43689843103](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43689843103) passed on Linux Chrome and Edge. The run covered the 15-pair A4 parity corpus, invalid-output recovery with V1/V2 preservation, P118 synthetic images/multipage fail-closed checks, 12 PDF layout-risk fixtures, and M04 structural audits. See [C008/VERIFICATION.md](C008/VERIFICATION.md). Customer documents, real OCR/CER, full visual fidelity, and large-document performance remain unverified; score +0.
+
+
+## C009 — hosted keyboard/accessibility-tree smoke PASS; narrow scope
+
+At exact code/test SHA `fa57116544217c6122b1cd9643fee91002f45edc`, [Chrome/Edge workflow 43690873135](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873135) passed 298 tests, build, accessibility-tree checks, keyboard Tab navigation and visible focus. [Policy run 43690873420](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873420) passed. This is not a screen-reader/WCAG certification or low-resource performance measurement; score +0.
