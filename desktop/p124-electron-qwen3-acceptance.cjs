@@ -123,9 +123,9 @@ async function runP124ElectronAcceptance(win,renderPdf){
   const evaluate=async expression=>{
     let result;
     try{
-      result=await win.webContents.executeJavaScript(
-        `(async()=>{try{return {__p124Ok:true,value:await (${expression})}}
-          catch(error){return {__p124Ok:false,error:String(error?.message||error)}}})()`,true);
+      const script='(async()=>{try{return {__p124Ok:true,value:await ('+expression+')}' +
+        '}catch(error){return {__p124Ok:false,error:String(error?.message||error)}}})()';
+      result=await win.webContents.executeJavaScript(script,true);
     }catch(error){
       throw Error('P124 renderer evaluation failed: '+String(error?.message||error));
     }
@@ -137,7 +137,12 @@ async function runP124ElectronAcceptance(win,renderPdf){
     while(Date.now()<deadline){const value=await fn();if(predicate(value))return value;await sleep(120);}
     throw Error('P124 timed out: '+label);
   };
-  const click=selector=>evaluate(`(()=>{const selector=${JSON.stringify(selector)},e=document.querySelector(selector);if(!e||e.disabled)throw Error('Missing/disabled acceptance control: '+selector);e.click();return true})()`);
+  const click=selector=>{
+    const encoded=encodeURIComponent(selector);
+    return evaluate(`(()=>{const selector=decodeURIComponent('${encoded}'),e=document.querySelector(selector);
+      if(!e||e.disabled)throw Error('Missing/disabled acceptance control: '+selector);
+      e.click();return true})()`);
+  };
   const currentSource=()=>evaluate('document.querySelector(".section-editor textarea")?.value||null');
   const setSource=async text=>{
     await evaluate('(()=>{const e=document.querySelector(".section-editor textarea");if(!e)throw Error("Missing real Workspace paragraph editor");const set=Object.getOwnPropertyDescriptor(HTMLTextAreaElement.prototype,"value").set;set.call(e,'+JSON.stringify(text)+');e.dispatchEvent(new Event("input",{bubbles:true}));e.dispatchEvent(new Event("change",{bubbles:true}));return true})()');
@@ -158,7 +163,7 @@ async function runP124ElectronAcceptance(win,renderPdf){
   const selectLayout=async layoutId=>{
     const selector='[data-extended-layout-id="'+layoutId+'"]';
     await click(selector);
-    await waitFor(()=>evaluate('document.querySelector('+JSON.stringify(selector)+')?.getAttribute("aria-pressed")==="true'),
+    await waitFor(()=>evaluate(`document.querySelector('[data-extended-layout-id="${layoutId}"]')?.getAttribute("aria-pressed")==="true`),
       Boolean,10000,'actual Workspace layout entitlement '+layoutId);
   };
   const denyLayout=async(layoutId,sku)=>{
@@ -166,7 +171,7 @@ async function runP124ElectronAcceptance(win,renderPdf){
     await click(selector);
     await waitFor(()=>evaluate('Array.from(document.querySelectorAll("[role=alert]")).some(node=>node.textContent.includes("사용권"))'),
       Boolean,10000,'actual Workspace SKU denial '+sku+' -> '+layoutId);
-    assert.equal(await evaluate('document.querySelector('+JSON.stringify(selector)+')?.getAttribute("aria-pressed")==="true'),
+    assert.equal(await evaluate(`document.querySelector('[data-extended-layout-id="${layoutId}"]')?.getAttribute("aria-pressed")==="true`),
       false,'insufficient '+sku+' entitlement must not select '+layoutId);
     if(await evaluate('Boolean(document.querySelector("p[role=alert] button"))'))await click('p[role=alert] button');
   };
