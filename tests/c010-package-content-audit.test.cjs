@@ -34,11 +34,9 @@ test('C010 scanner reports secret, personal-data signatures, and blocked package
  const fakeResidentId='900101-1234567';
  writeFileSync(join(assets,'leak.js'),[
   'const github='+JSON.stringify(fakeGithubToken)+';',
-  'const contact='+JSON.stringify(fakeEmail)+';',
-  'const mobile='+JSON.stringify(fakePhone)+';',
-  'const identity='+JSON.stringify(fakeResidentId)+';',
   '-----BEGIN PRIVATE KEY-----'
  ].join('\n'));
+ writeFileSync(join(assets,'contact.json'),JSON.stringify({contact:fakeEmail,mobile:fakePhone,identity:fakeResidentId}));
  const fixtures=join(root,'app','tests','fixtures');
  mkdirSync(fixtures,{recursive:true});
  writeFileSync(join(fixtures,'sample.json'),'synthetic only');
