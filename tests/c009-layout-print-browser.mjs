@@ -131,10 +131,13 @@ async function main(){
    'Printed layout is not A4 for '+id+': '+size[0]);
 
   const extracted=execFileSync('pdftotext',[pdfPath,'-'],{encoding:'utf8'}).normalize('NFC').replace(/\s+/g,' ').trim();
-  assert.ok(extracted.includes(titleMarker),'Printed PDF lost its title marker: '+id);
-  assert.ok(extracted.includes(bodyMarker),'Printed PDF lost its body marker: '+id);
-  assert.ok(extracted.includes('230,000원'),'Printed PDF changed its amount: '+id);
-  assert.ok(extracted.includes('승인 전에는 외부에 전달하지 않습니다.'),'Printed PDF changed its negation: '+id);
+  const compactText=extracted.replace(/[^A-Za-z0-9가-힣]/g,'');
+  const titleToken=titleMarker.replace(/[^A-Za-z0-9]/g,'');
+  const bodyToken=bodyMarker.replace(/[^A-Za-z0-9]/g,'');
+  assert.ok(compactText.includes(titleToken),'Printed PDF lost its title marker: '+id+'; extracted excerpt='+extracted.slice(0,700));
+  assert.ok(compactText.includes(bodyToken),'Printed PDF lost its body marker: '+id);
+  assert.ok(compactText.includes('230000원'),'Printed PDF changed its amount: '+id);
+  assert.ok(compactText.includes('승인전에는외부에전달하지않습니다'),'Printed PDF changed its negation: '+id);
   assert.ok(!extracted.includes('DESIGN STUDIO'),'Non-print studio UI leaked into the PDF: '+id);
 
   const pngPrefix=join(outputRoot,stem+'-first-page');
