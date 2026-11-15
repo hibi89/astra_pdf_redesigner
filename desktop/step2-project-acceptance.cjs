@@ -331,7 +331,8 @@ async function runStep2ProjectAcceptance(win,renderLocalPdf){
       '('+editStep2InBrowser.toString()+')('+JSON.stringify(PNG64)+')','document edit and save');
     if(!before?.editorSaved||!before?.image)throw Error('STEP2 UI edit did not complete');
   }
-  await reloadStep2Preview(win,"initial save");
+  await win.loadURL(APP_URL);
+  await waitForProjectPreview(win);
   const persisted=await evaluate('('+verifyReloadedProject.toString()+')()','reload verification');
   if(!persisted?.saved||persisted.assets!==1)throw Error('STEP2 IndexedDB reload failed');
   if(!verifyOnly&&process.env.ASTRA_STEP2_FAILURE_INJECTION==='1'){
