@@ -108,7 +108,8 @@ function writePdf(page,stem,bytes){
  const path=join(outputRoot,stem+'.pdf');
  writeFileSync(path,bytes,{flag:'wx'});
  const info=execFileSync('pdfinfo',[path],{encoding:'utf8'});
- const pagesLine=info.split(/\\r?\\n/).find(line=>line.startsWith('Pages:'));\n const pages=Number(pagesLine?.split(':')[1]?.trim()||0);
+ const pagesLine=info.split(/\r?\n/).find(line=>line.startsWith('Pages:'));
+ const pages=Number(pagesLine?.split(':')[1]?.trim()||0);
  assert.ok(pages>=5&&pages<=80,'Large synthetic print expected 5–80 A4 pages, got '+pages);
  const extracted=execFileSync('pdftotext',[path,'-'],{encoding:'utf8',maxBuffer:8*1024*1024}).normalize('NFC');
  const compact=extracted.replace(/[^A-Za-z0-9가-힣]/g,'');
