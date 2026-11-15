@@ -46,3 +46,10 @@ C005 remains +0 and BLOCKED for completion: the 8-GiB gate is unmet, and the rea
 - The available hosted Windows runner reports `17,174,360,064` bytes of RAM (about 16 GiB), so it cannot establish the requested 8-GiB-class acceptance.
 
 C005 remains **BLOCKED**, +0. The latest run's actual-model outcome is pending and the 8-GiB gate is unmet; no score is claimed.
+
+
+## C005 workload clarification — exact run implementation audit (2026-11-16 16:36 UTC)
+
+The in-progress [run 43711160507](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43711160507) combines C001/P124 and C005. In `tests/p124-windows-qwen3-acceptance.ps1`, the healthy scenario runs before the quality scenario. The healthy Electron path seeks at least 10 real guarded proposals in each of three SKU contexts (at least 30 inference calls, with replay of a guarded synthetic paragraph for decision/Undo coverage). Later, the quality path sends all 31 distinct corpus inputs once total across BASIC/PRO/BUSINESS (31 additional actual calls). Each SKU also exercises cancellation. Thus the “31 unique inputs once” optimization applies only to C005's corpus phase; the combined run requires at least 61 model calls plus setup, and may require more if a replay fails to produce a guarded proposal.
+
+At this check the hosted job remained `in_progress` at the real-model step, about 282 minutes after start, within its configured 300-minute timeout. The active-job logs and artifact remain unavailable; no quality outcome is inferred. This workload audit uses the source at SHA `8136c6b070eceb97e4e26fbdebae7632ab6f2ed3` (`tests/p124-windows-qwen3-acceptance.ps1` and `desktop/p124-electron-qwen3-acceptance.cjs`). C005 remains +0 / BLOCKED for the 8-GiB profile.
