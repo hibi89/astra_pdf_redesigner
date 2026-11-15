@@ -30,6 +30,12 @@ const report = {
   input_size_bytes: C008_LARGE_PDF_BYTES,
   input_sha256: null,
   generated_pdf_pages: null,
+  v2_document_schema_version: null,
+  v2_document_marker_flags: null,
+  v2_image_asset_count: null,
+  v2_image_asset_mime_types: null,
+  reopened_v2_marker_flags: null,
+  reopened_v2_image_count: null,
   input_text_markers: [],
   upload_parse_ms: null,
   consent_gate_closed_before_review: null,
@@ -48,8 +54,18 @@ const report = {
 function rpc(method, params = {}, sessionId) {
   return new Promise((resolve, reject) => {
     const id = ++seq;
-    pending.set(id, { resolve, reject });
-    ws.send(JSON.stringify({ id, method, params, ...(sessionId ? { sessionId } : {}) }));
+    const timer = setTimeout(() => {
+      pending.delete(id);
+      reject(new Error('C008 CDP request timed out: ' + method));
+    }, 30000);
+    pending.set(id, { resolve, reject, timer });
+    try {
+      ws.send(JSON.stringify({ id, method, params, ...(sessionId ? { sessionId } : {}) }));
+    } catch (error) {
+      clearTimeout(timer);
+      pending.delete(id);
+      reject(error);
+    }
   });
 }
 
@@ -57,8 +73,13 @@ async function eventually(fn, predicate = value => Boolean(value), timeout = 900
   const start = Date.now();
   let last;
   while (Date.now() - start < timeout) {
-    last = await fn();
-    if (predicate(last)) return last;
+    try {
+      last = await fn();
+      if (predicate(last)) return last;
+    } catch (error) {
+      if (!/context was destroyed|navigated or closed|Cannot find context/i.test(String(error))) throw error;
+      last = 'page navigation in progress';
+    }
     await sleep(200);
   }
   throw new Error('C008 browser timeout; last value=' + String(last).slice(0, 300));
@@ -73,7 +94,8 @@ try {
   const info = execFileSync('pdfinfo', [sourcePath], { encoding: 'utf8' });
   const sourceText = execFileSync('pdftotext', [sourcePath, '-'], { encoding: 'utf8' });
   const sourceImages = execFileSync('pdfimages', ['-list', sourcePath], { encoding: 'utf8' });
-  assert.match(info, /Pages:\s+1\b/);
+  report.generated_pdf_pages = Number(info.match(/Pages:\s+(\d+)/)?.[1] || 0);
+  assert.equal(report.generated_pdf_pages, 1);
   for (const marker of C008_SOURCE_MARKERS) {
     assert.ok(sourceText.includes(marker), 'Synthetic PDF preflight missed a text marker');
     report.input_text_markers.push(marker);
@@ -92,10 +114,20 @@ try {
     if (message.id && pending.has(message.id)) {
       const item = pending.get(message.id);
       pending.delete(message.id);
+      clearTimeout(item.timer);
       if (message.error) item.reject(new Error(message.error.message));
       else item.resolve(message.result);
     }
   });
+  const rejectPending = () => {
+    for (const item of pending.values()) {
+      clearTimeout(item.timer);
+      item.reject(new Error('C008 CDP connection closed before a reply'));
+    }
+    pending.clear();
+  };
+  ws.addEventListener('close', rejectPending, { once: true });
+  ws.addEventListener('error', rejectPending, { once: true });
 
   const { targetId } = await rpc('Target.createTarget', { url });
   const { sessionId } = await rpc('Target.attachToTarget', { targetId, flatten: true });
@@ -157,6 +189,20 @@ try {
   assert.equal(report.retained_source_sha256_matches, true,
     'The source PDF must remain byte-identical in the local source comparison');
 
+  const markersJson = JSON.stringify(C008_SOURCE_MARKERS);
+  const stored = await evaluate("(async()=>{const db=await new Promise((resolve,reject)=>{const r=indexedDB.open('astra-pdf-redesigner:v2');r.onsuccess=()=>resolve(r.result);r.onerror=()=>reject(r.error)});try{return await new Promise((resolve,reject)=>{const tx=db.transaction(['documents','assets','meta'],'readonly');const activeReq=tx.objectStore('meta').get('activeDocumentId');let documentRecord,assets=[];activeReq.onsuccess=()=>{const id=activeReq.result;const docReq=tx.objectStore('documents').get(id);const assetReq=tx.objectStore('assets').index('documentId').getAll(id);docReq.onsuccess=()=>{documentRecord=docReq.result};assetReq.onsuccess=()=>{assets=assetReq.result};};tx.oncomplete=()=>{const id=activeReq.result;const doc=documentRecord;const text=doc?.content?.sections?.flatMap(s=>s.blocks||[]).filter(b=>b.kind!=='image').map(b=>b.text||'').join(' ')||'';resolve({id,documentId:doc?.id||null,schemaVersion:doc?.schemaVersion||null,markerFlags:MARKERS.map(marker=>text.includes(marker)),imageBlockCount:doc?.content?.sections?.flatMap(s=>s.blocks||[]).filter(b=>b.kind==='image').length||0,assetCount:assets.length,assetMimeTypes:assets.map(a=>a.mimeType),assetSizes:assets.map(a=>a.byteSize)});};tx.onerror=()=>reject(tx.error||new Error('V2 readback failed'));tx.onabort=()=>reject(tx.error||new Error('V2 readback aborted'));})}finally{db.close()}})()".replace('MARKERS', markersJson));
+  report.v2_document_schema_version = stored.schemaVersion;
+  report.v2_document_marker_flags = stored.markerFlags;
+  report.v2_image_asset_count = stored.assetCount;
+  report.v2_image_asset_mime_types = stored.assetMimeTypes;
+  assert.ok(stored.id && stored.documentId === stored.id, 'IndexedDB active document reference is missing');
+  assert.equal(stored.schemaVersion, 2, 'Imported output was not stored as a V2 document');
+  assert.ok(stored.markerFlags.every(Boolean), 'IndexedDB V2 document lost source text markers');
+  assert.ok(stored.imageBlockCount >= 1 && stored.assetCount >= 1 &&
+    stored.assetMimeTypes.every(type => type === 'image/png') &&
+    stored.assetSizes.every(size => Number.isInteger(size) && size > 0),
+  'IndexedDB V2 image references/assets did not persist');
+
   const printStart = Date.now();
   const printed = await send('Page.printToPDF', { preferCSSPageSize: true, printBackground: true });
   writeFileSync(outputPath, Buffer.from(printed.data, 'base64'));
@@ -172,6 +218,17 @@ try {
   assert.equal(report.output_markers_preserved, true, 'Printed PDF lost source text markers');
   assert.ok(report.output_image_xobjects >= 1, 'Printed PDF lost the source raster image');
 
+  await send('Page.navigate', { url });
+  await eventually(() => evaluate("Boolean(document.querySelector('.project-paper'))"));
+  await eventually(() => evaluate("document.querySelector('.project-paper')?.textContent"),
+    text => C008_SOURCE_MARKERS.every(marker => text?.includes(marker)));
+  await eventually(() => evaluate("Promise.all([...document.querySelectorAll('.project-paper img')].map(img=>img.decode().then(()=>img.naturalWidth>0,()=>false))).then(results=>results.length>0&&results.every(Boolean))"), value => value === true);
+  const reopened = await evaluate("(()=>{const text=document.querySelector('.project-paper')?.textContent||'';return {markerFlags:"+JSON.stringify(["STEP3_CLIP_SOURCE_842","STEP3_CLIP_END_842"])+".map(marker=>text.includes(marker)),imageCount:document.querySelectorAll('.project-paper img').length}})()");
+  report.reopened_v2_marker_flags = reopened.markerFlags;
+  report.reopened_v2_image_count = reopened.imageCount;
+  assert.ok(reopened.markerFlags.every(Boolean), 'V2 text did not survive page reload');
+  assert.ok(reopened.imageCount >= 1, 'V2 image did not survive page reload');
+
   const metrics = await send('Performance.getMetrics');
   report.browser_js_heap_used_bytes = metrics.metrics.find(item => item.name === 'JSHeapUsedSize')?.value ?? null;
   report.status = 'PASS';
@@ -185,6 +242,17 @@ try {
     writeFileSync(reportPath, JSON.stringify(report, null, 2) + '\n');
   } catch {}
   if (ws && ws.readyState === 1) ws.close();
-  try { browser.child.kill('SIGTERM'); } catch {}
+  let cleanupError = null;
+  try {
+    await browser.close();
+  } catch (error) {
+    cleanupError = error;
+    report.status = 'FAIL';
+    report.error = 'Browser process cleanup failed: ' + String(error?.message || error).slice(0, 300);
+  }
+  try {
+    writeFileSync(reportPath, JSON.stringify(report, null, 2) + '\n');
+  } catch {}
   try { rmSync(dir, { recursive: true, force: true }); } catch {}
+  if (cleanupError) throw cleanupError;
 }
