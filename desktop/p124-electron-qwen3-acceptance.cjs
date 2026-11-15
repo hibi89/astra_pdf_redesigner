@@ -121,12 +121,13 @@ async function runP124ElectronAcceptance(win,renderPdf){
   let currentStep='initializing actual Workspace';
   const markStep=step=>{currentStep=step;console.log('P124 step: '+step);};
   const evaluate=async expression=>{
-    let result;
+    let result,script='';
     try{
-      const script='(async()=>{try{return {__p124Ok:true,value:await ('+expression+')}' +
+      script='(async()=>{try{return {__p124Ok:true,value:await ('+expression+')}' +
         '}catch(error){return {__p124Ok:false,error:String(error?.message||error)}}})()';
       result=await win.webContents.executeJavaScript(script,true);
     }catch(error){
+      console.log('P124 failed evaluation source: '+script.slice(0,800).replace(/\\s+/g,' '));
       throw Error('P124 renderer evaluation failed: '+String(error?.message||error));
     }
     if(!result?.__p124Ok)throw Error('P124 renderer script failed: '+String(result?.error||'unknown renderer error'));
