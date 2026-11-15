@@ -2,14 +2,14 @@
 
 Branch: `codex/astra-final-ai-sku-20261115`  
 Integration target: `integration/astra-final-blueprint-100-20261115`  
-Latest feature/test SHA: `fa57116544217c6122b1cd9643fee91002f45edc`  
+Latest tested feature SHA: `09b2d9c8f60631bb2f623f840bdde03450ed9e17`  
 Open draft PR: [#13](https://github.com/hibi89/astra_pdf_redesigner/pull/13)
 
 ## Completed and assessed
 
 | Task | Feature/test SHA | Tests | Score change |
 |---|---|---|---|
-| C001 / P124 Windows Electron Qwen3 synthetic review flow | `a2ca668c9578b68e760b922c026a5f2f8f941c8d` | Hosted model/review scenarios PASS; production SKU entitlement E2E not exercised | +2 A08 held/contested pending review |
+| C001 / P124 Windows Electron real Qwen3 3-SKU product flow | `09b2d9c8f60631bb2f623f840bdde03450ed9e17` | Real Root→Workspace→CommercialLicensePanel→SKU gate→LocalModelReview; all three Windows scenarios PASS; per-SKU PDF parity PASS | +2 A08 candidate supported; independent GPT/owner review pending |
 | C003 STEP6 rights acknowledgement and STEP5 local handoff | `20ae5fcab5b069bcd269ca0506721db5c180925e` | npm test/build, Chrome and Edge browser suites, blueprint policy PASS | +0; actual source-rights acceptance NOT VERIFIED |
 | C005 additional local-AI quality and 8-GiB CPU acceptance | Prior evidence reviewed; no new feature SHA | P123/P124 evidence does not establish an 8-GiB Windows/CPU profile | BLOCKED; +0 |
 | C006 offline license lifecycle prototype | `4e4bfc01aa2543ea03b0674a8fcc8f6f33f50a25` | Linux/Chrome/Edge PASS; Windows Electron/NSIS PASS; blueprint policy PASS | Operational gates BLOCKED; +0 |
@@ -32,9 +32,9 @@ C007 supports +1 A10 candidate for hosted Windows upgrade and data persistence; 
 
 ## Score and release state
 
-Candidate ceiling: **67/100 conditional** (64 baseline + C001/P124 +2 + C007 +1). The P124 +2 is held/contested because the hosted fixture bypasses production SKU entitlement flow; if P124 is withheld and C007 +1 is accepted, the worker evidence candidate is 65/100. The integration-owned central ledger remains **64/100** and unchanged. Official buyer acceptance remains UNASSESSED and RELEASE HOLD remains.
+Candidate ceiling: **67/100 conditional** (64 baseline + C001/P124 +2 + C007 +1). The C001/P124 +2 is now supported by the exact-SHA Windows run exercising the actual product Workspace, signed synthetic SKU receipts, and production SKU gate. It remains a worker candidate until independent GPT review and integration-owner scoring; if withheld while C007 +1 is accepted, the worker evidence candidate is 65/100. The integration-owned central ledger remains **64/100** and unchanged. Official buyer acceptance remains UNASSESSED and RELEASE HOLD remains.
 
-C001 uses synthetic documents and test-only SKU contexts; independent G003 review (pinned to the earlier SHA `6e8b2eeb381874a12be041fa080fb545b5e1fb82`) flagged that the fixture directly calls `LocalModelReview disabled={false}` instead of production `Workspace`/`CommercialLicensePanel`/`runSkuGatedAction`. This source limitation persists on the current branch, so +2 is held pending production entitlement-flow verification. G003 also found a release-content risk: `desktop/**` was packaged while main statically imported the P124 acceptance module. That narrow F02 risk is now resolved at C010 SHA `965fb977c9983b5cf2103ee267f57676a676cde8`: the runner enumerated 552 ASAR entries and confirmed the module/fixture are absent. A broad secret/customer-data scan remains unverified. See the C001/C010 verification reports and [G003](https://github.com/hibi89/astra_pdf_redesigner/blob/gpt/astra-final-qa-ocr-20261115/docs/evidence/astra/G003/VERIFICATION.md). C001 also does not verify production signing, SmartScreen, physical buyer PCs, legal readiness, or unique-paragraph quality breadth. C003 source rights remain UNVERIFIED unless the source is separately inspected. C005's 8-GiB requirement is not inferred from hosted runners. C007 verifies hosted-runner upgrade/preservation only; it does not prove a trusted signature, physical Win10/11 buyer acceptance, SmartScreen or interruption/quota recovery.
+C001 uses only synthetic documents and one-time test-generated signed SKU receipts. At exact SHA `09b2d9c8f60631bb2f623f840bdde03450ed9e17`, P124 exercises the real Root → Workspace → CommercialLicensePanel → runSkuGatedAction → LocalModelReview route in Windows Electron for BASIC/PRO/BUSINESS. This supersedes G003-F01's earlier test-fixture bypass finding on SHA `6e8b2eeb381874a12be041fa080fb545b5e1fb82`; independent G003 review of the new SHA is still pending, so the +2 remains a candidate rather than a central-ledger change. Production issuer keys and sale activation remain disabled. G003-F02 is resolved by exact-SHA C010 run `43700294393`: the unsigned candidate's 552-entry ASAR listing excludes the P124 test harness and fixture. A broad secret/customer-data scan remains unverified. C001 does not verify production signing, SmartScreen, physical buyer PCs, legal readiness, unique-paragraph quality breadth, or 8-GiB resource acceptance. C003 rights remain UNVERIFIED until a real selected source is assessed. C007 verifies hosted-runner upgrade/preservation only; trusted signing, physical Win10/11 buyer acceptance, SmartScreen and interruption/quota recovery remain open.
 
 ## C006 — PARTIAL, technical prototype PASS / operational gates BLOCKED
 
@@ -66,6 +66,24 @@ At original SHA `fa57116544217c6122b1cd9643fee91002f45edc`, [Windows run 4369087
 
 ## Independent review qualifications
 
-- C001/P124's hosted Qwen3 inference and review-flow execution passed at its recorded feature SHA, but the test selects SKU labels in a fixture and bypasses production entitlement gating. The +2 is a contested candidate held pending a true production-flow test; no central score change is made here.
+- C001/P124's actual production Workspace/SKU-gated Qwen3 flow passed on `09b2d9c8f60631bb2f623f840bdde03450ed9e17`; test-only receipts were issued ephemerally and no production issuer was configured. The +2 candidate awaits independent GPT review and central owner scoring; no central score change is made here.
 - C010's unsigned package/SBOM checks and targeted ASAR exclusion assertion passed at SHA `965fb977c9983b5cf2103ee267f57676a676cde8`; the P124 test harness is absent from 552 enumerated entries. Broad package secret/customer-data scanning remains open.
 - Overall buyer acceptance stays UNASSESSED; RELEASE HOLD stays active. See [C001](C001/VERIFICATION.md), [C010](C010/VERIFICATION.md), and [independent G003](https://github.com/hibi89/astra_pdf_redesigner/blob/gpt/astra-final-qa-ocr-20261115/docs/evidence/astra/G003/VERIFICATION.md).
+
+
+## C001 / P124 — exact-SHA product-path rerun
+
+At code/test SHA **09b2d9c8f60631bb2f623f840bdde03450ed9e17**, the Windows Electron harness now traverses the actual product Root → Workspace → CommercialLicensePanel → runSkuGatedAction → LocalModelReview path using one-time GitHub Actions test receipts. This supersedes the earlier G003-F01 fixture-bypass limitation. Production issuer keys and sale activation remain false; all documents and inputs are synthetic.
+
+- Windows real Qwen3, all three scenarios and production-only rebuild: [run 43700294401](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43700294401) — PASS.
+- Linux/Chrome and Microsoft Edge regression: [run 43700294427](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43700294427) — PASS.
+- C007 Windows NSIS install/upgrade and V2 preservation: [run 43700294405](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43700294405) — PASS.
+- C010 unsigned package/SBOM/ASAR exclusion audit: [run 43700294393](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43700294393) — PASS; 88/88 Windows desktop tests, SBOM 6 components/0 missing license metadata, 552 ASAR entries with the P124 harness excluded, candidate unsigned and unpublished.
+- Blueprint evidence gate: [run 43700294719](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43700294719) — PASS.
+- Synthetic reports and three screenshots: [P124 artifact 14156104065](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43700294401/artifacts/14156104065), SHA-256 `97d7e316127a0c18a7e9b199ba354fd554f09fe2f080a4dce6886c4fc0d722f8`.
+
+The healthy Windows run used Qwen3-4B-Instruct-2507 Q8_0 (model SHA-256 `eed67be2a8eed4320ff71f3d5b350db10653549281e09b8967b97aeb1f1554ee`) with Ollama 0.40.16 CPU-only and cloud disabled (runtime archive SHA-256 `50fcf5ad54277f2fa5d173ebfc93bcb017adbc0c9ef2314daabc96ca9e6aa64e`). BASIC, PRO, and BUSINESS each completed 10 real inference calls, showed 10 guarded proposals, explicitly approved one and Undid it, rejected nine, cancelled inference, and recorded zero automatic applies. Model-missing and forged-response scenarios passed for all three SKU contexts and preserved the input.
+
+Each selected layout's A4 PDF extracted text matched before/after review. The three output PDF SHA-256 values are recorded in [C001/VERIFICATION.md](C001/VERIFICATION.md); the marker, 230,000원 amount, and negation were preserved. Synthetic V1/V2 sentinels stayed unchanged; product V1/V2 content/assets were preserved, with the V2 updatedAt timestamp changing through normal edit/Undo persistence. No customer data or external inference was used.
+
+C001's A08 +2 is now supported as a technical candidate. It remains subject to the independent GPT review and integration-owner score decision; official buyer acceptance stays UNASSESSED and RELEASE HOLD stays. The integration-owned score ledger remains 64/100. With the conditional C001 +2 and C007 +1, the worker evidence ceiling is 67/100 pending acceptance.

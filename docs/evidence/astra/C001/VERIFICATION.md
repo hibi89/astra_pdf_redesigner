@@ -1,65 +1,61 @@
 # C001 / P124 — Windows Electron real Qwen3 3-SKU verification
 
-**Status:** VERIFIED only for the synthetic hosted-runner inference/review scope; production SKU entitlement E2E remains REVIEW REQUIRED  
-**Feature SHA:** `a2ca668c9578b68e760b922c026a5f2f8f941c8d`  
+**Status:** PASS for the synthetic Windows-hosted real-model product-path acceptance on the exact SHA below. Independent GPT review of this latest SHA and buyer acceptance remain pending.  
+**Feature/test SHA:** `09b2d9c8f60631bb2f623f840bdde03450ed9e17`  
 **Branch:** `codex/astra-final-ai-sku-20261115`  
 **Integration PR:** [#13](https://github.com/hibi89/astra_pdf_redesigner/pull/13) → `integration/astra-final-blueprint-100-20261115`  
-**Score:** A08 +2 candidate remains contested and is held from acceptance pending the production-SKU qualification below. The central score ledger remains unchanged pending integration-owner review. Official buyer acceptance is UNASSESSED; RELEASE HOLD remains.
+**Score:** A08 +2 candidate is supported by this technical evidence; the central score ledger remains 64/100 until integration-owner review. Official buyer acceptance is UNASSESSED; RELEASE HOLD remains.
 
-## Changes
+## Product path and changes
 
-The feature was implemented in commit `8a02e3c0d78bfe0e227677899c9ff1202cab1910`, workflow setup corrected in `6e8b2eeb381874a12be041fa080fb545b5e1fb82`, and the acceptance test stabilized in the exact tested feature SHA above.
+The acceptance harness launches the trusted Electron application protocol and actual Root/Workspace UI. It fills an ephemeral signed receipt through the real CommercialLicensePanel, verifies BASIC/PRO/BUSINESS with runSkuGatedAction, selects the actual permitted/denied layouts, and exercises the production LocalModelReview component through the Electron preload and main-process IPC.
 
-Changed paths:
+The code change in this rerun compares PDF text before and after review within each active SKU layout. It avoids requiring different BASIC, PRO, and BUSINESS visual layouts to have identical extracted text. The PowerShell validator now requires the per-SKU equality result.
 
-- `.github/workflows/p124-windows-qwen3-electron.yml`
-- `.github/workflows/ci.yml`
-- `desktop/main.cjs`
-- `desktop/p124-electron-qwen3-acceptance.cjs`
-- `tests/fixtures/p124-electron-qwen3.html`
-- `tests/fixtures/p124-electron-qwen3.jsx`
-- `tests/p124-fake-ollama.cjs`
-- `tests/p124-windows-qwen3-acceptance.ps1`
-- `vite.config.ts`
+Changed in SHA 09b2d9c8:
+- desktop/p124-electron-qwen3-acceptance.cjs
+- tests/p124-windows-qwen3-acceptance.ps1
 
-The test uses the production `LocalModelReview`, Electron preload and main-process IPC, synthetic STEP2 PDF input, and synthetic localStorage/IndexedDB sentinels. The known safe neutral paragraph that produced a valid real-model proposal is replayed only after its first proposal passes the production output guard. Each replay performs a new model inference and requires a fresh visible decision; this proves the repeated review flow, not ten unique-paragraph quality coverage.
+All application inputs, V1/V2 fixtures, model receipts, and rendered PDFs are synthetic. The test receipt signer is generated ephemerally by the hosted workflow. Production issuer configuration and customer sale activation remain disabled. No customer files are opened and the Ollama cloud route is disabled.
 
 ## Exact-SHA GitHub Actions evidence
 
-All listed runs checked out `a2ca668c9578b68e760b922c026a5f2f8f941c8d`.
+All runs below checked out `09b2d9c8f60631bb2f623f840bdde03450ed9e17`.
 
 | Verification | Result | Evidence |
 |---|---|---|
-| Existing regression suite, production build, desktop release-hold verification, native Electron smoke, real Qwen3 scenarios, production-only NSIS packaging and packaged EXE smoke | PASS | [Windows run 43684225170](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43684225170) |
-| Linux/Chrome build and test plus Microsoft Edge A4 PDF/IndexedDB | PASS | [Linux/Edge run 43684225214](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43684225214) |
-| Final blueprint evidence policy | PASS | [Policy run 43684225409](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43684225409) |
+| Windows Electron real Qwen3, actual product SKU flow, healthy/missing/forged scenarios, production-only rebuild and unsigned package | PASS | [Run 43700294401](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43700294401) |
+| Linux build/tests/Chrome print and Microsoft Edge A4 PDF/IndexedDB | PASS | [Run 43700294427](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43700294427) |
+| C007 Windows NSIS install/upgrade and STEP2 preservation | PASS | [Run 43700294405](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43700294405) |
+| C010 package/SBOM/ASAR exclusion audit | PASS | [Run 43700294393](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43700294393) |
+| Final blueprint evidence policy | PASS | [Run 43700294719](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43700294719) |
 
-The Windows run exported the synthetic report/screenshots as artifact `p124-windows-electron-qwen3-a2ca668c9578b68e760b922c026a5f2f8f941c8d` (artifact ID `14149509892`, SHA-256 `4bdc85bb367c2165beaefdfeaa187c79607e98eb52267b073a0187044cb7e91b`). The artifact is retained by GitHub Actions for 14 days.
+The P124 run's report and screenshot artifact is [artifact 14156104065](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43700294401/artifacts/14156104065), archive SHA-256 `97d7e316127a0c18a7e9b199ba354fd554f09fe2f080a4dce6886c4fc0d722f8`. It contains healthy, missing-model and tampered-response reports and synthetic screenshots for all three tiers.
 
 ## Scenario results
 
-- **Healthy CPU model:** Qwen3-4B-Instruct-2507 Q8_0 with Ollama 0.40.16. BASIC, PRO, and BUSINESS each completed 10 fresh real inference calls with 10 visible, validated proposals; each context explicitly approved one proposal and Undid it, rejected nine proposals, cancelled an inference, and recorded zero automatic applies.
-- **Model missing:** all three contexts reported unavailable, kept inference disabled, and preserved the original source.
-- **Forged loopback output:** all three contexts rejected the tampered response and preserved the original source.
-- All three reports record `external_transfer=false`, synthetic V1/V2 sentinels unchanged, actual product localStorage V1 and STEP2 IndexedDB V2 unchanged, and zero automatic text applications.
-- The healthy report records PDF text equality before and after review and preserves the synthetic document marker, amount, and negation. Extracted-text SHA-256: `a6b4e8c690989b20b7935d9d1f36a8c3814616a9f227fa52144141a0062eb079`.
-- The test model was fetched during the hosted run from a pinned GitHub release; combined model SHA-256 `eed67be2a8eed4320ff71f3d5b350db10653549281e09b8967b97aeb1f1554ee`. Ollama Windows release SHA-256: `50fcf5ad54277f2fa5d173ebfc93bcb017adbc0c9ef2314daabc96ca9e6aa64e`. Neither model nor production credentials were added to the application bundle.
-- Production-only Vite bundle rebuild, Windows NSIS packaging and packaged application smoke completed successfully. Installer SHA-256 printed by the runner: `2ff47d42cd1e730c05db16f6e52addc59be2613dc1e32df7f8bb00cb5feedfa1`. Production signing identity and SmartScreen status were not independently attested.
+- **Healthy model:** Qwen3-4B-Instruct-2507 Q8_0 on GitHub-hosted Windows through Ollama 0.40.16 CPU-only. The exact model hash was `eed67be2a8eed4320ff71f3d5b350db10653549281e09b8967b97aeb1f1554ee`; the runtime archive hash was `50fcf5ad54277f2fa5d173ebfc93bcb017adbc0c9ef2314daabc96ca9e6aa64e`. Cloud inference was disabled.
+- **BASIC:** verified signed test receipt; BASIC layout allowed and PRO layout denied; 10 real inference calls/10 guarded visible proposals; approve then Undo 1, reject 9, cancel 1, automatic applies 0.
+- **PRO:** verified signed test receipt; PRO layout allowed and BUSINESS layout denied; same 10/10 proposals and review decisions.
+- **BUSINESS:** verified signed test receipt; BUSINESS layout allowed; same 10/10 proposals and review decisions.
+- **Model missing:** all three SKU contexts kept inference disabled and retained the original paragraph.
+- **Forged loopback response:** all three contexts rejected tampered output and kept the input unchanged.
+- **PDF:** Each SKU's one-page A4 output passed structural checks. Extracted text was identical before and after review within that SKU layout. All outputs retained synthetic marker ASTRA_P124_PDF_SOURCE_7401, amount 230,000원, and the negation statement. Output PDF SHA-256: BASIC `13aa49d92b18a5469ea763b45749211f0ba3d314a5cdc6a4a59abd1e18acf790`; PRO `63e733735d2b0c9ce076b94f8794bdbb16371e440c81b0b6539cefb5879758c4`; BUSINESS `1848e9f888cee8d37628e575e94ab078e818cee09dc8320a662dc94e8301d341`.
+- Synthetic V1/V2 sentinels remained unchanged. Product V1 and STEP2 V2 content/assets were preserved; updatedAt changed through normal edit/Undo writes. No automatic application or external document transfer occurred.
+- The model was downloaded only during CI from a pinned GitHub release under its Apache-2.0 license; it was not added to the installer or redistributed.
 
-## Failure history and limits
+## Package and release boundaries
 
-- Run [43683050524](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43683050524) at `6e8b2eeb381874a12be041fa080fb545b5e1fb82` passed setup/regressions but failed the acceptance threshold because the initial fixture produced fewer than ten valid proposals. The acceptance loop was revised to replay a proposal source only after an actual guarded output passed, then re-tested on the current exact SHA.
-- The first run at `8a02e3c0d78bfe0e227677899c9ff1202cab1910` failed before testing because npm caching expected a lockfile absent from this repository; the workflow now follows the repository's `npm install` convention.
-- SKU names are test-only contexts for the shared production review UI; this does not verify production SKU entitlements, issuer keys, or sale activation.
-- Inputs are synthetic. No customer documents or customer data were used. Physical buyer-machine behavior, production signing, legal/model redistribution review, and buyer acceptance remain unverified.
+The exact-SHA C010 audit passed the Windows suite (88/88), SBOM metadata coverage (6 production components, 0 missing), and ASAR enumeration (552 entries) confirming the P124 harness and fixture are absent from the unsigned application package. The P124 workflow rebuilt a production-only Vite bundle and unsigned NSIS candidate after the acceptance run.
 
-## Independent QA qualification — current branch review
+No signing, publication, installation on a buyer PC, production issuer setup, sales activation, or release was performed. Production signing/SmartScreen, physical Windows buyer acceptance, legal/model redistribution review, 8-GiB resource behavior, and distinct-paragraph quality breadth remain unverified.
 
-The independent G003 report on the GPT branch, pinned to the earlier Codex SHA `6e8b2eeb381874a12be041fa080fb545b5e1fb82`, identified two scope risks. I rechecked the relevant source on the current worker branch; the findings still apply to the C001/C010 evidence:
+## Independent review and score qualification
 
-- **F01 — production SKU entitlement flow not exercised.** The P124 fixture selects BASIC/PRO/BUSINESS in test-local state and calls the shared `LocalModelReview` directly with `disabled={false}`. It does not traverse production `Workspace` / `CommercialLicensePanel` / `runSkuGatedAction` or verify SKU entitlements. Therefore the hosted runs demonstrate the real model and review component under three test labels, not the complete production three-SKU GUI/permission flow. Treat the +2 as **pending / not accepted** until that flow is exercised; production keys and customer-build activation remain prohibited.
-- **F02 — installer ASAR contents not verified.** `electron-builder.yml` selects `desktop/**`, while `desktop/main.cjs` statically imports `p124-electron-qwen3-acceptance.cjs`. The Windows acceptance workflow checks that the P124 fixture HTML is absent from `dist`, but does not inspect the built `app.asar`. This establishes a packaging-inclusion risk; whether the exact installer ASAR contains the test module remains unverified. C010 did not perform that ASAR audit, so no clean-bundle claim is made.
+G003's earlier F01 review was pinned to SHA `6e8b2eeb381874a12be041fa080fb545b5e1fb82` and correctly identified that the then-current harness bypassed Workspace and SKU gating. SHA `09b2d9c8f60631bb2f623f840bdde03450ed9e17` now exercises the actual product route with ephemeral test receipts. This resolves the previously identified harness gap in this branch, but GPT has not yet independently reviewed the updated SHA. The A08 +2 remains a technical candidate pending that review and the integration owner's scoring decision.
 
-G003 report: [read-only independent review](https://github.com/hibi89/astra_pdf_redesigner/blob/gpt/astra-final-qa-ocr-20261115/docs/evidence/astra/G003/VERIFICATION.md). Its tested/pinned source SHA predates the final P124 success run; the above qualification is based on rechecking the fixture, main process and builder rules, not treating its earlier failed run as the final run result.
+C001 does not establish 30 unique-input quality breadth; the same guarded synthetic paragraph is replayed for fresh decisions. C005's 8-GiB profile remains BLOCKED. Overall buyer acceptance stays UNASSESSED and RELEASE HOLD stays active.
 
-**Next READY work:** C003 (A06 user-selected online reference path), subject to the existing policy and browser/data isolation constraints.
+## Next
+
+C003 is the next independent Codex workstream after P124. Preserve the no-customer-data/no-external-inference boundaries and leave the central STATUS, HANDOFF, and score ledger to the integration owner.
