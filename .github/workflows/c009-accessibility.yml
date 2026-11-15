@@ -7,6 +7,7 @@ on:
       - 'src/**'
       - 'tests/c009-accessibility-browser.mjs'
       - 'tests/c009-layout-print-browser.mjs'
+      - 'tests/c009-resource-recovery-browser.mjs'
       - 'tests/browser-process.mjs'
       - 'index.html'
       - 'package*.json'
@@ -17,6 +18,7 @@ on:
       - 'src/**'
       - 'tests/c009-accessibility-browser.mjs'
       - 'tests/c009-layout-print-browser.mjs'
+      - 'tests/c009-resource-recovery-browser.mjs'
       - 'tests/browser-process.mjs'
       - 'index.html'
       - 'package*.json'
@@ -27,7 +29,7 @@ permissions:
 
 jobs:
   browser-accessibility:
-    name: Chrome and Edge AX tree and keyboard navigation
+    name: Chrome/Edge accessibility, layout, resource and recovery
     runs-on: ubuntu-latest
     timeout-minutes: 45
     steps:
@@ -66,13 +68,17 @@ jobs:
           curl -fsS http://127.0.0.1:4173 >/dev/null
           CHROME_PATH="$CHROME_BIN" node tests/c009-accessibility-browser.mjs
           C009_OUTPUT_DIR="$RUNNER_TEMP/astra-c009-layouts/chrome" CHROME_PATH="$CHROME_BIN" node tests/c009-layout-print-browser.mjs
+          C009_RESOURCE_OUTPUT_DIR="$RUNNER_TEMP/astra-c009-resource/chrome" CHROME_PATH="$CHROME_BIN" node tests/c009-resource-recovery-browser.mjs
           CHROME_PATH="$EDGE_BIN" node tests/c009-accessibility-browser.mjs
           C009_OUTPUT_DIR="$RUNNER_TEMP/astra-c009-layouts/edge" CHROME_PATH="$EDGE_BIN" node tests/c009-layout-print-browser.mjs
+          C009_RESOURCE_OUTPUT_DIR="$RUNNER_TEMP/astra-c009-resource/edge" CHROME_PATH="$EDGE_BIN" node tests/c009-resource-recovery-browser.mjs
       - name: Upload synthetic 30-layout print evidence
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: c009-layout-print-matrix-${{ github.run_id }}
-          path: ${{ runner.temp }}/astra-c009-layouts/
+          name: c009-accessibility-print-resource-${{ github.run_id }}
+          path: |
+            ${{ runner.temp }}/astra-c009-layouts/
+            ${{ runner.temp }}/astra-c009-resource/
           if-no-files-found: ignore
           retention-days: 14
