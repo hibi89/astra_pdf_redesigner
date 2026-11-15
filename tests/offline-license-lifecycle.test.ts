@@ -2,7 +2,8 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import {importOfflineLicensePublicKey,verifyOfflineEntitlement,type LicenseClaims}
  from '../src/commercial/offlineLicense.ts';
-import {publicIssuerJwkThumbprint} from '../src/commercial/skuAccess.ts';
+import {publicIssuerJwkThumbprint,productionSkuAccessConfigured,checkProductionSkuCapability}
+ from '../src/commercial/skuAccess.ts';
 import {issueOfflineLicenseReceipt,extendOfflineLicenseReceipt}
  from '../src/commercial/offlineLicenseIssuer.ts';
 import {createLicenseLifecycleSnapshot,effectiveLicenseLifecycleStatus,
