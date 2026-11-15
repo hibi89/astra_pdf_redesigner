@@ -16,7 +16,7 @@ Open draft PR: [#13](https://github.com/hibi89/astra_pdf_redesigner/pull/13)
 | C002 responsive viewport acceptance | `bd83ac2619a80f940dd628d513a760aee06f0ecb` | 298 unit tests/build, Chrome and Edge at 390/360/320px, blueprint policy PASS | Buyer visual acceptance pending; +0 |
 | C008 synthetic PDF accuracy regression | `bd83ac2619a80f940dd628d513a760aee06f0ecb` | Linux/Chrome, Edge; 15-pair corpus, 12-layout PDF risk matrix, V1/V2 no-write, policy PASS | Synthetic-only; owner acceptance pending; +0 |
 | C009 accessibility, 30-layout print, large-document resource and recovery | `2384a8287a7d5a196596acb4cf351ff61d7a7f34` | Run 43718318286 attempt 2 PASS: npm test 307/0; Chrome/Edge accessibility, 30 unique layouts, 28-page 4× CPU print and V2/localStorage recovery; artifact 14163129064 | Hosted synthetic only; buyer screen-reader/visual acceptance pending; +0 |
-| C010 Windows package/SBOM/content/reproducibility audit | `2384a8287a7d5a196596acb4cf351ff61d7a7f34` | Run 43718313656: npm test 306/0, build, desktop 88/88, SBOM 6/0, ASAR 552 entries, content scan 525 files/84,095,509 bytes/0 findings PASS; repeated unsigned NSIS hashes differ, explicit gate FAIL; policy 43718314059 PASS | Reproducible installer BLOCKED; +0 |
+| C010 Windows package/SBOM/content/reproducibility audit | `2384a8287a7d5a196596acb4cf351ff61d7a7f34` | Run 43718313656: npm test 306 passed/0 failed/1 skipped of 307, build, desktop 88/88, SBOM 6/0, ASAR 552 entries, content scan 525 files/84,095,509 bytes/0 findings PASS; repeated unsigned NSIS hashes differ, explicit gate FAIL; policy 43718314059 PASS | Reproducible installer BLOCKED; +0 |
 
 Detailed reports: [C001](C001/VERIFICATION.md), [C003](C003/VERIFICATION.md), [C005](C005/VERIFICATION.md). The earlier P124 BLOCKED note was superseded with hosted evidence: [P124/VERIFICATION.md](P124/VERIFICATION.md).
 
@@ -80,7 +80,7 @@ Follow-up at exact code/test SHA `2384a8287a7d5a196596acb4cf351ff61d7a7f34`: [ru
 
 ## C010 — package-content audit PASS; reproducible NSIS candidate BLOCKED
 
-At exact code/test SHA `2384a8287a7d5a196596acb4cf351ff61d7a7f34`, [Windows run 43718313656](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43718313656) passed `npm test` (306/0), production build, desktop verification (88/88), SBOM generation (6 components/0 missing license metadata), P124 test-harness exclusion (552 ASAR entries), and package-content audit (525 files/84,095,509 bytes/0 findings). The final job failed on the bit-for-bit reproducibility assertion.
+At exact code/test SHA `2384a8287a7d5a196596acb4cf351ff61d7a7f34`, [Windows run 43718313656](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43718313656) passed `npm test` (306 passed, 0 failed, 1 skipped of 307), production build, desktop verification (88/88), SBOM generation (6 components/0 missing license metadata), P124 test-harness exclusion (552 ASAR entries), and package-content audit (525 files/84,095,509 bytes/0 findings). The final job failed on the bit-for-bit reproducibility assertion.
 
 - First unsigned candidate: 129,200,848 bytes, SHA-256 `2EA9FACF91F04D609F88368A25282075A1D4A55AC26F4826E6A8DCEBF96D0AF9`.
 - Same-source rebuild: 129,200,956 bytes, SHA-256 `84AA17DBEA5BF89CADF38A81FBC84D0C6848F5CA62BA81F7BA773AA64613930C`.

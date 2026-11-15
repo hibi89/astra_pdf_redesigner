@@ -10,7 +10,7 @@
 ## Latest exact-SHA attempt — reproducibility gate FAIL
 
 - [Windows C010 run 43718313656](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43718313656) ran at exact code/test SHA `2384a8287a7d5a196596acb4cf351ff61d7a7f34`. The run is **FAIL** only at the same-source installer reproducibility assertion; its regression, build, package-content scan, SBOM, ASAR exclusion, and desktop verification steps passed.
-- `npm test`: 306 passed, 0 failed; production build PASS; `npm run desktop:verify`: 88/88 PASS.
+- `npm test`: 306 passed, 0 failed, 1 skipped of 307; production build PASS; `npm run desktop:verify`: 88/88 PASS.
 - CycloneDX SBOM: 6 production components, 0 with missing license metadata. The SBOM stayed in the ephemeral runner; metadata coverage is not legal/NOTICE approval.
 - `app.asar`: 552 entries; the P124 acceptance harness/fixture paths are absent. Content audit: 525 files / 84,095,509 bytes scanned, including 13 static text files, 8 secret-signature rules, 3 PII text rules, and 3 path rules; findings 0.
 - The candidate remained unsigned (`NotSigned`) and built with `--publish never`. Build 1: 129,200,848 bytes, SHA-256 `2EA9FACF91F04D609F88368A25282075A1D4A55AC26F4826E6A8DCEBF96D0AF9`. Build 2: 129,200,956 bytes, SHA-256 `84AA17DBEA5BF89CADF38A81FBC84D0C6848F5CA62BA81F7BA773AA64613930C`.
