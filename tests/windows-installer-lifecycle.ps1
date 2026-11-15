@@ -127,8 +127,6 @@ try {
         -not $recovery.quota_failure_preserved_storage -or -not $recovery.retry_persisted -or
         -not $recovery.png_bytes_preserved -or -not $recovery.multi_store_abort_atomic -or
         -not $recovery.renderer_reload_preserved -or
-        -not $recovery.stdout_stderr_leak_check -or
-        -not $recovery.installed_process_restart_verified -or
         $recovery.after_quota_snapshot_sha256 -ne $recovery.baseline_snapshot_sha256 -or
         $recovery.abort_before_snapshot_sha256 -ne $recovery.abort_after_snapshot_sha256) {
       throw 'Installed STEP2 quota, retry, atomic-abort, reload, SHA or report acceptance failed'
@@ -147,6 +145,9 @@ try {
     if ($preserve.ExitCode -ne 0) { throw "STEP2 persisted project failed separate installed EXE restart: $($preserve.ExitCode)" }
     $recovery.installed_process_restart_verified = $true
     Set-Content -LiteralPath $step2RecoveryReport -Value ($recovery | ConvertTo-Json -Depth 12) -Encoding utf8
+    if (-not $recovery.stdout_stderr_leak_check -or -not $recovery.installed_process_restart_verified) {
+      throw 'Installed STEP2 log-leak or separate-process restart acceptance failed'
+    }
     Write-Host 'PASS ASTRA STEP2 SECOND EXE LAUNCH: recovered document and PNG intact'
   } finally {
     Remove-Item Env:ASTRA_STEP2_FAILURE_INJECTION -ErrorAction SilentlyContinue
