@@ -65,7 +65,6 @@ function auditIntermediates(appArchivePath, uninstallerPath, env = process.env) 
   };
   const reportPath = path.join(outputDirectory, 'summary.json');
   fs.writeFileSync(reportPath, JSON.stringify(report, null, 2), { flag: 'wx' });
-  process.stdout.write(JSON.stringify(report) + '\n');
   return report;
 }
 
