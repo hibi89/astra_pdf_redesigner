@@ -1,0 +1,92 @@
+{
+  "schema": "astra-g004-anonymous-owner-summary-v1",
+  "ownerPerformedLocally": false,
+  "windows": [],
+  "cases": [
+    {
+      "caseId": "CASE-01",
+      "features": [
+        "text"
+      ],
+      "sourcePages": 1,
+      "outputPages": 1,
+      "sourceHashUnchanged": false,
+      "textOmissions": 0,
+      "numericMismatches": 0,
+      "tableIssues": 0,
+      "imageIssues": 0,
+      "readingOrderIssues": 0,
+      "layoutIssues": 0,
+      "warningsAcknowledged": false,
+      "visualReviewed": false
+    },
+    {
+      "caseId": "CASE-02",
+      "features": [
+        "table"
+      ],
+      "sourcePages": 1,
+      "outputPages": 1,
+      "sourceHashUnchanged": false,
+      "textOmissions": 0,
+      "numericMismatches": 0,
+      "tableIssues": 0,
+      "imageIssues": 0,
+      "readingOrderIssues": 0,
+      "layoutIssues": 0,
+      "warningsAcknowledged": false,
+      "visualReviewed": false
+    },
+    {
+      "caseId": "CASE-03",
+      "features": [
+        "multi-column"
+      ],
+      "sourcePages": 1,
+      "outputPages": 1,
+      "sourceHashUnchanged": false,
+      "textOmissions": 0,
+      "numericMismatches": 0,
+      "tableIssues": 0,
+      "imageIssues": 0,
+      "readingOrderIssues": 0,
+      "layoutIssues": 0,
+      "warningsAcknowledged": false,
+      "visualReviewed": false
+    },
+    {
+      "caseId": "CASE-04",
+      "features": [
+        "image"
+      ],
+      "sourcePages": 1,
+      "outputPages": 1,
+      "sourceHashUnchanged": false,
+      "textOmissions": 0,
+      "numericMismatches": 0,
+      "tableIssues": 0,
+      "imageIssues": 0,
+      "readingOrderIssues": 0,
+      "layoutIssues": 0,
+      "warningsAcknowledged": false,
+      "visualReviewed": false
+    },
+    {
+      "caseId": "CASE-05",
+      "features": [
+        "scan"
+      ],
+      "sourcePages": 1,
+      "outputPages": 1,
+      "sourceHashUnchanged": false,
+      "textOmissions": 0,
+      "numericMismatches": 0,
+      "tableIssues": 0,
+      "imageIssues": 0,
+      "readingOrderIssues": 0,
+      "layoutIssues": 0,
+      "warningsAcknowledged": false,
+      "visualReviewed": false
+    }
+  ]
+}
