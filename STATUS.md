@@ -360,3 +360,10 @@
 - 0.1.1은 **CI에서만 패키지 버전 번호를 바꾼 동일 앱 코드·동일 저장 스키마 빌드**. 따라서 **버전만 다른 설치 패키지 업그레이드 시 데이터 보존**을 검증한 것이며 **기능 코드/스키마 변경에 따른 마이그레이션은 미검증**. 고객 PC 수동 인수, 서명·SmartScreen, 실문서 시각 품질도 미검증.
 - 근거 [PR4 보고서](https://github.com/hibi89/astra_pdf_redesigner/blob/feature/windows-electron-package-20261019/docs/WINDOWS_NSIS_VERSION_UPGRADE_STEP2_PERSISTENCE_2026-10-19.md), feature docs 커밋 `057ccef81b97dd741c46002c28292bfdf544362f`; unsigned CI 전용 0.1.1 EXE SHA256 `EBDD0945CCF242CA126A109DA20772D3854DB0A292E5A39BBE28977F83F559FA`, [Artifact #12169723064](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/39216361190/artifacts/12169723064), 2026-10-26 만료.
 - 다음 `ㄱ`: 기존 앱 코드 또는 IndexedDB 스키마 **실제 변경**을 재현한 호환성 검사 가능성 확인 및 작은 단위 실행. PR3·PR4 Draft/open/unmerged, main 기능 병합/STEP4 별도 승인 전 금지; 전체 7단계 추정 약38% 유지.
+
+
+## 2026-11-15 KST — 사용자 선택 Astra PDF 디자인 레퍼런스 공시 (문서 전용)
+- **범위:** 고객이 선택한 딥 퍼플·전후 PDF 비교·KPI 카드 디자인을 `docs/design/ASTRA_PDF_VISUAL_REFERENCE_20261115.md` 및 재구성 SVG에 공시. `AGENTS.md`에 링크·적용 경계 추가. 참고 [GitHub Issue #?](https://github.com/hibi89/astra_pdf_redesigner/issues/11).
+- **원본 정확성:** 사용자가 첨부한 PNG 724×746px SHA-256 `06441f6258716f43d20f5ba10b2937a1cf0d2156e803ea9c5375dbf9f1a441c3` 확인. **원본 PNG는 GitHub에 포함하지 않았으며 SVG는 개념 재구성**이다. 레퍼런스는 완료 기능·실제 출력 검증 증거가 아니다.
+- **기능·테스트·배포:** 앱 소스 변경 0, 테스트 NOT RUN(문서 변경), Vercel/Production 미적용. 사용자 데이터·기존 코드·기능 브랜치·상품 RELEASE HOLD 정책 변경 없음. 기존 제품 완성률 재산정 없음.
+- **근거:** main 문서 반영 중간 커밋 `2430f5ef7528d8874d63c5ad22ff00332dc5ea8b`; 이후 문서 이력은 GitHub HEAD 직접 확인.
