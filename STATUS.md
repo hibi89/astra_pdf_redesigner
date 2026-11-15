@@ -1,3 +1,13 @@
+## 2026-11-15 KST — G002 NUL 글꼴/페이지 독립 진단 구현 (CI 검증 대기)
+
+- **코드·GitHub 실반영:** GPT 독립 QA 브랜치 `gpt/astra-final-qa-ocr-20261115`; 기능/CI 정확 커밋 `5a9ff8a6343db43cb76c823ce5fae8fee874ff47`, 증거 문서 `a044a1cfdbddea28b9e9a1607ac96f4eb346c8e4`. 신규 `tools/gpt-final-qa-pdfjs-nul-attribution.mjs`, 회귀 `tests/gpt-final-qa-pdfjs-nul-attribution.test.mjs`, 실제 Chrome font matrix `tests/gpt-final-qa-font-nul-browser.mjs`; 기존 G002 실제 V2 Chrome 출력 시험에 NUL 페이지별·익명 글꼴별 감사를 연결하고 워크플로를 확장. 원문·파일명·PDF 바이트·좌표·실제 원문 글꼴명 출력 금지.
+- **검증 구별:** 코드 GitHub 저장 성공·브랜치 HEAD 확인. 이번 변경의 Actions push run 목록은 연결 GitHub 도구에서 조회 불가하므로 **신규 CI PASS/FAIL/SKIP = 미확인**, 병합 보류. 과거 **G002 89/89 PASS**는 변경 전 `fbbb18c4070a8c19f37fd5fb09919e24f3ce6814` 결과로 별도 유지. 과거 원문 17/17 양 파서 보존 및 출력 PDF.js NUL 10 vs Poppler 0은 현 시점 원인 미확정.
+- **독립 Codex 검수:** Codex SHA `fa57116544217c6122b1cd9643fee91002f45edc`의 C009 Chrome/Edge, C010 NSIS/SBOM 좁은 범위 PASS. 반면 전체 [#43690873096](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873096)은 Chrome `Page.printToPDF` 실패(Edge SUCCESS, Node 298/298 PASS), 전체 회귀 FAIL. 패키지 `desktop/**` + main 테스트 전용 import의 ASAR 포함 위험 미해소. Codex [PR #13](https://github.com/hibi89/astra_pdf_redesigner/pull/13)에 [review #5909690944](https://github.com/hibi89/astra_pdf_redesigner/pull/13) 남김; **DRAFT/미병합**.
+- **보존·경계:** 제품 React/Electron, STEP1/V1, STEP2/V2, 고객 PDF·라이선스·OCR 매니페스트·`main`, Production/크몽 전혀 변경 없음. PDF.js NUL 및 숫자 차이 위험코드 비활성화 금지. **잠정 중앙 64/100 (+0), 공식 구매자 UNASSESSED, RELEASE HOLD.** 중앙 원장 값 변경 불필요(점수 +0).
+- **다음 필수:** 정확 SHA CI 4개 작업 확인 → 실패 시 최소 QA 수정 및 새 SHA 재검증 → GPT QA PR 통합 브랜치에만 병합 → 통합 후 CI. 상세 [증거](docs/evidence/astra/G002/FONT_NUL_ATTRIBUTION_20261115.md).
+
+---
+
 ## 2026-11-15 KST — G002 PDF.js×Poppler 실제 Chromium 출력 교차검증 / G003 C002 모바일 수용 감사
 
 - **통합:** 독립 QA [PR #17](https://github.com/hibi89/astra_pdf_redesigner/pull/17) **MERGED**, integration merge SHA `0ff4061a7c8520e6b1d2ebf57fe4d9b8a2aa10a5`. GPT 검증 기능 SHA `fbbb18c4070a8c19f37fd5fb09919e24f3ce6814`. [동일 SHA QA #43690380246](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690380246) **4/4 jobs SUCCESS**, G001–G004 52 + G002 PDF.js/V2 32 + Poppler×PDF.js 5 = **89/89 PASS, 0 FAIL, 0 SKIP**, 실제 Chromium STEP3→페이지별 원문 검수→V2 IndexedDB 저장→실제 프로젝트 내보내기 SHA→A4 PDF 출력 E2E SUCCESS. [정책 #43690380477](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690380477) SUCCESS. 새 도구 `tools/gpt-final-qa-pdf-cross-parser.mjs`; 사용 파서: PDF.js와 로컬 Poppler(`pdftotext` via stdin, 원문 로그/파일 기록·외부전송 없음).
