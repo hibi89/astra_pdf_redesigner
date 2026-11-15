@@ -13,7 +13,7 @@
 ## Current exact-SHA run — in progress
 
 - Windows Electron/Qwen3 run [43702880160](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43702880160) targets code/test SHA `5b323fd47d0c2cd2efb20a136102ee65b3bb7af2`.
-- As of 2026-11-15 11:12 UTC, GitHub reports the P124/C005 real-model step still `in_progress`; no artifacts or terminal result are available yet.
+- At 2026-11-15 11:42 UTC (about 90 minutes after the job began), GitHub still reports the P124/C005 real-model step `in_progress`; no artifacts or terminal result are available. The GitHub job-log endpoint returned 404 while the job is active, so per-input progress is unavailable.
 - The run exercises all 31 distinct synthetic inputs in each of BASIC, PRO, and BUSINESS (93 unique-input real inference calls), through the product Electron Workspace. Its evidence may address unique-input coverage, but cannot establish an 8-GiB-class runner profile.
 
 No C005 score is claimed while this run is pending or for any result on a 16-GiB-class host. No user PC was accessed, and no memory/performance result is extrapolated to an 8-GiB buyer device. The 8-GiB acceptance remains BLOCKED.
