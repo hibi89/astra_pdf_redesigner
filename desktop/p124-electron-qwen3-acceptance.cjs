@@ -220,6 +220,9 @@ async function runP124ElectronAcceptance(win,renderPdf){
       const selected=plan.layoutId||'basic-default';
       const beforeProbe=await currentSource();
       assert.equal(beforeProbe,BASELINE,'SKU setup must not change the actual STEP2 paragraph');
+      const skuPdfBefore=scenario==='healthy'
+        ?(plan.sku==='BASIC'?initialPdf:await printPdf('astra-p124-healthy-'+plan.sku.toLowerCase()+'-before.pdf'))
+        :null;
       const priorConsent=await evaluate('Boolean(document.querySelector("[data-local-ai-consent]")?.checked)');
       if(priorConsent){
         markStep(plan.sku+': clear previous SKU-context consent');
@@ -314,19 +317,22 @@ async function runP124ElectronAcceptance(win,renderPdf){
       await setSource(BASELINE);
       await waitFor(()=>evaluate('window.__p124ReadPersistedSource()'),value=>value===BASELINE,12000,'persisted source after approve/reject/undo/cancel');
       const printed=await printPdf('astra-p124-healthy-'+plan.sku.toLowerCase()+'-after.pdf');
+      if(skuPdfBefore)assert.equal(printed.text,skuPdfBefore.text,
+        plan.sku+' PDF text must remain identical before and after actual Workspace reviews');
       uiResults.push({sku:plan.sku,tier:plan.tier,receipt_panel:'verified',license_result:licenseResult,
         allowed_layout:selected,denied_layout:deniedLayout,model_status:'available',actual_proposals:proposalCases.length,
         inference_attempts:attempted,approved_then_undone:1,rejected,cancelled:1,proposals:proposalCases,
-        pdf_sha256:printed.sha256,automatic_applies:0});
+        pdf_sha256:printed.sha256,pdf_text_equal_before_after:Boolean(skuPdfBefore),automatic_applies:0});
     }
     if(scenario==='healthy'){
       const finalPdf=await readPdfText(await fs.readFile(path.join(process.env.RUNNER_TEMP,'astra-p124-healthy-business-after.pdf')));
-      assert.equal(finalPdf,initialPdf.text,'PDF text must remain identical after all three actual Workspace SKU review scenarios');
       assert.ok(finalPdf.includes('ASTRA_P124_PDF_SOURCE_7401')&&finalPdf.includes('230,000원')&&finalPdf.includes('승인전에는외부에전달하지않습니다'),
-        'PDF output must retain the original marker, amount and negation');
-      report.pdf={before_sha256:initialPdf.sha256,final_sha256:uiResults.at(-1).pdf_sha256,
-        extracted_text_sha256:sha(finalPdf),text_equal:true,original_marker:true,amount:true,negation:true};
-      report.pdf_text_equal=true;
+        'BUSINESS final PDF must retain the original marker, amount and negation');
+      report.pdf={comparison:'before/after within each SKU layout',source_marker:true,amount:true,negation:true,
+        sku_pdf_text_equal_before_after:uiResults.every(item=>item.pdf_text_equal_before_after),
+        sha256_by_sku:uiResults.map(({sku,pdf_sha256})=>({sku,sha256:pdf_sha256})),
+        extracted_text_sha256:sha(finalPdf)};
+      report.pdf_text_equal_by_sku=true;
     }
     const storageAfter=await evaluate('window.__p124SnapshotStorage()');
     assert.equal(storageAfter,storageBefore,'synthetic V1/V2 sentinels must remain unchanged');

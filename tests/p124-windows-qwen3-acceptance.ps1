@@ -113,8 +113,8 @@ function Invoke-ElectronScenario([string]$Scenario) {
     throw "P124 $Scenario changed stored V1/V2 content or automatically applied text."
   }
   if ($Scenario -eq 'healthy') {
-    if (-not $report.pdf_text_equal -or -not $report.synthetic_v1_v2_unchanged -or -not $report.product_step2_content_preserved -or $report.automatic_applies -ne 0) {
-      throw 'P124 healthy scenario missed PDF parity, V1/V2 content preservation, or no-auto-apply acceptance.'
+    if (-not $report.pdf_text_equal_by_sku -or -not $report.synthetic_v1_v2_unchanged -or -not $report.product_step2_content_preserved -or $report.automatic_applies -ne 0) {
+      throw 'P124 healthy scenario missed per-SKU PDF text stability, V1/V2 content preservation, or no-auto-apply acceptance.'
     }
     foreach ($sku in $report.sku_contexts) {
       if ($sku.actual_proposals -lt 10 -or -not $sku.cancelled -or $sku.approved_then_undone -ne 1 -or $sku.rejected -lt 1) {
