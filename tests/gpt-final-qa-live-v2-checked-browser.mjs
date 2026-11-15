@@ -172,6 +172,30 @@ try {
   };
   // Self-reported *synthetic* receipt above is intentionally NOT an attestation
   // that the owner reviewed each block. It binds the real V2 export hash only.
+  // Synthetic-only counts to locate PDF.js control glyph issues. Never log
+  // actual text, paths, input PDF bytes or customer values.
+  const {getDocument}=await import('pdfjs-dist/legacy/build/pdf.mjs');
+  const textStats=async bytes=>{
+    const task=getDocument({data:new Uint8Array(bytes),useSystemFonts:true,disableFontFace:true});
+    try{
+      const pdf=await task.promise;
+      let charCount=0,nullCount=0,itemCount=0;
+      for(let n=1;n<=pdf.numPages;n++){
+        const page=await pdf.getPage(n);
+        for(const item of (await page.getTextContent()).items){
+          if(typeof item.str!=='string')continue;
+          charCount+=item.str.length;nullCount+=item.str.split('\\u0000').length-1;itemCount++;
+        }
+      }
+      return {pages:pdf.numPages,itemCount,charCount,nullCount};
+    }finally{await task.destroy();}
+  };
+  const allAnchors=project.document.content.sections.flatMap(s=>s.blocks).filter(b=>b.origin&&b.kind!=='image');
+  const importedNull=allAnchors.reduce((n,b)=>n+b.text.split('\\u0000').length-1,0);
+  console.log('G002 synthetic PDF.js counts:',JSON.stringify({
+    source:await textStats(source),output:await textStats(output),
+    anchoredItems:allAnchors.length,anchoredNullCount:importedNull,
+  }));
   const report=await inspectStep2V2ExportPdfParity({
     sourcePdfBefore:source,sourcePdfAfter:Buffer.from(source),
     outputPdf:output,projectExportBytes:Buffer.from(projectJSON,'utf8'),
