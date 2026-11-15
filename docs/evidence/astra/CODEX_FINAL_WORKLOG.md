@@ -19,7 +19,7 @@ Detailed reports: [C001](C001/VERIFICATION.md), [C003](C003/VERIFICATION.md), [C
 
 Feature/test SHA `653c3483daefa4bfbe9c082ba4b1d24bbb4a43d5`. The Windows hosted run passed the current NSIS lifecycle, the P123 0.1.0 baseline install, and in-place upgrade to an ephemeral 0.1.1 candidate with STEP2 document and PNG persistence: [Windows run 43686779251](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43686779251). The run also passed PDF generation/audit and uninstall.
 
-- Linux/Chrome + Edge regression: [run 43686779245](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43686779245); Edge is PASS and the Linux/Chrome job is finishing.
+- Linux/Chrome build/test and Microsoft Edge regression: [run 43686779245](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43686779245) — PASS.
 - Blueprint evidence policy: [run 43686779318](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43686779318) — PASS.
 - Detailed report: [C007/VERIFICATION.md](C007/VERIFICATION.md).
 
