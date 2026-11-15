@@ -87,6 +87,28 @@ jobs:
             $rootItem.LastAccessTimeUtc = $fixedUtc
           }
 
+          function Copy-AstraPackageTreeDeterministic([string]$source, [string]$destination) {
+            $sourcePath = [System.IO.Path]::GetFullPath($source)
+            $destinationPath = [System.IO.Path]::GetFullPath($destination)
+            if (-not (Test-Path -LiteralPath $sourcePath -PathType Container)) { throw "Package source is missing: $sourcePath" }
+            if (Test-Path -LiteralPath $destinationPath) { throw "Deterministic package destination already exists: $destinationPath" }
+            New-Item -ItemType Directory -Path $destinationPath | Out-Null
+            $items = @(Get-ChildItem -LiteralPath $sourcePath -Force -Recurse)
+            if (@($items | Where-Object { $_.Attributes -band [System.IO.FileAttributes]::ReparsePoint }).Count -ne 0) {
+              throw 'Deterministic staging does not accept reparse points.'
+            }
+            $directories = @($items | Where-Object { $_.PSIsContainer } | Sort-Object { $_.FullName.Substring($sourcePath.Length) } -CaseSensitive)
+            foreach ($item in $directories) {
+              $relative = $item.FullName.Substring($sourcePath.Length).TrimStart([char[]]@([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar))
+              New-Item -ItemType Directory -Path (Join-Path $destinationPath $relative) -Force | Out-Null
+            }
+            $files = @($items | Where-Object { -not $_.PSIsContainer } | Sort-Object { $_.FullName.Substring($sourcePath.Length) } -CaseSensitive)
+            foreach ($item in $files) {
+              $relative = $item.FullName.Substring($sourcePath.Length).TrimStart([char[]]@([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar))
+              Copy-Item -LiteralPath $item.FullName -Destination (Join-Path $destinationPath $relative)
+            }
+          }
+
           $firstAppPath = Join-Path $env:RUNNER_TEMP 'astra-c010-prepackaged-first'
           $secondAppPath = Join-Path $env:RUNNER_TEMP 'astra-c010-prepackaged-second'
           if ((Test-Path -LiteralPath $firstAppPath) -or (Test-Path -LiteralPath $secondAppPath)) {
@@ -122,11 +144,30 @@ jobs:
           $canonicalAppPath = Join-Path $env:RUNNER_TEMP 'astra-c010-canonical-prepackaged'
           Copy-Item -LiteralPath $firstAppPath -Destination $canonicalAppPath -Recurse
           Normalize-AstraPackageTree $canonicalAppPath
-          $firstElevatePath = Join-Path $firstAppPath 'resources/elevate.exe'
+
+          $firstPackageAppPath = Join-Path $env:RUNNER_TEMP 'astra-c010-first-deterministic-tree'
+          $thirdAppPath = Join-Path $env:RUNNER_TEMP 'astra-c010-repeat-canonical'
+          Copy-AstraPackageTreeDeterministic $firstAppPath $firstPackageAppPath
+          Copy-AstraPackageTreeDeterministic $canonicalAppPath $thirdAppPath
+          Normalize-AstraPackageTree $firstPackageAppPath
+          Normalize-AstraPackageTree $thirdAppPath
+          $firstStageCompare = node tests/c010-package-tree-summary.cjs compare $firstPackageAppPath $treeSnapshot
+          if ($LASTEXITCODE -ne 0) { throw 'Could not verify the first deterministic package tree.' }
+          $firstStage = $firstStageCompare | ConvertFrom-Json
+          Write-Output $firstStageCompare
+          $thirdTreeOutput = node tests/c010-package-tree-summary.cjs compare $thirdAppPath $treeSnapshot
+          if ($LASTEXITCODE -ne 0) { throw 'Could not verify the repeat deterministic package tree.' }
+          $thirdTree = $thirdTreeOutput | ConvertFrom-Json
+          Write-Output $thirdTreeOutput
+          if (-not $firstStage.samePayloadTree -or $firstStage.counts.metadataChangedEntries -ne 0 -or
+            -not $thirdTree.samePayloadTree -or $thirdTree.counts.metadataChangedEntries -ne 0) {
+            throw 'Deterministic staging changed package content or metadata.'
+          }
+          $firstElevatePath = Join-Path $firstPackageAppPath 'resources/elevate.exe'
           $firstElevateBeforeHash = (Get-FileHash -LiteralPath $firstElevatePath -Algorithm SHA256).Hash
           $firstElevateBeforeSignature = (Get-AuthenticodeSignature -LiteralPath $firstElevatePath).Status
 
-          npx electron-builder --win nsis --x64 --prepackaged $firstAppPath --publish never
+          npx electron-builder --win nsis --x64 --prepackaged $firstPackageAppPath --publish never
           if ($LASTEXITCODE -ne 0) { throw 'First prepackaged unsigned NSIS build failed.' }
           $firstElevateAfterHash = (Get-FileHash -LiteralPath $firstElevatePath -Algorithm SHA256).Hash
           $firstElevateAfterSignature = (Get-AuthenticodeSignature -LiteralPath $firstElevatePath).Status
@@ -167,16 +208,7 @@ jobs:
             }
           }
 
-          $thirdAppPath = Join-Path $env:RUNNER_TEMP 'astra-c010-repeat-canonical'
-          Copy-Item -LiteralPath $canonicalAppPath -Destination $thirdAppPath -Recurse
-          Normalize-AstraPackageTree $thirdAppPath
-          $thirdTreeOutput = node tests/c010-package-tree-summary.cjs compare $thirdAppPath $treeSnapshot
-          if ($LASTEXITCODE -ne 0) { throw 'Could not verify the repeat canonical package tree.' }
-          $thirdTree = $thirdTreeOutput | ConvertFrom-Json
-          Write-Output $thirdTreeOutput
-          if (-not $thirdTree.samePayloadTree -or $thirdTree.counts.metadataChangedEntries -ne 0) {
-            throw 'Repeat packaging input differs from the canonical package tree.'
-          }
+
           $thirdElevatePath = Join-Path $thirdAppPath 'resources/elevate.exe'
           $thirdElevateBeforeHash = (Get-FileHash -LiteralPath $thirdElevatePath -Algorithm SHA256).Hash
           $thirdElevateBeforeSignature = (Get-AuthenticodeSignature -LiteralPath $thirdElevatePath).Status
