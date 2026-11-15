@@ -14,7 +14,8 @@ const PICTURE_OPS=new Set([
   OPS.paintInlineImageXObjectGroup,OPS.paintImageMaskXObject,
   OPS.paintImageMaskXObjectGroup,OPS.paintImageMaskXObjectRepeat,
 ]);
-// PDF.js batches PDF m/l/re commands as OPS.constructPath; do not equate with rendered strokes.\nconst VECTOR_OPS=new Set([OPS.constructPath,OPS.stroke,OPS.closeStroke,OPS.fillStroke,OPS.eoFillStroke,
+// PDF.js batches PDF m/l/re commands as OPS.constructPath; do not equate with rendered strokes.
+const VECTOR_OPS=new Set([OPS.constructPath,OPS.stroke,OPS.closeStroke,OPS.fillStroke,OPS.eoFillStroke,
   OPS.closeFillStroke,OPS.closeEOFillStroke]);
 const hash=b=>createHash('sha256').update(b).digest('hex');
 const norm=s=>s.normalize('NFC').replace(/\s+/gu,' ').trim();
