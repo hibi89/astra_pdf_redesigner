@@ -2,7 +2,7 @@
 
 Branch: `codex/astra-final-ai-sku-20261115`  
 Integration target: `integration/astra-final-blueprint-100-20261115`  
-Latest code/test SHA: `d0701f007c58bf53a452297a45cb81574a6ae039` (Linux/Chrome/Edge regression PASS run 43720322561; C009 push and PR runs 43720322613/43720328240 PASS; C010 Windows run 43720322521 fails the reproducibility gate. Policy 43720322704 PASS). Real-Qwen quality runs `8136c6b070eceb97e4e26fbdebae7632ab6f2ed3` and `5b323fd47d0c2cd2efb20a136102ee65b3bb7af2` remain pending
+Latest code/test SHA: `304b4a59a4bb37007a0796133cb7bfcb1e18ab22` (Windows C007 run 43726659709 PASS; Linux/Chrome/Edge regression 43726659775 PASS; C009 43726663515 PASS; C010 43726659739 fails reproducibility; blueprint policy 43726659959 PASS). Real-Qwen quality runs `8136c6b070eceb97e4e26fbdebae7632ab6f2ed3` and `5b323fd47d0c2cd2efb20a136102ee65b3bb7af2` remain pending
 Open draft PR: [#13](https://github.com/hibi89/astra_pdf_redesigner/pull/13)
 
 ## Completed and assessed
@@ -129,3 +129,15 @@ At code/test SHA `4aa4f533ea652f2f391a9b2deca15f6d7f804130`, the controller time
 - The Actions host reports `17,174,360,064` bytes of RAM (about 16 GiB). This does not satisfy the 8-GiB-class CPU acceptance.
 
 C005 stays +0/BLOCKED for completion. The real-Qwen corpus has no terminal result, and the low-memory acceptance is not met. Central score remains 64/100; the worker candidate ceiling remains conditional 67/100; buyer acceptance UNASSESSED; RELEASE HOLD.
+
+
+## Latest exact-SHA evidence update — 2026-11-16 KST
+
+| Task | Exact feature/test SHA | Latest hosted evidence | Score delta / state |
+|---|---|---|---|
+| C007 installed STEP2 recovery extension | `304b4a59a4bb37007a0796133cb7bfcb1e18ab22` | Windows NSIS run [43726659709](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43726659709) PASS; Linux/Chrome/Edge [43726659775](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43726659775) PASS; policy [43726659959](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43726659959) PASS. Synthetic quota exception and transaction-abort preservation, retry, renderer reload, separate EXE launch. Sanitized artifact [14166357202](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43726659709/artifacts/14166357202), digest `ef3361ec1bb77a2020125509bba6bd72530e95a97a7cacfc10ed0acb81a6c46a`. | Incremental +0; existing +1 A10 remains a candidate only. Actual power loss/physical buyer acceptance unverified. |
+| C009 latest Chrome/Edge | `304b4a59a4bb37007a0796133cb7bfcb1e18ab22` | [Run 43726663515](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43726663515) PASS; 307/0/0 unit tests, 30 distinct layout rasters in each browser, accessibility tree/keyboard checks, 28-page print and close/reopen recovery. Artifact [14166652727](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43726663515/artifacts/14166652727), digest `21086aedda7e53d2308cb269480435562869d4c8fa3b86f6f25575dc003d8353`. | +0; buyer visual and assistive-technology acceptance remains open. |
+| C010 latest unsigned package audit | `304b4a59a4bb37007a0796133cb7bfcb1e18ab22` | [Windows run 43726659739](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43726659739): content/SBOM/ASAR and regressions PASS; same-source installer reproducibility FAIL. Exact package hashes and limits are in [C010/VERIFICATION.md](C010/VERIFICATION.md). | +0 / BLOCKED. |
+| C005 real-Qwen unique-input and 8-GiB gate | `8136c6b070eceb97e4e26fbdebae7632ab6f2ed3` and `5b323fd47d0c2cd2efb20a136102ee65b3bb7af2` | GitHub Actions API still reported runs [43711160507](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43711160507) and [43702880160](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43702880160) in progress at 2026-11-16 00:03 KST; no artifacts. Available host is about 16 GiB. | +0 / BLOCKED; no 8-GiB or distinct-input outcome claimed. |
+
+Latest evidence files: [C007](C007/VERIFICATION.md), [C009](C009/VERIFICATION.md), [C010](C010/VERIFICATION.md), [C005](C005/VERIFICATION.md). These are worker-branch records only; central `STATUS.md`, `HANDOFF.md`, and score ledger remain under integration-owner control. Central score remains 64/100; worker ceiling remains conditional 67/100. Official buyer acceptance is UNASSESSED and RELEASE HOLD remains.
