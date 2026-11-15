@@ -1,3 +1,22 @@
+> **[2026-11-15 KST · G002 최우선 통합 브랜치·PR 정정]** 새 안전 통합 후보는 `gpt/astra-g002-nul-integration-20261115`, 최신 통합 `02f9481...` 기준 단일 QA 변경 SHA `3777dfec5e3e66f78e48fc708dbb5e2b07129a11`, [PR #19](https://github.com/hibi89/astra_pdf_redesigner/pull/19) DRAFT/MERGEABLE이다. 아래 G002 코드 내용과 위험 판단은 유효하나 과거 GPT 브랜치 `gpt/astra-final-qa-ocr-20261115` 및 PR #18은 통합 대상이 아니다. **새 코드 CI의 정확 SHA 결과가 확인되기 전 병합·점수 상승 금지**. `main`·Codex PR #13·제품 코드 보존. 64/100, UNASSESSED, RELEASE HOLD. 본 문서 갱신도 제품 기능 검증으로 계산 금지.
+
+# GPT G002 최신 인수인계 — 2026-11-15 KST · NUL 글꼴 진단 코드 구현·CI 대기
+
+이 최상단 10항은 과거 하단 시점 스냅샷보다 최신이다. `ㄱ` 시 실 작업을 재개한다. **현재 제품 최종설계 잠정 64/100 (+0), 공식 구매자 UNASSESSED, RELEASE HOLD.**
+
+1. **목표/요구/기술:** `hibi89/astra_pdf_redesigner` A01–A12 최종 100점. 독립 GPT QA+Codex 별도 브랜치, 로컬 PDF.js/Poppler/Chromium 합성 E2E 및 Electron/Qwen3/조건부 OCR. 오너 허가 원본/물리 Windows/법적 승인 별도.
+2. **완료 코드/설계 근거:** GPT G002 실제 Chromium 출력 PDF의 PDF.js NUL 원인 추적용 익명 글꼴·페이지 단위 카운터 `tools/gpt-final-qa-pdfjs-nul-attribution.mjs`, 합성 회귀 `tests/gpt-final-qa-pdfjs-nul-attribution.test.mjs`, 독립 신설 Chrome font matrix `tests/gpt-final-qa-font-nul-browser.mjs`, 기존 `tests/gpt-final-qa-live-v2-checked-browser.mjs`와 `.github/workflows/gpt-final-qa.yml` 연결. 기능/CI 설정 SHA `5a9ff8a6343db43cb76c823ce5fae8fee874ff47`. 증거 `docs/evidence/astra/G002/FONT_NUL_ATTRIBUTION_20261115.md`, 상태 `STATUS.md`.
+3. **테스트 명령/결과:** 새 워크플로의 `g002-real-pdfjs-parity`에서 `node --test tests/gpt-final-qa-pdf-cross-parser.test.mjs tests/gpt-final-qa-pdfjs-nul-attribution.test.mjs`; `g002-live-v2-reviewed-browser`에서 실제 Chrome V2→PDF 출력 및 fresh-profile font matrix; G001/G003 기존 고정 QA. **이번 신규 SHA의 Actions 결과는 미확인(PASS 0 확인, FAIL 0 확인, SKIP 0 확인; 시행 여부 불명)**. 변경 전 정확 SHA `fbbb18c4070a8c19f37fd5fb09919e24f3ce6814`의 G002 기존 89/89 PASS, 4/4 QA job SUCCESS와 혼동 금지.
+4. **진행/대기/차단:** 새 코드는 GitHub 반영 완료, CI 확인 및 PR 병합 대기. 출력 PDF의 PDF.js NUL 10건 / Poppler NUL 0건 원인 미해결; ToUnicode 가능성은 가설. 실제 고객 5~10 허가 PDF, 실제 Win10/11, P119 Windows OCR 공급처·NOTICE, C005 저사양 30개 서로 다른 Qwen 입력, 생산 서명/실 SKU·리보크는 차단/수용 대기.
+5. **오류/원인/시도/대안:** 이전 G002 정상 수동 페이지검수 누락 테스트 버그는 해결됨. 최근 Codex feature `fa57116544217c6122b1cd9643fee91002f45edc`의 [Chrome·Edge #43690873096](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43690873096): Edge SUCCESS, Node 298 PASS, Chrome 복잡한 PDF printing에서 `Error: Printing failed`, build-and-test FAILURE. 무의미한 동일 SHA 재실행 금지; 원인 계층 분리 후 변경 SHA 검증. C010 패키지 `desktop/**` 포함에 따라 실제 ASAR 시험 모듈 검사 미완; Codex PR13 [review 5909690944](https://github.com/hibi89/astra_pdf_redesigner/pull/13)에 수정 요구 전달. NUL 임의 제거/의미상 자동 합격 금지.
+6. **브랜치/경로/SHA:** GPT `gpt/astra-final-qa-ocr-20261115` 작업 기준 `5a9ff8a...`, 증거 `a044a1c...`, STATUS 기록 `233f477...`(이 HANDOFF 커밋 이전). 통합 `integration/astra-final-blueprint-100-20261115` 마지막 확인 `02f9481e441d20927d9f54a275717c7db33efa20`, Codex PR #13 DRAFT 최신은 별도 조회(변경 가능), main `afe122cf7d343b01877366034981f6aecafdb8a6` 불변. `main` 병합 금지.
+7. **Production/환경:** Vercel/Production 미적용. GitHub-hosted Linux Node22 + 실제 Chromium/Poppler. Windows C010 제한적 unsigned NSIS 생성 성공; 설치·launch·패키지 내부 비밀검사와 실기 구매자 수용은 미검증.
+8. **원본/백업/보안:** 사용자 STEP1 V1/STEP2 V2, PDF 원본, 업로드 문서, issuer private/JWK/핀, `.env` 보존. 로컬 합성 QA 전용. 외부 원본 전송·토큰 업로드·상용 서명 및 패키지 게시 금지. 기존 main 및 HEAD commit이 복구 기준.
+9. **다음 우선순위/기준/승인:** (a) 이번 GPT QA 정확 SHA GitHub Actions 실제 run IDs/4개 job 결과 조회, 테스트 수 기록 (b) 필요 시 실패 원인 최소 QA 수정, 진전 없으면 우회 금지 (c) 전부 검증되면 GPT QA PR→통합 브랜치만 병합, 통합 CI 확인 (d) STATUS/HANDOFF/점수 원장(값 변동 시에만) 갱신. Codex PR13 독립 검수·미병합 유지, 실제 구매자/서명/출시는 별도 승인 필수.
+10. **갱신 KST/범위/문서 기준:** 2026-11-15 KST. GitHub 파일 생성·수정 커밋 성공 및 GPT 브랜치 SHA 증거 확보. **새 코드 실행 테스트 아직 미검증.** 현 문서는 이전 STATUS `233f477...` 이후 작성되었으며 본 파일 최종 커밋 SHA는 새 HEAD 조회. **64/100 +0, UNASSESSED, RELEASE HOLD**.
+
+---
+
 # G005 최신 인수인계 — 2026-11-15 KST · G002 89/89 + C002 독립검수
 
 **작업 재개 명령:** `ㄱ` / `ㄱㄱ`. 아래 기록보다 이 상단 내용이 최신이며, 이전 과거 실패·진행중 상태를 현재 오류로 오독하지 않는다.
