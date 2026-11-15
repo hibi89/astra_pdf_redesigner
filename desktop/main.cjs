@@ -33,7 +33,10 @@ const SMOKE=process.argv.includes('--astra-desktop-smoke');
 const PDF_ACCEPTANCE=SMOKE&&process.argv.includes('--astra-pdf-acceptance');
 const STEP2_ACCEPTANCE=SMOKE&&(process.argv.includes('--astra-step2-acceptance')||process.argv.includes('--astra-step2-preservation-verify'));
 const STEP3_ACCEPTANCE=SMOKE&&process.argv.includes('--astra-step3-acceptance');
-const P124_ACCEPTANCE=SMOKE&&process.argv.includes('--astra-p124-qwen3-acceptance');
+const P124_ACCEPTANCE=SMOKE&&process.env.GITHUB_ACTIONS==='true'&&
+  process.env.ASTRA_P124_ELECTRON_ACCEPTANCE==='1'&&process.argv.includes('--astra-p124-qwen3-acceptance');
+const runP124ElectronAcceptance=P124_ACCEPTANCE
+  ?require('./p124-electron-qwen3-acceptance.cjs').runP124ElectronAcceptance:null;
 let step3NativeCaptureArmed=false;
 function p124ProfilePath(){
   if(!P124_ACCEPTANCE||process.env.GITHUB_ACTIONS!=='true'||!process.env.RUNNER_TEMP||!process.env.ASTRA_P124_PROFILE_DIR)return null;
