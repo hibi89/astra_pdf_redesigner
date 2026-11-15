@@ -152,3 +152,8 @@ Latest evidence files: [C007](C007/VERIFICATION.md), [C009](C009/VERIFICATION.md
 | C005 actual Qwen3 unique-input / low-memory acceptance | [Run 43711160507](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43711160507) at feature SHA `8136c6b070eceb97e4e26fbdebae7632ab6f2ed3` remains in progress at real-model step; earlier [run 43702880160](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43702880160) at `5b323fd47d0c2cd2efb20a136102ee65b3bb7af2` is cancelled. | No terminal result or artifact for optimized run. Hosted Windows host has 17,174,360,064 RAM bytes (~16 GiB); configured job timeout 300 minutes. | +0 / BLOCKED; no 8-GiB or distinct-input completion claim. |
 
 Evidence files updated: [C005](C005/VERIFICATION.md), [C009](C009/VERIFICATION.md), [C010](C010/VERIFICATION.md). Worker-branch evidence only; integration-owned `STATUS.md`, `HANDOFF.md`, and score ledger remain unchanged. Central score 64/100; worker candidate ceiling conditional 67/100; official buyer acceptance UNASSESSED; RELEASE HOLD.
+
+
+### C005 live-run workload audit — 2026-11-16 16:36 UTC
+
+The current Windows run [43711160507](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43711160507), source SHA `8136c6b070eceb97e4e26fbdebae7632ab6f2ed3`, performs at least 30 real inference calls for C001 healthy 10-proposal-per-SKU acceptance, then 31 unique C005 calls once total, plus cancellation requests. It was still in progress about 282/300 minutes after start. The prior report's “31 inputs once” referred only to the C005 quality phase, not total run calls. No terminal result/artifact is available, so quality remains unassessed and +0. The 16-GiB host cannot satisfy the 8-GiB requirement.
