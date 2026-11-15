@@ -3,6 +3,8 @@ on:
   push:
     branches:
       - 'gpt/astra-final-qa-ocr-20261115'
+      - 'gpt/astra-g002-nul-integration-20261115'
+      - 'integration/astra-final-blueprint-100-20261115'
     paths:
       - 'tools/gpt-final-qa-*'
       - 'tests/gpt-final-qa-*'
