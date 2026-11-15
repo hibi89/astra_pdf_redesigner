@@ -16,7 +16,7 @@ const outputRoot=process.env.C009_OUTPUT_DIR?resolve(process.env.C009_OUTPUT_DIR
 if(process.env.GITHUB_ACTIONS==='true'){
  if(!runnerTemp||!process.env.C009_OUTPUT_DIR)throw Error('C009 evidence output must be under GitHub RUNNER_TEMP.');
  const rel=relative(runnerTemp,outputRoot);
- if(rel==='..'||rel.startsWith('..'+process.platform==='win32'?'\\':'/')||isAbsolute(rel))
+ if(rel==='..'||rel.startsWith('..')||isAbsolute(rel))
   throw Error('C009 output path escaped GitHub RUNNER_TEMP.');
 }
 mkdirSync(outputRoot,{recursive:true});
