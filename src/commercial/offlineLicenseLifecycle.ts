@@ -1,9 +1,9 @@
 // C006 owner-side offline license lifecycle ledger.
 // This is an unsigned-by-default, pure replay helper. It is not wired into customer activation.
 // Production issuer material must remain null until the owner approves its custody and policy.
-import {ASTRA_LICENSE_FORMAT,ASTRA_LICENSE_VERSION,ASTRA_PRODUCT_MAJOR,
+import {ASTRA_PRODUCT_MAJOR,
   importOfflineLicensePublicKey,validateLicenseClaims,verifyOfflineEntitlement,
-  type LicenseClaims, type LicenseTier} from './offlineLicense.ts';
+  type LicenseClaims} from './offlineLicense.ts';
 import {publicIssuerJwkThumbprint} from './skuAccess.ts';
 
 export const ASTRA_LICENSE_LIFECYCLE_FORMAT='astra-offline-license-lifecycle';
@@ -69,12 +69,12 @@ function parseJson(value:string,maxBytes:number):unknown{
  if(typeof value!=='string'||new TextEncoder().encode(value).byteLength>maxBytes)return deny();
  try{return JSON.parse(value) as unknown;}catch{return deny();}
 }
-function validatePublicPin(jwk:JsonWebKey,pin:string):void{
+function validatePublicPin(pin:string):void{
  if(typeof pin!=='string'||!PIN.test(pin))deny();
 }
 async function importPinnedPublicKey(jwk:JsonWebKey|null,pin:string|null):Promise<CryptoKey>{
  if(!jwk||!pin)deny();
- validatePublicPin(jwk,pin);
+ validatePublicPin(pin);
  try{
   if(await publicIssuerJwkThumbprint(jwk)!==pin)deny();
   return await importOfflineLicensePublicKey(jwk);
