@@ -1,3 +1,5 @@
+> **[OWNER-DEV-EXECUTION-V2 | ACTIVE | 2026-11-16]** [공통 개발·새 채팅 정본](https://github.com/hibi89/hackathon-command-center-2026/blob/kmong-productization/docs/strategy/OWNER_DEV_EXECUTION_CANONICAL_20261116.md): **웹 Sol High 최초 최종설계/작업큐 → 웹 Sol Instant BE/FE 주력 구현100% 후보 → 전체 CI·오류 수정(중간 위험검사 유지) → Codex Sol Max 기술+Astra Max 디자인 독립감사 → 웹 Sol High 최종 인수 → GO 후 Codex Luna Extra High 등록**. 구형 Codex Luna Max 중간 코딩·High 단독 코딩·매 작업 전체 CI 실행 순서는 **현재 사용자 지정 역할에 대해서는 대체**된다. **이 브랜치는 이전 분리 작업/PR의 증거와 변경사항을 보존하는 기존 브랜치로, 작업 담당/파일 소유권을 재확정하기 전 자동 병합·새 작업 강제 실행을 금지**한다. 기존 보안/권리/원본·고객자료·실 고객/외부 감사/출시 게이트는 불변. 새 채팅은 역할·정확 branch/HEAD→이 AGENTS→HANDOFF/STATUS→최종설계→소스/검증 증거→NEXT_TASK 순으로 확인하고 최신 READY가 있으면 구현. HANDOFF 구형 지시로 역할을 바꾸지 말 것.
+
 # 프로젝트 작업 규칙
 - 확정 요구사항은 `REQUIREMENTS.md`, 설계 원본은 `docs/ASTRA_ORIGINAL_ROADMAP.txt`와 `docs/BLUEPRINT.md`에서 확인한다.
 - **현재 승인 범위(2026-10-27 최신): STEP3 PDF 가져오기 진행 승인에 이어 STEP4 디자인 비교·적용·취소 개발도 사용자가 승인했다.** 기존 8개 디자인·STEP1/2·사용자 데이터를 보존하며 최초 아스트라 로드맵을 따른다. OCR은 별도 승인 전까지 범위 밖이다. 기존 V2 `DesignSettings`로 가능한 비파괴 작업은 진행하고, 사용자 프리셋 저장/재사용을 위한 저장 스키마·migration은 별도 승인 전 변경하지 않는다.
