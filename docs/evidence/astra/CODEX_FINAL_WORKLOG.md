@@ -192,3 +192,14 @@ The initial C008 run at f8ae9bbe856104ea1b1a0367b5433f1ffe59638b failed at fixtu
 The required branch-push workflow automatically ran [Windows C010 43742609908](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43742609908) and failed the final unsigned installer reproducibility gate. The NSIS app archive and uninstaller now matched, but final installers differed by one byte in size (129,203,109 vs 129,203,110). No candidate artifact was uploaded/released. C010 remains BLOCKED, +0, and no further retry is planned under the retry limit.
 
 C008 earns +0. Official score remains 64/100, conditional candidate ceiling 67/100, buyer acceptance UNASSESSED, RELEASE HOLD. Central STATUS.md, HANDOFF.md, and the score ledger remain integration-owner files and were not edited.
+
+
+## C003 rights-gated online-reference handoff — 2026-11-16
+
+**Code/test SHA:** a7f7ed58f11faf95be8a8782952dea52f049acda  
+**Changed file:** tests/step5-reference-browser.mjs.  
+**Verification:** [GitHub-hosted run 43744625660](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43744625660) PASS on Chrome and Edge; npm test 315/315, production build PASS. The added E2E verifies user-entered fixed-domain search links remain opt-in; an HTTPS source record remains UNVERIFIED; session acknowledgement enables native local file selection; selected synthetic PDF bytes match their SHA-256; linked STEP5 preview is non-persistent until explicit apply; Undo restores the complete V2 store fingerprint; no request is sent to the recorded external source URL. This does not establish real-source copyright/license rights or actual user browser selection from a third-party site. C003 +0.
+
+At the same code/test SHA, [C009 run 43744631300](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43744631300) and [policy run 43744626125](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43744626125) PASS. The automatic Windows C010 run [43744625813](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43744625813) FAILED: app archive/uninstaller matched, final installer sizes differed by five bytes; no artifact/release. C010 remains BLOCKED/+0; this was triggered by the C003 push, not a deliberate retry.
+
+Score remains official 64/100, conditional candidate ceiling 67/100, buyer acceptance UNASSESSED, RELEASE HOLD. Central STATUS.md, HANDOFF.md and score ledger remain integration-owner files.
