@@ -1,0 +1,54 @@
+name: C002 responsive SKU studio acceptance
+
+on:
+  push:
+    branches: ['codex/astra-final-ai-sku-20261115']
+    paths:
+      - '.github/workflows/c002-mobile-layout.yml'
+      - 'src/styles.css'
+      - 'src/step2/Workspace.tsx'
+      - 'tests/c002-mobile-layout-browser.mjs'
+      - 'tests/browser-process.mjs'
+      - 'index.html'
+      - 'package*.json'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  mobile-layout:
+    name: Chrome and Edge mobile studio viewports
+    runs-on: ubuntu-latest
+    timeout-minutes: 35
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Unit, build and desktop boundary regressions
+        run: |
+          npm test
+          npm run build
+      - name: Verify actual mobile viewport in Chrome and Edge
+        shell: bash
+        run: |
+          set -euo pipefail
+          CHROME_BIN=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)
+          EDGE_BIN=$(command -v microsoft-edge || command -v microsoft-edge-stable || command -v microsoft-edge-beta || true)
+          if [ -z "$CHROME_BIN" ] || [ -z "$EDGE_BIN" ]; then
+            echo "::error::Both Chrome and Edge are required for C002 viewport acceptance"
+            exit 1
+          fi
+          npm run dev -- --port 4173 >/tmp/astra-c002-mobile.log 2>&1 &
+          SERVER_PID=$!
+          trap 'kill "$SERVER_PID" || true' EXIT
+          for i in $(seq 1 40); do
+            if curl -fsS http://127.0.0.1:4173 >/dev/null; then break; fi
+            sleep 0.5
+          done
+          curl -fsS http://127.0.0.1:4173 >/dev/null
+          CHROME_PATH="$CHROME_BIN" node tests/c002-mobile-layout-browser.mjs
+          CHROME_PATH="$EDGE_BIN" node tests/c002-mobile-layout-browser.mjs

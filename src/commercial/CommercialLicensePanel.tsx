@@ -1,5 +1,5 @@
 import {useState} from 'react';
-import {checkProductionSkuCapability,productionSkuAccessConfigured,type SkuCapability} from './skuAccess.ts';
+import {checkProductionSkuCapability,productionSkuAccessConfigured,p124TestEntitlementBuild,type SkuCapability} from './skuAccess.ts';
 import {ASTRA_CUSTOMER_BUILD_ENABLED} from './skuActionGate.ts';
 type Props={receipt:string;onChange:(text:string)=>void};
 const capabilities:ReadonlyArray<[SkuCapability,string]>=[
@@ -22,8 +22,10 @@ export default function CommercialLicensePanel({receipt,onChange}:Props){
  return <section className="panel no-print" data-commercial-license-panel aria-label="오프라인 상용 라이선스 확인">
   <div className="panel-heading"><h2>오프라인 상용 라이선스 확인</h2></div>
   <p className="help-text" data-commercial-release-state>
-   {ASTRA_CUSTOMER_BUILD_ENABLED?'고객용 실행 경로는 매번 서명을 검사합니다.':'내부 개발 시험판 · 상용 기능 활성화와 무관합니다.'}
-   {!productionSkuAccessConfigured()&&' 현재 정식 판매자 공개키가 없어 모든 상용 사용권은 거부됩니다.'}
+   {p124TestEntitlementBuild()
+    ?'GitHub Actions P124 격리 시험판 · 임시 생성한 테스트 서명만 허용합니다.'
+    :ASTRA_CUSTOMER_BUILD_ENABLED?'고객용 실행 경로는 매번 서명을 검사합니다.':'내부 개발 시험판 · 상용 기능 활성화와 무관합니다.'}
+   {!productionSkuAccessConfigured()&&!p124TestEntitlementBuild()&&' 현재 정식 판매자 공개키가 없어 모든 상용 사용권은 거부됩니다.'}
   </p>
   <label className="field">서명 영수증 JSON (메모리 전용 · 저장·전송하지 않음)
    <textarea rows={3} maxLength={2048} value={receipt} data-commercial-license-input

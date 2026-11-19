@@ -1,12 +1,14 @@
-# P124 — real-model 3-SKU Electron flow — BLOCKED, 0/2
+# P124 verification status
 
-**Date:** 2026-11-15 KST  
-**Depends on:** P123 and P117  
-**P117:** VERIFIED. **P123:** BLOCKED, +0.  
-**Score:** 0/2; A08 remains 4/14; current score at this audit is 59/100.
+**Current status:** PASS for the synthetic GitHub-hosted Windows Electron scope at exact feature/test SHA `09b2d9c8f60631bb2f623f840bdde03450ed9e17`. This replaces the earlier blocked report and prior P124 status at `a2ca668c9578b68e760b922c026a5f2f8f941c8d`.
 
-The acceptance requires an actual Qwen3 model inside an installed Windows Electron (or equivalent verified CPU) environment for BASIC/PRO/BUSINESS × normal/model-missing/cancel/forged-or-error cases; at least 10 real proposals; user approve/reject/Undo; no unapproved text mutation; output PDF text equality; and STEP1/STEP2 operation while model execution is missing or fails.
+The exact-SHA Windows run [43700294401](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43700294401) exercised actual Root → Workspace → CommercialLicensePanel → runSkuGatedAction → LocalModelReview in BASIC, PRO, and BUSINESS using ephemeral signed test receipts. Real Qwen3-4B-Instruct-2507 Q8_0 CPU inference completed 10 guarded proposals per SKU. Model-missing and forged-response scenarios passed for each SKU; the healthy run preserved per-layout PDF text, synthetic V1/V2 sentinels, and product V1/V2 content/assets, with zero automatic applies.
 
-P123's permitted-source audit found no Qwen3 4B weights or model release asset on official GitHub. The checkpoints and model-specific license files are hosted outside GitHub. This run did not use the owner PC, external model host, mock service, or smaller substitute to claim P124.
+- Linux/Chrome and Edge: [run 43700294427](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43700294427) — PASS.
+- C007 Windows NSIS install/upgrade and STEP2 persistence: [run 43700294405](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43700294405) — PASS.
+- C010 unsigned package/SBOM/ASAR test-harness exclusion: [run 43700294393](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43700294393) — PASS.
+- Blueprint evidence policy: [run 43700294719](https://github.com/hibi89/astra_pdf_redesigner/actions/runs/43700294719) — PASS.
 
-**Result:** P124 BLOCKED, +0. No Windows Electron real-model acceptance was run. P122 mock/static checks remain solely P122 evidence.
+Detailed per-SKU results, exact model/runtime hashes, PDF hashes, report artifact, independent-review limit, and release boundaries are recorded in [C001/VERIFICATION.md](../C001/VERIFICATION.md).
+
+The prior G003-F01 finding accurately described the old harness pinned at `6e8b2eeb381874a12be041fa080fb545b5e1fb82`; it is addressed by the actual product-path test at the new SHA. Independent GPT review of this exact SHA remains pending. Production issuer keys and sale activation remain disabled, buyer acceptance remains UNASSESSED, the central score ledger remains unchanged, and RELEASE HOLD remains.

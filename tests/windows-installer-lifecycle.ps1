@@ -17,6 +17,9 @@ $sentinelName = "astra-ci-preservation-$PID.marker"
 $sentinel = Join-Path $appProfile $sentinelName
 $markerValue = "CI-KEEP-$PID"
 $acceptancePdf = $null
+$step2RecoveryReport = Join-Path $env:RUNNER_TEMP ("astra-step2-recovery-$PID.json")
+$step2Stdout = Join-Path $env:RUNNER_TEMP ("astra-step2-stdout-$PID.log")
+$step2Stderr = Join-Path $env:RUNNER_TEMP ("astra-step2-stderr-$PID.log")
 $step3Pdf = $null
 $eightFolder = $null
 $wasInstalled = $false
@@ -98,18 +101,62 @@ try {
   $env:ASTRA_STEP2_PROFILE_DIR = Join-Path $env:RUNNER_TEMP ("astra-step2-profile-$PID")
   if (Test-Path -LiteralPath $env:ASTRA_STEP2_PROFILE_DIR) { throw 'Refusing to reuse an existing STEP2 profile' }
   $env:ASTRA_STEP2_ACCEPTANCE_OUT = $projectPdf
+  $env:ASTRA_STEP2_FAILURE_INJECTION = '1'
+  $env:ASTRA_STEP2_RECOVERY_REPORT_OUT = $step2RecoveryReport
+  foreach ($temporary in @($step2RecoveryReport,$step2Stdout,$step2Stderr)) {
+    if (Test-Path -LiteralPath $temporary) { throw "Refusing to overwrite recovery evidence path: $temporary" }
+  }
   try {
-    $projectProcess = Start-Process -FilePath $installedExe -ArgumentList @('--astra-desktop-smoke','--astra-step2-acceptance') -PassThru -Wait -NoNewWindow
-    if ($projectProcess.ExitCode -ne 0) { throw "Installed STEP2 project acceptance failed: $($projectProcess.ExitCode)" }
+    $projectProcess = Start-Process -FilePath $installedExe -ArgumentList @('--astra-desktop-smoke','--astra-step2-acceptance') -PassThru -Wait -NoNewWindow -RedirectStandardOutput $step2Stdout -RedirectStandardError $step2Stderr
+    if ($projectProcess.ExitCode -ne 0) {
+      $failedOutput = (Get-Content -LiteralPath $step2Stdout -Raw -ErrorAction SilentlyContinue) + (Get-Content -LiteralPath $step2Stderr -Raw -ErrorAction SilentlyContinue)
+      $failureLines = @($failedOutput -split '[\r\n]+' | Where-Object { $_ -match '(?i)(error|exception|step2|quota|abort|c007)' -and $_ -notmatch '^\s*at\s' } | Select-Object -Last 12)
+      foreach ($failureLine in $failureLines) {
+        $safeLine = $failureLine -replace 'ASTRA_STEP2_[A-Z0-9_]+|C007_[A-Z0-9_]+','[synthetic-marker]'
+        Write-Host "Sanitized STEP2 diagnostic: $safeLine"
+      }
+      throw "Installed STEP2 project acceptance failed: $($projectProcess.ExitCode)"
+    }
     & node tests/verify-desktop-pdf.mjs $projectPdf --step2-project
     if ($LASTEXITCODE -ne 0) { throw "Installed STEP2 project PDF verification failed: $LASTEXITCODE" }
     Write-Host 'PASS ASTRA INSTALLED STEP2 PROJECT PDF: actual editor, IDB, reload, A4 text/image PDF'
+    if (-not (Test-Path -LiteralPath $step2RecoveryReport -PathType Leaf)) { throw 'Sanitized STEP2 recovery report missing' }
+    $recovery = Get-Content -LiteralPath $step2RecoveryReport -Raw | ConvertFrom-Json
+    if ($recovery.schema -ne 'astra-c007-step2-recovery-v1' -or $recovery.status -ne 'PASS' -or
+        $recovery.github_sha -ne $env:GITHUB_SHA -or -not $recovery.quota_failure_visible -or
+        -not $recovery.quota_failure_preserved_storage -or -not $recovery.retry_persisted -or
+        -not $recovery.png_bytes_preserved -or -not $recovery.multi_store_abort_atomic -or
+        -not $recovery.renderer_reload_preserved -or
+        $recovery.after_quota_snapshot_sha256 -ne $recovery.baseline_snapshot_sha256 -or
+        $recovery.abort_before_snapshot_sha256 -ne $recovery.abort_after_snapshot_sha256) {
+      throw 'Installed STEP2 quota, retry, atomic-abort, reload, SHA or report acceptance failed'
+    }
+    $capturedLog = (Get-Content -LiteralPath $step2Stdout -Raw) + (Get-Content -LiteralPath $step2Stderr -Raw)
+    if ($capturedLog -match 'ASTRA_STEP2_BODY_8308|ASTRA_STEP2_PRINT_8307|ASTRA_STEP2_CAPTION_8309|C007_QUOTA|C007_ABORT_UNCOMMITTED') {
+      throw 'Installed STEP2 logs exposed synthetic document or recovery marker text'
+    }
+    $recovery.stdout_stderr_leak_check = $true
+    Set-Content -LiteralPath $step2RecoveryReport -Value ($recovery | ConvertTo-Json -Depth 12) -Encoding utf8
+    Remove-Item -LiteralPath $step2Stdout,$step2Stderr -Force
+    Write-Host "PASS ASTRA STEP2 QUOTA/ABORT RECOVERY: exact SHA $($recovery.github_sha); sanitized storage digests; no text in logs"
+    Remove-Item Env:ASTRA_STEP2_FAILURE_INJECTION -ErrorAction SilentlyContinue
+    Remove-Item Env:ASTRA_STEP2_RECOVERY_REPORT_OUT -ErrorAction SilentlyContinue
     $preserve = Start-Process -FilePath $installedExe -ArgumentList @('--astra-desktop-smoke','--astra-step2-preservation-verify') -PassThru -Wait -NoNewWindow
     if ($preserve.ExitCode -ne 0) { throw "STEP2 persisted project failed separate installed EXE restart: $($preserve.ExitCode)" }
-    Write-Host 'PASS ASTRA STEP2 SECOND EXE LAUNCH: same profile document and PNG intact'
+    $recovery.installed_process_restart_verified = $true
+    Set-Content -LiteralPath $step2RecoveryReport -Value ($recovery | ConvertTo-Json -Depth 12) -Encoding utf8
+    if (-not $recovery.stdout_stderr_leak_check -or -not $recovery.installed_process_restart_verified) {
+      throw 'Installed STEP2 log-leak or separate-process restart acceptance failed'
+    }
+    Write-Host 'PASS ASTRA STEP2 SECOND EXE LAUNCH: recovered document and PNG intact'
   } finally {
+    Remove-Item Env:ASTRA_STEP2_FAILURE_INJECTION -ErrorAction SilentlyContinue
+    Remove-Item Env:ASTRA_STEP2_RECOVERY_REPORT_OUT -ErrorAction SilentlyContinue
     Remove-Item Env:ASTRA_STEP2_ACCEPTANCE_OUT -ErrorAction SilentlyContinue
     Remove-Item Env:ASTRA_STEP2_PROFILE_DIR -ErrorAction SilentlyContinue
+    foreach ($temporary in @($step2Stdout,$step2Stderr)) {
+      if (Test-Path -LiteralPath $temporary) { Remove-Item -LiteralPath $temporary -Force }
+    }
     if (Test-Path -LiteralPath $projectPdf) { Remove-Item -LiteralPath $projectPdf -Force }
   }
 
@@ -132,7 +179,9 @@ try {
     Write-Host 'PASS ASTRA INSTALLED STEP3: PDF.js import, source review, persisted design and native A4 PDF output'
   } finally {
     Remove-Item Env:ASTRA_STEP3_ACCEPTANCE_OUT -ErrorAction SilentlyContinue
-    Remove-Item Env:ASTRA_STEP3_EIGHT_DIR -ErrorAction SilentlyContinue
+    Remove-Item Env:ASTRA_STEP2_FAILURE_INJECTION -ErrorAction SilentlyContinue
+  Remove-Item Env:ASTRA_STEP2_RECOVERY_REPORT_OUT -ErrorAction SilentlyContinue
+  Remove-Item Env:ASTRA_STEP3_EIGHT_DIR -ErrorAction SilentlyContinue
     if ($eightFolder -and (Test-Path -LiteralPath $eightFolder)) {
       Remove-Item -LiteralPath $eightFolder -Recurse -Force
     }

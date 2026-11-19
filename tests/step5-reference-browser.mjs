@@ -1,6 +1,7 @@
 // Local-only STEP5 reference analysis/apply/cancel regression in real Chromium or Edge.
 import assert from 'node:assert/strict';
-import {mkdtempSync,rmSync} from 'node:fs';
+import {createHash} from 'node:crypto';
+import {mkdtempSync,rmSync,writeFileSync} from 'node:fs';
 import {tmpdir} from 'node:os';
 import {join} from 'node:path';
 import {launchBrowser} from './browser-process.mjs';
@@ -34,7 +35,7 @@ try{
   const {targetId}=await request('Target.createTarget',{url});
   const {sessionId}=await request('Target.attachToTarget',{targetId,flatten:true});
   const send=(method,params)=>request(method,params,sessionId);
-  await send('Page.enable');await send('Runtime.enable');
+  await send('Page.enable');await send('Runtime.enable');await send('DOM.enable');
   const evaluate=async(expression)=>{
     const result=await send('Runtime.evaluate',{expression,returnByValue:true,awaitPromise:true});
     if(result.exceptionDetails)throw Error(JSON.stringify(result.exceptionDetails));
@@ -163,9 +164,66 @@ try{
   assert.equal(sources.length,1);
   assert.equal(sources[0].rights,'UNVERIFIED');
   assert.equal(sources[0].sourceUrl,'https://example.org/gallery');
+  const sourceId=sources[0].id;
+  const sourceButtonSelector=`[data-step6-source-to-step5="${sourceId}"]`;
+  const rightsSelector=`[data-step6-rights-confirm="${sourceId}"]`;
+  assert.equal(await evaluate(`document.querySelector(${JSON.stringify(sourceButtonSelector)})?.disabled`),true,
+    'STEP6 source must not enter STEP5 before an explicit usage-rights acknowledgement');
+  assert.equal(await evaluate(`document.querySelector(${JSON.stringify(rightsSelector)})?.checked`),false);
+  await evaluate(`document.querySelector(${JSON.stringify(rightsSelector)}).click()`);
+  await eventually(()=>evaluate(`document.querySelector(${JSON.stringify(sourceButtonSelector)})?.disabled`),disabled=>disabled===false);
+  assert.deepEqual(await evaluate(`JSON.parse(localStorage.getItem('astra.step6.sources.v1')).items`),sources,
+    'Rights acknowledgement is session-only; stored source rights remain UNVERIFIED');
   assert.deepEqual((await evaluate(stored)).content,before.content);
   assert.deepEqual((await evaluate(stored)).design,before.design);
-  console.log('PASS P100 STEP6 SOURCE: local-only manually entered source record, rights UNVERIFIED, V2 unchanged');
+  assert.equal(await projectFingerprint(true),projectBeforePdf,'STEP6 rights acknowledgement must not write the STEP2 V2 project store');
+  console.log('PASS C003 STEP6 RIGHTS GATE: HTTPS source record stays UNVERIFIED; local STEP5 use requires explicit session acknowledgement; IndexedDB V2 unchanged');
+  // C003 integrated path: rights-gated HTTPS source record -> explicit local file -> STEP5 preview/apply/undo.
+  // Capture only attempts to fetch the recorded host; the application should never request this URL.
+  await evaluate("(()=>{window.__astraC003ExternalRequests=[];const targetOrigin='https://example.org';const originalFetch=window.fetch.bind(window);window.fetch=(input,...args)=>{const raw=typeof input==='string'?input:input?.url;try{if(raw&&new URL(raw,location.href).origin===targetOrigin)window.__astraC003ExternalRequests.push(String(raw))}catch{}return originalFetch(input,...args)};const originalOpen=XMLHttpRequest.prototype.open;XMLHttpRequest.prototype.open=function(method,url,...args){try{if(new URL(url,location.href).origin===targetOrigin)window.__astraC003ExternalRequests.push(String(url))}catch{}return originalOpen.call(this,method,url,...args)};})()");
+  const localPdfBytes=Buffer.from(makeMixedLayoutPdf());
+  const localPdfPath=join(profile,'c003-user-selected-reference.pdf');
+  writeFileSync(localPdfPath,localPdfBytes);
+  const expectedLocalPdfSha=createHash('sha256').update(localPdfBytes).digest('hex');
+  const linkedStoreBefore=await projectFingerprint(false);
+  const linkedDocumentBefore=await evaluate(stored);
+  await evaluate("(()=>{const input=document.querySelector('.reference-style-panel input[type=file]');input.addEventListener('change',()=>{window.__astraC003PickedFile=input.files?.[0]??null},{once:true})})()");
+  await evaluate("document.querySelector("+JSON.stringify(sourceButtonSelector)+").click()");
+  const {root}=await send('DOM.getDocument',{depth:-1});
+  const localInput=await send('DOM.querySelector',{nodeId:root.nodeId,selector:'.reference-style-panel input[type=file]'});
+  assert.ok(localInput.nodeId,'STEP6 rights-gated handoff must open the local reference file input');
+  await send('DOM.setFileInputFiles',{nodeId:localInput.nodeId,files:[localPdfPath]});
+  const linkedNote=await eventually(()=>evaluate("document.querySelector('[data-step6-linked-reference]')?.textContent"),text=>text?.includes('합성 소스'));
+  assert.ok(linkedNote.includes('같은 저작물인지')&&linkedNote.includes('자동 인증되지 않습니다'),
+    'The UI must keep the source record and selected local file relationship unverified');
+  const pickedFile=await evaluate("(async()=>{const file=window.__astraC003PickedFile;if(!file)return null;const hash=Array.from(new Uint8Array(await crypto.subtle.digest('SHA-256',await file.arrayBuffer()))).map(value=>value.toString(16).padStart(2,'0')).join('');return{name:file.name,type:file.type,size:file.size,sha256:hash}})()");
+  assert.ok(pickedFile,'STEP6 did not retain the exact user-selected local file for analysis');
+  assert.equal(pickedFile.sha256,expectedLocalPdfSha,'Local file selection changed the synthetic source bytes');
+  assert.equal(pickedFile.type,'application/pdf');
+  await eventually(()=>evaluate("Boolean(document.querySelector('[data-reference-analysis]'))"));
+  await eventually(()=>evaluate("Number(document.querySelector('[data-reference-pdf-text-count]')?.getAttribute('data-reference-pdf-text-count'))"),count=>count>0);
+  assert.equal(await projectFingerprint(true),projectBeforePdf,'Linked local analysis must remain a preview and leave V2 unchanged');
+  assert.deepEqual((await evaluate(stored)).content,linkedDocumentBefore.content);
+  const sourceRightsAfterHandoff=await evaluate("JSON.parse(localStorage.getItem('astra.step6.sources.v1')).items.find(item=>item.id==="+JSON.stringify(sourceId)+")");
+  assert.equal(sourceRightsAfterHandoff.rights,'UNVERIFIED','Session acknowledgement must never certify stored rights');
+  const previewBeforeApply=await evaluate(stored);
+  const selectedTheme=await evaluate("(()=>{const currentLabel=document.querySelector('.settings-panel .theme-option.selected strong')?.textContent;const button=[...document.querySelectorAll('.reference-analysis .style-compare-candidates button')].find(item=>item.textContent!==currentLabel);if(!button)throw Error('No STEP5 theme candidate different from the active document');button.click();return button.textContent})()");
+  assert.ok(selectedTheme,'The user must be able to adjust the local analysis before applying');
+  assert.equal(await projectFingerprint(true),projectBeforePdf,'Choosing an analysis suggestion must remain non-persistent');
+  await evaluate("[...document.querySelectorAll('.reference-style-panel button')].find(button=>button.textContent==='제안 적용').click()");
+  const appliedLinked=await eventually(()=>evaluate(stored),document=>document?.design?.theme!==previewBeforeApply.design.theme);
+  assert.deepEqual(appliedLinked.content,previewBeforeApply.content,'Applying a local reference design must preserve document text');
+  assert.notEqual(appliedLinked.design.theme,previewBeforeApply.design.theme);
+  await eventually(()=>evaluate("Boolean([...document.querySelectorAll('button')].find(button=>button.textContent==='직전 디자인 적용 취소'))"));
+  await evaluate("[...document.querySelectorAll('button')].find(button=>button.textContent==='직전 디자인 적용 취소').click()");
+  const undoneLinked=await eventually(()=>evaluate(stored),document=>document?.design?.theme===previewBeforeApply.design.theme);
+  assert.deepEqual(undoneLinked.content,previewBeforeApply.content,'Undo after linked-source apply must preserve all document text');
+  assert.equal(await projectFingerprint(false),linkedStoreBefore,'STEP5 apply/undo must restore V2 document/assets/meta aside from normal timestamps');
+  assert.equal(await evaluate("window.__astraC003ExternalRequests.length"),0,
+    'STEP6/STEP5 must not request the recorded external source while using a local file');
+  const finalRights=await evaluate("JSON.parse(localStorage.getItem('astra.step6.sources.v1')).items.find(item=>item.id==="+JSON.stringify(sourceId)+")");
+  assert.equal(finalRights.rights,'UNVERIFIED','Applying/undoing a suggestion must not certify source rights');
+  console.log('PASS C003 LINKED SOURCE E2E: session rights gate -> native local PDF picker -> source-linked STEP5 preview/apply/undo; exact file SHA and full V2 store preserved; no request to recorded source URL');
   console.log('PASS STEP5: local image and selectable PDF-page analysis, A4 PDF output, transient preview, cancel, apply/undo and content preservation');
 }finally{
   try{ws?.close();}catch{}

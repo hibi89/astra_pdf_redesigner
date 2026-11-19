@@ -6,6 +6,7 @@ directories:
 files:
   - dist/**
   - desktop/**
+  - '!desktop/p124-electron-qwen3-acceptance.cjs'
   - package.json
 win:
   target:

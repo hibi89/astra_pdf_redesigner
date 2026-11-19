@@ -69,9 +69,14 @@ export const PRODUCTION_ISSUER_THUMBPRINT_SHA256:string|null=null;
 export function productionSkuAccessConfigured():boolean{
  return PRODUCTION_ISSUER_JWK!==null&&PRODUCTION_ISSUER_THUMBPRINT_SHA256!==null;
 }
+const P124_TEST_ENTITLEMENTS_ACTIVE =
+ typeof __ASTRA_P124_TEST_ENTITLEMENTS__ !== 'undefined' && __ASTRA_P124_TEST_ENTITLEMENTS__ === true;
+export function p124TestEntitlementBuild():boolean{return P124_TEST_ENTITLEMENTS_ACTIVE;}
 export async function checkProductionSkuCapability(
  licenseText:string,capability:SkuCapability,now=Math.floor(Date.now()/1000),
 ):Promise<SkuDecision>{
- return verifyPinnedSkuCapability(
-  licenseText,PRODUCTION_ISSUER_JWK,PRODUCTION_ISSUER_THUMBPRINT_SHA256,capability,now);
+ const jwk=P124_TEST_ENTITLEMENTS_ACTIVE?__ASTRA_P124_TEST_ISSUER_JWK__:PRODUCTION_ISSUER_JWK;
+ const pin=P124_TEST_ENTITLEMENTS_ACTIVE
+  ?__ASTRA_P124_TEST_ISSUER_THUMBPRINT_SHA256__:PRODUCTION_ISSUER_THUMBPRINT_SHA256;
+ return verifyPinnedSkuCapability(licenseText,jwk,pin,capability,now);
 }

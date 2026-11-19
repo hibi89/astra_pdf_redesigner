@@ -1,8 +1,10 @@
 // P109: commercial action boundary. Internal preview is not a sellable build.
 import {checkProductionSkuCapability,type SkuCapability} from './skuAccess.ts';
 import {skuLayoutCandidate} from '../step4/skuLayoutCandidates.ts';
-// Hard-coded, source-reviewed only. Never activate via receipt, localStorage, URL or IPC.
-export const ASTRA_CUSTOMER_BUILD_ENABLED:boolean=false;
+// Customer authorization remains disabled in normal builds. Only the isolated
+// GitHub Actions P124 build may enable the renderer gate with an ephemeral test issuer.
+export const ASTRA_CUSTOMER_BUILD_ENABLED:boolean =
+ typeof __ASTRA_P124_TEST_ENTITLEMENTS__ !== 'undefined' && __ASTRA_P124_TEST_ENTITLEMENTS__ === true;
 const VALID=new Set<SkuCapability>(['base-layout','pro-layout','business-layout','template-save','batch-pdf','brand-kit']);
 export class SkuAccessDeniedError extends Error{
  constructor(){super('상용 기능 사용권이 확인되지 않았습니다. 서명·만료·발급자를 확인하세요.');this.name='SkuAccessDeniedError';}

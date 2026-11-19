@@ -11,7 +11,7 @@ function verifyOcrReleaseHold(root=path.resolve(__dirname,'..')){
  if(/\bextraResources\s*:|\bextraFiles\s*:/m.test(config))deny('new-electron-extra-resources-must-be-audited');
  const fileList=config.match(/^files:\s*\r?\n((?:[ \t]+-[^\r\n]+\r?\n)+)/m);
  if(!fileList)deny('packaging-files-changed-review-required');
- const allowed=['- dist/**','- desktop/**','- package.json'];
+ const allowed=['- dist/**','- desktop/**',"- '!desktop/p124-electron-qwen3-acceptance.cjs'",'- package.json'];
  const actual=fileList[1].split(/\r?\n/).map(line=>line.trim()).filter(Boolean);
  if(actual.length!==allowed.length||actual.some((entry,i)=>entry!==allowed[i]))
   deny('packaging-files-changed-review-required');

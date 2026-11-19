@@ -69,6 +69,52 @@ test('M03-B fixed CLI has no input in argv; uses temporary 0600 prompt and no sh
     assert.equal(existsSync(prompt),false,'Transient prompt file must be deleted on completion');
   }finally{f.cleanup();}
 });
+function stalledChild(){
+ const child=new EventEmitter();
+ child.stdout=new PassThrough();child.stderr=new PassThrough();child.killed=false;
+ child.kill=()=>{child.killed=true;child.emit('close',1);};
+ return child;
+}
+test('C005 inference timeout kills the process, deletes the prompt, and fails closed',async()=>{
+ const f=fixture();let child,promptPath;
+ const keepAlive=setTimeout(()=>{},1000);
+ try{
+  const c=createLocalModelController({resourcesDir:f.root,manifest:f.manifest,timeoutMs:100,
+   spawnProcess:(_bin,args)=>{child=stalledChild();promptPath=args[args.indexOf('--file')+1];return child;}});
+  const result=await c.propose('승인 전에는 문서를 외부에 전달하지 않습니다.');
+  assert.deepEqual(result,{status:'error',reason:'local-inference-failed'});
+  assert.equal(child.killed,true,'a timed-out local process must be killed');
+  assert.equal(existsSync(promptPath),false,'the synthetic prompt must be deleted after timeout');
+  assert.deepEqual(c.cancel(),{status:'idle'},'timeout must release the single-flight slot');
+ }finally{clearTimeout(keepAlive);f.cleanup();}
+});
+test('C005 cancellation kills a stalled process and a later request can recover',async()=>{
+ const f=fixture();let child,resolveSpawn,spawnCount=0;
+ const spawned=new Promise(resolve=>{resolveSpawn=resolve;});
+ try{
+  const c=createLocalModelController({resourcesDir:f.root,manifest:f.manifest,timeoutMs:5000,
+   spawnProcess:(_bin,args)=>{
+    spawnCount++;
+    const current=spawnCount===1?stalledChild():new EventEmitter();
+    if(spawnCount>1){
+     current.stdout=new PassThrough();current.stderr=new PassThrough();current.killed=false;
+     process.nextTick(()=>{current.stdout.end('문서를 확인했습니다.');current.emit('close',0);});
+    }
+    if(spawnCount===1){child=current;resolveSpawn(current);}
+    return current;
+   }});
+  const pending=c.propose('문서를  확인하였습니다.');
+  child=await spawned;
+  assert.deepEqual(c.cancel(),{status:'cancel-requested'});
+  assert.deepEqual(await pending,{status:'error',reason:'local-inference-failed'});
+  assert.equal(child.killed,true,'cancel must terminate the stalled local process');
+  assert.deepEqual(c.cancel(),{status:'idle'},'cancel must release the single-flight slot');
+  assert.deepEqual(await c.propose('문서를  확인하였습니다.'),{
+   status:'proposal',suggested:'문서를 확인했습니다.',engine:'local-llm-unverified'
+  },'a new request must run after cancellation');
+  assert.equal(spawnCount,2);
+ }finally{f.cleanup();}
+});
 test('M03-B validation blocks numbers, quoted spans, URLs and empty output',()=>{
   assert.equal(validateSuggestion('결제 금액 30,000원입니다.','결제 금액 31,000원입니다.'),false);
   assert.equal(validateSuggestion('문서 "원문" 검토하였습니다.','문서 "수정" 검토했습니다.'),false);

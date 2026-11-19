@@ -33,7 +33,30 @@ const SMOKE=process.argv.includes('--astra-desktop-smoke');
 const PDF_ACCEPTANCE=SMOKE&&process.argv.includes('--astra-pdf-acceptance');
 const STEP2_ACCEPTANCE=SMOKE&&(process.argv.includes('--astra-step2-acceptance')||process.argv.includes('--astra-step2-preservation-verify'));
 const STEP3_ACCEPTANCE=SMOKE&&process.argv.includes('--astra-step3-acceptance');
+const P124_ACCEPTANCE=SMOKE&&process.env.GITHUB_ACTIONS==='true'&&
+  process.env.ASTRA_P124_ELECTRON_ACCEPTANCE==='1'&&process.argv.includes('--astra-p124-qwen3-acceptance');
+const p124Acceptance=P124_ACCEPTANCE?require('./p124-electron-qwen3-acceptance.cjs'):null;
+const runP124ElectronAcceptance=p124Acceptance?.runP124ElectronAcceptance||null;
 let step3NativeCaptureArmed=false;
+function p124ProfilePath(){
+  try{
+    return p124Acceptance?.resolveP124ProfilePath({
+      enabled:P124_ACCEPTANCE,
+      githubActions:process.env.GITHUB_ACTIONS,
+      runnerTemp:process.env.RUNNER_TEMP,
+      profile:process.env.ASTRA_P124_PROFILE_DIR,
+    })||null;
+  }catch{
+    console.error('P124 acceptance profile validation failed; exiting before Electron startup.');
+    app.exit(1);
+    process.exit(1);
+  }
+}
+const P124_PROFILE_DIR=p124ProfilePath();
+const STEP2_PROFILE_DIR=process.env.GITHUB_ACTIONS==='true'&&process.env.RUNNER_TEMP&&process.env.ASTRA_STEP2_PROFILE_DIR&&
+  path.dirname(path.resolve(process.env.ASTRA_STEP2_PROFILE_DIR))===path.resolve(process.env.RUNNER_TEMP)&&
+  /^astra-step2-profile-[A-Za-z0-9-]+$/.test(path.basename(process.env.ASTRA_STEP2_PROFILE_DIR))
+  ?path.resolve(process.env.ASTRA_STEP2_PROFILE_DIR):null;
 function step3OutputPath(){
   if(process.env.GITHUB_ACTIONS!=='true'||!process.env.RUNNER_TEMP||!process.env.ASTRA_STEP3_ACCEPTANCE_OUT)
     throw Error('STEP3 acceptance is restricted to ephemeral GitHub Actions runners');
@@ -50,11 +73,7 @@ protocol.registerSchemesAsPrivileged([{
 }]);
 app.setName('ASTRA PDF Redesigner');
 app.setPath('userData',SMOKE
-  ?(process.env.GITHUB_ACTIONS==='true'&&process.env.ASTRA_STEP2_PROFILE_DIR&&
-    path.dirname(path.resolve(process.env.ASTRA_STEP2_PROFILE_DIR))===path.resolve(process.env.RUNNER_TEMP||'')&&
-    /^astra-step2-profile-[A-Za-z0-9-]+$/.test(path.basename(process.env.ASTRA_STEP2_PROFILE_DIR))
-    ?path.resolve(process.env.ASTRA_STEP2_PROFILE_DIR)
-    :path.join(os.tmpdir(),'astra-desktop-ci-'+process.pid))
+  ?(P124_PROFILE_DIR||STEP2_PROFILE_DIR||path.join(os.tmpdir(),'astra-desktop-ci-'+process.pid))
   :path.join(app.getPath('appData'),'AstraPDFRedesigner'));
 if(process.platform==='win32')app.setAppUserModelId('com.astra.pdfredesigner');
 
@@ -218,7 +237,7 @@ function registerLocalOcr(){
 function createWindow(){
   mainWindow=new BrowserWindow({
     width:1360,height:900,minWidth:900,minHeight:620,
-    show:!SMOKE,title:'ASTRA PDF Redesigner',
+    show:!SMOKE||P124_ACCEPTANCE,title:'ASTRA PDF Redesigner',
     backgroundColor:'#f4f5f6',
     webPreferences:{
       preload:path.join(__dirname,'preload.cjs'),
@@ -243,7 +262,8 @@ function createWindow(){
     if(!isAppUrl(url))event.preventDefault();
   });
   mainWindow.webContents.on('will-attach-webview',event=>event.preventDefault());
-  return mainWindow.loadURL(APP_URL);
+  return mainWindow.loadURL(P124_ACCEPTANCE&&!STEP2_ACCEPTANCE?
+    'astra://app/tests/fixtures/p124-electron-qwen3.html':APP_URL);
 }
 
 async function runSmoke(win){
@@ -329,7 +349,22 @@ if(lock){
       registerLocalModel();
       registerLocalOcr();
       await createWindow();
-      if(SMOKE){
+      if(P124_ACCEPTANCE){
+        mainWindow.webContents.on('console-message',(_event,...details)=>{
+          const message=details.map(value=>{
+            if(typeof value==='string')return value;
+            try{return JSON.stringify(value);}catch{return String(value);}
+          }).join(' ').slice(0,1200);
+          console.log('P124 renderer console: '+message);
+        });
+        mainWindow.webContents.on('render-process-gone',(_event,details)=>{
+          console.log('P124 renderer process gone: '+JSON.stringify(details));
+        });
+        if(STEP2_ACCEPTANCE)await runStep2ProjectAcceptance(mainWindow,renderLocalPdf);
+        await mainWindow.loadURL('astra://app/tests/fixtures/p124-electron-qwen3.html');
+        await runP124ElectronAcceptance(mainWindow,renderLocalPdf);
+        app.exit(0);
+      }else if(SMOKE){
         await runSmoke(mainWindow);
         if(PDF_ACCEPTANCE)await runPdfContentAcceptance(mainWindow);
         if(STEP2_ACCEPTANCE)await runStep2ProjectAcceptance(mainWindow,renderLocalPdf);
