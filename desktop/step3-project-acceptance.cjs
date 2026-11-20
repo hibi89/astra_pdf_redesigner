@@ -170,7 +170,11 @@ async function uploadAndConfirm(encoded){
     const second=splitButton.closest('.section-editor')?.nextElementSibling?.querySelector('textarea')?.value;
     return first+second==='ASTRA_MANUAL_MISSING_7403';
   },'manual source correction splits without losing characters');
-  approval.click();
+  // Page-level approvals are independent and must be repeated after the final correction.
+  const layoutReviews=[...document.querySelectorAll('[data-step3-layout-review-confirm]')];
+  for(const review of layoutReviews)if(!review.checked)review.click();
+  const currentApproval=document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]');
+  if(currentApproval&&!currentApproval.checked)currentApproval.click();
   if(save.disabled)throw Error('STEP3 completed manual correction remains unsavable');
   const confirm=document.querySelector('.step3-import-panel > label.step3-confirm input[type=checkbox]');
   if(!confirm?.checked||!save||save.disabled)throw Error('STEP3 explicit source-review checkbox or approval state missing');

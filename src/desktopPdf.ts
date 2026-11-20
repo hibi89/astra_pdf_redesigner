@@ -1,5 +1,6 @@
 // This single action powers browser PDF printing and the installed Electron
 // "Save PDF..." native dialog. Web users retain their existing print flow.
+export type CustomerSkuLicenseContext=Readonly<{receipt:string;layoutId:string|null;brand:boolean;requestId:string}>;
 export interface DesktopPdfResponse {
   status:'saved'|'cancelled'|'error';
   message?:string;
@@ -7,22 +8,25 @@ export interface DesktopPdfResponse {
 declare global {
   interface Window {
     astraDesktop?:Readonly<{
-      savePdf:(expectedTextMarkers?:string[],expectedRasterImages?:number)=>Promise<DesktopPdfResponse>;
+      savePdf:(expectedTextMarkers?:string[],expectedRasterImages?:number,licenseContext?:CustomerSkuLicenseContext)=>Promise<DesktopPdfResponse>;
       localModelStatus?:()=>Promise<{status:'available'|'unavailable';modelId?:string;reason?:string}>;
-      localModelPropose?:(text:string)=>Promise<{status:string;suggested?:string;reason?:string}>;
+      localModelPropose?:(text:string,explicitConsent?:boolean)=>Promise<{status:string;suggested?:string;reason?:string;engine?:string;externalTransfer?:boolean}>;
       localModelCancel?:()=>Promise<{status:string}>;
+      localOcrStatus?:()=>Promise<{status:'available'|'unavailable';engineId?:string;reason?:string}>;
+      localOcrRecognizePng?:(bytes:Uint8Array,layoutMode?:3|6)=>Promise<{status:string;text?:string;reason?:string;reviewOnly?:boolean;approved?:boolean;externalTransfer?:boolean}>;
+      localOcrCancel?:()=>Promise<{status:string}>;
     }>;
   }
 }
 export function hasDesktopPdfExport():boolean{
   return typeof window!=='undefined'&&typeof window.astraDesktop?.savePdf==='function';
 }
-export async function savePdfFromEditor(expectedTextMarkers:string[]=[],expectedRasterImages=0):Promise<'browser'|'saved'|'cancelled'>{
+export async function savePdfFromEditor(expectedTextMarkers:string[]=[],expectedRasterImages=0,licenseContext?:CustomerSkuLicenseContext):Promise<'browser'|'saved'|'cancelled'>{
   if(!hasDesktopPdfExport()){
     window.print();
     return 'browser';
   }
-  const reply=await window.astraDesktop!.savePdf(expectedTextMarkers,expectedRasterImages);
+  const reply=await window.astraDesktop!.savePdf(expectedTextMarkers,expectedRasterImages,licenseContext);
   if(reply?.status==='saved'||reply?.status==='cancelled')return reply.status;
   if(reply?.status==='error')throw Error(reply.message||'PDF 저장 중 오류가 발생했습니다.');
   throw Error('PDF 저장 응답을 확인할 수 없습니다.');

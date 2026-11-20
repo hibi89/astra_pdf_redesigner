@@ -1,0 +1,119 @@
+name: P123 real Qwen3 CPU acceptance
+
+on:
+  push:
+    branches: ['feature/astra-p71-pdf-source-parity-20261112']
+    paths:
+      - '.github/workflows/p123-real-qwen3-inference.yml'
+      - 'desktop/owner-ollama-controller.cjs'
+      - 'tests/owner-ollama-controller.test.cjs'
+      - 'tests/local-model-review-real-qwen3.mjs'
+      - 'tests/fixtures/local-model-review-real-qwen3.*'
+      - 'src/humanize/LocalModelReview.tsx'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  actual-qwen3-cpu:
+    name: Actual Qwen3-4B CPU inference and review UI
+    runs-on: ubuntu-latest
+    timeout-minutes: 300
+    env:
+      OLLAMA_HOST: 127.0.0.1:11434
+      OLLAMA_NO_CLOUD: '1'
+      OLLAMA_MODELS: /home/runner/.ollama/models
+      CUDA_VISIBLE_DEVICES: '-1'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Verify pinned GitHub model license and conversion metadata
+        shell: bash
+        run: |
+          set -euo pipefail
+          rev=6bbfd43a548c506734fb8899ed5adee5878a5e4a
+          base=https://raw.githubusercontent.com/locomotive-works/npu-local-model-running/$rev
+          curl --fail --show-error --location --retry 3 "$base/LICENSE" -o "$RUNNER_TEMP/qwen3-LICENSE"
+          actual=$(git hash-object "$RUNNER_TEMP/qwen3-LICENSE")
+          test "$actual" = 6634c8cc3133b3848ec74b9f275acaaa1ea618ab
+          curl --fail --show-error --location --retry 3 "$base/README.md" -o "$RUNNER_TEMP/qwen3-README.md"
+          grep -Fq 'Selected Model: Qwen3-4B-Instruct-2507' "$RUNNER_TEMP/qwen3-README.md"
+          grep -Fq 'Apache-2.0' "$RUNNER_TEMP/qwen3-README.md"
+          echo "Pinned repository LICENSE blob and model identity verified; no README commands are executed."
+      - name: Download and verify GitHub-hosted CPU runtime
+        shell: bash
+        run: |
+          set -euo pipefail
+          asset="$RUNNER_TEMP/ollama-linux-amd64.tar.zst"
+          curl --fail --show-error --location --retry 5 --retry-all-errors \
+            https://github.com/ollama/ollama/releases/download/v0.40.16/ollama-linux-amd64.tar.zst -o "$asset"
+          echo "87bfafb2acbc89b2e6a1be0a9043de6aa75fb450696f86bc426e65fc448f788d  $asset" | sha256sum --check -
+          sudo tar --zstd -xf "$asset" -C /usr/local
+          rm -f "$asset"
+          ollama --version
+      - name: Download exact model release assets from GitHub and verify hashes
+        shell: bash
+        run: |
+          set -euo pipefail
+          folder="$RUNNER_TEMP/qwen3-model"
+          mkdir -p "$folder"
+          base=https://github.com/locomotive-works/npu-local-model-running/releases/download/v1.0
+          curl --fail --show-error --location --retry 5 --retry-all-errors "$base/qwen3-4b-instruct-2507-Q8_0.gguf.part0" -o "$folder/model.part0"
+          curl --fail --show-error --location --retry 5 --retry-all-errors "$base/qwen3-4b-instruct-2507-Q8_0.gguf.part1" -o "$folder/model.part1"
+          curl --fail --show-error --location --retry 5 --retry-all-errors "$base/qwen3-4b-instruct-2507-Q8_0.gguf.part2" -o "$folder/model.part2"
+          echo "611f555849d7360ac5157df694b2ca7327a9d69a40612cf86807e765cbfdb75c  $folder/model.part0" | sha256sum --check -
+          echo "4d329adca10c17ab73a64d47a22ffc8163f0f89567459ccb149ef685cf33e87a  $folder/model.part1" | sha256sum --check -
+          echo "8aa6a472d08a4ba1922eff00e2833cbb36f30ae7b13d98620ff84d8b81862e21  $folder/model.part2" | sha256sum --check -
+          cat "$folder/model.part0" "$folder/model.part1" "$folder/model.part2" > "$folder/qwen3-4b-instruct-2507-Q8_0.gguf"
+          echo "eed67be2a8eed4320ff71f3d5b350db10653549281e09b8967b97aeb1f1554ee  $folder/qwen3-4b-instruct-2507-Q8_0.gguf" | sha256sum --check -
+          rm -f "$folder/model.part0" "$folder/model.part1" "$folder/model.part2"
+          echo "Model ID Qwen3-4B-Instruct-2507; format GGUF Q8_0; exact combined SHA-256 verified."
+      - name: Start loopback-only Ollama and import pinned model
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$OLLAMA_MODELS"
+          nohup ollama serve > "$RUNNER_TEMP/ollama-server.log" 2>&1 < /dev/null &
+          echo "$!" > "$RUNNER_TEMP/ollama-server.pid"
+          for attempt in $(seq 1 90); do
+            if curl --fail --silent "http://$OLLAMA_HOST/api/tags" >/dev/null; then break; fi
+            sleep 1
+          done
+          curl --fail --silent "http://$OLLAMA_HOST/api/tags" >/dev/null
+          folder="$RUNNER_TEMP/qwen3-model"
+          printf 'FROM %s\n' "$folder/qwen3-4b-instruct-2507-Q8_0.gguf" > "$folder/Modelfile"
+          ollama create qwen3:4b-instruct -f "$folder/Modelfile"
+          rm -f "$folder/qwen3-4b-instruct-2507-Q8_0.gguf"
+          ollama list
+          echo "Ollama API bound to $OLLAMA_HOST with cloud disabled; no remote model fallback is configured."
+      - name: Run existing regressions and real-model Korean review acceptance
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          npm test
+          npm run build
+          chromium=$(command -v google-chrome || command -v google-chrome-stable || command -v chromium || command -v chromium-browser || true)
+          if [ -z "$chromium" ]; then
+            echo "::error::GitHub-hosted Chrome is required for actual review UI acceptance"
+            exit 1
+          fi
+          npm run dev -- --host 127.0.0.1 --port 4173 > "$RUNNER_TEMP/p123-vite.log" 2>&1 &
+          echo "$!" > "$RUNNER_TEMP/p123-vite.pid"
+          for attempt in $(seq 1 60); do
+            if curl --fail --silent http://127.0.0.1:4173/tests/fixtures/local-model-review-real-qwen3.html >/dev/null; then break; fi
+            sleep 1
+          done
+          curl --fail --silent http://127.0.0.1:4173/tests/fixtures/local-model-review-real-qwen3.html >/dev/null
+          CHROME_PATH="$chromium" P123_OLLAMA_PID="$(cat "$RUNNER_TEMP/ollama-server.pid")" P123_REPORT_OUT="$RUNNER_TEMP/p123-qwen3-report.json" node tests/local-model-review-real-qwen3.mjs
+      - name: Upload redacted real-model report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: p123-qwen3-real-cpu-report
+          path: ${{ runner.temp }}/p123-qwen3-report.json
+          if-no-files-found: warn
+          retention-days: 7

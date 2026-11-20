@@ -50,7 +50,7 @@ test('M03-B IPC never accepts executable paths from renderer',()=>{
     assert.ok(main.includes(item),'Missing safe IPC: '+item);
   }
   assert.ok(preload.includes('localModelStatus:'));
-  assert.ok(preload.includes('localModelPropose:text=>'));
+  assert.ok(preload.includes("localModelPropose:(text,explicitConsent)=>ipcRenderer.invoke('astra:local-model-propose',text,explicitConsent)"));
   assert.ok(engine.includes('RELEASE_MANIFEST=null'));
   assert.ok(engine.includes('shell:false'));
   assert.ok(engine.includes("mode:0o600"));
